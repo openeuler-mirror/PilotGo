@@ -1,0 +1,16 @@
+server:
+  port: ":8083"
+db:
+  ip: 192.168.160.18
+  port: 3306
+  username: root
+  password: qwer1234
+  dbname: pilotgo
+log_opts:
+  log_level: debug
+  log_driver: stdout
+  log_path: D:\kylin.os\kylin\log\pilotgo
+  max_file: 1
+  max_size: 10485760
+max_age: 1800,
+session_count: 100

@@ -1,7 +1,8 @@
 # PilotGo
 
 #### 介绍
-PilotGo is a plugable operation platform written in go.
+
+PilotGo是一个运维管理平台。
 
 #### 软件架构
 软件架构说明
