@@ -18,6 +18,7 @@ const (
 	RunScript       = 7
 	AgentUpdate     = 8
 	AgentUninstall  = 9
+	Info            = 10
 )
 
 type Message struct {
