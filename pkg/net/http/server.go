@@ -1,9 +1,12 @@
 package http
+
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -59,4 +62,23 @@ func join_url_param(target_ip string, query string, start string, end string, st
 		end,
 		step)
 	return promethues_api_param
+}
+
+//发送邮件接口
+func EmailSender(c *gin.Context) {
+	SrcIp := c.PostForm("ip")
+	WarningData := c.PostForm("WarningData")
+	AlertApi := fmt.Sprintf("%s/api/v1/alerts", WaringData)
+	jspull(SrcIp, AlertApi)
+}
+
+func jspull(AlertApi string, WarningData string) {
+	req, err := http.Post(AlertApi,
+		"application/json",
+		bytes.NewBuffer([]byte(WarningData)))
+	if err != nil {
+		fmt.Println("err=", err)
+	}
+	body, _ := ioutil.ReadAll(req.Body)
+	fmt.Println(string(body))
 }
