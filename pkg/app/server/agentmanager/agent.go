@@ -89,21 +89,21 @@ func (a *Agent) GetSysInfo() {
 
 }
 
-func send(conn net.Conn, data []byte) error {
-	sendData := protocol.TlvEncode(data)
-	fmt.Println("send data:", string(sendData))
+func Send(conn net.Conn, msg *protocol.Message) (error, error) {
+  data := msg.Encode()
+  sendData := protocol.TlvEncode(data)
 
 	data_length := len(sendData)
 	send_count := 0
 	for {
 		n, err := conn.Write(sendData[send_count:])
 		if err != nil {
-			return err
+      return err, nil
 		}
 		if n+send_count >= data_length {
 			send_count = send_count + n
 			break
 		}
 	}
-	return nil
+  return nil, nil
 }

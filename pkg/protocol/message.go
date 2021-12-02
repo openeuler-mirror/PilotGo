@@ -19,6 +19,7 @@ const (
 	AgentUpdate     = 8
 	AgentUninstall  = 9
 	Info            = 10
+  AgentScan       = 11
 )
 
 type Message struct {

@@ -51,6 +51,7 @@ func AddandRunAgent(c net.Conn) {
 	agent.StartListen()
 	GetAgentManager().AddAgent(agent)
 	fmt.Println("add new agent from:", c.RemoteAddr().String())
+
 }
 
 func StopAgentManager() {
