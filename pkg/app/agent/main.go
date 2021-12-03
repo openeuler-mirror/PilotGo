@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"time"
-
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+  "fmt"
+  "openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
+  "openeluer.org/PilotGo/PilotGo/pkg/protocol"
+  "openeluer.org/PilotGo/PilotGo/pkg/utils"
+  "os"
+  "time"
 )
 
 func main() {

@@ -1,10 +1,11 @@
 package network
 
 import (
-	"fmt"
-	"net"
+  "fmt"
+  "net"
+  "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
+  "openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
 type AgentMessageHandler func(*SocketClient, *protocol.Message) error
@@ -31,16 +32,35 @@ func (c *SocketClient) Connect(addr string) error {
 				fmt.Println("read error:", err)
 				return
 			}
-			// fmt.Println("read data:", string(buff[:n]))
 			readBuff = append(readBuff, buff[:n]...)
 
-			// 切割frame
+			//切割frame
 			i, f := protocol.TlvDecode(&readBuff)
+
 			if i != 0 {
 				readBuff = readBuff[i:]
 
 				msg := protocol.ParseMessage(*f)
 				c.MessageProcesser.ProcessMessage(c, msg)
+        cmd := string(msg.Body)
+        fmt.Println("recv message:", cmd)
+
+        switch cmd{
+        case "firewall stop" :
+          tmp:= os.Stop()
+          fmt.Println(tmp)
+        case "firewall restart":
+          tmp:=os.Restart()
+          fmt.Println(tmp)
+        case "firewall reload":
+          tmp:=os.Reload()
+          fmt.Println(tmp)
+        case "firewall config":
+          tmp:= os.Config()
+          fmt.Println(tmp)
+        default:
+          fmt.Println("消息未执行!")
+        }
 			}
 		}
 	}(c)

@@ -2,23 +2,63 @@
 
 #### 介绍
 
-PilotGo是一个运维管理平台。
+PilotGo是一个openEuler社区原生的运维管理平台。
 
 #### 软件架构
-软件架构说明
+开发工具：golang 1.15
 
+系统支持：openEuler、麒麟操作系统
 
-#### 安装教程
+PilotGo项目后端采用golang语言开发，使用到以下开源库：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+​        web框架：https://github.com/gin-gonic/gin
 
-#### 使用说明
+​        websocket：https://github.com/gorilla/websocket
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+​        日志框架：https://github.com/sirupsen/logrus
+
+​        文件监控：https://github.com/fsnotify/fsnotify
+
+​        配置解析：https://github.com/spf13/viper
+
+​        mock测试：https://github.com/golang/mock
+
+以及系统自带库：
+
+​        net/http
+
+​        os
+
+​        time 等
+
+前端代码主要使用到以下技术：
+
+​        JavaScript技术：https://www.javascript.com
+
+​        vue框架：https://cn.vuejs.org
+
+​        element组件：https://element.eleme.cn
+
+可在该网站方便查询第三方库及系统库的API文档：
+
+​        https://pkg.go.dev/
+
+​        https://pkg.go.dev/std
+
+#### 安装、启动教程
+
+```
+# Required before startup
+go >=1.15;  nodejs >=14;  yarn
+# Installing yarn using NPM
+npm install -g yarn
+# install dependencies
+yarn / yarn install
+# vue server with hot reload at localhost:8080
+yarn run dev
+# web server with hot reload at localhost:8083
+go run web-main.go
+```
 
 #### 参与贡献
 

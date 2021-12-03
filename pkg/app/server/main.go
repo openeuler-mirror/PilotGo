@@ -1,8 +1,8 @@
 package main
 
 import (
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
+  "openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+  "openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 )
 
 func main() {
