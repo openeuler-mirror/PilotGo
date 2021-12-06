@@ -68,7 +68,7 @@ func join_url_param(target_ip string, query string, start string, end string, st
 func EmailSender(c *gin.Context) {
 	SrcIp := c.PostForm("ip")
 	WarningData := c.PostForm("WarningData")
-	AlertApi := fmt.Sprintf("%s/api/v1/alerts", WaringData)
+	AlertApi := fmt.Sprintf("%s/api/v1/alerts", WarningData)
 	jspull(SrcIp, AlertApi)
 }
 

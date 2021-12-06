@@ -37,8 +37,12 @@ func (am *AgentManager) AddAgent(a *Agent) {
 	am.agentMap.Store(a.UUID, a)
 }
 
-func (am *AgentManager) GetAgent(a *Agent) {
-	am.agentMap.Store(a.UUID, a)
+func (am *AgentManager) GetAgent(uuid string) *Agent {
+	agent, ok := am.agentMap.Load(uuid)
+	if ok {
+		return agent.(*Agent)
+	}
+	return nil
 }
 
 func (am *AgentManager) DeleteAgent(uuid string) {
