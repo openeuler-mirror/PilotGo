@@ -19,9 +19,7 @@ func setLogDriver(logopts *conf.LogOpts) error {
 	switch logopts.LogDriver {
 	case "stdout":
 		log.SetOutput(os.Stdout)
-	case "stderr":
-		log.SetOutput(os.Stderr)
-	default:
+	case "file":
 		writer, err := rotatelogs.New(
 			logopts.LogPath+"/"+logName,
 			rotatelogs.WithRotationCount(uint(logopts.MaxFile)),
@@ -31,6 +29,9 @@ func setLogDriver(logopts *conf.LogOpts) error {
 			return err
 		}
 		log.SetOutput(writer)
+	default:
+		log.SetOutput(os.Stdout)
+		log.Warn("!!! invalid log output, use stdout !!!")
 	}
 	return nil
 }
