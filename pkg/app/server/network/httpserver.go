@@ -6,11 +6,13 @@ import (
 )
 
 func HttpServerStart(addr string) error {
-	// TODO: 此处绑定 http api handler
 	r := gin.Default()
+	// TODO: 此处绑定 http api handler
 	r.GET("/api/agent_info", handlers.AgentInfoHandler)
 
 	// TODO: 此处绑定前端静态资源handler
+	r.Static("/static", "./dist/static")
+	r.StaticFile("/", "./dist/index.html")
 
 	return r.Run(addr)
 }

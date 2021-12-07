@@ -9,17 +9,18 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 )
 
 const (
 	configType = "yaml"
 )
 
-var pilogo_config_file_name = "pkg/config//config.json"
+var pilogo_config_file_name = "pkg/config/config.json"
 
 type LogOpts struct {
 	LogLevel  string `json:"log_level"`
