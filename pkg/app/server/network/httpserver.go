@@ -6,13 +6,20 @@ import (
 )
 
 func HttpServerStart(addr string) error {
-	r := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	engine := gin.New()
+	// engine.Use(gin.Logger())
+	engine.Use(gin.Recovery())
+
 	// TODO: 此处绑定 http api handler
-	r.GET("/api/agent_info", handlers.AgentInfoHandler)
+	group := engine.Group("/api")
+	{
+		group.GET("/agent_info", handlers.AgentInfoHandler)
+	}
 
 	// TODO: 此处绑定前端静态资源handler
-	r.Static("/static", "./dist/static")
-	r.StaticFile("/", "./dist/index.html")
+	engine.Static("/static", "./dist/static")
+	engine.StaticFile("/", "./dist/index.html")
 
-	return r.Run(addr)
+	return engine.Run(addr)
 }

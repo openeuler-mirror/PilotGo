@@ -5,9 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func AgentInfoHandler(c *gin.Context) {
+	logger.Debug("process get agent request")
 	// TODO: process agent info
 	agent := agentmanager.GetAgentManager().GetAgent("uuid")
 	if agent != nil {

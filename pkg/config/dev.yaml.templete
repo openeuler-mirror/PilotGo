@@ -3,13 +3,13 @@ server:
 db:
   ip: 192.168.160.18
   port: 3306
-  username: root
-  password: qwer1234
+  username: "name"
+  password: "password"
   dbname: pilotgo
 log_opts:
-  log_level: debug
-  log_driver: stdout
-  log_path: D:\kylin.os\kylin\log\pilotgo
+  log_level: "debug"
+  log_driver: "stdout"
+  log_path: "./log"
   max_file: 1
   max_size: 10485760
 max_age: 1800,

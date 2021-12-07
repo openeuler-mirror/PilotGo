@@ -20,7 +20,7 @@ const (
 	configType = "yaml"
 )
 
-var pilogo_config_file_name = "pkg/config/config.json"
+var pilogo_config_file_name = "./config.json"
 
 type LogOpts struct {
 	LogLevel  string `json:"log_level"`

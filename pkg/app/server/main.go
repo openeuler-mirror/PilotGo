@@ -1,19 +1,25 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeluer.org/PilotGo/PilotGo/pkg/config"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func main() {
-	// conf, err := config.Load()
-	// if err != nil {
-	// 	fmt.Println("failed to load configure, exit..", err)
-	// 	os.Exit(-1)
-	// }
 
-	// logger.Init(conf)
-	// logger.Info("Thanks to choose PilotGo!")
+	conf, err := config.Load()
+	if err != nil {
+		fmt.Println("failed to load configure, exit..", err)
+		os.Exit(-1)
+	}
+
+	logger.Init(conf)
+	logger.Info("Thanks to choose PilotGo!")
 
 	server := &network.SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
