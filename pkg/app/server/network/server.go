@@ -1,15 +1,10 @@
 package network
 
 import (
-	"bufio"
 	"fmt"
 	"net"
-	"os"
-	"time"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
 type SocketServer struct {
@@ -33,31 +28,34 @@ func (s *SocketServer) Run(addr string) error {
 		}
 		s.OnAccept(conn)
 
-		go SendHandle(conn)
+		// go SendHandle(conn)
 	}
 }
 
-func SendHandle(conn net.Conn) {
-	for {
-		fmt.Println("请输入指令：")
-		inputReader := bufio.NewReader(os.Stdin)
-		input, err := inputReader.ReadString('\n')
-		if err != nil {
-			continue
-		}
-		data := &protocol.Message{
-			Type: protocol.AgentScan,
-			Body: []byte(input),
-		}
+// func SendHandle(conn net.Conn) {
+// 	for {
+// 		fmt.Println("请输入指令：")
+// 		inputReader := bufio.NewReader(os.Stdin)
+// 		input, err := inputReader.ReadString('\n')
+// 		if err != nil {
+// 			continue
+// 		}
+// 		data := &protocol.Message{
+// 			Type: protocol.RunScript,
+// 			Body: []byte(input),
+// 		}
 
-		_, err = agentmanager.Send(conn, data)
-		if err != nil {
-			fmt.Println("send error:", err)
-		}
+// 		// data := msg.Encode()
+// 		// sendData := protocol.TlvEncode(data)
 
-		time.Sleep(time.Second)
-	}
-}
+// 		err = pnet.Send(conn, protocol.TlvEncode(data.Encode()))
+// 		if err != nil {
+// 			fmt.Println("send error:", err)
+// 		}
+
+// 		time.Sleep(time.Second)
+// 	}
+// }
 
 func (s *SocketServer) Stop() {
 

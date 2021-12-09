@@ -11,11 +11,22 @@ import (
 func AgentInfoHandler(c *gin.Context) {
 	logger.Debug("process get agent request")
 	// TODO: process agent info
-	agent := agentmanager.GetAgentManager().GetAgent("uuid")
+	agent := agentmanager.GetAgent("uuid")
 	if agent != nil {
-		agent.GetInfo()
+		agent.AgentInfo()
 		// TODO: 此处处理并返回agent信息
+
+		c.JSON(http.StatusOK, `{"status":0}`)
+		return
 	}
 
 	c.JSON(http.StatusOK, `{"status":-1}`)
+}
+
+func AgentListHandler(c *gin.Context) {
+	logger.Debug("process get agent list request")
+
+	agent_list := agentmanager.GetAgentList()
+
+	c.JSON(http.StatusOK, agent_list)
 }
