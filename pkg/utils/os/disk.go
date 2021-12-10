@@ -1,9 +1,8 @@
 package os
 
 import (
-	"fmt"
-
 	"github.com/shirou/gopsutil/disk"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 type DiskIOInfo struct {
@@ -31,7 +30,7 @@ func GetDiskUsageInfo() []DiskUsageINfo {
 	diskusage := make([]DiskUsageINfo, 0)
 	parts, err := disk.Partitions(true)
 	if err != nil {
-		fmt.Printf("get Partitions failed, err:%v\n", err)
+		logger.Error("get Partitions failed, err:%v\n", err)
 		return nil
 	}
 	for _, part := range parts {

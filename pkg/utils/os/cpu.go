@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
@@ -44,7 +45,7 @@ func GetPhysicalCPU() int {
 	num = strings.Replace(num, "\n", "", -1)
 	cpunum, err := strconv.Atoi(num)
 	if err != nil {
-		fmt.Println("获取cpu个数失败！")
+		logger.Error("获取cpu个数失败！")
 	}
 	return cpunum
 }
