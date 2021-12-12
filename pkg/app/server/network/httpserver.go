@@ -15,6 +15,8 @@ func HttpServerStart(addr string) error {
 	group := engine.Group("/api")
 	{
 		group.GET("/agent_info", handlers.AgentInfoHandler)
+		group.GET("/agent_list", handlers.AgentListHandler)
+		group.GET("/run_script", handlers.RunScript)
 	}
 
 	// TODO: 此处绑定前端静态资源handler

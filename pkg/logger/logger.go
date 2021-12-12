@@ -3,9 +3,11 @@ package logger
 import (
 	"errors"
 	"os"
+	"path"
+	"runtime"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	conf "openeluer.org/PilotGo/PilotGo/pkg/config"
 )
 
@@ -16,9 +18,18 @@ func setLogDriver(logopts *conf.LogOpts) error {
 		return errors.New("logopts == nil")
 	}
 
+	logrus.SetReportCaller(true)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		DisableColors: false,
+		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
+			fileName := path.Base(f.File)
+			return f.Function, fileName
+		},
+	})
+
 	switch logopts.LogDriver {
 	case "stdout":
-		log.SetOutput(os.Stdout)
+		logrus.SetOutput(os.Stdout)
 	case "file":
 		writer, err := rotatelogs.New(
 			logopts.LogPath+"/"+logName,
@@ -28,10 +39,10 @@ func setLogDriver(logopts *conf.LogOpts) error {
 		if err != nil {
 			return err
 		}
-		log.SetOutput(writer)
+		logrus.SetOutput(writer)
 	default:
-		log.SetOutput(os.Stdout)
-		log.Warn("!!! invalid log output, use stdout !!!")
+		logrus.SetOutput(os.Stdout)
+		logrus.Warn("!!! invalid log output, use stdout !!!")
 	}
 	return nil
 }
@@ -39,19 +50,19 @@ func setLogDriver(logopts *conf.LogOpts) error {
 func setLogLevel(logopts *conf.LogOpts) error {
 	switch logopts.LogLevel {
 	case "trace":
-		log.SetLevel(log.TraceLevel)
+		logrus.SetLevel(logrus.TraceLevel)
 	case "debug":
-		log.SetLevel(log.DebugLevel)
+		logrus.SetLevel(logrus.DebugLevel)
 	case "info":
-		log.SetLevel(log.InfoLevel)
+		logrus.SetLevel(logrus.InfoLevel)
 	case "warn":
-		log.SetLevel(log.WarnLevel)
+		logrus.SetLevel(logrus.WarnLevel)
 	case "error":
-		log.SetLevel(log.ErrorLevel)
+		logrus.SetLevel(logrus.ErrorLevel)
 	case "fatal":
-		log.SetLevel(log.FatalLevel)
+		logrus.SetLevel(logrus.FatalLevel)
 	default:
-		log.SetLevel(log.InfoLevel)
+		logrus.SetLevel(logrus.InfoLevel)
 	}
 	return nil
 }
@@ -61,31 +72,31 @@ func Init(conf *conf.Configure) error {
 	if err != nil {
 		return err
 	}
-	log.Debug("log init")
+	logrus.Debug("log init")
 
 	return nil
 }
 
 func Trace(format string, args ...interface{}) {
-	log.Tracef(format, args...)
+	logrus.Tracef(format, args...)
 }
 
 func Debug(format string, args ...interface{}) {
-	log.Debugf(format, args...)
+	logrus.Debugf(format, args...)
 }
 
 func Info(format string, args ...interface{}) {
-	log.Infof(format, args...)
+	logrus.Infof(format, args...)
 }
 
 func Warn(format string, args ...interface{}) {
-	log.Warnf(format, args...)
+	logrus.Warnf(format, args...)
 }
 
 func Error(format string, args ...interface{}) {
-	log.Errorf(format, args...)
+	logrus.Errorf(format, args...)
 }
 
 func Fatal(format string, args ...interface{}) {
-	log.Fatalf(format, args...)
+	logrus.Fatalf(format, args...)
 }

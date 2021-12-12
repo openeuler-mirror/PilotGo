@@ -3,7 +3,11 @@ package agentmanager
 import (
 	"fmt"
 	"net"
+	"time"
 
+	"github.com/google/uuid"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	pnet "openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
@@ -11,16 +15,23 @@ type AgentMessageHandler func(*Agent, *protocol.Message) error
 
 type Agent struct {
 	UUID             string
+	Version          string
 	conn             net.Conn
 	MessageProcesser *protocol.MessageProcesser
 }
 
-// 通过给定的conn连接初始化一个agent
+// 通过给定的conn连接初始化一个agent并启动监听
 func NewAgent(conn net.Conn) (*Agent, error) {
 	agent := &Agent{
+		UUID:             "agent",
 		conn:             conn,
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
+
+	go func() {
+		agent.startListen()
+	}()
+
 	if err := agent.Init(); err != nil {
 		return nil, err
 	}
@@ -34,16 +45,10 @@ func (a *Agent) bindHandler(t int, f AgentMessageHandler) {
 	})
 }
 
-func (a *Agent) StartListen() {
-	go func() {
-		a.startListen()
-	}()
-}
-
 func (a *Agent) startListen() {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("server processor panic error:", err)
+			logger.Error("server processor panic error:%s", err.(error).Error())
 			a.conn.Close()
 		}
 	}()
@@ -71,17 +76,75 @@ func (a *Agent) startListen() {
 
 // 远程获取agent端的信息进行初始化
 func (a *Agent) Init() error {
+	// TODO: 此处绑定所有的消息处理函数
 	a.bindHandler(protocol.Heartbeat, func(a *Agent, msg *protocol.Message) error {
-		fmt.Println("process heartbeat from processor:", a.conn.RemoteAddr(), string(msg.Body))
+		logger.Info("process heartbeat from processor, remote addr:%s, data:%s",
+			a.conn.RemoteAddr().String(), msg.String())
 		return nil
 	})
+
+	a.bindHandler(protocol.AgentInfo, func(a *Agent, msg *protocol.Message) error {
+		logger.Info("process heartbeat from processor, remote addr:%s, data:%s",
+			a.conn.RemoteAddr().String(), msg.String())
+		return nil
+	})
+
+	data, err := a.AgentInfo()
+	if err != nil {
+		logger.Error("fail to get agent info, address:%s", a.conn.RemoteAddr().String())
+	}
+	d := data.(map[string]interface{})
+	logger.Debug("response agent info is %v", d)
+	a.UUID = d["agent_uuid"].(string)
+
+	a.Version = d["agent_version"].(string)
+
+	// add agent to agent manager
+	AddAgent(a)
 
 	return nil
 }
 
 // 远程在agent上运行脚本
-func (a *Agent) RunScript() {
+func (a *Agent) RunScript(cmd string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.RunScript,
+		Data: struct {
+			Command string
+		}{
+			Command: cmd,
+		},
+	}
 
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Duration) (*protocol.Message, error) {
+	logger.Debug("send message:%s", msg.String())
+
+	if msg.UUID == "" {
+		msg.UUID = uuid.New().String()
+	}
+
+	if wait {
+		waitChan := make(chan *protocol.Message)
+		a.MessageProcesser.WaitMap.Store(msg.UUID, waitChan)
+
+		pnet.Send(a.conn, protocol.TlvEncode(msg.Encode()))
+
+		// wail for response
+		data := <-waitChan
+		return data, nil
+	}
+
+	// just send data
+	return nil, pnet.Send(a.conn, protocol.TlvEncode(msg.Encode()))
 }
 
 // 远程获取agent端的系统信息
@@ -90,25 +153,17 @@ func (a *Agent) GetOSInfo() {
 }
 
 // 远程获取agent端的系统信息
-func (a *Agent) GetInfo() {
-
-}
-
-func Send(conn net.Conn, msg *protocol.Message) (error, error) {
-	data := msg.Encode()
-	sendData := protocol.TlvEncode(data)
-
-	data_length := len(sendData)
-	send_count := 0
-	for {
-		n, err := conn.Write(sendData[send_count:])
-		if err != nil {
-			return err, nil
-		}
-		if n+send_count >= data_length {
-			send_count = send_count + n
-			break
-		}
+func (a *Agent) AgentInfo() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AgentInfo,
+		Data: struct{}{},
 	}
-	return nil, nil
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
 }
