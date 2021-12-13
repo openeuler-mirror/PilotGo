@@ -7,60 +7,61 @@ package config
  */
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 const (
 	configType = "yaml"
 )
 
-var pilogo_config_file_name = "./config.json"
+var pilogo_config_file_name = "./config.yaml"
 
 type LogOpts struct {
-	LogLevel  string `json:"log_level"`
-	LogDriver string `json:"log_driver"`
-	LogPath   string `json:"log_path"`
-	MaxFile   int    `json:"max_file"`
-	MaxSize   int    `json:"max_size"`
+	LogLevel  string `yaml:"log_level"`
+	LogDriver string `yaml:"log_driver"`
+	LogPath   string `yaml:"log_path"`
+	MaxFile   int    `yaml:"max_file"`
+	MaxSize   int    `yaml:"max_size"`
 }
 type Server struct {
-	ServerPort int `json:"server_port"`
+	ServerPort int `yaml:"server_port"`
 }
 type DbInfo struct {
-	HostName string `json:"host_name"`
-	UserName string `json:"user_name"`
-	Password string `json:"password"`
-	DataBase string `json:"data_base"`
-	Port     int    `json:"port"`
+	HostName string `yaml:"host_name"`
+	UserName string `yaml:"user_name"`
+	Password string `yaml:"password"`
+	DataBase string `yaml:"data_base"`
+	Port     int    `yaml:"port"`
 }
 
 type Configure struct {
-	Logopts      LogOpts `json:"log_opts"`
-	S            Server  `json:"server"`
-	MaxAge       int     `json:"max_age"`
-	SessionCount int     `json:"session_count"`
-	Dbinfo       DbInfo  `json:"db_info"`
+	Logopts      LogOpts `yaml:"log_opts"`
+	S            Server  `yaml:"server"`
+	MaxAge       int     `yaml:"max_age"`
+	SessionCount int     `yaml:"session_count"`
+	Dbinfo       DbInfo  `yaml:"db_info"`
 }
 
 func Load() (*Configure, error) {
-	var config Configure
+	config := Configure{}
 	bytes, err := ioutil.ReadFile(pilogo_config_file_name)
 	if err != nil {
 		fmt.Printf("open %s failed! err = %s\n", pilogo_config_file_name, err.Error())
 		return nil, err
 	}
 
-	err = json.Unmarshal(bytes, &config)
+	err = yaml.Unmarshal(bytes, &config)
 	if err != nil {
-		fmt.Printf("json.Unmarshal %s failed!\n", string(bytes))
+		fmt.Printf("yaml Unmarshal %s failed!\n", string(bytes))
 		return nil, err
 	}
+	fmt.Printf("config: %v", config)
 	return &config, nil
 }
 
