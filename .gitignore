@@ -31,4 +31,5 @@ yarn-error.log*
 /log
 
 # Local config
+config.yaml
 config.json
