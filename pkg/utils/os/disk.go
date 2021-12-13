@@ -1,8 +1,11 @@
 package os
 
 import (
+	"fmt"
+
 	"github.com/shirou/gopsutil/disk"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type DiskIOInfo struct {
@@ -30,7 +33,7 @@ func GetDiskUsageInfo() []DiskUsageINfo {
 	diskusage := make([]DiskUsageINfo, 0)
 	parts, err := disk.Partitions(true)
 	if err != nil {
-		logger.Error("get Partitions failed, err:%v\n", err)
+		logger.Error("get Partitions failed, err:%v\n", err.Error())
 		return nil
 	}
 	for _, part := range parts {
@@ -81,4 +84,40 @@ func GetDiskInfo() []DiskIOInfo {
 		diskinfo = append(diskinfo, tmp)
 	}
 	return diskinfo
+}
+
+/*挂载磁盘
+1.创建挂载磁盘的目录
+2.挂载磁盘*/
+func CreateDiskPath(mountpath string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("mkdir %s", mountpath))
+	if err != nil {
+		logger.Error("创建挂载目录失败!%s", err.Error())
+	}
+	logger.Info("创建挂载目录成功!%s", tmp)
+}
+func DiskMount(sourceDisk, destPath string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, destPath))
+	if err != nil {
+		logger.Error("挂载磁盘失败!%s", err.Error())
+	}
+	logger.Info("挂载磁盘成功!%s", tmp)
+}
+
+// 卸载磁盘
+func DiskUMount(diskPath string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("umount %s", diskPath))
+	if err != nil {
+		logger.Error("挂载磁盘失败!%s", err.Error())
+	}
+	logger.Info("卸载磁盘成功!%s", tmp)
+}
+
+// 磁盘格式化
+func DiskFormat(fileType, diskPath string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("mkfs.%s %s", fileType, diskPath))
+	if err != nil {
+		logger.Error("格式化磁盘失败!%s", err.Error())
+	}
+	logger.Info("格式化磁盘成功!%s", tmp)
 }
