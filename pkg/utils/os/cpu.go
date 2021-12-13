@@ -45,7 +45,7 @@ func GetPhysicalCPU() int {
 	num = strings.Replace(num, "\n", "", -1)
 	cpunum, err := strconv.Atoi(num)
 	if err != nil {
-		logger.Error("获取cpu个数失败！")
+		logger.Error("获取cpu个数失败!")
 	}
 	return cpunum
 }

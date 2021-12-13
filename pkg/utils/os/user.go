@@ -2,7 +2,11 @@ package os
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
+	"os"
+	"os/exec"
 	"os/user"
 	"strings"
 
@@ -51,7 +55,7 @@ func GetCurrentUserInfo() CurrentUser {
 func GetAllUserInfo() []AllUserInfo {
 	tmp, err := utils.RunCommand("cat /etc/passwd")
 	if err != nil {
-		logger.Error("获取失败！%s", err)
+		logger.Error("获取失败!%s", err.Error())
 	}
 	reader := strings.NewReader(tmp)
 	scanner := bufio.NewScanner(reader)
@@ -76,4 +80,66 @@ func GetAllUserInfo() []AllUserInfo {
 	}
 
 	return allUsers
+}
+
+// 创建新的用户，并新建家目录
+func AddLinuxUser(username, password string) {
+	useradd := exec.Command("useradd", "-m", username)
+	err := useradd.Start()
+	if err != nil {
+		logger.Error(err.Error())
+	}
+
+	useradd.Wait()
+	//下面两个是管道的两端
+	//linux可以使用  echo "password" | passwd --stdin username
+	//直接更改密码
+	ps := exec.Command("echo", password)
+	grep := exec.Command("passwd", "--stdin", username)
+
+	r, w := io.Pipe() // 创建一个管道
+	defer r.Close()
+	defer w.Close()
+	ps.Stdout = w  // ps向管道的一端写
+	grep.Stdin = r // grep从管道的一端读
+
+	var buffer bytes.Buffer
+	grep.Stdout = &buffer // grep的输出为buffer
+
+	_ = ps.Start()
+	_ = grep.Start()
+	ps.Wait()
+	w.Close()
+	grep.Wait()
+	io.Copy(os.Stdout, &buffer) // buffer拷贝到系统标准输出
+}
+
+// 删除用户
+func DelUser(username string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("userdel -r %s", username))
+	if err != nil {
+		logger.Error("删除用户失败!%s", err.Error())
+		return
+	}
+	logger.Info("删除用户成功!%s", tmp)
+}
+
+// chmod [-R] 权限值 文件名
+func ChangePermission(permission, file string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("chmod %s %s", permission, file))
+	if err != nil {
+		logger.Error("改变文件权限失败!%s", err.Error())
+		return
+	}
+	logger.Info("改变文件权限成功!%s", tmp)
+}
+
+// chown [-R] 所有者 文件或目录 / chown [-R] 所有者 文件或目录
+func ChangeFileOwner(user, file string) {
+	tmp, err := utils.RunCommand(fmt.Sprintf("chown -R %s %s", user, file))
+	if err != nil {
+		logger.Error("改变文件所有者失败!%s", err.Error())
+		return
+	}
+	logger.Info("改变文件所有者成功!%s", tmp)
 }
