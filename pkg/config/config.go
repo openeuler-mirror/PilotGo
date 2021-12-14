@@ -78,13 +78,13 @@ func Init(output io.Writer, configFile string) error {
 	}
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		_, _ = fmt.Fprintf(output, "Config file changed %s \n", e.Name)
+		fmt.Fprintf(output, "Config file changed %s \n", e.Name)
 	})
 	return nil
 }
 
 func MustInit(output io.Writer, conf string) { // MustInit if fail panic
 	if err := Init(output, conf); err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 }
