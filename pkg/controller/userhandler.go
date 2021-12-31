@@ -7,9 +7,10 @@ package controller
  */
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/dto"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
@@ -106,3 +107,52 @@ func Info(c *gin.Context) {
 		"data": gin.H{"user": dto.ToUserDto(user.(model.User))},
 	})
 }
+
+// 查询所有用户
+func UserAll(c *gin.Context) {
+	users := model.User{}
+	query := &model.PaginationQ{}
+	err := c.ShouldBindQuery(query)
+
+	if model.HandleError(c, err) {
+		return
+	}
+	list, total, err := users.All(query)
+	if model.HandleError(c, err) {
+		return
+	}
+	// 返回数据开始拼装分页的json
+	model.JsonPagination(c, list, total, query)
+}
+
+// 更新用户
+func UserUpdate(c *gin.Context) {
+	var user model.User
+	err := c.ShouldBind(&user)
+	if model.HandleError(c, err) {
+		return
+	}
+	err = user.Update()
+	if model.HandleError(c, err) {
+		return
+	}
+	response.Success(c, nil, "Updated User successfully!")
+}
+
+// 删除用户
+func DeleteUser(c *gin.Context) {
+	var user model.User
+	userEmail := c.PostForm("email")
+	if dao.IsEmailExist(userEmail) {
+		mysqlmanager.DB.Where("email=?", userEmail).Delete(user)
+		response.Response(c, http.StatusUnprocessableEntity,
+			200,
+			nil,
+			"User deleted successfully!")
+		return
+	} else {
+		response.Fail(c, nil, "No user found!")
+	}
+}
+
+//修改用户信息

@@ -6,6 +6,7 @@ import (
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeluer.org/PilotGo/PilotGo/pkg/cmd"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -36,8 +37,13 @@ func main() {
 
 	// 此处启动前端及REST http server
 	go func() {
-		network.HttpServerStart("localhost:8080")
-	}()
+		err = cmd.Start(conf)
+		if err != nil {
+			logger.Info("server start failed:%s", err.Error())
+			os.Exit(-1)
+		}
+		// network.HttpServerStart("192.168.160.18:8080")
 
+	}()
 	select {}
 }
