@@ -35,8 +35,10 @@ func SetupRouter() *gin.Engine {
 		user.POST("/login", controller.Login)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 		user.GET("/searchAll", controller.UserAll)
-		user.GET("/update", controller.UserUpdate)
+		user.GET("/refresh", controller.UserRefresh)
 		user.POST("/delete", controller.DeleteUser)
+		user.POST("/update", controller.UpdateUser)
+		// user.POST("/import", controller.ImportUser)
 	}
 
 	// TODO: 此处绑定前端静态资源handler
