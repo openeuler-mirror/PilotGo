@@ -27,8 +27,14 @@ func IsDepartIDExist(ID int) bool {
 	mysqlmanager.DB.Where("id=?", ID).Find(&Depart)
 	return Depart.ID != 0
 }
-func DepartStore() {
-	var Depart model.DepartNode
+func DepartStore() []model.DepartNode {
+	var Depart []model.DepartNode
 	mysqlmanager.DB.Find(&Depart)
 	logger.Info("%v", Depart)
+	return Depart
+}
+func IsRootExist() bool {
+	var Depart model.DepartNode
+	mysqlmanager.DB.Where("node_locate=?", 0).Find(&Depart)
+	return Depart.ID != 0
 }
