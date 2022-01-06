@@ -52,10 +52,14 @@ func Register(c *gin.Context) {
 			"Email exist!")
 		return
 	}
-
+	hasedPassword, err := common.HashAndSalt(password)
+	if err != nil {
+		response.Response(c, http.StatusInternalServerError, 500, nil, "Hased password error!")
+		return
+	}
 	user := model.User{ //Create user
 		Username: username,
-		Password: password,
+		Password: string(hasedPassword),
 		Phone:    phone,
 		Email:    email,
 		Enable:   enable,
@@ -80,7 +84,8 @@ func Login(c *gin.Context) {
 			"用户不存在!")
 		return
 	}
-	if password != user.Password {
+	check := common.ComparePasswords(user.Password, password)
+	if !check {
 		response.Response(c, http.StatusBadRequest,
 			400,
 			nil,
@@ -125,14 +130,14 @@ func UserAll(c *gin.Context) {
 	model.JsonPagination(c, list, total, query)
 }
 
-// 更新用户
-func UserUpdate(c *gin.Context) {
+// 刷新
+func UserRefresh(c *gin.Context) {
 	var user model.User
 	err := c.ShouldBind(&user)
 	if model.HandleError(c, err) {
 		return
 	}
-	err = user.Update()
+	err = user.Refresh()
 	if model.HandleError(c, err) {
 		return
 	}
@@ -156,3 +161,28 @@ func DeleteUser(c *gin.Context) {
 }
 
 //修改用户信息
+func UpdateUser(c *gin.Context) {
+	var user model.User
+	email := c.PostForm("email")
+	phone := c.PostForm("phone")
+	password := c.PostForm("password")
+	if dao.IsEmailExist(email) {
+		// 修改手机号
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
+		hasedPassword, err := common.HashAndSalt(password)
+		if err != nil {
+			response.Response(c, http.StatusInternalServerError, 500, nil, "Hased password error!")
+			return
+		}
+
+		//修改密码
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", hasedPassword)
+		response.Response(c, http.StatusUnprocessableEntity,
+			200,
+			gin.H{"data": user},
+			"User update successfully!")
+		return
+	} else {
+		response.Fail(c, nil, "No user found!")
+	}
+}

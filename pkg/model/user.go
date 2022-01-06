@@ -34,8 +34,8 @@ func (u *User) All(q *PaginationQ) (list *[]User, total uint, err error) {
 	return
 }
 
-//Update
-func (m *User) Update() (err error) {
+//Refresh
+func (m *User) Refresh() (err error) {
 	m.makePassword()
 	return mysqlmanager.DB.Model(m).Update(m).Error
 }
