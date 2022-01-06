@@ -7,19 +7,20 @@ package cmd
  */
 
 import (
+	"net/http"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"net/http"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/plugin"
 	"openeluer.org/PilotGo/PilotGo/pkg/router"
-	"os"
-	"strconv"
-	"time"
 )
 
 var (
@@ -93,6 +94,8 @@ func Start(conf *config.Configure) (err error) {
 	}
 
 	mysqlmanager.DB.AutoMigrate(&model.User{})
+	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
+	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
 	defer mysqlmanager.DB.Close()
 
 	r := router.SetupRouter()
