@@ -12,9 +12,33 @@ import (
 )
 
 func AddDepart(c *gin.Context) {
+	pid := c.PostForm("PID")
 	parentDepart := c.PostForm("ParentDepart")
 	depart := c.PostForm("Depart")
+	tmp, err := strconv.Atoi(pid)
+	if len(pid) != 0 && err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"pid识别失败")
+		return
+	}
+	if len(pid) != 0 && !dao.IsDepartIDExist(tmp) {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门PID有误,数据库中不存在该部门PID")
+		return
+	}
+	if len(pid) == 0 && len(parentDepart) != 0 {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"请输入PID")
+		return
+	}
 	departNode := model.DepartNode{
+		PID:          tmp,
 		ParentDepart: parentDepart,
 		Depart:       depart,
 	}
@@ -39,8 +63,16 @@ func AddDepart(c *gin.Context) {
 			"部门节点不能为空")
 		return
 	} else if len(parentDepart) == 0 {
-		departNode.NodeLocate = 0
-		mysqlmanager.DB.Create(&departNode)
+		if dao.IsRootExist() {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				"已存在根节点,即组织名称")
+			return
+		} else {
+			departNode.NodeLocate = 0
+			mysqlmanager.DB.Create(&departNode)
+		}
 	} else {
 		departNode.NodeLocate = 1
 		mysqlmanager.DB.Create(&departNode)
@@ -87,7 +119,64 @@ func AddMachine(c *gin.Context) {
 	response.Success(c, nil, "机器入库成功")
 }
 func DepartInfo(c *gin.Context) {
-	dao.DepartStore()
+	depart := dao.DepartStore()
+	var root model.MachineTreeNode
+	departnode := make([]model.MachineTreeNode, 0)
+	ptrchild := make([]*model.MachineTreeNode, 0)
+
+	for _, value := range depart {
+		if value.NodeLocate == 0 {
+			root = model.MachineTreeNode{
+				Label: value.Depart,
+				Id:    value.ID,
+				Pid:   0,
+			}
+		} else {
+			departnode = append(departnode, model.MachineTreeNode{
+				Label: value.Depart,
+				Id:    value.ID,
+				Pid:   value.PID,
+			})
+		}
+
+	}
+	ptrchild = append(ptrchild, &root)
+	for key, _ := range departnode {
+		var a *model.MachineTreeNode
+		a = &departnode[key]
+		ptrchild = append(ptrchild, a)
+	}
+	node := &root
+	makeTree(node, ptrchild)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": node,
+	})
+}
+func makeTree(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) {
+	childs := findchild(node, ptrchild)
+	for _, value := range childs {
+		node.Children = append(node.Children, value)
+		if IsChildExist(value, ptrchild) {
+			makeTree(value, ptrchild)
+		}
+	}
+}
+func findchild(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) (ret []*model.MachineTreeNode) {
+	for _, value := range ptrchild {
+		if node.Id == value.Pid {
+			ret = append(ret, value)
+		}
+	}
+	return
+}
+func IsChildExist(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) bool {
+	for _, child := range ptrchild {
+		if node.Id == child.Pid {
+			return true
+		}
+	}
+	return false
 }
 func Postmachinedata(c *gin.Context) {}
 
