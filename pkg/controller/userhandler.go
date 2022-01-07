@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"github.com/tealeg/xlsx"
 	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/dto"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
@@ -185,4 +186,50 @@ func UpdateUser(c *gin.Context) {
 	} else {
 		response.Fail(c, nil, "No user found!")
 	}
+}
+
+//一键导入用户数据
+func ImportUser(c *gin.Context) {
+	form, _ := c.MultipartForm()
+
+	files := form.File["upload"]
+	if files == nil {
+		response.Fail(c, nil, "Please select a file first!")
+		return
+	}
+	filePath := "static/"
+	for _, file := range files {
+		name := file.Filename
+		filename := filePath + name
+
+		// c.SaveUploadedFile(file, filename)
+		xlFile, error := xlsx.OpenFile(filename)
+		if error != nil {
+			return
+		}
+		for _, sheet := range xlFile.Sheets {
+			for rowIndex, row := range sheet.Rows {
+				//跳过第一行表头信息
+				if rowIndex == 0 {
+					continue
+				}
+				user := model.User{}
+				user.Username = row.Cells[0].Value
+				// 设置默认密码为123456
+				hasedPassword, err := common.HashAndSalt("123456")
+				if err != nil {
+					response.Response(c, http.StatusInternalServerError, 500, nil, "Hased password error!")
+					return
+				}
+				user.Password = hasedPassword
+				user.Phone = row.Cells[1].Value
+				user.Email = row.Cells[2].Value
+				mysqlmanager.DB.Create(&user)
+			}
+		}
+	}
+	response.Response(c, http.StatusUnprocessableEntity,
+		200,
+		nil,
+		"import success")
 }
