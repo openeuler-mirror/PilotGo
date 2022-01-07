@@ -38,7 +38,7 @@ func SetupRouter() *gin.Engine {
 		user.GET("/refresh", controller.UserRefresh)
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
-		// user.POST("/import", controller.ImportUser)
+		user.POST("/import", controller.ImportUser)
 	}
 	machinemanager := router.Group("machinemanager")
 	{
