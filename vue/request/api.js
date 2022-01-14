@@ -16,26 +16,17 @@ export function getChart(url) {
   })
 }
 
-export function getClusters() {
+export function loginByEmail(data) {
   return request({
-    url: '/hosts',
-    method: 'get',
-  })
-}
-
-export function insertIp(data) {
-  return request({
-    url: '/hosts',
+    url: '/user/login',
     method: 'post',
     data
   })
 }
-
-export function deleteIp(data) {
+export function logout() {
   return request({
-    url: '/hosts',
-    method: 'delete',
-    data
+    url: '/user/logout',
+    method: 'post',
   })
 }
 

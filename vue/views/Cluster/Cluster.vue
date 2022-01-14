@@ -1,268 +1,299 @@
 <template>
   <div class="cluster">
-    <div class="cluster-title">
-      <span class="cluster-title__text">主机列表</span>
-      <div class="cluster-title__operate">
-        <el-button size="mini" @click="addIPDialogVisible = true"
-          >添加IP</el-button
-        >
-        <el-popconfirm
-          title="确定删除所选项目吗？"
-          @confirm="handleDeleteItems"
-        >
-          <el-button size="mini" slot="reference">删除</el-button>
-        </el-popconfirm>
-      </div>
+    <div class="dept">
+      <el-tree
+       class="treeitems"
+       :data="data"
+       node-key="id"
+       :props="defaultProps"
+       :load="loadNode"
+       lazy
+       :default-expanded-keys="[0]"
+       @node-click="handleNodeClick"
+       draggable
+       ref="tree"
+     >
+     <span class="custom-tree-node" slot-scope="{ node, data }">
+       <span>{{ node.label }}</span>
+       <span>
+         <em @click="() => append(node,data)" class="el-icon-plus"></em>
+         <em v-if="data.id !== 0" @click="() => remove(node,data)" class="el-icon-delete"></em>
+         <em v-if="data.id !== 0" @click="() => rename(node,data)" class="el-icon-edit"></em>
+       </span>
+     </span>
+    </el-tree>
+
     </div>
-    <el-table
-      class="cluster-table"
-      :header-cell-style="{
-        'background-color': '#f6f8fd',
-        'border-bottom': '2px solid #e4eaf9',
-        padding: '8px 4px',
-      }"
-      :cell-style="rowStyle"
-      ref="multipleTable"
-      :data="clusterList"
-      style="width: 100%"
-      @selection-change="handleClickRow"
-    >
-      <el-table-column
-        prop="id"
-        v-model="multipleSelection"
-        type="selection"
-        width="55"
-      >
-      </el-table-column>
-
-      <el-table-column label="IP" width="150">
-        <template slot-scope="scope">
-          <a @click="pluginLogin(scope.row.ip)">{{ scope.row.ip }}</a>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" width="150">
-        <template slot-scope="scope">
-          <span v-if="scope.row.system_status == 0">异常</span>
-          <span v-else>正常</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="类型" width="150">
-        <template slot-scope="scope">
-          <span v-if="scope.row.machine_type == 0">虚拟机</span>
-          <span v-else>物理机</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="system_info" label="系统信息"> </el-table-column>
-      <el-table-column prop="system_version" label="系统版本" width="150">
-      </el-table-column>
-      <el-table-column prop="arch" label="架构" width="150"> </el-table-column>
-      <el-table-column prop="installation_time" label="安装时间">
-      </el-table-column>
-    </el-table>
-
-    <el-row class="cluster-footer">
-      <el-pagination
-        class="pagination"
-        background
-        :page-sizes="sizes"
-        layout="total, sizes, prev, pager, next, jumper"
-        prev-text="上一页"
-        next-text="下一页"
-        :page-size="pageSize"
-        :total="clusterTableData.length"
-        @size-change="handleChangePageSize"
-        @current-change="handleCurrentChangePlugInTable"
-      >
-      </el-pagination>
-    </el-row>
-
-    <el-dialog title="添加IP" :visible.sync="addIPDialogVisible" width="560px">
-      <el-form
-        :model="addIPForm"
-        :rules="rules"
-        ref="addIPForm"
-        label-width="100px"
-      >
-        <el-form-item label="IP:" prop="ip">
-          <el-input
-            class="ipInput"
-            type="text"
-            size="medium"
-            v-model="addIPForm.ip"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-
-        <el-form-item label="系统信息:" prop="system_info">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="addIPForm.system_info"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="系统版本:" prop="system_version">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="addIPForm.system_version"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="架构:" prop="arch">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="addIPForm.arch"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="安装时间:" prop="installation_time">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="addIPForm.installation_time"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="机器类型:" prop="machine_type">
-          <el-select v-model="addIPForm.machine_type" placeholder="请选择">
-            <el-option
-              v-for="item in machinetypes"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="addIPDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="handleSubmitForm('addIPForm')"
-            >确 定</el-button
+    <div class="info">
+      <div class="cluster-title">
+        <span class="cluster-title__text">主机列表</span>
+        <div class="cluster-title__operate">
+          <el-button size="mini" @click="handleAddIp"
+            >添加IP</el-button>
+            <el-button size="mini" @click="handleUpdateIp"
+            >编辑IP</el-button>
+          <el-popconfirm
+            title="确定删除所选项目吗？"
+            @confirm="handleDeleteItems"
           >
-        </span>
-      </template>
+            <el-button size="mini" slot="reference">删除</el-button>
+          </el-popconfirm>
+        </div>
+      </div>
+      <ky-table
+        class="cluster-table"
+        ref="table"
+        :getData="getClusters"
+      >
+        <template v-slot:table>
+          <el-table-column
+            prop="id"
+            v-model="multipleSelection"
+            type="selection"
+            width="55"
+          >
+          </el-table-column>
+
+          <el-table-column label="IP" width="90">
+            <template slot-scope="scope">
+              <router-link
+                :to="$route.path + scope.row.id + `?ip=${scope.row.ip}`"
+                @click.native="handleSelectIp(scope.row)"
+              >
+                {{ scope.row.ip }}
+              </router-link>
+            </template>
+          </el-table-column>
+          <el-table-column prop="system_cpu" label="cpu" width="90"> 
+          </el-table-column>
+          <el-table-column label="状态" width="150">
+            <template slot-scope="scope">
+              <span v-if="scope.row.system_status == 0">异常</span>
+              <span v-else>正常</span>
+            </template>
+          </el-table-column>
+           <el-table-column prop="system_info" label="系统信息" width="150"> 
+          </el-table-column>
+          <el-table-column label="防火墙配置" width="150">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                @click="handleFireWall(scope.row.ip)">
+                <i class="el-icon-edit-outline"></i>
+              </el-button>
+            </template>
+          </el-table-column>
+          <!-- <el-table-column label="类型" width="150">
+            <template slot-scope="scope">
+              <span v-if="scope.row.machine_type == 0">虚拟机</span>
+              <span v-else>物理机</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="system_version" label="系统版本" width="150">
+          </el-table-column>
+          <el-table-column prop="arch" label="架构" width="150"> </el-table-column>
+          <el-table-column prop="installation_time" label="安装时间">
+          </el-table-column> -->
+        </template>
+      </ky-table>
+    </div>
+
+    <el-dialog 
+      :title="title"
+      :before-close="handleClose" 
+      :visible.sync="addIPDialogVisible" 
+      width="560px"
+    >
+     <add-form v-if="type === 'create'" @click="handleClose"></add-form>
+     <update-form v-if="type === 'update'" @click="handleClose"></update-form>   
     </el-dialog>
   </div>
 </template>
 
 <script>
-import axios from "axios";
-import { getClusters, insertIp, deleteIp } from "@/request/api";
+import kyTable from "@/components/KyTable";
+import AddForm from "./form/addForm";
+import UpdateForm from "./form/updateForm";
+import { getClusters, deleteIp } from "@/request/cluster";
 export default {
   name: "Cluster",
-  data() {
-    const validateIP = (rule, value, callback) => {
-      let _this = this;
-      if (!value && value == 0) {
-        callback(new Error("IP不能为空！"));
-      } else if (!_this.ipReg.test(value)) {
-        callback(new Error("请输入正确的IP地址"));
-      } else {
-        callback();
-      }
-    };
+  components: {
+    AddForm,
+    UpdateForm,
+    kyTable,
+  },
+  data() {  
     return {
+      title: '',
+      type: '',
+      dirIdSuff: 0,
+      editDirId: 0,
       addIPDialogVisible: false,
       delHostDialogVisible: false,
-      ipReg:
-        /^([1-9]|[1-9]\d|1\d{2}|2[0-1]\d|22[0-3])(\.(\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])){3}$/,
-      sizes: [14, 20, 30, 40, 50, 100], // 选择table每页显示多少条
-      pageSize: 14, // 默认table每页多少条数据
-      clusterTableData: [
-        {
-          ip: "",
-          status: "",
-          type: "",
-          systemInfo: "",
-          systemVersion: "",
-          Architecture: "",
-          installationTime: "",
-        },
-      ],
-      tableData: [],
       multipleSelection: [],
-      addIPForm: {
-        ip: "",
-        system_info: "",
-        system_version: "",
-        arch: "",
-        installation_time: "",
-        machine_type: 0,
-      },
-      rules: {
-        // 添加插件需要填的信息的验证规则
-        ip: [{ required: true, validator: validateIP, trigger: "blur" }],
-        system_info: [{ required: true, trigger: "blur" }],
-        system_version: [{ required: true, trigger: "blur" }],
-        arch: [{ required: true, trigger: "blur" }],
-        installation_time: [{ required: true, trigger: "blur" }],
-        machine_type: [{ required: true, trigger: "blur" }],
-      },
-      clusterList: [
-        {
-          ip: "",
-          status: "",
-          type: "",
-          systemInfo: "",
-          systemVersion: "",
-          Architecture: "",
-          installationTime: "",
-        },
-      ],
       deleteIPList: [],
-      machinetypes: [
-        { label: "虚拟机", value: 0 },
-        { label: "物理机", value: 1 },
-      ],
       cockpitUrl: "",
+      filterText: '',
+      data: [{
+        id:0,
+        label: '中国',     
+      }],
+      children: [{
+        id:1,
+        label: '北京',
+        children: [{
+          id:11,
+          label: '通州'
+        }]
+      },
+      {  
+        id:2,
+        label: '上海',
+        leaf: true,
+      },
+      {  
+        id:3,
+        label: '山西',
+        children:[{
+          id: 13,
+          label: '太原'
+        },{
+          id: 14,
+          label: '阳泉'
+        }]
+      },{
+        id:4,
+        label: '黑龙江',
+        children: [{
+          id:12,
+          label: '哈尔滨'
+        }]
+      }],
+      defaultProps: {
+        children: 'children',
+        label: 'label',
+        isLeaf: 'leaf'
+        },
     };
   },
+  mounted() {
+    // 加载部门节点的接口数据
 
+  },
   methods: {
-    // 改变table行的背景颜色条纹式
-    rowStyle({ rowIndex }) {
-      if (rowIndex % 2 == 0) {
-        return "background: #fff; padding: 8px 0;";
-      } else {
-        return "background: #f2f7ff; padding: 8px 0";
-      }
+    getClusters,
+    handleAddIp() {
+      this.addIPDialogVisible = true;
+      this.title = "添加IP";
+      this.type = "create"; 
     },
-    // table每页显示条数
-    currentChangePlugInTable(currentPage, pageSize) {
-      let _this = this;
-
-      // 初次改变时，排除当前页数为空的情况
-      if (!currentPage) {
-        currentPage = 1;
-      }
-
-      _this.tableData = _this.clusterTableData.slice(
-        (currentPage - 1) * pageSize,
-        currentPage * pageSize
-      );
+    handleUpdateIp() {
+      this.addIPDialogVisible = true;
+      this.title = "编辑IP";
+      this.type = "update"; 
     },
-    // 每页显示条目个数改变
-    handleChangePageSize(size) {
-      let _this = this;
-      _this.pageSize = size;
-
-      this.currentChangePlugInTable(_this.currentPage, _this.pageSize);
-    },
-    // 点击选中/取消选框
-    handleClickRow(val) {
-      this.multipleSelection = val;
-    },
-
-    // 当前页改变
-    handleCurrentChangePlugInTable(current) {
-      let _this = this;
-      _this.currentPage = current;
-      _this.currentChangePlugInTable(_this.currentPage, _this.pageSize);
+    handleClose() {
+      this.addIPDialogVisible = false;
+      this.title = "";
+      this.type = "";
+    }, 
+    append(node,data) {
+      this.$prompt('输入节点名字', '新建节点', {
+       confirmButtonText: '确定',
+       cancelButtonText: '取消',
+       }).then(({ value }) => {
+         this.$message({
+             type: 'success',
+             message: '新建成功'
+           });
+         /* http().then((data)=>{
+           this.$message({
+             type: 'success',
+             message: '新建成功'
+           }); 
+           this.partialRefresh(node)
+         })
+         //请求失败
+         .catch(()=>{
+           this.$message({
+             type: 'info',
+             message: '新建失败'
+           }); 
+         }) */
+       }).catch(() => {}); 
+   },
+   
+   refreshNode(){
+     // 封装请求整个树结构数据
+   },
+   //懒加载
+   loadNode(node, resolve){
+     if (node.level === 0) {
+       return resolve(this.data);
+     }
+     else if(node.level === 1){
+       return resolve(this.children)
+     }
+     else{
+       return resolve([])
+     }
+   },
+   rename(node,data) {
+      this.$prompt('输入节点名字', '编辑节点', {
+       confirmButtonText: '确定',
+       cancelButtonText: '取消',
+       }).then(({ value }) => {
+         this.$message({
+             type: 'success',
+             message: '修改成功'
+           });
+         /* http().then((data)=>{
+           this.$message({
+             type: 'success',
+             message: '修改成功'
+           }); 
+           this.partialRefresh(node)
+         })
+         //请求失败
+         .catch(()=>{
+           this.$message({
+             type: 'info',
+             message: '修改失败'
+           }); 
+         }) */
+       }).catch(() => {}); 
+   },
+   remove(node,data) {
+     this.$confirm('确定删除该节点？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(() => {});
+   },
+   //拖拽==>拖拽时判定目标节点能否被放置
+   allowDrop(draggingNode, dropNode, type){
+     //参数：被拖拽节点，要拖拽到的位置
+     //因为根目录是我本地写死的，不能有同级，所以我设置凡是拖拽到的level===1都存放到根节点的下面；
+     if(dropNode.level===1){
+       return type == 'inner';
+     }
+     else {
+       return true;
+     }
+   },
+   //拖拽==>判断节点能否被拖拽
+   allowDrag(draggingNode){
+    //第一级节点不允许拖拽
+     return draggingNode.level !== 1;
+   },
+    handleNodeClick(node,data) {
+      // 获取当前分支与上级分支的数据
+      console.log(node,data);
     },
     // 删除主机界面
     handleDeleteItems() {
@@ -273,78 +304,20 @@ export default {
       }
       deleteIp({ id: ids }).then((res) => {
         if (res.data.status === "success") {
-          _this.refreshList();
+          this.$refs.table.handleSearch();
           this.$message.success("删除成功");
         }
       });
     },
-    pluginLogin(name) {
-      axios
-        .get(
-          "https://" +
-            this.$store.state.cockpitPluginServer +
-            ":8888/plugin/cockpit/port",
-          {
-            params: {
-              ip: name,
-              port: "9090",
-            },
-          }
-        )
-        .then((res) => {
-          let cockpitUrl = "https://" + name + ":" + res.data.port;
-          this.$emit("selectIp", cockpitUrl);
-        });
+    handleSelectIp(row) {
+      this.$store.commit("SET_SELECTIP", row.ip);
     },
-    handleSubmitForm() {
-      let _this = this;
-      this.$refs["addIPForm"].validate((valid) => {
-        if (valid) {
-          insertIp(_this.addIPForm)
-            .then((res) => {
-              if (res.data.status === "success") {
-                _this.refreshList();
-                _this.addIPDialogVisible = false;
-              } else {
-                _this.$message.error(res.data.error);
-              }
-            })
-            .catch((res) => {
-              this.$message.error("添加失败，请检查输入内容");
-            });
-        } else {
-          this.$message.error("添加失败，请检查输入内容");
-          return false;
-        }
-      });
-    },
-    refreshList() {
-      getClusters().then((res) => {
-        let _this = this;
-        _this.clusterList = res.data.data;
-      });
-    },
-  },
-
-  mounted() {
-    let _this = this;
-    if (_this.clusterTableData.length > 14) {
-      _this.tableData = _this.clusterTableData.slice(0, _this.pageSize);
-    } else {
-      _this.tableData = _this.clusterTableData.slice(
-        0,
-        _this.clusterTableData.length
-      );
+    handleFireWall(ip) {
+      this.$router.push({
+        name: 'FireWall',
+        query: { ip: ip }
+      })
     }
-
-    let count = 0;
-
-    _this.clusterTableData.forEach((tableItem) => {
-      tableItem.id = count;
-      count++;
-    });
-
-    _this.refreshList();
   },
 };
 </script>
@@ -352,6 +325,22 @@ export default {
 <style scoped lang="scss">
 .cluster {
   margin-top: 10px;
+  .dept {
+    width: 36%;
+    display: inline-block;
+    .custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    padding-right: 8px;
+  }
+  }
+  .info {
+    width: 60%;
+    float: right;
+  }
   .cluster-title {
     height: 44px;
     background: #3e9df9;
@@ -364,7 +353,6 @@ export default {
 
     .cluster-title__operate {
       float: right;
-
       .el-button {
         color: #fff;
         background: transparent;
@@ -375,21 +363,6 @@ export default {
         background: #fff;
         color: #3e9df9;
       }
-    }
-  }
-
-  .cluster-footer {
-    float: right;
-    margin-top: 20px;
-
-    .total {
-      float: left;
-      font-size: 14px;
-      color: #606266;
-      line-height: 32px;
-    }
-    .pagination {
-      float: right;
     }
   }
 

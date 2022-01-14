@@ -1,5 +1,5 @@
 import axios from 'axios'
-import store from '@/store/store'
+import store from '@/store'
 import router from '@/router'
 
 export function request(config) {
