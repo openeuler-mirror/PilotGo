@@ -178,228 +178,71 @@ func IsChildExist(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode
 	}
 	return false
 }
-func Postmachinedata(c *gin.Context) {}
+func Deletemachinedata(c *gin.Context) {
+	uuid := c.PostForm("uuid")
+	if !dao.IsUUIDExist(uuid) {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"不存在该机器")
+		return
+	} else {
+		dao.Deleteuuid(uuid)
+		response.Success(c, nil, "机器删除成功")
+	}
+}
 
-// func Getmachinedata(c *gin.Context) {
-// 	company := c.PostForm("company")
-// 	primdepart := c.PostForm(("primaryDepart"))
-// 	secondepart := c.PostForm("secondaryDepart")
-// 	tertpart := c.PostForm("tertiaryDepart")
-// 	id := c.PostForm("UserID")
-// 	uid := c.PostForm("machineUID")
-// 	if (len(company)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"公司不能为空")
-// 		return
-// 	}
-// 	if (len(primdepart)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"一级部门不能为空")
-// 		return
-// 	}
-// 	if (len(secondepart)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"二级部门不能为空")
-// 		return
-// 	}
-// 	if (len(tertpart)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"三级部门不能为空")
-// 		return
-// 	}
-// 	if (len(id)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"id不能为空")
-// 		return
-// 	}
-// 	if (len(uid)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"uid不能为空")
-// 		return
-// 	}
-// 	machine := fmt.Sprintf("%s/%s/%s/%s/%s/%s", company, primdepart, secondepart, tertpart, id, uid)
-// 	tert := fmt.Sprintf("%s/%s/%s/%s", company, primdepart, secondepart, tertpart)
-// 	second := fmt.Sprintf("%s/%s/%s", company, primdepart, secondepart)
-// 	prim := fmt.Sprintf("%s/%s", company, primdepart)
+func Deletedepartdata(c *gin.Context) {
+	departid := c.PostForm("DepartID")
+	needdelete := make([]int, 0)
+	tmp, err := strconv.Atoi(departid)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门ID有误")
+		return
+	}
+	if !dao.IsDepartIDExist(tmp) {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"不存在该机器")
+		return
+	}
+	DepartInfo := dao.GetPid(departid)
+	needdelete = append(needdelete, tmp)
+	for _, value := range DepartInfo {
+		needdelete = append(needdelete, value.ID)
+	}
 
-// 	// machineman := model.MachineNode{
-// 	// 	Companyname: company,
-// 	// 	Primdepart:  primdepart,
-// 	// 	Secondepart: secondepart,
-// 	// 	Tertpart:    tertpart,
-// 	// 	ID:          id,
-// 	// 	UID:         uid,
-// 	// }
-// 	machineman := model.MachineManage{
-// 		Data: company,
-// 	}
-// 	if dao.IsMachineinfoExist(company) {
-// 		logger.Info("该机器的所属公司已入库")
-// 	} else {
-// 		mysqlmanager.DB.Create(&machineman)
-// 	}
+	for {
+		if len(needdelete) == 0 {
+			break
+		}
+		dao.Deletedepartdata(needdelete)
+		dao.Insertdepartlist(needdelete)
+	}
+	response.Success(c, nil, "部门删除成功")
+}
 
-// 	machineman = model.MachineManage{
-// 		Data: prim,
-// 	}
-// 	if dao.IsMachineinfoExist(prim) {
-// 		logger.Info("该机器的一级部门已入库")
-// 	} else {
-// 		mysqlmanager.DB.Create(&machineman)
-// 	}
-
-// 	machineman = model.MachineManage{
-// 		Data: second,
-// 	}
-// 	if dao.IsMachineinfoExist(second) {
-// 		logger.Info("该机器的二级部门已入库")
-// 	} else {
-// 		mysqlmanager.DB.Create(&machineman)
-// 	}
-
-// 	machineman = model.MachineManage{
-// 		Data: tert,
-// 	}
-// 	if dao.IsMachineinfoExist(tert) {
-// 		logger.Info("该机器的三级部门已入库")
-// 	} else {
-// 		mysqlmanager.DB.Create(&machineman)
-// 	}
-
-// 	machineman = model.MachineManage{
-// 		Data: machine,
-// 	}
-// 	if dao.IsMachineinfoExist(machine) {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"该机器已经存在")
-// 		return
-// 	} else {
-// 		mysqlmanager.DB.Create(&machineman)
-// 	}
-// 	response.Success(c, nil, "机器入库成功")
-// }
-// func DeleteMachineInfo(c *gin.Context) {
-// 	company := c.PostForm("company")
-// 	primdepart := c.PostForm(("primaryDepart"))
-// 	secondepart := c.PostForm("secondaryDepart")
-// 	tertpart := c.PostForm("tertiaryDepart")
-// 	id := c.PostForm("UserID")
-// 	uid := c.PostForm("machineUID")
-// 	if (len(company)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"公司不能为空")
-// 		return
-// 	} else if (len(primdepart)) == 0 {
-// 		if (len(secondepart)) != 0 || (len(tertpart)) != 0 || (len(id)) != 0 || (len(uid)) != 0 {
-// 			response.Response(c, http.StatusUnprocessableEntity,
-// 				422,
-// 				nil,
-// 				"一级部门不能为空")
-// 			return
-// 		} else {
-// 			if dao.IsMachineinfoExist(company) {
-// 				var machineman model.MachineManage
-// 				mysqlmanager.DB.Where("data like ?", company+"%%").Delete(machineman)
-// 			} else {
-// 				response.Response(c, http.StatusUnprocessableEntity,
-// 					422,
-// 					nil,
-// 					"数据库不存在该公司!")
-// 				return
-// 			}
-// 		}
-// 	} else if (len(secondepart)) == 0 {
-// 		if (len(tertpart)) != 0 || (len(id)) != 0 || (len(uid)) != 0 {
-// 			response.Response(c, http.StatusUnprocessableEntity,
-// 				422,
-// 				nil,
-// 				"二级部门不能为空")
-// 			return
-// 		} else {
-// 			if dao.IsMachineinfoExist(company + "/" + primdepart) {
-// 				var machineman model.MachineManage
-// 				mysqlmanager.DB.Where("data like ?", company+"/"+primdepart+"%%").Delete(machineman)
-// 			} else {
-// 				response.Response(c, http.StatusUnprocessableEntity,
-// 					422,
-// 					nil,
-// 					"数据库不存在该公司一级部门!")
-// 				return
-// 			}
-// 		}
-// 	} else if (len(tertpart)) == 0 {
-// 		if (len(id)) != 0 || (len(uid)) != 0 {
-// 			response.Response(c, http.StatusUnprocessableEntity,
-// 				422,
-// 				nil,
-// 				"三级部门不能为空")
-// 			return
-// 		} else {
-// 			if dao.IsMachineinfoExist(company + "/" + primdepart + "/" + secondepart) {
-// 				var machineman model.MachineManage
-// 				mysqlmanager.DB.Where("data like ?", company+"/"+primdepart+"/"+secondepart+"%%").Delete(machineman)
-// 			} else {
-// 				response.Response(c, http.StatusUnprocessableEntity,
-// 					422,
-// 					nil,
-// 					"数据库不存在该公司二级部门!")
-// 				return
-// 			}
-// 		}
-// 	} else if (len(id)) == 0 {
-// 		if (len(uid)) != 0 {
-// 			response.Response(c, http.StatusUnprocessableEntity,
-// 				422,
-// 				nil,
-// 				"id不能为空")
-// 			return
-// 		} else {
-// 			if dao.IsMachineinfoExist(company + "/" + primdepart + "/" + secondepart + "/" + tertpart) {
-// 				var machineman model.MachineManage
-// 				mysqlmanager.DB.Where("data like ?", company+"/"+primdepart+"/"+secondepart+"/"+tertpart+"%%").Delete(machineman)
-// 			} else {
-// 				response.Response(c, http.StatusUnprocessableEntity,
-// 					422,
-// 					nil,
-// 					"数据库不存在该公司三级部门!")
-// 				return
-// 			}
-// 		}
-// 	} else if (len(uid)) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"uid不能为空")
-// 		return
-// 	} else {
-// 		machine := fmt.Sprintf("%s/%s/%s/%s/%s/%s", company, primdepart, secondepart, tertpart, id, uid)
-// 		if dao.IsMachineinfoExist(machine) {
-// 			var machineman model.MachineManage
-// 			mysqlmanager.DB.Where("data=?", machine).Delete(machineman)
-// 		} else {
-// 			response.Response(c, http.StatusUnprocessableEntity,
-// 				422,
-// 				nil,
-// 				"数据库不存在该机器!")
-// 			return
-// 		}
-// 	}
-// 	response.Success(c, nil, "机器删除成功")
-
-// }
+func MachineInfo(c *gin.Context) {
+	departid := c.Query("DepartId")
+	tmp, err := strconv.Atoi(departid)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门ID输入格式有误")
+		return
+	}
+	machineinformation := dao.MachineStore(tmp)
+	var uuid model.MachineInfo
+	for _, value := range machineinformation {
+		uuid.Uuid = append(uuid.Uuid, value.MachineUUID)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": uuid,
+	})
+}

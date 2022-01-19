@@ -25,3 +25,7 @@ type MachineTreeNode struct {
 	Pid      int                `json:"pid"`
 	Children []*MachineTreeNode `json:"children"`
 }
+
+type MachineInfo struct {
+	Uuid []string `json:"label"`
+}
