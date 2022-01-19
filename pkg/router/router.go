@@ -45,7 +45,9 @@ func SetupRouter() *gin.Engine {
 		machinemanager.POST("/adddepart", controller.AddDepart)
 		machinemanager.POST("/addmachine", controller.AddMachine)
 		machinemanager.GET("/departinfo", controller.DepartInfo)
-		machinemanager.GET("/postmachinedata", controller.Postmachinedata)
+		machinemanager.GET("/machineinfo", controller.MachineInfo)
+		machinemanager.POST("/deletedepartdata", controller.Deletedepartdata)
+		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)
 	}
 	// TODO: 此处绑定前端静态资源handler
 	router.Static("/static", "./dist/static")

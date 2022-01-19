@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"fmt"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
@@ -37,4 +39,43 @@ func IsRootExist() bool {
 	var Depart model.DepartNode
 	mysqlmanager.DB.Where("node_locate=?", 0).Find(&Depart)
 	return Depart.ID != 0
+}
+func IsUUIDExist(uuid string) bool {
+	var Machine model.MachineNode
+	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&Machine)
+	return Machine.DepartId != 0
+}
+func Deleteuuid(uuid string) {
+	var Machine model.MachineNode
+	mysqlmanager.DB.Where("machine_uuid=?", uuid).Delete(Machine)
+}
+func MachineStore(departid int) []model.MachineNode {
+	var Machineinfo []model.MachineNode
+	mysqlmanager.DB.Where("depart_id=?", departid).Find(&Machineinfo)
+	logger.Info("%v", Machineinfo)
+	return Machineinfo
+}
+
+func GetPid(departid string) []model.DepartNode {
+	var DepartInfo []model.DepartNode
+	mysqlmanager.DB.Where("p_id=?", departid).Find(&DepartInfo)
+	logger.Info("%v", DepartInfo)
+	return DepartInfo
+}
+
+func Deletedepartdata(needdelete []int) {
+	var DepartInfo []model.DepartNode
+	mysqlmanager.DB.Where("id=?", needdelete[0]).Delete(&DepartInfo)
+}
+
+//向需要删除的depart的组内增加需要删除的子节点
+func Insertdepartlist(needdelete []int) []int {
+	var DepartInfo []model.DepartNode
+	str := fmt.Sprintf("%d", needdelete[0])
+	needdelete = append(needdelete[:0], needdelete[1:]...)
+	mysqlmanager.DB.Where("p_id=?", str).Find(&DepartInfo)
+	for _, value := range DepartInfo {
+		needdelete = append(needdelete, value.ID)
+	}
+	return needdelete
 }
