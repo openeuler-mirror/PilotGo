@@ -32,6 +32,8 @@ const (
 	AgentUninstall = 10
 	// agent信息获取
 	AgentInfo = 11
+	// os信息获取
+	OsInfo = 12
 )
 
 type Message struct {

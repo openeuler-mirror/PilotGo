@@ -9,6 +9,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
 var agent_uuid = uuid.New().String()
@@ -27,7 +28,7 @@ func main() {
 	client := &network.SocketClient{
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
-	if err := client.Connect("localhost:8879"); err != nil {
+	if err := client.Connect("172.30.30.91:8879"); err != nil {
 		fmt.Println("connect server failed, error:", err)
 		os.Exit(-1)
 	}
@@ -97,6 +98,20 @@ func regitsterHandler(c *network.SocketClient) {
 				"agent_version": agent_version,
 				"agent_uuid":    agent_uuid,
 			},
+		}
+		return c.Send(resp_msg)
+	})
+
+	c.BindHandler(protocol.OsInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		sysinfo := uos.GetHostInfo()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   sysinfo,
 		}
 		return c.Send(resp_msg)
 	})
