@@ -14,6 +14,7 @@
           :rules="rules"
           ref="loginForm"
           class="form"
+          v-loading="loading"
         >
           <el-form-item class="form_item" prop="email" label="邮箱">
             <el-input
@@ -21,7 +22,6 @@
               v-model="loginForm.email"
               class="form_item__input"
               placeholder="请输入邮箱"
-              @keyup.enter.native="submitLogin('loginForm')"
             >
             </el-input>
           </el-form-item>
@@ -31,7 +31,7 @@
               v-model="loginForm.password"
               class="form_item__input"
               placeholder="请输入密码"
-              @keyup.enter.native="submitLogin('loginForm')"
+              @keyup.enter.native="submitLogin"
             >
             </el-input>
           </el-form-item>
@@ -51,20 +51,37 @@
 </template>
 
 <script>
-import axios from "axios";
-import Cookies from 'js-cookie';
-
+import { checkEmail } from "@/rules/check";
+import { encrypt } from "@/utils/crypto";
 export default {
   name: "Login",
   data() {
     return {
+      loading: false,
       loginForm: {
         email: "",
         password: "",
       },
       rules: {
-        email: [{ required: true, message: "请输入邮箱", trigger: "blur" }],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+        email: [
+          { 
+            required: true, 
+            message: "请输入邮箱", 
+            trigger: "blur" 
+          },
+          {
+            validator: checkEmail,
+            message: "请输入正确的邮箱格式",
+            trigger: "change"
+          }
+        ],
+        password: [
+          { 
+            required: true, 
+            message: "请输入密码", 
+            trigger: "blur" 
+          }
+        ],
       },
     };
   },
@@ -72,21 +89,27 @@ export default {
     submitLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-          Cookies.set('email',this.loginForm.email)
-
-          let loginStr = this.loginForm.email + ":" + this.loginForm.password;
-          let head = "Basic " + window.btoa(loginStr);
-          let data = new FormData();
-          data.append('email',this.loginForm.email)
-          data.append('password',this.loginForm.password)
-          axios
-            .post("/user/login", data, { headers: { Authorization: head } })
-            .then((res) => {
-              this.$router.push({ path: "/home" });
-              });
-        } else {
-          console.log("error submit!!");
-          return false;
+            this.loading = true;
+            let data = {
+                username: this.loginForm.email,
+                password: encrypt(this.loginForm.password, this.loginForm.email)
+            }
+            this.$store.dispatch("loginByEmail", data).then((res) => {
+                this.loading = false;
+                this.$router.push({
+                    path: '/home',
+                    query: {
+                        page: 1,
+                        per_page: 20
+                    }
+                })
+            }).catch(error => {
+                this.loading = false;
+                this.$message({
+                    message: error.message,
+                    type: 'error'
+                })
+            })
         }
       });
     },

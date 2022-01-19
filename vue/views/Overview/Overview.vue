@@ -73,15 +73,14 @@ export default {
       char2: "",
       pageSize: 4, //表格显示数据条数
       machineTable: [], //机器表格显示数据
-      monitorTable: [], //监控表格显示数据
-      //表格总数据
+      monitorTable: [], //监控表格显示数据 
       machineTableData: [
         {
           ip: "172.17.6.163",
           type: "虚拟机",
           details: "",
         },
-      ],
+      ],//表格总数据
       monitorTableData: [],
       chartData: [],
     };
@@ -89,7 +88,7 @@ export default {
   computed: {
     option() {
       let _this = this;
-      let option = {
+      return {
         title: {
           text: "",
           left: "center",
@@ -115,8 +114,11 @@ export default {
           },
         ],
       };
-      return option;
     },
+  },
+  mounted() {
+    let _this = this;
+    _this.refreshData();
   },
   methods: {
     refreshData() {
@@ -167,11 +169,6 @@ export default {
       let _this = this;
       this.currentPageChange(currentPage, _this.monitorTableData, "monitor");
     },
-  },
-
-  mounted() {
-    let _this = this;
-    _this.refreshData();
   },
 };
 </script>

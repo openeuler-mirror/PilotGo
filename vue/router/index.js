@@ -1,60 +1,106 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '@/views/Home'
-import Login from '@/views/Login'
-import UserInfo from "@/views/UserInfo";
+const _import = require('./_import')
+import Home from '@/views/Home/Home'
 
 Vue.use(Router)
+const originalPush = Router.prototype.push
+const originalReplace = Router.prototype.replace
+Router.prototype.push = function push(location) {
+    return originalPush.call(this, location).catch(err => err)
+}
+Router.prototype.replace = function replace(location) {
+    return originalReplace.call(this, location).catch(err => err)
+}
+export const constantRouterMap = [
+  { path: '/401', component: _import('errorPage/401') },
+  { path: '/404', component: _import('errorPage/404') },
+]
+export const routes = [
+  {
+    path: '/', 
+    redirect: '/login'
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: _import('Login'),
+    meta: { title: 'login', header_title: "登录", panel: "login" }
+  },
+  {
+    path: '/home',
+    component: Home,
+    children: [
+      {
+        path: '/overview',
+        name: 'Overview',
+        component: _import('Overview/Overview'),
+        meta: { title: 'overview', header_title: "概览", panel: "overview", icon_class: 'el-icon-location' }
+      },
+      {
+        path: '/cluster',
+        name: 'Cluster',
+        component:  _import('Cluster/Cluster'),
+        meta: { title: 'cluster', header_title: "机器管理", panel: "cluster", icon_class: 'el-icon-s-platform' }
+      },
+      {
+        path: '/cluster/ip',
+        name: 'cluter_detail',
+        component:  _import('Cluster/detail/index'),
+      },
+      {
+        path: '/batch',
+        name: 'Batch',
+        component:  _import('Batch/Batch'),
+        meta: { title: 'batch', header_title: "批次管理", panel: "batch", icon_class: 'el-icon-menu' }
+      },     
+      {
+        path: '/plug_in',
+        name: 'PlugIn',
+        component:  _import('Plug-in/Plug-in'),
+        meta: { title: 'plug_in', header_title: "插件管理", panel: "plug_in", icon_class: 'el-icon-document' }
+      },
+      /* {
+        path: '/prometheus',
+        name: 'Prometheus',
+        component: Prometheus,
+        // icon_class: 'el-icon-odometer'
+      }, 
+      {
+        path: '/cockpit',
+        name: 'Cockpit',
+        component: Cockpit
+        //icon_class: 'el-icon-setting'
+      },*/
+      {
+        path: '/usermanager',
+        name: 'UserManager',
+        component:  _import('UserManager/UserMan'),
+        meta: { title: 'usermanager', header_title: "用户管理", panel: "usermanager", icon_class: 'el-icon-user-solid' }
+      },
+      {
+        path: '/rolemanager',
+        name: 'RoleManager',
+        component:  _import('RoleManager/RoleMan'),
+        meta: { title: 'rolemanager', header_title: "角色管理", panel: "rolemanager", icon_class: 'el-icon-s-custom' }
+      },
+      {
+        path: '/firewall',
+        name: 'Firewall',
+        component:  _import('Firewall/Firewall'),
+        meta: { title: 'firewall', header_title: "防火墙配置", panel: "firewall", icon_class: 'el-icon-s-home' }
+      },
+      {
+        path: '', 
+        redirect: '/overview'
+      },
+    ]
+  },
+]
 
 const router = new Router({
-  routes: [
-    {
-      path: '/home',
-      name: 'Home',
-      component: Home,
-    },
-    {
-      path: '/userinfo',
-      name: 'UserInfo',
-      component: UserInfo,
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: Login
-    }
-  ]
+  mode: 'hash',
+  routes: [...constantRouterMap, ...routes],
 })
-// router.beforeEach((to, from, next) => {
-//
-//   const token = sessionStorage.setItem("token")
-//   //已经登录
-//   if(token){
-//     // 登录过就不能访问登录界面，需要中断这一次路由守卫login，执行下一次路由守卫/home
-//     if (to.path === '/login') {
-//       next({ path: '/home' })
-//     }
-//     // 动态添加路由
-//     // 保存在store中路由不为空则放行 (如果执行了刷新操作，则 store 里的路由为空，此时需要重新添加路由)
-//     if (store.getters.getRoutes.length || to.name != null) {
-//       //放行
-//       next()
-//     } else {
-//       // 将路由添加到 store 中，用来标记已添加动态路由
-//       store.commit('SET_ROUTER', '需要添加的路由')
-//       router.addRoutes('需要添加的路由')
-//       // 如果 addRoutes 并未完成，路由守卫会一层一层的执行执行，直到 addRoutes 完成，找到对应的路由
-//       next({ ...to, replace: true })
-//       //replace: true只是一个设置，表示不能通过浏览器后退按钮返回前一个路由。
-//     }
-//   }else {
-//     // 未登录时，注意 ：在这里也许你的项目不只有 logon 不需要登录 ，register 等其他不需要登录的页面也需要处理
-//     if (to.path !== '/login') {
-//       next({ path: '/login' })
-//     } else {
-//       next()
-//     }
-//   }
-// })
 
 export default router;
