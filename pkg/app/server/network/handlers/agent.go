@@ -12,15 +12,14 @@ func AgentInfoHandler(c *gin.Context) {
 	logger.Debug("process get agent request")
 	// TODO: process agent info
 	agent := agentmanager.GetAgent("uuid")
-	if agent != nil {
-		agent.AgentInfo()
-		// TODO: 此处处理并返回agent信息
-
-		c.JSON(http.StatusOK, `{"status":0}`)
-		return
+	if agent == nil {
+		c.JSON(http.StatusOK, `{"status":-1}`)
 	}
 
-	c.JSON(http.StatusOK, `{"status":-1}`)
+	agent.AgentInfo()
+	// TODO: 此处处理并返回agent信息
+
+	c.JSON(http.StatusOK, `{"status":0}`)
 }
 
 func AgentListHandler(c *gin.Context) {

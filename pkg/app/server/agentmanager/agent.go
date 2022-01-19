@@ -148,8 +148,19 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 }
 
 // 远程获取agent端的系统信息
-func (a *Agent) GetOSInfo() {
+func (a *Agent) GetOSInfo() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.OsInfo,
+		Data: struct{}{},
+	}
 
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
 }
 
 // 远程获取agent端的系统信息
