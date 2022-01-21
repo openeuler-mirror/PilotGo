@@ -8,15 +8,13 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 type User struct {
 	gorm.Model
 	Username string `gorm:"type:varchar(25);not null" json:"username,omitempty" form:"username"`
-	Password string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
+	Password string `gorm:"type:varchar(100);not null" json:"password,omitempty" form:"password"`
 	Phone    string `gorm:"size:255" json:"phone,omitempty" form:"phone"`
 	Email    string `gorm:"type:varchar(30);not null" json:"email,omitempty" form:"email"`
 	Enable   string `gorm:"size:10;not null" json:"enable,omitempty"`
@@ -36,16 +34,5 @@ func (u *User) All(q *PaginationQ) (list *[]User, total uint, err error) {
 
 //Refresh
 func (m *User) Refresh() (err error) {
-	m.makePassword()
 	return mysqlmanager.DB.Model(m).Update(m).Error
-}
-
-func (m *User) makePassword() {
-	if m.Password != "" {
-		if bytes, err := bcrypt.GenerateFromPassword([]byte(m.Password), bcrypt.DefaultCost); err != nil {
-			logrus.WithError(err).Error("bcrypt making password is failed")
-		} else {
-			m.Password = string(bytes)
-		}
-	}
 }

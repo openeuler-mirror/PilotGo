@@ -11,7 +11,7 @@ import (
  */
 
 type UserDto struct {
-	Name     string `json:"name,omitempty"`
+	Name     string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 	Phone    string `json:"phone,omitempty"`
 	Email    string `json:"email,omitempty"`

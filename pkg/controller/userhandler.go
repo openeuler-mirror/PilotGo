@@ -23,21 +23,19 @@ import (
 
 func Register(c *gin.Context) {
 
-	username := c.PostForm("username") //Get the parameter
-	password := c.PostForm("password")
-	phone := c.PostForm("phone")
-	email := c.PostForm("email")
-	enable := c.PostForm("enable")
+	var user model.User
+	c.Bind(&user)
+	username := user.Username
+	password := user.Password
+	email := user.Email
+	phone := user.Phone
+	enable := user.Enable
 
 	if len(username) == 0 { //Data verification
 		username = utils.RandomString(5)
 	}
 	if len(password) == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"密码不能为空!")
-		return
+		password = "123456"
 	}
 	if len(email) == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
@@ -53,14 +51,10 @@ func Register(c *gin.Context) {
 			"Email exist!")
 		return
 	}
-	hasedPassword, err := common.HashAndSalt(password)
-	if err != nil {
-		response.Response(c, http.StatusInternalServerError, 500, nil, "Hased password error!")
-		return
-	}
-	user := model.User{ //Create user
+
+	user = model.User{ //Create user
 		Username: username,
-		Password: string(hasedPassword),
+		Password: password,
 		Phone:    phone,
 		Email:    email,
 		Enable:   enable,
@@ -72,21 +66,26 @@ func Register(c *gin.Context) {
 
 func Login(c *gin.Context) {
 
-	email := c.PostForm("email") //get the argument
-	password := c.PostForm("password")
-	/*Data verification*/
 	var user model.User //Data verification
+	c.Bind(&user)
+	email := user.Email
+	password := user.Password
+
 	mysqlmanager.DB.Where("email = ?", email).Find(&user)
 
 	if user.ID == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
-			422,
+			400,
 			nil,
 			"用户不存在!")
 		return
 	}
-	check := common.ComparePasswords(user.Password, password)
-	if !check {
+
+	bpassword := []byte(password)
+	bemail := []byte(email)
+	bpassword, _ = common.JsAesDecrypt(bpassword, bemail)
+	btspassword := string(bpassword)
+	if user.Password != btspassword {
 		response.Response(c, http.StatusBadRequest,
 			400,
 			nil,
@@ -134,11 +133,8 @@ func UserAll(c *gin.Context) {
 // 刷新
 func UserRefresh(c *gin.Context) {
 	var user model.User
-	err := c.ShouldBind(&user)
-	if model.HandleError(c, err) {
-		return
-	}
-	err = user.Refresh()
+	c.Bind(&user)
+	err := user.Refresh()
 	if model.HandleError(c, err) {
 		return
 	}
@@ -148,7 +144,8 @@ func UserRefresh(c *gin.Context) {
 // 删除用户
 func DeleteUser(c *gin.Context) {
 	var user model.User
-	userEmail := c.PostForm("email")
+	c.Bind(&user)
+	userEmail := user.Email
 	if dao.IsEmailExist(userEmail) {
 		mysqlmanager.DB.Where("email=?", userEmail).Delete(user)
 		response.Response(c, http.StatusUnprocessableEntity,
@@ -164,20 +161,16 @@ func DeleteUser(c *gin.Context) {
 //修改用户信息
 func UpdateUser(c *gin.Context) {
 	var user model.User
-	email := c.PostForm("email")
-	phone := c.PostForm("phone")
-	password := c.PostForm("password")
+	c.Bind(&user)
+	email := user.Email
+	phone := user.Phone
+	password := user.Password
 	if dao.IsEmailExist(email) {
 		// 修改手机号
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
-		hasedPassword, err := common.HashAndSalt(password)
-		if err != nil {
-			response.Response(c, http.StatusInternalServerError, 500, nil, "Hased password error!")
-			return
-		}
 
 		//修改密码
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", hasedPassword)
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", password)
 		response.Response(c, http.StatusUnprocessableEntity,
 			200,
 			gin.H{"data": user},
@@ -216,12 +209,7 @@ func ImportUser(c *gin.Context) {
 				user := model.User{}
 				user.Username = row.Cells[0].Value
 				// 设置默认密码为123456
-				hasedPassword, err := common.HashAndSalt("123456")
-				if err != nil {
-					response.Response(c, http.StatusInternalServerError, 500, nil, "Hased password error!")
-					return
-				}
-				user.Password = hasedPassword
+				user.Password = "123456"
 				user.Phone = row.Cells[1].Value
 				user.Email = row.Cells[2].Value
 				mysqlmanager.DB.Create(&user)
