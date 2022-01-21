@@ -24,7 +24,7 @@ function PaddingLeft(key, length){
     if (l < length) {
         pkey = new Array(length - l + 1).join('0') + pkey;
     }else if (l > length){
-        pkey = pkey.slice(length);
+        pkey = pkey.slice(0,length);
     }
     return pkey;
 }
