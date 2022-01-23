@@ -17,6 +17,7 @@ type DepartNode struct {
 type MachineNode struct {
 	DepartId    int    `"gorm:type:int(100);not null" json:"departid"`
 	MachineUUID string `gorm:"type:varchar(100);not null" json:"machineuuid"`
+	BatchInfo   string `gorm:"type:varchar(100);`
 } // kylin/serve/opensource/ops/wanghao/dfsagdasgs
 
 type MachineTreeNode struct {

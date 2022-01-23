@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
@@ -90,9 +91,10 @@ func Start(conf *config.Configure) (err error) {
 	// 	})
 	// }
 
-	// mysqlmanager.DB.AutoMigrate(&model.User{})
-	// mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
-	// mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
+	mysqlmanager.DB.AutoMigrate(&model.User{})
+	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
+	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
+	mysqlmanager.DB.AutoMigrate(&model.Batch{})
 	defer mysqlmanager.DB.Close()
 
 	r := router.SetupRouter()
