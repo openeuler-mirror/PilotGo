@@ -31,5 +31,6 @@ yarn-error.log*
 /log
 
 # Local config
+agent
 config.yaml
 config.json

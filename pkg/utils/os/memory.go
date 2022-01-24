@@ -103,7 +103,7 @@ func bytesToInt(bys []byte) int64 {
 
 }
 
-func GetMemoryConfig() MemoryConfig {
+func GetMemoryConfig() *MemoryConfig {
 	cmd := exec.Command("/bin/sh", "-c", "cat /proc/meminfo")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -114,7 +114,7 @@ func GetMemoryConfig() MemoryConfig {
 	}
 	//使用带缓冲的读取器
 	outputBuf := bufio.NewReader(stdout)
-	m := MemoryConfig{}
+	m := &MemoryConfig{}
 	for {
 		//一次获取一行,_ 获取当前行是否被读完
 		output, _, err := outputBuf.ReadLine()
@@ -126,7 +126,7 @@ func GetMemoryConfig() MemoryConfig {
 			break
 		}
 		a, b := reserveRead(output)
-		moduleMatch(string(a), bytesToInt(b), &m)
+		moduleMatch(string(a), bytesToInt(b), m)
 
 	}
 	return m
