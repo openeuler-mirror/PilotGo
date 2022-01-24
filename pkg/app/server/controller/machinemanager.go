@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
-	"openeluer.org/PilotGo/PilotGo/pkg/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 

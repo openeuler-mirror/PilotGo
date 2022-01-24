@@ -7,12 +7,13 @@ package middleware
  */
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"openeluer.org/PilotGo/PilotGo/pkg/common"
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/common"
+	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 func AuthMiddleware() gin.HandlerFunc {

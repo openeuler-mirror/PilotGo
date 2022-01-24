@@ -28,7 +28,7 @@ type UserQ struct {
 func (u *User) All(q *PaginationQ) (list *[]User, total uint, err error) {
 	list = &[]User{}
 	tx := mysqlmanager.DB.Find(list)
-	total, err = crudAll(q, tx, list)
+	total, err = CrudAll(q, tx, list)
 	return
 }
 

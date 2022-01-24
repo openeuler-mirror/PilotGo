@@ -34,7 +34,7 @@ type PaginationQ struct {
 }
 
 // 分页查询方法
-func crudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
+func CrudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}

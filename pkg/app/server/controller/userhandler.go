@@ -12,11 +12,11 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/tealeg/xlsx"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/dto"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
-	"openeluer.org/PilotGo/PilotGo/pkg/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )

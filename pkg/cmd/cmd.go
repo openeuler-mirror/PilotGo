@@ -15,12 +15,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/plugin"
-	"openeluer.org/PilotGo/PilotGo/pkg/router"
 )
 
 var (

@@ -7,9 +7,10 @@ package common
  */
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 var jwtKey = []byte("a_secret_crect")

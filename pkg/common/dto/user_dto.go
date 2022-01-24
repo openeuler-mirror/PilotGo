@@ -1,8 +1,6 @@
 package dto
 
-import (
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
-)
+import "openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 
 /**
  * @Author: zhang han
