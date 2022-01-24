@@ -7,7 +7,7 @@ package dao
  */
 
 import (
-	"openeluer.org/PilotGo/PilotGo/pkg/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 

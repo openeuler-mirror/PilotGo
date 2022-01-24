@@ -10,9 +10,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network/handlers"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/middleware"
-	"openeluer.org/PilotGo/PilotGo/pkg/controller"
 )
 
 func SetupRouter() *gin.Engine {

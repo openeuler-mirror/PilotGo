@@ -9,10 +9,11 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"strconv"
 	"strings"
 	"time"
+
+	"openeluer.org/PilotGo/PilotGo/pkg/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
