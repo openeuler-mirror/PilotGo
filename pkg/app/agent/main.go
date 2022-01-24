@@ -28,7 +28,7 @@ func main() {
 	client := &network.SocketClient{
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
-	if err := client.Connect("172.30.30.91:8879"); err != nil {
+	if err := client.Connect("192.168.160.128:8879"); err != nil {
 		fmt.Println("connect server failed, error:", err)
 		os.Exit(-1)
 	}
@@ -112,6 +112,32 @@ func regitsterHandler(c *network.SocketClient) {
 			Type:   msg.Type,
 			Status: 0,
 			Data:   sysinfo,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.CPUInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		cpuinfo := uos.GetCPUInfo()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   cpuinfo,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.MemoryInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		memoryinfo := uos.GetMemoryConfig()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   memoryinfo,
 		}
 		return c.Send(resp_msg)
 	})

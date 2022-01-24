@@ -34,6 +34,12 @@ const (
 	AgentInfo = 11
 	// os信息获取
 	OsInfo = 12
+	//CPU信息数据获取
+	CPUInfo = 13
+	//内存信息数据获取
+	MemoryInfo = 14
+	//磁盘信息数据获取
+	DiskInfo = 15
 )
 
 type Message struct {

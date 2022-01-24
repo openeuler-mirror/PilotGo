@@ -6,6 +6,7 @@ import (
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeluer.org/PilotGo/PilotGo/pkg/cmd"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -31,17 +32,18 @@ func main() {
 
 	// 启动agent socket server
 	go func() {
-		server.Run("172.30.30.91:8879")
+		server.Run("192.168.160.128:8879")
 	}()
 
 	// 此处启动前端及REST http server
 	go func() {
-		// err = cmd.Start(conf)
-		// if err != nil {
-		// 	logger.Info("server start failed:%s", err.Error())
-		// 	os.Exit(-1)
-		// }
-		network.HttpServerStart("172.30.30.91:8080")
+		// 连接数据库及启动router
+		err = cmd.Start(conf)
+		if err != nil {
+			logger.Info("server start failed:%s", err.Error())
+			os.Exit(-1)
+		}
+		// network.HttpServerStart("192.168.160.128:8084")
 
 	}()
 	select {}

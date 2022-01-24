@@ -58,6 +58,7 @@ func crudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
 // 拼装json 分页数据
 func JsonPagination(c *gin.Context, list interface{}, total uint, query *PaginationQ) {
 	c.AbortWithStatusJSON(200, gin.H{
+		"code":  200,
 		"ok":    true,
 		"data":  list,
 		"total": total,

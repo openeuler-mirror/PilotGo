@@ -7,8 +7,9 @@ package response
  */
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Response(c *gin.Context, httpStatus int, code int, data gin.H, msg string) {
@@ -23,5 +24,5 @@ func Success(c *gin.Context, data gin.H, msg string) {
 }
 
 func Fail(c *gin.Context, data gin.H, msg string) {
-	Response(c, http.StatusOK, 400, data, msg)
+	Response(c, http.StatusBadRequest, 400, data, msg)
 }

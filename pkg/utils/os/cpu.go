@@ -49,3 +49,11 @@ func GetPhysicalCPU() int {
 	}
 	return cpunum
 }
+
+func GetCPUInfo() *CPUInfo {
+	cpuinfo := &CPUInfo{
+		CpuName: GetCPUName(),
+		CpuNum:  GetPhysicalCPU(),
+	}
+	return cpuinfo
+}

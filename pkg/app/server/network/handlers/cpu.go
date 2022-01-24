@@ -6,7 +6,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
 )
 
-func OSInfoHandler(c *gin.Context) {
+func CPUInfoHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 
 	agent := agentmanager.GetAgent(uuid)
@@ -15,10 +15,10 @@ func OSInfoHandler(c *gin.Context) {
 		return
 	}
 
-	os_info, err := agent.GetOSInfo()
+	cpu_info, err := agent.GetCPUInfo()
 	if err != nil {
-		response.Fail(c, nil, "获取系统信息失败!")
+		response.Fail(c, nil, "获取系统CPU信息失败!")
 		return
 	}
-	response.Success(c, gin.H{"os_info": os_info}, "Success")
+	response.Success(c, gin.H{"CPU_info": cpu_info}, "Success")
 }
