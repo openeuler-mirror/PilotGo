@@ -8,6 +8,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 import * as echarts from 'echarts'; //echarts 5.0 导入方式
 import './permission';
 
+import './styles/index.scss'
+
 
 Vue.prototype.$http = axios  
 Vue.prototype.$echarts = echarts

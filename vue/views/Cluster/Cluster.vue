@@ -46,14 +46,6 @@
         :getData="getClusters"
       >
         <template v-slot:table>
-          <el-table-column
-            prop="id"
-            v-model="multipleSelection"
-            type="selection"
-            width="55"
-          >
-          </el-table-column>
-
           <el-table-column label="IP" width="90">
             <template slot-scope="scope">
               <router-link

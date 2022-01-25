@@ -1,105 +1,190 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <div style="display: flex;justify-content: space-between" class="search-form">
       <div>
-        <el-input placeholder="请输入用户名或邮箱名进行搜索..." prefix-icon="el-icon-search"
+        <el-input placeholder="请输入手机号或邮箱名进行搜索..." prefix-icon="el-icon-search"
                   clearable
-                  @clear="initEmps"
+                  disabled
                   style="width: 350px;margin-right: 10px" v-model="keyword"
-                  @keydown.enter.native="initEmps" :disabled="showAdvanceSearchView"></el-input>
-        <el-button icon="el-icon-search" type="primary" @click="initEmps" :disabled="showAdvanceSearchView">
+                  @keydown.enter.native="searchUser"></el-input>
+        <el-button icon="el-icon-search" type="primary" disabled @click="searchUser">
           搜索
         </el-button>
       </div>
       <div>
-        <el-button type="primary" icon="el-icon-plus" @click="showAddEmpView">
-          添加用户
+        <el-button type="primary" @click="handleCreate">
+          添加
         </el-button>
-        <el-button type="success" @click="exportData" icon="el-icon-download">
-          导出用户数据
-        </el-button>
+        <el-popconfirm 
+          title="确定删除此用户？"
+          cancel-button-type="default"
+          confirm-button-type="danger"
+          @confirm="handleDelete">
+          <el-button slot="reference" type="danger"> 删除 </el-button>
+        </el-popconfirm>
+        <el-button type="success" @click="handleExport"> 导出 </el-button>
         <el-upload
           :show-file-list="false"
           :before-upload="beforeUpload"
           :on-success="onSuccess"
           :on-error="onError"
-          :disabled="importDataDisabled"
+          name="upload"
+          accept="xlsx"
           style="display: inline-flex;margin-right: 8px"
-          action="/employee/basic/import">
-          <el-button :disabled="importDataDisabled" type="success" icon="el-icon-download">
-            {{importDataBtnText}}批量添加用户
-          </el-button>
+          action="/user/import">
+          <el-button type="success"> 批量导入 </el-button>
         </el-upload>
       </div>
     </div>
-    <el-table
-      :data="tableData"
-      style="width: 100%"
-      :row-class-name="tableRowClassName">
-      <el-table-column
-        prop="id"
-        label="编号"
-        width="80">
-      </el-table-column>
-      <el-table-column
-        prop="username"
-        label="用户名"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="phoneNum"
-        label="手机号"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="email"
-        label="邮箱">
-      </el-table-column>
-      <el-table-column
-        prop="enable"
-        label="是否启用"
-        width="80">
-      </el-table-column>
-    </el-table>
+    <ky-table
+      :getData="getUsers"
+      ref="table"
+      id="exportTab"
+    >
+      <template v-slot:table>
+        <el-table-column prop="ID" label="编号" width="60">
+        </el-table-column>
+        <el-table-column  prop="username" label="用户名" width="160">
+        </el-table-column>
+        <el-table-column prop="phone" label="手机号" width="120">
+        </el-table-column>
+        <el-table-column  prop="email" label="邮箱">
+        </el-table-column>
+        <el-table-column prop="enable" label="启用" width="80">
+          <template slot-scope="scope">
+            {{scope.row.enable === true ? "是" : "否"}}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180">
+          <template slot-scope="scope">
+            <el-button class="editBtn" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button class="editBtn" type="primary" plain size="mini" @click="handleReset(scope.row.email)">重置密码</el-button>
+          </template>
+        </el-table-column>
+      </template>
+    </ky-table>
+    
+    <el-dialog 
+      :title="title"
+      :before-close="handleClose" 
+      :visible.sync="display" 
+      width="560px"
+    >
+     <add-form v-if="type === 'create'" @click="handleClose"></add-form>
+     <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
+import FileSaver from 'file-saver'
+import XLSX from 'xlsx'
+import AddForm from "./form/addForm.vue"
+import UpdateForm from "./form/updateForm.vue"
+import kyTable from "@/components/KyTable";
+import { getUsers, delUser, resetPwd, } from "@/request/user"
 export default {
-  name: "UsersMan",
+  components: {
+    kyTable,
+    AddForm,
+    UpdateForm,
+  },
   data() {
     return {
-      showAdvanceSearchView: true,
-      importDataDisabled: false,
+      loading: false,
+      display: false,
+      isDelete: true,
+      title: "",
+      type: "",
       keyword: '',
-      importDataBtnText: '',
-      tableData: [
-        {"id":"1","username":"fairy","phoneNum":"12345678123","email":"12345678123@123.com","enable":true}
-        ]
+      rowData: {},
+      tableData: []
     }
   },
   methods: {
-    initEmps() {
-      console.log("待写入1");
+    getUsers,
+    handleClose(type) {
+      this.display = false;
+      this.title = "";
+      this.type = "";
+      if(type === 'success') {
+        this.refresh();
+      }
+    }, 
+    refresh(){
+      this.$refs.table.handleSearch();
     },
-    showAddEmpView() {
-      console.log("待写入2")
+    searchUser() {
+      console.log("待写入按关键子查找用户");
     },
-    exportData() {
-      console.log("待写入3")
+    handleCreate() {
+      this.display = true;
+      this.title = "新增用户";
+      this.type = "create";
     },
-    beforeUpload() {
-      console.log("待写入4")
+    handleEdit(row) {
+      this.rowData = row;
+      this.display = true;
+      this.title = "编辑用户";
+      this.type = "update";
+    },
+    handleReset(email) {
+      resetPwd({email: email}).then(res => {
+        if(res.code == 200){
+          this.$message.success("重置密码成功")
+          this.refresh();
+        } else {
+          this.$message.error(res.msg);
+        }
+      })
+    },
+    handleDelete() {
+      let delDatas = [];
+      this.$refs.table.selectRow.rows.forEach(item => {
+        delDatas.push(item.email);
+      });
+      delUser({email: delDatas[0]}).then(res => {
+        if(res.status === 200) {
+          this.$message.success(res.data.msg);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+        this.refresh();
+      })
+
+    },
+    handleExport() {
+      const xlsxParam = { raw: true }; 
+      const t2b = XLSX.utils.table_to_book(document.querySelector('#exportTab'), xlsxParam);
+      const userExcel = XLSX.write(t2b, { bookType: 'xlsx', bookSST: true, type: 'array' });
+      try {
+        FileSaver.saveAs(
+          new Blob([userExcel], {
+            type: 'application/octet-stream' 
+            }), 'userInfo.xlsx');
+      } catch (e) {
+          console.log(e, userExcel);
+          this.$message.error("导出失败")
+      }
+      return userExcel;
+    },
+    beforeUpload(file) {
+      const fileData = file.name.split(".");
+      if (fileData[fileData.length-1] !== 'xlsx') {
+        this.$message.error('请上传xlsx格式表格!');
+        return false;
+      }
+      return true;
     },
     onSuccess() {
-      console.log("待写入5")
+      this.$message.success("导入成功");
+      this.refresh();
     },
     onError() {
-      console.log("待写入3")
-    },
-    tableRowClassName() {
-      console.log("待写入5")
-    },
+      this.$message.success("导入失败");
+      this.refresh();
+    }
   }
 }
 </script>
@@ -114,5 +199,8 @@ export default {
 
 .el-table .success-row {
   background: #f0f9eb;
+}
+.editBtn {
+  padding: 10px;
 }
 </style>

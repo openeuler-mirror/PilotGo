@@ -15,6 +15,7 @@
     "crypto-js": "^4.1.1",
     "echarts": "^5.1.1",
     "element-ui": "^2.15.6",
+    "file-saver": "^2.0.5",
     "js-cookie": "^3.0.1",
     "node-sass": "^4.14.1",
     "requestjs": "^1.0.3",
@@ -22,7 +23,8 @@
     "vue-devtools": "^5.1.4",
     "vue-router": "^3.0.1",
     "vuejs": "^3.0.1",
-    "vuex": "^3.6.2"
+    "vuex": "^3.6.2",
+    "xlsx": "^0.17.5"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
