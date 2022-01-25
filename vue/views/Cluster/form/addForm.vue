@@ -5,7 +5,6 @@
         :rules="rules"
         ref="addIPForm"
         label-width="100px"
-        class="kylin-form"
       >
         <el-form-item label="IP:" prop="ip">
           <el-input
