@@ -61,7 +61,6 @@ func Load() (*Configure, error) {
 		fmt.Printf("yaml Unmarshal %s failed!\n", string(bytes))
 		return nil, err
 	}
-	fmt.Printf("config: %v", config)
 	return &config, nil
 }
 

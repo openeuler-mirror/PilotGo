@@ -27,7 +27,6 @@ func Init(ip, username, password, dbname string, port int) (*MysqlManager, error
 		m.port,
 		m.dbName)
 	var err error
-	fmt.Println(url)
 	m.db, err = gorm.Open("mysql", url)
 	if err != nil {
 		return nil, err

@@ -21,6 +21,7 @@ yarn-error.log*
 *.dll
 *.so
 *.dylib
+*.xlsx
 
 # Test binary, built with `go test -c`
 *.test
