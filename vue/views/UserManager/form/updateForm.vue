@@ -65,7 +65,7 @@ export default {
         phone: [
           {
             validator: checkPhone,
-            message: "请输入正确的邮箱格式",
+            message: "请输入正确的手机号格式",
             trigger: "change",
           }],
         email: [

@@ -74,7 +74,7 @@ func Login(c *gin.Context) {
 	mysqlmanager.DB.Where("email = ?", email).Find(&user)
 
 	if user.ID == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusBadRequest,
 			400,
 			nil,
 			"用户不存在!")
@@ -130,15 +130,24 @@ func UserAll(c *gin.Context) {
 	model.JsonPagination(c, list, total, query)
 }
 
-// 刷新
-func UserRefresh(c *gin.Context) {
+// 重置密码
+func ResetPassword(c *gin.Context) {
 	var user model.User
 	c.Bind(&user)
-	err := user.Refresh()
-	if model.HandleError(c, err) {
+	email := user.Email
+
+	if dao.IsEmailExist(email) {
+
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", "123456")
+
+		response.Response(c, http.StatusOK,
+			200,
+			gin.H{"data": user},
+			"password reset successfully!")
 		return
+	} else {
+		response.Fail(c, nil, "No user found!")
 	}
-	response.Success(c, nil, "Updated User successfully!")
 }
 
 // 删除用户
@@ -148,7 +157,7 @@ func DeleteUser(c *gin.Context) {
 	userEmail := user.Email
 	if dao.IsEmailExist(userEmail) {
 		mysqlmanager.DB.Where("email=?", userEmail).Delete(user)
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			200,
 			nil,
 			"User deleted successfully!")
@@ -164,14 +173,11 @@ func UpdateUser(c *gin.Context) {
 	c.Bind(&user)
 	email := user.Email
 	phone := user.Phone
-	password := user.Password
 	if dao.IsEmailExist(email) {
 		// 修改手机号
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
 
-		//修改密码
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", password)
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			200,
 			gin.H{"data": user},
 			"User update successfully!")
@@ -190,34 +196,46 @@ func ImportUser(c *gin.Context) {
 		response.Fail(c, nil, "Please select a file first!")
 		return
 	}
-	filePath := "static/"
+	UserExit := make([]string, 0)
 	for _, file := range files {
 		name := file.Filename
-		filename := filePath + name
-
-		// c.SaveUploadedFile(file, filename)
-		xlFile, error := xlsx.OpenFile(filename)
+		c.SaveUploadedFile(file, name)
+		xlFile, error := xlsx.OpenFile(name)
 		if error != nil {
 			return
 		}
 		for _, sheet := range xlFile.Sheets {
+
 			for rowIndex, row := range sheet.Rows {
+				user := model.User{}
+
 				//跳过第一行表头信息
 				if rowIndex == 0 {
 					continue
 				}
-				user := model.User{}
 				user.Username = row.Cells[0].Value
-				// 设置默认密码为123456
-				user.Password = "123456"
 				user.Phone = row.Cells[1].Value
 				user.Email = row.Cells[2].Value
-				mysqlmanager.DB.Create(&user)
+				if dao.IsEmailExist(user.Email) {
+					UserExit = append(UserExit, user.Email)
+					continue
+				}
+				// 设置默认密码为123456
+				user.Password = "123456"
+				mysqlmanager.DB.Save(&user)
 			}
 		}
 	}
-	response.Response(c, http.StatusUnprocessableEntity,
-		200,
-		nil,
-		"import success")
+	if len(UserExit) == 0 {
+		response.Response(c, http.StatusOK,
+			200,
+			nil,
+			"import success")
+	} else {
+		response.Response(c, http.StatusOK,
+			200, gin.H{
+				"UserExit": UserExit,
+			}, "以上用户已经存在")
+	}
+
 }

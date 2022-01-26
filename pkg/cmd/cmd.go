@@ -10,17 +10,14 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/net"
-	"openeluer.org/PilotGo/PilotGo/pkg/plugin"
 )
 
 var (
@@ -54,48 +51,48 @@ func Start(conf *config.Configure) (err error) {
 		return err
 	}
 
-	sessionManage.Init(conf.MaxAge, conf.SessionCount)
-	go func() {
-		for true {
-			time.Sleep(time.Second * 10)
-			//每10秒读取一次数据库，并更改数据库状态
-			mi, err := mysqlmanager.GetMachInfo(sqlManager)
-			if err != nil {
-				continue
-			}
+	// sessionManage.Init(conf.MaxAge, conf.SessionCount)
+	// go func() {
+	// 	for true {
+	// 		time.Sleep(time.Second * 10)
+	// 		//每10秒读取一次数据库，并更改数据库状态
+	// 		mi, err := mysqlmanager.GetMachInfo(sqlManager)
+	// 		if err != nil {
+	// 			continue
+	// 		}
 
-			for _, m := range mi {
-				status := m.CheckStatus()
-				if m.SystemStatus != status {
-					m1 := mysqlmanager.MachInfo{
-						Id:           m.Id,
-						SystemStatus: status,
-					}
-					sqlManager.Update(&m1)
-				}
-			}
-		}
-	}()
+	// 		for _, m := range mi {
+	// 			status := m.CheckStatus()
+	// 			if m.SystemStatus != status {
+	// 				m1 := mysqlmanager.MachInfo{
+	// 					Id:           m.Id,
+	// 					SystemStatus: status,
+	// 				}
+	// 				sqlManager.Update(&m1)
+	// 			}
+	// 		}
+	// 	}
+	// }()
 
-	pi, err := mysqlmanager.GetPluginInfo(sqlManager)
-	if err != nil {
-		return err
-	}
+	// pi, err := mysqlmanager.GetPluginInfo(sqlManager)
+	// if err != nil {
+	// 	return err
+	// }
 
-	for _, value := range pi {
-		plugin.GetManager().Regist(&plugin.Plugin{
-			Name:        value.Name,
-			Version:     value.Version,
-			Description: value.Description,
-			Url:         value.Url,
-			Port:        value.Port,
-			Protocol:    value.Protocol,
-		})
-	}
+	// for _, value := range pi {
+	// 	plugin.GetManager().Regist(&plugin.Plugin{
+	// 		Name:        value.Name,
+	// 		Version:     value.Version,
+	// 		Description: value.Description,
+	// 		Url:         value.Url,
+	// 		Port:        value.Port,
+	// 		Protocol:    value.Protocol,
+	// 	})
+	// }
 
-	mysqlmanager.DB.AutoMigrate(&model.User{})
-	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
-	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
+	// mysqlmanager.DB.AutoMigrate(&model.User{})
+	// mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
+	// mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
 	defer mysqlmanager.DB.Close()
 
 	r := router.SetupRouter()
