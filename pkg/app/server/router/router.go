@@ -52,6 +52,10 @@ func SetupRouter() *gin.Engine {
 		machinemanager.POST("/deletedepartdata", controller.Deletedepartdata)
 		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)
 	}
+	batchmanager := router.Group("batchmanager")
+	{
+		batchmanager.POST("/createbatch", controller.CreateBatch)
+	}
 	// TODO: 此处绑定前端静态资源handler
 	router.Static("/static", "./dist/static")
 	router.StaticFile("/", "./dist/index.html")
