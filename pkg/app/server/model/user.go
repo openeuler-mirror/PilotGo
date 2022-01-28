@@ -31,8 +31,3 @@ func (u *User) All(q *PaginationQ) (list *[]User, total uint, err error) {
 	total, err = CrudAll(q, tx, list)
 	return
 }
-
-//Refresh
-func (m *User) Refresh() (err error) {
-	return mysqlmanager.DB.Model(m).Update(m).Error
-}

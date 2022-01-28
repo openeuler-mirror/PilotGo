@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
-			"Email exist!")
+			"邮箱已存在!")
 		return
 	}
 
@@ -130,6 +130,19 @@ func UserAll(c *gin.Context) {
 	model.JsonPagination(c, list, total, query)
 }
 
+// 高级搜索
+func UserSearch(c *gin.Context) {
+	// var users model.User
+	// c.Bind(&users)
+	// var email = users.Email
+	// fmt.Println(email)
+	// mysqlmanager.DB.Where("email like ?", "%"+email+"%").Find(&users)
+	// response.Response(c, http.StatusOK,
+	// 	200,
+	// 	gin.H{"data": users},
+	// 	"查询成功!")
+}
+
 // 重置密码
 func ResetPassword(c *gin.Context) {
 	var user model.User
@@ -143,10 +156,10 @@ func ResetPassword(c *gin.Context) {
 		response.Response(c, http.StatusOK,
 			200,
 			gin.H{"data": user},
-			"password reset successfully!")
+			"密码重置成功!")
 		return
 	} else {
-		response.Fail(c, nil, "No user found!")
+		response.Fail(c, nil, "无此用户!")
 	}
 }
 
@@ -156,14 +169,14 @@ func DeleteUser(c *gin.Context) {
 	c.Bind(&user)
 	userEmail := user.Email
 	if dao.IsEmailExist(userEmail) {
-		mysqlmanager.DB.Where("email=?", userEmail).Delete(user)
+		mysqlmanager.DB.Where("email=?", userEmail).Unscoped().Delete(user)
 		response.Response(c, http.StatusOK,
 			200,
 			nil,
-			"User deleted successfully!")
+			"此用户已删除!")
 		return
 	} else {
-		response.Fail(c, nil, "No user found!")
+		response.Fail(c, nil, "无此用户!")
 	}
 }
 
