@@ -38,7 +38,6 @@ func SetupRouter() *gin.Engine {
 		user.POST("/login", controller.Login)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 		user.GET("/searchAll", controller.UserAll)
-		user.GET("/userSearch", controller.UserSearch)
 		user.GET("/reset", controller.ResetPassword)
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
@@ -50,12 +49,16 @@ func SetupRouter() *gin.Engine {
 		machinemanager.POST("/addmachine", controller.AddMachine)
 		machinemanager.GET("/departinfo", controller.DepartInfo)
 		machinemanager.GET("/machineinfo", controller.MachineInfo)
-		machinemanager.POST("/deletedepartdata", controller.Deletedepartdata)
 		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)
+		machinemanager.GET("/t", controller.Deletedepartdata)
+		machinemanager.GET("/depart", controller.Dep)
+		machinemanager.GET("/updatedepart", controller.UpdateDepart)
+		machinemanager.GET("/test", controller.AddIP)
 	}
 	batchmanager := router.Group("batchmanager")
 	{
 		batchmanager.POST("/createbatch", controller.CreateBatch)
+		// batchmanager.POST("/deletebatch", controller.DeleteBatch)
 	}
 	// TODO: 此处绑定前端静态资源handler
 	router.Static("/static", "./dist/static")

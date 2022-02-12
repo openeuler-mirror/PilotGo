@@ -13,6 +13,7 @@ type Batch struct {
 	Name        string `gorm:"type:varchar(100);not null" json:"name"`
 	Description string `gorm:"type:varchar(100)" json:"description"`
 	Manager     string `gorm:"type:varchar(100)" json:"manager"`
+	Machinelist string `gorm:"type:varchar(100)" json:"machinelist"`
 	Depart      string `gorm:"type:varchar(100)"`
 }
 
