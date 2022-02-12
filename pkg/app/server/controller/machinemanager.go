@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -8,13 +9,14 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 func AddDepart(c *gin.Context) {
-	pid := c.PostForm("PID")
-	parentDepart := c.PostForm("ParentDepart")
-	depart := c.PostForm("Depart")
+	pid := c.Query("PID")
+	parentDepart := c.Query("ParentDepart")
+	depart := c.Query("Depart")
 	tmp, err := strconv.Atoi(pid)
 	if len(pid) != 0 && err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
@@ -178,8 +180,20 @@ func IsChildExist(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode
 	}
 	return false
 }
+func LoopTree(node *model.MachineTreeNode, ID int) *model.MachineTreeNode {
+	for _, value := range node.Children {
+		if value.Id == ID {
+			return value
+		}
+		LoopTree(value, ID)
+	}
+	return &model.MachineTreeNode{}
+}
 func Deletemachinedata(c *gin.Context) {
-	uuid := c.PostForm("uuid")
+	uuid := c.Query("uuid")
+	logger.Info("%s", uuid)
+	var Machine model.MachineNode
+	logger.Info("%+v", Machine)
 	if !dao.IsUUIDExist(uuid) {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -193,9 +207,10 @@ func Deletemachinedata(c *gin.Context) {
 }
 
 func Deletedepartdata(c *gin.Context) {
-	departid := c.PostForm("DepartID")
-	needdelete := make([]int, 0)
-	tmp, err := strconv.Atoi(departid)
+	a := c.Query("DepartID")
+	logger.Info("%s", a)
+	tmp, err := strconv.Atoi(a)
+	logger.Info("%d", tmp)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -210,7 +225,8 @@ func Deletedepartdata(c *gin.Context) {
 			"不存在该机器")
 		return
 	}
-	DepartInfo := dao.GetPid(departid)
+	needdelete := make([]int, 0)
+	DepartInfo := dao.GetPid(a)
 	needdelete = append(needdelete, tmp)
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
@@ -220,14 +236,25 @@ func Deletedepartdata(c *gin.Context) {
 		if len(needdelete) == 0 {
 			break
 		}
+		logger.Info("%d", needdelete[0])
 		dao.Deletedepartdata(needdelete)
-		dao.Insertdepartlist(needdelete)
+		str := fmt.Sprintf("%d", needdelete[0])
+		needdelete = needdelete[1:]
+		dao.Insertdepartlist(needdelete, str)
+
 	}
 	response.Success(c, nil, "部门删除成功")
 }
 
 func MachineInfo(c *gin.Context) {
 	departid := c.Query("DepartId")
+	machine := model.MachineNode{}
+	query := &model.PaginationQ{}
+	err := c.ShouldBindQuery(query)
+
+	if model.HandleError(c, err) {
+		return
+	}
 	tmp, err := strconv.Atoi(departid)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
@@ -236,13 +263,86 @@ func MachineInfo(c *gin.Context) {
 			"部门ID输入格式有误")
 		return
 	}
-	machineinformation := dao.MachineStore(tmp)
-	var uuid model.MachineInfo
-	for _, value := range machineinformation {
-		uuid.Uuid = append(uuid.Uuid, value.MachineUUID)
+	list, total, err := machine.ReturnMachine(query, tmp)
+	if model.HandleError(c, err) {
+		return
+	}
+	// 返回数据开始拼装分页的json
+	model.JsonPagination(c, list, total, query)
+
+}
+
+func Dep(c *gin.Context) {
+	departID := c.Query("DepartID")
+	tmp, err := strconv.Atoi(departID)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门ID有误")
+		return
+	}
+	depart := dao.DepartStore()
+	var root model.MachineTreeNode
+	departnode := make([]model.MachineTreeNode, 0)
+	ptrchild := make([]*model.MachineTreeNode, 0)
+
+	for _, value := range depart {
+		if value.NodeLocate == 0 {
+			root = model.MachineTreeNode{
+				Label: value.Depart,
+				Id:    value.ID,
+				Pid:   0,
+			}
+		} else {
+			departnode = append(departnode, model.MachineTreeNode{
+				Label: value.Depart,
+				Id:    value.ID,
+				Pid:   value.PID,
+			})
+		}
+
+	}
+	ptrchild = append(ptrchild, &root)
+	for key, _ := range departnode {
+		var a *model.MachineTreeNode
+		a = &departnode[key]
+		ptrchild = append(ptrchild, a)
+	}
+	node := &root
+	makeTree(node, ptrchild)
+	if node.Id != tmp {
+		node = LoopTree(node, tmp)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
-		"data": uuid,
+		"data": node,
 	})
+}
+
+func UpdateDepart(c *gin.Context) {
+	DepartID := c.Query("DepartID")
+	DepartName := c.Query("DepartName")
+	tmp, err := strconv.Atoi(DepartID)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门ID有误")
+		return
+	}
+	dao.UpdateDepart(tmp, DepartName)
+	dao.UpdateParentDepart(tmp, DepartName)
+	response.Success(c, nil, "部门更新成功")
+}
+
+func AddIP(c *gin.Context) {
+	IP := c.Query("ip")
+	uuid := c.Query("uuid")
+	var MachineInfo model.MachineNode
+	Machine := model.MachineNode{
+		IP: IP,
+	}
+	mysqlmanager.DB.Model(&MachineInfo).Where("machine_uuid=?", uuid).Update(&Machine)
+	response.Success(c, nil, "ip更新成功")
 }

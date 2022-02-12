@@ -1,8 +1,6 @@
 package dao
 
 import (
-	"fmt"
-
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
@@ -59,7 +57,7 @@ func MachineStore(departid int) []model.MachineNode {
 func GetPid(departid string) []model.DepartNode {
 	var DepartInfo []model.DepartNode
 	mysqlmanager.DB.Where("p_id=?", departid).Find(&DepartInfo)
-	logger.Info("%v", DepartInfo)
+	// logger.Info("%v", DepartInfo)
 	return DepartInfo
 }
 
@@ -69,13 +67,28 @@ func Deletedepartdata(needdelete []int) {
 }
 
 //向需要删除的depart的组内增加需要删除的子节点
-func Insertdepartlist(needdelete []int) []int {
+func Insertdepartlist(needdelete []int, str string) []int {
 	var DepartInfo []model.DepartNode
-	str := fmt.Sprintf("%d", needdelete[0])
-	needdelete = append(needdelete[:0], needdelete[1:]...)
+
+	// needdelete = append(needdelete[:0], needdelete[1:]...)
 	mysqlmanager.DB.Where("p_id=?", str).Find(&DepartInfo)
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
 	}
 	return needdelete
+}
+
+func UpdateDepart(DepartID int, DepartName string) {
+	var DepartInfo model.DepartNode
+	Depart := model.DepartNode{
+		Depart: DepartName,
+	}
+	mysqlmanager.DB.Model(&DepartInfo).Where("id=?", DepartID).Update(&Depart)
+}
+func UpdateParentDepart(DepartID int, DepartName string) {
+	var DepartInfo model.DepartNode
+	Depart := model.DepartNode{
+		ParentDepart: DepartName,
+	}
+	mysqlmanager.DB.Model(&DepartInfo).Where("p_id=?", DepartID).Update(&Depart)
 }
