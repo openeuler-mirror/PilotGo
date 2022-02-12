@@ -42,6 +42,12 @@ export default {
     getData: {
       type: Function,
     },
+    searchData: {
+      type: Object,
+      default: function() {
+        return {};
+      }
+    }
   },
   data() {
     return {
@@ -66,7 +72,7 @@ export default {
   methods: {
     loadData(data) {
       this.loading = true;
-      this.getData({ ...data }).then((response) => {
+      this.getData({ ...data, ...this.searchData }).then((response) => {
         const res = response.data;
         if (res.code === 200) {
           this.total = res.total;
@@ -87,10 +93,10 @@ export default {
     },
     handleSelectionChange(selection, row) {
         // 1.判断是否已经存在已选中行
-        const index = this.selectRow.ids.indexOf(row.ID);
+        const index = this.selectRow.ids.indexOf(row.ID || row.machineuuid);
         // 2.若是不在就放入选中数组中，在就删掉
         if (index < 0) {
-          this.selectRow.ids.push(row.ID);
+          this.selectRow.ids.push(row.ID || row.machineuuid);
           this.selectRow.rows.push(row);
         } else {
           this.selectRow.ids.splice(index, 1);

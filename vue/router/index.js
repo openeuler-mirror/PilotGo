@@ -44,7 +44,7 @@ export const routes = [
         meta: { title: 'cluster', header_title: "机器管理", panel: "cluster", icon_class: 'el-icon-s-platform' }
       },
       {
-        path: '/cluster/ip',
+        path: ':id',
         name: 'cluter_detail',
         component:  _import('Cluster/detail/index'),
       },

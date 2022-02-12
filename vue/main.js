@@ -7,7 +7,6 @@ import ElementUI from 'element-ui';  //导入element ui
 import 'element-ui/lib/theme-chalk/index.css';
 import * as echarts from 'echarts'; //echarts 5.0 导入方式
 import './permission';
-
 import './styles/index.scss'
 
 

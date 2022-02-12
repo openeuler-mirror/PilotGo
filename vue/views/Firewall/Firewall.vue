@@ -229,6 +229,9 @@ export default {
       ],
     };
   },
+  mounted() {
+    this.firewallForm.ip = this.$route.query.ip || '';
+  },
   methods: {
     handleClick() {
       this.$refs.firewallForm.validate((valid)=>{
