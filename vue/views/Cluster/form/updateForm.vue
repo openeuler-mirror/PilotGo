@@ -13,10 +13,18 @@
             size="medium"
             v-model="form.ip"
             autocomplete="off"
+            disabled="disabled"
           ></el-input>
         </el-form-item>
-
-        <el-form-item label="repo配置" prop="repo">
+        <el-form-item label="内核" prop="kernel">
+          <el-input
+            class="ipInput"
+            controls-position="right"
+            v-model="form.kernel"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="repo" prop="repo">
           <el-select v-model="form.repoId">
             <el-option
               v-for="item in repos"
@@ -26,14 +34,6 @@
             >
             </el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="内核参数" prop="kernel">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="form.kernel"
-            autocomplete="off"
-          ></el-input>
         </el-form-item>
         <el-form-item label="服务" prop="service">
          <el-select v-model="form.service">
@@ -56,8 +56,12 @@
 
 <script>
 import {  updateIp  } from "@/request/cluster";
-import { checkIP } from "@/rules/check";
 export default {
+  props: {
+    ip: {
+      type: String
+    } 
+  },
   data() {
     return {
       form: {
@@ -67,28 +71,40 @@ export default {
         service: "",
       },
       rules: {
-        ip: [{ required: true, validator: checkIP, trigger: "change", message: "请输入正确的IP地址"}],
-        kernel: [{ required: true, trigger: "blur", message:"修改后需要重启生效" }],
-      }
+        ip: [{ 
+          required: true, 
+          message: "请输入IP",
+          trigger: "blur"
+        }],
+        kernel: [{ 
+          required: true, 
+          trigger: "blur", 
+          message:"修改后需要重启生效" 
+        }],
+      },
+      disabled: true,
+      repos: [],
+      service: [],
     }
   },
-  mounted() {},
+  mounted() {
+    this.form.ip = this.ip;
+  },
   methods: {
     handleCancel() {
       this.$refs.form.resetFields();
       this.$emit("click");
     },
     handleSubmitForm() {
-      let _this = this;
       this.$refs.form.validate((valid) => {
         if (valid) {
-          updateIp({ip: _this.form.ip, data: _this.form})
+          updateIp({ip: this.form.ip, data: this.form})
             .then((res) => {
               if (res.data.status === "success") {
-                _this.$emit("click");
-                _this.$refs.form.resetFields();
+                this.$emit("click");
+                this.$refs.form.resetFields();
               } else {
-                _this.$message.error(res.data.error);
+                this.$message.error(res.data.error);
               }
             })
             .catch((res) => {
