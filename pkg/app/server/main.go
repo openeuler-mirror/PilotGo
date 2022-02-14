@@ -32,7 +32,7 @@ func main() {
 
 	// 启动agent socket server
 	go func() {
-		server.Run("192.168.160.128:8879")
+		server.Run("192.168.47.128:8879")
 	}()
 
 	// 此处启动前端及REST http server

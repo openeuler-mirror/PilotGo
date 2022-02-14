@@ -30,6 +30,9 @@ func SetupRouter() *gin.Engine {
 		group.GET("/os_info", handlers.OSInfoHandler)
 		group.GET("/cpu_info", handlers.CPUInfoHandler)
 		group.GET("/memory_info", handlers.MemoryInfoHandler)
+		group.GET("/sysctl_info", handlers.SysInfoHandler)
+		group.GET("/sysctl_change", handlers.SysctlChangeHandler)
+		group.GET("/sysctl_view", handlers.SysctlViewHandler)
 	}
 
 	user := router.Group("user")

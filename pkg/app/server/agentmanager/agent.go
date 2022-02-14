@@ -195,6 +195,54 @@ func (a *Agent) GetMemoryInfo() (interface{}, error) {
 	return resp_message.Data, nil
 }
 
+// 远程获取agent端的内核信息
+func (a *Agent) GetSysctlInfo() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.SysctlInfo,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 临时修改agent端系统参数
+func (a *Agent) ChangeSysctl(args string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.SysctlChange,
+		Data: args,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 查看某个内核参数的值
+func (a *Agent) SysctlView(args string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.SysctlView,
+		Data: args,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
 // 远程获取agent端的系统信息
 func (a *Agent) AgentInfo() (interface{}, error) {
 	msg := &protocol.Message{

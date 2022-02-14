@@ -36,19 +36,22 @@ func GetSysConfig() []map[string]string {
 }
 
 // sysctl -w net.ipv4.ip_forward=1  临时修改系统参数
-func TempModifyPar(arg string) {
+func TempModifyPar(arg string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sudo sysctl -w %s", arg))
+	tmp = strings.Replace(tmp, "\n", "", -1)
+
 	if err != nil {
 		logger.Error("修改内核运行时参数失败!%s", err.Error())
 	}
-	logger.Info("修改内核运行时参数成功!%s", tmp)
+	return tmp
 }
 
 // sysctl -n net.ipv4.ip_forward  查看某个内核参数的值
-func GetVarNameValue(arg string) {
+func GetVarNameValue(arg string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sysctl -n %s", arg))
+	tmp = strings.Replace(tmp, "\n", "", -1)
 	if err != nil {
 		logger.Error("获取该参数的值失败!%s", err.Error())
 	}
-	logger.Info("已将该参数修改!%s", tmp)
+	return tmp
 }

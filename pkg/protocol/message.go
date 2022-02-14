@@ -40,6 +40,12 @@ const (
 	MemoryInfo = 14
 	//磁盘信息数据获取
 	DiskInfo = 15
+	//内核配置信息数据获取
+	SysctlInfo = 16
+	//临时修改系统参数
+	SysctlChange = 17
+	//查看某个内核参数的值
+	SysctlView = 18
 )
 
 type Message struct {

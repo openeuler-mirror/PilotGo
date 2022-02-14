@@ -28,7 +28,7 @@ func main() {
 	client := &network.SocketClient{
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
-	if err := client.Connect("192.168.160.128:8879"); err != nil {
+	if err := client.Connect("192.168.47.128:8879"); err != nil {
 		fmt.Println("connect server failed, error:", err)
 		os.Exit(-1)
 	}
@@ -138,6 +138,45 @@ func regitsterHandler(c *network.SocketClient) {
 			Type:   msg.Type,
 			Status: 0,
 			Data:   memoryinfo,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.SysctlInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		sysctlinfo := uos.GetSysConfig()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   sysctlinfo,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.SysctlChange, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		args := msg.Data.(string)
+		sysctlchange := uos.TempModifyPar(args)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   sysctlchange,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.SysctlView, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		args := msg.Data.(string)
+		sysctlview := uos.GetVarNameValue(args)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   sysctlview,
 		}
 		return c.Send(resp_msg)
 	})
