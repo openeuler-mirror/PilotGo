@@ -245,4 +245,69 @@ func regitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
+	c.BindHandler(protocol.AllRpm, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		allrpm := uos.GetAllRpm()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   allrpm,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.RpmSource, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		rpmname := msg.Data.(string)
+		rpmsource, _ := uos.GetRpmSource(rpmname)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   rpmsource,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.RpmInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		rpmname := msg.Data.(string)
+		rpminfo, _ := uos.GetRpmInfo(rpmname)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   rpminfo,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.InstallRpm, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		rpmname := msg.Data.(string)
+		rpminstall := uos.InstallRpm(rpmname)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   rpminstall,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.RemoveRpm, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		rpmname := msg.Data.(string)
+		rpmremove := uos.RemoveRpm(rpmname)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   rpmremove,
+		}
+		return c.Send(resp_msg)
+	})
 }
