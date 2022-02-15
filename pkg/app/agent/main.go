@@ -180,4 +180,69 @@ func regitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
+	c.BindHandler(protocol.ServiceList, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		servicelist, _ := uos.GetServiceList()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   servicelist,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.ServiceStatus, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		service := msg.Data.(string)
+		servicestatus, _ := uos.GetServiceStatus(service)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   servicestatus,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.ServiceRestart, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		service := msg.Data.(string)
+		servicerestart := uos.RestartService(service)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   servicerestart,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.ServiceStart, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		service := msg.Data.(string)
+		servicestart := uos.StartService(service)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   servicestart,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.ServiceStop, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		service := msg.Data.(string)
+		servicestop := uos.StopService(service)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   servicestop,
+		}
+		return c.Send(resp_msg)
+	})
 }

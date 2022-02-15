@@ -243,6 +243,86 @@ func (a *Agent) SysctlView(args string) (interface{}, error) {
 	return resp_message.Data, nil
 }
 
+// 查看服务列表
+func (a *Agent) ServiceList() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ServiceList,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 查看某个服务的状态
+func (a *Agent) ServiceStatus(service string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ServiceStatus,
+		Data: service,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 重启服务
+func (a *Agent) ServiceRestart(service string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ServiceRestart,
+		Data: service,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 关闭服务
+func (a *Agent) ServiceStop(service string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ServiceStop,
+		Data: service,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 启动服务
+func (a *Agent) ServiceStart(service string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ServiceStart,
+		Data: service,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
 // 远程获取agent端的系统信息
 func (a *Agent) AgentInfo() (interface{}, error) {
 	msg := &protocol.Message{

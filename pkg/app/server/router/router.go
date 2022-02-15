@@ -33,6 +33,11 @@ func SetupRouter() *gin.Engine {
 		group.GET("/sysctl_info", handlers.SysInfoHandler)
 		group.GET("/sysctl_change", handlers.SysctlChangeHandler)
 		group.GET("/sysctl_view", handlers.SysctlViewHandler)
+		group.GET("/service_list", handlers.ServiceListHandler)
+		group.GET("/service_status", handlers.ServiceStatusHandler)
+		group.GET("/service_stop", handlers.ServiceStopHandler)
+		group.GET("/service_start", handlers.ServiceStartHandler)
+		group.GET("/service_restart", handlers.ServiceRestartHandler)
 	}
 
 	user := router.Group("user")

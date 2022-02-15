@@ -46,6 +46,16 @@ const (
 	SysctlChange = 17
 	//查看某个内核参数的值
 	SysctlView = 18
+	//查看服务列表
+	ServiceList = 19
+	//查看某个服务状态
+	ServiceStatus = 20
+	//重启某个服务
+	ServiceRestart = 21
+	//启动某个服务
+	ServiceStart = 22
+	//关闭某个服务
+	ServiceStop = 23
 )
 
 type Message struct {
