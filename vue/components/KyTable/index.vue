@@ -1,5 +1,15 @@
 <template>
   <div class="ky-table">
+    <div class="header">
+      <div class="header_content">
+        <div class="table_search">
+          <slot name="table_search"></slot>
+        </div>
+        <div class="table_action">
+          <slot name="table_action"></slot>
+        </div>
+      </div>
+    </div>
     <div class="content">
       <el-table
         :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
@@ -102,7 +112,6 @@ export default {
           this.selectRow.ids.splice(index, 1);
           this.selectRow.rows.splice(index, 1);
         }
-        console.log(this.selectRow.ids)
     },
     handleSelectAll(selection) {
       if(selection.length === 0) {
@@ -145,6 +154,23 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 .ky-table {
+  .header {
+    width: 100%;
+    padding: 5px 0;
+    background-color: #36ade0;
+    .header_content {
+      margin: 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      .el-button {
+        font-size: 12px;
+        padding: 10px;
+        color: #3e9df9;
+      }
+    }
+  }
   .el-table {
     border: 1px solid #ebeef5;
     .line-color {

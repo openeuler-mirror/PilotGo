@@ -4,26 +4,22 @@
       <ky-tree :getData="getChildNode" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
     </div>
     <div class="info">
-      <div class="cluster-title">
-        <span class="cluster-title__text">主机列表</span>
-        <div class="cluster-title__operate">
-          <el-button size="mini" @click="handleAddIp"> 注册 </el-button>
-          <el-button size="mini" @click="handleAddBatch"> 创建批次 </el-button>
-          <el-button size="mini" 
-           @click="handleUpdateIp" 
-           :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"
-           > 编辑 </el-button>
-          <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
-            <el-button size="mini" slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
-          </el-popconfirm>
-        </div>
-      </div>
       <ky-table
         class="cluster-table"
         ref="table"
         :getData="getClusters"
         :searchData="searchData"
       >
+        <template v-slot:table_search>
+          <div>{{ departName }}</div>
+        </template>
+        <template v-slot:table_action>
+          <el-button  @click="handleAddIp"> 注册 </el-button>
+          <el-button  @click="handleAddBatch"> 创建批次 </el-button>
+          <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
+            <el-button  slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
+          </el-popconfirm>
+        </template>
         <template v-slot:table>
           <el-table-column label="IP" width="90">
             <template slot-scope="scope">
@@ -42,13 +38,20 @@
           </el-table-column>
            <el-table-column prop="system_info" label="系统信息" width="150"> 
           </el-table-column>
-          <el-table-column label="防火墙配置" width="150">
+          <el-table-column label="防火墙配置" width="120">
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 @click="handleFireWall(scope.row.ip)">
                 <em class="el-icon-edit-outline"></em>
               </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="120">
+            <template slot-scope="scope">
+              <el-button size="mini" type="primary" plain 
+                @click="handleUpdateIp(scope.row.ip)"> 
+                编辑 </el-button>
             </template>
           </el-table-column>
         </template>
@@ -63,8 +66,8 @@
     >
      <add-form v-if="type === 'create'" @click="handleClose"></add-form>
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
-     <batch-form v-if="type === 'batch'" @click="handleClose"></batch-form>   
-     <device-detail v-if="type === 'disk'" :ip='ip'> </device-detail>   
+     <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machineIds='machineIds' @click="handleClose"></batch-form>   
+     <device-detail v-if="type === 'disk'" :ip='ip'></device-detail>
     </el-dialog>
   </div>
 </template>
@@ -92,12 +95,18 @@ export default {
       title: '',
       type: '',
       ip: '',
+      departName: '',
+      departInfo: {},
+      machineIds: [],
       display: false,
       disabled: false,
       searchData: {
         DepartId: 1
       },
     };
+  },
+  mounted() {
+    this.departName = '机器列表';
   },
   methods: {
     getClusters,
@@ -112,19 +121,23 @@ export default {
       this.title = "注册IP";
       this.type = "create"; 
     },
-    handleUpdateIp() {
+    handleUpdateIp(ip) {
       this.display = true;
       this.title = "编辑IP";
       this.type = "update"; 
-      this.ip = this.$refs.table.selectRow.rows[0].ip;
+      this.ip = ip;
     },
     handleAddBatch() {
+      this.machineIds = [];
       this.display = true;
       this.title = "创建批次";
       this.type = "batch"; 
+      let selects = this.$refs.table.selectRow.rows;
+      selects.forEach(item => {
+        this.machineIds.push(item.machineuuid);
+      })
     },
     handleDelete() {
-      console.log(this.$refs.table.selectRow.rows)
       let ids = this.$refs.table.selectRow.rows[0];
       deleteIp({ uuid: ids }).then((res) => {
         if (res.data.code === 200) {
@@ -135,7 +148,9 @@ export default {
     },
     handleSelectDept(data) {
       if(data) {
+        this.departName = data.label + '机器列表';
         this.searchData.DepartId = data.id;
+        this.departInfo = data;
         this.$refs.table.handleSearch();
       }
     },
@@ -166,30 +181,6 @@ export default {
   .info {
     width: 60%;
     float: right;
-  }
-  .cluster-title {
-    height: 44px;
-    background: #3e9df9;
-    line-height: 44px;
-    padding: 0 10px;
-    .cluster-title__text {
-      font-size: 14px;
-      color: #fff;
-    }
-
-    .cluster-title__operate {
-      float: right;
-      .el-button {
-        color: #fff;
-        background: transparent;
-        border: none;
-      }
-      .el-button:hover,
-      .el-button:active {
-        background: #fff;
-        color: #3e9df9;
-      }
-    }
   }
 
   .deleteHostText {

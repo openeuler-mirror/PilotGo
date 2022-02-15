@@ -1,4 +1,4 @@
-import { loginByEmail, logout } from '@/request/api'
+import { loginByEmail, logout } from '@/request/user'
 import { getToken, setToken, removeToken, getUsername, setUsername, removeUsername, 
     getRoles, setRoles, removeRoles, getUserId, removeUserId, setUserId } from '@/utils/auth'
 

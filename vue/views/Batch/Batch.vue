@@ -1,12 +1,124 @@
 <template>
   <div>
-    批次管理
+    <ky-table
+        class="cluster-table"
+        ref="table"
+        :getData="getBatches"
+      >
+        <template v-slot:table_search>
+          <div>批次列表</div>
+        </template>
+        <template v-slot:table_action>
+          <el-popconfirm 
+          title="确定删除此批次？"
+          cancel-button-type="default"
+          confirm-button-type="danger"
+          @confirm="handleDelete">
+          <el-button slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
+        </el-popconfirm>
+        </template>
+        <template v-slot:table>
+          <el-table-column prop="name" label="批次名称" width="90">
+          </el-table-column>
+          <el-table-column prop="manager" label="创建者" width="90"> 
+          </el-table-column>
+          <el-table-column prop="CreatedAt" label="创建时间" width="150">
+            <template slot-scope="scope">
+              <span>{{scope.row.CreatedAt | dateFormat}}</span>
+            </template>
+          </el-table-column>
+           <el-table-column prop="description" label="备注"> 
+          </el-table-column>
+          <el-table-column prop="operation" label="操作" width="150">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                @click="handleEdit(scope.row)">
+                编辑
+              </el-button>
+            </template>
+          </el-table-column>
+        </template>
+      </ky-table>
+      <el-dialog 
+        :title="title"
+        :before-close="handleClose" 
+        :visible.sync="display" 
+        width="560px"
+      >
+        <add-form v-if="type === 'create'" @click="handleClose"></add-form>
+        <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
+      </el-dialog>
   </div>
 </template>
 
 <script>
+import kyTable from "@/components/KyTable";
+import UpdateForm from "./form/updateForm.vue"
+import { getBatches, delBatch } from "@/request/batch";
 export default {
-  name: "UsersRole"
+  name: "UsersRole",
+  components: {
+    kyTable,
+    UpdateForm,
+  },
+  data() {
+    return {
+      display: false,
+      title: "",
+      type: "",
+    }
+  },
+  methods: {
+    getBatches,
+    handleClose(type) {
+      this.display = false;
+      this.title = "";
+      this.type = "";
+      if(type === 'success') {
+        this.refresh();
+      }
+    }, 
+    refresh(){
+      this.$refs.table.handleSearch();
+    },
+    handleEdit(row) {
+      this.display = true;
+      this.title = "编辑用户";
+      this.type = "update";
+    },
+    handleDelete() {
+      let delDatas = [];
+      this.$refs.table.selectRow.rows.forEach(item => {
+        delDatas.push(item.batchId);
+      });
+      delBatch({ids: delDatas[0]}).then(res => {
+        if(res.status === 200) {
+          this.$message.success(res.data.msg);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+        this.refresh();
+      })
+    },
+  },
+  filters: {
+    dateFormat: function(value) {
+      let date = new Date(value);
+      let y = date.getFullYear();
+      let MM = date.getMonth() + 1;
+      MM = MM < 10 ? "0" + MM : MM;
+      let d = date.getDate();
+      d = d < 10 ? "0" + d : d;
+      let h = date.getHours();
+      h = h < 10 ? "0" + h : h;
+      let m = date.getMinutes();
+      m = m < 10 ? "0" + m : m;
+      let s = date.getSeconds();
+      s = s < 10 ? "0" + s : s;
+      return y + "-" + MM + "-" + d + " " + h + ":" + m;
+    }
+  },
 }
 </script>
 

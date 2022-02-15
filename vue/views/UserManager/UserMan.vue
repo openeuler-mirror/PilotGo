@@ -1,28 +1,30 @@
 <template>
   <div v-loading="loading">
-    <div style="display: flex;justify-content: space-between" class="search-form">
-      <div>
+    <ky-table
+      :getData="getUsers"
+      ref="table"
+      id="exportTab"
+    >
+      <template v-slot:table_search>
         <el-input placeholder="请输入手机号或邮箱名进行搜索..." prefix-icon="el-icon-search"
                   clearable
                   disabled
-                  style="width: 350px;margin-right: 10px" v-model="keyword"
+                  style="width: 280px;margin-right: 10px;" v-model="keyword"
                   @keydown.enter.native="searchUser"></el-input>
-        <el-button icon="el-icon-search" type="primary" disabled @click="searchUser">
+        <el-button icon="el-icon-search" disabled @click="searchUser">
           搜索
         </el-button>
-      </div>
-      <div>
-        <el-button type="primary" @click="handleCreate">
-          添加
-        </el-button>
+      </template>
+      <template v-slot:table_action>
+        <el-button @click="handleCreate"> 添加 </el-button>
         <el-popconfirm 
           title="确定删除此用户？"
           cancel-button-type="default"
           confirm-button-type="danger"
           @confirm="handleDelete">
-          <el-button slot="reference" type="danger"> 删除 </el-button>
+          <el-button slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
         </el-popconfirm>
-        <el-button type="success" @click="handleExport"> 导出 </el-button>
+        <el-button @click="handleExport"> 导出 </el-button>
         <el-upload
           :show-file-list="false"
           :before-upload="beforeUpload"
@@ -32,15 +34,9 @@
           accept="xlsx"
           style="display: inline-flex;margin-right: 8px"
           action="/user/import">
-          <el-button type="success"> 批量导入 </el-button>
+          <el-button> 批量导入 </el-button>
         </el-upload>
-      </div>
-    </div>
-    <ky-table
-      :getData="getUsers"
-      ref="table"
-      id="exportTab"
-    >
+      </template>
       <template v-slot:table>
         <el-table-column prop="ID" label="编号" width="60">
         </el-table-column>

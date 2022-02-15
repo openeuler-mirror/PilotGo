@@ -7,6 +7,13 @@ export function loginByEmail(data) {
     data
   })
 }
+// 用户退出
+export function logout() {
+  return request({
+    url: '/user/logout',
+    method: 'post',
+  })
+}
 // 获取当前登录用户信息
 export function getCurUser() {
   return request({
