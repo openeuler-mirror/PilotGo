@@ -14,22 +14,29 @@ func IsExistName(name string) bool {
 func GetBatchID(name string) uint {
 	var machine model.Batch
 	mysqlmanager.DB.Where("name=?", name).Find(&machine)
-	logger.Info("%d", machine.ID)
 	return machine.ID
 }
 func GetmachineBatch(uuid string) string {
 	var machine model.MachineNode
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machine)
-	logger.Info("%s", machine.BatchInfo)
 	return machine.BatchInfo
 }
 
 func UpdatemachineBatch(s string, b string) {
-	var machine model.MachineNode
-	mysqlmanager.DB.Find(&machine)
-	mysqlmanager.DB.Model(&machine).Where("machine_uuid=?", s).Update("batch_info", b)
+	var machineInfo model.MachineNode
+	machine := model.MachineNode{
+		BatchInfo: b,
+	}
+	mysqlmanager.DB.Model(&machineInfo).Where("machine_uuid=?", s).Update(&machine)
 	logger.Info("%+v", machine)
 }
+
+// func Batchinfo() []model.Batch {
+// 	var batch []model.Batch
+// 	a := mysqlmanager.DB.Find(&batch)
+// 	logger.Info("%+v", a)
+// 	return batch
+// }
 
 // func UpdatemachineBatch(m model.MachineNode) {
 

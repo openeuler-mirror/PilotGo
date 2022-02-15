@@ -1,6 +1,10 @@
 package controller
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,67 +13,141 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
+type BatchInfo struct {
+	Name     string
+	Descrip  string
+	Manager  string
+	DepartID []string
+	Machine  []string
+}
+
 func CreateBatch(c *gin.Context) {
-	name := c.Query("Name")
-	descrip := c.PostForm("Description")
-	manager := c.PostForm("Manager")
-	depart := c.QueryArray("Depart")
-	machine := c.QueryArray("Machine")
-	if len(name) == 0 {
+	buf := make([]byte, 1024)
+	n, err := c.Request.Body.Read(buf)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf[:n]))
+	j := buf[0:n]
+	fmt.Println("body:", string(j)) //获取到post传递过来的数据
+	var batchinfo BatchInfo
+	err = json.Unmarshal(j, &batchinfo)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	fmt.Println("====>" + batchinfo.Name)
+	// name := c.Query("Name")
+	// descrip := c.Query("Description")
+	// manager := c.Query("Manager")
+	// depart := c.QueryArray("Depart")
+	// machine := c.QueryArray("Machine")
+	if len(batchinfo.Name) == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"批次名未输入")
 		return
 	}
-	if len(manager) == 0 {
+	if len(batchinfo.Manager) == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"创建人未输入")
 		return
 	}
-	if len(depart) == 0 {
+	if len(batchinfo.DepartID) == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"归属部门未输入")
 		return
 	}
-	if len(machine) == 0 {
+	if len(batchinfo.Machine) == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"归属部门未输入")
 		return
 	}
-	if dao.IsExistName(name) {
+	if dao.IsExistName(batchinfo.Name) {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"已存在该名称批次")
 		return
 	}
+	for _, value := range batchinfo.DepartID {
+		tmp, err := strconv.Atoi(value)
+		if err != nil {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				"部门ID有误")
+			return
+		}
+		if !dao.IsDepartIDExist(tmp) {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				"不存在该部门")
+			return
+		}
+	}
+
 	Batch := model.Batch{
-		Name:        name,
-		Description: descrip,
-		Manager:     manager,
-		Depart:      strings.Join(depart, ","),
+		Name:        batchinfo.Name,
+		Description: batchinfo.Descrip,
+		Manager:     batchinfo.Manager,
+		Depart:      strings.Join(batchinfo.DepartID, ","),
+		Machinelist: strings.Join(batchinfo.Machine, ","),
 	}
 	mysqlmanager.DB.Create(&Batch)
-	response.Success(c, nil, "批次入库成功")
-	for _, value := range machine {
-		batchid := dao.GetBatchID(name)
+	logger.Info("%s", batchinfo.Machine)
+	for _, value := range batchinfo.Machine {
+		logger.Info("%s", value)
+		batchid := dao.GetBatchID(batchinfo.Name)
+		logger.Info("%s", batchid)
 		tmp := strconv.Itoa(int(batchid))
 		x := dao.GetmachineBatch(value)
+		logger.Info("%+v", x)
 		if dao.GetmachineBatch(value) != "" {
 			x += ","
 		}
+		logger.Info("%s", value)
+		logger.Info("%s", x+tmp)
 		dao.UpdatemachineBatch(value, x+tmp)
 	}
-	response.Success(c, nil, "机器已绑定批次")
+	response.Success(c, nil, "批次入库成功，机器绑定批次成功")
+}
+
+func BatchInform(c *gin.Context) {
+	batch := model.Batch{}
+	query := &model.PaginationQ{}
+	err := c.ShouldBindQuery(query)
+
+	if model.HandleError(c, err) {
+		return
+	}
+	list, total, err := batch.ReturnBatch(query)
+	if model.HandleError(c, err) {
+		return
+	}
+	// 返回数据开始拼装分页的json
+	model.JsonPagination(c, list, total, query)
+}
+func DeleteBatch(c *gin.Context) {
+
 }
