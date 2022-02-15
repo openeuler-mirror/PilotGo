@@ -38,6 +38,11 @@ func SetupRouter() *gin.Engine {
 		group.GET("/service_stop", handlers.ServiceStopHandler)
 		group.GET("/service_start", handlers.ServiceStartHandler)
 		group.GET("/service_restart", handlers.ServiceRestartHandler)
+		group.GET("/rpm_all", handlers.AllRpmHandler)
+		group.GET("/rpm_source", handlers.RpmSourceHandler)
+		group.GET("/rpm_info", handlers.RpmInfoHandler)
+		group.GET("/rpm_install", handlers.InstallRpmHandler)
+		group.GET("/rpm_remove", handlers.RemoveRpmHandler)
 	}
 
 	user := router.Group("user")

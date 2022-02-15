@@ -323,6 +323,86 @@ func (a *Agent) ServiceStart(service string) (interface{}, error) {
 	return resp_message.Data, nil
 }
 
+// 获取全部安装的rpm包列表
+func (a *Agent) AllRpm() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AllRpm,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取源软件包名以及源
+func (a *Agent) RpmSource(rpm string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.RpmSource,
+		Data: rpm,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取软件包信息
+func (a *Agent) RpmInfo(rpm string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.RpmInfo,
+		Data: rpm,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取源软件包名以及源
+func (a *Agent) InstallRpm(rpm string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.InstallRpm,
+		Data: rpm,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取源软件包名以及源
+func (a *Agent) RemoveRpm(rpm string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.RemoveRpm,
+		Data: rpm,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
 // 远程获取agent端的系统信息
 func (a *Agent) AgentInfo() (interface{}, error) {
 	msg := &protocol.Message{

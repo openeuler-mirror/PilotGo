@@ -56,6 +56,16 @@ const (
 	ServiceStart = 22
 	//关闭某个服务
 	ServiceStop = 23
+	//获取全部安装的rpm包列表
+	AllRpm = 24
+	//获取源软件包名以及源
+	RpmSource = 25
+	//获取软件包信息
+	RpmInfo = 26
+	//安装rpm软件包
+	InstallRpm = 27
+	//卸载rpm软件包
+	RemoveRpm = 28
 )
 
 type Message struct {
