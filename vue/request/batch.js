@@ -2,22 +2,23 @@ import { request } from './request'
 // 创建批次
 export function createBatch(data) {
   return request({
-    url: '/user/login',
+    url: 'batchmanager/createbatch',
     method: 'post',
     data
   })
 }
 // 获取批次
-export function getBatch() {
+export function getBatches(data) {
   return request({
-    url: '/user/info',
-    method: 'get'
+    url: '/batchmanager/batchinfo',
+    method: 'get',
+    params: data
   })
 }
 // 删除批次
-export function deleteBatch(data) {
+export function delBatch(data) {
   return request({
-    url: '/user/searchAll',
+    url: '/batch/delete',
     method: 'post',
     params: data
   })
@@ -25,7 +26,7 @@ export function deleteBatch(data) {
 // 编辑批次
 export function updateBatch(data) {
   return request({
-    url: '/user/register',
+    url: '/batch/update',
     method: 'post',
     data
   })

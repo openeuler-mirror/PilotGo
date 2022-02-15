@@ -1,5 +1,5 @@
 // api请求接口文件
-import { request } from './request'  //引入axios封装的request请求
+import { request } from './request'
 
 const API1 = '/plugin/prometheus/api/v1'
 export function getChartName(time) {
@@ -16,42 +16,7 @@ export function getChart(url) {
   })
 }
 
-export function loginByEmail(data) {
-  return request({
-    url: '/user/login',
-    method: 'post',
-    data
-  })
-}
-export function logout() {
-  return request({
-    url: '/user/logout',
-    method: 'post',
-  })
-}
 
-export function getPlugins() {
-  return request({
-    url: '/plugin',
-    method: 'get',
-  })
-}
-
-export function insertPlugin(data) {
-  return request({
-    url: '/plugin',
-    method: 'post',
-    data
-  })
-}
-
-export function deletePlugins(data) {
-  return request({
-    url: '/plugin',
-    method: 'delete',
-    data
-  })
-}
 
 export function getOverview() {
   return request({

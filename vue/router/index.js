@@ -54,13 +54,13 @@ export const routes = [
         component:  _import('Batch/Batch'),
         meta: { title: 'batch', header_title: "批次管理", panel: "batch", icon_class: 'el-icon-menu' }
       },     
-      {
+      /*{
         path: '/plug_in',
         name: 'PlugIn',
         component:  _import('Plug-in/Plug-in'),
         meta: { title: 'plug_in', header_title: "插件管理", panel: "plug_in", icon_class: 'el-icon-document' }
       },
-      /* {
+      {
         path: '/prometheus',
         name: 'Prometheus',
         component: Prometheus,

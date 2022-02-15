@@ -160,7 +160,6 @@ export default {
    //拖拽==>拖拽时判定目标节点能否被放置  draggable属性最后做
    allowDrop(draggingNode, dropNode, type){
      //参数：被拖拽节点，要拖拽到的位置
-     //因为根目录是我本地写死的，不能有同级，所以我设置凡是拖拽到的level===1都存放到根节点的下面；
      if(dropNode.level===1){
        return type == 'inner';
      }
