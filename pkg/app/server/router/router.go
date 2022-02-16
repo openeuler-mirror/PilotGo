@@ -43,6 +43,12 @@ func SetupRouter() *gin.Engine {
 		group.GET("/rpm_info", handlers.RpmInfoHandler)
 		group.GET("/rpm_install", handlers.InstallRpmHandler)
 		group.GET("/rpm_remove", handlers.RemoveRpmHandler)
+		group.GET("/disk_use", handlers.DiskUsageHandler)
+		group.GET("/disk_info", handlers.DiskInfoHandler)
+		group.GET("/disk_path", handlers.DiskCreatPathHandler)
+		group.GET("/disk_mount", handlers.DiskMountHandler)
+		group.GET("/disk_umount", handlers.DiskUMountHandler)
+		group.GET("/disk_format", handlers.DiskFormatHandler)
 	}
 
 	user := router.Group("user")
