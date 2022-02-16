@@ -122,6 +122,13 @@ func AddMachine(c *gin.Context) {
 }
 func DepartInfo(c *gin.Context) {
 	depart := dao.DepartStore()
+	if len(depart) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": model.MachineTreeNode{},
+		})
+		return
+	}
 	var root model.MachineTreeNode
 	departnode := make([]model.MachineTreeNode, 0)
 	ptrchild := make([]*model.MachineTreeNode, 0)
