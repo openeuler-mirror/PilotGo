@@ -83,7 +83,7 @@ func GetAllUserInfo() []AllUserInfo {
 }
 
 // 创建新的用户，并新建家目录
-func AddLinuxUser(username, password string) {
+func AddLinuxUser(username, password string) error {
 	useradd := exec.Command("useradd", "-m", username)
 	err := useradd.Start()
 	if err != nil {
@@ -112,34 +112,38 @@ func AddLinuxUser(username, password string) {
 	w.Close()
 	grep.Wait()
 	io.Copy(os.Stdout, &buffer) // buffer拷贝到系统标准输出
+	return nil
 }
 
 // 删除用户
-func DelUser(username string) {
+func DelUser(username string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("userdel -r %s", username))
 	if err != nil {
 		logger.Error("删除用户失败!%s", err.Error())
-		return
+		return "", fmt.Errorf("删除用户失败%s", err)
 	}
 	logger.Info("删除用户成功!%s", tmp)
+	return tmp, nil
 }
 
 // chmod [-R] 权限值 文件名
-func ChangePermission(permission, file string) {
+func ChangePermission(permission, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chmod %s %s", permission, file))
 	if err != nil {
 		logger.Error("改变文件权限失败!%s", err.Error())
-		return
+		return "", err
 	}
 	logger.Info("改变文件权限成功!%s", tmp)
+	return tmp, nil
 }
 
-// chown [-R] 所有者 文件或目录 / chown [-R] 所有者 文件或目录
-func ChangeFileOwner(user, file string) {
+// chown [-R] 所有者 文件或目录
+func ChangeFileOwner(user, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chown -R %s %s", user, file))
 	if err != nil {
 		logger.Error("改变文件所有者失败!%s", err.Error())
-		return
+		return "", err
 	}
 	logger.Info("改变文件所有者成功!%s", tmp)
+	return tmp, nil
 }

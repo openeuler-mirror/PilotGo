@@ -76,6 +76,26 @@ const (
 	DiskUMount = 32
 	//磁盘格式化
 	DiskFormat = 33
+	// 获取当前TCP网络连接信息
+	NetTCP = 34
+	//获取当前UDP网络连接信息
+	NetUDP = 35
+	//获取网络读写字节／包的个数
+	NetIOCounter = 36
+	// 获取网卡配置
+	NetNICConfig = 37
+	// 获取当前用户信息
+	CurrentUser = 38
+	// 获取所有用户的信息
+	AllUser = 39
+	// 创建新的用户，并新建家目录
+	AddLinuxUser = 40
+	// 删除用户
+	DelUser = 41
+	// chmod [-R] 权限值 文件名
+	ChangePermission = 42
+	// chown [-R] 所有者 文件或目录
+	ChangeFileOwner = 43
 )
 
 type Message struct {
@@ -83,6 +103,7 @@ type Message struct {
 	Type   int    `json:"message_type"`
 	Status int    `json:"status"`
 	Data   interface{}
+	Error  string
 }
 
 type MessageContext interface{}

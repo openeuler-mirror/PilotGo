@@ -49,6 +49,17 @@ func SetupRouter() *gin.Engine {
 		group.GET("/disk_mount", handlers.DiskMountHandler)
 		group.GET("/disk_umount", handlers.DiskUMountHandler)
 		group.GET("/disk_format", handlers.DiskFormatHandler)
+		group.GET("/net_tcp", handlers.NetTCPHandler)
+		group.GET("/net_udp", handlers.NetUDPHandler)
+		group.GET("/net_io", handlers.NetIOCounterHandler)
+		group.GET("/net_nic", handlers.NetNICConfigHandler)
+		group.GET("/user_info", handlers.CurrentUserInfoHandler)
+		group.GET("/user_all", handlers.AllUserInfoHandler)
+		group.GET("/user_add", handlers.AddLinuxUserHandler)
+		group.GET("/user_del", handlers.DelUserHandler)
+		group.GET("/user_ower", handlers.ChangeFileOwnerHandler)
+		group.GET("/user_per", handlers.ChangePermissionHandler)
+
 	}
 
 	user := router.Group("user")
