@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -27,8 +26,13 @@ type BatchInfo struct {
 }
 
 func CreateBatch(c *gin.Context) {
-	buf := make([]byte, 1024)
-	n, err := c.Request.Body.Read(buf)
+	// buf := make([]byte, 1024)
+	// n, _ := c.Request.Body.Read(buf)
+	// c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf[:n]))
+	// j := buf[0:n]
+	// fmt.Println("body:", string(j)) //获取到post传递过来的数据
+	j, err := ioutil.ReadAll(c.Request.Body)
+	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -36,11 +40,9 @@ func CreateBatch(c *gin.Context) {
 			err.Error())
 		return
 	}
-	c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf[:n]))
-	j := buf[0:n]
-	fmt.Println("body:", string(j)) //获取到post传递过来的数据
 	var batchinfo BatchInfo
 	err = json.Unmarshal(j, &batchinfo)
+	logger.Info("%+v", batchinfo)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -49,11 +51,6 @@ func CreateBatch(c *gin.Context) {
 		return
 	}
 	fmt.Println("====>" + batchinfo.Name)
-	// name := c.Query("Name")
-	// descrip := c.Query("Description")
-	// manager := c.Query("Manager")
-	// depart := c.QueryArray("Depart")
-	// machine := c.QueryArray("Machine")
 	if len(batchinfo.Name) == 0 {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -142,12 +139,47 @@ func BatchInform(c *gin.Context) {
 		return
 	}
 	list, total, err := batch.ReturnBatch(query)
+	logger.Info("%+v", list)
 	if model.HandleError(c, err) {
 		return
 	}
 	// 返回数据开始拼装分页的json
 	model.JsonPagination(c, list, total, query)
 }
-func DeleteBatch(c *gin.Context) {
 
+type Batchdel struct {
+	BatchID []string
+}
+
+func DeleteBatch(c *gin.Context) {
+	j, err := ioutil.ReadAll(c.Request.Body)
+	fmt.Println("body:", string(j))
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var batchdel Batchdel
+	err = json.Unmarshal(j, &batchdel)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	for _, value := range batchdel.BatchID {
+		tmp, err := strconv.Atoi(value)
+		if err != nil {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				err.Error())
+			return
+		}
+		dao.DeleteBatch(tmp)
+	}
+	response.Success(c, nil, "批次删除成功")
 }
