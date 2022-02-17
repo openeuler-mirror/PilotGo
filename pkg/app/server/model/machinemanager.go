@@ -21,7 +21,7 @@ type MachineNode struct {
 	IP          string `gorm:"type:varchar(100)" json:"ip"`
 	MachineUUID string `gorm:"type:varchar(100);not null" json:"machineuuid"`
 	CPU         string `gorm:"type:varchar(100)" json:"CPU"`
-	State       string `gorm:"type:varchar(100)" json:"state"`
+	State       int    `gorm:"type:varchar(100)" json:"state"`
 	Systeminfo  string `gorm:"type:varchar(100)" json:"sysinfo"`
 	BatchInfo   string `gorm:"type:varchar(100)"`
 } // kylin/serve/opensource/ops/wanghao/dfsagdasgs
@@ -32,6 +32,20 @@ type MachineTreeNode struct {
 	Pid      int                `json:"pid"`
 	Children []*MachineTreeNode `json:"children"`
 }
+
+func GetMachList() (mi []MachineNode, e error) {
+	mysqlmanager.DB.Find(&mi)
+	return mi, nil
+}
+
+const (
+	// 机器运行
+	Normal = 1
+	// 脱机
+	OffLine = 2
+	// 空闲
+	Free = 3
+)
 
 type MachineInfo struct {
 	Uuid []string `json:"label"`

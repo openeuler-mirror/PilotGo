@@ -1,7 +1,6 @@
 package agentmanager
 
 import (
-	"fmt"
 	"net"
 	"time"
 
@@ -58,7 +57,8 @@ func (a *Agent) startListen() {
 		buff := make([]byte, 1024)
 		n, err := a.conn.Read(buff)
 		if err != nil {
-			fmt.Println("read error:", err)
+			logger.Error("read error:%s", err)
+			DeleteAgent(a.UUID)
 			return
 		}
 		readBuff = append(readBuff, buff[:n]...)
@@ -661,6 +661,38 @@ func (a *Agent) ChangeFileOwner(user, file string) (interface{}, error) {
 		UUID: uuid.New().String(),
 		Type: protocol.ChangeFileOwner,
 		Data: user + "," + file,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 远程获取agent端的内核信息
+func (a *Agent) GetAgentOSInfo() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AgentOSInfo,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 心跳
+func (a *Agent) HeartBeat() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.Heartbeat,
+		Data: "连接正常",
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)

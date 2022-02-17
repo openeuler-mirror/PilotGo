@@ -29,6 +29,7 @@ var (
 
 var sessionManage net.SessionManage
 var sqlManager *mysqlmanager.MysqlManager
+var machinelist *model.MachineInfo
 
 func initConfig() {
 	config.MustInit(os.Stdout, cfgFile) // 配置初始化
@@ -52,7 +53,7 @@ func Start(conf *config.Configure) (err error) {
 		return err
 	}
 
-	// sessionManage.Init(conf.MaxAge, conf.SessionCount)
+	sessionManage.Init(conf.MaxAge, conf.SessionCount)
 	// go func() {
 	// 	for true {
 	// 		time.Sleep(time.Second * 10)
@@ -91,6 +92,7 @@ func Start(conf *config.Configure) (err error) {
 	// 	})
 	// }
 
+	mysqlmanager.DB.Delete(&model.MachineNode{})
 	mysqlmanager.DB.AutoMigrate(&model.User{})
 	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
 	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})

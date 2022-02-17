@@ -1,7 +1,6 @@
 package agentmanager
 
 import (
-	"fmt"
 	"net"
 	"sync"
 
@@ -79,7 +78,7 @@ func AddandRunAgent(c net.Conn) {
 	}
 
 	AddAgent(agent)
-	fmt.Println("add new agent from:", c.RemoteAddr().String())
+	logger.Info("Add new agent from:%s", c.RemoteAddr().String())
 }
 
 func StopAgentManager() {
