@@ -68,6 +68,7 @@ func SetupRouter() *gin.Engine {
 		user.POST("/login", controller.Login)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 		user.GET("/searchAll", controller.UserAll)
+		user.POST("/userSearch", controller.UserSearch)
 		user.GET("/reset", controller.ResetPassword)
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
