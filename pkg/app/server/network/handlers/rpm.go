@@ -88,5 +88,9 @@ func RemoveRpmHandler(c *gin.Context) {
 		response.Fail(c, nil, "rpm包卸载命令执行失败!")
 		return
 	}
-	response.Success(c, gin.H{"rpm_remove": rpm_remove}, "Success")
+	if rpm_remove != nil {
+		response.Fail(c, nil, "软件包卸载失败!")
+		return
+	}
+	response.Success(c, gin.H{"rpm_remove": "卸载成功!"}, "Success")
 }

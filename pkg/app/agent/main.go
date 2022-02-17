@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -307,6 +308,89 @@ func regitsterHandler(c *network.SocketClient) {
 			Type:   msg.Type,
 			Status: 0,
 			Data:   rpmremove,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.DiskUsage, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		diskusage := uos.GetDiskUsageInfo()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   diskusage,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.DiskInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		diskinfo := uos.GetDiskInfo()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   diskinfo,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.CreateDiskPath, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		mountpath := msg.Data.(string)
+		creatdiskpath := uos.CreateDiskPath(mountpath)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   creatdiskpath,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.DiskMount, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		disk := msg.Data.(string)
+		disks := strings.Split(disk, ",")
+		source := disks[0]
+		dest := disks[1]
+		mountpath := uos.DiskMount(source, dest)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   mountpath,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.DiskUMount, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		disk := msg.Data.(string)
+		diskPath := uos.DiskUMount(disk)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   diskPath,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.DiskFormat, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		disk := msg.Data.(string)
+		disks := strings.Split(disk, ",")
+		fileType := disks[0]
+		diskPath := disks[1]
+		formatpath := uos.DiskFormat(fileType, diskPath)
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   formatpath,
 		}
 		return c.Send(resp_msg)
 	})

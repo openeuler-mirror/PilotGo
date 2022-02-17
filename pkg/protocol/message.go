@@ -38,7 +38,7 @@ const (
 	CPUInfo = 13
 	//内存信息数据获取
 	MemoryInfo = 14
-	//磁盘信息数据获取
+	//获取磁盘的IO信息
 	DiskInfo = 15
 	//内核配置信息数据获取
 	SysctlInfo = 16
@@ -66,6 +66,16 @@ const (
 	InstallRpm = 27
 	//卸载rpm软件包
 	RemoveRpm = 28
+	//获取磁盘的使用情况
+	DiskUsage = 29
+	//创建挂载磁盘的目录
+	CreateDiskPath = 30
+	//挂载磁盘
+	DiskMount = 31
+	//卸载磁盘
+	DiskUMount = 32
+	//磁盘格式化
+	DiskFormat = 33
 )
 
 type Message struct {

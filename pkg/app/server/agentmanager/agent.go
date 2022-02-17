@@ -148,6 +148,22 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 }
 
 // 远程获取agent端的系统信息
+func (a *Agent) AgentInfo() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AgentInfo,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 远程获取agent端的系统信息
 func (a *Agent) GetOSInfo() (interface{}, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -403,12 +419,88 @@ func (a *Agent) RemoveRpm(rpm string) (interface{}, error) {
 	return resp_message.Data, nil
 }
 
-// 远程获取agent端的系统信息
-func (a *Agent) AgentInfo() (interface{}, error) {
+// 获取磁盘的使用情况
+func (a *Agent) DiskUsage() (interface{}, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
-		Type: protocol.AgentInfo,
+		Type: protocol.DiskUsage,
 		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取磁盘的IO信息
+func (a *Agent) DiskInfo() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.DiskInfo,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+/*挂载磁盘
+1.创建挂载磁盘的目录
+2.挂载磁盘*/
+func (a *Agent) DiskCreatPath(mountpath string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.CreateDiskPath,
+		Data: mountpath,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+func (a *Agent) DiskMount(sourceDisk, destPath string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.DiskMount,
+		Data: sourceDisk + "," + destPath,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+func (a *Agent) DiskUMount(diskPath string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.DiskUMount,
+		Data: diskPath,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+func (a *Agent) DiskFormat(fileType, diskPath string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.DiskFormat,
+		Data: fileType + "," + diskPath,
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
