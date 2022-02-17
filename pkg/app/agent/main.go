@@ -275,28 +275,49 @@ func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RpmInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 		rpmname := msg.Data.(string)
-		rpminfo, _ := uos.GetRpmInfo(rpmname)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   rpminfo,
+		rpminfo, Err, err := uos.GetRpmInfo(rpmname)
+		if Err != nil && err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   rpminfo,
+				Error:  Err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   rpminfo,
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.InstallRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 		rpmname := msg.Data.(string)
-		rpminstall := uos.InstallRpm(rpmname)
 
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   rpminstall,
+		err := uos.InstallRpm(rpmname)
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "",
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.RemoveRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
@@ -393,5 +414,218 @@ func regitsterHandler(c *network.SocketClient) {
 			Data:   formatpath,
 		}
 		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.NetTCP, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		nettcp, err := uos.GetTCP()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   nettcp,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.NetUDP, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		netudp, err := uos.GetUDP()
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   netudp,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.NetIOCounter, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		netio, err := uos.GetIOCounter()
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   netio,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.NetNICConfig, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		netnic, err := uos.GetNICConfig()
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   netnic,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.CurrentUser, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		user_info := uos.GetCurrentUserInfo()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   user_info,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.AllUser, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		user_all := uos.GetAllUserInfo()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   user_all,
+		}
+		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.AddLinuxUser, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		user := msg.Data.(string)
+		users := strings.Split(user, ",")
+		username := users[0]
+		password := users[1]
+		err := uos.AddLinuxUser(username, password)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "新增用户成功!",
+			}
+			return c.Send(resp_msg)
+		}
+
+	})
+	c.BindHandler(protocol.DelUser, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		username := msg.Data.(string)
+		user_del, err := uos.DelUser(username)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   user_del,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.ChangePermission, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		data := msg.Data.(string)
+		datas := strings.Split(data, ",")
+		permission := datas[0]
+		file := datas[1]
+		user_per, err := uos.ChangePermission(permission, file)
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   user_per,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.ChangeFileOwner, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		disk := msg.Data.(string)
+		disks := strings.Split(disk, ",")
+		fileType := disks[0]
+		diskPath := disks[1]
+		user_ower, err := uos.ChangeFileOwner(fileType, diskPath)
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   err,
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   user_ower,
+			}
+			return c.Send(resp_msg)
+		}
 	})
 }

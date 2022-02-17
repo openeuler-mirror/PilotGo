@@ -372,7 +372,7 @@ func (a *Agent) RpmSource(rpm string) (interface{}, error) {
 }
 
 // 获取软件包信息
-func (a *Agent) RpmInfo(rpm string) (interface{}, error) {
+func (a *Agent) RpmInfo(rpm string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RpmInfo,
@@ -382,9 +382,9 @@ func (a *Agent) RpmInfo(rpm string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return nil, "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data, resp_message.Error, nil
 }
 
 // 获取源软件包名以及源
@@ -501,6 +501,166 @@ func (a *Agent) DiskFormat(fileType, diskPath string) (interface{}, error) {
 		UUID: uuid.New().String(),
 		Type: protocol.DiskFormat,
 		Data: fileType + "," + diskPath,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取当前TCP网络连接信息
+func (a *Agent) NetTCP() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.NetTCP,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取当前UDP网络连接信息
+func (a *Agent) NetUDP() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.NetUDP,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取网络读写字节／包的个数
+func (a *Agent) NetIOCounter() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.NetIOCounter,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取网卡配置
+func (a *Agent) NetNICConfig() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.NetNICConfig,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取当前用户信息
+func (a *Agent) CurrentUser() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.CurrentUser,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 获取所有用户的信息
+func (a *Agent) AllUser() (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AllUser,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 创建新的用户，并新建家目录
+func (a *Agent) AddLinuxUser(username, password string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AddLinuxUser,
+		Data: username + "," + password,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// 删除用户
+func (a *Agent) DelUser(username string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.DelUser,
+		Data: username,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// chmod [-R] 权限值 文件名
+func (a *Agent) ChangePermission(permission, file string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ChangePermission,
+		Data: permission + "," + file,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
+}
+
+// chown [-R] 所有者 文件或目录
+func (a *Agent) ChangeFileOwner(user, file string) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ChangeFileOwner,
+		Data: user + "," + file,
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)

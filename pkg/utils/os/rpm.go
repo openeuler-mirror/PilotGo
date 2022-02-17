@@ -164,99 +164,99 @@ func readInfo(reader *strings.Reader, reg string) (string, error) {
 	return string(""), fmt.Errorf("匹配结构体属性失败")
 }
 
-func GetRpmInfo(rpm string) (RpmInfo, error) {
+func GetRpmInfo(rpm string) (RpmInfo, error, error) {
 	rpminfo := RpmInfo{}
 	result, err := utils.RunCommand("rpm -qi " + rpm)
 	//未安装该软件包情况
 	if err != nil && len(result) != 0 {
 		logger.Error(" %s的rpm包未安装", rpm)
-		return RpmInfo{}, fmt.Errorf("%s的rpm包未安装", rpm)
+		return RpmInfo{}, fmt.Errorf("%s的rpm包未安装", rpm), err
 	}
 	reader := strings.NewReader(result)
 	str, err := readInfo(reader, `^Name.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包名属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包名属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包名属性失败"), err
 	}
 	rpminfo.Name = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Version.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Version属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Version属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Version属性失败"), err
 	}
 	rpminfo.Version = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Release.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Release属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Release属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Release属性失败"), err
 	}
 	rpminfo.Release = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Architecture.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Architecture属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Architecture属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Architecture属性失败"), err
 	}
 	rpminfo.Architecture = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Install Date.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包InstallDate属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包InstallDate属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包InstallDate属性失败"), err
 	}
 	rpminfo.Architecture = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Size.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Size属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Size属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Size属性失败"), err
 	}
 	rpminfo.Size = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^License.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包License属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包License属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包License属性失败"), err
 	}
 	rpminfo.License = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Signature.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Signature属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Signature属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Signature属性失败"), err
 	}
 	rpminfo.Signature = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Packager.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Packager属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Packager属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Packager属性失败"), err
 	}
 	rpminfo.Packager = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Vendor.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Vendor属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Vendor属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包Vendor属性失败"), err
 	}
 	rpminfo.Vendor = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^URL.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包URL属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
 	}
 	rpminfo.URL = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Summary.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Summary属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Summary属性失败")
+		return RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
 	}
 	rpminfo.Summary = str
-	return rpminfo, nil
+	return rpminfo, nil, nil
 }
 
 //判断rpm软件包是否安装/卸载成功
@@ -284,7 +284,7 @@ func InstallRpm(rpm string) error {
 		logger.Error("rpm包安装命令运行失败: ", err)
 		return fmt.Errorf("rpm包安装命令执行失败")
 	}
-	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) {
+	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
 		logger.Error("rpm包安装命令由于rpm包已安装而运行失败")
 		return fmt.Errorf("该rpm包已安装")
 	} else if verifyRpmInstalled(strings.NewReader(result), `^Error: Unable to find a match:.*`) {

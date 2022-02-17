@@ -49,12 +49,14 @@ func RpmInfoHandler(c *gin.Context) {
 		return
 	}
 
-	rpm_info, err := agent.RpmInfo(rpmname)
-	if err != nil {
-		response.Fail(c, nil, "获取源软件包信息失败!")
+	rpm_info, Err, err := agent.RpmInfo(rpmname)
+	if len(Err) != 0 || err != nil {
+		response.Fail(c, gin.H{"error": Err}, "获取源软件包信息失败!")
 		return
+	} else {
+		response.Success(c, gin.H{"rpm_info": rpm_info}, "Success")
 	}
-	response.Success(c, gin.H{"rpm_info": rpm_info}, "Success")
+
 }
 func InstallRpmHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -67,11 +69,14 @@ func InstallRpmHandler(c *gin.Context) {
 	}
 
 	rpm_install, err := agent.InstallRpm(rpmname)
-	if err != nil {
-		response.Fail(c, nil, "rpm包安装命令执行失败!")
+	rpm := rpm_install.(string)
+	if len(rpm) != 0 || err != nil {
+		response.Fail(c, gin.H{"error": rpm}, "Failed!")
 		return
+	} else {
+		response.Success(c, nil, "该rpm包安装成功!")
 	}
-	response.Success(c, gin.H{"rpm_install": rpm_install}, "Success")
+
 }
 func RemoveRpmHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
