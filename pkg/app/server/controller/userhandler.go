@@ -7,6 +7,8 @@ package controller
  */
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -132,15 +134,16 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearch(c *gin.Context) {
-	// var users model.User
-	// c.Bind(&users)
-	// var email = users.Email
-	// fmt.Println(email)
-	// mysqlmanager.DB.Where("email like ?", "%"+email+"%").Find(&users)
-	// response.Response(c, http.StatusOK,
-	// 	200,
-	// 	gin.H{"data": users},
-	// 	"查询成功!")
+	var user model.User
+	var users []model.User
+	c.Bind(&user)
+	var email = user.Email
+
+	mysqlmanager.DB.Where("email LIKE ?", "%"+email+"%").Find(&users)
+	response.Response(c, http.StatusOK,
+		200,
+		gin.H{"data": users},
+		"查询成功!")
 }
 
 // 重置密码
@@ -164,20 +167,37 @@ func ResetPassword(c *gin.Context) {
 }
 
 // 删除用户
+type Userdel struct {
+	Emails []string `gorm:"type:varchar(30);not null" json:"email,omitempty" form:"email"`
+}
+
 func DeleteUser(c *gin.Context) {
-	var user model.User
-	c.Bind(&user)
-	userEmail := user.Email
-	if dao.IsEmailExist(userEmail) {
-		mysqlmanager.DB.Where("email=?", userEmail).Unscoped().Delete(user)
-		response.Response(c, http.StatusOK,
-			200,
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
 			nil,
-			"此用户已删除!")
+			err.Error())
 		return
-	} else {
-		response.Fail(c, nil, "无此用户!")
 	}
+	var userdel Userdel
+	bodys := string(body)
+	err = json.Unmarshal([]byte(bodys), &userdel)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var user model.User
+	for _, userEmail := range userdel.Emails {
+		mysqlmanager.DB.Where("email=?", userEmail).Unscoped().Delete(user)
+	}
+	response.Response(c, http.StatusOK,
+		200,
+		nil,
+		"用户删除成功!")
 }
 
 //修改用户信息
