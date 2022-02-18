@@ -84,45 +84,6 @@ func AddDepart(c *gin.Context) {
 	response.Success(c, nil, "部门信息入库成功")
 }
 
-// func AddMachine(c *gin.Context) {
-// 	departID := c.PostForm("DepartID")
-// 	machineuuid := c.PostForm("MachineUUID")
-// 	if len(departID) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"部门ID不能为空")
-// 		return
-// 	}
-// 	if len(machineuuid) == 0 {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			442,
-// 			nil,
-// 			"机器uuid不能为空")
-// 		return
-// 	}
-// 	tmp, err := strconv.Atoi(departID)
-// 	if err != nil {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"部门ID有误")
-// 		return
-// 	}
-// 	if !dao.IsDepartIDExist(tmp) {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			"部门ID有误,数据库中不存在该部门ID")
-// 		return
-// 	}
-// 	machinenode := model.MachineNode{
-// 		DepartId:    tmp,
-// 		MachineUUID: machineuuid,
-// 	}
-// 	mysqlmanager.DB.Create(&machinenode)
-// 	response.Success(c, nil, "机器入库成功")
-// }
 func DepartInfo(c *gin.Context) {
 	depart := dao.DepartStore()
 	if len(depart) == 0 {
@@ -356,20 +317,20 @@ func AddIP(c *gin.Context) {
 	mysqlmanager.DB.Model(&MachineInfo).Where("machine_uuid=?", uuid).Update(&Machine)
 	response.Success(c, nil, "ip更新成功")
 }
-func AgentAdd(c *gin.Context) {
+
+func AddAgents() {
 	var agent_list model.MachineNode
-	c.Bind(&agent_list)
 	agents := agentmanager.GetAgentList()
 	for _, agent := range agents {
 		uuid := agent["agent_uuid"]
 		agent_uuid := agentmanager.GetAgent(uuid)
 		if agent_uuid == nil {
-			response.Fail(c, nil, "获取uuid失败!")
+			logger.Fatal("获取uuid失败!")
 			return
 		}
 		agent_OS, err := agent_uuid.GetAgentOSInfo()
 		if err != nil {
-			response.Fail(c, nil, "初始化系统信息失败!")
+			logger.Fatal("初始化系统信息失败!")
 			return
 		}
 		agentOS := strings.Split(agent_OS.(string), ";")
@@ -381,12 +342,12 @@ func AgentAdd(c *gin.Context) {
 		}
 		agent_list.IP = agentOS[0]
 		if dao.IsIPExist(agentOS[0]) {
-			mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update("state", model.OffLine)
+			mysqlmanager.DB.Where("ip=?", agentOS[0]).Unscoped().Delete(agent_list)
+			// mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update("state", model.OffLine)
 		}
 		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
 		agent_list.CPU = agentOS[3]
 		agent_list.State = model.Free
 		mysqlmanager.DB.Save(&agent_list)
 	}
-	response.Success(c, nil, "机器注册成功")
 }

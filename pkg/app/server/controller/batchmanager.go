@@ -115,21 +115,7 @@ func CreateBatch(c *gin.Context) {
 	}
 	mysqlmanager.DB.Create(&Batch)
 	logger.Info("%s", batchinfo.Machine)
-	for _, value := range batchinfo.Machine {
-		logger.Info("%s", value)
-		batchid := dao.GetBatchID(batchinfo.Name)
-		logger.Info("%s", batchid)
-		tmp := strconv.Itoa(int(batchid))
-		x := dao.GetmachineBatch(value)
-		logger.Info("%+v", x)
-		if dao.GetmachineBatch(value) != "" {
-			x += ","
-		}
-		logger.Info("%s", value)
-		logger.Info("%s", x+tmp)
-		dao.UpdatemachineBatch(value, x+tmp)
-	}
-	response.Success(c, nil, "批次入库成功，机器绑定批次成功")
+	response.Success(c, nil, "批次入库成功")
 }
 
 func BatchInform(c *gin.Context) {

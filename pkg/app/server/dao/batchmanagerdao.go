@@ -21,21 +21,6 @@ func GetBatchID(name string) uint {
 	return batch.ID
 }
 
-// func GetmachineBatch(uuid string) string {
-// 	var machine model.MachineNode
-// 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machine)
-// 	return machine.BatchInfo
-// }
-
-// func UpdatemachineBatch(s string, b string) {
-// 	var machineInfo model.MachineNode
-// 	machine := model.MachineNode{
-// 		BatchInfo: b,
-// 	}
-// 	mysqlmanager.DB.Model(&machineInfo).Where("machine_uuid=?", s).Update(&machine)
-// 	logger.Info("%+v", machine)
-// }
-
 func DeleteBatch(departid int) {
 	var batch model.Batch
 	mysqlmanager.DB.Where("id=?", departid).Delete(&batch)
