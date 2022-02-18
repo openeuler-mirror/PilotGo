@@ -6,12 +6,11 @@
       id="exportTab"
     >
       <template v-slot:table_search>
-        <el-input placeholder="请输入手机号或邮箱名进行搜索..." prefix-icon="el-icon-search"
+        <el-input placeholder="请输入邮箱名进行搜索..." prefix-icon="el-icon-search"
                   clearable
-                  disabled
-                  style="width: 280px;margin-right: 10px;" v-model="keyword"
+                  style="width: 280px;margin-right: 10px;" v-model="emailInput"
                   @keydown.enter.native="searchUser"></el-input>
-        <el-button icon="el-icon-search" disabled @click="searchUser">
+        <el-button icon="el-icon-search" @click="searchUser">
           搜索
         </el-button>
       </template>
@@ -79,7 +78,7 @@ import XLSX from 'xlsx'
 import AddForm from "./form/addForm.vue"
 import UpdateForm from "./form/updateForm.vue"
 import kyTable from "@/components/KyTable";
-import { getUsers, delUser, resetPwd, } from "@/request/user"
+import { getUsers, delUser, resetPwd, searchUser } from "@/request/user"
 export default {
   components: {
     kyTable,
@@ -91,6 +90,7 @@ export default {
       loading: false,
       display: false,
       isDelete: true,
+      emailInput: '',
       title: "",
       type: "",
       keyword: '',
@@ -112,7 +112,11 @@ export default {
       this.$refs.table.handleSearch();
     },
     searchUser() {
-      console.log("待写入按关键子查找用户");
+      searchUser({'email':this.emailInput}).then((res) => {
+        if(res.data.code === 200) {
+          this.$refs.table.handleLoadSearch(res.data.data.data);
+        }
+      })
     },
     handleCreate() {
       this.display = true;
@@ -126,11 +130,15 @@ export default {
       this.type = "update";
     },
     handleReset(email) {
-      resetPwd({email: email}).then(res => {
-        if(res.code == 200){
+      console.log(email)
+      resetPwd({'email': email}).then((res) => {
+        console.log(res)
+        if(res.data.code === 200){
+          console.log("1111")
           this.$message.success("重置密码成功")
           this.refresh();
         } else {
+          console.log("1111")
           this.$message.error(res.msg);
         }
       })
@@ -143,10 +151,10 @@ export default {
       delUser({email: delDatas}).then(res => {
         if(res.status === 200) {
           this.$message.success(res.data.msg);
+          this.refresh();
         } else {
           this.$message.error(res.data.msg);
         }
-        this.refresh();
       })
 
     },

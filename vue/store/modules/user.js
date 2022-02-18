@@ -62,14 +62,13 @@ const user = {
                 })
             })
         },
-        logOut1({ commit, dispatch }) {
+        logOut1({ commit }) {
             return new Promise((resolve, reject) => {
                 logout().then(() => {
                     commit('SET_TOKEN', '')
                     commit('SET_ROLES', [])
                     commit('SET_MENUS', [])
                     commit('SET_NAME', '')
-                    dispatch("delAllViews")
                     removeRoles();
                     removeUsername();
                     removeToken();
@@ -81,21 +80,6 @@ const user = {
                 })
             })
         },
-        logOutFont({ commit, dispatch }) {
-            return new Promise((resolve, reject) => {
-                commit('SET_TOKEN', '')
-                commit('SET_ROLES', [])
-                commit('SET_NAME', '')
-                commit('SET_MENUS', [])
-                dispatch("delAllViews")
-                removeRoles();
-                removeUsername();
-                removeToken();
-                removeUserId();
-                localStorage.clear()
-                resolve()
-            })
-        }
     }
 }
 

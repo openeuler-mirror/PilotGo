@@ -57,7 +57,7 @@ export function delUser(data) {
 export function resetPwd(data) {
   return request({
     url: '/user/reset',
-    method: 'post',
+    method: 'get',
     data
   })
 }
@@ -65,6 +65,14 @@ export function resetPwd(data) {
 export function importUser(data) {
   return request({
     url: '/user/import',
+    method: 'post',
+    data
+  })
+}
+// 按邮箱查找用户
+export function searchUser(data) {
+  return request({
+    url: '/user/userSearch',
     method: 'post',
     data
   })

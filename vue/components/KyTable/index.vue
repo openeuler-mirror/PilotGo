@@ -26,6 +26,7 @@
           type="selection"
           width="55"
           align="center"
+          :selectable="checkSelectTable"
         >
         </el-table-column>
         <slot name="table"></slot>
@@ -57,6 +58,12 @@ export default {
       default: function() {
         return {};
       }
+    },
+    treeNodes: {
+      type: Array,
+      default: function() {
+        return []
+      }
     }
   },
   data() {
@@ -75,6 +82,9 @@ export default {
         page: 1,
       },
     };
+  },
+  activated() {
+    this.refresh();
   },
   mounted() {
     this.loadData({ ...this.objSearch, ...this.$route.query });
@@ -96,6 +106,10 @@ export default {
           });
         }
       });
+    },
+    handleLoadSearch(data) {
+      // 渲染高级搜索后的数据
+      this.tableData = data;
     },
     handleCurrentChange(page) {
       this.objSearch.page = page;
@@ -147,6 +161,9 @@ export default {
     },
     handleClose() {
       this.display = false;
+    },
+    checkSelectTable() {
+      return this.treeNodes.length === 0;
     },
   },
 };
