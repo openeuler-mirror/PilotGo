@@ -18,11 +18,12 @@ import (
 )
 
 type BatchInfo struct {
-	Name     string
-	Descrip  string
-	Manager  string
-	DepartID []string
-	Machine  []string
+	Name       string
+	Descrip    string
+	Manager    string
+	DepartName []string
+	DepartID   []string
+	Machine    []string
 }
 
 func CreateBatch(c *gin.Context) {
@@ -109,6 +110,7 @@ func CreateBatch(c *gin.Context) {
 		Description: batchinfo.Descrip,
 		Manager:     batchinfo.Manager,
 		Depart:      strings.Join(batchinfo.DepartID, ","),
+		DepartName:  strings.Join(batchinfo.DepartName, ","),
 		Machinelist: strings.Join(batchinfo.Machine, ","),
 	}
 	mysqlmanager.DB.Create(&Batch)
@@ -170,6 +172,13 @@ func DeleteBatch(c *gin.Context) {
 			err.Error())
 		return
 	}
+	if len(batchdel.BatchID) == 0 {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"请输入删除批次ID")
+		return
+	}
 	for _, value := range batchdel.BatchID {
 		tmp, err := strconv.Atoi(value)
 		if err != nil {
@@ -182,4 +191,56 @@ func DeleteBatch(c *gin.Context) {
 		dao.DeleteBatch(tmp)
 	}
 	response.Success(c, nil, "批次删除成功")
+}
+
+type Batchupdate struct {
+	BatchID   string
+	BatchName string
+	Descrip   string
+}
+
+func UpdateBatch(c *gin.Context) {
+	j, err := ioutil.ReadAll(c.Request.Body)
+	fmt.Println("body:", string(j))
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var batchinfo Batchupdate
+	err = json.Unmarshal(j, &batchinfo)
+	logger.Info("%+v", batchinfo)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	if len(batchinfo.BatchID) == 0 {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"请输入修改批次ID")
+		return
+	}
+	tmp, err := strconv.Atoi(batchinfo.BatchID)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门ID有误")
+		return
+	}
+	if !dao.IsExistID(tmp) {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"不存在该批次")
+		return
+	}
+	dao.UpdateBatch(tmp, batchinfo.BatchName, batchinfo.Descrip)
+	response.Success(c, nil, "批次修改成功")
 }

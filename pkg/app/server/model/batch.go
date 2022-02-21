@@ -18,6 +18,7 @@ type Batch struct {
 	Manager     string `gorm:"type:varchar(100)" json:"manager"`
 	Machinelist string `gorm:"type:varchar(100)" json:"machinelist"`
 	Depart      string `gorm:"type:varchar(100)"`
+	DepartName  string `gorm:"type:varchar(100)"`
 }
 
 func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, total uint, err error) {

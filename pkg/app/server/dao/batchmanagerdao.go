@@ -11,6 +11,11 @@ func IsExistName(name string) bool {
 	mysqlmanager.DB.Where("name=?", name).Find(&batch)
 	return batch.ID != 0
 }
+func IsExistID(id int) bool {
+	var batch model.Batch
+	mysqlmanager.DB.Where("id=?", id).Find(&batch)
+	return batch.ID != 0
+}
 func GetBatchID(name string) uint {
 	var batch model.Batch
 	mysqlmanager.DB.Where("name=?", name).Find(&batch)
@@ -34,6 +39,15 @@ func UpdatemachineBatch(s string, b string) {
 func DeleteBatch(departid int) {
 	var batch model.Batch
 	mysqlmanager.DB.Where("id=?", departid).Delete(&batch)
+}
+
+func UpdateBatch(BatchID int, BatchName string, Descrip string) {
+	var Batch model.Batch
+	BatchNew := model.Batch{
+		Name:        BatchName,
+		Description: Descrip,
+	}
+	mysqlmanager.DB.Model(&Batch).Where("id=?", BatchID).Update(&BatchNew)
 }
 
 // func Batchinfo() []model.Batch {
