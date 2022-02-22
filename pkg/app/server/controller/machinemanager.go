@@ -83,45 +83,46 @@ func AddDepart(c *gin.Context) {
 	}
 	response.Success(c, nil, "部门信息入库成功")
 }
-func AddMachine(c *gin.Context) {
-	departID := c.PostForm("DepartID")
-	machineuuid := c.PostForm("MachineUUID")
-	if len(departID) == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"部门ID不能为空")
-		return
-	}
-	if len(machineuuid) == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
-			442,
-			nil,
-			"机器uuid不能为空")
-		return
-	}
-	tmp, err := strconv.Atoi(departID)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"部门ID有误")
-		return
-	}
-	if !dao.IsDepartIDExist(tmp) {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"部门ID有误,数据库中不存在该部门ID")
-		return
-	}
-	machinenode := model.MachineNode{
-		DepartId:    tmp,
-		MachineUUID: machineuuid,
-	}
-	mysqlmanager.DB.Create(&machinenode)
-	response.Success(c, nil, "机器入库成功")
-}
+
+// func AddMachine(c *gin.Context) {
+// 	departID := c.PostForm("DepartID")
+// 	machineuuid := c.PostForm("MachineUUID")
+// 	if len(departID) == 0 {
+// 		response.Response(c, http.StatusUnprocessableEntity,
+// 			422,
+// 			nil,
+// 			"部门ID不能为空")
+// 		return
+// 	}
+// 	if len(machineuuid) == 0 {
+// 		response.Response(c, http.StatusUnprocessableEntity,
+// 			442,
+// 			nil,
+// 			"机器uuid不能为空")
+// 		return
+// 	}
+// 	tmp, err := strconv.Atoi(departID)
+// 	if err != nil {
+// 		response.Response(c, http.StatusUnprocessableEntity,
+// 			422,
+// 			nil,
+// 			"部门ID有误")
+// 		return
+// 	}
+// 	if !dao.IsDepartIDExist(tmp) {
+// 		response.Response(c, http.StatusUnprocessableEntity,
+// 			422,
+// 			nil,
+// 			"部门ID有误,数据库中不存在该部门ID")
+// 		return
+// 	}
+// 	machinenode := model.MachineNode{
+// 		DepartId:    tmp,
+// 		MachineUUID: machineuuid,
+// 	}
+// 	mysqlmanager.DB.Create(&machinenode)
+// 	response.Success(c, nil, "机器入库成功")
+// }
 func DepartInfo(c *gin.Context) {
 	depart := dao.DepartStore()
 	if len(depart) == 0 {
