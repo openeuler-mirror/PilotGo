@@ -15,18 +15,26 @@ export function getBatches(data) {
     params: data
   })
 }
-// 删除批次
-export function delBatch(data) {
+// 获取批次详情
+export function getBatchDetail(data) {
   return request({
-    url: '/batch/delete',
-    method: 'post',
+    url: '/batchmanager/batchdetail',
+    method: 'get',
     params: data
+  })
+}
+// 删除批次
+export function delBatches(data) {
+  return request({
+    url: 'batchmanager/deletebatch',
+    method: 'post',
+    data
   })
 }
 // 编辑批次
 export function updateBatch(data) {
   return request({
-    url: '/batch/update',
+    url: 'batchmanager/updatebatch',
     method: 'post',
     data
   })

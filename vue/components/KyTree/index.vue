@@ -7,7 +7,10 @@
        node-key="id"
        :props="defaultProps"
        :load="loadNode"
+       :highlight-current="true"
        lazy
+       :default-expanded-keys="[1,2]"
+       :expand-on-click-node="false"
        :render-after-expand="isRender"
        @node-click="handleNodeClick"
        ref="multipleTree"
@@ -133,9 +136,9 @@ export default {
            }); 
          })
        }).catch(() => {}); 
-   },
-   // 删除节点
-   remove(node,data) {
+    },
+    // 删除节点
+    remove(node,data) {
      this.$confirm('确定删除该节点？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -156,22 +159,22 @@ export default {
            }); 
          })
        }).catch(() => {}); 
-   },
-   //拖拽==>拖拽时判定目标节点能否被放置  draggable属性最后做
-   allowDrop(draggingNode, dropNode, type){
+    },
+    //拖拽==>拖拽时判定目标节点能否被放置  draggable属性最后做
+    allowDrop(draggingNode, dropNode, type){
      //参数：被拖拽节点，要拖拽到的位置
-     if(dropNode.level===1){
-       return type == 'inner';
-     }
-     else {
-       return true;
-     }
-   },
-   //拖拽==>判断节点能否被拖拽
-   allowDrag(draggingNode){
+      if(dropNode.level===1){
+        return type == 'inner';
+      }
+      else {
+        return true;
+      }
+    },
+    //拖拽==>判断节点能否被拖拽
+    allowDrag(draggingNode){
     //第一级节点不允许拖拽
      return draggingNode.level !== 1;
-   },
+    },
     handleNodeClick(node,data) {
       // 获取当前分支与上级分支的数据
       this.$emit("nodeClick",node);
@@ -187,7 +190,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: 16px;
     padding-right: 8px;
   }
 }

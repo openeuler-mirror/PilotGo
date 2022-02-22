@@ -34,9 +34,12 @@
     </div>
     <div class="pagination">
       <el-pagination
+        @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="objSearch.page"
-        layout="total, prev, pager, next, jumper"
+        :page-sizes="[10, 20, 25, 50, 75, 100]"
+        :page-size="objSearch.size"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="total"
       >
       </el-pagination>
@@ -80,6 +83,7 @@ export default {
       display: false,
       objSearch: {
         page: 1,
+        size: 10
       },
     };
   },
@@ -110,6 +114,11 @@ export default {
     handleLoadSearch(data) {
       // 渲染高级搜索后的数据
       this.tableData = data;
+    },
+    handleSizeChange(size) {
+      // 修改每页显示个数
+      this.objSearch.size = size;
+      this.loadData({ ...this.objSearch });
     },
     handleCurrentChange(page) {
       this.objSearch.page = page;

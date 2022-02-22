@@ -6,50 +6,28 @@
         ref="form"
         label-width="100px"
       >
-        <el-form-item label="IP" prop="ip">
+        <el-form-item label="批次名称" prop="name">
           <el-input
             class="ipInput"
             type="text"
             size="medium"
-            v-model="form.ip"
+            v-model="form.name"
             autocomplete="off"
-            disabled="disabled"
           ></el-input>
         </el-form-item>
-        <el-form-item label="内核" prop="kernel">
+        <el-form-item label="备注" prop="description">
           <el-input
             class="ipInput"
-            controls-position="right"
-            v-model="form.kernel"
+            type="text"
+            size="medium"
+            v-model="form.description"
             autocomplete="off"
           ></el-input>
-        </el-form-item>
-        <el-form-item label="repo" prop="repo">
-          <el-select v-model="form.repoId">
-            <el-option
-              v-for="item in repos"
-              :key="item.id"
-              :value="item.id"
-              :label="item.name"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="服务" prop="service">
-         <el-select v-model="form.service">
-            <el-option
-              v-for="item in service"
-              :key="item.id"
-              :value="item.id"
-              :label="item.name"
-            >
-            </el-option>
-          </el-select>
         </el-form-item>
       </el-form>
       <div class="dialog-footer">
         <el-button @click="handleCancel">取 消</el-button>
-        <el-button type="primary" @click="handleSubmitForm()">确 定</el-button>
+        <el-button type="primary" @click="handleSubmitForm">确 定</el-button>
       </div>
   </div>
 </template>
@@ -58,37 +36,34 @@
 import {  updateBatch  } from "@/request/batch";
 export default {
   props: {
-    ip: {
-      type: String
+    row: {
+      type: Object,
+      default: {
+         function(){
+           return {}
+        }
+      }
     } 
   },
   data() {
     return {
       form: {
-        ip: "",
-        repo: "",
-        kernel: "",
-        service: "",
+        name: "",
+        description: "",
       },
       rules: {
-        ip: [{ 
+        name: [{ 
           required: true, 
-          message: "请输入IP",
+          message: "请输入名称",
           trigger: "blur"
-        }],
-        kernel: [{ 
-          required: true, 
-          trigger: "blur", 
-          message:"修改后需要重启生效" 
         }],
       },
       disabled: true,
-      repos: [],
-      service: [],
     }
   },
   mounted() {
-    this.form.ip = this.ip;
+    this.form.name = this.row.name;
+    this.form.description = this.row.description;
   },
   methods: {
     handleCancel() {
@@ -96,23 +71,23 @@ export default {
       this.$emit("click");
     },
     handleSubmitForm() {
+      let params = {
+        BatchID: this.row.ID + '',
+        BatchName: this.form.name,
+        Descrip: this.form.description,
+      }
       this.$refs.form.validate((valid) => {
         if (valid) {
-          updateBatch({data: this.form})
+          updateBatch(params)
             .then((res) => {
-              if (res.data.status === "success") {
-                this.$emit("click");
+              if (res.data.code === 200) {
+                this.$emit("click",'success');
+                 this.$message.success(res.data.msg);
                 this.$refs.form.resetFields();
               } else {
                 this.$message.error(res.data.error);
               }
             })
-            .catch((res) => {
-              this.$message.error("修改失败，请检查输入内容");
-            });
-        } else {
-          this.$message.error("修改失败，请检查输入内容");
-          return false;
         }
       });
     },
