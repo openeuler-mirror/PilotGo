@@ -59,7 +59,7 @@ func SetupRouter() *gin.Engine {
 		group.GET("/user_del", handlers.DelUserHandler)
 		group.GET("/user_ower", handlers.ChangeFileOwnerHandler)
 		group.GET("/user_per", handlers.ChangePermissionHandler)
-
+		group.GET("/agent_add", controller.AgentAdd)
 	}
 
 	user := router.Group("user")

@@ -20,11 +20,6 @@ type User struct {
 	Enable   string `gorm:"size:10;not null" json:"enable,omitempty"`
 }
 
-type UserQ struct {
-	User
-	PaginationQ
-}
-
 func (u *User) All(q *PaginationQ) (list *[]User, total uint, err error) {
 	list = &[]User{}
 	tx := mysqlmanager.DB.Order("ID desc").Find(list)

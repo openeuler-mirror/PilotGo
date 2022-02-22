@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
@@ -352,4 +354,38 @@ func AddIP(c *gin.Context) {
 	}
 	mysqlmanager.DB.Model(&MachineInfo).Where("machine_uuid=?", uuid).Update(&Machine)
 	response.Success(c, nil, "ip更新成功")
+}
+func AgentAdd(c *gin.Context) {
+	var agent_list model.MachineNode
+	c.Bind(&agent_list)
+	agents := agentmanager.GetAgentList()
+	for _, agent := range agents {
+		uuid := agent["agent_uuid"]
+		agent_uuid := agentmanager.GetAgent(uuid)
+		if agent_uuid == nil {
+			response.Fail(c, nil, "获取uuid失败!")
+			return
+		}
+		agent_OS, err := agent_uuid.GetAgentOSInfo()
+		if err != nil {
+			response.Fail(c, nil, "初始化系统信息失败!")
+			return
+		}
+		agentOS := strings.Split(agent_OS.(string), ";")
+		agent_list.DepartId = 1
+		agent_list.MachineUUID = uuid
+		if dao.IsUUIDExist(uuid) {
+			logger.Warn("该机器已经存在!")
+			continue
+		}
+		agent_list.IP = agentOS[0]
+		if dao.IsIPExist(agentOS[0]) {
+			mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update("state", model.OffLine)
+		}
+		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
+		agent_list.CPU = agentOS[3]
+		agent_list.State = model.Free
+		mysqlmanager.DB.Save(&agent_list)
+	}
+	response.Success(c, nil, "机器注册成功")
 }

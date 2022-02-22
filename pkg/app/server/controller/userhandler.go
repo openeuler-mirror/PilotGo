@@ -147,15 +147,34 @@ func UserSearch(c *gin.Context) {
 }
 
 // 重置密码
+type PasswordReset struct {
+	Emails string `gorm:"type:varchar(30);not null" json:"email,omitempty" form:"email"`
+}
+
 func ResetPassword(c *gin.Context) {
 	var user model.User
-	c.Bind(&user)
-	email := user.Email
+	var reset PasswordReset
 
-	if dao.IsEmailExist(email) {
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	bodys := string(body)
+	err = json.Unmarshal([]byte(bodys), &reset)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
 
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", "123456")
-
+	if dao.IsEmailExist(reset.Emails) {
+		mysqlmanager.DB.Model(&user).Where("email=?", reset.Emails).Update("password", "123456")
 		response.Response(c, http.StatusOK,
 			200,
 			gin.H{"data": user},

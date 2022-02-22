@@ -96,6 +96,8 @@ const (
 	ChangePermission = 42
 	// chown [-R] 所有者 文件或目录
 	ChangeFileOwner = 43
+	// 获取agent必要信息
+	AgentOSInfo = 44
 )
 
 type Message struct {

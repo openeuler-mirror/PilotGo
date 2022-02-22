@@ -43,6 +43,11 @@ func IsUUIDExist(uuid string) bool {
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&Machine)
 	return Machine.DepartId != 0
 }
+func IsIPExist(ip string) bool {
+	var Machine model.MachineNode
+	mysqlmanager.DB.Where("ip=?", ip).Find(&Machine)
+	return Machine.DepartId != 0
+}
 func Deleteuuid(uuid string) {
 	var Machine model.MachineNode
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Delete(Machine)

@@ -35,7 +35,7 @@ func main() {
 	}
 	regitsterHandler(client)
 
-	// go send_heartbeat()
+	// go send_heartbeat(client)
 
 	select {}
 
@@ -47,10 +47,7 @@ func send_heartbeat(client *network.SocketClient) {
 		msg := &protocol.Message{
 			UUID: uuid.New().String(),
 			Type: protocol.Heartbeat,
-			Data: map[string]string{
-				"agent_version": agent_version,
-				"agent_id":      agent_uuid,
-			},
+			Data: "连接正常",
 		}
 
 		if err := client.Send(msg); err != nil {
@@ -58,7 +55,7 @@ func send_heartbeat(client *network.SocketClient) {
 		}
 		fmt.Println("send heartbeat message")
 
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 5)
 
 		// 接受远程指令并执行
 		if false {
@@ -74,8 +71,13 @@ func send_heartbeat(client *network.SocketClient) {
 
 func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.Heartbeat, func(c *network.SocketClient, msg *protocol.Message) error {
-		fmt.Println(msg.String())
-		return nil
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   "连接正常",
+		}
+		return c.Send(resp_msg)
 	})
 
 	c.BindHandler(protocol.RunScript, func(c *network.SocketClient, msg *protocol.Message) error {
@@ -627,5 +629,18 @@ func regitsterHandler(c *network.SocketClient) {
 			}
 			return c.Send(resp_msg)
 		}
+	})
+	c.BindHandler(protocol.AgentOSInfo, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		os := uos.GetHostInfo()
+		cpu := uos.GetCPUInfo()
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   os.IP + ";" + os.Platform + ";" + os.PlatformVersion + ";" + cpu.ModelName,
+		}
+		return c.Send(resp_msg)
 	})
 }
