@@ -1,5 +1,7 @@
 <template>
   <div>
+  <router-view v-if="$route.meta.breadcrumb"></router-view>
+  <div v-if="!$route.meta.breadcrumb">
     <ky-table
         class="cluster-table"
         ref="table"
@@ -18,18 +20,25 @@
         </el-popconfirm>
         </template>
         <template v-slot:table>
-          <el-table-column prop="name" label="批次名称" width="90">
+          <el-table-column label="批次名称">
+            <template slot-scope="scope">
+              <router-link :to="$route.path + scope.row.ID">
+                {{ scope.row.name }}
+              </router-link>
+            </template>
           </el-table-column>
-          <el-table-column prop="manager" label="创建者" width="90"> 
+          <el-table-column prop="manager" label="创建者"> 
           </el-table-column>
-          <el-table-column prop="CreatedAt" label="创建时间" width="150">
+          <el-table-column prop="DepartName" label="部门"> 
+          </el-table-column>
+          <el-table-column prop="CreatedAt" label="创建时间">
             <template slot-scope="scope">
               <span>{{scope.row.CreatedAt | dateFormat}}</span>
             </template>
           </el-table-column>
            <el-table-column prop="description" label="备注"> 
           </el-table-column>
-          <el-table-column prop="operation" label="操作" width="150">
+          <el-table-column prop="operation" label="操作">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -49,15 +58,16 @@
         <add-form v-if="type === 'create'" @click="handleClose"></add-form>
         <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
       </el-dialog>
+      </div>
   </div>
 </template>
 
 <script>
 import kyTable from "@/components/KyTable";
 import UpdateForm from "./form/updateForm.vue"
-import { getBatches, delBatch } from "@/request/batch";
+import { getBatches, delBatches } from "@/request/batch";
 export default {
-  name: "UsersRole",
+  name: "batch",
   components: {
     kyTable,
     UpdateForm,
@@ -67,6 +77,7 @@ export default {
       display: false,
       title: "",
       type: "",
+      rowData: {},
     }
   },
   methods: {
@@ -86,14 +97,15 @@ export default {
       this.display = true;
       this.title = "编辑用户";
       this.type = "update";
+      this.rowData = row;
     },
     handleDelete() {
       let delDatas = [];
-      this.$refs.table.selectRow.rows.forEach(item => {
-        delDatas.push(item.batchId);
+      delDatas = this.$refs.table.selectRow.ids.map(item => {
+        return item.toString();
       });
-      delBatch({ids: delDatas[0]}).then(res => {
-        if(res.status === 200) {
+      delBatches({BatchID: delDatas}).then(res => {
+        if(res.data.code === 200) {
           this.$message.success(res.data.msg);
         } else {
           this.$message.error(res.data.msg);
@@ -101,6 +113,7 @@ export default {
         this.refresh();
       })
     },
+    
   },
   filters: {
     dateFormat: function(value) {
