@@ -10,10 +10,12 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
@@ -54,6 +56,13 @@ func Start(conf *config.Configure) (err error) {
 	}
 
 	sessionManage.Init(conf.MaxAge, conf.SessionCount)
+	go func() {
+		for {
+			controller.AddAgents()
+			time.Sleep(time.Second * 20)
+		}
+	}()
+
 	// go func() {
 	// 	for true {
 	// 		time.Sleep(time.Second * 10)

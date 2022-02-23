@@ -13,11 +13,13 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network/handlers"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/middleware"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
+	router.Use(logger.LoggerToFile())
 	router.Use(gin.Recovery())
 
 	// TODO: 此处绑定 http api handler
@@ -59,7 +61,6 @@ func SetupRouter() *gin.Engine {
 		group.GET("/user_del", handlers.DelUserHandler)
 		group.GET("/user_ower", handlers.ChangeFileOwnerHandler)
 		group.GET("/user_per", handlers.ChangePermissionHandler)
-		group.GET("/agent_add", controller.AgentAdd)
 	}
 
 	user := router.Group("user")
@@ -77,7 +78,6 @@ func SetupRouter() *gin.Engine {
 	machinemanager := router.Group("machinemanager")
 	{
 		machinemanager.POST("/adddepart", controller.AddDepart)
-		machinemanager.POST("/addmachine", controller.AddMachine)
 		machinemanager.GET("/departinfo", controller.DepartInfo)
 		machinemanager.GET("/machineinfo", controller.MachineInfo)
 		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)

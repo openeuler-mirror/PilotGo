@@ -17,7 +17,9 @@ import (
 )
 
 const (
-	configType = "yaml"
+	configType    = "yaml"
+	Log_FILE_PATH = "/var/log/pilotgo"
+	LOG_FILE_NAME = "pilotgo.log"
 )
 
 var pilogo_config_file_name = "./config.yaml"
