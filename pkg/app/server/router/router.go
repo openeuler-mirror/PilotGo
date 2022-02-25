@@ -1,10 +1,18 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2021-11-18 13:03:16
+ * LastEditTime: 2022-02-24 15:46:48
+ * Description: Interface routing forwarding
+ ******************************************************************************/
 package router
-
-/**
- * @Author: zhang han
- * @Date: 2021/10/28 09:58
- * @Description: 接口路由转发
- */
 
 import (
 	"net/http"
@@ -33,36 +41,38 @@ func SetupRouter() *gin.Engine {
 		group.GET("/cpu_info", handlers.CPUInfoHandler)
 		group.GET("/memory_info", handlers.MemoryInfoHandler)
 		group.GET("/sysctl_info", handlers.SysInfoHandler)
-		group.GET("/sysctl_change", handlers.SysctlChangeHandler)
 		group.GET("/sysctl_view", handlers.SysctlViewHandler)
 		group.GET("/service_list", handlers.ServiceListHandler)
 		group.GET("/service_status", handlers.ServiceStatusHandler)
-		group.GET("/service_stop", handlers.ServiceStopHandler)
-		group.GET("/service_start", handlers.ServiceStartHandler)
-		group.GET("/service_restart", handlers.ServiceRestartHandler)
 		group.GET("/rpm_all", handlers.AllRpmHandler)
 		group.GET("/rpm_source", handlers.RpmSourceHandler)
 		group.GET("/rpm_info", handlers.RpmInfoHandler)
-		group.GET("/rpm_install", handlers.InstallRpmHandler)
-		group.GET("/rpm_remove", handlers.RemoveRpmHandler)
 		group.GET("/disk_use", handlers.DiskUsageHandler)
 		group.GET("/disk_info", handlers.DiskInfoHandler)
-		group.GET("/disk_path", handlers.DiskCreatPathHandler)
-		group.GET("/disk_mount", handlers.DiskMountHandler)
-		group.GET("/disk_umount", handlers.DiskUMountHandler)
-		group.GET("/disk_format", handlers.DiskFormatHandler)
 		group.GET("/net_tcp", handlers.NetTCPHandler)
 		group.GET("/net_udp", handlers.NetUDPHandler)
 		group.GET("/net_io", handlers.NetIOCounterHandler)
 		group.GET("/net_nic", handlers.NetNICConfigHandler)
 		group.GET("/user_info", handlers.CurrentUserInfoHandler)
 		group.GET("/user_all", handlers.AllUserInfoHandler)
-		group.GET("/user_add", handlers.AddLinuxUserHandler)
-		group.GET("/user_del", handlers.DelUserHandler)
-		group.GET("/user_ower", handlers.ChangeFileOwnerHandler)
-		group.GET("/user_per", handlers.ChangePermissionHandler)
 	}
-
+	agent := router.Group("/agent")
+	{
+		agent.GET("/sysctl_change", handlers.SysctlChangeHandler)
+		agent.GET("/service_stop", handlers.ServiceStopHandler)
+		agent.GET("/service_start", handlers.ServiceStartHandler)
+		agent.GET("/service_restart", handlers.ServiceRestartHandler)
+		agent.GET("/rpm_install", handlers.InstallRpmHandler)
+		agent.GET("/rpm_remove", handlers.RemoveRpmHandler)
+		agent.GET("/disk_path", handlers.DiskCreatPathHandler)
+		agent.GET("/disk_mount", handlers.DiskMountHandler)
+		agent.GET("/disk_umount", handlers.DiskUMountHandler)
+		agent.GET("/disk_format", handlers.DiskFormatHandler)
+		agent.GET("/user_add", handlers.AddLinuxUserHandler)
+		agent.GET("/user_del", handlers.DelUserHandler)
+		agent.GET("/user_ower", handlers.ChangeFileOwnerHandler)
+		agent.GET("/user_per", handlers.ChangePermissionHandler)
+	}
 	user := router.Group("user")
 	{
 		user.POST("/register", controller.Register)

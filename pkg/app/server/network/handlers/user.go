@@ -1,3 +1,17 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2022-02-17 02:43:29
+ * LastEditTime: 2022-02-24 14:32:25
+ * Description: provide agent user manager functions.
+ ******************************************************************************/
 package handlers
 
 import (
@@ -77,7 +91,7 @@ func DelUserHandler(c *gin.Context) {
 }
 func ChangeFileOwnerHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
-	user := c.Query("user")
+	user := c.Query("username")
 	file := c.Query("file")
 
 	agent := agentmanager.GetAgent(uuid)
