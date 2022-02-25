@@ -1,3 +1,17 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-02-25 16:33:46
+  LastEditTime: 2022-02-25 17:40:15
+  Description: provide agent log manager of pilotgo
+ -->
 <template>
   <el-container>
     <el-header>
@@ -29,8 +43,9 @@
         </el-menu>
       </el-aside>
       <el-main>
-         <keep-alive>
-            <router-view></router-view>
+        <bread-crumb></bread-crumb>
+        <keep-alive>
+          <router-view></router-view>
         </keep-alive>
       </el-main>
     </el-container>
@@ -39,25 +54,16 @@
 
 <script>
 import SidebarItem from "./components/SidebarItem";
+import BreadCrumb from "./components/BreadCrumb";
 export default {
   name: "Home",
   components: {
     SidebarItem,
+    BreadCrumb,
   },
-
   data() {
     return {
-      /* routesData: [
-        {path: 'overview', name: 'overview', title: '概览', index: "1", icon_class: 'el-icon-location'},
-        {path: 'cluster', name: 'cluster', title: '机器管理', index: "2", icon_class: 'el-icon-s-platform'},
-        {path: 'batch', name: 'batch', title: '批次管理', index: "3", icon_class: 'el-icon-menu'},
-        {path: 'plug_in', name: 'plug_in', title: '插件管理', index: "4",  icon_class: 'el-icon-document'},
-        // {path: 'prometheus', name: 'prometheus', title: 'Prometheus', index: "5",  icon_class: 'el-icon-odometer'},
-        // {path: 'cockpit', name: 'cockpit', title: 'cockpit', index: "6",  icon_class: 'el-icon-setting'},
-        {path: 'usermanager', name: 'usermanager', title: '用户管理', index: "7",  icon_class: 'el-icon-user-solid'},
-        {path: 'rolemanager', name: 'rolemanager', title: '角色管理', index: "8",  icon_class: 'el-icon-s-custom'},
-        {path: 'firewall', name: 'firewall', title: '防火墙配置', index: "9",  icon_class: 'el-icon-s-home'},
-      ] */
+      crumbs: [],
     };
   },
   computed: {
@@ -77,12 +83,15 @@ export default {
     },
     username(){
       return this.$store.getters.userName;
+    },
+    breadCrumb() {
+      this.crumbs = [];
+      if(this.$route.params.id) {
+        this.$route.meta.breadCrumb[1].name = this.$route.params.id
+      }
     }
   },
   methods: {
-    // userInfo() {
-    //     this. =true;
-    // },
     handleSelect(key) {
       this.$store.commit("SET_ACtiVEPANEL", key);
     },
@@ -103,7 +112,6 @@ export default {
       });
     },
     updatePwd() {
-      console.log("修改密码")
       this.$prompt('请输入邮箱', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -183,6 +191,7 @@ export default {
   }
 
   .el-main {
+    height: 100%;
     background: #fafafa;
     .cockpit {
       width: 100%;

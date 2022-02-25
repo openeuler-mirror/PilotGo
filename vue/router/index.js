@@ -41,19 +41,44 @@ export const routes = [
         path: '/cluster',
         name: 'Cluster',
         component:  _import('Cluster/Cluster'),
-        meta: { title: 'cluster', header_title: "机器管理", panel: "cluster", icon_class: 'el-icon-s-platform' }
-      },
-      {
-        path: ':id',
-        name: 'cluter_detail',
-        component:  _import('Cluster/detail/index'),
+        meta: { title: 'cluster', header_title: "机器管理", panel: "cluster", icon_class: 'el-icon-s-platform' },
+        children:[
+          {
+            path: '/cluster:uuid',
+            name: 'MacDetail',
+            component: _import('Cluster/detail/index'),
+            meta: {
+              header_title: "机器详情", 
+              panel: "cluster", 
+              breadcrumb: [
+                  { name: '机器管理', path: '/cluster' },
+                  { name: '机器详情'}
+              ]
+            }
+        },
+        ]
       },
       {
         path: '/batch',
-        name: 'Batch',
         component:  _import('Batch/Batch'),
-        meta: { title: 'batch', header_title: "批次管理", panel: "batch", icon_class: 'el-icon-menu' }
-      },     
+        meta: { title: 'batch', header_title: "批次管理", panel: "batch", icon_class: 'el-icon-menu' },
+        children:[
+          {
+            path: '/batch:id',
+            name: 'BatchDetail',
+            component: _import('Batch/detail/index'),
+            meta: {
+              header_title: "批次详情", 
+              panel: "batch", 
+              breadcrumb: [
+                  { name: '批次管理', path: '/batch' },
+                  { name: '批次详情'}
+              ]
+            }
+        },
+        ]
+      }, 
+          
       /*{
         path: '/plug_in',
         name: 'PlugIn',
@@ -89,6 +114,12 @@ export const routes = [
         name: 'Firewall',
         component:  _import('Firewall/Firewall'),
         meta: { title: 'firewall', header_title: "防火墙配置", panel: "firewall", icon_class: 'el-icon-s-home' }
+      },
+      {
+        path: '/log',
+        name: 'Log',
+        component:  _import('Log/Log'),
+        meta: { title: 'log', header_title: "日志管理", panel: "log", icon_class: 'el-icon-s-order' }
       },
       {
         path: '', 
