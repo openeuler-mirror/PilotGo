@@ -1,130 +1,244 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-02-25 16:33:46
+  LastEditTime: 2022-02-25 17:34:19
+  Description: provide agent log manager of pilotgo
+ -->
 <template>
- <div>
-   <div id="diskChar" :style="{width:'480px',height:'460px'}"></div>
+ <div class="chartContent">
+    <div class="left">
+      <h4>基本信息</h4>
+      <div class="basic">
+        <el-descriptions :column="2" size="medium" border>
+          <el-descriptions-item label="平台">{{ basic.macPlatform }}</el-descriptions-item>
+          <el-descriptions-item label="架构">{{ basic.mackernel }}</el-descriptions-item>
+          <el-descriptions-item label="cpu">{{ basic.macCPU }}</el-descriptions-item>
+          <el-descriptions-item label="内存" :span="2">{{basic.macMEM}}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      <div id="diskChar" :style="{width:'90%',height:'90%'}"></div>
+    </div>
+    <div class="right">
+      <div class="user">
+        <h4>用户信息</h4>
+        <small-table
+          ref="userTab"
+          :data="userData"
+          :height="tHight"
+        >
+          <template v-slot:content>
+            <el-table-column
+              prop="Username"
+              label="用户">
+            </el-table-column>
+            <!-- <el-table-column
+              prop="currUser"
+              label="当前用户">
+            </el-table-column> -->
+            <el-table-column
+              prop="Description"
+              label="备注">
+            </el-table-column>
+          </template>
+        </small-table>
+      </div>
+      <div class="service">
+        <h4>服务信息</h4>
+        <small-table
+          ref="userTab"
+          :data="serviceData"
+          :height="tHight"
+        >
+          <template v-slot:content>
+            <el-table-column
+              prop="Name"
+              label="名称">
+            </el-table-column>
+            <el-table-column
+              prop="Active"
+              label="状态">
+            </el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button v-if="scope.row.Active == 'inactive'" size="mini" type="primary" plain 
+                  @click="handleUpdateIp(scope.row.ip)"> 
+                  启动 </el-button>
+                  <el-button v-if="scope.row.Active == 'active'" size="mini" type="primary" plain 
+                  @click="handleUpdateIp(scope.row.ip)"> 
+                  关闭 </el-button>
+              </template>
+            </el-table-column>
+          </template>
+        </small-table>
+      </div>
+      <div class="kernel">
+        <h4>内核信息</h4>
+        <small-table
+          ref="userTab"
+          :data="kernelData"
+          :height="tHight"
+        >
+          <template v-slot:content>
+            <el-table-column
+              label="内核">
+              <template slot-scope="scope">
+                {{ Object.keys(scope.row)[0] }}  
+              </template> 
+            </el-table-column>
+            <el-table-column
+              label="个数">
+              <template slot-scope="scope">
+                {{ Object.values(scope.row)[0] }}  
+              </template> 
+            </el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button size="mini" type="primary" plain 
+                  @click="handleUpdateIp(scope.row.ip)"> 
+                  编辑 </el-button>
+              </template>
+            </el-table-column>
+          </template>
+        </small-table>
+      </div>
+    </div>
  </div>
 </template>
 <script>
-import { getDeviceInfo } from '@/request/cluster'
+import { getCpu, getOS, getMemory, getUser, getAllUser, 
+        getserviceList, getSyskernel, getDisk } from '@/request/cluster';
+import SmallTable from "@/components/SmallTable";
 export default {
    /* 某一台机器的详情，左右分布
-      左：柱状图，磁盘信息，占用多少空闲多少
-      右：暂定
+      左：上 描述列表，下 饼图
+      右：上 用户表，中 service,表 下 内核表
    */
+  components: {
+    SmallTable,
+  },
   props: {
     ip: {
-      type: String
+      type: String,
+      default: '0.0.0.0'
     } 
   },
   data() {
     return {
+      tHight: 200,
+      basic: {
+        macPlatform: '',
+        mackernel: '',
+        macCPU: '',
+        macMEM: ''
+      },
+      userData: [],
+      serviceData: [],
+      kernelData: [],
+      diskData: [],
     }
   },
   mounted() {
-    this.drawEchart();
+    let obj = {uuid:this.$route.params.uuid};
+     getOS(obj).then((res) => {
+      let result = res.data.data.os_info;
+      this.basic.macPlatform = result.Platform;
+      this.basic.mackernel = result.KernelArch;
+    })
+    
+    getCpu(obj).then((res) => {
+      this.basic.macCPU = res.data.data.CPU_info.CpuNum + '核';
+    })
+    getMemory(obj).then((res) => {
+      let memTotal = 0;
+      memTotal = res.data.data.memory_info.MemTotal / 1024 / 1024;
+      this.basic.macMEM = memTotal.toFixed(2) + 'G';
+    })
+    getAllUser(obj).then((res) => {
+      this.userData = res.data.data.user_all;
+    })
+    getserviceList(obj).then((res) => {
+      this.serviceData = res.data.data.service_list;
+    })
+    getSyskernel(obj).then((res) => {
+      this.kernelData = res.data.data.sysctl_info;
+    })
+    getDisk(obj).then((res) => {
+      let disk = [];
+      disk = res.data.data.disk_use;
+      disk.filter((item) => {
+        return item.usedPercent > 0;
+      }).forEach(item => {
+        this.diskData.push({value: item.usedPercent.toFixed(2),name: item.device})
+      });;
+      this.diskEchart(this.diskData);
+    })
   },
   methods: {
-    drawEchart() {
-      let myChart = this.$echarts.init(document.getElementById('diskChar'))
+    diskEchart(disks) {
+      let diskChart = this.$echarts.init(document.getElementById('diskChar'))
       let option = {
-        title: {
-            text: '',
-            top: 0,
-            left: 10
+        title: {					         	
+                text: '磁盘信息',                
+                textStyle:{					//---主标题内容样式	
+                	color:'#000'
+                },
+                x: 'center',
+                y: '16%',
         },
-        tooltip: {
-            trigger: 'item',
-            formatter: "{a} <br/>{b} : {c}%"
-        },
-        toolbox: {
-            show : true,
-            top:0,
-            right:0,
-            feature : {
-                mark : {show: false},
-                magicType : {show: false, type: ['line', 'bar']},
-                saveAsImage : {show: true}
-            }
-        },
-        grid: {
-          top: 60,
-          right: 30,
-          bottom: 30,
-          left: 60
-        },
-        legend: {
-          top: 0,
-          left: 'center',
-          data: ['占用','空闲']
-        },
-        calculable: true,
-        xAxis: [
-          {
-            name: '磁盘',
-            nameGap: 6,
-            type: 'category',
-            data: ['C','D','E','F'],
-            axisLabel:{					//---坐标轴 标签
-              show:true,					//---是否显示
-              inside:false,				//---是否朝内
-              rotate:0,					//---旋转角度	
-              margin: 10,					//---刻度标签与轴线之间的距离
-              color:'#000',
-              fontSize: '16'				//---默认取轴线的颜色
-            },
-          }
-        ],
-        yAxis : [
-          {
-            type: 'value',
-            name: '比例%',
-            axisLine: {
-              show: true,
-            },
-            axisLabel: {
-              show:true,
-              showMinLabel:true,
-              showMaxLabel:true,
-              formatter: function (value) {
-                  return value;
-              }
-            }
-          },
-          {
-            type: 'value',
-            name: "",
-            axisLabel: {
-                show:false,
-            }
-          }
-        ],
-        series: [
-            {
-              name:'占用',
-              type:'bar',
-              yAxisIndex: 0,
-              data: [20,30,10,78],
-            },
-            {
-              name:'空闲',
-              type:'bar',
-              yAxisIndex: 1,
-              data:[18,78,28,65],
-            }
-        ]
-    };
-      // 通过ip获取磁盘信息
-      /* getDeviceInfo({'ip': this.ip}).then((res) => {
-        if(res.code == 200) {
-          // 设置option中数据的信息
-          option.series[0].data = res.data.data[0];
-          option.series[1].data = res.data.data[1];
-        }
-        myChart.setOption(option);
-      }) */
-      myChart.setOption(option);
+        series: [{
+                    name: '磁盘信息',
+                    type: 'pie',
+                    radius: '55%',
+                    data: disks
+                  }]};
+      diskChart.setOption(option);
     }
-  }
+  },
+
+
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+.chartContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  h4 {
+    margin: 10px;
+    width: 100%;
+    text-align: center;
+  }
+  .left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .basic {
+      margin-bottom: 20px;
+      width: 90%;
+    }
+  }
+  .right {
+    flex: 2;  
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    div {
+      width: 100%;
+    };
+  }
+}
+
 </style>

@@ -84,3 +84,75 @@ export function getDeviceInfo(data) {
     params: data
   })
 }
+
+// 获取OS
+export function getOS(data) {
+  return request({
+    url: 'api/os_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取CPU
+export function getCpu(data) {
+  return request({
+    url: 'api/cpu_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取memory
+export function getMemory(data) {
+  return request({
+    url: 'api/memory_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取当前user
+export function getUser(data) {
+  return request({
+    url: 'api/user_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取所有user
+export function getAllUser(data) {
+  return request({
+    url: 'api/user_all',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取所有服务
+export function getserviceList(data) {
+  return request({
+    url: 'api/service_list',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取内核信息
+export function getSyskernel(data) {
+  return request({
+    url: 'api/sysctl_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取磁盘信息
+export function getDisk(data) {
+  return request({
+    url: 'api/disk_use',
+    method: 'get',
+    params: data
+  })
+}

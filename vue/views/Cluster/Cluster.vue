@@ -1,5 +1,21 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-02-25 16:33:46
+  LastEditTime: 2022-02-25 16:39:21
+  Description: provide agent log manager of pilotgo
+ -->
 <template>
   <div class="cluster">
+    <router-view v-if="$route.meta.breadcrumb"></router-view>
+    <div v-if="!$route.meta.breadcrumb">
     <div class="dept">
       <ky-tree :getData="getChildNode" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
     </div>
@@ -15,30 +31,31 @@
           <div>{{ departName }}</div>
         </template>
         <template v-slot:table_action>
-          <el-button  @click="handleAddIp" v-show="!isBatch"> 注册 </el-button>
           <el-button  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </el-button>
           <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
             <el-button  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
           </el-popconfirm>
         </template>
         <template v-slot:table>
-          <el-table-column label="IP">
+          <el-table-column label="ip">
             <template slot-scope="scope">
-              <a @click.stop="handleSelectIp(scope.row.ip)">
+              <router-link :to="$route.path + scope.row.uuid">
                 {{ scope.row.ip }}
-              </a>
+              </router-link>
             </template>
           </el-table-column>
-          <el-table-column prop="system_cpu" label="cpu"> 
+          <el-table-column prop="departname" label="部门"> 
           </el-table-column>
-          <el-table-column label="状态" width="150">
+          <el-table-column prop="cpu" label="cpu" width="130"> 
+          </el-table-column>
+          <el-table-column label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.system_status == 0">空闲</span>
-              <span v-if="scope.row.system_status == 1">正常</span>
-              <span v-else>异常</span>
+              <span v-if="scope.row.state == 1">正常</span>
+              <span v-if="scope.row.state == 2">离线</span>
+              <span v-if="scope.row.state == 3">空闲</span>
             </template>
           </el-table-column>
-           <el-table-column prop="system_info" label="系统信息"> 
+           <el-table-column prop="systeminfo" label="系统信息"> 
           </el-table-column>
           <el-table-column label="防火墙配置" width="120">
             <template slot-scope="scope">
@@ -66,29 +83,24 @@
       :visible.sync="display" 
       width="560px"
     >
-     <add-form v-if="type === 'create'" @click="handleClose"></add-form>
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
      <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='machines' @click="handleClose"></batch-form>   
-     <device-detail v-if="type === 'disk'" :ip='ip'></device-detail>
     </el-dialog>
+  </div>
   </div>
 </template>
 
 <script>
 import kyTable from "@/components/KyTable";
 import kyTree from "@/components/KyTree";
-import AddForm from "./form/addForm";
 import UpdateForm from "./form/updateForm";
 import BatchForm from "./form/batchForm";
-import DeviceDetail from "./detail/index";
 import { getClusters, deleteIp, getChildNode } from "@/request/cluster";
 export default {
   name: "Cluster",
   components: {
-    AddForm,
     UpdateForm,
     BatchForm,
-    DeviceDetail,
     kyTable,
     kyTree,
   },
@@ -126,11 +138,6 @@ export default {
         this.machines = [];
         this.$refs.table.handleSearch();
       }
-    },
-    handleAddIp() {
-      this.display = true;
-      this.title = "注册IP";
-      this.type = "create"; 
     },
     handleUpdateIp(ip) {
       this.display = true;
@@ -172,13 +179,6 @@ export default {
         this.checkedNode = data.checkedKeys;
       }
     },
-    handleSelectIp(ip) {
-      this.display = true;
-      this.title = "机器详情";
-      this.type = "disk"; 
-      // this.ip = ip;
-      // this.$store.commit("SET_SELECTIP", row.ip);
-    },
     handleFireWall(ip) {
       this.$router.push({
         name: 'Firewall',
@@ -191,6 +191,7 @@ export default {
 
 <style scoped lang="scss">
 .cluster {
+  height: 94%;
   margin-top: 10px;
   .dept {
     width: 36%;
