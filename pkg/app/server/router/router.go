@@ -102,7 +102,7 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/deletebatch", controller.DeleteBatch)
 		batchmanager.GET("/batchinfo", controller.BatchInform)
 		batchmanager.POST("/updatebatch", controller.UpdateBatch)
-		batchmanager.GET("/batchmachineinfo", controller.Batchmachineinfo)
+		batchmanager.POST("/batchmachineinfo", controller.Batchmachineinfo)
 	}
 	// TODO: 此处绑定前端静态资源handler
 	router.Static("/static", "./dist/static")
