@@ -231,8 +231,62 @@ func UpdateBatch(c *gin.Context) {
 	response.Success(c, nil, "批次修改成功")
 }
 
+type Batchupdate struct {
+	BatchID   string
+	BatchName string
+	Descrip   string
+}
+
+func UpdateBatch(c *gin.Context) {
+	j, err := ioutil.ReadAll(c.Request.Body)
+	fmt.Println("body:", string(j))
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var batchinfo Batchupdate
+	err = json.Unmarshal(j, &batchinfo)
+	logger.Info("%+v", batchinfo)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	if len(batchinfo.BatchID) == 0 {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"请输入修改批次ID")
+		return
+	}
+	tmp, err := strconv.Atoi(batchinfo.BatchID)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"部门ID有误")
+		return
+	}
+	if !dao.IsExistID(tmp) {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"不存在该批次")
+		return
+	}
+	dao.UpdateBatch(tmp, batchinfo.BatchName, batchinfo.Descrip)
+	response.Success(c, nil, "批次修改成功")
+}
+
 type BatchId struct {
-	ID string
+	Page int `json:"page"`
+	Size int `json:"size"`
+	ID   int `json:"ID"`
 }
 
 func Batchmachineinfo(c *gin.Context) {
@@ -255,15 +309,15 @@ func Batchmachineinfo(c *gin.Context) {
 			err.Error())
 		return
 	}
-	tmp, err := strconv.Atoi(batchid.ID)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"批次ID有误")
-		return
-	}
-	machinelist := dao.GetMachineID(tmp)
+	// tmp, err := strconv.Atoi(batchid.ID)
+	// if err != nil {
+	// 	response.Response(c, http.StatusUnprocessableEntity,
+	// 		422,
+	// 		nil,
+	// 		"批次ID有误")
+	// 	return
+	// }
+	machinelist := dao.GetMachineID(batchid.ID)
 	MachineInfo := make([]model.MachineNode, 0)
 	for _, value := range machinelist {
 		tmp1, err := strconv.Atoi(value)
@@ -277,8 +331,51 @@ func Batchmachineinfo(c *gin.Context) {
 		m := dao.MachineData(tmp1)
 		MachineInfo = append(MachineInfo, m)
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"data": MachineInfo,
-	})
+	logger.Info("%+v", MachineInfo)
+	len := len(MachineInfo)
+	size := batchid.Size
+	page := batchid.Page
+	if len == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":  200,
+			"data":  MachineInfo,
+			"page":  page,
+			"size":  size,
+			"total": len,
+		})
+	}
+	// page, _ := strconv.Atoi(batchid.Page)
+	// size, _ := strconv.Atoi(batchid.Size)
+
+	num := size * (page - 1)
+	if num > len {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"页码超出")
+	}
+
+	if page*size >= len {
+		c.JSON(http.StatusOK, gin.H{
+			"code":  200,
+			"data":  MachineInfo[num:],
+			"page":  page,
+			"size":  size,
+			"total": len,
+		})
+	} else {
+		if page*size < num {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				"读取错误")
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code":  200,
+			"data":  MachineInfo[num : page*size-1],
+			"page":  page,
+			"size":  size,
+			"total": len,
+		})
+	}
 }
