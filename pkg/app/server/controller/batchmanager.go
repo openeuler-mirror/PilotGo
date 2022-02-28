@@ -230,3 +230,55 @@ func UpdateBatch(c *gin.Context) {
 	dao.UpdateBatch(tmp, batchinfo.BatchName, batchinfo.Descrip)
 	response.Success(c, nil, "批次修改成功")
 }
+
+type BatchId struct {
+	ID string
+}
+
+func Batchmachineinfo(c *gin.Context) {
+	j, err := ioutil.ReadAll(c.Request.Body)
+	fmt.Println("body:", string(j))
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var batchid BatchId
+	err = json.Unmarshal(j, &batchid)
+	logger.Info("%+v", batchid)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	tmp, err := strconv.Atoi(batchid.ID)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"批次ID有误")
+		return
+	}
+	machinelist := dao.GetMachineID(tmp)
+	MachineInfo := make([]model.MachineNode, 0)
+	for _, value := range machinelist {
+		tmp1, err := strconv.Atoi(value)
+		if err != nil {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				"批次ID有误")
+			return
+		}
+		m := dao.MachineData(tmp1)
+		MachineInfo = append(MachineInfo, m)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": MachineInfo,
+	})
+}
