@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-02-25 17:40:36
+  LastEditTime: 2022-02-28 15:27:46
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -40,6 +40,7 @@
           type="selection"
           width="55"
           align="center"
+          v-if="searchData.showSelect"
           :selectable="checkSelectTable"
         >
         </el-table-column>
@@ -73,7 +74,9 @@ export default {
     searchData: {
       type: Object,
       default: function() {
-        return {};
+        return {
+          showSelect: true,
+        };
       }
     },
     treeNodes: {
@@ -102,14 +105,19 @@ export default {
     };
   },
   activated() {
-    this.refresh();
+    // this.refresh();
   },
   mounted() {
-    this.loadData({ ...this.objSearch, ...this.$route.query });
+    if(this.searchData.load == 'false'){
+      return;
+    } else {
+      this.loadData({ ...this.objSearch, ...this.$route.query });
+    }
   },
   methods: {
     loadData(data) {
       this.loading = true;
+      console.log(...this.searchData)
       this.getData({ ...data, ...this.searchData }).then((response) => {
         const res = response.data;
         if (res.code === 200) {
