@@ -35,13 +35,9 @@ func UpdateBatch(BatchID int, BatchName string, Descrip string) {
 	mysqlmanager.DB.Model(&Batch).Where("id=?", BatchID).Update(&BatchNew)
 }
 
-// func Batchinfo() []model.Batch {
-// 	var batch []model.Batch
-// 	a := mysqlmanager.DB.Find(&batch)
-// 	logger.Info("%+v", a)
-// 	return batch
-// }
-
-// func UpdatemachineBatch(m model.MachineNode) {
-
-// }
+func GetMachineID(BatchID int) []string {
+	var Batch model.Batch
+	mysqlmanager.DB.Where("id=?", BatchID).Find(&Batch)
+	str := strings.Split(Batch.Machinelist, ",")
+	return str
+}
