@@ -231,58 +231,6 @@ func UpdateBatch(c *gin.Context) {
 	response.Success(c, nil, "批次修改成功")
 }
 
-type Batchupdate struct {
-	BatchID   string
-	BatchName string
-	Descrip   string
-}
-
-func UpdateBatch(c *gin.Context) {
-	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	var batchinfo Batchupdate
-	err = json.Unmarshal(j, &batchinfo)
-	logger.Info("%+v", batchinfo)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	if len(batchinfo.BatchID) == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"请输入修改批次ID")
-		return
-	}
-	tmp, err := strconv.Atoi(batchinfo.BatchID)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"部门ID有误")
-		return
-	}
-	if !dao.IsExistID(tmp) {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"不存在该批次")
-		return
-	}
-	dao.UpdateBatch(tmp, batchinfo.BatchName, batchinfo.Descrip)
-	response.Success(c, nil, "批次修改成功")
-}
-
 type BatchId struct {
 	Page int `json:"page"`
 	Size int `json:"size"`
