@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:11:01
- * LastEditTime: 2022-02-25 15:56:57
+ * LastEditTime: 2022-03-01 12:22:37
  * Description: 启动程序、初始化、加载配置
  ******************************************************************************/
 package cmd
@@ -67,53 +67,16 @@ func Start(conf *config.Configure) (err error) {
 	go func() {
 		for {
 			controller.AddAgents()
-			time.Sleep(time.Second * 20)
+			time.Sleep(time.Second * 30)
 		}
 	}()
-
-	// go func() {
-	// 	for true {
-	// 		time.Sleep(time.Second * 10)
-	// 		//每10秒读取一次数据库，并更改数据库状态
-	// 		mi, err := mysqlmanager.GetMachInfo(sqlManager)
-	// 		if err != nil {
-	// 			continue
-	// 		}
-
-	// 		for _, m := range mi {
-	// 			status := m.CheckStatus()
-	// 			if m.SystemStatus != status {
-	// 				m1 := mysqlmanager.MachInfo{
-	// 					Id:           m.Id,
-	// 					SystemStatus: status,
-	// 				}
-	// 				sqlManager.Update(&m1)
-	// 			}
-	// 		}
-	// 	}
-	// }()
-
-	// pi, err := mysqlmanager.GetPluginInfo(sqlManager)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// for _, value := range pi {
-	// 	plugin.GetManager().Regist(&plugin.Plugin{
-	// 		Name:        value.Name,
-	// 		Version:     value.Version,
-	// 		Description: value.Description,
-	// 		Url:         value.Url,
-	// 		Port:        value.Port,
-	// 		Protocol:    value.Protocol,
-	// 	})
-	// }
 
 	mysqlmanager.DB.Delete(&model.MachineNode{})
 	mysqlmanager.DB.AutoMigrate(&model.User{})
 	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
 	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
 	mysqlmanager.DB.AutoMigrate(&model.Batch{})
+	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
 	defer mysqlmanager.DB.Close()
 
 	r := router.SetupRouter()

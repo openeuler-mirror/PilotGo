@@ -1,10 +1,18 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2021-11-18 13:03:16
+ * LastEditTime: 2022-03-01 13:12:22
+ * Description: provide configure yaml functions.
+ ******************************************************************************/
 package config
-
-/**
- * @Author: zhang han
- * @Date: 2021/11/1 16:08
- * @Description:
- */
 
 import (
 	"fmt"
@@ -32,7 +40,8 @@ type LogOpts struct {
 	MaxSize   int    `yaml:"max_size"`
 }
 type Server struct {
-	ServerPort int `yaml:"server_port"`
+	ServerIP   string `yaml:"server_ip"`
+	ServerPort int    `yaml:"server_port"`
 }
 type DbInfo struct {
 	HostName string `yaml:"host_name"`
@@ -47,6 +56,7 @@ type Configure struct {
 	S            Server  `yaml:"server"`
 	MaxAge       int     `yaml:"max_age"`
 	SessionCount int     `yaml:"session_count"`
+	SocketPort   int     `yaml:"socket_port"`
 	Dbinfo       DbInfo  `yaml:"db_info"`
 }
 

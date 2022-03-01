@@ -111,18 +111,18 @@ func StartService(service string) error {
 	build.WriteString(service)
 	command := build.String()
 	result, err := utils.RunCommand(command)
-	if err != nil || len(result) == 0 {
+	if err != nil || len(result) != 0 {
 		logger.Error("开启服务命令运行失败: ", err)
-		return fmt.Errorf(" %s 服务启动失败", service)
+		return fmt.Errorf(" %s 服务启动失败%s", service, err)
 	}
 	output, err := GetServiceStatus(service)
 	if err != nil {
 		logger.Error("获取服务状态失败")
-		return fmt.Errorf(" %s 服务重新启动失败", service)
+		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
 	}
 	if !verifyStatus(output, ServiceStart) {
 		logger.Error("开启服务命令运行结果无效!")
-		return fmt.Errorf(" %s 服务启动失败", service)
+		return fmt.Errorf(" %s 服务启动失败%s", service, err)
 	}
 	return nil
 }
@@ -132,18 +132,18 @@ func StopService(service string) error {
 	build.WriteString(service)
 	command := build.String()
 	result, err := utils.RunCommand(command)
-	if err != nil || len(result) == 0 {
+	if err != nil || len(result) != 0 {
 		logger.Error("关闭服务命令运行失败: ", err)
-		return fmt.Errorf(" %s 服务关闭失败", service)
+		return fmt.Errorf(" %s 服务关闭失败%s", service, err)
 	}
 	output, err := GetServiceStatus(service)
 	if err != nil {
 		logger.Error("获取服务状态失败")
-		return fmt.Errorf(" %s 服务重新启动失败", service)
+		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
 	}
 	if !verifyStatus(output, ServiceStop) {
 		logger.Error("关闭服务命令运行结果无效!")
-		return fmt.Errorf(" %s 服务关闭失败", service)
+		return fmt.Errorf(" %s 服务关闭失败%s", service, err)
 	}
 	return nil
 }
@@ -153,18 +153,18 @@ func RestartService(service string) error {
 	build.WriteString(service)
 	command := build.String()
 	result, err := utils.RunCommand(command)
-	if err != nil || len(result) == 0 {
+	if err != nil || len(result) != 0 {
 		logger.Error("重启服务命令运行失败: ", err)
-		return fmt.Errorf(" %s 服务重新启动失败", service)
+		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
 	}
 	output, err := GetServiceStatus(service)
 	if err != nil {
 		logger.Error("获取服务状态失败")
-		return fmt.Errorf(" %s 服务重新启动失败", service)
+		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
 	}
 	if !verifyStatus(output, ServiceRestart) {
 		logger.Error("重启服务命令运行结果无效!")
-		return fmt.Errorf(" %s 服务重新启动失败", service)
+		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
 	}
 	return nil
 }

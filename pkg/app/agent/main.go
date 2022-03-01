@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-02-25 16:45:41
+ * LastEditTime: 2022-03-01 13:13:02
  * Description: agent main
  ******************************************************************************/
 package main
@@ -17,11 +17,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
+	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
@@ -36,6 +38,12 @@ func main() {
 	// init agent info
 
 	// 加载系统配置
+	conf, err := config.Load()
+	if err != nil {
+		fmt.Println("failed to load configure, exit..", err)
+		os.Exit(-1)
+	}
+	url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
 
 	// 初始化日志
 
@@ -43,7 +51,8 @@ func main() {
 	client := &network.SocketClient{
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
-	if err := client.Connect("192.168.47.128:8879"); err != nil {
+
+	if err := client.Connect(url); err != nil {
 		fmt.Println("connect server failed, error:", err)
 		os.Exit(-1)
 	}
@@ -224,41 +233,70 @@ func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ServiceRestart, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 		service := msg.Data.(string)
-		servicerestart := uos.RestartService(service)
+		err := uos.RestartService(service)
 
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   servicerestart,
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "重启成功",
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.ServiceStart, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 		service := msg.Data.(string)
-		servicestart := uos.StartService(service)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   servicestart,
+		err := uos.StartService(service)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "启动成功",
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.ServiceStop, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 		service := msg.Data.(string)
-		servicestop := uos.StopService(service)
+		err := uos.StopService(service)
 
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   servicestop,
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "关闭服务成功",
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.AllRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
