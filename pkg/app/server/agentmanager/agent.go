@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2022-02-25 16:42:38
+ * LastEditTime: 2022-03-01 11:15:14
  * Description: provide server service functions.
  ******************************************************************************/
 package agentmanager
@@ -307,7 +307,7 @@ func (a *Agent) ServiceStatus(service string) (interface{}, error) {
 }
 
 // 重启服务
-func (a *Agent) ServiceRestart(service string) (interface{}, error) {
+func (a *Agent) ServiceRestart(service string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceRestart,
@@ -317,13 +317,13 @@ func (a *Agent) ServiceRestart(service string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return nil, "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data, resp_message.Error, nil
 }
 
 // 关闭服务
-func (a *Agent) ServiceStop(service string) (interface{}, error) {
+func (a *Agent) ServiceStop(service string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceStop,
@@ -333,13 +333,13 @@ func (a *Agent) ServiceStop(service string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return nil, "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data, resp_message.Error, nil
 }
 
 // 启动服务
-func (a *Agent) ServiceStart(service string) (interface{}, error) {
+func (a *Agent) ServiceStart(service string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceStart,
@@ -349,9 +349,9 @@ func (a *Agent) ServiceStart(service string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return nil, "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data, resp_message.Error, nil
 }
 
 // 获取全部安装的rpm包列表

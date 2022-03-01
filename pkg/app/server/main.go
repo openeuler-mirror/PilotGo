@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-02-25 16:45:53
+ * LastEditTime: 2022-03-01 13:12:29
  * Description: server main
  ******************************************************************************/
 package main
@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
@@ -45,8 +46,9 @@ func main() {
 	// agentmanager := agentmanager.GetAgentManager()
 
 	// 启动agent socket server
+	url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
 	go func() {
-		server.Run("192.168.47.128:8879")
+		server.Run(url)
 	}()
 
 	// 此处启动前端及REST http server
