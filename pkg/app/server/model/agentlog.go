@@ -9,18 +9,29 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:46:13
- * LastEditTime: 2022-02-28 15:25:33
+ * LastEditTime: 2022-03-02 13:21:42
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package model
 
-import "github.com/jinzhu/gorm"
+import (
+	"time"
+)
+
+type AgentLogParent struct {
+	ID        int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt time.Time
+	UserName  string     `json:"userName"`
+	Type      string     `json:"type"`
+	Status    string     `json:"status"`
+	AgentLogs []AgentLog `gorm:"ForeignKey:LogParentID;AssociationForeignKey:ID" json:"agent_log"`
+}
 
 type AgentLog struct {
-	gorm.Model
-	Type            string `json:"type"`
+	ID              int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	LogParentID     int `gorm:"index" json:"logparent_id"`
+	LogParent       AgentLogParent
 	IP              string `json:"ip"`
-	UserName        string `json:"userName"`
 	StatusCode      int    `json:"code"`
 	OperationObject string `json:"object"`
 	Action          string `json:"action"`

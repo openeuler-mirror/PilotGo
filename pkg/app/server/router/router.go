@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-01 12:54:06
+ * LastEditTime: 2022-03-02 14:38:24
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -62,8 +62,8 @@ func SetupRouter() *gin.Engine {
 		agent.GET("/service_stop", handlers.ServiceStopHandler)
 		agent.GET("/service_start", handlers.ServiceStartHandler)
 		agent.GET("/service_restart", handlers.ServiceRestartHandler)
-		agent.GET("/rpm_install", handlers.InstallRpmHandler)
-		agent.GET("/rpm_remove", handlers.RemoveRpmHandler)
+		agent.POST("/rpm_install", handlers.InstallRpmHandler)
+		agent.POST("/rpm_remove", handlers.RemoveRpmHandler)
 		agent.GET("/disk_path", handlers.DiskCreatPathHandler)
 		agent.GET("/disk_mount", handlers.DiskMountHandler)
 		agent.GET("/disk_umount", handlers.DiskUMountHandler)

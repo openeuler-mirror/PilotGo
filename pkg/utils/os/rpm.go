@@ -1,3 +1,17 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2022-01-17 02:43:29
+ * LastEditTime: 2022-03-02 18:35:12
+ * Description: provide agent rpm manager functions.
+ ******************************************************************************/
 package os
 
 import (
@@ -304,7 +318,7 @@ func RemoveRpm(rpm string) error {
 		logger.Error("rpm包卸载命令运行失败: ", err)
 		return fmt.Errorf("rpm包卸载命令执行失败")
 	}
-	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) {
+	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
 		logger.Error("rpm包卸载命令由于rpm包不存在而运行失败")
 		return fmt.Errorf("该rpm包不存在")
 	} else {

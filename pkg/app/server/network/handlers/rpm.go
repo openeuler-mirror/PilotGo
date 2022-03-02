@@ -9,12 +9,16 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-17 02:43:29
- * LastEditTime: 2022-02-28 14:50:08
+ * LastEditTime: 2022-03-02 18:17:11
  * Description: provide agent rpm manager functions.
  ******************************************************************************/
 package handlers
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
@@ -74,86 +78,155 @@ func RpmInfoHandler(c *gin.Context) {
 	}
 
 }
+
+type RPMS struct {
+	UUIDs    []string `json:"uuid"`
+	RPM      string   `json:"rpm"`
+	UserName string   `json:"userName"`
+}
+
 func InstallRpmHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-	rpmname := c.Query("rpm")
-	username := c.Query("userName")
-
-	var logParent model.AgentLog
+	var rpm RPMS
+	var logParent model.AgentLogParent
+	var log model.AgentLog
 	var machineNode model.MachineNode
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
-	logParent.Type = "软件包安装/卸载"
-	logParent.IP = machineNode.IP
-	logParent.UserName = username
-	logParent.OperationObject = rpmname
-	logParent.Action = model.RPMInstall
 
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败")
-		logParent.StatusCode = 400
-		logParent.Message = "获取uuid失败"
-		mysqlmanager.DB.Save(&logParent)
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
 		return
 	}
 
-	rpm_install, err := agent.InstallRpm(rpmname)
-	rpm := rpm_install.(string)
-	if len(rpm) != 0 || err != nil {
-		response.Fail(c, gin.H{"error": rpm}, "Failed!")
+	bodys := string(body)
 
-		logParent.StatusCode = 400
-		logParent.Message = rpm
-		mysqlmanager.DB.Save(&logParent)
+	err = json.Unmarshal([]byte(bodys), &rpm)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
 		return
+	}
+
+	logParent.Type = "软件包安装/卸载"
+	logParent.UserName = rpm.UserName
+	mysqlmanager.DB.Save(&logParent)
+	StatusCodes := make([]string, 0)
+
+	for _, uuid := range rpm.UUIDs {
+		mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+
+		log.IP = machineNode.IP
+		log.OperationObject = rpm.RPM
+		log.Action = model.RPMInstall
+		log.LogParentID = logParent.ID
+
+		agent := agentmanager.GetAgent(uuid)
+		if agent == nil {
+			response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+
+			log.StatusCode = 400
+			log.Message = "获取uuid失败"
+			mysqlmanager.DB.Save(&log)
+			StatusCodes = append(StatusCodes, "400")
+			continue
+		}
+		rpm_install, Err, err := agent.InstallRpm(rpm.RPM)
+		if err != nil || len(Err) != 0 {
+			response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
+
+			log.StatusCode = 400
+			log.Message = Err
+			mysqlmanager.DB.Save(&log)
+			StatusCodes = append(StatusCodes, "400")
+			continue
+		} else {
+			response.Success(c, gin.H{"code": 200, "install": rpm_install}, "该rpm包安装成功!")
+			log.StatusCode = 200
+			log.Message = "安装成功"
+			mysqlmanager.DB.Save(&log)
+		}
+	}
+	if len(StatusCodes) == 0 {
+		logParent.Status = "成功"
+		mysqlmanager.DB.Save(&logParent)
 	} else {
-		response.Success(c, nil, "该rpm包安装成功!")
-		logParent.StatusCode = 200
-		logParent.Message = "安装成功"
+		logParent.Status = "失败"
 		mysqlmanager.DB.Save(&logParent)
 	}
 
 }
 func RemoveRpmHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-	rpmname := c.Query("rpm")
-	username := c.Query("userName")
-
-	var logParent model.AgentLog
+	var rpm RPMS
+	var logParent model.AgentLogParent
+	var log model.AgentLog
 	var machineNode model.MachineNode
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
-	logParent.Type = "软件包安装/卸载"
-	logParent.IP = machineNode.IP
-	logParent.UserName = username
-	logParent.OperationObject = rpmname
-	logParent.Action = model.RPMRemove
 
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
-		logParent.StatusCode = 400
-		logParent.Message = "获取uuid失败"
-		mysqlmanager.DB.Save(&logParent)
-		return
-	}
-
-	rpm_remove, err := agent.RemoveRpm(rpmname)
+	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Fail(c, nil, "rpm包卸载命令执行失败!")
-		logParent.StatusCode = 400
-		logParent.Message = "卸载命令执行失败"
-		mysqlmanager.DB.Save(&logParent)
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
 		return
 	}
-	if rpm_remove != nil {
-		response.Fail(c, nil, "软件包卸载失败!")
-		logParent.StatusCode = 400
-		logParent.Message = "软件包卸载失败"
-		mysqlmanager.DB.Save(&logParent)
+
+	bodys := string(body)
+	err = json.Unmarshal([]byte(bodys), &rpm)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
 		return
 	}
-	response.Success(c, gin.H{"rpm_remove": "卸载成功!"}, "Success")
-	logParent.StatusCode = 200
-	logParent.Message = "卸载成功"
+
+	logParent.Type = "软件包安装/卸载"
+	logParent.UserName = rpm.UserName
 	mysqlmanager.DB.Save(&logParent)
+	StatusCodes := make([]string, 0)
+	for _, uuid := range rpm.UUIDs {
+		mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+
+		log.IP = machineNode.IP
+		log.OperationObject = rpm.RPM
+		log.Action = model.RPMRemove
+		log.LogParentID = logParent.ID
+
+		agent := agentmanager.GetAgent(uuid)
+		if agent == nil {
+			response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+			log.StatusCode = 400
+			log.Message = "获取uuid失败"
+			mysqlmanager.DB.Save(&log)
+			StatusCodes = append(StatusCodes, "400")
+			continue
+		}
+
+		rpm_remove, Err, err := agent.RemoveRpm(rpm.RPM)
+		if len(Err) != 0 || err != nil {
+			response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
+
+			log.StatusCode = 400
+			log.Message = Err
+			mysqlmanager.DB.Save(&log)
+			StatusCodes = append(StatusCodes, "400")
+			continue
+		} else {
+			response.Success(c, gin.H{"code": 200, "remove": rpm_remove}, "卸载成功")
+			log.StatusCode = 200
+			log.Message = "卸载成功"
+			mysqlmanager.DB.Save(&log)
+		}
+	}
+	if len(StatusCodes) == 0 {
+		logParent.Status = "成功"
+		mysqlmanager.DB.Save(&logParent)
+	} else {
+		logParent.Status = "失败"
+		mysqlmanager.DB.Save(&logParent)
+	}
 }
