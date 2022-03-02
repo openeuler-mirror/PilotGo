@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-02-25 17:34:19
+  LastEditTime: 2022-03-01 14:57:40
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -69,10 +69,10 @@
             <el-table-column label="操作">
               <template slot-scope="scope">
                 <el-button v-if="scope.row.Active == 'inactive'" size="mini" type="primary" plain 
-                  @click="handleUpdateIp(scope.row.ip)"> 
+                  @click="handleStart(scope.$index,scope.row)"> 
                   启动 </el-button>
                   <el-button v-if="scope.row.Active == 'active'" size="mini" type="primary" plain 
-                  @click="handleUpdateIp(scope.row.ip)"> 
+                  @click="handleStop()"> 
                   关闭 </el-button>
               </template>
             </el-table-column>
@@ -102,7 +102,7 @@
             <el-table-column label="操作">
               <template slot-scope="scope">
                 <el-button size="mini" type="primary" plain 
-                  @click="handleUpdateIp(scope.row.ip)"> 
+                  @click="handleChange(scope.row)"> 
                   编辑 </el-button>
               </template>
             </el-table-column>
@@ -114,7 +114,8 @@
 </template>
 <script>
 import { getCpu, getOS, getMemory, getUser, getAllUser, 
-        getserviceList, getSyskernel, getDisk } from '@/request/cluster';
+        getserviceList, getSyskernel, getDisk, serviceStart, 
+        serviceStop, changeSyskernel } from '@/request/cluster';
 import SmallTable from "@/components/SmallTable";
 export default {
    /* 某一台机器的详情，左右分布
@@ -132,7 +133,9 @@ export default {
   },
   data() {
     return {
+      userName: '',
       tHight: 200,
+      params: {},
       basic: {
         macPlatform: '',
         mackernel: '',
@@ -146,7 +149,11 @@ export default {
     }
   },
   mounted() {
-    let obj = {uuid:this.$route.params.uuid};
+    if(this.$route.params.uuid.length > 0) {
+
+    
+    this.userName = this.$store.getters.userName;
+    let obj = this.params = {uuid:this.$route.params.uuid};
      getOS(obj).then((res) => {
       let result = res.data.data.os_info;
       this.basic.macPlatform = result.Platform;
@@ -180,6 +187,7 @@ export default {
       });;
       this.diskEchart(this.diskData);
     })
+    }
   },
   methods: {
     diskEchart(disks) {
@@ -200,7 +208,51 @@ export default {
                     data: disks
                   }]};
       diskChart.setOption(option);
+    },
+    handleStart(index,row) {
+      serviceStart({...this.params,userName:this.userName}).then(res => {
+        if(res.data.code === 200) {
+          this.serviceData[index].Active = 'active';
+          this.$message.success(res.data.msg);
+        } else {
+           this.$message.error(res.data.msg);
+        }
+      })
+    },
+    handleStop(index,row) {
+      serviceStop({...this.params,userName:this.userName}).then(res => {
+        if(res.data.code === 200) {
+          this.serviceData[index].Active = 'inactive';
+          this.$message.success(res.data.msg);
+        } else {
+           this.$message.error(res.data.msg);
+        }
+      })
+    },
+    handleChange(row) {
+      this.$prompt('输入内核数量', '修改内核', {
+       confirmButtonText: '确定',
+       cancelButtonText: '取消',
+       }).then(({value}) => {
+         let name = Object.keys(row)[0];
+         let params = {
+           args:name + '=' + value, 
+           uuid: this.$route.params.uuid, 
+           userName: this.userName
+          }
+         changeSyskernel(params).then(res => {
+           if(res.data.code === 200) {
+            this.kernelData[index] = {name : value};
+            this.$message.success(res.data.msg);
+           } else {
+            this.$message.error(res.data.msg);
+           }
+         })
+       }) 
+      
     }
+
+
   },
 
 

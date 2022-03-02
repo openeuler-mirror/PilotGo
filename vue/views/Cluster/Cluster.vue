@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-02-25 16:39:21
+  LastEditTime: 2022-03-02 15:19:40
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -31,6 +31,8 @@
           <div>{{ departName }}</div>
         </template>
         <template v-slot:table_action>
+          <el-button  @click="handleIssue" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm下发 </el-button>
+          <el-button  @click="handleUnInstall" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm卸载 </el-button>
           <el-button  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </el-button>
           <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
             <el-button  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
@@ -85,6 +87,7 @@
     >
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
      <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='machines' @click="handleClose"></batch-form>   
+     <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>   
     </el-dialog>
   </div>
   </div>
@@ -95,12 +98,14 @@ import kyTable from "@/components/KyTable";
 import kyTree from "@/components/KyTree";
 import UpdateForm from "./form/updateForm";
 import BatchForm from "./form/batchForm";
+import RpmIssue from "./form/rpmIssue";
 import { getClusters, deleteIp, getChildNode } from "@/request/cluster";
 export default {
   name: "Cluster",
   components: {
     UpdateForm,
     BatchForm,
+    RpmIssue,
     kyTable,
     kyTree,
   },
@@ -109,6 +114,7 @@ export default {
       title: '',
       type: '',
       ip: '',
+      acType: '',
       isBatch: false,
       checkedNode: [],
       departName: '',
@@ -117,7 +123,8 @@ export default {
       display: false,
       disabled: false,
       searchData: {
-        DepartId: 1
+        DepartId: 1,
+        showSelect: true,
       },
     };
   },
@@ -149,10 +156,21 @@ export default {
       this.display = true;
       this.title = "创建批次";
       this.type = "batch"; 
-      let selects = this.$refs.table.selectRow.rows;
-      selects.forEach(item => {
-        this.machines.push(item);
-      })
+      this.machines = this.$refs.table.selectRow.rows;
+    },
+    handleIssue() {
+      this.machines = [];
+      this.display = true;
+      this.title = "软件包下发";
+      this.type = "issue"; 
+      this.machines = this.$refs.table.selectRow.rows;
+    },
+    handleUnInstall() {
+      this.machines = [];
+      this.display = true;
+      this.title = "软件包卸载";
+      this.type = "issue"; 
+      this.machines = this.$refs.table.selectRow.rows;
     },
     handleDelete() {
       let ids = this.$refs.table.selectRow.rows[0];

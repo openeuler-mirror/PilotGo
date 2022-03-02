@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * @Author: zhaozhenfang
+ * @Date: 2022-02-25 16:33:46
+ * @LastEditTime: 2022-03-02 15:29:08
+ * @Description: provide agent log manager of pilotgo
+ */
 import { request } from './request'
 
 // 请求组织树接口
@@ -76,6 +90,24 @@ export function deleteIp(data) {
   })
 }
 
+// rpm下发
+export function rpmIssue(data) {
+  return request({
+    url: '/agent/rpm_install',
+    method: 'post',
+    data
+  })
+}
+
+// rpm卸载
+export function rpmUnInstall(data) {
+  return request({
+    url: '/agent/rpm_remove',
+    method: 'post',
+    data
+  })
+}
+
 // 根据ip获取机器信息
 export function getDeviceInfo(data) {
   return request({
@@ -139,10 +171,37 @@ export function getserviceList(data) {
   })
 }
 
+// 开启一项服务
+export function serviceStart(data) {
+  return request({
+    url: 'agent/service_start',
+    method: 'get',
+    params: data
+  })
+}
+
+// 关闭一项服务
+export function serviceStop(data) {
+  return request({
+    url: 'agent/service_stop',
+    method: 'get',
+    params: data
+  })
+}
+
 // 获取内核信息
 export function getSyskernel(data) {
   return request({
     url: 'api/sysctl_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 修改内核信息
+export function changeSyskernel(data) {
+  return request({
+    url: 'agent/sysctl_change',
     method: 'get',
     params: data
   })
