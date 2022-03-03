@@ -1,10 +1,18 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2021-12-18 02:33:55
+ * LastEditTime: 2022-03-03 14:16:28
+ * Description: 用户登录、增删改查
+ ******************************************************************************/
 package controller
-
-/**
- * @Author: zhang han
- * @Date: 2021/10/28 14:58
- * @Description: 用户登录和注册
- */
 
 import (
 	"encoding/json"

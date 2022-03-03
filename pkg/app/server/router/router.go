@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-02 14:38:24
+ * LastEditTime: 2022-03-03 13:12:10
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -72,6 +72,9 @@ func SetupRouter() *gin.Engine {
 		agent.GET("/user_del", handlers.DelUserHandler)
 		agent.GET("/user_ower", handlers.ChangeFileOwnerHandler)
 		agent.GET("/user_per", handlers.ChangePermissionHandler)
+		agent.GET("/log_all", controller.LogAll)
+		agent.GET("/logs", controller.AgentLogs)
+		agent.POST("/delete", controller.DeleteLog)
 	}
 	user := router.Group("user")
 	{
