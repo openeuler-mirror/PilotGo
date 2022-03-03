@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-03 14:16:28
+ * LastEditTime: 2022-03-04 01:59:29
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -39,6 +39,9 @@ func Register(c *gin.Context) {
 	password := user.Password
 	email := user.Email
 	phone := user.Phone
+	depart := user.DepartName
+	departId := user.DepartSecond
+	departPid := user.DepartFirst
 	enable := user.Enable
 
 	if len(username) == 0 { //Data verification
@@ -63,11 +66,14 @@ func Register(c *gin.Context) {
 	}
 
 	user = model.User{ //Create user
-		Username: username,
-		Password: password,
-		Phone:    phone,
-		Email:    email,
-		Enable:   enable,
+		Username:     username,
+		Password:     password,
+		Phone:        phone,
+		Email:        email,
+		DepartName:   depart,
+		DepartFirst:  departPid,
+		DepartSecond: departId,
+		Enable:       enable,
 	}
 	mysqlmanager.DB.Create(&user)
 
@@ -112,7 +118,14 @@ func Login(c *gin.Context) {
 		log.Printf("token生成错误:%v", err)
 		return
 	}
-	response.Success(c, gin.H{"token": token}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": user.DepartName, "departId": user.DepartSecond}, "登陆成功!")
+}
+
+// 退出
+func Logout(c *gin.Context) {
+
+	response.Success(c, nil, "退出成功!")
+
 }
 
 func Info(c *gin.Context) {
@@ -155,34 +168,12 @@ func UserSearch(c *gin.Context) {
 }
 
 // 重置密码
-type PasswordReset struct {
-	Emails string `gorm:"type:varchar(30);not null" json:"email,omitempty" form:"email"`
-}
-
 func ResetPassword(c *gin.Context) {
 	var user model.User
-	var reset PasswordReset
+	email := c.Query("email")
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &reset)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-
-	if dao.IsEmailExist(reset.Emails) {
-		mysqlmanager.DB.Model(&user).Where("email=?", reset.Emails).Update("password", "123456")
+	if dao.IsEmailExist(email) {
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", "123456")
 		response.Response(c, http.StatusOK,
 			200,
 			gin.H{"data": user},
@@ -268,6 +259,7 @@ func ImportUser(c *gin.Context) {
 
 			for rowIndex, row := range sheet.Rows {
 				user := model.User{}
+				depart := model.DepartNode{}
 
 				//跳过第一行表头信息
 				if rowIndex == 0 {
@@ -282,6 +274,10 @@ func ImportUser(c *gin.Context) {
 				}
 				// 设置默认密码为123456
 				user.Password = "123456"
+				user.DepartName = row.Cells[3].Value
+				mysqlmanager.DB.Where("depart=?", user.DepartName).Find(&depart)
+				user.DepartSecond = depart.ID
+				user.DepartFirst = depart.PID
 				mysqlmanager.DB.Save(&user)
 			}
 		}

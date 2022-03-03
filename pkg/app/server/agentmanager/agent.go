@@ -9,8 +9,8 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2022-03-02 15:50:34
- * Description: provide server service functions.
+ * LastEditTime: 2022-03-04 02:33:13
+ * Description: socket server's agentmanager
  ******************************************************************************/
 package agentmanager
 
@@ -19,8 +19,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	pnet "openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
@@ -151,7 +151,7 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 		waitChan := make(chan *protocol.Message)
 		a.MessageProcesser.WaitMap.Store(msg.UUID, waitChan)
 
-		pnet.Send(a.conn, protocol.TlvEncode(msg.Encode()))
+		network.Send(a.conn, protocol.TlvEncode(msg.Encode()))
 
 		// wail for response
 		data := <-waitChan
@@ -159,7 +159,7 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 	}
 
 	// just send data
-	return nil, pnet.Send(a.conn, protocol.TlvEncode(msg.Encode()))
+	return nil, network.Send(a.conn, protocol.TlvEncode(msg.Encode()))
 }
 
 // 远程获取agent端的系统信息
