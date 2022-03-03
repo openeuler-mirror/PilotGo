@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-02-28 15:27:46
+  LastEditTime: 2022-03-03 13:49:43
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -105,7 +105,7 @@ export default {
     };
   },
   activated() {
-    // this.refresh();
+    this.refresh();
   },
   mounted() {
     if(this.searchData.load == 'false'){
@@ -116,8 +116,7 @@ export default {
   },
   methods: {
     loadData(data) {
-      this.loading = true;
-      console.log(...this.searchData)
+      // this.loading = true;
       this.getData({ ...data, ...this.searchData }).then((response) => {
         const res = response.data;
         if (res.code === 200) {
@@ -151,7 +150,7 @@ export default {
         const index = this.selectRow.ids.indexOf(row.ID || row.machineuuid);
         // 2.若是不在就放入选中数组中，在就删掉
         if (index < 0) {
-          this.selectRow.ids.push(row.ID || row.machineuuid);
+          this.selectRow.ids.push(row.ID || row.machineuuid || row.id);
           this.selectRow.rows.push(row);
         } else {
           this.selectRow.ids.splice(index, 1);
