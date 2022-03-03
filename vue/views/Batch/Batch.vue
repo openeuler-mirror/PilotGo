@@ -38,11 +38,9 @@
           </el-table-column>
            <el-table-column prop="description" label="备注"> 
           </el-table-column>
-          <el-table-column prop="operation" label="操作">
+          <el-table-column prop="operation" label="操作" width="200">
             <template slot-scope="scope">
-              <el-button
-                size="mini"
-                @click="handleEdit(scope.row)">
+              <el-button size="mini" type="primary" plain @click="handleEdit(scope.row)">
                 编辑
               </el-button>
             </template>
@@ -95,7 +93,7 @@ export default {
     },
     handleEdit(row) {
       this.display = true;
-      this.title = "编辑用户";
+      this.title = "编辑批次";
       this.type = "update";
       this.rowData = row;
     },
