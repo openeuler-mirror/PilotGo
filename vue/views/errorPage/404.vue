@@ -1,3 +1,17 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-02-25 16:33:46
+  LastEditTime: 2022-02-25 17:39:58
+  Description: provide agent log manager of pilotgo
+ -->
 <template>
   <div style="background:#f0f2f5;margin-top: -20px;height:100%;">
     <div class="wscn-http404">
@@ -9,8 +23,8 @@
       </div>
       <div class="bullshit">
         <div class="bullshit__headline">{{ message }}</div>
-        <div class="bullshit__info">请检查您输入的网址是否正确，请点击以下按钮返回主页或者发送错误报告</div>
-        <a href="/" class="bullshit__return-home">返回首页</a>
+        <div class="bullshit__info">请检查您输入的网址是否正确，请点击以下按钮返回上一页</div>
+        <a href="javascript:history.back(-1)" class="bullshit__return-home">返回上一页</a>
       </div>
     </div>
   </div>
@@ -30,7 +44,7 @@ export default {
   },
   computed: {
     message() {
-      return '特朗普说这个页面你不能进......'
+      return '普京说这个页面你不能进......'
     }
   }
 }
