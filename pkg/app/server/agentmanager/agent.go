@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2022-03-01 11:15:14
+ * LastEditTime: 2022-03-02 15:50:34
  * Description: provide server service functions.
  ******************************************************************************/
 package agentmanager
@@ -403,7 +403,7 @@ func (a *Agent) RpmInfo(rpm string) (interface{}, string, error) {
 }
 
 // 获取源软件包名以及源
-func (a *Agent) InstallRpm(rpm string) (interface{}, error) {
+func (a *Agent) InstallRpm(rpm string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.InstallRpm,
@@ -413,13 +413,13 @@ func (a *Agent) InstallRpm(rpm string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return nil, "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data, resp_message.Error, nil
 }
 
 // 获取源软件包名以及源
-func (a *Agent) RemoveRpm(rpm string) (interface{}, error) {
+func (a *Agent) RemoveRpm(rpm string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RemoveRpm,
@@ -429,9 +429,9 @@ func (a *Agent) RemoveRpm(rpm string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return nil, "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data, resp_message.Error, nil
 }
 
 // 获取磁盘的使用情况

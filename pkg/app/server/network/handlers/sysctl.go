@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-16 09:28:46
- * LastEditTime: 2022-02-28 15:16:13
+ * LastEditTime: 2022-03-02 18:42:27
  * Description: provide Kernel configuration.
  ******************************************************************************/
 package handlers
@@ -43,35 +43,48 @@ func SysctlChangeHandler(c *gin.Context) {
 	args := c.Query("args")
 	username := c.Query("userName")
 
-	var logParent model.AgentLog
+	var logParent model.AgentLogParent
+	var log model.AgentLog
 	var machineNode model.MachineNode
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+
 	logParent.Type = "配置内核参数"
-	logParent.IP = machineNode.IP
 	logParent.UserName = username
-	logParent.OperationObject = args
-	logParent.Action = model.SysctlChange
+	mysqlmanager.DB.Save(&logParent)
+
+	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+
+	log.IP = machineNode.IP
+	log.OperationObject = args
+	log.Action = model.ServiceStart
+	log.LogParentID = logParent.ID
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
-		logParent.StatusCode = 400
-		logParent.Message = "获取uuid失败"
+		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+
+		log.StatusCode = 400
+		log.Message = "获取uuid失败"
+		mysqlmanager.DB.Save(&log)
+		logParent.Status = "失败"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
 
 	sysctl_change, err := agent.ChangeSysctl(args)
 	if err != nil {
-		response.Fail(c, nil, "修改内核运行时参数失败!")
-		logParent.StatusCode = 400
-		logParent.Message = "修改内核运行时参数失败"
+		response.Success(c, gin.H{"code": 400, "error": err}, "修改内核运行时参数失败!")
+		log.StatusCode = 400
+		log.Message = err.Error()
+		mysqlmanager.DB.Save(&log)
+		logParent.Status = "失败"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
-	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")
-	logParent.StatusCode = 200
-	logParent.Message = "修改成功"
+	response.Success(c, gin.H{"code": 200, "sysctl_change": sysctl_change}, "Success")
+	log.StatusCode = 200
+	log.Message = "修改成功"
+	mysqlmanager.DB.Save(&log)
+	logParent.Status = "成功"
 	mysqlmanager.DB.Save(&logParent)
 }
 func SysctlViewHandler(c *gin.Context) {

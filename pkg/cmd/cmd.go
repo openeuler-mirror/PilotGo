@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:11:01
- * LastEditTime: 2022-03-01 12:22:37
+ * LastEditTime: 2022-03-01 15:55:02
  * Description: 启动程序、初始化、加载配置
  ******************************************************************************/
 package cmd
@@ -76,6 +76,7 @@ func Start(conf *config.Configure) (err error) {
 	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
 	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
 	mysqlmanager.DB.AutoMigrate(&model.Batch{})
+	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
 	defer mysqlmanager.DB.Close()
 

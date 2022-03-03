@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-03-01 13:13:02
+ * LastEditTime: 2022-03-02 16:13:36
  * Description: agent main
  ******************************************************************************/
 package main
@@ -358,7 +358,7 @@ func regitsterHandler(c *network.SocketClient) {
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: 0,
-				Data:   err.Error(),
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		} else {
@@ -374,15 +374,25 @@ func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RemoveRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 		rpmname := msg.Data.(string)
-		rpmremove := uos.RemoveRpm(rpmname)
+		err := uos.RemoveRpm(rpmname)
 
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   rpmremove,
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "",
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.DiskUsage, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
