@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-02-24 14:35:03
+ * LastEditTime: 2022-03-04 01:37:58
  * Description: provide machine manager functions.
  ******************************************************************************/
 package controller
@@ -128,8 +128,8 @@ func DepartInfo(c *gin.Context) {
 
 	}
 	ptrchild = append(ptrchild, &root)
-	for key, _ := range departnode {
-		var a *model.MachineTreeNode
+	var a *model.MachineTreeNode
+	for key := range departnode {
 		a = &departnode[key]
 		ptrchild = append(ptrchild, a)
 	}
@@ -295,8 +295,8 @@ func Dep(c *gin.Context) {
 
 	}
 	ptrchild = append(ptrchild, &root)
-	for key, _ := range departnode {
-		var a *model.MachineTreeNode
+	var a *model.MachineTreeNode
+	for key := range departnode {
 		a = &departnode[key]
 		ptrchild = append(ptrchild, a)
 	}

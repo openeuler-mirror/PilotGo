@@ -1,3 +1,17 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: wanghao
+ * Date: 2022-01-04 12:56:59
+ * LastEditTime: 2022-03-03 17:33:17
+ * Description: 部门管理数据库相关函数
+ ******************************************************************************/
 package dao
 
 import (
@@ -6,11 +20,6 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
-/**
- * @Author: wang hao
- * @Date: 2021/12/28 9:34
- * @Description:
- */
 func IsParentDepartExist(parent string) bool {
 	var Depart model.DepartNode
 	mysqlmanager.DB.Where("depart=? ", parent).Find(&Depart)
@@ -30,7 +39,6 @@ func IsDepartIDExist(ID int) bool {
 func DepartStore() []model.DepartNode {
 	var Depart []model.DepartNode
 	mysqlmanager.DB.Find(&Depart)
-	logger.Info("%v", Depart)
 	return Depart
 }
 func IsRootExist() bool {

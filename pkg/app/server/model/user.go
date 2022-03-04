@@ -9,23 +9,28 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-03 14:15:34
+ * LastEditTime: 2022-03-03 20:17:57
  * Description: 用户数据存储结构体
  ******************************************************************************/
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 type User struct {
-	gorm.Model
-	Username string `gorm:"type:varchar(25);not null" json:"username,omitempty" form:"username"`
-	Password string `gorm:"type:varchar(100);not null" json:"password,omitempty" form:"password"`
-	Phone    string `gorm:"size:255" json:"phone,omitempty" form:"phone"`
-	Email    string `gorm:"type:varchar(30);not null" json:"email,omitempty" form:"email"`
-	Enable   string `gorm:"size:10;not null" json:"enable,omitempty"`
+	ID           uint `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt    time.Time
+	DepartFirst  int    `gorm:"size:25" json:"departPId,omitempty"`
+	DepartSecond int    `gorm:"size:25" json:"departid,omitempty"`
+	DepartName   string `gorm:"size:25" json:"departName,omitempty"`
+	Username     string `json:"username,omitempty"`
+	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
+	Phone        string `gorm:"size:11" json:"phone,omitempty"`
+	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
+	Enable       string `gorm:"size:10;not null" json:"enable,omitempty"`
 }
 
 func (u *User) All(q *PaginationQ) (list *[]User, total uint, err error) {

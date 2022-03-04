@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-03 13:12:10
+ * LastEditTime: 2022-03-04 01:34:07
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -80,6 +80,7 @@ func SetupRouter() *gin.Engine {
 	{
 		user.POST("/register", controller.Register)
 		user.POST("/login", controller.Login)
+		user.GET("/logout", controller.Logout)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearch)

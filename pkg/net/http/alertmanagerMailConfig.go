@@ -1,3 +1,17 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: wanghao
+ * Date: 2021-12-04 15:08:08
+ * LastEditTime: 2022-03-04 02:09:57
+ * Description: 实现alertmanager邮箱的动态配置
+ ******************************************************************************/
 package http
 
 import (
@@ -16,7 +30,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// 实现alertmanager邮箱的动态配置
 // Alertmanager配置文件结构
 type AlertmanagerYaml struct {
 	Global    Global      `yaml:"global"`
@@ -116,7 +129,7 @@ func WriteToYaml(email []string) {
 	write.WriteString("\n repeat_interval: " + alertYml.Route.RepeatInterval)
 	write.WriteString("\n receiver: " + alertYml.Route.Receiver)
 	write.WriteString("\nreceivers:")
-	for key, _ := range alertYml.Receivers {
+	for key := range alertYml.Receivers {
 		write.WriteString(
 			"\n- name: " + alertYml.Receivers[key].Name +
 				"\n  email_configs:" +
@@ -199,7 +212,7 @@ func SendFile() {
 }
 
 //alertmanager邮箱配置热启动
-func configReload() {
+func ConfigReload() {
 	response, _ := http.PostForm("http://192.168.217.22:9093/-/reload", url.Values{})
 	fmt.Println(response)
 }

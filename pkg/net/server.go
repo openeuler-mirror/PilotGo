@@ -203,7 +203,7 @@ func PluginAddHandler(c *gin.Context, errResp *errorResp, rResp *resultResp) (in
 	if err != nil {
 		errResp.ErrorType = "regist_error"
 		errResp.Error = err.Error()
-		return http.StatusBadRequest, errors.New(fmt.Sprintf("can not regster %s,error:%s", pluAdd.Plugin, err.Error()))
+		return http.StatusBadRequest, fmt.Errorf("can not regster %s,error:%s", pluAdd.Plugin, err.Error())
 	}
 
 	err = sqlManager.Insert(&mysqlmanager.PluginInfo{
@@ -293,7 +293,7 @@ func HostAddHandler(c *gin.Context, errResp *errorResp, rResp *resultResp) (int,
 	if err != nil {
 		errResp.ErrorType = "insert_error"
 		errResp.Error = err.Error()
-		return http.StatusBadRequest, errors.New(fmt.Sprintf("insert error:%s", err.Error()))
+		return http.StatusBadRequest, fmt.Errorf("insert error:%s", err.Error())
 	}
 
 	rResp.Data = "{}"
@@ -311,7 +311,7 @@ func HostDeleteHandler(c *gin.Context, errResp *errorResp, rResp *resultResp) (i
 
 	for _, val := range value.Id {
 		if val == "0" {
-			err = errors.New(fmt.Sprintf("invaild value:%d", value.Id))
+			err = fmt.Errorf("invaild value:%s", value.Id)
 			errResp.ErrorType = "value_error"
 			errResp.Error = err.Error()
 			return http.StatusBadRequest, err
@@ -322,7 +322,7 @@ func HostDeleteHandler(c *gin.Context, errResp *errorResp, rResp *resultResp) (i
 	if err != nil {
 		errResp.ErrorType = "delete_error"
 		errResp.Error = err.Error()
-		return http.StatusBadRequest, errors.New(fmt.Sprintf("delete error:%s", err.Error()))
+		return http.StatusBadRequest, fmt.Errorf("delete error:%s", err.Error())
 	}
 
 	rResp.Data = "{}"
@@ -341,7 +341,7 @@ func GetLogin(c *gin.Context, errResp *errorResp, rResp *resultResp) (int, error
 	if !ok {
 		errResp.ErrorType = "checkauth_error"
 		errResp.Error = "checkauth_error"
-		return http.StatusUnauthorized, errors.New(fmt.Sprintf("CheckAuth %s:%s failed", u, p))
+		return http.StatusUnauthorized, fmt.Errorf("CheckAuth %s:%s failed", u, p)
 	}
 
 	id, err := c.Cookie("pilotgoSession")
@@ -368,7 +368,7 @@ func GetLogin(c *gin.Context, errResp *errorResp, rResp *resultResp) (int, error
 	return http.StatusOK, nil
 }
 
-func checkSession(c *gin.Context) {
+func CheckSession(c *gin.Context) {
 	if c == nil {
 		logger.Error("c == nil")
 		return
@@ -411,7 +411,7 @@ func Start(conf *config.Configure) (err error) {
 
 	sessionManage.Init(conf.MaxAge, conf.SessionCount)
 	go func() {
-		for true {
+		for {
 			time.Sleep(time.Second * 10)
 			//每10秒读取一次数据库，并更改数据库状态
 			mi, err := mysqlmanager.GetMachInfo(sqlManager)
