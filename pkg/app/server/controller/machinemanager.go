@@ -165,14 +165,20 @@ func IsChildExist(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode
 	}
 	return false
 }
-func LoopTree(node *model.MachineTreeNode, ID int) *model.MachineTreeNode {
-	for _, value := range node.Children {
-		if value.Id == ID {
-			return value
+func LoopTree(node *model.MachineTreeNode, ID int, res **model.MachineTreeNode) {
+	if node.Children != nil {
+		for _, value := range node.Children {
+			if value.Id == ID {
+				*res = value
+			}
+			
+			LoopTree(value, ID, res)
+			
+
 		}
-		LoopTree(value, ID)
+
 	}
-	return &model.MachineTreeNode{}
+	return
 }
 func Deletemachinedata(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -296,9 +302,12 @@ func Dep(c *gin.Context) {
 	}
 	node := &root
 	makeTree(node, ptrchild)
+	var d *model.MachineTreeNode
 	if node.Id != tmp {
-		node = LoopTree(node, tmp)
+		LoopTree(node, tmp, &d)
+		node = d
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": node,
