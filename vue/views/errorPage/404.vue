@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-02-25 17:39:58
+  LastEditTime: 2022-03-04 16:04:00
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -44,7 +44,7 @@ export default {
   },
   computed: {
     message() {
-      return '普京说这个页面你不能进......'
+      return '这个页面你不能进......'
     }
   }
 }

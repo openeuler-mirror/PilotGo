@@ -1,13 +1,29 @@
+/*
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * @Author: zhaozhenfang
+ * @Date: 2022-02-18 17:47:56
+ * @LastEditTime: 2022-03-04 15:59:02
+ * @Description: provide agent log manager of pilotgo
+ */
 import { loginByEmail, logout } from '@/request/user'
 import { getToken, setToken, removeToken, getUsername, setUsername, removeUsername, 
-    getRoles, setRoles, removeRoles, getUserId, removeUserId, setUserId } from '@/utils/auth'
+    getRoles, setRoles, removeRoles, removeUserDepartId, setUserDepartId,
+    getUserDepartId, getUserDepartName, removeUserDepartName, setUserDepartName, } from '@/utils/auth'
 
 const user = {
     state: {
         token: getToken(),
         username: getUsername(),
         roles: getRoles() ? JSON.parse(getRoles()) : [],
-        userId: getUserId(),
+        departId: getUserDepartId(),
+        departName: getUserDepartName(),
     },
     mutations: {
         SET_TOKEN: (state, token) => {
@@ -19,29 +35,14 @@ const user = {
         SET_ROLES: (state, roles) => {
             state.roles = roles
         },
-        SET_USERID: (state, userId) => {
-            state.userId = userId
+        SET_DEPARTID: (state, departId) => {
+            state.departId = departId
+        },
+        SET_DEPARTNAME: (state, departName) => {
+            state.departName = departName
         },
     },
     actions: {
-        loginByEmail2({ commit }, userInfo){
-            commit('SET_TOKEN', "saajhdjshdjsad12")
-            commit('SET_NAME', userInfo.email)
-            commit('SET_USERID', "111")
-            setToken("saajhdjshdjsad12")
-            setUsername(userInfo.email)
-            setUserId("111")
-        },
-        logOut({ commit, dispatch }) {
-            commit('SET_TOKEN', '')
-            commit('SET_ROLES', [])
-            commit('SET_MENUS', [])
-            commit('SET_NAME', '')
-            removeUsername();
-            removeToken();
-            removeUserId();
-            localStorage.clear()
-        },
         loginByEmail({ commit }, userInfo) {
             const username = userInfo.username.trim()
             return new Promise((resolve, reject) => {
@@ -52,27 +53,35 @@ const user = {
                     } else {
                         commit('SET_TOKEN', res.data.token)
                         commit('SET_NAME', username)
-                        
+                        // commit('SET_ROLES', username)
+                        commit('SET_DEPARTID', res.data.departId)
+                        commit('SET_DEPARTNAME', res.data.departName)
                         setToken(res.data.token)
+                        // setRoles(res.data.roles)
                         setUsername(username)
+                        setUserDepartId(res.data.departId)
+                        setUserDepartName(res.data.departName)
                         resolve()
                     }
                 }).catch(error => {
-                    reject(error)
+                    reject('缺少必要的参数')
                 })
             })
         },
-        logOut1({ commit }) {
+        logOut({ commit }, userInfo) {
             return new Promise((resolve, reject) => {
                 logout().then(() => {
                     commit('SET_TOKEN', '')
                     commit('SET_ROLES', [])
                     commit('SET_MENUS', [])
                     commit('SET_NAME', '')
+                    commit('SET_DEPARTID', '')
+                    commit('SET_DEPARTNAME', '')
                     removeRoles();
                     removeUsername();
                     removeToken();
-                    removeUserId();
+                    removeUserDepartId();
+                    removeUserDepartName();
                     localStorage.clear()
                     resolve()
                 }).catch(error => {
