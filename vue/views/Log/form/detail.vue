@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-28 14:22:36
-  LastEditTime: 2022-03-03 16:53:24
+  LastEditTime: 2022-03-04 09:36:54
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -17,11 +17,11 @@
     <div class="basic">
       <el-descriptions class="margin-top" :column="2">
         <el-descriptions-item label="类型">{{ type }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ status }}</el-descriptions-item>
+        <el-descriptions-item label="状态">{{ Status }}</el-descriptions-item>
         <el-descriptions-item label="进度">
         </el-descriptions-item>
       </el-descriptions>
-           <el-progress type="line" :percentage="percent" :status="statusType"></el-progress>
+           <el-progress type="line" :percentage="percent" :status="Status == '成功' ? 'success' : 'exception'"></el-progress>
     </div>
       <small-table
         ref="stable"
@@ -60,15 +60,14 @@ export default {
     return {
       result: [],
       type: '',
-      status: '',
+      Status: '',
       theight: 260,
       statusType: '',
       percent: 10,
     }
   },
   mounted() {
-    this.status = this.log.status;
-    this.statusType = this.log.status == '成功' ? 'success' : 'exception';
+    this.Status = this.log.status;
     getLogDetail({id: this.log.id}).then(res => {
       this.result = res.data.data;
       this.type = res.data.data[0].action;
@@ -80,12 +79,6 @@ export default {
       }
     })
   },
-  methods: {
-    handleCancel() {
-      this.$refs.addIPForm.resetFields();
-      this.$emit("click");
-    },
-  }
 }
 </script>
 <style scoped lang="scss">

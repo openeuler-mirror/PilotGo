@@ -37,15 +37,17 @@
         </el-upload>
       </template>
       <template v-slot:table>
-        <el-table-column prop="ID" label="编号" width="60">
+        <el-table-column prop="id" label="编号" width="60">
         </el-table-column>
-        <el-table-column  prop="username" label="用户名" width="160">
+        <el-table-column  prop="username" label="用户名">
         </el-table-column>
-        <el-table-column prop="phone" label="手机号" width="120">
+        <el-table-column  prop="departName" label="部门">
+        </el-table-column>
+        <el-table-column prop="phone" label="手机号">
         </el-table-column>
         <el-table-column  prop="email" label="邮箱">
         </el-table-column>
-        <el-table-column prop="enable" label="启用" width="80">
+        <el-table-column prop="enable" label="启用">
           <template slot-scope="scope">
             {{scope.row.enable === true ? "是" : "否"}}
           </template>
@@ -130,9 +132,7 @@ export default {
       this.type = "update";
     },
     handleReset(email) {
-      console.log(email)
       resetPwd({'email': email}).then((res) => {
-        console.log(res)
         if(res.data.code === 200){
           console.log("1111")
           this.$message.success("重置密码成功")
