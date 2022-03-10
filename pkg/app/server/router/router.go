@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-04 01:34:07
+ * LastEditTime: 2022-03-10 13:39:14
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -17,11 +17,15 @@ package router
 import (
 	"net/http"
 
+	"github.com/casbin/casbin"
+	gormadapter "github.com/casbin/gorm-adapter"
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network/handlers"
+	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/middleware"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 func SetupRouter() *gin.Engine {
@@ -78,40 +82,47 @@ func SetupRouter() *gin.Engine {
 	}
 	user := router.Group("user")
 	{
-		user.POST("/register", controller.Register)
 		user.POST("/login", controller.Login)
 		user.GET("/logout", controller.Logout)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
-		user.GET("/searchAll", controller.UserAll)
-		user.POST("/userSearch", controller.UserSearch)
-		user.GET("/reset", controller.ResetPassword)
-		user.POST("/delete", controller.DeleteUser)
-		user.POST("/update", controller.UpdateUser)
-		user.POST("/import", controller.ImportUser)
 	}
 	machinemanager := router.Group("machinemanager")
 	{
-		machinemanager.POST("/adddepart", controller.AddDepart)
 		machinemanager.GET("/departinfo", controller.DepartInfo)
 		machinemanager.GET("/machineinfo", controller.MachineInfo)
-		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)
-		machinemanager.GET("/t", controller.Deletedepartdata)
 		machinemanager.GET("/depart", controller.Dep)
-		machinemanager.GET("/updatedepart", controller.UpdateDepart)
 		machinemanager.GET("/test", controller.AddIP)
 	}
 	batchmanager := router.Group("batchmanager")
 	{
 		batchmanager.POST("/createbatch", controller.CreateBatch)
-		batchmanager.POST("/deletebatch", controller.DeleteBatch)
 		batchmanager.GET("/batchinfo", controller.BatchInform)
-		batchmanager.POST("/updatebatch", controller.UpdateBatch)
 		batchmanager.POST("/batchmachineinfo", controller.Batchmachineinfo)
 	}
 	prometheus := router.Group("prometheus")
 	{
 		prometheus.POST("/queryrange", controller.Queryrange)
 		prometheus.POST("/query", controller.Query)
+	}
+	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
+	common.E = casbin.NewEnforcer("./rbac_models.conf", a)
+	common.E.LoadPolicy()
+	Level := router.Group("")
+	Level.Use(common.CasbinHandler())
+	{
+		user.POST("/register", controller.Register)
+		user.GET("/searchAll", controller.UserAll)
+		user.POST("/userSearch", controller.UserSearch)
+		user.GET("/reset", controller.ResetPassword)
+		user.POST("/delete", controller.DeleteUser)
+		user.POST("/update", controller.UpdateUser)
+		user.POST("/import", controller.ImportUser)
+		machinemanager.GET("/t", controller.Deletedepartdata)
+		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)
+		machinemanager.POST("/adddepart", controller.AddDepart)
+		machinemanager.GET("/updatedepart", controller.UpdateDepart)
+		batchmanager.POST("/updatebatch", controller.UpdateBatch)
+		batchmanager.POST("/deletebatch", controller.DeleteBatch)
 	}
 	// TODO: 此处绑定前端静态资源handler
 	router.Static("/static", "./dist/static")
