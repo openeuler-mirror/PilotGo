@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-04 01:59:29
+ * LastEditTime: 2022-03-08 09:48:38
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -42,7 +42,6 @@ func Register(c *gin.Context) {
 	depart := user.DepartName
 	departId := user.DepartSecond
 	departPid := user.DepartFirst
-	enable := user.Enable
 
 	if len(username) == 0 { //Data verification
 		username = utils.RandomString(5)
@@ -64,7 +63,11 @@ func Register(c *gin.Context) {
 			"邮箱已存在!")
 		return
 	}
-
+	if departPid == 1 {
+		user.RoleType = 1
+	} else {
+		user.RoleType = 2
+	}
 	user = model.User{ //Create user
 		Username:     username,
 		Password:     password,
@@ -73,9 +76,9 @@ func Register(c *gin.Context) {
 		DepartName:   depart,
 		DepartFirst:  departPid,
 		DepartSecond: departId,
-		Enable:       enable,
+		RoleType:     user.RoleType,
 	}
-	mysqlmanager.DB.Create(&user)
+	mysqlmanager.DB.Save(&user)
 
 	response.Success(c, nil, "注册成功!") //Return result
 }
@@ -129,7 +132,7 @@ func Logout(c *gin.Context) {
 }
 
 func Info(c *gin.Context) {
-	user, _ := c.Get("user")
+	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": gin.H{"user": dto.ToUserDto(user.(model.User))},

@@ -1,10 +1,18 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2021-11-1 15:08:08
+ * LastEditTime: 2022-03-08 09:46:30
+ * Description: jwt是一个基于token的轻量级认证方式
+ ******************************************************************************/
 package common
-
-/**
- * @Author: zhang han
- * @Date: 2021/11/1 9:29
- * @Description: jwt是一个基于token的轻量级认证方式
- */
 
 import (
 	"time"
@@ -14,6 +22,7 @@ import (
 )
 
 var jwtKey = []byte("a_secret_crect")
+var Issue = "PilotGo"
 
 type Claims struct {
 	UserId uint
@@ -27,7 +36,7 @@ func ReleaseToken(user model.User) (string, error) {
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
-			Issuer:    "zhang han",
+			Issuer:    Issue,
 			Subject:   "user token",
 		},
 	}
