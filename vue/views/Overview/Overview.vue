@@ -1,15 +1,23 @@
 <template>
   <div class="overview">
     <div class="cluster">
-      <span class="level-title">集群整体情况</span>
-      <el-row class="cluster-row">
-        <el-col :span="12">
-          <div id="echarts_box1"></div>
-        </el-col>
-        <el-col :span="12">
-          <div id="echarts_box2"></div>
-        </el-col>
-      </el-row>
+      <span class="level-title">机器监控数据</span>
+      <el-select v-model="macIp" filterable placeholder="请选择或输入关键字">
+        <el-option
+          v-for="item in options"
+          :key="item.label"
+          :label="item.label"
+          :value="item.label">
+        </el-option>
+      </el-select>
+      <el-carousel trigger="click" type="card" :autoplay="false" ref="card" height="360px">
+      <el-carousel-item v-for="item in chartData" 
+        :key="item.index" 
+        :name="item.lable" 
+        :label="item.label"
+        :id="item.chartId">
+      </el-carousel-item>
+    </el-carousel>
     </div>
     <div class="monitor">
       <span class="monitor-title">监控告警情况</span>
@@ -18,14 +26,7 @@
           <div class="table-title">
             <span class="table-title__left">机器异常</span>
             <div class="table-title__right">
-              <span>共{{ machineTableData.length }}条</span>
-              <el-pagination
-                layout="prev, next"
-                :total="machineTableData.length"
-                :page-size="pageSize"
-                @current-change="handleCurrentChangeMachineTable"
-              >
-              </el-pagination>
+              <span>共{{ machineTableData.length }}条</span>>
             </div>
           </div>
 
@@ -41,13 +42,6 @@
             <span class="table-title__left">监控异常</span>
             <div class="table-title__right">
               <span>共{{ monitorTableData.length }}条</span>
-              <el-pagination
-                layout="prev, next"
-                :total="monitorTableData.length"
-                :page-size="pageSize"
-                @current-change="handleCurrentChangeMonitorTable"
-              >
-              </el-pagination>
             </div>
           </div>
 
@@ -63,14 +57,61 @@
 </template>
 
 <script>
-import { getOverview } from "@/request/api";
+import { getData, getCurrData } from "@/request/overview";
+import { getClusters } from "@/request/cluster";
 export default {
   name: "Overview",
   props: {},
   data() {
     return {
-      char1: "",
-      char2: "",
+      label: 'data',
+      cpuChart: {},
+      memChart: {},
+      cpuData: [],
+      memData: [],
+      netData: [],
+      inData: [],
+      outData: [],
+      chartData: [
+        {
+          label: 'CPU',
+          chartId: 'cpu',
+          index: 1
+        },
+        {
+          label: '内存',
+          chartId: 'memory',
+          index: 2
+        },
+        {
+          label: 'I/O',
+          chartId: 'io',
+          index: 3
+        },
+        {
+          label: '网络',
+          chartId: 'network',
+          index: 4
+        }
+      ],
+      options: [{
+          value: '0',
+          label: 'localhost:9100'
+        },{
+          value: '1',
+          label: '172.17.127.20'
+        }, {
+          value: '2',
+          label: '172.17.127.21'
+        }, {
+          value: '3',
+          label: '172.17.127.22'
+        }, ],
+      macIp: 'localhost:9100',
+      chartW: 0,
+      chartH: 0,
+      now: new Date().getTime()/1000,
+      currIndex: 0,
       pageSize: 4, //表格显示数据条数
       machineTable: [], //机器表格显示数据
       monitorTable: [], //监控表格显示数据 
@@ -82,94 +123,202 @@ export default {
         },
       ],//表格总数据
       monitorTableData: [],
-      chartData: [],
     };
   },
   computed: {
-    option() {
-      let _this = this;
+    cpuOption() {
       return {
         title: {
-          text: "",
-          left: "center",
-          top: 20,
-          textStyle: {
-            color: "#ccc",
-          },
+          text: 'cpu使用率'
         },
         tooltip: {
-          trigger: "item",
+          trigger: 'axis',
+          formatter: function (params) {
+            params = params[0];
+            return (
+              params.value[0] + ' ' + 
+              params.value[1] + '%'
+            );
+          },
+          axisPointer: {
+            animation: false
+          }
         },
-        legend: {
-          orient: "vertical",
-          right: 0,
-          data: ["虚拟机", "物理机"],
+        xAxis: {
+          type: 'time',
+          splitLine: {
+            show: false
+          }
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          boundaryGap: [0, '100%'],
         },
         series: [
           {
-            name: "集群情况",
-            type: "pie",
-            radius: ["50%", "70%"],
-            data: _this.chartData,
-          },
-        ],
-      };
-    },
-  },
-  mounted() {
-    let _this = this;
-    _this.refreshData();
-  },
-  methods: {
-    refreshData() {
-      let _this = this;
-      getOverview().then((res) => {
-        let chartData = res.data.data;
-        for (let i of chartData) {
-          if (i.name == "virtual") {
-            i.name = "虚拟机";
+            name: '',
+            type: 'line',
+            smooth: true,
+            showSymbol: false,
+            lineStyle: {
+              width: 1
+            },
+            areaStyle: {
+              opacity: 0.3,
+              color:  '#37A2FF'
+            },
+            data: this.cpuData,
           }
-          if (i.name == "physics") {
-            i.name = "物理机";
-          }
-        }
-        _this.chartData = chartData;
-        let chartDiv = document.getElementById("echarts_box1");
-        //基于准备好的dom，初始化echarts实例
-        _this.chart1 = this.$echarts.init(chartDiv);
-        _this.chart2 = this.$echarts.init(
-          document.getElementById("echarts_box2")
-        );
-        _this.chart1.setOption(_this.option);
-        _this.chart2.setOption(_this.option);
-
-        _this.machineTable = _this.machineTableData.slice(0, _this.pageSize);
-        _this.monitorTable = _this.monitorTableData.slice(0, _this.pageSize);
-      });
-    },
-    currentPageChange(currentPage, tableData, tableName) {
-      let _this = this;
-      let data = tableData.slice(
-        (currentPage - 1) * _this.pageSize,
-        currentPage * _this.pageSize
-      );
-      if (tableName == "machine") {
-        _this.machineTable = data;
-      } else if (tableName == "monitor") {
-        _this.monitorTable = data;
+        ]
       }
     },
-    //机器异常数据分页处理
-    handleCurrentChangeMachineTable(currentPage) {
-      let _this = this;
-      this.currentPageChange(currentPage, _this.machineTableData, "machine");
-    },
-    //监控异常数据分页处理
-    handleCurrentChangeMonitorTable(currentPage) {
-      let _this = this;
-      this.currentPageChange(currentPage, _this.monitorTableData, "monitor");
-    },
+    memOption() {
+      return {
+        title: {
+          text: '内存使用率'
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: function (params) {
+            params = params[0];
+            return (
+              params.value[0] + ' ' + 
+              params.value[1] + '%'
+            );
+          },
+          axisPointer: {
+            animation: false
+          }
+        },
+        xAxis: {
+          type: 'time',
+          splitLine: {
+            show: false
+          }
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          boundaryGap: [0, '100%'],
+        },
+        series: [
+          {
+            name: '',
+            type: 'line',
+            smooth: true,
+            showSymbol: false,
+            lineStyle: {
+              width: 1
+            },
+            areaStyle: {
+              opacity: 0.3,
+              color:  '#37A2FF'
+            },
+            data: this.memData,
+          }
+        ]
+      }
+    }
   },
+  mounted() {
+    this.chartW = document.getElementsByClassName("cluster")[0].clientWidth/2+20;
+    this.chartH = document.getElementsByClassName("cluster")[0].clientHeight;
+    
+    this.getStepCpu();
+    this.getStepMem();
+    // this.getStepNet();
+    // this.getStepIO();
+  },
+  methods: {
+    getStepData(thisData,itemIndex) {
+      let params= {
+        machineip: this.macIp,
+        query: itemIndex,
+        starttime: parseInt(this.now - 180) + '',
+        endtime: parseInt(this.now - 0) + '',
+        step: 10
+      }
+      getData(params).then(res => {
+        if(res.data.code === 200) {
+          res.data.data.forEach(item => {
+            thisData.push({
+              time: item.time,
+              value: [ item.time,item.value]
+            })
+          })
+        }
+      })
+    },
+    getPointData(thisData,itemIndex) {
+      let params= {
+        machineip: this.macIp,
+        query: itemIndex,
+        time: parseInt(new Date().getTime()/1000 - 0) + '',
+      }
+      getCurrData(params).then(res => {
+        if(res.data.code === 200) {
+          thisData.shift();
+          let item = res.data.data;
+          thisData.push({
+            time: item.time,
+            value: [ item.time,item.value]
+          });
+        }
+      })
+    },
+    getCurrCpu() {
+      this.getPointData(this.cpuData,1);
+    },
+    getStepCpu() {
+      this.cpuChart = this.$echarts.init(document.getElementById('cpu'))
+      this.cpuChart.resize({width: this.chartW,height: this.chartH})
+      this.getStepData(this.cpuData, 1);
+      setInterval(this.getCurrCpu, 10000); 
+    },
+    getCurrMem() {
+      this.getPointData(this.memData,2);
+    },
+    getStepMem() {
+      this.memChart = this.$echarts.init(document.getElementById('memory'))
+      this.memChart.resize({width: this.chartW,height: this.chartH})
+      this.getStepData(this.memData,2);
+      setInterval(this.getCurrCpu, 10000); 
+    },
+    getCurrNet() {
+      this.getPointData(this.netData,4);
+    },
+    getStepNet() {
+      this.getStepData(this.netData,4);
+      this.option.title.text = "平均网络输入输出";
+      setInterval(this.getCurrCpu, 10000); 
+    },
+    
+
+  },
+  watch: {
+    cpuData: function(newData) {
+        this.cpuChart.setOption(this.cpuOption,true)
+    },
+    memData: function(newData) {
+      this.memChart.setOption(this.memOption,true)
+    },
+    netData: function(newData) {
+      this.resizeChart('network',{width: this.chartW,height: this.chartH})
+      this.myChart.setOption(this.option,true)
+    },
+    inData: function(newData) {
+      this.resizeChart('io',{width: this.chartW,height: this.chartH})
+      this.myChart.setOption(this.option,true)
+    },
+    macIp: function(newIp) {
+      clearInterval();
+    }
+  },
+  beforeRouteLeave(to, form, next) {
+    clearInterval();
+    next()
+  }
 };
 </script>
 
@@ -177,10 +326,8 @@ export default {
 .overview {
   margin: 0 10px;
   .cluster {
-    .cluster-row {
-      margin-top: 20px;
-      padding-top: 10px;
-      background-color: #fff;
+    .el-carousel__item {
+      background-color: #d3dce6;
     }
   }
 

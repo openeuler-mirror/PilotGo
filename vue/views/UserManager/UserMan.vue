@@ -134,11 +134,9 @@ export default {
     handleReset(email) {
       resetPwd({'email': email}).then((res) => {
         if(res.data.code === 200){
-          console.log("1111")
           this.$message.success("重置密码成功")
           this.refresh();
         } else {
-          console.log("1111")
           this.$message.error(res.msg);
         }
       })

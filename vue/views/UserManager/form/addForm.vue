@@ -10,7 +10,6 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
-
       <el-form-item label="密码:" prop="password">
         <el-input
           class="ipInput"
@@ -18,6 +17,21 @@
           v-model="form.password"
           autocomplete="off"
         ></el-input>
+      </el-form-item>
+      <el-form-item label="部门:" prop="departName">
+        <el-input
+          class="ipInput"
+          controls-position="right"
+          :disabled="disabled"
+          v-model="form.departName"
+          autocomplete="off"
+        ></el-input>
+        <ky-tree
+        :getData="getChildNode" 
+        :showEdit="false"
+        ref="tree" 
+        @nodeClick="handleSelectDept">
+        </ky-tree>
       </el-form-item>
       <el-form-item label="手机号:" prop="phone">
         <el-input
@@ -45,16 +59,25 @@
 </template>
 
 <script>
+import kyTree from "@/components/KyTree";
 import { addUser } from "@/request/user";
+import { getChildNode } from "@/request/cluster";
 import { checkEmail, checkPhone } from "@/rules/check"
 export default {
+  components: {
+    kyTree
+  },
   data() {
     return {
+      disabled: true,
       form: {
         username: "",
         password: "",
         phone: "",
         email: "",
+        departName: "",
+        departId: 0,
+        departPid: 0
       },
       rules: {
         username: [
@@ -67,6 +90,11 @@ export default {
           { 
             required: true, 
             message: "请输入密码",
+            trigger: "blur" 
+          }],
+        departName: [{ 
+            required: true, 
+            message: "请选择部门",
             trigger: "blur" 
           }],
         phone: [
@@ -90,9 +118,18 @@ export default {
     };
   },
   methods: {
+    getChildNode,
     handleCancel() {
       this.$refs.form.resetFields();
       this.$emit("click");
+    },
+    handleSelectDept(data) {
+      if(data) {
+        this.form.departName = data.label;
+        this.form.departId = data.id;
+        this.form.departPid = data.pid;
+        this.departId = data.id;
+      }
     },
     handleAdd() {
       this.$refs.form.validate((valid) => {
