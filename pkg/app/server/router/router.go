@@ -108,6 +108,11 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/updatebatch", controller.UpdateBatch)
 		batchmanager.POST("/batchmachineinfo", controller.Batchmachineinfo)
 	}
+	prometheus := router.Group("prometheus")
+	{
+		prometheus.POST("/queryrange", controller.Queryrange)
+		prometheus.POST("/query", controller.Query)
+	}
 	// TODO: 此处绑定前端静态资源handler
 	router.Static("/static", "./dist/static")
 	router.StaticFile("/", "./dist/index.html")

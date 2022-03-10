@@ -171,9 +171,8 @@ func LoopTree(node *model.MachineTreeNode, ID int, res **model.MachineTreeNode) 
 			if value.Id == ID {
 				*res = value
 			}
-			
+
 			LoopTree(value, ID, res)
-			
 
 		}
 
