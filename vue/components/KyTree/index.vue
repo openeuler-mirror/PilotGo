@@ -9,8 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-02-25 17:40:31
-  Description: provide agent log manager of pilotgo
+  LastEditTime: 2022-03-04 16:08:34
  -->
 <template>
   <div class="ky-tree">
@@ -23,7 +22,7 @@
        :load="loadNode"
        :highlight-current="true"
        lazy
-       :default-expanded-keys="[1,2]"
+       :default-expanded-keys="[1]"
        :expand-on-click-node="false"
        :render-after-expand="isRender"
        @node-click="handleNodeClick"
@@ -31,7 +30,7 @@
       >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
-        <span>
+        <span v-if="showEdit">
           <em @click.stop="() => append(node,data)" class="el-icon-plus"></em>
           <em v-if="data.id !== 1" @click.stop="() => remove(node,data)" class="el-icon-delete"></em>
           <em @click.stop="() => rename(node,data)" class="el-icon-edit"></em>
@@ -47,6 +46,9 @@ export default {
   props: {
     getData: {
       type: Function,
+    },
+    showEdit: {
+      type: Boolean
     },
   },
   data() {
@@ -74,7 +76,7 @@ export default {
    },
     // 加载根
     async loadFirstNode(resolve) {
-      let res = await this.getData({'DepartID': 1});
+      let res = await this.getData({'DepartID': this.$store.getters.UserDepartId});
       if(res.status === 200) {
         let data = res.data.data;
         let rootNode = [{

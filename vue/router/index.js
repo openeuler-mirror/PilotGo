@@ -84,12 +84,6 @@ export const routes = [
         name: 'PlugIn',
         component:  _import('Plug-in/Plug-in'),
         meta: { title: 'plug_in', header_title: "插件管理", panel: "plug_in", icon_class: 'el-icon-document' }
-      },
-      {
-        path: '/prometheus',
-        name: 'Prometheus',
-        component: Prometheus,
-        // icon_class: 'el-icon-odometer'
       }, 
       {
         path: '/cockpit',
