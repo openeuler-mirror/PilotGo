@@ -110,3 +110,13 @@ func MachineData(MachineIP string) model.MachineNode {
 	mysqlmanager.DB.Where("ip=?", MachineIP).Find(&m)
 	return m
 }
+func MachineAllData(a string) []string {
+	var mch []model.MachineNode
+	mysqlmanager.DB.Where("depart_id=?", a).Find(&mch)
+	res := make([]string, 0)
+	for _, value := range mch {
+		res = append(res, value.IP)
+	}
+	return res
+
+}

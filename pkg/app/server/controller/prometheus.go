@@ -29,11 +29,12 @@ import (
 )
 
 const (
-	CPU     = 1 //CPU使用率
-	Memory  = 2 //内存使用率
-	IO      = 3 //IO使用
-	Network = 4 //网络使用
-
+	CPU             = 1 //CPU使用率
+	Memory          = 2 //内存使用率
+	IOWrite         = 3 //IO写入速率
+	IORead          = 4 //IO读取速率
+	NetworkReceive  = 5 //平均入网 (字节)
+	NetworkTransmit = 6 //平均出网
 )
 
 type Promequeryrange struct {
@@ -67,9 +68,28 @@ type ReturnPromeMemory struct {
 		} `json:"result"`
 	} `json:"data"`
 }
+type ReturnPromeIO struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string `json:"resultType"`
+		Result     []struct {
+			Metric struct {
+				Device   string `json:"device"`
+				Instance string `json:"instance"`
+				Job      string `json:"job"`
+			} `json:"metric"`
+			Value []interface{} `json:"values"`
+		} `json:"result"`
+	} `json:"data"`
+}
+
 type Res struct {
 	Time string `json:"time"`
 	Res  string `json:"value"`
+}
+type IO struct {
+	Type  string `json:"device"`
+	Label []Res  `json:"label"`
 }
 
 func Queryrange(c *gin.Context) {
@@ -147,7 +167,6 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					x.Res = x.Res[:4]
 					logger.Info("%+v", x)
 					res = append(res, x)
 				}
@@ -180,7 +199,6 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					x.Res = x.Res[:4]
 					logger.Info("%+v", x)
 					res = append(res, x)
 				}
@@ -192,11 +210,53 @@ func Queryrange(c *gin.Context) {
 			"code": 200,
 			"data": res,
 		})
+	case 3, 4, 5, 6:
+		var result ReturnPromeIO
+		err = json.Unmarshal(body, &result)
+		logger.Info("%v", result)
+		if err != nil {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				err.Error())
+			return
+		}
+
+		io := make([]IO, 0)
+		var x Res
+		var i IO
+		for _, value := range result.Data.Result {
+
+			if value.Metric.Instance == Pqr.Machineip {
+				i.Type = value.Metric.Device
+				for _, value2 := range value.Value {
+					a := value2.([]interface{})
+					tm := time.Unix(int64(a[0].(float64)), 0)
+					x.Time = tm.Format("2006-01-02 15:04:05")
+					x.Res = a[1].(string)
+					logger.Info("%+v", x)
+					i.Label = append(i.Label, x)
+
+				}
+			} else {
+				continue
+			}
+			io = append(io, i)
+			i.Label = []Res{}
+		}
+
+		logger.Info("%v", io)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": io,
+		})
+
 	default:
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"输入查询号有误")
+
 	}
 
 }
@@ -216,6 +276,39 @@ func JudgeQueryRange(query int, ip string, start string, end string) (func() str
 		return func() string {
 			return JoinUrlParam(ip+":9090",
 				"(1-(node_memory_MemAvailable_bytes/(node_memory_MemTotal_bytes)))*100",
+				start,
+				end,
+				"10")
+		}, nil
+
+	case 3:
+		return func() string {
+			return JoinUrlParam(ip+":9090",
+				"irate(node_disk_writes_completed_total[1m])",
+				start,
+				end,
+				"10")
+		}, nil
+	case 4:
+		return func() string {
+			return JoinUrlParam(ip+":9090",
+				"irate(node_disk_reads_completed_total[1m])",
+				start,
+				end,
+				"10")
+		}, nil
+	case 5:
+		return func() string {
+			return JoinUrlParam(ip+":9090",
+				"irate(node_network_receive_bytes_total[5m])",
+				start,
+				end,
+				"10")
+		}, nil
+	case 6:
+		return func() string {
+			return JoinUrlParam(ip+":9090",
+				"irate(node_network_transmit_bytes_total[5m])",
 				start,
 				end,
 				"10")
@@ -272,6 +365,25 @@ type ReturnPromeMemory2 struct {
 			Value []interface{} `json:"value"`
 		} `json:"result"`
 	} `json:"data"`
+}
+
+type ReturnPromeIO2 struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string `json:"resultType"`
+		Result     []struct {
+			Metric struct {
+				Device   string `json:"device"`
+				Instance string `json:"instance"`
+				Job      string `json:"job"`
+			} `json:"metric"`
+			Value []interface{} `json:"value"`
+		} `json:"result"`
+	} `json:"data"`
+}
+type IO2 struct {
+	Type  string `json:"device"`
+	Label Res    `json:"label"`
 }
 
 func Query(c *gin.Context) {
@@ -345,7 +457,7 @@ func Query(c *gin.Context) {
 				tm := time.Unix(int64(value.Value[0].(float64)), 0)
 				res.Time = tm.Format("2006-01-02 15:04:05")
 				res.Res = value.Value[1].(string)
-				res.Res = res.Res[:4]
+				// res.Res = res.Res[:4]
 				logger.Info("%+v", res)
 			}
 
@@ -373,7 +485,7 @@ func Query(c *gin.Context) {
 				tm := time.Unix(int64(value.Value[0].(float64)), 0)
 				res.Time = tm.Format("2006-01-02 15:04:05")
 				res.Res = value.Value[1].(string)
-				res.Res = res.Res[:4]
+				// res.Res = res.Res[:4]
 				logger.Info("%+v", res)
 			}
 
@@ -382,6 +494,36 @@ func Query(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
+		})
+
+	case 3, 4, 5, 6:
+		var result ReturnPromeIO2
+		err = json.Unmarshal(body, &result)
+		logger.Info("%v", result)
+		if err != nil {
+			response.Response(c, http.StatusOK,
+				422,
+				nil,
+				err.Error())
+			return
+		}
+
+		io := make([]IO2, 0)
+		var i IO2
+		for _, value := range result.Data.Result {
+
+			if value.Metric.Instance == Pq.Machineip {
+				i.Type = value.Metric.Device
+				tm := time.Unix(int64(value.Value[0].(float64)), 0)
+				i.Label.Time = tm.Format("2006-01-02 15:04:05")
+				i.Label.Res = value.Value[1].(string)
+			}
+			io = append(io, i)
+		}
+		logger.Info("%v", io)
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": io,
 		})
 	}
 
@@ -408,6 +550,30 @@ func JudgeQuery(query int, ip string, time string) (func() string, error) {
 		return func() string {
 			return JoinUrlParam2(ip+":9090",
 				"(1-(node_memory_MemAvailable_bytes/(node_memory_MemTotal_bytes)))*100",
+				time)
+		}, nil
+	case 3:
+		return func() string {
+			return JoinUrlParam2(ip+":9090",
+				"irate(node_disk_writes_completed_total[1m])",
+				time)
+		}, nil
+	case 4:
+		return func() string {
+			return JoinUrlParam2(ip+":9090",
+				"irate(node_disk_reads_completed_total[1m])",
+				time)
+		}, nil
+	case 5:
+		return func() string {
+			return JoinUrlParam2(ip+":9090",
+				"irate(node_network_receive_bytes_total[5m])",
+				time)
+		}, nil
+	case 6:
+		return func() string {
+			return JoinUrlParam2(ip+":9090",
+				"irate(node_network_transmit_bytes_total[5m])",
 				time)
 		}, nil
 	default:
