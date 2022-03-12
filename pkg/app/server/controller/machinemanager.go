@@ -262,6 +262,14 @@ func MachineInfo(c *gin.Context) {
 
 }
 
+func MachineAllData(c *gin.Context) {
+	id := c.Query("departid")
+	AllData := dao.MachineAllData(id)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": AllData,
+	})
+}
 func Dep(c *gin.Context) {
 	departID := c.Query("DepartID")
 	tmp, err := strconv.Atoi(departID)
@@ -306,7 +314,13 @@ func Dep(c *gin.Context) {
 		LoopTree(node, tmp, &d)
 		node = d
 	}
-
+	if node == nil {
+		response.Response(c, http.StatusOK,
+			422,
+			nil,
+			"部门ID有误")
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": node,

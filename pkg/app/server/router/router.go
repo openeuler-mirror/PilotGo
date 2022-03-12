@@ -92,6 +92,7 @@ func SetupRouter() *gin.Engine {
 		machinemanager.GET("/machineinfo", controller.MachineInfo)
 		machinemanager.GET("/depart", controller.Dep)
 		machinemanager.GET("/test", controller.AddIP)
+		machinemanager.GET("/machinealldata", controller.MachineAllData)
 	}
 	batchmanager := router.Group("batchmanager")
 	{
