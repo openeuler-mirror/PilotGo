@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/casbin/casbin v1.9.1
 	github.com/casbin/gorm-adapter v1.0.0
-	github.com/casbin/gorm-adapter/v3 v3.5.0
+	github.com/casbin/gorm-adapter/v3 v3.5.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gin-gonic/gin v1.7.1
@@ -28,5 +28,5 @@ require (
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e
 	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/gorm v1.23.2
+	gorm.io/gorm v1.23.2 // indirect
 )

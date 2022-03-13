@@ -419,10 +419,6 @@ func Query(c *gin.Context) {
 			"查询数字输入有误")
 		return
 	}
-	// url := JoinUrlParam2(conf.S.ServerIP+":9090",
-	// 	"100-(avg%20by(instance)(irate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)",
-	// 	Pq.Time,
-	// )
 	logger.Info(url())
 	resp, err := http.Get(url())
 	if err != nil {
@@ -579,4 +575,90 @@ func JudgeQuery(query int, ip string, time string) (func() string, error) {
 	default:
 		return func() string { return "" }, fmt.Errorf("获取源软件包名以及源失败")
 	}
+}
+
+type Alert struct {
+	Status string `json:"status"`
+	Data   struct {
+		Alerts []struct {
+			Labels struct {
+				Alertname string `json:"alertname"`
+				Instance  string `json:"instance"`
+				Job       string `json:"job"`
+				Severity  string `json:"severity"`
+			} `json:"labels"`
+			Annotations struct {
+				Description string `json:"description"`
+				Summary     string `json:"summary"`
+			} `json:"annotations"`
+			State    string    `json:"state"`
+			ActiveAt time.Time `json:"activeAt"`
+			Value    string    `json:"value"`
+		} `json:"alerts"`
+	} `json:"data"`
+}
+
+type Alertmanager struct {
+	Alertname   string    `json:"alertname"`
+	Instance    string    `json:"instance"`
+	Job         string    `json:"job"`
+	Annotations string    `json:"annotations"`
+	State       string    `json:"state"`
+	ActiveAt    time.Time `json:"activeAt"`
+}
+
+func ListenALert(c *gin.Context) {
+	conf, err := config.Load()
+	if err != nil {
+		fmt.Println("failed to load configure, exit..", err)
+		os.Exit(-1)
+	}
+	url := conf.S.ServerIP + "/api/v1/alerts"
+	logger.Info("%s", url)
+	resp, err := http.Get("http://" + conf.S.ServerIP + ":9090/api/v1/alerts")
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("body:", string(body))
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var result Alert
+	err = json.Unmarshal(body, &result)
+	logger.Info("%v", result)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+
+	res := []Alertmanager{}
+	for _, value := range result.Data.Alerts {
+		Al := Alertmanager{
+			value.Labels.Alertname,
+			value.Labels.Instance,
+			value.Labels.Job,
+			value.Annotations.Summary,
+			value.State,
+			value.ActiveAt,
+		}
+		res = append(res, Al)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": res,
+	})
+
 }
