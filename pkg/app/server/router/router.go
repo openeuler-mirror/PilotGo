@@ -104,6 +104,7 @@ func SetupRouter() *gin.Engine {
 	{
 		prometheus.POST("/queryrange", controller.Queryrange)
 		prometheus.POST("/query", controller.Query)
+		prometheus.GET("/alert", controller.ListenALert)
 	}
 	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
 	common.E = casbin.NewEnforcer("./rbac_models.conf", a)
