@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-10 13:39:14
+ * LastEditTime: 2022-03-10 20:15:00
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -84,6 +84,8 @@ func SetupRouter() *gin.Engine {
 	{
 		user.POST("/login", controller.Login)
 		user.GET("/logout", controller.Logout)
+		user.GET("/searchAll", controller.UserAll)
+		user.POST("/userSearch", controller.UserSearch)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 	}
 	machinemanager := router.Group("machinemanager")
@@ -106,6 +108,12 @@ func SetupRouter() *gin.Engine {
 		prometheus.POST("/query", controller.Query)
 		prometheus.GET("/alert", controller.ListenALert)
 	}
+	policy := router.Group("casbin")
+	{
+		policy.GET("/get", controller.GetPolicy)
+		policy.POST("/delete", controller.PolicyDelete)
+		policy.POST("/add", controller.PolicyAdd)
+	}
 	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
 	common.E = casbin.NewEnforcer("./rbac_models.conf", a)
 	common.E.LoadPolicy()
@@ -113,8 +121,6 @@ func SetupRouter() *gin.Engine {
 	Level.Use(common.CasbinHandler())
 	{
 		user.POST("/register", controller.Register)
-		user.GET("/searchAll", controller.UserAll)
-		user.POST("/userSearch", controller.UserSearch)
 		user.GET("/reset", controller.ResetPassword)
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)

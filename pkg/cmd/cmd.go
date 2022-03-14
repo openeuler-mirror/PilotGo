@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:11:01
- * LastEditTime: 2022-03-08 00:06:33
+ * LastEditTime: 2022-03-10 14:19:50
  * Description: 启动程序、初始化、加载配置
  ******************************************************************************/
 package cmd
@@ -78,12 +78,13 @@ func Start(conf *config.Configure) (err error) {
 	mysqlmanager.DB.Where("depart_first=?", pid).Find(&user)
 	if user.ID == 0 {
 		user = model.User{
-			DepartFirst: 0,
-			DepartName:  "组织名",
-			Username:    "admin",
-			Password:    "1234",
-			Email:       "admin@123.com",
-			RoleType:    0,
+			DepartFirst:  0,
+			DepartSecond: 1,
+			DepartName:   "超级用户",
+			Username:     "admin",
+			Password:     "1234",
+			Email:        "admin@123.com",
+			RoleType:     0,
 		}
 		mysqlmanager.DB.Create(&user)
 		role = model.UserRole{

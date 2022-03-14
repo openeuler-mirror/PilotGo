@@ -9,21 +9,15 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-03-07 15:25:53
- * LastEditTime: 2022-03-10 11:18:22
+ * LastEditTime: 2022-03-14 10:35:54
  * Description: casbin权限控制
  ******************************************************************************/
 package common
 
 import (
-	"net/http"
-
 	"github.com/casbin/casbin"
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/dto"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 var (
@@ -33,22 +27,13 @@ var (
 // 拦截器
 func CasbinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, ok := c.Get("x-user")
-		if !ok {
-			response.Response(c, http.StatusOK,
-				200,
-				nil,
-				"登录已失效")
-		}
-		var User model.User
-		email := dto.ToUserDto(user.(model.User)).Email
-		mysqlmanager.DB.Where("email=?", email).Find(&User)
+		role := c.Query("roleId")
 		// 获取请求的PATH
-		obj := c.Request.URL.Path
+		obj := c.Request.URL.RequestURI()
 		// 获取请求方法
-		act := User.RoleType
+		act := c.Request.Method
 		// 获取用户的角色
-		sub := email
+		sub := role
 		//判断策略中是否存在
 		if ok := E.Enforce(sub, obj, act); ok {
 			logger.Info("恭喜您,权限验证通过")

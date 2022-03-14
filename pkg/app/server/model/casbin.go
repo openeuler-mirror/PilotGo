@@ -8,12 +8,15 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2022-03-07 15:32:38
- * LastEditTime: 2022-03-08 11:20:20
- * Description: 权限控制
+ * Date: 2022-03-10 20:06:05
+ * LastEditTime: 2022-03-14 14:49:44
+ * Description: casbin权限控制
  ******************************************************************************/
-package dao
+package model
 
-func EEE() {
-
+type CasbinRule struct {
+	PType    string `json:"ptype"`
+	RoleType string `json:"role"`
+	Url      string `json:"url"`
+	Method   string `json:"method"`
 }

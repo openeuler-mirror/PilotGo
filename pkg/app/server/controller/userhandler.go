@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-08 09:48:38
+ * LastEditTime: 2022-03-14 10:54:08
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -50,14 +50,14 @@ func Register(c *gin.Context) {
 		password = "123456"
 	}
 	if len(email) == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"邮箱不能为空!")
 		return
 	}
 	if dao.IsEmailExist(email) {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"邮箱已存在!")
@@ -93,7 +93,7 @@ func Login(c *gin.Context) {
 	mysqlmanager.DB.Where("email = ?", email).Find(&user)
 
 	if user.ID == 0 {
-		response.Response(c, http.StatusBadRequest,
+		response.Response(c, http.StatusOK,
 			400,
 			nil,
 			"用户不存在!")
@@ -102,10 +102,17 @@ func Login(c *gin.Context) {
 
 	bpassword := []byte(password)
 	bemail := []byte(email)
-	bpassword, _ = common.JsAesDecrypt(bpassword, bemail)
-	btspassword := string(bpassword)
+	bbpassword, err := common.JsAesDecrypt(bpassword, bemail)
+	if err != nil {
+		response.Response(c, http.StatusOK,
+			400,
+			nil,
+			"密码解密失败")
+		return
+	}
+	btspassword := string(bbpassword)
 	if user.Password != btspassword {
-		response.Response(c, http.StatusBadRequest,
+		response.Response(c, http.StatusOK,
 			400,
 			nil,
 			"密码错误!")
