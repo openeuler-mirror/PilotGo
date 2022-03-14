@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-04 16:56:07
- * @LastEditTime: 2022-03-09 19:14:41
+ * @LastEditTime: 2022-03-10 10:59:55
  */
 import { request } from './request'
 export function getData(data) {
@@ -24,5 +24,12 @@ export function getCurrData(data) {
     url: '/prometheus/query',
     method: 'post',
     data
+  })
+}
+export function getPromeIp(data) {
+  return request({
+    url: '/machinemanager/machinealldata',
+    method: 'get',
+    params:data
   })
 }
