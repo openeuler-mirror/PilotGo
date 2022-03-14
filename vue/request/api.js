@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-15 17:02:23
- * @LastEditTime: 2022-02-28 14:26:37
+ * @LastEditTime: 2022-03-04 16:56:49
  * @Description: provide agent log manager of pilotgo
  */
 // api请求接口文件
@@ -27,15 +27,6 @@ export function getChart(url) {
   return request({
     url: API1 + url,
     method: 'get',
-  })
-}
-
-
-
-export function getOverview() {
-  return request({
-    url: '/overview',
-    method: 'get'
   })
 }
 

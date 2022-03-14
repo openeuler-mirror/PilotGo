@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-03-04 16:08:34
+  LastEditTime: 2022-03-10 16:35:39
  -->
 <template>
   <div class="ky-tree">
@@ -48,7 +48,10 @@ export default {
       type: Function,
     },
     showEdit: {
-      type: Boolean
+      type: Boolean,
+      default(){
+        return true
+      }
     },
   },
   data() {
@@ -77,7 +80,7 @@ export default {
     // 加载根
     async loadFirstNode(resolve) {
       let res = await this.getData({'DepartID': this.$store.getters.UserDepartId});
-      if(res.status === 200) {
+      if(res.data.code === 200) {
         let data = res.data.data;
         let rootNode = [{
           id: data.id,
@@ -88,7 +91,7 @@ export default {
       } else {
         this.$message({
           type: 'error',
-          message: '数据请求失败'
+          message: res.data.msg
         });
       }
     },
@@ -96,7 +99,7 @@ export default {
     async loadChildrenNode(node,resolve) {
       let deptId = node.key;
       let res = await this.getData({'DepartID': deptId});
-      if(res.status === 200) {
+      if(res.data.code === 200) {
         if(node.childNodes.length == 0) {
           node.isLeaf = true;
         }
@@ -105,7 +108,7 @@ export default {
       } else {
         this.$message({
           type: 'error',
-          message: '数据请求失败'
+          message: res.data.msg
         });
       }
     },
