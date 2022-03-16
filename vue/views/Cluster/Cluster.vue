@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-02 15:19:40
+  LastEditTime: 2022-03-16 10:23:57
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -31,11 +31,11 @@
           <div>{{ departName }}</div>
         </template>
         <template v-slot:table_action>
-          <el-button  @click="handleIssue" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm下发 </el-button>
-          <el-button  @click="handleUnInstall" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm卸载 </el-button>
-          <el-button  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </el-button>
+          <auth-button name="rpm_install"  @click="handleIssue" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm下发 </auth-button>
+          <auth-button name="rpm_uninstall"  @click="handleUnInstall" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm卸载 </auth-button>
+          <auth-button name="create_batch"  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </auth-button>
           <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
-            <el-button  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
+            <auth-button name="cluster_delete"  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
           </el-popconfirm>
         </template>
         <template v-slot:table>
@@ -96,6 +96,7 @@
 <script>
 import kyTable from "@/components/KyTable";
 import kyTree from "@/components/KyTree";
+import AuthButton from "@/components/AuthButton";
 import UpdateForm from "./form/updateForm";
 import BatchForm from "./form/batchForm";
 import RpmIssue from "./form/rpmIssue";
@@ -108,6 +109,7 @@ export default {
     RpmIssue,
     kyTable,
     kyTree,
+    AuthButton,
   },
   data() {  
     return {
@@ -130,6 +132,7 @@ export default {
   },
   mounted() {
     this.departName = '机器列表';
+    this.showSelect = ['0','1'].includes(this.$store.getters.userType) ? true : false;
   },
   methods: {
     getClusters,
