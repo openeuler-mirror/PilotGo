@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-07 16:33:31
+ * LastEditTime: 2022-03-16 13:01:43
  * Description: 用户数据存储结构体
  ******************************************************************************/
 package model
@@ -30,7 +30,8 @@ type User struct {
 	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
 	Phone        string `gorm:"size:11" json:"phone,omitempty"`
 	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
-	RoleType     int    `json:"roleId,omitempty"`
+	UserType     int    `json:"userType,omitempty"`
+	RoleID       string `json:"roleId,omitempty"`
 	Enable       string `gorm:"size:10;not null" json:"enable,omitempty"`
 }
 

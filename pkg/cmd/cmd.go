@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:11:01
- * LastEditTime: 2022-03-10 14:19:50
+ * LastEditTime: 2022-03-16 13:03:03
  * Description: 启动程序、初始化、加载配置
  ******************************************************************************/
 package cmd
@@ -37,6 +37,7 @@ var (
 
 var sessionManage net.SessionManage
 var SqlManager *mysqlmanager.MysqlManager
+var menus string = "cluster,batch,usermanager,rolemanager"
 
 func initConfig() {
 	config.MustInit(os.Stdout, cfgFile) // 配置初始化
@@ -78,18 +79,21 @@ func Start(conf *config.Configure) (err error) {
 	mysqlmanager.DB.Where("depart_first=?", pid).Find(&user)
 	if user.ID == 0 {
 		user = model.User{
+			CreatedAt:    time.Time{},
 			DepartFirst:  0,
 			DepartSecond: 1,
 			DepartName:   "超级用户",
 			Username:     "admin",
 			Password:     "1234",
 			Email:        "admin@123.com",
-			RoleType:     0,
+			UserType:     0,
+			RoleID:       "1",
 		}
 		mysqlmanager.DB.Create(&user)
 		role = model.UserRole{
-			Role: "超级管理员",
-			Type: 0,
+			Role:  "超级管理员",
+			Type:  0,
+			Menus: menus,
 		}
 		mysqlmanager.DB.Create(&role)
 	}
@@ -107,6 +111,7 @@ func Start(conf *config.Configure) (err error) {
 		mysqlmanager.DB.Save(&Depart)
 	}
 	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
+	mysqlmanager.DB.AutoMigrate(&model.RoleButton{})
 	mysqlmanager.DB.AutoMigrate(&model.Batch{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-14 10:54:08
+ * LastEditTime: 2022-03-16 13:32:20
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -42,6 +43,7 @@ func Register(c *gin.Context) {
 	depart := user.DepartName
 	departId := user.DepartSecond
 	departPid := user.DepartFirst
+	roleId := user.RoleID
 
 	if len(username) == 0 { //Data verification
 		username = utils.RandomString(5)
@@ -64,9 +66,9 @@ func Register(c *gin.Context) {
 		return
 	}
 	if departPid == 1 {
-		user.RoleType = 1
+		user.UserType = 1
 	} else {
-		user.RoleType = 2
+		user.UserType = 2
 	}
 	user = model.User{ //Create user
 		Username:     username,
@@ -76,7 +78,8 @@ func Register(c *gin.Context) {
 		DepartName:   depart,
 		DepartFirst:  departPid,
 		DepartSecond: departId,
-		RoleType:     user.RoleType,
+		UserType:     user.UserType,
+		RoleID:       roleId,
 	}
 	mysqlmanager.DB.Save(&user)
 
@@ -89,7 +92,6 @@ func Login(c *gin.Context) {
 	c.Bind(&user)
 	email := user.Email
 	password := user.Password
-
 	mysqlmanager.DB.Where("email = ?", email).Find(&user)
 
 	if user.ID == 0 {
@@ -99,7 +101,6 @@ func Login(c *gin.Context) {
 			"用户不存在!")
 		return
 	}
-
 	bpassword := []byte(password)
 	bemail := []byte(email)
 	bbpassword, err := common.JsAesDecrypt(bpassword, bemail)
@@ -118,7 +119,7 @@ func Login(c *gin.Context) {
 			"密码错误!")
 		return
 	}
-
+	roleId := strings.Split(user.RoleID, ",")
 	token, err := common.ReleaseToken(user) // Issue token
 	if err != nil {
 		response.Response(c, http.StatusInternalServerError,
@@ -128,7 +129,7 @@ func Login(c *gin.Context) {
 		log.Printf("token生成错误:%v", err)
 		return
 	}
-	response.Success(c, gin.H{"token": token, "departName": user.DepartName, "departId": user.DepartSecond}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": user.DepartName, "departId": user.DepartSecond, "userType": user.UserType, "roleId": roleId}, "登陆成功!")
 }
 
 // 退出

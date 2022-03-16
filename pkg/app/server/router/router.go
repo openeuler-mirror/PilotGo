@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-10 20:15:00
+ * LastEditTime: 2022-03-16 14:07:11
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -87,6 +87,9 @@ func SetupRouter() *gin.Engine {
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearch)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
+		user.POST("/addPermission", controller.AddPermission)
+		user.POST("/permission", controller.GetLoginUserPermission)
+		user.GET("/roles", controller.GetRoles)
 	}
 	machinemanager := router.Group("machinemanager")
 	{
