@@ -9,12 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-03-03 14:17:04
+ * LastEditTime: 2022-03-15 14:46:08
  * Description: 用户模块相关数据验证
  ******************************************************************************/
 package dao
 
 import (
+	"strings"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
@@ -22,8 +24,14 @@ import (
 func IsEmailExist(email string) bool {
 	var user model.User
 	mysqlmanager.DB.Where("email=?", email).Find(&user)
-	if user.ID != 0 {
-		return true
+	return user.ID != 0
+}
+func IsContain(str string, substr int) bool {
+	strs := strings.Split(str, ",")
+	for value := range strs {
+		if value == substr {
+			return true
+		}
 	}
 	return false
 }
