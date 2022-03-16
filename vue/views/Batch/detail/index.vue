@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-03-03 15:54:48
+  LastEditTime: 2022-03-16 10:07:11
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -24,8 +24,8 @@
           <div>机器列表</div>
         </template>
         <template v-slot:table_action>
-          <el-button  @click="handleIssue()"> rpm下发 </el-button>
-          <el-button @click="handleUnInstall()"> rpm卸载</el-button>
+          <auth-button name="rpm_install"  @click="handleIssue()"> rpm下发 </auth-button>
+          <auth-button name="rpm_uninstall" @click="handleUnInstall()"> rpm卸载</auth-button>
         </template>
         <template v-slot:table>
          <el-table-column prop="ip" label="IP">
@@ -57,10 +57,12 @@
 import { getBatchDetail } from "@/request/batch";
 import RpmIssue from "../form/rpmIssue";
 import kyTable from "@/components/KyTable";
+import AuthButton from "@/components/AuthButton";
 export default {
   name: "BatchDetail",
   components: {
     kyTable,
+    AuthButton,
     RpmIssue
   },
   data() {
