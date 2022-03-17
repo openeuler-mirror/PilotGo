@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-03-04 11:34:02
+ * @LastEditTime: 2022-03-17 10:11:08
  * @Description: provide agent log manager of pilotgo
  */
 import Cookies from 'js-cookie'
@@ -20,6 +20,8 @@ const Username = 'Username'
 
 const Roles = 'Roles'
 
+const UserType = 'UserType'
+
 const UserDepartId = "UserDepartId"
 
 const UserDepartName = 'UserDepartName'
@@ -28,7 +30,10 @@ const UserDepartName = 'UserDepartName'
 const whileList = [
     "/login",
     "/401",
-    "/404"
+    "/404",
+    "/home",
+    "/",
+    ""
 ]
 
 export function getToken() {
@@ -60,7 +65,7 @@ export function removeUsername() {
 }
 
 export function getRoles() {
-    return Cookies.get(Roles)
+    return Cookies.get(Roles);
 }
 
 export function removeRoles() {
@@ -69,6 +74,19 @@ export function removeRoles() {
 export function setRoles(roles) {
     if (roles) {
         return Cookies.set(Roles, roles)
+    }
+}
+
+export function getUserType() {
+    return Cookies.get(UserType)
+}
+
+export function removeUserType() {
+    return Cookies.remove(UserType)
+}
+export function setUserType(usertype) {
+    if (usertype) {
+        return Cookies.set(UserType, usertype)
     }
 }
 
@@ -102,6 +120,6 @@ export function removeUserDepartName() {
 
 export function hasPermission(menus, to) {
     if (whileList.includes(to.path)) return true
-    if (!to.meta) return true
+    if (to.meta.icon_class === '') return true
     return Array.isArray(menus) && menus.includes(to.meta.panel)
 }
