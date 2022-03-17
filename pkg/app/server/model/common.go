@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-03-14 14:38:56
+ * LastEditTime: 2022-03-17 14:55:44
  * Description: 分页查询及结构体定义
  ******************************************************************************/
 package model
@@ -67,7 +67,7 @@ func CrudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
 }
 
 // map分页查询方法
-func SearchAll(p *PaginationQ, data []map[string]string) (uint, []map[string]string, error) {
+func SearchAll(p *PaginationQ, data []map[string]interface{}) (uint, []map[string]interface{}, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}

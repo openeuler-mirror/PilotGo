@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-16 13:32:20
+ * LastEditTime: 2022-03-16 19:03:03
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -119,7 +118,6 @@ func Login(c *gin.Context) {
 			"密码错误!")
 		return
 	}
-	roleId := strings.Split(user.RoleID, ",")
 	token, err := common.ReleaseToken(user) // Issue token
 	if err != nil {
 		response.Response(c, http.StatusInternalServerError,
@@ -129,7 +127,7 @@ func Login(c *gin.Context) {
 		log.Printf("token生成错误:%v", err)
 		return
 	}
-	response.Success(c, gin.H{"token": token, "departName": user.DepartName, "departId": user.DepartSecond, "userType": user.UserType, "roleId": roleId}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": user.DepartName, "departId": user.DepartSecond, "userType": user.UserType, "roleId": user.RoleID}, "登陆成功!")
 }
 
 // 退出
