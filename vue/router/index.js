@@ -15,12 +15,9 @@ Router.prototype.replace = function replace(location) {
 export const constantRouterMap = [
   { path: '/401', component: _import('errorPage/401') },
   { path: '/404', component: _import('errorPage/404') },
+  { path: '/', component: _import('errorPage/404') },
 ]
 export const routes = [
-  {
-    path: '/', 
-    redirect: '/login'
-  },
   {
     path: '/login',
     name: 'Login',
@@ -53,7 +50,8 @@ export const routes = [
               breadcrumb: [
                   { name: '机器管理', path: '/cluster' },
                   { name: '机器详情'}
-              ]
+              ],
+              icon_class: ''
             }
         },
         ]
@@ -73,7 +71,8 @@ export const routes = [
               breadcrumb: [
                   { name: '批次管理', path: '/batch' },
                   { name: '批次详情'}
-              ]
+              ],
+              icon_class: ''
             }
         },
         ]
@@ -125,7 +124,7 @@ export const routes = [
 
 const router = new Router({
   mode: 'hash',
-  routes: [...constantRouterMap, ...routes],
+  routes: [ ...routes, ...constantRouterMap],
 })
 
 export default router;

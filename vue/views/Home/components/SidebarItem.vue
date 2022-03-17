@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-02-25 17:40:08
+  LastEditTime: 2022-03-14 20:30:59
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -18,6 +18,7 @@
       <router-link
         :to="item.panel"
         :key="item.header_title"
+        v-if="!item.hidden"
       >
         <el-menu-item :index="item.panel">
           <em :class="item.icon_class"></em>
@@ -35,8 +36,6 @@ export default {
     routes: {
       type: Array,
     },
-  },
-  methods: {
   },
 };
 </script>
