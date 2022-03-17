@@ -110,6 +110,7 @@ func SetupRouter() *gin.Engine {
 		prometheus.POST("/queryrange", controller.Queryrange)
 		prometheus.POST("/query", controller.Query)
 		prometheus.GET("/alert", controller.ListenALert)
+		prometheus.POST("/alertmanager", controller.AlertMessageConfig)
 	}
 	policy := router.Group("casbin")
 	{
