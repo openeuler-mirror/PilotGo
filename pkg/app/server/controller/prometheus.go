@@ -573,7 +573,7 @@ func JudgeQuery(query int, ip string, time string) (func() string, error) {
 				time)
 		}, nil
 	default:
-		return func() string { return "" }, fmt.Errorf("获取源软件包名以及源失败")
+		return func() string { return "" }, fmt.Errorf("输入查询号错误")
 	}
 }
 

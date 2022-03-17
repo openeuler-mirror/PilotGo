@@ -13,7 +13,7 @@ module.exports = {
     https:true,
     proxyTable: {
       '/': {
-        target: 'http://192.168.47.128:8081',
+        target: 'http://192.168.136.21:8888',
         changeOrigin: true,  //改变源
         secure:true
         // pathRewrite: {
@@ -60,7 +60,7 @@ module.exports = {
 
     // Various Dev Server settings
     // host: '172.17.6.167', // can be overwritten by process.env.HOST
-    host: '192.168.47.128', // can be overwritten by process.env.HOST
+    host: '192.168.136.21', // can be overwritten by process.env.HOST
     port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
