@@ -97,7 +97,7 @@ export default {
             this.$store.dispatch("loginByEmail", data).then((res) => {
                 this.loading = false;
                 this.$router.push({
-                    path: '/home',
+                    path: '/',
                     query: {
                         page: 1,
                         per_page: 20
