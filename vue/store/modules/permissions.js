@@ -1,12 +1,25 @@
+/*
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * @Author: zhaozhenfang
+ * @Date: 2022-01-19 17:30:12
+ * @LastEditTime: 2022-03-17 15:45:47
+ */
 import { constantRouterMap, routes } from '@/router'
-// import { getPermission } from "@/api/role"
+import { getPermission } from "@/request/user"
 import { hasPermission } from "@/utils/auth";
 
 
 function filterAsyncRouter(routers, menus) {
     routers.forEach((route) => {
         if (!hasPermission(menus, route)) {
-            route.hidden = true;
+            route.meta.hidden = true;
         }
         route.children && filterAsyncRouter(route.children, menus)
     })
@@ -15,17 +28,16 @@ function filterAsyncRouter(routers, menus) {
 
 const permission = {
     state: {
-        routers: constantRouterMap,
+        routers: [],
         routes: routes,
-        hostRouters: [],
         notfound: [],
         menus: [],
         operations: [],
         activePanel: ''
     },
     mutations: {
-        SET_HOSTROUTERS: (state, routers) => {
-            state.hostRouters = routers;
+        SET_ROUTERS: (state, routers) => {
+            state.routers = [...routers, ...constantRouterMap];
         },
         SET_MENUS: (state, menus) => {
             state.menus = menus
@@ -47,31 +59,28 @@ const permission = {
         GenerateRoutes({ commit, state }) {
             return new Promise(resolve => {
                 const menus = state.menus;
-                let hostRouters;
-                hostRouters = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), menus)
-                commit('SET_HOSTROUTERS', hostRouters)
+                let routers = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), menus)
+
+                commit('SET_ROUTERS', routers)
                 resolve()
             })
         },
-       /*  getPermission({ commit }, ids) {
-            return getPermission({ ids }).then(res => {
+        getPermission({ commit }, roles) {
+            let roleId = roles.split(',').map(Number)
+            return getPermission({ roleId: roleId}).then(res => {
                 return new Promise((resolve, reject) => {
-                    if (res.data.code === "0") {
+                    if (res.data.code === 200) {
                         let data = res.data.data;
-                        let { menu, operation } = data;
-                        let arr = []
-                        operation.forEach(item => {
-                            arr.push(item.name)
-                        })
-                        commit("SET_MENUS", menu);
-                        commit("SET_OPERATIONS", arr);
+                        let { menu, button } = data;
+                        commit("SET_MENUS", menu.split(','));
+                        commit("SET_OPERATIONS", button);
                         resolve()
                     } else {
                         reject()
                     }
                 })
             })
-        }, */
+        },
         SetMenus({ commit }, menus) {
             commit("SET_MENUS", menus)
         },
@@ -91,7 +100,7 @@ const permission = {
             return state.operations
         },
         getPaths: state => {
-            return state.routes[2].children.filter(item => {
+            return state.routers[1].children.filter(item => {
                 return item.meta != undefined;
             }).map(item => item.meta)
         }

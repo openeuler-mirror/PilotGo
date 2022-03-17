@@ -9,28 +9,43 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-03-04 11:13:58
+ * @LastEditTime: 2022-03-17 15:20:35
  */
 import router from './router'
 import store from './store'
-import { getToken } from '@/utils/auth'
+import { getRoles, hasPermission } from '@/utils/auth'
 
-const whiteList = ['/login'];
+const whiteList = ['/login']
 
 router.beforeEach((to, from, next) => {
     if (to.meta && to.meta.header_title) {
         document.title = to.meta.header_title
     }
-    
-    if(getToken()) {
-        if(to.path === '/login') {
-            next()
+    if (getRoles()) {
+        if (to.path === '/login') {
+            next({ path: '/' })
+            
         } else {
-            if(to.matched.length === 0) {
-                next({ path: "/404", replace: true })
+            if (!store.getters.getMenus || store.getters.getMenus.length === 0) {
+                store.dispatch('getPermission', store.getters.roles).then(res => {
+                    store.dispatch('GenerateRoutes').then(() => {
+                        next({ ...to, replace: true })
+                    })
+                })
             } else {
-                store.dispatch('SetActivePanel', to.meta.panel)
-                next()
+                if (to.path === "/") {
+                    let paths = store.getters.getPaths.filter(path => !path.hidden)
+                    let to = paths.length > 0 ? paths[0].panel : "/404"
+                    next({ path: to, replace: true })
+                } else {
+                    if (hasPermission(store.getters.getMenus, to)) {
+                        store.dispatch('SetActivePanel', to.meta.panel)
+                        next()
+                    } else {
+                        next({ path: '/404', replace: true })
+                        
+                    }
+                }
             }
         }
     } else {
@@ -38,8 +53,11 @@ router.beforeEach((to, from, next) => {
             next()
         } else {
             next('/login')
+            
         }
     }
-        
+})
+
+router.afterEach(route => {
     
 })
