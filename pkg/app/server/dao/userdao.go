@@ -9,12 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-03-15 14:46:08
+ * LastEditTime: 2022-03-16 15:25:41
  * Description: 用户模块相关数据验证
  ******************************************************************************/
 package dao
 
 import (
+	"strconv"
 	"strings"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
@@ -28,8 +29,8 @@ func IsEmailExist(email string) bool {
 }
 func IsContain(str string, substr int) bool {
 	strs := strings.Split(str, ",")
-	for value := range strs {
-		if value == substr {
+	for _, value := range strs {
+		if value == strconv.Itoa(substr) {
 			return true
 		}
 	}
