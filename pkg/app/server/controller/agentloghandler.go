@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:44:00
- * LastEditTime: 2022-03-03 13:46:08
+ * LastEditTime: 2022-03-18 17:22:53
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package controller
@@ -28,19 +28,34 @@ import (
 
 // 查询所有父日志
 func LogAll(c *gin.Context) {
-	logparent := model.AgentLogParent{}
+	var logparents []model.AgentLogParent
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 
-	if model.HandleError(c, err) {
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	list, total, err := logparent.LogAll(query)
-	if model.HandleError(c, err) {
+	mysqlmanager.DB.Find(&logparents)
+	datas := make([]map[string]interface{}, 0)
+	for _, logparent := range logparents {
+		var user model.User
+		data := make(map[string]interface{})
+		data["id"] = logparent.ID
+		data["created_at"] = logparent.CreatedAt
+		data["userName"] = logparent.UserName
+		mysqlmanager.DB.Where("email = ?", logparent.UserName).Find(&user)
+		data["departName"] = user.DepartName
+		data["type"] = logparent.Type
+		data["status"] = logparent.Status
+		datas = append(datas, data)
+	}
+	total, data, err := model.SearchAll(query, datas)
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	// 返回数据开始拼装分页的json
-	model.JsonPagination(c, list, total, query)
+	model.JsonPagination(c, data, total, query)
 }
 
 // 查询所有子日志
