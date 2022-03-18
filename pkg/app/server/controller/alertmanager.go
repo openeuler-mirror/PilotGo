@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -80,13 +79,12 @@ type EmailConfigs struct {
 
 //写邮箱配置文件
 func WriteToYaml(email []string) error {
-	FilePath := "/root/alertmanager.yml"
+	FilePath := "/home/alertmanager.yml"
 	os.Remove(FilePath)
 	os.Create(FilePath)
 	emailstr := strings.Join(email, ", ")
 	var alertYml AlertmanagerYaml
 	alertYml.Global.SmtpSmarthost = "'smtp.qq.com:465'"
-	fmt.Println(alertYml.Global.SmtpSmarthost)
 	alertYml.Global.SmtpFrom = "'157309081@qq.com'"
 	alertYml.Global.SmtpAuthUsername = "'157309081@qq.com'"
 	alertYml.Global.SmtpAuthPassword = "'pklazwfbpvkucbda'"
@@ -102,7 +100,7 @@ func WriteToYaml(email []string) error {
 
 	file, err := os.OpenFile(FilePath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Println("文件打开失败", err)
+		logger.Error("文件打开失败" + err.Error())
 		return err
 	}
 	defer file.Close()
@@ -145,14 +143,14 @@ func WriteToYaml(email []string) error {
 
 //alertmanager邮箱配置热启动
 func ConfigReload(ip string) error {
-	response, err := http.PostForm("http://"+ip+"/-/reload", url.Values{})
+	response, err := http.PostForm("http://"+ip+":9093/-/reload", url.Values{})
 	logger.Info("%s", response)
 	return err
 }
 
 func AlertMessageConfig(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
+	logger.Info(string(j))
 	if err != nil {
 		logger.Error("%s", err.Error())
 		response.Response(c, http.StatusUnprocessableEntity,
@@ -200,23 +198,58 @@ func AlertMessageConfig(c *gin.Context) {
 			err.Error())
 		return
 	}
-	url := "http://" + conf.S.ServerIP + "/api/v2/alerts"
+	url := "http://" + conf.S.ServerIP + ":9093/api/v2/alerts"
 	res := AlertSentMessage{
 		AM.Labels,
 		AM.Annotations,
 		AM.StartsAt,
 		AM.EndsAt,
 	}
-	err = Post(url, res, "appliction/json")
+
+	r := []AlertSentMessage{}
+	r = append(r, res)
+	logger.Info("%+v", r)
+	jsonStr, err := json.Marshal(r)
+
 	if err != nil {
-		logger.Error("%s", err.Error())
+		logger.Error(err.Error())
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			err.Error())
 		return
 	}
-
+	reader := bytes.NewReader(jsonStr)
+	request, err := http.NewRequest("POST", url, reader)
+	if err != nil {
+		logger.Error(err.Error())
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	// err = Post(url, res, "appliction/json")
+	// if err != nil {
+	// 	logger.Error("%s", err.Error())
+	// 	response.Response(c, http.StatusUnprocessableEntity,
+	// 		422,
+	// 		nil,
+	// 		err.Error())
+	// 	return
+	// }
+	client := http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		logger.Error(err.Error())
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	logger.Info("%+v", resp)
 	response.Success(c, nil, "success")
 }
 func Post(url string, data interface{}, contentType string) error {
