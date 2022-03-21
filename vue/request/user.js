@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-03 17:00:36
- * @LastEditTime: 2022-03-04 15:49:00
+ * @LastEditTime: 2022-03-16 15:18:40
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
@@ -34,6 +34,14 @@ export function getCurUser() {
   return request({
     url: '/user/info',
     method: 'get'
+  })
+}
+// 获取用户权限
+export function getPermission(data) {
+  return request({
+    url: '/user/permission',
+    method: 'post',
+    data
   })
 }
 // 获取全部用户信息
