@@ -33,6 +33,17 @@
         @nodeClick="handleSelectDept">
         </ky-tree>
       </el-form-item>
+      <el-form-item label="用户角色:" prop="role">
+          <el-select v-model="form.role" placeholder="请选择">
+            <el-option
+              v-for="item in roles"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
       <el-form-item label="手机号:" prop="phone">
         <el-input
           class="ipInput"
@@ -70,7 +81,21 @@ export default {
   data() {
     return {
       disabled: true,
+      role:'',
+      roles: [
+        {
+          value: '1',
+          label: '超级管理员',
+        },{
+          value: '2',
+          label: '部门管理员',
+        },{
+          value: '3',
+          label: '普通用户',
+        }
+      ],
       form: {
+        role: '',
         username: "",
         password: "",
         phone: "",
@@ -95,6 +120,11 @@ export default {
         departName: [{ 
             required: true, 
             message: "请选择部门",
+            trigger: "blur" 
+          }],
+        role: [{ 
+            required: true, 
+            message: "请选择角色",
             trigger: "blur" 
           }],
         phone: [

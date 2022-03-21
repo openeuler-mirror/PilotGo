@@ -11,6 +11,21 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
+      <el-form-item label="部门:" prop="departName">
+        <el-input
+          class="ipInput"
+          controls-position="right"
+          :disabled="disabled"
+          v-model="form.departName"
+          autocomplete="off"
+        ></el-input>
+        <ky-tree
+        :getData="getChildNode" 
+        :showEdit="false"
+        ref="tree" 
+        @nodeClick="handleSelectDept">
+        </ky-tree>
+      </el-form-item>
       <el-form-item label="手机号:" prop="phone">
         <el-input
           class="ipInput"
@@ -38,9 +53,14 @@
 </template>
 
 <script>
+import kyTree from "@/components/KyTree";
 import { updateUser } from "@/request/user";
+import { getChildNode } from "@/request/cluster";
 import { checkEmail, checkPhone } from "@/rules/check"
 export default {
+  components: {
+    kyTree,
+  },
   props: {
     row: {
       type: Object,
@@ -52,6 +72,9 @@ export default {
       disabled: true,
       form: {
         username: "",
+        departName: "",
+        departId: 0,
+        departPid: 0,
         phone: "",
         email: "",
       },
@@ -60,6 +83,11 @@ export default {
           { 
             required: true, 
             message: "请输入用户名",
+            trigger: "blur" 
+          }],
+        departName: [{ 
+            required: true, 
+            message: "请选择部门",
             trigger: "blur" 
           }],
         phone: [
@@ -86,11 +114,21 @@ export default {
     this.form.username = this.row.username;
     this.form.phone = this.row.phone;
     this.form.email = this.row.email;
+    this.form.departName = this.row.departName;
+    this.form.departId = this.row.departid;
   },
   methods: {
+    getChildNode,
     handleCancel() {
       this.$refs.form.resetFields();
       this.$emit("click");
+    },
+    handleSelectDept(data) {
+      if(data) {
+        this.form.departName = data.label;
+        this.form.departId = data.id;
+        this.form.departPid = data.pid;
+      }
     },
     handleUpdate() {
       this.$refs.form.validate((valid) => {
