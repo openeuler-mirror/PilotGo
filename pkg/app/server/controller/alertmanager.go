@@ -79,7 +79,7 @@ type EmailConfigs struct {
 
 //写邮箱配置文件
 func WriteToYaml(email []string) error {
-	FilePath := "/home/alertmanager.yml"
+	FilePath := "/root/alertmanager.yml"
 	os.Remove(FilePath)
 	os.Create(FilePath)
 	emailstr := strings.Join(email, ", ")
