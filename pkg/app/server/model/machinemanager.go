@@ -15,6 +15,7 @@
 package model
 
 import (
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
@@ -86,14 +87,22 @@ type Res struct {
 func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, total uint, err error) {
 	list = &[]Res{}
 	// tx := mysqlmanager.DB.Where("depart_id=?", departid).Find(&list)
-	tx := mysqlmanager.DB.Order("ID desc").Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
+	tx := mysqlmanager.DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
 		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
+	logger.Info("%+v", list)
+	res := make([]Res, 0)
+	for _, value := range *list {
+		if value.Departid == departid {
+			res = append(res, value)
+		}
+	}
 	// tx := mysqlmanager.DB.Raw("SELECT a.id as id,a.depart_id as departid," +
 	// 	"b.depart as departname,a.ip as ip,a.machine_uuid as uuid, " +
 	// 	"a.cpu as cpu,a.state as state, a.systeminfo as systeminfo" +
-	// 	" FROM machine_node a LEFT JOIN depart_node b ON a.depart_id = b.id").Scan(&list)
-	total, err = CrudAll(q, tx, list)
+	// 	" FROM machine_node a LEFT JOIN depart_node b ON a.depart_id = b.id").Scan(&list).Order("ID desc")
+
+	total, err = CrudAll(q, tx, &res)
 	return
 }
 
