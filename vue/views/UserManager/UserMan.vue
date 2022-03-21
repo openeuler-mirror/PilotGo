@@ -15,13 +15,13 @@
         </el-button>
       </template>
       <template v-slot:table_action>
-        <el-button @click="handleCreate"> 添加 </el-button>
+        <auth-button name="user_add" @click="handleCreate"> 添加 </auth-button>
         <el-popconfirm 
           title="确定删除此用户？"
           cancel-button-type="default"
           confirm-button-type="danger"
           @confirm="handleDelete">
-          <el-button slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
+          <auth-button name="user_del" slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
         </el-popconfirm>
         <el-button @click="handleExport"> 导出 </el-button>
         <el-upload
@@ -33,29 +33,27 @@
           accept="xlsx"
           style="display: inline-flex;margin-right: 8px"
           action="/user/import">
-          <el-button> 批量导入 </el-button>
+          <auth-button name="user_import"> 批量导入 </auth-button>
         </el-upload>
       </template>
       <template v-slot:table>
-        <el-table-column prop="id" label="编号" width="60">
-        </el-table-column>
         <el-table-column  prop="username" label="用户名">
         </el-table-column>
         <el-table-column  prop="departName" label="部门">
+        </el-table-column>
+        <el-table-column  prop="role" label="角色">
+          <!-- <template slot-scope="scope" @>
+            {{ handleRoles(scope.row.role) }}  
+          </template>  -->
         </el-table-column>
         <el-table-column prop="phone" label="手机号">
         </el-table-column>
         <el-table-column  prop="email" label="邮箱">
         </el-table-column>
-        <el-table-column prop="enable" label="启用">
-          <template slot-scope="scope">
-            {{scope.row.enable === true ? "是" : "否"}}
-          </template>
-        </el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button class="editBtn" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button class="editBtn" type="primary" plain size="mini" @click="handleReset(scope.row.email)">重置密码</el-button>
+            <auth-button name="user_edit" class="editBtn" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+            <auth-button name="user_reset" class="editBtn" type="primary" plain size="mini" @click="handleReset(scope.row.email)">重置密码</auth-button>
           </template>
         </el-table-column>
       </template>
@@ -80,12 +78,14 @@ import XLSX from 'xlsx'
 import AddForm from "./form/addForm.vue"
 import UpdateForm from "./form/updateForm.vue"
 import kyTable from "@/components/KyTable";
+import AuthButton from "@/components/AuthButton";
 import { getUsers, delUser, resetPwd, searchUser } from "@/request/user"
 export default {
   components: {
     kyTable,
     AddForm,
     UpdateForm,
+    AuthButton,
   },
   data() {
     return {
@@ -110,6 +110,21 @@ export default {
         this.refresh();
       }
     }, 
+    handleRoles(roles) {
+      if (roles && roles.length > 0) {
+        let roleString = "";
+        roles.forEach((item, index) => {
+          if (index == roles.length - 1) {
+            roleString += item;
+          } else {
+            roleString = item + "," + roleString;
+          }
+        });
+        return roleString;
+      } else {
+        return "暂无";
+      }
+    },
     refresh(){
       this.$refs.table.handleSearch();
     },
