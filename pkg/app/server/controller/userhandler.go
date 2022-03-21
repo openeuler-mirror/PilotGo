@@ -9,13 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-18 17:28:16
+ * LastEditTime: 2022-03-21 17:16:17
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -186,6 +187,7 @@ func UserAll(c *gin.Context) {
 		data["role"] = roles
 		datas = append(datas, data)
 	}
+	common.Reverse(&datas)
 	total, data, err := model.SearchAll(query, datas)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
@@ -265,17 +267,46 @@ func UpdateUser(c *gin.Context) {
 	c.Bind(&user)
 	email := user.Email
 	phone := user.Phone
-	if dao.IsEmailExist(email) {
-		// 修改手机号
+	Pid := user.DepartFirst
+	id := user.DepartSecond
+	departName := user.DepartName
+	mysqlmanager.DB.Where("email = ?", email).Find(&user)
+	if user.DepartName != departName && user.Phone != phone {
+		u := model.User{
+			DepartFirst:  Pid,
+			DepartSecond: id,
+			DepartName:   departName,
+		}
+		fmt.Println("1", Pid, id, departName, phone)
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Updates(&u)
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
-
 		response.Response(c, http.StatusOK,
 			200,
 			gin.H{"data": user},
-			"User update successfully!")
+			"用户信息修改成功")
 		return
-	} else {
-		response.Fail(c, nil, "No user found!")
+	}
+	if user.DepartName != departName && user.Phone != phone {
+		fmt.Println("2", Pid, id, departName, phone)
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
+		response.Response(c, http.StatusOK,
+			200,
+			gin.H{"data": user},
+			"用户信息修改成功")
+		return
+	}
+	if user.DepartName != departName && user.Phone == phone {
+		fmt.Println("3", Pid, id, departName, phone)
+		u := model.User{
+			DepartFirst:  Pid,
+			DepartSecond: id,
+			DepartName:   departName,
+		}
+		mysqlmanager.DB.Model(&user).Where("email=?", email).Updates(&u)
+		response.Response(c, http.StatusOK,
+			200,
+			gin.H{"data": user},
+			"用户信息修改成功")
 	}
 }
 

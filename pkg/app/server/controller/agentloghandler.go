@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:44:00
- * LastEditTime: 2022-03-18 17:22:53
+ * LastEditTime: 2022-03-21 15:34:57
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package controller
@@ -22,6 +22,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
@@ -50,6 +51,7 @@ func LogAll(c *gin.Context) {
 		data["status"] = logparent.Status
 		datas = append(datas, data)
 	}
+	common.Reverse(&datas)
 	total, data, err := model.SearchAll(query, datas)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())

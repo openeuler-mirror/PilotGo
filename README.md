@@ -49,15 +49,19 @@ PilotGo项目后端采用golang语言开发，使用到以下开源库：
 
 ```
 # Required before startup
-go >=1.15;  nodejs >=14;  yarn
-# Installing yarn using NPM
-npm install -g yarn
-# install dependencies
-yarn / yarn install
-# vue server with hot reload at localhost:8080
-yarn run dev
-# web server with hot reload at localhost:8083
-go run web-main.go
+go >=1.15;  nodejs >=14
+# install npm dependencies
+npm install
+# vue server with hot reload at localhost:8080(Modify the IP addresses of go server and web server under config/index.js)
+npm run dev
+# Rename the config.yaml.templete to config.yaml
+
+# PilotGo server with hot reload at localhost:8083
+go run pkg/app/server/main.go
+# PilotGo agent with hot reload at localhost:8083
+go build -o agent pkg/app/agent/main.go
+./agent
+
 ```
 
 #### 参与贡献

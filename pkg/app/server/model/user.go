@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-18 14:05:13
+ * LastEditTime: 2022-03-21 17:02:19
  * Description: 用户数据存储结构体
  ******************************************************************************/
 package model
@@ -21,8 +21,8 @@ import (
 type User struct {
 	ID           uint `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	CreatedAt    time.Time
-	DepartFirst  int    `gorm:"size:25" json:"departPId,omitempty"`
-	DepartSecond int    `gorm:"size:25" json:"departid,omitempty"`
+	DepartFirst  int    `gorm:"size:25" json:"departPid,omitempty"`
+	DepartSecond int    `gorm:"size:25" json:"departId,omitempty"`
 	DepartName   string `gorm:"size:25" json:"departName,omitempty"`
 	Username     string `json:"username,omitempty"`
 	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
