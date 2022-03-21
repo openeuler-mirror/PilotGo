@@ -9,10 +9,10 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 09:16:44
-  LastEditTime: 2022-03-16 09:59:34
+  LastEditTime: 2022-03-17 09:34:10
  -->
 <template>
-    <el-button v-if="showBtn">
+    <el-button v-if="showBtn" :disabled="disabled" v-bind="$attrs" v-on="$listeners" >
       <slot></slot>
     </el-button>
 </template>
@@ -23,13 +23,17 @@ export default{
     name: {
       type: String,
       default: ''
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
     showBtn() {
-      let btnArray = this.$store.getters.operations || [];
+      let btnArray = this.$store.getters.getOperations || [];
       if(btnArray && btnArray.length > 0){
-        return btnArray.includes(this.name) ? false :true;
+        return btnArray.includes(this.name) ? true : false;
       }
     }
   },
