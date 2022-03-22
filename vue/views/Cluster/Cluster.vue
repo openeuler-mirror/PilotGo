@@ -9,17 +9,17 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-16 10:23:57
+  LastEditTime: 2022-03-21 16:25:05
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div class="cluster">
     <router-view v-if="$route.meta.breadcrumb"></router-view>
     <div v-if="!$route.meta.breadcrumb">
-    <div class="dept">
+    <div class="dept panel">
       <ky-tree :getData="getChildNode" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
     </div>
-    <div class="info">
+    <div class="info panel">
       <ky-table
         class="cluster-table"
         ref="table"

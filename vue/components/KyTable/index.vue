@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-03-03 13:49:43
+  LastEditTime: 2022-03-21 17:18:43
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -204,7 +204,8 @@ export default {
   .header {
     width: 100%;
     padding: 5px 0;
-    background-color: #36ade0;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(to right,rgb(11, 35, 117) 0%, rgb(96, 122, 207) 100%,);
     .header_content {
       margin: 0 10px;
       display: flex;
@@ -225,6 +226,11 @@ export default {
     }
     th, td {
       text-align: center;
+    }
+    .el-checkbox__input.is-checked .el-checkbox__inner, 
+    .el-checkbox__input.is-indeterminate .el-checkbox__inner {
+      background-color: rgb(82, 108, 193);
+      border-color: rgb(82, 108, 193)
     }
   }
   .pagination {

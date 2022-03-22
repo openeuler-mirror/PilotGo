@@ -17,6 +17,7 @@
     "element-ui": "^2.15.6",
     "file-saver": "^2.0.5",
     "js-cookie": "^3.0.1",
+    "mockjs": "^1.1.0",
     "requestjs": "^1.0.3",
     "vue": "^2.5.2",
     "vue-devtools": "^5.1.4",

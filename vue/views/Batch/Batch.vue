@@ -1,7 +1,7 @@
 <template>
   <div>
   <router-view v-if="$route.meta.breadcrumb"></router-view>
-  <div v-if="!$route.meta.breadcrumb">
+  <div v-if="!$route.meta.breadcrumb" class="panel">
     <ky-table
         class="cluster-table"
         ref="table"

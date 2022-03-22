@@ -1,0 +1,79 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3196855 */
+  src: url('iconfont.woff2?t=1647845343325') format('woff2'),
+       url('iconfont.woff?t=1647845343325') format('woff'),
+       url('iconfont.ttf?t=1647845343325') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-fankui:before {
+  content: "\ee9b";
+}
+
+.icon-women:before {
+  content: "\ee9e";
+}
+
+.icon-fenlei:before {
+  content: "\eea7";
+}
+
+.icon-qingdan:before {
+  content: "\eeae";
+}
+
+.icon-wode:before {
+  content: "\eeca";
+}
+
+.icon-yujing:before {
+  content: "\eecb";
+}
+
+.icon-yonghuquanxian:before {
+  content: "\fce9";
+}
+
+.icon-yonghuguanli:before {
+  content: "\fcea";
+}
+
+.icon-tongjiguanli:before {
+  content: "\fced";
+}
+
+.icon-quanxianguanli:before {
+  content: "\fcf5";
+}
+
+.icon-leimuguanli:before {
+  content: "\fcf9";
+}
+
+.icon-jigouguanli:before {
+  content: "\fcfd";
+}
+
+.icon-gailan:before {
+  content: "\e612";
+}
+
+.icon-yichang:before {
+  content: "\e741";
+}
+
+.icon-zhengchang:before {
+  content: "\e663";
+}
+
+.icon-kongxianzhong:before {
+  content: "\e624";
+}
+

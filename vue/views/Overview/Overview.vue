@@ -1,6 +1,7 @@
 <template>
   <div class="overview">
     <div class="cluster">
+      <span class="iconfont">&#xe663;</span>
       <span class="level-title">机器监控数据</span>
       <el-select v-model="macIp" filterable placeholder="请选择或输入关键字">
         <el-option
@@ -22,34 +23,26 @@
     <div class="monitor">
       <span class="monitor-title">监控告警情况</span>
       <el-row class="monitor-row" :gutter="30">
-        <el-col :span="12">
-          <div class="table-title">
-            <span class="table-title__left">机器异常</span>
-            <div class="table-title__right">
-              <span>共{{ machineTableData.length }}条</span>>
-            </div>
-          </div>
-
-          <el-table :data="machineTable" style="width: 100%" size="small">
-            <el-table-column prop="ip" label="IP"> </el-table-column>
-            <el-table-column prop="type" label="类型"> </el-table-column>
-            <el-table-column prop="details" label="详情"> </el-table-column>
-          </el-table>
-        </el-col>
-
-        <el-col :span="12">
+        <el-col>
           <div class="table-title">
             <span class="table-title__left">监控异常</span>
             <div class="table-title__right">
-              <span>共{{ monitorTableData.length }}条</span>
+              <span>共{{ alertData.length }}条</span>>
             </div>
           </div>
 
-          <el-table :data="monitorTable" style="width: 100%" size="small">
-            <el-table-column prop="ip" label="IP"></el-table-column>
-            <el-table-column prop="type" label="类型"></el-table-column>
-            <el-table-column prop="details" label="详情"></el-table-column>
-          </el-table>
+          <small-table :data="alertData">
+            <el-table-column prop="instance" label="IP"> </el-table-column>
+            <el-table-column prop="alertname" label="告警名称"> </el-table-column>
+            <el-table-column prop="state" label="状态"> </el-table-column>
+            <el-table-column  label="操作"> 
+              <template slot-scope="scope">
+                <el-button size="mini" type="primary" plain 
+                  @click="handleSend(scope.row)"> 
+                  发送告警 </el-button>
+              </template>
+            </el-table-column>
+          </small-table>
         </el-col>
       </el-row>
     </div>
@@ -57,9 +50,13 @@
 </template>
 
 <script>
-import { getData, getCurrData, getPromeIp } from "@/request/overview";
+import { getData, getCurrData, getPromeIp, getAlerts } from "@/request/overview";
+import SmallTable from "@/components/SmallTable";
 export default {
   name: "Overview",
+  components: {
+    SmallTable
+  },
   props: {},
   data() {
     return {
@@ -130,17 +127,7 @@ export default {
         boundaryGap: [0, '100%'],
       },
       timer: [],
-      pageSize: 4, //表格显示数据条数
-      machineTable: [], //机器表格显示数据
-      monitorTable: [], //监控表格显示数据 
-      machineTableData: [
-        {
-          ip: "172.17.6.163",
-          type: "虚拟机",
-          details: "",
-        },
-      ],//表格总数据
-      monitorTableData: [],
+      alertData: []
     };
   },
   computed: {
@@ -288,6 +275,11 @@ export default {
 
   },
   mounted() {
+    getAlerts().then(res => {
+      if(res.data.code === 200) {
+        this.alertData = res.data.data;
+      }
+    })
     getPromeIp({departid: this.$store.getters.UserDepartId}).then(res => {
       if(res.data.code == 200) {
         this.options = res.data.data;
@@ -296,12 +288,39 @@ export default {
     this.chartW = document.getElementsByClassName("cluster")[0].clientWidth/2+20;
     this.chartH = document.getElementsByClassName("cluster")[0].clientHeight;
     
-    this.getStepCpu();
-    this.getStepMem();
-    this.getStepNet();
-    this.getStepIO();
+    // this.getStepCpu();
+    // this.getStepMem();
+    // this.getStepNet();
+    // this.getStepIO();
   },
   methods: {
+    handleSend(row) {
+      //发送告警信息
+      let params = [{
+        "Labels": {
+          "alertname": row.alertname,
+          "IP": row.instance,
+        },
+        "Annotations": {
+          "summary": row.annotations,
+        },
+        "StartsAt": new Data().toISOString()+'+8:00',
+        "EndsAt": (new Data()+24*60*60).toISOString()+'+8:00',
+      }]
+      senMessage({message: params}).then(res => {
+        if(res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '告警发送成功'
+          })
+        } else {
+          this.$message({
+            type: 'erroe',
+            message: '告警发送失败,请重试'
+          })
+        }
+      })
+    },
     getStepData(thisData,itemIndex) {
       let params= {
         machineip: this.macIp,

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-03-10 16:35:39
+  LastEditTime: 2022-03-21 17:01:01
  -->
 <template>
   <div class="ky-tree">
@@ -211,6 +211,15 @@ export default {
     justify-content: space-between;
     font-size: 16px;
     padding-right: 8px;
+    em {
+      color: rgb(11, 35, 117)
+    }
   }
+  .el-icon-caret-right:before {
+    content: "\27a7";
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(11, 35, 117);
+}
 }
 </style>

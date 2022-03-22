@@ -9,11 +9,11 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-03-03 17:09:25
+  LastEditTime: 2022-03-21 18:21:55
   Description: provide agent log manager of pilotgo
  -->
 <template>
- <div>
+ <div style="width: 100%">
    <ky-table
         class="cluster-table"
         ref="table"
@@ -36,11 +36,13 @@
           </el-table-column>
           <el-table-column prop="userName" label="创建者"> 
           </el-table-column>
+          <el-table-column prop="departName" label="部门"> 
+          </el-table-column>
           <el-table-column prop="status" label="状态"> 
           </el-table-column>
-          <el-table-column prop="CreatedAt" label="创建时间">
+          <el-table-column prop="created_at" label="创建时间">
             <template slot-scope="scope">
-              <span>{{scope.row.CreatedAt | dateFormat}}</span>
+              <span>{{scope.row.created_at | dateFormat}}</span>
             </template>
           </el-table-column>
           <el-table-column prop="operation" label="详情">
@@ -132,4 +134,9 @@ export default {
 }
 </script>
 <style scoped>
+.cluster-table {
+  width: 100%;
+  height: 96%;
+  overflow: auto;
+}
 </style>
