@@ -233,6 +233,8 @@ func Deletedepartdata(c *gin.Context) {
 		dao.Insertdepartlist(needdelete, str)
 
 	}
+	var user model.User
+	mysqlmanager.DB.Where("depart_second=?", a).Unscoped().Delete(user)
 	response.Success(c, nil, "部门删除成功")
 }
 
