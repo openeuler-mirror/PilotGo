@@ -1,0 +1,121 @@
+{
+  "id": "3196855",
+  "name": "pilotgo",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "17967618",
+      "name": "反馈",
+      "font_class": "fankui",
+      "unicode": "ee9b",
+      "unicode_decimal": 61083
+    },
+    {
+      "icon_id": "17967621",
+      "name": "我们",
+      "font_class": "women",
+      "unicode": "ee9e",
+      "unicode_decimal": 61086
+    },
+    {
+      "icon_id": "17967630",
+      "name": "分类",
+      "font_class": "fenlei",
+      "unicode": "eea7",
+      "unicode_decimal": 61095
+    },
+    {
+      "icon_id": "17967637",
+      "name": "清单",
+      "font_class": "qingdan",
+      "unicode": "eeae",
+      "unicode_decimal": 61102
+    },
+    {
+      "icon_id": "17967665",
+      "name": "我的",
+      "font_class": "wode",
+      "unicode": "eeca",
+      "unicode_decimal": 61130
+    },
+    {
+      "icon_id": "17967666",
+      "name": "预警",
+      "font_class": "yujing",
+      "unicode": "eecb",
+      "unicode_decimal": 61131
+    },
+    {
+      "icon_id": "25007066",
+      "name": "用户权限",
+      "font_class": "yonghuquanxian",
+      "unicode": "fce9",
+      "unicode_decimal": 64745
+    },
+    {
+      "icon_id": "25007068",
+      "name": "用户管理",
+      "font_class": "yonghuguanli",
+      "unicode": "fcea",
+      "unicode_decimal": 64746
+    },
+    {
+      "icon_id": "25007106",
+      "name": "统计管理",
+      "font_class": "tongjiguanli",
+      "unicode": "fced",
+      "unicode_decimal": 64749
+    },
+    {
+      "icon_id": "25007169",
+      "name": "权限管理",
+      "font_class": "quanxianguanli",
+      "unicode": "fcf5",
+      "unicode_decimal": 64757
+    },
+    {
+      "icon_id": "25007179",
+      "name": "类目管理",
+      "font_class": "leimuguanli",
+      "unicode": "fcf9",
+      "unicode_decimal": 64761
+    },
+    {
+      "icon_id": "25007194",
+      "name": "机构管理",
+      "font_class": "jigouguanli",
+      "unicode": "fcfd",
+      "unicode_decimal": 64765
+    },
+    {
+      "icon_id": "9783460",
+      "name": "概览",
+      "font_class": "gailan",
+      "unicode": "e612",
+      "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "6345513",
+      "name": "异常",
+      "font_class": "yichang",
+      "unicode": "e741",
+      "unicode_decimal": 59201
+    },
+    {
+      "icon_id": "10884095",
+      "name": "正常",
+      "font_class": "zhengchang",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "26945576",
+      "name": "空闲中",
+      "font_class": "kongxianzhong",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    }
+  ]
+}

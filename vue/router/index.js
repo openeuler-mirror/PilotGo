@@ -32,7 +32,7 @@ export const routes = [
         path: '/overview',
         name: 'Overview',
         component: _import('Overview/Overview'),
-        meta: { title: 'overview', header_title: "概览", panel: "overview", icon_class: 'el-icon-location' }
+        meta: { title: 'overview', header_title: "概览", panel: "overview", icon_class: 'el-icon-s-help', icon_code:'&#xe612;' }
       },
       {
         path: '/cluster',
@@ -40,6 +40,18 @@ export const routes = [
         component:  _import('Cluster/Cluster'),
         meta: { title: 'cluster', header_title: "机器管理", panel: "cluster", icon_class: 'el-icon-s-platform' },
         children:[
+          {
+            path: '/firewall',
+            name: 'Firewall',
+            component:  _import('Firewall/Firewall'),
+            meta: {  
+              header_title: "防火墙配置", 
+              panel: "cluster", 
+              breadcrumb: [
+                { name: '机器管理', path: '/cluster' },
+                { name: '防火墙配置'}], 
+            }
+          },
           {
             path: '/cluster:uuid',
             name: 'MacDetail',
@@ -54,6 +66,7 @@ export const routes = [
               icon_class: ''
             }
         },
+
         ]
       },
       {
@@ -102,12 +115,12 @@ export const routes = [
         component:  _import('RoleManager/RoleMan'),
         meta: { title: 'rolemanager', header_title: "角色管理", panel: "rolemanager", icon_class: 'el-icon-s-custom' }
       },
-      {
+     /*  {
         path: '/firewall',
         name: 'Firewall',
         component:  _import('Firewall/Firewall'),
         meta: { title: 'firewall', header_title: "防火墙配置", panel: "firewall", icon_class: 'el-icon-s-home' }
-      },
+      }, */
       {
         path: '/log',
         name: 'Log',

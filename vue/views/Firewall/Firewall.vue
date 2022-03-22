@@ -1,12 +1,9 @@
 <template>
-  <div>
-    <div class="firewall-conditions">
-      <span>防火墙配置</span>
+  <div class="firewall_content">
+    <div class="firewall-conditions panel">
       <div>
         <el-form :model="firewallForm" ref="firewallForm" :rules="rules">
-          <el-row>
-            <el-col :span="6">
-              <el-form-item prop="ip" label="主 机 IP" class="p_text">
+              <el-form-item prop="ip" label="主机IP:" class="p_text">
                 <el-input
                   class="firewall-input"
                   size="mini"
@@ -17,9 +14,7 @@
                 >
                 </el-input>
               </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item prop="host_user" label="用户名" class="p_text">
+              <el-form-item prop="host_user" label="用户名:" class="p_text">
                 <el-input
                   class="firewall-input"
                   size="mini"
@@ -30,12 +25,11 @@
                 >
                 </el-input>
               </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item prop="host_password" label="密码" class="p_text">
+              <el-form-item prop="host_password" label="密码:" class="p_text">
                 <el-input
                   class="firewall-input"
                   size="mini"
+                  type="password"
                   placeholder="请输入密码"
                   v-model="firewallForm.host_password"
                   clearable
@@ -43,11 +37,7 @@
                 >
                 </el-input>
               </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="6">
-              <el-form-item label="执行命令" class="p_text" prop="linux_value">
+              <el-form-item label="执行命令:" class="p_text" prop="linux_value">
                 <el-select
                   size="mini"
                   class="firewall-input1"
@@ -63,11 +53,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row v-if="firewallForm.linux_value==='4'||firewallForm.linux_value==='5'||firewallForm.linux_value==='6'">
-            <el-col :span="6">
-              <el-form-item prop="zone" label="区域位置" class="p_text">
+              <el-form-item v-show="showNext" prop="zone" label="区域位置:" class="p_text">
                 <el-select
                   size="mini"
                   class="firewall-input1"
@@ -83,9 +69,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item prop="port" label="端口号" class="p_text">
+              <el-form-item v-show="showNext" prop="port" label="端口号:" class="p_text">
                 <el-input
                   size="mini"
                   class="firewall-input2"
@@ -96,9 +80,7 @@
                 >
                 </el-input>
               </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
+          <el-row style="width:46%; margin: 0 auto;">
             <el-col :span="4"> </el-col>
             <el-button size="mini" type="primary" @click="handleClick">确定</el-button>
             <el-button type="primary" size="mini" @click="handlerClickReset">重置</el-button>
@@ -106,7 +88,7 @@
         </el-form>
       </div>
     </div>
-    <div class="firewall-config">
+    <div class="firewall-config panel">
       <div class="config">
         <el-descriptions title="防火墙配置信息" :data="tmpData">
           <el-descriptions-item label="Config">
@@ -229,6 +211,12 @@ export default {
       ],
     };
   },
+  computed: {
+    showNext() {
+      let value = this.firewallForm.linux_value;
+      return ['4','5','6'].includes(value);
+    }
+  },
   mounted() {
     this.firewallForm.ip = this.$route.query.ip || '';
   },
@@ -324,20 +312,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.firewall-conditions {
-  background: #fff;
-  /*height: 100px;*/
-  line-height: 50px;
-  .el-row {
-    margin-left: 30px;
+.firewall_content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-around;
+  .firewall-conditions {
+    width: 45%;
   }
-
-  .el-col {
-    .p_text {
-      font-size: 14px;
-    }
+  .firewall-config {
+    width: 50%;
   }
 }
+
 
 .firewall-input {
   margin-left: 18px;
@@ -350,14 +337,5 @@ export default {
 .firewall-input2 {
   margin-left: 18px;
   width: 230px;
-}
-.firewall-config {
-  width: 100%;
-  margin: 10px auto;
-  float: left;
-}
-.config {
-  margin-top: 15px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 </style>

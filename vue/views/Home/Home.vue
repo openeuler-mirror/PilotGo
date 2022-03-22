@@ -9,13 +9,13 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-04 15:59:11
+  LastEditTime: 2022-03-22 10:23:51
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <el-container>
     <el-header>
-      <div class="header-logoName">PilotGo运维平台</div>
+      <div class="header-logoName"><img src="../../assets/logo.png" alt="">运维平台</div>
       <div class="header-function">
         <el-dropdown class="header-function__username" trigger="click">
           <div>
@@ -29,8 +29,8 @@
         </el-dropdown>
       </div>
     </el-header>
-    <el-container class="aside-main">
-      <el-aside width="170px">
+    <el-container>
+      <el-aside style="width: 16%">
         <el-menu
           id="el-menu"
           :uniqueOpened="true"
@@ -135,16 +135,21 @@ export default {
 
 <style lang="scss" scope>
 .el-container {
+  position: relative;
+  height: calc(100%);
+  width: calc(100%);
   .el-header {
-    background: url(../../assets/header-bg.png);
-    background-size: cover;
-
     .header-logoName {
+      height: 100%;
       font-size: 28px;
       color: #fff;
       float: left;
-      line-height: 60px;
-      margin-left: 8px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      img {
+      height: 120%;
+    }
     }
     .header-function {
       float: right;
@@ -167,13 +172,26 @@ export default {
       }
     }
   }
-
-  .aside-main {
-    height: calc(100% - 60px);
-  }
   .el-aside {
-    background: #fff;
-    position: relative;
+    width: 16%;
+    .el-menu {
+      width: 88%;
+      height: 98%;
+      border-radius: 6px;
+      margin-left: 5.6%;
+    }
+    .el-menu::after {
+      content: '';
+      position: fixed;
+      display: block;
+      width: 0;
+      height: 0;
+      border: 8px solid transparent;
+      border-left: 8px solid #fff;
+      left: 15%;
+      top: 46%;
+      clear: both;
+    }
     .aside-footer {
       position: absolute;
       bottom: 0;
@@ -191,12 +209,19 @@ export default {
   }
 
   .el-main {
-    height: 100%;
-    background: #fafafa;
+    height: 98%;
+    width: 80%;
+    border-radius: 6px;
+    margin-right: 0.8%;
+    padding: 12px;
+    overflow: auto;
+    background: #fff;
     .cockpit {
       width: 100%;
       height: 100%;
     }
   }
+  
+
 }
 </style>
