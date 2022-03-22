@@ -136,7 +136,7 @@ export const routes = [
 ]
 
 const router = new Router({
-  mode: 'hash',
+  mode: 'history',
   routes: [ ...routes, ...constantRouterMap],
 })
 

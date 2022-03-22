@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:44:00
- * LastEditTime: 2022-03-21 15:34:57
+ * LastEditTime: 2022-03-22 16:46:40
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package controller
@@ -29,10 +29,13 @@ import (
 
 // 查询所有父日志
 func LogAll(c *gin.Context) {
+	email := c.Query("email")
 	var logparents []model.AgentLogParent
+	var user model.User
+	mysqlmanager.DB.Where("email = ?", email).Find(&user)
+	departId := user.DepartSecond
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
-
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
@@ -40,16 +43,20 @@ func LogAll(c *gin.Context) {
 	mysqlmanager.DB.Find(&logparents)
 	datas := make([]map[string]interface{}, 0)
 	for _, logparent := range logparents {
-		var user model.User
+		var u model.User
 		data := make(map[string]interface{})
 		data["id"] = logparent.ID
 		data["created_at"] = logparent.CreatedAt
 		data["userName"] = logparent.UserName
-		mysqlmanager.DB.Where("email = ?", logparent.UserName).Find(&user)
-		data["departName"] = user.DepartName
-		data["type"] = logparent.Type
-		data["status"] = logparent.Status
-		datas = append(datas, data)
+		mysqlmanager.DB.Where("email = ?", logparent.UserName).Find(&u)
+		if u.DepartSecond == departId || u.DepartFirst == departId {
+			data["departName"] = u.DepartName
+			data["type"] = logparent.Type
+			data["status"] = logparent.Status
+			datas = append(datas, data)
+		} else {
+			continue
+		}
 	}
 	common.Reverse(&datas)
 	total, data, err := model.SearchAll(query, datas)
