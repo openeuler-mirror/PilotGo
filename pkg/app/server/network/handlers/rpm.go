@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-17 02:43:29
- * LastEditTime: 2022-03-02 18:17:11
+ * LastEditTime: 2022-03-22 23:02:00
  * Description: provide agent rpm manager functions.
  ******************************************************************************/
 package handlers
@@ -87,6 +87,7 @@ type RPMS struct {
 
 func InstallRpmHandler(c *gin.Context) {
 	var rpm RPMS
+	var user model.User
 	var logParent model.AgentLogParent
 	var log model.AgentLog
 	var machineNode model.MachineNode
@@ -113,6 +114,8 @@ func InstallRpmHandler(c *gin.Context) {
 
 	logParent.Type = "软件包安装/卸载"
 	logParent.UserName = rpm.UserName
+	mysqlmanager.DB.Where("email = ?", rpm.UserName).Find(&user)
+	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 	StatusCodes := make([]string, 0)
 
@@ -161,6 +164,7 @@ func InstallRpmHandler(c *gin.Context) {
 }
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
+	var user model.User
 	var logParent model.AgentLogParent
 	var log model.AgentLog
 	var machineNode model.MachineNode
@@ -186,6 +190,8 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	logParent.Type = "软件包安装/卸载"
 	logParent.UserName = rpm.UserName
+	mysqlmanager.DB.Where("email = ?", rpm.UserName).Find(&user)
+	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 	StatusCodes := make([]string, 0)
 	for _, uuid := range rpm.UUIDs {

@@ -9,23 +9,25 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:46:13
- * LastEditTime: 2022-03-21 15:32:23
+ * LastEditTime: 2022-03-24 00:17:47
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 type AgentLogParent struct {
-	ID        int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	CreatedAt time.Time
-	UserName  string `json:"userName"`
-	Type      string `json:"type"`
-	Status    string `json:"status"`
+	ID         int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt  time.Time
+	UserName   string `json:"userName"`
+	DepartName string `json:"departName"`
+	Type       string `json:"type"`
+	Status     string `json:"status"`
 }
 
 type AgentLog struct {
@@ -47,10 +49,14 @@ const (
 	ServiceStart   = "开启服务"
 )
 
-func (p *AgentLogParent) LogAll(q *PaginationQ) (list *[]AgentLogParent, total uint, err error) {
-	list = &[]AgentLogParent{}
-	tx := mysqlmanager.DB.Order("created_at desc").Find(list)
-	total, err = CrudAll(q, tx, list)
+func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (list []AgentLogParent, total uint, err error) {
+	list = []AgentLogParent{}
+	lists := []AgentLogParent{}
+	for _, name := range Dnames {
+		mysqlmanager.DB.Order("created_at desc").Where("depart_name = ?", name).Find(&list)
+		lists = append(lists, list...)
+	}
+	list, total, err = SliceAll(q, lists)
 	return
 }
 
@@ -59,4 +65,32 @@ func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tot
 	tx := mysqlmanager.DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	total, err = CrudAll(q, tx, list)
 	return
+}
+func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, uint, error) {
+	if p.Size < 1 {
+		p.Size = 10
+	}
+	if p.CurrentPageNum < 1 {
+		p.CurrentPageNum = 1
+	}
+	total := len(data)
+	if total == 0 {
+		p.TotalPage = 1
+	}
+	num := p.Size * (p.CurrentPageNum - 1)
+	if num > uint(total) {
+		return nil, uint(total), fmt.Errorf("页码超出")
+	}
+	if p.Size*p.CurrentPageNum > uint(total) {
+		return data[num:], uint(total), nil
+	} else {
+		if p.Size*p.CurrentPageNum < num {
+			return nil, uint(total), fmt.Errorf("读取错误")
+		}
+		if p.Size*p.CurrentPageNum == 0 {
+			return data, uint(total), nil
+		} else {
+			return data[num : p.CurrentPageNum*p.Size-1], uint(total), nil
+		}
+	}
 }

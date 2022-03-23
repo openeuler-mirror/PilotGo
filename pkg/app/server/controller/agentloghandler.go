@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:44:00
- * LastEditTime: 2022-03-22 16:46:40
+ * LastEditTime: 2022-03-24 00:18:14
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package controller
@@ -22,49 +22,42 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 // 查询所有父日志
 func LogAll(c *gin.Context) {
-	email := c.Query("email")
-	var logparents []model.AgentLogParent
-	var user model.User
-	mysqlmanager.DB.Where("email = ?", email).Find(&user)
-	departId := user.DepartSecond
+	Id := c.Query("departId")
+	departId, err := strconv.Atoi(Id)
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		return
+	}
+	logParent := model.AgentLogParent{}
 	query := &model.PaginationQ{}
-	err := c.ShouldBindQuery(query)
+	err = c.ShouldBindQuery(query)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	mysqlmanager.DB.Find(&logparents)
-	datas := make([]map[string]interface{}, 0)
-	for _, logparent := range logparents {
-		var u model.User
-		data := make(map[string]interface{})
-		data["id"] = logparent.ID
-		data["created_at"] = logparent.CreatedAt
-		data["userName"] = logparent.UserName
-		mysqlmanager.DB.Where("email = ?", logparent.UserName).Find(&u)
-		if u.DepartSecond == departId || u.DepartFirst == departId {
-			data["departName"] = u.DepartName
-			data["type"] = logparent.Type
-			data["status"] = logparent.Status
-			datas = append(datas, data)
-		} else {
-			continue
-		}
+	Dids := make([]int, 0)
+	Dnames := make([]string, 0)
+	ReturnSpecifiedDepart(departId, &Dids)
+	Dids = append(Dids, departId)
+	for _, id := range Dids {
+		var departNames model.DepartNode
+		mysqlmanager.DB.Where("id =?", id).Find(&departNames)
+
+		Dnames = append(Dnames, departNames.Depart)
 	}
-	common.Reverse(&datas)
-	total, data, err := model.SearchAll(query, datas)
+	list, total, err := logParent.LogAll(query, Dnames)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	model.JsonPagination(c, data, total, query)
+	// 返回数据开始拼装分页的json
+	model.JsonPagination(c, list, total, query)
 }
 
 // 查询所有子日志
