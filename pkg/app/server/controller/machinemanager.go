@@ -265,8 +265,7 @@ func MachineInfo(c *gin.Context) {
 }
 
 func MachineAllData(c *gin.Context) {
-	id := c.Query("departid")
-	AllData := dao.MachineAllData(id)
+	AllData := model.MachineAllData()
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": AllData,
