@@ -389,3 +389,57 @@ func AddAgents() {
 		mysqlmanager.DB.Save(&agent_list)
 	}
 }
+
+func ReturnID(id int) []int {
+	var depart []model.DepartNode
+	mysqlmanager.DB.Where("p_id=?", id).Find(&depart)
+
+	res := make([]int, 0)
+	for _, value := range depart {
+		res = append(res, value.ID)
+	}
+	return res
+}
+func ReturnSpecifiedDepart(id int, res *[]int) {
+	if len(ReturnID(id)) == 0 {
+		return
+	}
+	for _, value := range ReturnID(id) {
+		*res = append(*res, value)
+		ReturnSpecifiedDepart(value, res)
+	}
+}
+
+// type A struct {
+// 	Tmp int `json:"id"`
+// }
+
+// func Test(c *gin.Context) {
+// 	j, err := ioutil.ReadAll(c.Request.Body)
+// 	fmt.Println("body:", string(j))
+// 	if err != nil {
+// 		response.Response(c, http.StatusUnprocessableEntity,
+// 			422,
+// 			nil,
+// 			err.Error())
+// 		return
+// 	}
+// 	var a A
+// 	err = json.Unmarshal(j, &a)
+// 	logger.Info("%+v", a)
+// 	if err != nil {
+// 		response.Response(c, http.StatusUnprocessableEntity,
+// 			422,
+// 			nil,
+// 			err.Error())
+// 		return
+// 	}
+
+// 	logger.Info("%d", a.Tmp)
+// 	res := make([]int, 0)
+// 	ReturnSpecifiedDepart(a.Tmp, &res)
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"code": 200,
+// 		"data": res,
+// 	})
+// }
