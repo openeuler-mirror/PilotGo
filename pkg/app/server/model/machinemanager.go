@@ -105,5 +105,12 @@ func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, 
 	total, err = CrudAll(q, tx, &res)
 	return
 }
+func MachineAllData() []Res {
+	var mch []Res
+	mysqlmanager.DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
+		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
+		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch)
+	return mch
+}
 
 // SELECT a.id as id,a.depart_id as departid,b.depart as departname,a.ip as ip,a.machine_uuid as uuid,a.cpu as cpu,a.state as state, a.systeminfo as systeminfo FROM machine_node a LEFT JOIN depart_node b ON a.depart_id = b.id;
