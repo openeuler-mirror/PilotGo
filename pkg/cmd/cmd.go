@@ -69,7 +69,7 @@ func Start(conf *config.Configure) (err error) {
 		}
 	}()
 
-	mysqlmanager.DB.Delete(&model.MachineNode{})
+	// mysqlmanager.DB.Delete(&model.MachineNode{})
 
 	mysqlmanager.DB.AutoMigrate(&model.User{})
 	mysqlmanager.DB.AutoMigrate(&model.UserRole{})
