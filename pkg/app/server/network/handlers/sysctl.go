@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-16 09:28:46
- * LastEditTime: 2022-03-22 23:07:15
+ * LastEditTime: 2022-03-25 02:00:34
  * Description: provide Kernel configuration.
  ******************************************************************************/
 package handlers
@@ -68,7 +68,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -79,7 +79,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = err.Error()
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -87,7 +87,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	log.StatusCode = 200
 	log.Message = "修改成功"
 	mysqlmanager.DB.Save(&log)
-	logParent.Status = "成功"
+	logParent.Status = "1,1,1.00"
 	mysqlmanager.DB.Save(&logParent)
 }
 func SysctlViewHandler(c *gin.Context) {
