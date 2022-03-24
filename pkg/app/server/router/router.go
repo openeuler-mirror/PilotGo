@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-22 15:07:01
+ * LastEditTime: 2022-03-24 05:14:02
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -59,6 +59,11 @@ func SetupRouter() *gin.Engine {
 		group.GET("/net_nic", handlers.NetNICConfigHandler)
 		group.GET("/user_info", handlers.CurrentUserInfoHandler)
 		group.GET("/user_all", handlers.AllUserInfoHandler)
+	}
+	cluster := router.Group("/cluster")
+	{
+		cluster.GET("/info", controller.ClusterInfo)
+		cluster.GET("/depart_info", controller.DepartClusterInfo)
 	}
 	agent := router.Group("/agent")
 	{
