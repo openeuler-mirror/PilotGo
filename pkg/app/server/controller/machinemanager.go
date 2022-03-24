@@ -15,7 +15,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -344,6 +346,37 @@ func UpdateDepart(c *gin.Context) {
 	response.Success(c, nil, "部门更新成功")
 }
 
+type modify struct {
+	MachineID int `json:"machineid"`
+	DepartID  int `json:"departid"`
+}
+
+func ModifyMachineDepart(c *gin.Context) {
+	j, err := ioutil.ReadAll(c.Request.Body)
+	logger.Info(string(j))
+	if err != nil {
+		logger.Error("%s", err.Error())
+		response.Response(c, http.StatusOK,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var M modify
+	err = json.Unmarshal(j, &M)
+	logger.Info("%+v", M)
+
+	if err != nil {
+		logger.Error("%s", err.Error())
+		response.Response(c, http.StatusOK,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	dao.ModifyMachineDepart(M.MachineID, M.DepartID)
+	response.Success(c, nil, "机器部门修改成功")
+}
 func AddIP(c *gin.Context) {
 	IP := c.Query("ip")
 	uuid := c.Query("uuid")

@@ -105,9 +105,15 @@ func UpdateParentDepart(DepartID int, DepartName string) {
 	}
 	mysqlmanager.DB.Model(&DepartInfo).Where("p_id=?", DepartID).Update(&Depart)
 }
+func ModifyMachineDepart(M int, D int) {
+	var Machine model.MachineNode
+	Ma := model.MachineNode{
+		DepartId: D,
+	}
+	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
+}
 func MachineData(MachineIP string) model.MachineNode {
 	var m model.MachineNode
 	mysqlmanager.DB.Where("ip=?", MachineIP).Find(&m)
 	return m
 }
-
