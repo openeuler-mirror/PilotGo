@@ -26,6 +26,17 @@ type BatchInfo struct {
 	Machine    []string
 }
 
+func RemoveRepeatedElement(s []string) []string {
+	result := make([]string, 0)
+	m := make(map[string]bool) //map的值不重要
+	for _, v := range s {
+		if _, ok := m[v]; !ok {
+			result = append(result, v)
+			m[v] = true
+		}
+	}
+	return result
+}
 func CreateBatch(c *gin.Context) {
 	// buf := make([]byte, 1024)
 	// n, _ := c.Request.Body.Read(buf)
@@ -87,6 +98,8 @@ func CreateBatch(c *gin.Context) {
 			"已存在该名称批次")
 		return
 	}
+	batchinfo.DepartID = RemoveRepeatedElement(batchinfo.DepartID)
+	batchinfo.DepartName = RemoveRepeatedElement(batchinfo.DepartName)
 	for _, value := range batchinfo.DepartID {
 		tmp, err := strconv.Atoi(value)
 		if err != nil {
