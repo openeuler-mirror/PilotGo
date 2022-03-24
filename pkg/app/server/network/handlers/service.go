@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-16 09:28:46
- * LastEditTime: 2022-03-02 18:33:52
+ * LastEditTime: 2022-03-22 23:06:03
  * Description: provide agent service manager functions.
  ******************************************************************************/
 package handlers
@@ -62,11 +62,14 @@ func ServiceStartHandler(c *gin.Context) {
 	username := c.Query("userName")
 
 	var logParent model.AgentLogParent
+	var user model.User
 	var log model.AgentLog
 	var machineNode model.MachineNode
 
 	logParent.Type = "运行服务"
 	logParent.UserName = username
+	mysqlmanager.DB.Where("email = ?", username).Find(&user)
+	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
@@ -112,11 +115,14 @@ func ServiceStopHandler(c *gin.Context) {
 	username := c.Query("userName")
 
 	var logParent model.AgentLogParent
+	var user model.User
 	var log model.AgentLog
 	var machineNode model.MachineNode
 
 	logParent.Type = "运行服务"
 	logParent.UserName = username
+	mysqlmanager.DB.Where("email = ?", username).Find(&user)
+	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
@@ -162,11 +168,14 @@ func ServiceRestartHandler(c *gin.Context) {
 	username := c.Query("userName")
 
 	var logParent model.AgentLogParent
+	var user model.User
 	var log model.AgentLog
 	var machineNode model.MachineNode
 
 	logParent.Type = "运行服务"
 	logParent.UserName = username
+	mysqlmanager.DB.Where("email = ?", username).Find(&user)
+	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
