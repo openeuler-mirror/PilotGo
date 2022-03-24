@@ -153,7 +153,7 @@ func AlertMessageConfig(c *gin.Context) {
 	logger.Info(string(j))
 	if err != nil {
 		logger.Error("%s", err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -165,7 +165,7 @@ func AlertMessageConfig(c *gin.Context) {
 
 	if err != nil {
 		logger.Error("%s", err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -174,7 +174,7 @@ func AlertMessageConfig(c *gin.Context) {
 	conf, err := config.Load()
 	if err != nil {
 		logger.Error("%s", "failed to load configure, exit.."+err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -183,7 +183,7 @@ func AlertMessageConfig(c *gin.Context) {
 	err = WriteToYaml(AM.Email) //重写alermanager配置文件
 	if err != nil {
 		logger.Error("%s", err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -192,7 +192,7 @@ func AlertMessageConfig(c *gin.Context) {
 	err = ConfigReload(conf.S.ServerIP) //配置alertmanager邮箱热启动
 	if err != nil {
 		logger.Error("%s", err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -213,7 +213,7 @@ func AlertMessageConfig(c *gin.Context) {
 
 	if err != nil {
 		logger.Error(err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -223,7 +223,7 @@ func AlertMessageConfig(c *gin.Context) {
 	request, err := http.NewRequest("POST", url, reader)
 	if err != nil {
 		logger.Error(err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -233,7 +233,7 @@ func AlertMessageConfig(c *gin.Context) {
 	// err = Post(url, res, "appliction/json")
 	// if err != nil {
 	// 	logger.Error("%s", err.Error())
-	// 	response.Response(c, http.StatusUnprocessableEntity,
+	// 	response.Response(c, http.StatusOK,
 	// 		422,
 	// 		nil,
 	// 		err.Error())
@@ -243,7 +243,7 @@ func AlertMessageConfig(c *gin.Context) {
 	resp, err := client.Do(request)
 	if err != nil {
 		logger.Error(err.Error())
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
