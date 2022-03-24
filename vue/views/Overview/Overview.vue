@@ -1,554 +1,195 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-03-16 11:17:06
+  LastEditTime: 2022-03-24 17:38:09
+ -->
 <template>
-  <div class="overview">
-    <div class="cluster">
-      <span class="iconfont">&#xe663;</span>
-      <span class="level-title">机器监控数据</span>
-      <el-select v-model="macIp" filterable placeholder="请选择或输入关键字">
-        <el-option
-          v-for="item in options"
-          :key="item.$index"
-          :label="item"
-          :value="item">
-        </el-option>
-      </el-select>
-      <el-carousel trigger="click" type="card" :autoplay="false" ref="card" height="500px">
-      <el-carousel-item v-for="item in chartData" 
-        :key="item.index" 
-        :name="item.lable" 
-        :label="item.label"
-        :id="item.chartId">
-      </el-carousel-item>
-    </el-carousel>
-    </div>
-    <div class="monitor">
-      <span class="monitor-title">监控告警情况</span>
-      <el-row class="monitor-row" :gutter="30">
-        <el-col>
-          <div class="table-title">
-            <span class="table-title__left">监控异常</span>
-            <div class="table-title__right">
-              <span>共{{ alertData.length }}条</span>>
-            </div>
-          </div>
+ <div class="content flex">
+   <div class="flag_header">
+     <p class="panel">机器信息看板<span class="icon iconfont icon-tongjiguanli"></span></p>
+   </div>
+   <div class="total panel flex" ref="total">
+     <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :width="epWidth" type="circle" :percentage="total" :format="format"></el-progress>
+     <div class="macStatus">
+       <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :percentage="normal" :format="macOn"></el-progress>
+       <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :percentage="offline" :format="macOff"></el-progress>
+       <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :percentage="free" :format="macFree"></el-progress>
+     </div>
+   </div>
+   <div class="recent panel">
+     <div class="message flex">
+       &nbsp;
+       <em class="el-icon-s-promotion"></em>
+       <span>&nbsp;消息提醒</span>
+     </div>
+    <el-timeline :reverse="reverse">
+      <el-timeline-item v-for="item in Message" :key="item.$index" :timestamp="item.activeAt | dateFormat" color="rgb(92, 123, 217)" size="large" placement="top">
+        <el-card>
+          <h4 style="display: inline-block">{{ item.alertname }}</h4> 
+          <span style="color:rgb(11, 35, 117); cursor:pointer" v-if="item.state" @click="handleDetail(item)">&emsp;>>详情</span>
+          <br/><br/>
+          <p>{{ item.annotations }}</p>
+        </el-card>
+      </el-timeline-item>
+    </el-timeline>
+   </div>
+   <div class="dept panel">
+     <depart-chart ref="dept">
+     </depart-chart>
+   </div>
+   <el-dialog 
+    :title="title"
+    :before-close="handleClose" 
+    :visible.sync="display" 
+    width="560px"
+  >
+    <alert-detail v-if="type === 'detail'" :row="row" @click="handleClose"></alert-detail>
+  </el-dialog>
+ </div>
 
-          <small-table :data="alertData">
-            <el-table-column prop="instance" label="IP"> </el-table-column>
-            <el-table-column prop="alertname" label="告警名称"> </el-table-column>
-            <el-table-column prop="state" label="状态"> </el-table-column>
-            <el-table-column  label="操作"> 
-              <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain 
-                  @click="handleSend(scope.row)"> 
-                  发送告警 </el-button>
-              </template>
-            </el-table-column>
-          </small-table>
-        </el-col>
-      </el-row>
-    </div>
-  </div>
 </template>
-
 <script>
-import { getData, getCurrData, getPromeIp, getAlerts } from "@/request/overview";
-import SmallTable from "@/components/SmallTable";
+import DepartChart from './charts/dept.vue';
+import AlertDetail from './form/detail.vue';
+import { getAlerts, getPanelDatas } from '@/request/overview'
 export default {
   name: "Overview",
   components: {
-    SmallTable
+    DepartChart,
+    AlertDetail,
   },
-  props: {},
   data() {
     return {
-      label: 'data',
-      cpuChart: {},
-      memChart: {},
-      ioChart: {},
-      netChart: {},
-      cpuData: [],
-      memData: [],
-      netIn: [],
-      netOut: [],
-      inData: [],
-      outData: [],
-      netName: [],
-      chartData: [
-        {
-          label: 'CPU',
-          chartId: 'cpu',
-          index: 1
-        },
-        {
-          label: '内存',
-          chartId: 'memory',
-          index: 2
-        },
-        {
-          label: 'I/O',
-          chartId: 'io',
-          index: 3
-        },
-        {
-          label: '网络',
-          chartId: 'network',
-          index: 4
-        }
-      ],
-      options: [],
-      macIp: 'localhost:9100',
-      chartW: 0,
-      chartH: 0,
-      now: new Date().getTime()/1000,
-      currIndex: 0,
-      tooltip: {
-        trigger: 'axis',
-        position: [10, 60],
-        formatter: function (params) {
-          params = params[0];
-          return (
-            params.value[0] + ' ' + 
-            params.value[1] + '%'
-          );
-        },
-        axisPointer: {
-          animation: false
-        }
-      },
-      xAxis: {
-        type: 'time',
-        splitLine: {
-          show: false
-        }
-      },
-      yAxis: {
-        type: 'value',
-        // max: 100,
-        min: 0,
-        boundaryGap: [0, '100%'],
-      },
-      timer: [],
-      alertData: []
-    };
-  },
-  computed: {
-    ioData() {
-      const {inData,outData} = this;
-      return {inData,outData}
-    },
-    netData() {
-      const {netIn,netOut} = this;
-      return {netIn,netOut}
-    },
-    cpuOption() {
-      return {
-        title: {text:'cpu使用率'},
-        tooltip: this.tooltip,
-        xAxis: this.xAxis,
-        yAxis: {...this.yAxis,max:100},
-        series: [{
-          name: 'cpu',
-          type: 'line',
-          smooth: false,
-          showSymbol: false,
-          lineStyle: {width: 1},
-          areaStyle: {
-            opacity: 0.1,
-            color:  '#37A2FF'
-          },
-          data: this.cpuData,
-        }]
-      }
-    },
-    memOption() {
-      return {
-        title: {text: '内存使用率'},
-        tooltip: this.tooltip,
-        xAxis: this.xAxis,
-        yAxis: {...this.yAxis,max:100},
-        series: [{
-          name: 'memory',
-          type: 'line',
-          smooth: true,
-          showSymbol: false,
-          lineStyle: {width: 1},
-          areaStyle: {
-            opacity: 0.3,
-            color:  '#37A2FF'
-          },
-          data: this.memData,
-        }]
-      }
-    },
-    ioOption() {
-      return {
-        title: {text: '磁盘读写速率'},
-        tooltip: {
-          trigger: 'axis',
-        },
-        legend: {
-          data: []
-        },
-        grid: [
-          {
-            bottom: '60%'
-          },
-          {
-            top: '46%'
-          }
-        ],
-        xAxis: [{
-          type: 'time',
-          splitLine: {
-            show: false
-          }
-        },{
-          type: 'time',
-          show: false,
-          gridIndex: 1,
-          position: 'top',
-          splitLine: {
-            show: false
-          }
-        },
-        ],
-        yAxis: [{
-            name: 'input(K/s)',
-            type: 'value',
-          },
-          {
-            gridIndex: 1,
-            name: 'output(K/s)',
-            type: 'value',
-            inverse: true
-          },
-        ],
-        series: []
-      }
-    },
-    netOption() {
-      return {
-        title: {text: '网络平均速率'},
-        tooltip: {
-          trigger: 'axis',
-        },
-        legend: {
-          data: [],
-        },
-        grid: [
-          {
-            bottom: '60%'
-          },
-          {
-            top: '46%'
-          }
-        ],
-        xAxis: [{
-          type: 'time',
-          splitLine: {
-            show: false
-          }
-        },{
-          type: 'time',
-          show: false,
-          gridIndex: 1,
-          position: 'top',
-          splitLine: {
-            show: false
-          }
-        },
-        ],
-        yAxis: [{
-            name: 'input(B/s)',
-            type: 'value',
-          },
-          {
-            gridIndex: 1,
-            name: 'output(B/s)',
-            type: 'value',
-            inverse: true
-          },
-        ],
-        series: []
-      }
+      row: {},
+      reverse: true,
+      epWidth: 146,
+      strokeW: 16, // 进度条宽度
+      display: false,
+      title: '',
+      type: '',
+      total: 0,
+      normal: 0,
+      offline: 0,
+      free: 0,
+      Message: [{
+          activeAt: '',
+          alertname: '暂无',
+          annotations: '暂无'
+      }],
     }
-
-
   },
   mounted() {
-    getAlerts().then(res => {
+    let cWidth = document.getElementsByClassName('dept')[0].clientWidth;
+    let cHeight = document.getElementsByClassName('dept')[0].clientHeight;
+    this.$refs.dept.resize({width:cWidth,height:cHeight})
+    this.epWidth = this.$refs.total.clientWidth/3 + 14;
+    getPanelDatas().then(res => {
       if(res.data.code === 200) {
-        this.alertData = res.data.data;
+        let data = res.data.data.data;
+        this.total = data.total;
+        this.offline = data.offline;
+        this.free = data.free;
+        this.normal = data.normal
       }
-    })
-    getPromeIp({departid: this.$store.getters.UserDepartId}).then(res => {
-      if(res.data.code == 200) {
-        this.options = res.data.data;
-      }
-    })
-    this.chartW = document.getElementsByClassName("cluster")[0].clientWidth/2+20;
-    this.chartH = document.getElementsByClassName("cluster")[0].clientHeight;
-    
-    // this.getStepCpu();
-    // this.getStepMem();
-    // this.getStepNet();
-    // this.getStepIO();
+    }) 
+    this.getAlerts();
   },
   methods: {
-    handleSend(row) {
-      //发送告警信息
-      let params = [{
-        "Labels": {
-          "alertname": row.alertname,
-          "IP": row.instance,
-        },
-        "Annotations": {
-          "summary": row.annotations,
-        },
-        "StartsAt": new Data().toISOString()+'+8:00',
-        "EndsAt": (new Data()+24*60*60).toISOString()+'+8:00',
-      }]
-      senMessage({message: params}).then(res => {
+    getAlerts() {
+      getAlerts().then(res => {
         if(res.data.code === 200) {
-          this.$message({
-            type: 'success',
-            message: '告警发送成功'
-          })
-        } else {
-          this.$message({
-            type: 'erroe',
-            message: '告警发送失败,请重试'
-          })
+          this.Message = res.data.data;
         }
       })
-    },
-    getStepData(thisData,itemIndex) {
-      let params= {
-        machineip: this.macIp,
-        query: itemIndex,
-        starttime: parseInt(this.now - 180) + '',
-        endtime: parseInt(this.now - 0) + '',
-      }
-      getData(params).then(res => {
+      setInterval(function() {
+        getAlerts().then(res => {
         if(res.data.code === 200) {
-          if(itemIndex == 1 || itemIndex == 2) {
-              res.data.data.forEach(item => {
-              thisData.push({
-                time: item.time,
-                value: [ item.time,parseInt(item.value).toFixed(2)]
-              })
-            })
-          } else {
-            let legend = [];
-            let index = 0;
-            for(let i of res.data.data) {
-              index++;
-              let resArr = []; 
-              i.label.forEach(item => {
-                resArr.push({
-                  time: item.time,
-                  value: [item.time, parseInt(item.value).toFixed(2)],
-                  name: i.device
-                })
-              })
-              legend.push(i.device)
-              switch (itemIndex) {
-                case 3:
-                  this.ioOption.series[index]= {
-                    neme: i.device,
-                    smooth: true,
-                    type: 'line',
-                    showSymbol: false,
-                    data: resArr,
-                  }
-                  break;
-                case 4:
-                  this.ioOption.series[index+4] = {
-                    name: i.device,
-                    smooth: true,
-                    type: 'line',
-                    showSymbol: false,
-                    xAxisIndex: 1,
-                    yAxisIndex: 1,
-                    data: resArr
-                  }
-                  break;
-                case 5:
-                  this.netOption.series[index] = {
-                    name: i.device,
-                    smooth: true,
-                    type: 'line',
-                    showSymbol: false,
-                    data: resArr
-                  }
-                  break;
-                case 6:
-                  this.netOption.series[index+4] = {
-                    name: i.device,
-                    smooth: true,
-                    type: 'line',
-                    showSymbol: false,
-                    xAxisIndex: 1,
-                    yAxisIndex: 1,
-                    data: resArr
-                  }
-                  break;
-                default:
-                  break;
-              }
-              
-              thisData.push(resArr);
-            }
-            if(itemIndex == 3 || itemIndex == 4) {
-              this.ioOption.legend.data = legend;
-            } else {
-              this.netOption.legend.data = legend;
-            }
-          }
+          this.Message = res.data.data;
         }
       })
+      },20000);
     },
-    getPointData(thisData,itemIndex) {
-      let params= {
-        machineip: this.macIp,
-        query: itemIndex,
-        time: parseInt(new Date().getTime()/1000 - 0) + '',
-      }
-      getCurrData(params).then(res => {
-        if(res.data.code === 200) {
-          if(itemIndex == 0 || itemIndex == 1) {
-            thisData.shift();
-            let item = res.data.data;
-            thisData.push({
-              time: item.time,
-              value: [ item.time,parseInt(item.value).toFixed(2)]
-            });
-          } else {
-            res.data.data.forEach( (i,index) => {
-              thisData[index].shift();
-              thisData[index].push({
-                time: i.label.time,
-                value: [i.label.time, parseInt(i.label.value).toFixed(2)],
-                name: i.device
-              })
-            })
-          }
-        }
-      })
+    handleClose() {
+      this.display = false;
+      this.title = "";
+      this.type = "";
     },
-    getCurrCpu() {
-      this.getPointData(this.cpuData,1);
+    handleDetail(row) {
+      this.display = true;
+      this.title = "告警处理";
+      this.type = "detail";
+      this.row = row;
     },
-    getStepCpu() {
-      this.cpuChart = this.$echarts.init(document.getElementById('cpu'))
-      this.cpuChart.resize({width: this.chartW,height: this.chartH})
-      this.getStepData(this.cpuData, 1);
-      this.timer[0] = setInterval(this.getCurrCpu, 10000); 
+    format(percentage) {
+      return percentage + "台";
     },
-    getCurrMem() {
-      this.getPointData(this.memData,2);
+    macOn(percentage) {
+      return `在线:${percentage}`;
     },
-    getStepMem() {
-      this.memChart = this.$echarts.init(document.getElementById('memory'))
-      this.memChart.resize({width: this.chartW,height: this.chartH})
-      this.getStepData(this.memData,2);
-      this.timer[1] = setInterval(this.getCurrMem, 10000); 
+    macOff(percentage) {
+      return `离线:${percentage}`;
     },
-    getCurrIO() {
-      this.getPointData(this.inData,3);
-      this.getPointData(this.outData,4);
+    macFree(percentage) {
+      return `空闲:${percentage}`;
     },
-    getStepIO() {
-      this.ioChart = this.$echarts.init(document.getElementById('io'))
-      this.ioChart.resize({width: this.chartW,height: this.chartH})
-      this.getStepData(this.inData,3);
-      this.getStepData(this.outData,4);
-      this.timer[2] = setInterval(this.getCurrIO, 10000); 
-    },
-    getCurrNet() {
-      this.getPointData(this.netIn,5);
-      this.getPointData(this.netOut,6);
-    },
-    getStepNet() {
-      this.netChart = this.$echarts.init(document.getElementById('network'))
-      this.netChart.resize({width: this.chartW,height: this.chartH})
-      this.getStepData(this.netIn,5);
-      this.getStepData(this.netOut,6);
-      this.timer[3] = setInterval(this.getCurrNet, 10000); 
-    },
-
   },
-  watch: {
-    cpuData: function(newData) {
-        this.cpuChart.setOption(this.cpuOption,true)
-    },
-    memData: function(newData) {
-      this.memChart.setOption(this.memOption,true)
-    },
-    netData: function(newData) {
-      this.netChart.setOption(this.netOption,true)
-    },
-    ioData: function(newData) {
-      this.ioChart.setOption(this.ioOption,true)
-    },
-    macIp: function(newIp) {
-      this.macIp = newIp;
-      clearInterval(this.timer[0]);
-      clearInterval(this.timer[1]);
-      clearInterval(this.timer[2]);
-      clearInterval(this.timer[3]);
-      this.getStepCpu();
-      this.getStepMem();
-    this.getStepNet();
-    this.getStepIO();
-      
+  filters: {
+    dateFormat: function(value) {
+      if(value != '') {
+        let date = value.split('T')[0];
+        let time = value.split('T')[1].split('.')[0]
+        return date + ' ' + time;
+      } else {
+        return new Date().getFullYear() + '.' + 
+          ( new Date().getMonth() + 1 ) + '.' + 
+          new Date().getDate();
+      }
     }
   },
-};
-</script>
-
-<style scoped lang="scss">
-.overview {
-  margin: 0 10px;
-  .cluster {
-    .el-carousel__item {
-      background-color: #d3dce6;
-    }
-  }
-
-  //监控告警情况
-  .monitor {
-    .monitor-row {
-      margin-top: 20px;
-    }
-
-    .table-title {
-      width: 100%;
-      height: 40px;
-      border: 1px solid #f4f4f4;
-      background-color: #fff;
-      font-size: 14px;
-      line-height: 40px;
-
-      .table-title__left {
-        float: left;
-        margin-left: 6px;
-      }
-      .table-title__right {
-        float: right;
-        .el-pagination {
-          float: right;
-          padding: 0;
-          height: 30px;
-          margin-top: 5px;
-        }
-      }
-    }
-  }
-
-  #echarts_box1,
-  #echarts_box2 {
-    width: 400px;
-    height: 200px;
-  }
 }
+</script>
+<style scoped lang="scss">
+  .content {
+    width: 100%;
+    height: 100%;
+    .total {
+      width: 48%;
+      height: 40%;
+      .macStatus {
+        width: 50%;
+        height: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+      }
+    }
+    .recent {
+      width: 48%;
+      height: 40%;
+      .message {
+        position: relative;
+        z-index: 2;
+        justify-content: start;
+        background-color: #fff;
+        color: rgb(11, 35, 117);
+        font-size: 16px;
+        width: 100%;
+        height: 13%;
+        // padding: 2.6%;
+        box-shadow: 0 6px 12px 0 rgba(0,0,0,.1);
+      }
+    }
+    .dept {
+      width: 98%;
+      height: 48%;
+    }
+  }
 </style>

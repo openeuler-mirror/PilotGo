@@ -4,6 +4,7 @@
       :getData="getUsers"
       ref="table"
       id="exportTab"
+      class="panel"
     >
       <template v-slot:table_search>
         <el-input placeholder="请输入邮箱名进行搜索..." prefix-icon="el-icon-search"
@@ -42,9 +43,9 @@
         <el-table-column  prop="departName" label="部门">
         </el-table-column>
         <el-table-column  prop="role" label="角色">
-          <!-- <template slot-scope="scope" @>
+          <template slot-scope="scope">
             {{ handleRoles(scope.row.role) }}  
-          </template>  -->
+          </template> 
         </el-table-column>
         <el-table-column prop="phone" label="手机号">
         </el-table-column>
