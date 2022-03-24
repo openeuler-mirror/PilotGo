@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-22 10:23:51
+  LastEditTime: 2022-03-23 17:29:28
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -139,6 +139,11 @@ export default {
   height: calc(100%);
   width: calc(100%);
   .el-header {
+    padding-left: 0;
+    border-radius: 6px;
+    border: 1px solid #FFF;
+    width: 98%;
+    margin: 0.6% auto;
     .header-logoName {
       height: 100%;
       font-size: 28px;
@@ -183,11 +188,12 @@ export default {
     .el-menu::after {
       content: '';
       position: fixed;
+      z-index: 999;
       display: block;
       width: 0;
       height: 0;
-      border: 8px solid transparent;
-      border-left: 8px solid #fff;
+      border: 10px solid transparent;
+      border-left: 10px solid #fff;
       left: 15%;
       top: 46%;
       clear: both;

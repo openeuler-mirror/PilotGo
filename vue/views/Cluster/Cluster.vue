@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-24 14:16:44
+  LastEditTime: 2022-03-24 17:35:58
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -39,12 +39,12 @@
           </el-popconfirm>
         </template>
         <template v-slot:table>
-          <el-table-column label="ip">
-            <template slot-scope="scope">
+          <el-table-column label="ip" prop="ip">
+            <!-- <template slot-scope="scope">
               <router-link :to="$route.path + scope.row.ip">
                 {{ scope.row.ip }}
               </router-link>
-            </template>
+            </template> -->
           </el-table-column>
           <el-table-column prop="departname" label="部门"> 
           </el-table-column>
