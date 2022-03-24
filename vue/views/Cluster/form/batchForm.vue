@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-03 15:27:36
+  LastEditTime: 2022-03-24 13:58:59
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -44,7 +44,7 @@
               label="id">
             </el-table-column>
             <el-table-column
-              prop="departid"
+              prop="departname"
               label="部门">
             </el-table-column>
             </template>

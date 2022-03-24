@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-21 16:25:05
+  LastEditTime: 2022-03-24 14:16:44
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -41,7 +41,7 @@
         <template v-slot:table>
           <el-table-column label="ip">
             <template slot-scope="scope">
-              <router-link :to="$route.path + scope.row.uuid">
+              <router-link :to="$route.path + scope.row.ip">
                 {{ scope.row.ip }}
               </router-link>
             </template>
@@ -59,7 +59,7 @@
           </el-table-column>
            <el-table-column prop="systeminfo" label="系统信息"> 
           </el-table-column>
-          <el-table-column label="防火墙配置" width="120">
+          <el-table-column label="防火墙配置">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -70,6 +70,11 @@
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
+              <el-button size="mini" type="primary" plain>
+                <router-link :to="$route.path + '/detail'">
+                  详情
+                </router-link>
+              </el-button>
               <el-button size="mini" type="primary" plain 
                 @click="handleUpdateIp(scope.row.ip)"> 
                 编辑 </el-button>
@@ -86,7 +91,7 @@
       width="560px"
     >
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
-     <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='machines' @click="handleClose"></batch-form>   
+     <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='batchMAcs' @click="handleClose"></batch-form>   
      <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>   
     </el-dialog>
   </div>
@@ -122,6 +127,7 @@ export default {
       departName: '',
       departInfo: {},
       machines: [],
+      batchMAcs: [],
       display: false,
       disabled: false,
       searchData: {
@@ -131,7 +137,11 @@ export default {
     };
   },
   mounted() {
-    this.departName = '机器列表';
+    getClusters({DepartId: 1}).then(res => {
+      if(res.data.code === 200) {
+        this.departName = res.data.data[0].departname +  '机器列表';
+      }
+    })
     this.showSelect = ['0','1'].includes(this.$store.getters.userType) ? true : false;
   },
   methods: {
@@ -207,6 +217,11 @@ export default {
       })
     }
   },
+  watch: {
+    machines: function(newValue,oldValue) {
+      this.batchMAcs = newValue.concat(oldValue)
+    }
+  }
 };
 </script>
 
