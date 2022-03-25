@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-28 14:22:36
-  LastEditTime: 2022-03-04 09:36:54
+  LastEditTime: 2022-03-25 14:01:39
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -17,13 +17,12 @@
     <div class="basic">
       <el-descriptions class="margin-top" :column="2">
         <el-descriptions-item label="类型">{{ type }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ Status }}</el-descriptions-item>
-        <el-descriptions-item label="进度">
-        </el-descriptions-item>
+        <el-descriptions-item label="状态">{{ status }}</el-descriptions-item>
+        <el-descriptions-item label="进度">{{ percent }}</el-descriptions-item>
       </el-descriptions>
-           <el-progress type="line" :percentage="percent" :status="Status == '成功' ? 'success' : 'exception'"></el-progress>
     </div>
       <small-table
+        class="tab"
         ref="stable"
         :data="result"
         :height='theight'>
@@ -60,23 +59,24 @@ export default {
     return {
       result: [],
       type: '',
-      Status: '',
       theight: 260,
       statusType: '',
-      percent: 10,
+      percent: '0/0',
+      status: ''
     }
   },
   mounted() {
-    this.Status = this.log.status;
+    this.status = this.log.status.split(',')[2] === '1.00' ? '成功' : '失败';
+    this.percent = this.log.status.split(',')[0] + '/' + this.log.status.split(',')[1];
     getLogDetail({id: this.log.id}).then(res => {
       this.result = res.data.data;
       this.type = res.data.data[0].action;
       let errMac = this.result.filter(item => item.code == 400).length;
-      if(this.log.status == '成功') {
-        this.percent = 100;
-      } else {
-        this.percent = (errMac / this.result.length).toFixed(2) * 100;
-      }
+      // if(this.log.status == '成功') {
+      //   this.percent = 100;
+      // } else {
+      //   this.percent = (errMac / this.result.length).toFixed(2) * 100;
+      // }
     })
   },
 }
@@ -85,10 +85,13 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
   .basic{
     width: 100%;
-    height: 140px;
-    overflow: auto;
+  }
+  .tab {
+    width: 100%;
   }
 }
 </style>

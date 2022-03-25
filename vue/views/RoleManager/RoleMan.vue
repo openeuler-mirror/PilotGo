@@ -9,11 +9,12 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-03-17 15:02:50
+  LastEditTime: 2022-03-24 17:58:25
  -->
 <template>
   <div>
     <ky-table
+      class="panel"
       :getData="getRoles"
       :searchData="searchData"
       ref="table"
