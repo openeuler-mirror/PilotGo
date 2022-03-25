@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-03-24 16:52:12
+  LastEditTime: 2022-03-25 11:43:11
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -39,7 +39,19 @@
           </el-table-column>
           <el-table-column prop="departName" label="部门"> 
           </el-table-column>
-          <el-table-column prop="status" label="状态"> 
+          <el-table-column label="进度">
+            <template slot-scope="scope">
+              <el-progress style="width: 100%" 
+                type="line" 
+                text-inside
+                :stroke-width="strokeW"
+                :format="format"
+                :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : 
+                    scope.row.status.split(',')[2] * 100 " 
+                :status="scope.row.status.split(',')[2] === '0.00' ? 'exception' : 
+                    scope.row.status.split(',')[2] === '1.00' ? 'success' : 'warning' ">
+              </el-progress>
+            </template> 
           </el-table-column>
           <el-table-column prop="created_at" label="创建时间">
             <template slot-scope="scope">
@@ -85,6 +97,7 @@ export default {
       title: '',
       type: '',
       log: {},
+      strokeW: 12,
       searchData: {
         departId: '',
         showSelect: true,
@@ -122,6 +135,11 @@ export default {
           this.$message.error(res.data.msg);
         }
       })
+    },
+    format(value) {
+      if(value) {
+        return `${value}%`;
+      }
     }
   },
   filters: {

@@ -9,8 +9,8 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-03-24 11:13:34
-  Description: provide agent log manager of pilotgo
+  LastEditTime: 2022-03-25 09:36:34
+  Description: 'Components Table'
  -->
 <template>
   <div class="ky-table">
