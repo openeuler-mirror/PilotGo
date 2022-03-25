@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-03-02 15:29:08
+ * @LastEditTime: 2022-03-25 10:49:48
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
@@ -64,6 +64,15 @@ export function getClusters(data) {
       params: data
     })
   }
+
+  // 更换机器所属部门
+export function changeMacDept(data) {
+  return request({
+    url: 'machinemanager/modifydepart',
+    method: 'post',
+    data
+  })
+}
 
 // 添加ip接口
 export function insertIp(data) {

@@ -9,12 +9,13 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-02-25 17:40:25
+  LastEditTime: 2022-03-25 09:37:10
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div>
     <el-table
+    class="panel"
       :header-cell-style="hStyle"
       :cell-style="bstyle"
       :data="data"
@@ -42,8 +43,9 @@ export default {
   data() {
     return {
       hStyle: {
-        background:'#F3F4F7',
-        color:'#555',
+        background:'rgb(96, 122, 207)',
+        borderRadius: '6px',
+        color:'#fff',
         textAlign:'center',
         padding:'0'
       },

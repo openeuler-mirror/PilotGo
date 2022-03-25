@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-24 17:35:58
+  LastEditTime: 2022-03-25 14:08:49
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -47,6 +47,10 @@
             </template> -->
           </el-table-column>
           <el-table-column prop="departname" label="部门"> 
+            <template slot-scope="scope">
+              {{scope.row.departname}}
+              <span v-if="showChange" title="变更部门" class="el-icon-edit-outline deptchange" @click="handleChange(scope.row)"></span>
+            </template>
           </el-table-column>
           <el-table-column prop="cpu" label="cpu" width="130"> 
           </el-table-column>
@@ -64,14 +68,14 @@
               <el-button
                 size="mini"
                 @click="handleFireWall(scope.row.ip)">
-                <em class="el-icon-edit-outline"></em>
+                <em class="el-icon-setting"></em>
               </el-button>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="mini" type="primary" plain>
-                <router-link :to="$route.path + '/detail'">
+                <router-link :to="$route.path + ':detail'">
                   详情
                 </router-link>
               </el-button>
@@ -91,6 +95,7 @@
       width="560px"
     >
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
+     <change-form v-if="type === 'change'" :row='row' @click="handleClose"></change-form>   
      <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='batchMAcs' @click="handleClose"></batch-form>   
      <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>   
     </el-dialog>
@@ -104,6 +109,7 @@ import kyTree from "@/components/KyTree";
 import AuthButton from "@/components/AuthButton";
 import UpdateForm from "./form/updateForm";
 import BatchForm from "./form/batchForm";
+import ChangeForm from "./form/changeForm";
 import RpmIssue from "./form/rpmIssue";
 import { getClusters, deleteIp, getChildNode } from "@/request/cluster";
 export default {
@@ -111,6 +117,7 @@ export default {
   components: {
     UpdateForm,
     BatchForm,
+    ChangeForm,
     RpmIssue,
     kyTable,
     kyTree,
@@ -121,7 +128,9 @@ export default {
       title: '',
       type: '',
       ip: '',
+      row: {},
       acType: '',
+      showChange: false,
       isBatch: false,
       checkedNode: [],
       departName: '',
@@ -137,9 +146,13 @@ export default {
     };
   },
   mounted() {
+    this.showChange = [0,1].includes(this.$store.getters.userType);
     getClusters({DepartId: 1}).then(res => {
-      if(res.data.code === 200) {
-        this.departName = res.data.data[0].departname +  '机器列表';
+      if(res.data.code === 200 && res.data.total !== 0) {
+        let name = res.data.data[0].departname;
+        this.departName = name === '' ? '机器列表' : name + '机器列表';
+      } else {
+        this.departName = "机器列表"
       }
     })
     this.showSelect = ['0','1'].includes(this.$store.getters.userType) ? true : false;
@@ -158,6 +171,12 @@ export default {
         this.machines = [];
         this.$refs.table.handleSearch();
       }
+    },
+    handleChange(row) {
+      this.display = true;
+      this.title = "变更部门";
+      this.type = "change"; 
+      this.row = row;
     },
     handleUpdateIp(ip) {
       this.display = true;
@@ -236,6 +255,12 @@ export default {
   .info {
     width: 60%;
     float: right;
+    .deptchange {
+      cursor: pointer;
+    }
+    .deptchange:hover {
+      color: rgb(108, 173, 228)
+    }
   }
 
   .deleteHostText {
