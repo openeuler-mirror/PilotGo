@@ -67,7 +67,7 @@ export const routes = [
             }
           },
           {
-            path: '/cluster/detail',
+            path: '/cluster:detail',
             name: 'MacDetail',
             component: _import('Cluster/detail/index'),
             meta: {
