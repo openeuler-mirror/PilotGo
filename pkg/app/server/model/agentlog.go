@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-23 17:46:13
- * LastEditTime: 2022-03-24 00:17:47
+ * LastEditTime: 2022-03-25 03:04:30
  * Description: provide agent log manager functions.
  ******************************************************************************/
 package model
@@ -22,12 +22,12 @@ import (
 )
 
 type AgentLogParent struct {
-	ID         int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	CreatedAt  time.Time
-	UserName   string `json:"userName"`
-	DepartName string `json:"departName"`
-	Type       string `json:"type"`
-	Status     string `json:"status"`
+	ID         int       `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt  time.Time `json:"created_at"`
+	UserName   string    `json:"userName"`
+	DepartName string    `json:"departName"`
+	Type       string    `json:"type"`
+	Status     string    `json:"status"`
 }
 
 type AgentLog struct {
@@ -90,7 +90,7 @@ func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, uint, er
 		if p.Size*p.CurrentPageNum == 0 {
 			return data, uint(total), nil
 		} else {
-			return data[num : p.CurrentPageNum*p.Size-1], uint(total), nil
+			return data[num : p.CurrentPageNum*p.Size], uint(total), nil
 		}
 	}
 }

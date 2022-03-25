@@ -9,15 +9,17 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-17 02:43:29
- * LastEditTime: 2022-03-22 23:02:00
+ * LastEditTime: 2022-03-25 01:51:51
  * Description: provide agent rpm manager functions.
  ******************************************************************************/
 package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
@@ -149,18 +151,21 @@ func InstallRpmHandler(c *gin.Context) {
 		} else {
 			response.Success(c, gin.H{"code": 200, "install": rpm_install}, "该rpm包安装成功!")
 			log.StatusCode = 200
+			StatusCodes = append(StatusCodes, "200")
 			log.Message = "安装成功"
 			mysqlmanager.DB.Save(&log)
 		}
 	}
-	if len(StatusCodes) == 0 {
-		logParent.Status = "成功"
-		mysqlmanager.DB.Save(&logParent)
-	} else {
-		logParent.Status = "失败"
-		mysqlmanager.DB.Save(&logParent)
+	var s int
+	for _, success := range StatusCodes {
+		if success == "200" {
+			s++
+		}
 	}
-
+	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(s)/float64(len(StatusCodes))), 64)
+	rate := strconv.FormatFloat(num, 'f', 2, 64)
+	logParent.Status = strconv.Itoa(s) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
+	mysqlmanager.DB.Save(&logParent)
 }
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
@@ -224,15 +229,19 @@ func RemoveRpmHandler(c *gin.Context) {
 		} else {
 			response.Success(c, gin.H{"code": 200, "remove": rpm_remove}, "卸载成功")
 			log.StatusCode = 200
+			StatusCodes = append(StatusCodes, "200")
 			log.Message = "卸载成功"
 			mysqlmanager.DB.Save(&log)
 		}
 	}
-	if len(StatusCodes) == 0 {
-		logParent.Status = "成功"
-		mysqlmanager.DB.Save(&logParent)
-	} else {
-		logParent.Status = "失败"
-		mysqlmanager.DB.Save(&logParent)
+	var s int
+	for _, success := range StatusCodes {
+		if success == "200" {
+			s++
+		}
 	}
+	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(s)/float64(len(StatusCodes))), 64)
+	rate := strconv.FormatFloat(num, 'f', 2, 64)
+	logParent.Status = strconv.Itoa(s) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
+	mysqlmanager.DB.Save(&logParent)
 }

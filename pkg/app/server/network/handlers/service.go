@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-16 09:28:46
- * LastEditTime: 2022-03-22 23:06:03
+ * LastEditTime: 2022-03-25 01:59:30
  * Description: provide agent service manager functions.
  ******************************************************************************/
 package handlers
@@ -86,7 +86,7 @@ func ServiceStartHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -98,7 +98,7 @@ func ServiceStartHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = Err
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -106,7 +106,7 @@ func ServiceStartHandler(c *gin.Context) {
 	log.StatusCode = 200
 	log.Message = "启动服务成功"
 	mysqlmanager.DB.Save(&log)
-	logParent.Status = "成功"
+	logParent.Status = "1,1,1.00"
 	mysqlmanager.DB.Save(&logParent)
 }
 func ServiceStopHandler(c *gin.Context) {
@@ -139,7 +139,7 @@ func ServiceStopHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -151,7 +151,7 @@ func ServiceStopHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = Err
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -159,7 +159,7 @@ func ServiceStopHandler(c *gin.Context) {
 	log.StatusCode = 200
 	log.Message = "关闭服务成功"
 	mysqlmanager.DB.Save(&log)
-	logParent.Status = "成功"
+	logParent.Status = "1,1,1.00"
 	mysqlmanager.DB.Save(&logParent)
 }
 func ServiceRestartHandler(c *gin.Context) {
@@ -192,7 +192,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -203,7 +203,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		log.StatusCode = 400
 		log.Message = Err
 		mysqlmanager.DB.Save(&log)
-		logParent.Status = "失败"
+		logParent.Status = "0,1,0.00"
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
@@ -211,6 +211,6 @@ func ServiceRestartHandler(c *gin.Context) {
 	log.StatusCode = 200
 	log.Message = "重启服务成功"
 	mysqlmanager.DB.Save(&log)
-	logParent.Status = "成功"
+	logParent.Status = "1,1,1.00"
 	mysqlmanager.DB.Save(&logParent)
 }
