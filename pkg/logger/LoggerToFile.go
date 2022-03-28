@@ -15,8 +15,12 @@ import (
 // 日志记录到文件
 func LoggerToFile() gin.HandlerFunc {
 
-	logFilePath := config.Log_FILE_PATH
-	logFileName := config.LOG_FILE_NAME
+	conf, err := config.Load()
+	if err != nil {
+		Error("failed to load configure, %s,exit..", err)
+	}
+	logFilePath := conf.Logopts.LogPath
+	logFileName := conf.Logopts.LogFileName
 
 	// 日志文件
 	fileName := path.Join(logFilePath, logFileName)
