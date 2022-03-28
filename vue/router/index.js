@@ -53,9 +53,9 @@ export const routes = [
             }
           },
           {
-            path: '/cluster:uuid',
-            name: 'MacPrometheus',
-            component: _import('Cluster/detail/prometheus'),
+            path: '/prometheus',
+            name: 'Prometheus',
+            component: _import('Prometheus/index'),
             meta: {
               header_title: "性能监控", 
               panel: "cluster", 
@@ -140,10 +140,10 @@ export const routes = [
         component:  _import('Log/Log'),
         meta: { title: 'log', header_title: "日志管理", panel: "log", icon_class: 'el-icon-s-order' }
       },
-      {
-        path: '', 
-        redirect: '/overview'
-      },
+      // {
+      //   path: '', 
+      //   redirect: '/overview'
+      // },
     ]
   },
 ]

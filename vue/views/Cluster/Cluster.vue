@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-25 14:08:49
+  LastEditTime: 2022-03-28 15:55:14
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -39,12 +39,12 @@
           </el-popconfirm>
         </template>
         <template v-slot:table>
-          <el-table-column label="ip" prop="ip">
-            <!-- <template slot-scope="scope">
+          <el-table-column label="ip">
+            <template slot-scope="scope">
               <router-link :to="$route.path + scope.row.ip">
                 {{ scope.row.ip }}
               </router-link>
-            </template> -->
+            </template>
           </el-table-column>
           <el-table-column prop="departname" label="部门"> 
             <template slot-scope="scope">
@@ -74,10 +74,9 @@
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button size="mini" type="primary" plain>
-                <router-link :to="$route.path + ':detail'">
-                  详情
-                </router-link>
+              <el-button size="mini" type="primary" plain 
+                @click="handleProme(scope.row.ip)">               
+                监控
               </el-button>
               <el-button size="mini" type="primary" plain 
                 @click="handleUpdateIp(scope.row.ip)"> 
@@ -232,6 +231,12 @@ export default {
     handleFireWall(ip) {
       this.$router.push({
         name: 'Firewall',
+        query: { ip: ip }
+      })
+    },
+    handleProme(ip) {
+      this.$router.push({
+        name: 'Prometheus',
         query: { ip: ip }
       })
     }

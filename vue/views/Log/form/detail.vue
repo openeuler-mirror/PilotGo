@@ -9,16 +9,16 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-28 14:22:36
-  LastEditTime: 2022-03-25 14:01:39
+  LastEditTime: 2022-03-25 16:15:52
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div class="content">
     <div class="basic">
-      <el-descriptions class="margin-top" :column="2">
+      <el-descriptions class="margin-top" :column="3">
         <el-descriptions-item label="类型">{{ type }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ status }}</el-descriptions-item>
-        <el-descriptions-item label="进度">{{ percent }}</el-descriptions-item>
+        <el-descriptions-item label="进度比">{{ percent }}</el-descriptions-item>
       </el-descriptions>
     </div>
       <small-table
@@ -89,6 +89,7 @@ export default {
   justify-content: space-around;
   .basic{
     width: 100%;
+    text-align: center;
   }
   .tab {
     width: 100%;
