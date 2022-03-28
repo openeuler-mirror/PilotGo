@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-01 13:12:22
+ * LastEditTime: 2022-03-25 06:47:51
  * Description: provide configure yaml functions.
  ******************************************************************************/
 package config
@@ -25,19 +25,18 @@ import (
 )
 
 const (
-	configType    = "yaml"
-	Log_FILE_PATH = "/var/log/pilotgo"
-	LOG_FILE_NAME = "pilotgo.log"
+	configType = "yaml"
 )
 
 var pilogo_config_file_name = "./config.yaml"
 
 type LogOpts struct {
-	LogLevel  string `yaml:"log_level"`
-	LogDriver string `yaml:"log_driver"`
-	LogPath   string `yaml:"log_path"`
-	MaxFile   int    `yaml:"max_file"`
-	MaxSize   int    `yaml:"max_size"`
+	LogLevel    string `yaml:"log_level"`
+	LogDriver   string `yaml:"log_driver"`
+	LogPath     string `yaml:"log_path"`
+	LogFileName string `yaml:"log_file_name"`
+	MaxFile     int    `yaml:"max_file"`
+	MaxSize     int    `yaml:"max_size"`
 }
 type Server struct {
 	ServerIP   string `yaml:"server_ip"`

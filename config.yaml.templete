@@ -5,6 +5,7 @@ log_opts:
   log_level: debug
   log_driver: stdout
   log_path: /var/log/pilotgo
+  log_file_name: pilotgo.log
   max_file: 1
   max_size: 10485760
 db_info:
