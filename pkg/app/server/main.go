@@ -51,7 +51,7 @@ func main() {
 		server.Run(url)
 	}()
 
-	// 此处启动前端及REST http server
+	//此处启动前端及REST http server
 	go func() {
 		// 连接数据库及启动router
 		err = cmd.Start(conf)
@@ -59,8 +59,10 @@ func main() {
 			logger.Info("server start failed:%s", err.Error())
 			os.Exit(-1)
 		}
+		logger.Info("启动数据库成功")
 		// network.HttpServerStart("192.168.160.128:8084")
 
 	}()
+
 	select {}
 }

@@ -15,11 +15,14 @@
 package controller
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -96,7 +99,7 @@ func Queryrange(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	fmt.Println("body:", string(j))
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -107,7 +110,7 @@ func Queryrange(c *gin.Context) {
 	logger.Info("%+v", Pqr)
 
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -120,7 +123,7 @@ func Queryrange(c *gin.Context) {
 	}
 	url, err := JudgeQueryRange(Pqr.Query, conf.S.ServerIP, Pqr.Starttime, Pqr.Endtime)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"查询数字输入有误")
@@ -129,7 +132,7 @@ func Queryrange(c *gin.Context) {
 	logger.Info(url())
 	resp, err := http.Get(url())
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -139,7 +142,7 @@ func Queryrange(c *gin.Context) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("body:", string(body))
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -152,7 +155,7 @@ func Queryrange(c *gin.Context) {
 		err = json.Unmarshal(body, &result)
 		logger.Info("%v", result)
 		if err != nil {
-			response.Response(c, http.StatusUnprocessableEntity,
+			response.Response(c, http.StatusOK,
 				422,
 				nil,
 				err.Error())
@@ -184,7 +187,7 @@ func Queryrange(c *gin.Context) {
 		err = json.Unmarshal(body, &result)
 		logger.Info("%v", result)
 		if err != nil {
-			response.Response(c, http.StatusUnprocessableEntity,
+			response.Response(c, http.StatusOK,
 				422,
 				nil,
 				err.Error())
@@ -215,7 +218,7 @@ func Queryrange(c *gin.Context) {
 		err = json.Unmarshal(body, &result)
 		logger.Info("%v", result)
 		if err != nil {
-			response.Response(c, http.StatusUnprocessableEntity,
+			response.Response(c, http.StatusOK,
 				422,
 				nil,
 				err.Error())
@@ -252,7 +255,7 @@ func Queryrange(c *gin.Context) {
 		})
 
 	default:
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"输入查询号有误")
@@ -390,7 +393,7 @@ func Query(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	fmt.Println("body:", string(j))
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -400,7 +403,7 @@ func Query(c *gin.Context) {
 	err = json.Unmarshal(j, &Pq)
 	logger.Info("%+v", Pq)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -413,7 +416,7 @@ func Query(c *gin.Context) {
 	}
 	url, err := JudgeQuery(Pq.Query, conf.S.ServerIP, Pq.Time)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"查询数字输入有误")
@@ -429,7 +432,7 @@ func Query(c *gin.Context) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("body:", string(body))
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -441,7 +444,7 @@ func Query(c *gin.Context) {
 		err = json.Unmarshal(body, &result)
 		logger.Info("%v", result)
 		if err != nil {
-			response.Response(c, http.StatusUnprocessableEntity,
+			response.Response(c, http.StatusOK,
 				422,
 				nil,
 				err.Error())
@@ -469,7 +472,7 @@ func Query(c *gin.Context) {
 		err = json.Unmarshal(body, &result)
 		logger.Info("%v", result)
 		if err != nil {
-			response.Response(c, http.StatusUnprocessableEntity,
+			response.Response(c, http.StatusOK,
 				422,
 				nil,
 				err.Error())
@@ -617,7 +620,7 @@ func ListenALert(c *gin.Context) {
 	logger.Info("%s", url)
 	resp, err := http.Get("http://" + conf.S.ServerIP + ":9090/api/v1/alerts")
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -627,7 +630,7 @@ func ListenALert(c *gin.Context) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("body:", string(body))
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -637,7 +640,7 @@ func ListenALert(c *gin.Context) {
 	err = json.Unmarshal(body, &result)
 	logger.Info("%v", result)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -662,3 +665,78 @@ func ListenALert(c *gin.Context) {
 	})
 
 }
+
+type Prometheusyml struct {
+	Global struct {
+		ScrapeInterval     string `yaml:"scrape_interval"`
+		EvaluationInterval string `yaml:"evaluation_interval"`
+	} `yaml:"global"`
+	RuleFiles     []string         `yaml:"rule_files"`
+	ScrapeConfigs []static_configs `yaml:"scrape_configs"`
+}
+type static_configs struct {
+	JobName       string   `yaml:"job_name"`
+	StaticConfigs []target `yaml:"static_configs"`
+}
+type target struct {
+	Targets []string `yaml:"targets"`
+}
+
+func WritePrometheusYml(a []map[string]string) error {
+	FilePath := "/root/prometheus.yml"
+	os.Remove(FilePath)
+	os.Create(FilePath)
+	var prometheusYml Prometheusyml
+	prometheusYml.Global.ScrapeInterval = "15s"
+	prometheusYml.Global.EvaluationInterval = "15s"
+	prometheusYml.RuleFiles = []string{"/etc/prometheus/alert.rules"}
+	var tmp static_configs
+	for _, value := range a {
+		for key, value2 := range value {
+			tmp.JobName = key
+			x := make([]target, 0)
+			x = append(x, target{[]string{value2}})
+			tmp.StaticConfigs = x
+			prometheusYml.ScrapeConfigs = append(prometheusYml.ScrapeConfigs, tmp)
+		}
+	}
+	file, err := os.OpenFile(FilePath, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		logger.Error("文件打开失败" + err.Error())
+		return err
+	}
+	defer file.Close()
+	write := bufio.NewWriter(file)
+	write.WriteString(
+		"global:" +
+			"\n scrape_interval: " + prometheusYml.Global.ScrapeInterval +
+			"\n evaluation_interval: " + prometheusYml.Global.EvaluationInterval + "\n")
+	write.WriteString("rule_files:")
+	for _, value := range prometheusYml.RuleFiles {
+		write.WriteString("\n - " + value)
+	}
+	write.WriteString("\nscrape_configs:")
+	for _, value := range prometheusYml.ScrapeConfigs {
+		write.WriteString("\n  - job_name: '" + value.JobName + "'")
+		write.WriteString("\n    static_configs:")
+		for _, value2 := range value.StaticConfigs {
+			a := strings.TrimSpace("- targets: ['" + value2.Targets[0] + "']")
+			write.WriteString("\n      " + a)
+		}
+	}
+	write.Flush()
+	return nil
+}
+func PrometheusConfigReload(ip string) error {
+	response, err := http.PostForm("http://"+ip+":9090/-/reload", url.Values{})
+	logger.Info("%s", response)
+	return err
+}
+
+// # Alertmanager configuration
+// alerting:
+//   alertmanagers:
+//   - static_configs:
+//       - targets:
+//          - 192.168.217.131:9093
+//           # - alertmanager:9093
