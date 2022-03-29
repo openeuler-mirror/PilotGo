@@ -117,3 +117,9 @@ func MachineData(MachineIP string) model.MachineNode {
 	mysqlmanager.DB.Where("ip=?", MachineIP).Find(&m)
 	return m
 }
+func AllMachine() []model.MachineNode {
+	var m []model.MachineNode
+	mysqlmanager.DB.Find(&m)
+
+	return m
+}

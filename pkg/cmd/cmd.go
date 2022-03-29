@@ -26,6 +26,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/net"
 )
@@ -116,7 +117,37 @@ func Start(conf *config.Configure) (err error) {
 	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
 	defer mysqlmanager.DB.Close()
+	go func() {
 
+		logger.Info("start ")
+		for {
+
+			a := make([]map[string]string, 0)
+			var m []model.MachineNode
+			mysqlmanager.DB.Find(&m)
+			logger.Info("%+v", m)
+			for _, value := range m {
+				r := map[string]string{}
+				r[value.MachineUUID] = value.IP
+				a = append(a, r)
+			}
+			err = controller.WritePrometheusYml(a)
+			if err != nil {
+				logger.Error("写入promethues配置文件失败")
+			}
+			conf, err := config.Load()
+			if err != nil {
+				logger.Error("%s", "failed to load configure, exit.."+err.Error())
+
+			}
+			err = controller.PrometheusConfigReload(conf.S.ServerIP)
+			if err != nil {
+				logger.Error("%s", err.Error())
+			}
+			time.Sleep(100 * time.Second)
+		}
+
+	}()
 	r := router.SetupRouter()
 	server_url := ":" + strconv.Itoa(conf.S.ServerPort)
 	r.Run(server_url)
