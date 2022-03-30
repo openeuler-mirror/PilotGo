@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-03-28 15:47:40
+  LastEditTime: 2022-03-30 16:38:56
  -->
 <template>
   <div class="panel">
@@ -20,35 +20,18 @@
 <script>
 import { getData, getCurrData } from "@/request/overview";
 export default {
-  props: {
-    macIp: {
-      type: String,
-    }
-  },
   data() {
     return {
+      macIp: '',
       memChart: {},
       memData: [],
       now: new Date()/1000,
     }
   },
   mounted() {
+      this.macIp = this.$store.getters.selectIp;
       this.memChart = this.$echarts.init(document.getElementById('memory'))
-      let params= {
-        machineip: this.macIp,
-        query: 2,
-      }
-      getData({...params,starttime: parseInt(this.now - 180) + '',
-        endtime: parseInt(this.now - 0) + '',}).then(res => {
-        if(res.data.code === 200) {
-          res.data.data.forEach(item => {
-              this.memData.push({
-                time: item.time,
-                value: [ item.time,parseInt(item.value).toFixed(2)]
-              })
-            })
-        }
-      })
+      this.getMem({starttime: parseInt(this.now - 6*60*60) + '', endtime: parseInt(this.now - 0) + ''})
   },
   computed: {
     option() {
@@ -100,9 +83,30 @@ export default {
       this.memChart.resize(params)
       this.memChart.setOption(this.option,true)
     },
-    handleClose() {
-      this.$emit('close',3);
+    getMem(timeRange) {
+      let params= {
+        machineip: this.macIp,
+        query: 2,
+      }
+      getData({...params, ...timeRange}).then(res => {
+        if(res.data.code === 200) {
+          res.data.data.forEach(item => {
+              this.memData.push({
+                time: item.time,
+                value: [ item.time,parseInt(item.value).toFixed(2)]
+              })
+            })
+        }
+      })
     },
+    handleClose() {
+      this.$emit('close',2);
+    },
+  },
+  watch: {
+    memData: function() {
+      this.memChart.setOption(this.option,true)
+    }
   }
 }
 </script>

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-03-25 09:36:34
+  LastEditTime: 2022-03-28 16:41:31
   Description: 'Components Table'
  -->
 <template>
@@ -201,6 +201,7 @@ export default {
 
 <style rel="stylesheet/scss" lang="scss">
 .ky-table {
+  height: 96%;
   .header {
     width: 100%;
     padding: 5px 0;

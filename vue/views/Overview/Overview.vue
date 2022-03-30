@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 11:17:06
-  LastEditTime: 2022-03-24 17:38:09
+  LastEditTime: 2022-03-24 17:58:49
  -->
 <template>
  <div class="content flex">
@@ -109,13 +109,13 @@ export default {
           this.Message = res.data.data;
         }
       })
-      setInterval(function() {
+      /* setInterval(function() {
         getAlerts().then(res => {
         if(res.data.code === 200) {
           this.Message = res.data.data;
         }
       })
-      },20000);
+      },20000); */
     },
     handleClose() {
       this.display = false;

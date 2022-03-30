@@ -9,23 +9,20 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-03-25 16:25:04
+  LastEditTime: 2022-03-30 16:38:42
  -->
 <template>
   <div class="panel">
+    <span @click="handleClose" class="closeChart">✕</span>
     <div id="network"></div>
   </div>
 </template>
 <script>
-import { getData, getCurrData } from "@/request/overview";
+import { getData } from "@/request/overview";
 export default {
-  props: {
-    macIp: {
-      type: String,
-    }
-  },
   data() {
     return {
+      macIP: '',
       netChart: {},
       netIn: [],
       netOut: [],
@@ -33,9 +30,12 @@ export default {
     }
   },
   mounted() {
+    this.macIp = this.$store.getters.selectIp;
     this.netChart = this.$echarts.init(document.getElementById('network'))
-    this.getStepData(this.netIn,5);
-    this.getStepData(this.netOut,6);
+    this.getStepData(this.netIn,5,{starttime: parseInt(this.now - 6*60*60) + '',
+        endtime: parseInt(this.now - 0) + ''});
+    this.getStepData(this.netOut,6,{starttime: parseInt(this.now - 6*60*60) + '',
+        endtime: parseInt(this.now - 0) + ''});
   },
   computed: {
     option() {
@@ -90,14 +90,19 @@ export default {
       this.netChart.resize(params)
       this.netChart.setOption(this.option,true)
     },
-    getStepData(thisData,itemIndex) {
+    handleClose() {
+      this.$emit('close',4);
+    },
+    getNet(rangeTime) {
+      this.getStepData(this.netIn,5,rangeTime);
+      this.getStepData(this.netOut,6,rangeTime);
+    },
+    getStepData(thisData,itemIndex,rangeTime) {
       let params= {
         machineip: this.macIp,
         query: itemIndex,
-        starttime: parseInt(new Date().getTime()/1000 - 180) + '',
-        endtime: parseInt(new Date().getTime()/1000 - 0) + '',
       }
-      getData(params).then(res => {
+      getData({...params, ...rangeTime}).then(res => {
         if(res.data.code === 200) {
           let legend = [];
           let index = 0;
@@ -142,25 +147,30 @@ export default {
         }
       })
     },
-    getPointData(thisData,itemIndex) {
-      let params= {
-        machineip: this.macIp,
-        query: itemIndex,
-        time: parseInt(new Date().getTime()/1000 - 0) + '',
-      }
-      getCurrData(params).then(res => {
-        if(res.data.code === 200) {
-          res.data.data.forEach( (i,index) => {
-            thisData[index].shift();
-            thisData[index].push({
-              time: i.label.time,
-              value: [i.label.time, parseInt(i.label.value).toFixed(2)],
-              name: i.device
-            })
-          })
-        }
-      })
-    },
+  },
+  watch: {
+    netIn: function() {
+      this.netChart.setOption(this.option,true)
+    }
   }
 }
 </script>
+<style scoped lang="scss">
+  .panel {
+    position: relative;
+    .closeChart {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      position: absolute;
+      top: 2%;
+      right: 4%;
+      z-index: 1;
+      cursor: pointer;
+    }
+    .closeChart:hover {
+      color: rgb(0, 163, 217)
+    }
+  }
+  
+</style>

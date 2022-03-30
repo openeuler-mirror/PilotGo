@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-03-28 15:46:55
+  LastEditTime: 2022-03-30 16:38:03
  -->
 <template>
   <div class="panel">
@@ -20,22 +20,22 @@
 <script>
 import { getData } from "@/request/overview";
 export default {
-  props: {
-    macIp: {
-      type: String,
-    }
-  },
   data() {
     return {
+      macIp: '',
       diskChart: {},
       inData: [],
       outData: [],
+      now: new Date()/1000,
     }
   },
   mounted() {
+    this.macIp = this.$store.getters.selectIp;
     this.diskChart = this.$echarts.init(document.getElementById('io'))
-    this.getStepData(this.inData,3);
-    this.getStepData(this.outData,4);
+    this.getStepData(this.inData,3,{starttime: parseInt(this.now - 60*60*6) + '',
+        endtime: parseInt(this.now - 0) + '',});
+    this.getStepData(this.outData,4,{starttime: parseInt(this.now - 60*60*6) + '',
+        endtime: parseInt(this.now - 0) + '',});
   },
   computed: {
     option() {
@@ -93,14 +93,16 @@ export default {
     handleClose() {
       this.$emit('close',3);
     },
-    getStepData(thisData,itemIndex) {
+    getDisk(rangeTime) {
+      this.getStepData(this.inData,3,rangeTime);
+      this.getStepData(this.outData,4,rangeTime);
+    },
+    getStepData(thisData,itemIndex,rangeTime) {
       let params= {
         machineip: this.macIp,
         query: itemIndex,
-        starttime: parseInt(new Date()/1000 - 60*60*6) + '',
-        endtime: parseInt(new Date()/1000 - 0) + '',
       }
-      getData(params).then(res => {
+      getData({...params, ...rangeTime}).then(res => {
         if(res.data.code === 200) {
           let legend = [];
           let index = 0;
@@ -117,7 +119,7 @@ export default {
             legend.push(i.device)
             switch (itemIndex) {
               case 3:
-                this.ioOption.series[index]= {
+                this.option.series[index]= {
                   neme: i.device,
                   smooth: true,
                   type: 'line',
@@ -126,7 +128,7 @@ export default {
                 }
                 break;
               case 4:
-                this.ioOption.series[index+4] = {
+                this.option.series[index+4] = {
                   name: i.device,
                   smooth: true,
                   type: 'line',
@@ -144,6 +146,11 @@ export default {
           this.option.legend.data = legend;
         }
       })
+    }
+  },
+  watch: {
+    inData: function() {
+      this.diskChart.setOption(this.option,true)
     }
   }
 }

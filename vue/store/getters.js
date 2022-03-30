@@ -19,6 +19,7 @@ const getters = {
     UserDepartId: state => state.user.departId,
     UserDepartName: state => state.user.departName,
     activePanel: state => state.permissions.activePanel,
+    selectIp: state => state.cluster.selectIp,
 }
 
 export default getters
