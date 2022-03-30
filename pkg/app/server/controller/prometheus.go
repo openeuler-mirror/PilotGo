@@ -452,14 +452,18 @@ func Query(c *gin.Context) {
 		}
 		var res Res
 		for _, value := range result.Data.Result {
-			if value.Metric.Instance == Pq.Machineip {
+			logger.Info("%d", []byte(value.Metric.Instance))
+			logger.Info("%d", []byte(Pq.Machineip))
+
+			if Pq.Machineip == value.Metric.Instance {
 				tm := time.Unix(int64(value.Value[0].(float64)), 0)
 				res.Time = tm.Format("2006-01-02 15:04:05")
 				res.Res = value.Value[1].(string)
-				// res.Res = res.Res[:4]
+
 				logger.Info("%+v", res)
 			}
 
+			logger.Info("%+v", res)
 		}
 		logger.Info("%v", res)
 		c.JSON(http.StatusOK, gin.H{
@@ -720,7 +724,7 @@ func WritePrometheusYml(a []map[string]string) error {
 		write.WriteString("\n  - job_name: '" + value.JobName + "'")
 		write.WriteString("\n    static_configs:")
 		for _, value2 := range value.StaticConfigs {
-			a := strings.TrimSpace("- targets: ['" + value2.Targets[0] + "']")
+			a := strings.TrimSpace("- targets: ['" + value2.Targets[0] + ":9090']")
 			write.WriteString("\n      " + a)
 		}
 	}
@@ -729,7 +733,7 @@ func WritePrometheusYml(a []map[string]string) error {
 }
 func PrometheusConfigReload(ip string) error {
 	response, err := http.PostForm("http://"+ip+":9090/-/reload", url.Values{})
-	logger.Info("%s", response)
+	logger.Info("%+v", response)
 	return err
 }
 
