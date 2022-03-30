@@ -125,7 +125,6 @@ func Start(conf *config.Configure) (err error) {
 			a := make([]map[string]string, 0)
 			var m []model.MachineNode
 			mysqlmanager.DB.Find(&m)
-			logger.Info("%+v", m)
 			for _, value := range m {
 				r := map[string]string{}
 				r[value.MachineUUID] = value.IP
