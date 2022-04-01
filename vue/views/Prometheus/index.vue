@@ -9,35 +9,33 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-03-28 15:32:47
+  LastEditTime: 2022-03-30 15:55:59
  -->
 <template>
   <div class="overview">
     <div class="content">
-      <!-- 头部标签 -->
-      <div class="flag_headedr">
-        <span class="iconfont">&#xe663;</span>
-        <span class="level-title">机器监控数据</span>
-        <button @click="handleAppend"> 显示 </button>
-      </div>
       <!-- 选择区 -->
       <div class="choice">
         <el-form ref="form" :model="form">
           <el-form-item label="监控时间:">
-            <el-row>
+            <el-row :gutter="20">
               <el-col :span="7">
               <el-date-picker type="date" placeholder="开始日期" v-model="form.dateSD" style="width: 49%;"></el-date-picker>
               <el-time-picker type="date" placeholder="开始时间" v-model="form.dateST" style="width: 49%;"></el-time-picker>
             </el-col>
-            <el-col class="line" :span="2">-</el-col>
+            <el-col class="line" :span="1">-</el-col>
             <el-col :span="7">
               <el-date-picker placeholder="结束日期" v-model="form.dateED" style="width: 49%;"></el-date-picker>
               <el-time-picker placeholder="结束时间" v-model="form.dateET" style="width: 49%;"></el-time-picker>
             </el-col>
+              <el-col :span="4">
+                <el-button type="primary" @click="handleConfirm"> 确认 </el-button>
+                <el-button @click="resetForm">重置</el-button>
+              </el-col>
             </el-row>
           </el-form-item>
           <el-form-item label="新增指标:">
-            <el-select v-model="prome" placeholder="请选择">
+            <el-select v-model="prome" placeholder="请选择" @click="handleAppend">
               <el-option v-for="item in promes"
                 :key="item.value"
                 :label="item.label"
@@ -46,16 +44,13 @@
             </el-select>
           </el-form-item>
         </el-form>
-
-        <!-- <el-button>确定</el-button> -->
-
       </div>
       <!-- 图表展示区 -->
       <div class="charts flex">
-        <cpu-chart v-show="cpuShow" @close="handleClose" ref="cpuchart" :macIp="macIp"></cpu-chart>
-        <mem-chart v-show="memShow" @close="handleClose"  ref="memchart" :macIp="macIp"></mem-chart>
-        <disk-chart v-show="diskShow" @close="handleClose"  ref="diskchart" :macIp="macIp"></disk-chart>
-        <net-chart v-show="netShow" @close="handleClose"  ref="netchart" :macIp="macIp"></net-chart>
+        <cpu-chart v-show="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
+        <mem-chart v-show="memShow" @close="handleClose"  ref="memchart"></mem-chart>
+        <disk-chart v-show="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
+        <net-chart v-show="netShow" @close="handleClose"  ref="netchart"></net-chart>
       </div>
     </div>
   </div>
@@ -80,30 +75,28 @@ export default {
       promes: [
         {
           label: 'cpu',
-          value: '1'
+          value: 1
         },
         {
           label: 'memroy',
-          value: '2'
+          value: 2
         },
         {
           label: 'disk',
-          value: '3'
+          value: 3
         },
         {
           label: 'network',
-          value: '4'
+          value: 4
         }
       ],
       cpuShow: true,
       memShow: true,
       diskShow: false,
       netShow: false,
-      macIp: 'localhost:9100',
       label: 'data',
       chartW: 0,
       chartH: 0,
-      options: ['123.12.11.23'],
       form: {
         dateSD: '',
         dateST: '',
@@ -113,13 +106,10 @@ export default {
     };
   },
   mounted() {
-    this.macIp = this.$route.query.ip || '';
     this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.4;
     this.chartH = document.getElementsByClassName("charts")[0].clientHeight/2;
     this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
-    this.$refs.memchart.resize({width:this.chartW,height: this.chartH});
-    this.$refs.diskchart.resize({width:this.chartW,height: this.chartH});
-    this.$refs.netchart.resize({width:this.chartW,height: this.chartH});
+    this.$refs.memchart.resize({width:this.chartW,height: this.chartH});   
   },
   methods: {
     handleAppend(key) {
@@ -132,9 +122,11 @@ export default {
           break;
         case 3:
           this.diskShow = true;
+          this.$refs.diskchart.resize({width:this.chartW,height: this.chartH});
           break;
         case 4:
           this.netShow = true;
+          this.$refs.netchart.resize({width:this.chartW,height: this.chartH});
           break;
       
         default:
@@ -159,7 +151,27 @@ export default {
         default:
           break;
       }
-    }
+    },
+    handleConfirm() {
+      let sTime = new Date(this.form.dateSD).getFullYear()+'-'+
+          (new Date(this.form.dateSD).getMonth()+ 1) +'-'+new Date(this.form.dateSD).getDate()+' '+
+          new Date(this.form.dateST).getHours()+':'+new Date(this.form.dateST).getMinutes()+':'+
+          new Date(this.form.dateST).getSeconds();
+      let eTime = new Date(this.form.dateED).getFullYear()+'-'+
+          (new Date(this.form.dateED).getMonth()+ 1) +'-'+new Date(this.form.dateED).getDate()+' '+
+          new Date(this.form.dateET).getHours()+':'+new Date(this.form.dateET).getMinutes()+':'+
+          new Date(this.form.dateET).getSeconds();
+      this.$refs.cpuchart.getCpu({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
+      this.$refs.memchart.getMem({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
+      this.$refs.diskchart.getDisk({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
+      this.$refs.netchart.getNet({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
+    },
+    resetForm() {
+        this.form.dateSD = '';
+        this.form.dateST = '';
+        this.form.dateED = '';
+        this.form.dateET = '';
+      }
   },
   watch: {
     prome: function(newValue) {
@@ -187,12 +199,19 @@ export default {
       height: 8%;
     }
     .choice {
-      width: 98%;
-      height: 14%;
+      width: 92%;
+      margin: 0 auto;
+      height: 16%;
+      input {
+        cursor: pointer;
+      }
+      .line {
+        text-align: center;
+      }
     }
     .charts {
       width: 98%;
-      height: 70%;
+      height: 80%;
       flex-flow: wrap;
       flex-direction: column;
       align-content: space-around;

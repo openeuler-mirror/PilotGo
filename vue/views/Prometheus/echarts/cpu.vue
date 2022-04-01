@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-03-28 15:34:30
+  LastEditTime: 2022-03-30 16:36:49
  -->
 <template>
   <div class="panel">
@@ -21,35 +21,18 @@
 <script>
 import { getData } from "@/request/overview";
 export default {
-  props: {
-    macIp: {
-      type: String,
-    }
-  },
   data() {
     return {
+      macIp: '',
       cpuChart: {},
       cpuData: [],
       now: new Date()/1000,
     }
   },
   mounted() {
+    this.macIp = this.$store.getters.selectIp;
     this.cpuChart = this.$echarts.init(document.getElementById('cpu'))
-    let params= {
-      machineip: this.macIp,
-      query: 1,
-    }
-    getData({...params,starttime: parseInt(this.now - 60*60*6) + '',
-      endtime: parseInt(this.now - 0) + '',}).then(res => {
-      if(res.data.code === 200) {
-        res.data.data.forEach(item => {
-            this.cpuData.push({
-              time: item.time,
-              value: [ item.time,parseInt(item.value).toFixed(2)]
-            })
-          })
-      }
-    })
+    this.getCpu({starttime: parseInt(this.now - 60*60*6) + '', endtime: parseInt(this.now - 0) + ''});
   },
   computed: {
     option() {
@@ -101,8 +84,29 @@ export default {
       this.cpuChart.resize(params)
       this.cpuChart.setOption(this.option,true)
     },
+    getCpu(timeRange) {
+      let params= {
+        machineip: this.macIp,
+        query: 1,
+      }
+      getData({...params, ...timeRange}).then(res => {
+        if(res.data.code === 200) {
+          res.data.data.forEach(item => {
+              this.cpuData.push({
+                time: item.time,
+                value: [ item.time,parseInt(item.value).toFixed(2)]
+              })
+            })
+        }
+      })
+    },
     handleClose() {
       this.$emit('close',1);
+    }
+  },
+  watch: {
+    cpuData: function() {
+      this.cpuChart.setOption(this.option,true)
     }
   }
 }
