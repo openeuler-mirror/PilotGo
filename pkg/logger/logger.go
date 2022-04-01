@@ -1,10 +1,22 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: yangzhao1
+ * Date: 2022-03-01 09:59:30
+ * LastEditTime: 2022-04-01 15:14:22
+ * Description: provide agent log manager of pilotgo
+ ******************************************************************************/
 package logger
 
 import (
 	"errors"
 	"os"
-	"path"
-	"runtime"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
@@ -17,15 +29,6 @@ func setLogDriver(logopts *conf.LogOpts) error {
 	if logopts == nil {
 		return errors.New("logopts == nil")
 	}
-
-	logrus.SetReportCaller(true)
-	logrus.SetFormatter(&logrus.TextFormatter{
-		DisableColors: false,
-		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
-			fileName := path.Base(f.File)
-			return f.Function, fileName
-		},
-	})
 
 	switch logopts.LogDriver {
 	case "stdout":
