@@ -1,82 +1,27 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: yangzhao1
+ * Date: 2022-03-28 19:04:37
+ * LastEditTime: 2022-04-01 13:59:42
+ * Description: provide agent log manager of pilotgo
+ ******************************************************************************/
 package logger
 
 import (
-	"os"
-	"path"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/rifflock/lfshook"
-	"github.com/sirupsen/logrus"
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 )
 
 // 日志记录到文件
 func LoggerToFile() gin.HandlerFunc {
-
-	conf, err := config.Load()
-	if err != nil {
-		Error("failed to load configure, %s,exit..", err)
-	}
-	logFilePath := conf.Logopts.LogPath
-	logFileName := conf.Logopts.LogFileName
-
-	// 日志文件
-	fileName := path.Join(logFilePath, logFileName)
-
-	// 写入文件
-	src, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		Error("err:%s", err.Error())
-	}
-
-	// 实例化
-	logger := logrus.New()
-
-	// 屏幕输出
-	logger.SetOutput(os.Stdout)
-
-	// 设置输出
-	logger.Out = src
-
-	// 设置日志级别
-	logger.SetLevel(logrus.DebugLevel)
-
-	// 设置 rotatelogs
-	logWriter, errors := rotatelogs.New(
-		// 分割后的文件名称
-		fileName+".%Y%m%d.log",
-
-		// 生成软链，指向最新日志文件
-		rotatelogs.WithLinkName(fileName),
-
-		// 设置最大保存时间(7天)
-		rotatelogs.WithMaxAge(7*24*time.Hour),
-
-		// 设置日志切割时间间隔(1天)
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
-	if errors != nil {
-		Error("err:%s", errors.Error())
-	}
-
-	writeMap := lfshook.WriterMap{
-		logrus.InfoLevel:  logWriter,
-		logrus.FatalLevel: logWriter,
-		logrus.DebugLevel: logWriter,
-		logrus.WarnLevel:  logWriter,
-		logrus.ErrorLevel: logWriter,
-		logrus.PanicLevel: logWriter,
-	}
-
-	lfHook := lfshook.NewHook(writeMap, &logrus.JSONFormatter{
-		TimestampFormat: "2006-01-02 15:04:05",
-	})
-
-	// 新增钩子
-	logger.AddHook(lfHook)
-
 	return func(c *gin.Context) {
 		// 开始时间
 		startTime := time.Now()
@@ -103,12 +48,12 @@ func LoggerToFile() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 
 		// 日志格式
-		logger.WithFields(logrus.Fields{
-			"status_code":  statusCode,
-			"latency_time": latencyTime,
-			"client_ip":    clientIP,
-			"req_method":   reqMethod,
-			"req_uri":      reqUri,
-		}).Info()
+		Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
+			statusCode,
+			latencyTime,
+			clientIP,
+			reqMethod,
+			reqUri,
+		)
 	}
 }
