@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-03-08 14:07:58
+ * LastEditTime: 2022-04-01 16:36:42
  * Description: 与prometheus进行对接.
  ******************************************************************************/
 package controller
@@ -733,7 +733,7 @@ func WritePrometheusYml(a []map[string]string) error {
 }
 func PrometheusConfigReload(ip string) error {
 	response, err := http.PostForm("http://"+ip+":9090/-/reload", url.Values{})
-	logger.Info("%+v", response)
+	logger.Debug("%+v", response)
 	return err
 }
 

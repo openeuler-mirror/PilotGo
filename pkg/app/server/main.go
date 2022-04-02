@@ -9,21 +9,27 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-03-01 13:12:29
+ * LastEditTime: 2022-04-02 10:53:43
  * Description: server main
  ******************************************************************************/
 package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/cmd"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/net"
 )
 
 func main() {
@@ -34,35 +40,178 @@ func main() {
 		os.Exit(-1)
 	}
 
-	logger.Init(conf)
+	if err := logger.Init(conf); err != nil {
+		fmt.Println("logger init failed, please check the config file")
+		os.Exit(-1)
+	}
 	logger.Info("Thanks to choose PilotGo!")
 
+	// db初始化
+	if err := dbInit(conf); err != nil {
+		logger.Error("logger init failed, please check the config file")
+		os.Exit(-1)
+	}
+
+	// 监控初始化
+	if err := monitorInit(); err != nil {
+		logger.Error("monitor init failed")
+		os.Exit(-1)
+	}
+
+	// 启动agent socket server
+	if err := sockerServerInit(conf); err != nil {
+		logger.Error("socket server init failed, error:%v", err)
+		os.Exit(-1)
+	}
+
+	//此处启动前端及REST http server
+	if err := httpServerInit(conf); err != nil {
+		logger.Error("socket server init failed, error:%v", err)
+		os.Exit(-1)
+	}
+
+	logger.Info("start to serve.")
+	select {}
+}
+
+func sessionManagerInit(conf *config.Configure) error {
+	var sessionManage net.SessionManage
+	sessionManage.Init(conf.MaxAge, conf.SessionCount)
+	go func() {
+		for {
+			controller.AddAgents()
+			time.Sleep(time.Second * 30)
+		}
+	}()
+	return nil
+}
+
+func dbInit(conf *config.Configure) error {
+	var menus string = "cluster,batch,usermanager,rolemanager"
+
+	_, err := mysqlmanager.Init(
+		conf.Dbinfo.HostName,
+		conf.Dbinfo.UserName,
+		conf.Dbinfo.Password,
+		conf.Dbinfo.DataBase,
+		conf.Dbinfo.Port)
+	if err != nil {
+		return err
+	}
+
+	// mysqlmanager.DB.Delete(&model.MachineNode{})
+	mysqlmanager.DB.AutoMigrate(&model.User{})
+	mysqlmanager.DB.AutoMigrate(&model.UserRole{})
+
+	var user model.User
+	var role model.UserRole
+	pid := 0
+	mysqlmanager.DB.Where("depart_first=?", pid).Find(&user)
+	if user.ID == 0 {
+		user = model.User{
+			CreatedAt:    time.Time{},
+			DepartFirst:  0,
+			DepartSecond: 1,
+			DepartName:   "超级用户",
+			Username:     "admin",
+			Password:     "1234",
+			Email:        "admin@123.com",
+			UserType:     0,
+			RoleID:       "1",
+		}
+		mysqlmanager.DB.Create(&user)
+		role = model.UserRole{
+			Role:  "超级管理员",
+			Type:  0,
+			Menus: menus,
+		}
+		mysqlmanager.DB.Create(&role)
+	}
+
+	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
+	var Depart model.DepartNode
+	mysqlmanager.DB.Where("p_id=?", pid).Find(&Depart)
+	if Depart.ID == 0 {
+		Depart = model.DepartNode{
+			PID:          0,
+			ParentDepart: "",
+			Depart:       "组织名",
+			NodeLocate:   0,
+		}
+		mysqlmanager.DB.Save(&Depart)
+	}
+	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
+	mysqlmanager.DB.AutoMigrate(&model.RoleButton{})
+	mysqlmanager.DB.AutoMigrate(&model.Batch{})
+	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
+	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
+	// defer mysqlmanager.DB.Close()
+
+	return nil
+}
+
+func sockerServerInit(conf *config.Configure) error {
 	server := &network.SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
 		OnAccept: agentmanager.AddandRunAgent,
 		OnStop:   agentmanager.StopAgentManager,
 	}
-
-	// agentmanager := agentmanager.GetAgentManager()
-
-	// 启动agent socket server
 	url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
 	go func() {
 		server.Run(url)
 	}()
+	return nil
+}
 
-	//此处启动前端及REST http server
+func httpServerInit(conf *config.Configure) error {
+	if err := sessionManagerInit(conf); err != nil {
+		return err
+	}
+
 	go func() {
-		// 连接数据库及启动router
-		err = cmd.Start(conf)
+		r := router.SetupRouter()
+		server_url := ":" + strconv.Itoa(conf.S.ServerPort)
+		r.Run(server_url)
+
+		err := http.ListenAndServe(server_url, nil) // listen and serve
 		if err != nil {
-			logger.Info("server start failed:%s", err.Error())
-			os.Exit(-1)
+			logger.Error("failed to start http server, error:%v", err)
 		}
-		logger.Info("启动数据库成功")
-		// network.HttpServerStart("192.168.160.128:8084")
+	}()
+
+	return nil
+}
+
+func monitorInit() error {
+	go func() {
+		logger.Info("start monitor")
+		for {
+			// TODO: 重构为事件触发机制
+			a := make([]map[string]string, 0)
+			var m []model.MachineNode
+			mysqlmanager.DB.Find(&m)
+			for _, value := range m {
+				r := map[string]string{}
+				r[value.MachineUUID] = value.IP
+				a = append(a, r)
+			}
+			err := controller.WritePrometheusYml(a)
+			if err != nil {
+				logger.Error("写入promethues配置文件失败")
+			}
+			conf, err := config.Load()
+			if err != nil {
+				logger.Error("%s", "failed to load configure, exit.."+err.Error())
+
+			}
+			err = controller.PrometheusConfigReload(conf.S.ServerIP)
+			if err != nil {
+				logger.Error("%s", err.Error())
+			}
+			time.Sleep(100 * time.Second)
+		}
 
 	}()
 
-	select {}
+	return nil
 }

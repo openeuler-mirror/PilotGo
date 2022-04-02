@@ -26,7 +26,7 @@ type SessionInfo struct {
 }
 
 func (s *SessionManage) Init(maxAge, maxLen int) bool {
-	logger.Debug("the MaxAge is %d,the SessionCount is %d\n", maxAge, maxLen)
+	logger.Debug("the MaxAge is %d,the SessionCount is %d", maxAge, maxLen)
 	s.maxAge = maxAge
 	if s.maxAge <= 0 {
 		s.maxAge = default_age
