@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-02 10:53:43
+ * LastEditTime: 2022-04-02 11:28:13
  * Description: server main
  ******************************************************************************/
 package main
@@ -18,7 +18,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
@@ -71,7 +73,26 @@ func main() {
 	}
 
 	logger.Info("start to serve.")
-	select {}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	for {
+		s := <-c
+		switch s {
+		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			logger.Info("signal interrupted: %s", s.String())
+			// TODO: DO EXIT
+
+			mysqlmanager.DB.Close()
+
+			goto EXIT
+		default:
+			logger.Info("unknown signal: %s", s.String())
+		}
+	}
+
+EXIT:
+	logger.Info("exit system, bye~")
 }
 
 func sessionManagerInit(conf *config.Configure) error {
