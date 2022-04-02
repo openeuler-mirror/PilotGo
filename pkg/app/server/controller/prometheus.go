@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-01 16:36:42
+ * LastEditTime: 2022-04-02 15:25:05
  * Description: 与prometheus进行对接.
  ******************************************************************************/
 package controller
@@ -121,7 +121,7 @@ func Queryrange(c *gin.Context) {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
-	url, err := JudgeQueryRange(Pqr.Query, conf.S.ServerIP, Pqr.Starttime, Pqr.Endtime)
+	url, err := JudgeQueryRange(Pqr.Query, conf.Monitor.PrometheusAddr, Pqr.Starttime, Pqr.Endtime)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -264,12 +264,12 @@ func Queryrange(c *gin.Context) {
 
 }
 
-func JudgeQueryRange(query int, ip string, start string, end string) (func() string, error) {
+func JudgeQueryRange(query int, addr string, start string, end string) (func() string, error) {
 	switch query {
 	case 1:
 
 		return func() string {
-			return JoinUrlParam(ip+":9090",
+			return JoinUrlParam(addr,
 				"100-(avg%20by(instance)(irate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)",
 				start,
 				end,
@@ -277,7 +277,7 @@ func JudgeQueryRange(query int, ip string, start string, end string) (func() str
 		}, nil
 	case 2:
 		return func() string {
-			return JoinUrlParam(ip+":9090",
+			return JoinUrlParam(addr,
 				"(1-(node_memory_MemAvailable_bytes/(node_memory_MemTotal_bytes)))*100",
 				start,
 				end,
@@ -286,7 +286,7 @@ func JudgeQueryRange(query int, ip string, start string, end string) (func() str
 
 	case 3:
 		return func() string {
-			return JoinUrlParam(ip+":9090",
+			return JoinUrlParam(addr,
 				"irate(node_disk_writes_completed_total[1m])",
 				start,
 				end,
@@ -294,7 +294,7 @@ func JudgeQueryRange(query int, ip string, start string, end string) (func() str
 		}, nil
 	case 4:
 		return func() string {
-			return JoinUrlParam(ip+":9090",
+			return JoinUrlParam(addr,
 				"irate(node_disk_reads_completed_total[1m])",
 				start,
 				end,
@@ -302,7 +302,7 @@ func JudgeQueryRange(query int, ip string, start string, end string) (func() str
 		}, nil
 	case 5:
 		return func() string {
-			return JoinUrlParam(ip+":9090",
+			return JoinUrlParam(addr,
 				"irate(node_network_receive_bytes_total[5m])",
 				start,
 				end,
@@ -310,7 +310,7 @@ func JudgeQueryRange(query int, ip string, start string, end string) (func() str
 		}, nil
 	case 6:
 		return func() string {
-			return JoinUrlParam(ip+":9090",
+			return JoinUrlParam(addr,
 				"irate(node_network_transmit_bytes_total[5m])",
 				start,
 				end,
@@ -328,9 +328,9 @@ func TimeParse(times string) string {
 	current_time := parse_time.Unix()
 	return fmt.Sprintf("%d", current_time)
 }
-func JoinUrlParam(target_ip string, query string, start string, end string, step string) string {
+func JoinUrlParam(addr string, query string, start string, end string, step string) string {
 	promethues_api_param := fmt.Sprintf("http://%s/api/v1/query_range?query=%s&start=%s&end=%s&step=%ss",
-		target_ip,
+		addr,
 		query,
 		start,
 		end,
@@ -414,7 +414,7 @@ func Query(c *gin.Context) {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
-	url, err := JudgeQuery(Pq.Query, conf.S.ServerIP, Pq.Time)
+	url, err := JudgeQuery(Pq.Query, conf.Monitor.PrometheusAddr, Pq.Time)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -540,42 +540,42 @@ func JoinUrlParam2(target_ip string, query string, time string) string {
 	)
 	return promethues_api_param
 }
-func JudgeQuery(query int, ip string, time string) (func() string, error) {
+func JudgeQuery(query int, addr string, time string) (func() string, error) {
 	switch query {
 	case 1:
 
 		return func() string {
-			return JoinUrlParam2(ip+":9090",
+			return JoinUrlParam2(addr,
 				"100-(avg%20by(instance)(irate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)",
 				time)
 		}, nil
 	case 2:
 		return func() string {
-			return JoinUrlParam2(ip+":9090",
+			return JoinUrlParam2(addr,
 				"(1-(node_memory_MemAvailable_bytes/(node_memory_MemTotal_bytes)))*100",
 				time)
 		}, nil
 	case 3:
 		return func() string {
-			return JoinUrlParam2(ip+":9090",
+			return JoinUrlParam2(addr,
 				"irate(node_disk_writes_completed_total[1m])",
 				time)
 		}, nil
 	case 4:
 		return func() string {
-			return JoinUrlParam2(ip+":9090",
+			return JoinUrlParam2(addr,
 				"irate(node_disk_reads_completed_total[1m])",
 				time)
 		}, nil
 	case 5:
 		return func() string {
-			return JoinUrlParam2(ip+":9090",
+			return JoinUrlParam2(addr,
 				"irate(node_network_receive_bytes_total[5m])",
 				time)
 		}, nil
 	case 6:
 		return func() string {
-			return JoinUrlParam2(ip+":9090",
+			return JoinUrlParam2(addr,
 				"irate(node_network_transmit_bytes_total[5m])",
 				time)
 		}, nil
@@ -620,9 +620,9 @@ func ListenALert(c *gin.Context) {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
-	url := conf.S.ServerIP + "/api/v1/alerts"
-	logger.Info("%s", url)
-	resp, err := http.Get("http://" + conf.S.ServerIP + ":9090/api/v1/alerts")
+	// url := conf.S.ServerIP + "/api/v1/alerts"
+	// logger.Info("%s", url)
+	resp, err := http.Get("http://" + conf.Monitor.PrometheusAddr + "/api/v1/alerts")
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -731,8 +731,8 @@ func WritePrometheusYml(a []map[string]string) error {
 	write.Flush()
 	return nil
 }
-func PrometheusConfigReload(ip string) error {
-	response, err := http.PostForm("http://"+ip+":9090/-/reload", url.Values{})
+func PrometheusConfigReload(addr string) error {
+	response, err := http.PostForm("http://"+addr+"/-/reload", url.Values{})
 	logger.Debug("%+v", response)
 	return err
 }

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
  * Date: 2022-03-01 09:59:30
- * LastEditTime: 2022-04-01 15:14:22
+ * LastEditTime: 2022-04-02 15:30:32
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
 package logger
@@ -27,15 +27,15 @@ var logName string = "pilotgo"
 
 func setLogDriver(logopts *conf.LogOpts) error {
 	if logopts == nil {
-		return errors.New("logopts == nil")
+		return errors.New("logopts is nil")
 	}
 
-	switch logopts.LogDriver {
+	switch logopts.Driver {
 	case "stdout":
 		logrus.SetOutput(os.Stdout)
 	case "file":
 		writer, err := rotatelogs.New(
-			logopts.LogPath+"/"+logName,
+			logopts.Path+"/"+logName,
 			rotatelogs.WithRotationCount(uint(logopts.MaxFile)),
 			rotatelogs.WithRotationSize(int64(logopts.MaxSize)),
 		)
@@ -51,7 +51,7 @@ func setLogDriver(logopts *conf.LogOpts) error {
 }
 
 func setLogLevel(logopts *conf.LogOpts) error {
-	switch logopts.LogLevel {
+	switch logopts.Level {
 	case "trace":
 		logrus.SetLevel(logrus.TraceLevel)
 	case "debug":
@@ -65,7 +65,7 @@ func setLogLevel(logopts *conf.LogOpts) error {
 	case "fatal":
 		logrus.SetLevel(logrus.FatalLevel)
 	default:
-		logrus.SetLevel(logrus.InfoLevel)
+		return errors.New("invalid log level")
 	}
 	return nil
 }

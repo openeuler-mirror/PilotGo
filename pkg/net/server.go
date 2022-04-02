@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -403,13 +402,13 @@ func CheckSession(c *gin.Context) {
 	c.Next()
 }
 
-func Start(conf *config.Configure) (err error) {
-	sqlManager, err = mysqlmanager.Init(conf.Dbinfo.HostName, conf.Dbinfo.UserName, conf.Dbinfo.Password, conf.Dbinfo.DataBase, conf.Dbinfo.Port)
-	if err != nil {
-		return err
-	}
+func Start(conf *config.HttpServer) (err error) {
+	// sqlManager, err = mysqlmanager.Init(conf.Dbinfo.HostName, conf.Dbinfo.UserName, conf.Dbinfo.Password, conf.Dbinfo.DataBase, conf.Dbinfo.Port)
+	// if err != nil {
+	// 	return err
+	// }
 
-	sessionManage.Init(conf.MaxAge, conf.SessionCount)
+	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
 	go func() {
 		for {
 			time.Sleep(time.Second * 10)
@@ -473,8 +472,8 @@ func Start(conf *config.Configure) (err error) {
 	r.POST("/hosts", MakeHandler("hostPutHandler", HostAddHandler))
 	r.DELETE("/hosts", MakeHandler("hostDeleteHandler", HostDeleteHandler))
 	r.GET("/overview", MakeHandler("overview", HostsOverview))
-	server_url := ":" + strconv.Itoa(conf.S.ServerPort)
-	e := r.RunTLS(server_url, "server.crt", "server.key")
+	// server_url := ":" + strconv.Itoa(conf.S.ServerPort)
+	e := r.RunTLS(conf.Addr, "server.crt", "server.key")
 	return e
 }
 

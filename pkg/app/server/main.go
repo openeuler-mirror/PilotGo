@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-02 11:28:13
+ * LastEditTime: 2022-04-02 15:24:54
  * Description: server main
  ******************************************************************************/
 package main
@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -61,19 +60,20 @@ func main() {
 	}
 
 	// 启动agent socket server
-	if err := sockerServerInit(conf); err != nil {
+	if err := socketServerInit(&conf.SocketServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
 
 	//此处启动前端及REST http server
-	if err := httpServerInit(conf); err != nil {
+	if err := httpServerInit(&conf.HttpServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
 
 	logger.Info("start to serve.")
 
+	// 信号监听
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	for {
@@ -95,9 +95,9 @@ EXIT:
 	logger.Info("exit system, bye~")
 }
 
-func sessionManagerInit(conf *config.Configure) error {
+func sessionManagerInit(conf *config.HttpServer) error {
 	var sessionManage net.SessionManage
-	sessionManage.Init(conf.MaxAge, conf.SessionCount)
+	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
 	go func() {
 		for {
 			controller.AddAgents()
@@ -171,30 +171,30 @@ func dbInit(conf *config.Configure) error {
 	return nil
 }
 
-func sockerServerInit(conf *config.Configure) error {
+func socketServerInit(conf *config.SocketServer) error {
 	server := &network.SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
 		OnAccept: agentmanager.AddandRunAgent,
 		OnStop:   agentmanager.StopAgentManager,
 	}
-	url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
+	// url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
 	go func() {
-		server.Run(url)
+		server.Run(conf.Addr)
 	}()
 	return nil
 }
 
-func httpServerInit(conf *config.Configure) error {
+func httpServerInit(conf *config.HttpServer) error {
 	if err := sessionManagerInit(conf); err != nil {
 		return err
 	}
 
 	go func() {
 		r := router.SetupRouter()
-		server_url := ":" + strconv.Itoa(conf.S.ServerPort)
-		r.Run(server_url)
+		// server_url := ":" + strconv.Itoa(conf.S.ServerPort)
+		r.Run(conf.Addr)
 
-		err := http.ListenAndServe(server_url, nil) // listen and serve
+		err := http.ListenAndServe(conf.Addr, nil) // listen and serve
 		if err != nil {
 			logger.Error("failed to start http server, error:%v", err)
 		}
@@ -225,7 +225,7 @@ func monitorInit() error {
 				logger.Error("%s", "failed to load configure, exit.."+err.Error())
 
 			}
-			err = controller.PrometheusConfigReload(conf.S.ServerIP)
+			err = controller.PrometheusConfigReload(conf.Monitor.PrometheusAddr)
 			if err != nil {
 				logger.Error("%s", err.Error())
 			}
