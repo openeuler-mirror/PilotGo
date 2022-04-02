@@ -142,8 +142,8 @@ func WriteToYaml(email []string) error {
 }
 
 //alertmanager邮箱配置热启动
-func ConfigReload(ip string) error {
-	response, err := http.PostForm("http://"+ip+":9093/-/reload", url.Values{})
+func ConfigReload(addr string) error {
+	response, err := http.PostForm("http://"+addr+"/-/reload", url.Values{})
 	logger.Info("%s", response)
 	return err
 }
@@ -189,7 +189,7 @@ func AlertMessageConfig(c *gin.Context) {
 			err.Error())
 		return
 	}
-	err = ConfigReload(conf.S.ServerIP) //配置alertmanager邮箱热启动
+	err = ConfigReload(conf.Monitor.AlertManagerAddr) //配置alertmanager邮箱热启动
 	if err != nil {
 		logger.Error("%s", err.Error())
 		response.Response(c, http.StatusOK,
@@ -198,7 +198,7 @@ func AlertMessageConfig(c *gin.Context) {
 			err.Error())
 		return
 	}
-	url := "http://" + conf.S.ServerIP + ":9093/api/v2/alerts"
+	url := "http://" + conf.Monitor.AlertManagerAddr + "/api/v2/alerts"
 	res := AlertSentMessage{
 		AM.Labels,
 		AM.Annotations,

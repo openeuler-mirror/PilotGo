@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-03-25 06:47:51
+ * LastEditTime: 2022-04-02 18:03:06
  * Description: provide configure yaml functions.
  ******************************************************************************/
 package config
@@ -28,19 +28,26 @@ const (
 	configType = "yaml"
 )
 
-var pilogo_config_file_name = "./config.yaml"
+var pilogo_config_file_name = "./config_server.yaml"
 
 type LogOpts struct {
-	LogLevel    string `yaml:"log_level"`
-	LogDriver   string `yaml:"log_driver"`
-	LogPath     string `yaml:"log_path"`
-	LogFileName string `yaml:"log_file_name"`
-	MaxFile     int    `yaml:"max_file"`
-	MaxSize     int    `yaml:"max_size"`
+	Level   string `yaml:"level"`
+	Driver  string `yaml:"driver"`
+	Path    string `yaml:"path"`
+	MaxFile int    `yaml:"max_file"`
+	MaxSize int    `yaml:"max_size"`
 }
-type Server struct {
-	ServerIP   string `yaml:"server_ip"`
-	ServerPort int    `yaml:"server_port"`
+type HttpServer struct {
+	Addr          string `yaml:"addr"`
+	SessionCount  int    `yaml:"session_count"`
+	SessionMaxAge int    `yaml:"session_max_age"`
+}
+type SocketServer struct {
+	Addr string `yaml:"addr"`
+}
+type Monitor struct {
+	PrometheusAddr   string `yaml:"prometheus_addr"`
+	AlertManagerAddr string `yaml:"alertmanager_addr"`
 }
 type DbInfo struct {
 	HostName string `yaml:"host_name"`
@@ -51,12 +58,11 @@ type DbInfo struct {
 }
 
 type Configure struct {
-	Logopts      LogOpts `yaml:"log_opts"`
-	S            Server  `yaml:"server"`
-	MaxAge       int     `yaml:"max_age"`
-	SessionCount int     `yaml:"session_count"`
-	SocketPort   int     `yaml:"socket_port"`
-	Dbinfo       DbInfo  `yaml:"db_info"`
+	HttpServer   HttpServer   `yaml:"http_server"`
+	SocketServer SocketServer `yaml:"socket_server"`
+	Monitor      Monitor      `yaml:"monitor"`
+	Logopts      LogOpts      `yaml:"log"`
+	Dbinfo       DbInfo       `yaml:"database"`
 }
 
 func Load() (*Configure, error) {
