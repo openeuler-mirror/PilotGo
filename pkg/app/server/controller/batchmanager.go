@@ -42,9 +42,7 @@ func CreateBatch(c *gin.Context) {
 	// n, _ := c.Request.Body.Read(buf)
 	// c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf[:n]))
 	// j := buf[0:n]
-	// fmt.Println("body:", string(j)) //获取到post传递过来的数据
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -154,7 +152,6 @@ type Batchdel struct {
 
 func DeleteBatch(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -200,7 +197,6 @@ type Batchupdate struct {
 
 func UpdateBatch(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
@@ -252,7 +248,6 @@ type BatchId struct {
 
 func Batchmachineinfo(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
