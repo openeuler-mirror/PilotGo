@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
  * Date: 2022-03-01 09:59:30
- * LastEditTime: 2022-04-02 15:30:32
+ * LastEditTime: 2022-04-05 11:37:16
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
 package logger
@@ -20,12 +20,19 @@ import (
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
-	conf "openeluer.org/PilotGo/PilotGo/pkg/config"
 )
 
 var logName string = "pilotgo"
 
-func setLogDriver(logopts *conf.LogOpts) error {
+type LogOpts struct {
+	Level   string `yaml:"level"`
+	Driver  string `yaml:"driver"`
+	Path    string `yaml:"path"`
+	MaxFile int    `yaml:"max_file"`
+	MaxSize int    `yaml:"max_size"`
+}
+
+func setLogDriver(logopts *LogOpts) error {
 	if logopts == nil {
 		return errors.New("logopts is nil")
 	}
@@ -50,7 +57,7 @@ func setLogDriver(logopts *conf.LogOpts) error {
 	return nil
 }
 
-func setLogLevel(logopts *conf.LogOpts) error {
+func setLogLevel(logopts *LogOpts) error {
 	switch logopts.Level {
 	case "trace":
 		logrus.SetLevel(logrus.TraceLevel)
@@ -69,9 +76,9 @@ func setLogLevel(logopts *conf.LogOpts) error {
 	}
 	return nil
 }
-func Init(conf *conf.Configure) error {
-	setLogLevel(&(conf.Logopts))
-	err := setLogDriver(&(conf.Logopts))
+func Init(conf *LogOpts) error {
+	setLogLevel(conf)
+	err := setLogDriver(conf)
 	if err != nil {
 		return err
 	}
