@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-03-04 01:37:58
+ * LastEditTime: 2022-04-06 15:40:02
  * Description: provide machine manager functions.
  ******************************************************************************/
 package controller
@@ -441,37 +441,3 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 		ReturnSpecifiedDepart(value, res)
 	}
 }
-
-// type A struct {
-// 	Tmp int `json:"id"`
-// }
-
-// func Test(c *gin.Context) {
-// 	j, err := ioutil.ReadAll(c.Request.Body)
-// 	fmt.Println("body:", string(j))
-// 	if err != nil {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			err.Error())
-// 		return
-// 	}
-// 	var a A
-// 	err = json.Unmarshal(j, &a)
-// 	logger.Info("%+v", a)
-// 	if err != nil {
-// 		response.Response(c, http.StatusUnprocessableEntity,
-// 			422,
-// 			nil,
-// 			err.Error())
-// 		return
-// 	}
-
-// 	logger.Info("%d", a.Tmp)
-// 	res := make([]int, 0)
-// 	ReturnSpecifiedDepart(a.Tmp, &res)
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"code": 200,
-// 		"data": res,
-// 	})
-// }

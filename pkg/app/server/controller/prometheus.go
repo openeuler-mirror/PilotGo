@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-06 14:35:27
+ * LastEditTime: 2022-04-06 15:30:47
  * Description: 与prometheus进行对接.
  ******************************************************************************/
 package controller
@@ -97,7 +97,6 @@ type IO struct {
 
 func Queryrange(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -107,7 +106,7 @@ func Queryrange(c *gin.Context) {
 	}
 	var Pqr Promequeryrange
 	err = json.Unmarshal(j, &Pqr)
-	logger.Info("%+v", Pqr)
+	logger.Debug("%+v", Pqr)
 
 	if err != nil {
 		response.Response(c, http.StatusOK,
@@ -124,7 +123,7 @@ func Queryrange(c *gin.Context) {
 			"查询数字输入有误")
 		return
 	}
-	logger.Info(url())
+	logger.Debug(url())
 	resp, err := http.Get(url())
 	if err != nil {
 		response.Response(c, http.StatusOK,
@@ -135,7 +134,6 @@ func Queryrange(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("body:", string(body))
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -148,7 +146,7 @@ func Queryrange(c *gin.Context) {
 	case 1:
 		var result ReturnPromeCPU
 		err = json.Unmarshal(body, &result)
-		logger.Info("%v", result)
+		logger.Debug("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -165,13 +163,13 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					logger.Info("%+v", x)
+					logger.Debug("%+v", x)
 					res = append(res, x)
 				}
 			}
 
 		}
-		logger.Info("%v", res)
+		logger.Debug("%v", res)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
@@ -180,7 +178,7 @@ func Queryrange(c *gin.Context) {
 	case 2:
 		var result ReturnPromeMemory
 		err = json.Unmarshal(body, &result)
-		logger.Info("%v", result)
+		logger.Debug("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -197,13 +195,13 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					logger.Info("%+v", x)
+					logger.Debug("%+v", x)
 					res = append(res, x)
 				}
 			}
 
 		}
-		logger.Info("%v", res)
+		logger.Debug("%v", res)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
@@ -211,7 +209,7 @@ func Queryrange(c *gin.Context) {
 	case 3, 4, 5, 6:
 		var result ReturnPromeIO
 		err = json.Unmarshal(body, &result)
-		logger.Info("%v", result)
+		logger.Debug("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -232,7 +230,7 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					logger.Info("%+v", x)
+					logger.Debug("%+v", x)
 					i.Label = append(i.Label, x)
 
 				}
@@ -243,7 +241,7 @@ func Queryrange(c *gin.Context) {
 			i.Label = []Res{}
 		}
 
-		logger.Info("%v", io)
+		logger.Debug("%v", io)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": io,
@@ -386,7 +384,6 @@ type IO2 struct {
 
 func Query(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("body:", string(j))
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -396,7 +393,7 @@ func Query(c *gin.Context) {
 	}
 	var Pq Promequery
 	err = json.Unmarshal(j, &Pq)
-	logger.Info("%+v", Pq)
+	logger.Debug("%+v", Pq)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -412,15 +409,14 @@ func Query(c *gin.Context) {
 			"查询数字输入有误")
 		return
 	}
-	logger.Info(url())
+	logger.Debug(url())
 	resp, err := http.Get(url())
 	if err != nil {
-		fmt.Println(err)
+		logger.Error("http get error: %s", err.Error())
 		return
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("body:", string(body))
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -432,7 +428,7 @@ func Query(c *gin.Context) {
 	case 1:
 		var result ReturnPromeCPU2
 		err = json.Unmarshal(body, &result)
-		logger.Info("%v", result)
+		logger.Debug("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -442,20 +438,20 @@ func Query(c *gin.Context) {
 		}
 		var res Res
 		for _, value := range result.Data.Result {
-			logger.Info("%d", []byte(value.Metric.Instance))
-			logger.Info("%d", []byte(Pq.Machineip))
+			logger.Debug("%d", []byte(value.Metric.Instance))
+			logger.Debug("%d", []byte(Pq.Machineip))
 
 			if Pq.Machineip == value.Metric.Instance {
 				tm := time.Unix(int64(value.Value[0].(float64)), 0)
 				res.Time = tm.Format("2006-01-02 15:04:05")
 				res.Res = value.Value[1].(string)
 
-				logger.Info("%+v", res)
+				logger.Debug("%+v", res)
 			}
 
-			logger.Info("%+v", res)
+			logger.Debug("%+v", res)
 		}
-		logger.Info("%v", res)
+		logger.Debug("%v", res)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
@@ -464,7 +460,7 @@ func Query(c *gin.Context) {
 	case 2:
 		var result ReturnPromeMemory2
 		err = json.Unmarshal(body, &result)
-		logger.Info("%v", result)
+		logger.Debug("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -479,11 +475,11 @@ func Query(c *gin.Context) {
 				res.Time = tm.Format("2006-01-02 15:04:05")
 				res.Res = value.Value[1].(string)
 				// res.Res = res.Res[:4]
-				logger.Info("%+v", res)
+				logger.Debug("%+v", res)
 			}
 
 		}
-		logger.Info("%v", res)
+		logger.Debug("%v", res)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
@@ -492,7 +488,7 @@ func Query(c *gin.Context) {
 	case 3, 4, 5, 6:
 		var result ReturnPromeIO2
 		err = json.Unmarshal(body, &result)
-		logger.Info("%v", result)
+		logger.Debug("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -513,7 +509,7 @@ func Query(c *gin.Context) {
 			}
 			io = append(io, i)
 		}
-		logger.Info("%v", io)
+		logger.Debug("%v", io)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": io,
@@ -606,7 +602,7 @@ type Alertmanager struct {
 
 func ListenALert(c *gin.Context) {
 	// url := conf.S.ServerIP + "/api/v1/alerts"
-	// logger.Info("%s", url)
+	// logger.Debug("%s", url)
 	resp, err := http.Get("http://" + sconfig.Config().Monitor.PrometheusAddr + "/api/v1/alerts")
 	if err != nil {
 		response.Response(c, http.StatusOK,
@@ -617,7 +613,6 @@ func ListenALert(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("body:", string(body))
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -627,7 +622,7 @@ func ListenALert(c *gin.Context) {
 	}
 	var result Alert
 	err = json.Unmarshal(body, &result)
-	logger.Info("%v", result)
+	logger.Debug("%v", result)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
