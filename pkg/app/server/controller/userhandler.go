@@ -9,14 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-21 17:16:17
+ * LastEditTime: 2022-04-06 16:31:40
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -34,8 +33,13 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func Register(c *gin.Context) {
+func GetUserRole(c *gin.Context) {
+	var roles []model.UserRole
+	mysqlmanager.DB.Find(&roles)
+	response.Success(c, gin.H{"role": roles}, "获取用户角色")
+}
 
+func Register(c *gin.Context) {
 	var user model.User
 	c.Bind(&user)
 	username := user.Username
@@ -67,11 +71,28 @@ func Register(c *gin.Context) {
 			"邮箱已存在!")
 		return
 	}
-	if departPid == 1 {
-		user.UserType = 1
-	} else {
-		user.UserType = 2
+	roleIds := strings.Split(roleId, ",")
+	res := make([]int, len(roleIds))
+
+	for index, val := range roleIds {
+		res[index], _ = strconv.Atoi(val)
 	}
+
+	min := res[0]
+	if len(res) > 1 {
+		for _, v := range res {
+			if v < min {
+				min = v
+			}
+		}
+	}
+	var user_type int
+	if min > 3 {
+		user_type = 3
+	} else {
+		user_type = min - 1
+	}
+
 	user = model.User{ //Create user
 		Username:     username,
 		Password:     password,
@@ -80,7 +101,7 @@ func Register(c *gin.Context) {
 		DepartName:   depart,
 		DepartFirst:  departPid,
 		DepartSecond: departId,
-		UserType:     user.UserType,
+		UserType:     user_type,
 		RoleID:       roleId,
 	}
 	mysqlmanager.DB.Save(&user)
@@ -277,7 +298,6 @@ func UpdateUser(c *gin.Context) {
 			DepartSecond: id,
 			DepartName:   departName,
 		}
-		fmt.Println("1", Pid, id, departName, phone)
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Updates(&u)
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
 		response.Response(c, http.StatusOK,
@@ -287,7 +307,6 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	if user.DepartName != departName && user.Phone != phone {
-		fmt.Println("2", Pid, id, departName, phone)
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
 		response.Response(c, http.StatusOK,
 			200,
@@ -296,7 +315,6 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	if user.DepartName != departName && user.Phone == phone {
-		fmt.Println("3", Pid, id, departName, phone)
 		u := model.User{
 			DepartFirst:  Pid,
 			DepartSecond: id,

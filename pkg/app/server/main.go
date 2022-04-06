@@ -9,7 +9,11 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-06 14:33:32
+<<<<<<< Updated upstream
+ * LastEditTime: 2022-04-06 16:42:06
+=======
+ * LastEditTime: 2022-04-06 10:56:15
+>>>>>>> Stashed changes
  * Description: server main
  ******************************************************************************/
 package main
@@ -107,7 +111,7 @@ func sessionManagerInit(conf *sconfig.HttpServer) error {
 }
 
 func dbInit(conf *sconfig.DbInfo) error {
-	var menus string = "cluster,batch,usermanager,rolemanager"
+	var menus string = "cluster,batch,usermanager,rolemanager,overview,firewall,log"
 
 	_, err := mysqlmanager.Init(
 		conf.HostName,
