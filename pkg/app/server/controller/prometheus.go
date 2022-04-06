@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-06 15:30:47
+ * LastEditTime: 2022-04-06 18:57:09
  * Description: 与prometheus进行对接.
  ******************************************************************************/
 package controller
@@ -146,7 +146,7 @@ func Queryrange(c *gin.Context) {
 	case 1:
 		var result ReturnPromeCPU
 		err = json.Unmarshal(body, &result)
-		logger.Debug("%v", result)
+		logger.Trace("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -163,13 +163,12 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					logger.Debug("%+v", x)
 					res = append(res, x)
 				}
 			}
 
 		}
-		logger.Debug("%v", res)
+		logger.Trace("%v", res)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
@@ -178,7 +177,7 @@ func Queryrange(c *gin.Context) {
 	case 2:
 		var result ReturnPromeMemory
 		err = json.Unmarshal(body, &result)
-		logger.Debug("%v", result)
+		logger.Trace("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -195,13 +194,12 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					logger.Debug("%+v", x)
 					res = append(res, x)
 				}
 			}
 
 		}
-		logger.Debug("%v", res)
+		logger.Trace("%v", res)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": res,
@@ -209,7 +207,7 @@ func Queryrange(c *gin.Context) {
 	case 3, 4, 5, 6:
 		var result ReturnPromeIO
 		err = json.Unmarshal(body, &result)
-		logger.Debug("%v", result)
+		logger.Trace("%v", result)
 		if err != nil {
 			response.Response(c, http.StatusOK,
 				422,
@@ -230,7 +228,6 @@ func Queryrange(c *gin.Context) {
 					tm := time.Unix(int64(a[0].(float64)), 0)
 					x.Time = tm.Format("2006-01-02 15:04:05")
 					x.Res = a[1].(string)
-					logger.Debug("%+v", x)
 					i.Label = append(i.Label, x)
 
 				}
@@ -241,7 +238,7 @@ func Queryrange(c *gin.Context) {
 			i.Label = []Res{}
 		}
 
-		logger.Debug("%v", io)
+		logger.Trace("%v", io)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": io,
