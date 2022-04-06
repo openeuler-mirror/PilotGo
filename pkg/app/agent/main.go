@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-03-02 16:13:36
+ * LastEditTime: 2022-04-06 09:56:08
  * Description: agent main
  ******************************************************************************/
 package main
@@ -17,7 +17,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -43,7 +42,6 @@ func main() {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
-	url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
 
 	// 初始化日志
 
@@ -52,7 +50,7 @@ func main() {
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
 
-	if err := client.Connect(url); err != nil {
+	if err := client.Connect(conf.SocketServer.Addr); err != nil {
 		fmt.Println("connect server failed, error:", err)
 		os.Exit(-1)
 	}
