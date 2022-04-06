@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-02 15:24:54
+ * LastEditTime: 2022-04-06 14:33:32
  * Description: server main
  ******************************************************************************/
 package main
@@ -23,50 +23,49 @@ import (
 	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/net"
 )
 
 func main() {
-
-	conf, err := config.Load()
+	err := sconfig.Init()
 	if err != nil {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
 
-	if err := logger.Init(conf); err != nil {
+	if err := logger.Init(&sconfig.Config().Logopts); err != nil {
 		fmt.Println("logger init failed, please check the config file")
 		os.Exit(-1)
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
 	// db初始化
-	if err := dbInit(conf); err != nil {
+	if err := dbInit(&sconfig.Config().Dbinfo); err != nil {
 		logger.Error("logger init failed, please check the config file")
 		os.Exit(-1)
 	}
 
 	// 监控初始化
-	if err := monitorInit(); err != nil {
+	if err := monitorInit(&sconfig.Config().Monitor); err != nil {
 		logger.Error("monitor init failed")
 		os.Exit(-1)
 	}
 
 	// 启动agent socket server
-	if err := socketServerInit(&conf.SocketServer); err != nil {
+	if err := socketServerInit(&sconfig.Config().SocketServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
 
 	//此处启动前端及REST http server
-	if err := httpServerInit(&conf.HttpServer); err != nil {
+	if err := httpServerInit(&sconfig.Config().HttpServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
@@ -95,7 +94,7 @@ EXIT:
 	logger.Info("exit system, bye~")
 }
 
-func sessionManagerInit(conf *config.HttpServer) error {
+func sessionManagerInit(conf *sconfig.HttpServer) error {
 	var sessionManage net.SessionManage
 	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
 	go func() {
@@ -107,15 +106,15 @@ func sessionManagerInit(conf *config.HttpServer) error {
 	return nil
 }
 
-func dbInit(conf *config.Configure) error {
+func dbInit(conf *sconfig.DbInfo) error {
 	var menus string = "cluster,batch,usermanager,rolemanager"
 
 	_, err := mysqlmanager.Init(
-		conf.Dbinfo.HostName,
-		conf.Dbinfo.UserName,
-		conf.Dbinfo.Password,
-		conf.Dbinfo.DataBase,
-		conf.Dbinfo.Port)
+		conf.HostName,
+		conf.UserName,
+		conf.Password,
+		conf.DataBase,
+		conf.Port)
 	if err != nil {
 		return err
 	}
@@ -171,7 +170,7 @@ func dbInit(conf *config.Configure) error {
 	return nil
 }
 
-func socketServerInit(conf *config.SocketServer) error {
+func socketServerInit(conf *sconfig.SocketServer) error {
 	server := &network.SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
 		OnAccept: agentmanager.AddandRunAgent,
@@ -184,7 +183,7 @@ func socketServerInit(conf *config.SocketServer) error {
 	return nil
 }
 
-func httpServerInit(conf *config.HttpServer) error {
+func httpServerInit(conf *sconfig.HttpServer) error {
 	if err := sessionManagerInit(conf); err != nil {
 		return err
 	}
@@ -203,7 +202,7 @@ func httpServerInit(conf *config.HttpServer) error {
 	return nil
 }
 
-func monitorInit() error {
+func monitorInit(conf *sconfig.Monitor) error {
 	go func() {
 		logger.Info("start monitor")
 		for {
@@ -220,12 +219,8 @@ func monitorInit() error {
 			if err != nil {
 				logger.Error("写入promethues配置文件失败")
 			}
-			conf, err := config.Load()
-			if err != nil {
-				logger.Error("%s", "failed to load configure, exit.."+err.Error())
 
-			}
-			err = controller.PrometheusConfigReload(conf.Monitor.PrometheusAddr)
+			err = controller.PrometheusConfigReload(conf.PrometheusAddr)
 			if err != nil {
 				logger.Error("%s", err.Error())
 			}

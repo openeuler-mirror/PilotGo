@@ -1,0 +1,8 @@
+server:
+  addr: 192.168.1.1:8888
+log_opts:
+  level: debug
+  driver: stdout
+  path: /var/log/pilotgo
+  max_file: 3
+  max_size: 10485760

@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -171,15 +171,6 @@ func AlertMessageConfig(c *gin.Context) {
 			err.Error())
 		return
 	}
-	conf, err := config.Load()
-	if err != nil {
-		logger.Error("%s", "failed to load configure, exit.."+err.Error())
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
 	err = WriteToYaml(AM.Email) //重写alermanager配置文件
 	if err != nil {
 		logger.Error("%s", err.Error())
@@ -189,7 +180,7 @@ func AlertMessageConfig(c *gin.Context) {
 			err.Error())
 		return
 	}
-	err = ConfigReload(conf.Monitor.AlertManagerAddr) //配置alertmanager邮箱热启动
+	err = ConfigReload(sconfig.Config().Monitor.AlertManagerAddr) //配置alertmanager邮箱热启动
 	if err != nil {
 		logger.Error("%s", err.Error())
 		response.Response(c, http.StatusOK,
@@ -198,7 +189,7 @@ func AlertMessageConfig(c *gin.Context) {
 			err.Error())
 		return
 	}
-	url := "http://" + conf.Monitor.AlertManagerAddr + "/api/v2/alerts"
+	url := "http://" + sconfig.Config().Monitor.AlertManagerAddr + "/api/v2/alerts"
 	res := AlertSentMessage{
 		AM.Labels,
 		AM.Annotations,

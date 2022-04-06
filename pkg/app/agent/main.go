@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-06 09:56:08
+ * LastEditTime: 2022-04-06 14:37:24
  * Description: agent main
  ******************************************************************************/
 package main
@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
@@ -37,7 +37,8 @@ func main() {
 	// init agent info
 
 	// 加载系统配置
-	conf, err := config.Load()
+
+	err := aconfig.Init()
 	if err != nil {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
@@ -50,7 +51,7 @@ func main() {
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
 
-	if err := client.Connect(conf.SocketServer.Addr); err != nil {
+	if err := client.Connect(aconfig.Config().Server.Addr); err != nil {
 		fmt.Println("connect server failed, error:", err)
 		os.Exit(-1)
 	}

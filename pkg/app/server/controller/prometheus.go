@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-02 15:25:05
+ * LastEditTime: 2022-04-06 14:35:27
  * Description: 与prometheus进行对接.
  ******************************************************************************/
 package controller
@@ -26,8 +26,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -116,12 +116,7 @@ func Queryrange(c *gin.Context) {
 			err.Error())
 		return
 	}
-	conf, err := config.Load()
-	if err != nil {
-		fmt.Println("failed to load configure, exit..", err)
-		os.Exit(-1)
-	}
-	url, err := JudgeQueryRange(Pqr.Query, conf.Monitor.PrometheusAddr, Pqr.Starttime, Pqr.Endtime)
+	url, err := JudgeQueryRange(Pqr.Query, sconfig.Config().Monitor.PrometheusAddr, Pqr.Starttime, Pqr.Endtime)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -409,12 +404,7 @@ func Query(c *gin.Context) {
 			err.Error())
 		return
 	}
-	conf, err := config.Load()
-	if err != nil {
-		fmt.Println("failed to load configure, exit..", err)
-		os.Exit(-1)
-	}
-	url, err := JudgeQuery(Pq.Query, conf.Monitor.PrometheusAddr, Pq.Time)
+	url, err := JudgeQuery(Pq.Query, sconfig.Config().Monitor.PrometheusAddr, Pq.Time)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,
@@ -615,14 +605,9 @@ type Alertmanager struct {
 }
 
 func ListenALert(c *gin.Context) {
-	conf, err := config.Load()
-	if err != nil {
-		fmt.Println("failed to load configure, exit..", err)
-		os.Exit(-1)
-	}
 	// url := conf.S.ServerIP + "/api/v1/alerts"
 	// logger.Info("%s", url)
-	resp, err := http.Get("http://" + conf.Monitor.PrometheusAddr + "/api/v1/alerts")
+	resp, err := http.Get("http://" + sconfig.Config().Monitor.PrometheusAddr + "/api/v1/alerts")
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			422,

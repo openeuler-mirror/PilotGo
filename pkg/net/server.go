@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
+	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -402,7 +402,7 @@ func CheckSession(c *gin.Context) {
 	c.Next()
 }
 
-func Start(conf *config.HttpServer) (err error) {
+func Start(conf *sconfig.HttpServer) (err error) {
 	// sqlManager, err = mysqlmanager.Init(conf.Dbinfo.HostName, conf.Dbinfo.UserName, conf.Dbinfo.Password, conf.Dbinfo.DataBase, conf.Dbinfo.Port)
 	// if err != nil {
 	// 	return err

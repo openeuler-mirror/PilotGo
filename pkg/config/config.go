@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-04-02 18:03:06
+ * LastEditTime: 2022-04-06 14:22:15
  * Description: provide configure yaml functions.
  ******************************************************************************/
 package config
@@ -28,57 +28,19 @@ const (
 	configType = "yaml"
 )
 
-var pilogo_config_file_name = "./config_server.yaml"
-
-type LogOpts struct {
-	Level   string `yaml:"level"`
-	Driver  string `yaml:"driver"`
-	Path    string `yaml:"path"`
-	MaxFile int    `yaml:"max_file"`
-	MaxSize int    `yaml:"max_size"`
-}
-type HttpServer struct {
-	Addr          string `yaml:"addr"`
-	SessionCount  int    `yaml:"session_count"`
-	SessionMaxAge int    `yaml:"session_max_age"`
-}
-type SocketServer struct {
-	Addr string `yaml:"addr"`
-}
-type Monitor struct {
-	PrometheusAddr   string `yaml:"prometheus_addr"`
-	AlertManagerAddr string `yaml:"alertmanager_addr"`
-}
-type DbInfo struct {
-	HostName string `yaml:"host_name"`
-	UserName string `yaml:"user_name"`
-	Password string `yaml:"password"`
-	DataBase string `yaml:"data_base"`
-	Port     int    `yaml:"port"`
-}
-
-type Configure struct {
-	HttpServer   HttpServer   `yaml:"http_server"`
-	SocketServer SocketServer `yaml:"socket_server"`
-	Monitor      Monitor      `yaml:"monitor"`
-	Logopts      LogOpts      `yaml:"log"`
-	Dbinfo       DbInfo       `yaml:"database"`
-}
-
-func Load() (*Configure, error) {
-	config := Configure{}
-	bytes, err := ioutil.ReadFile(pilogo_config_file_name)
+func Load(file string, config interface{}) error {
+	bytes, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Printf("open %s failed! err = %s\n", pilogo_config_file_name, err.Error())
-		return nil, err
+		fmt.Printf("open %s failed! err = %s\n", file, err.Error())
+		return err
 	}
 
-	err = yaml.Unmarshal(bytes, &config)
+	err = yaml.Unmarshal(bytes, config)
 	if err != nil {
 		fmt.Printf("yaml Unmarshal %s failed!\n", string(bytes))
-		return nil, err
+		return err
 	}
-	return &config, nil
+	return nil
 }
 
 func Init(output io.Writer, configFile string) error {
