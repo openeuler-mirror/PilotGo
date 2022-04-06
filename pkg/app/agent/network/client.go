@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-02-25 16:42:09
+ * LastEditTime: 2022-04-06 19:23:17
  * Description: provide agent service functions.
  ******************************************************************************/
 package network
@@ -56,32 +56,6 @@ func (c *SocketClient) Connect(addr string) error {
 					c.MessageProcesser.ProcessMessage(c, msg)
 				}()
 			}
-
-			// if i != 0 {
-			// 	readBuff = readBuff[i:]
-
-			// 	msg := protocol.ParseMessage(*f)
-			// 	c.MessageProcesser.ProcessMessage(c, msg)
-			// 	cmd := msg.Data.(string)
-			// 	fmt.Println("recv message:", cmd)
-
-			// 	switch cmd {
-			// 	case "firewall stop":
-			// 		tmp := os.Stop()
-			// 		fmt.Println(tmp)
-			// 	case "firewall restart":
-			// 		tmp := os.Restart()
-			// 		fmt.Println(tmp)
-			// 	case "firewall reload":
-			// 		tmp := os.Reload()
-			// 		fmt.Println(tmp)
-			// 	case "firewall config":
-			// 		tmp := os.Config()
-			// 		fmt.Println(tmp)
-			// 	default:
-			// 		fmt.Println("消息未执行!")
-			// 	}
-			// }
 		}
 	}(c)
 	return nil

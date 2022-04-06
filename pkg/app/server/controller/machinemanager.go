@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-06 15:40:02
+ * LastEditTime: 2022-04-06 16:23:06
  * Description: provide machine manager functions.
  ******************************************************************************/
 package controller
@@ -179,7 +179,6 @@ func LoopTree(node *model.MachineTreeNode, ID int, res **model.MachineTreeNode) 
 		}
 
 	}
-	return
 }
 func Deletemachinedata(c *gin.Context) {
 	uuid := c.Query("uuid")

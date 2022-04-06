@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-06 14:37:24
+ * LastEditTime: 2022-04-06 18:12:35
  * Description: agent main
  ******************************************************************************/
 package main
@@ -51,9 +51,15 @@ func main() {
 		MessageProcesser: protocol.NewMessageProcesser(),
 	}
 
-	if err := client.Connect(aconfig.Config().Server.Addr); err != nil {
-		fmt.Println("connect server failed, error:", err)
-		os.Exit(-1)
+	for {
+
+		if err := client.Connect(aconfig.Config().Server.Addr); err != nil {
+			fmt.Println("connect server failed, error:", err)
+
+			time.Sleep(time.Second * 5)
+			continue
+		}
+		break
 	}
 	regitsterHandler(client)
 
