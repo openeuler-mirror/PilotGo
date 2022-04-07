@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-03-30 16:38:03
+  LastEditTime: 2022-04-07 12:43:48
  -->
 <template>
   <div class="panel">
@@ -80,6 +80,17 @@ export default {
             type: 'value',
             inverse: true
           },
+        ],
+        dataZoom: [
+          {
+            type: 'inside',
+            start: 0,
+            end: 20
+          },
+          {
+            start: 0,
+            end: 20
+          }
         ],
         series: []
       }

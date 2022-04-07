@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-03-28 16:41:31
+  LastEditTime: 2022-04-07 11:13:23
   Description: 'Components Table'
  -->
 <template>
@@ -219,6 +219,9 @@ export default {
         color: #3e9df9;
       }
     }
+  }
+  .content {
+    height: 92%;
   }
   .el-table {
     border: 1px solid #ebeef5;

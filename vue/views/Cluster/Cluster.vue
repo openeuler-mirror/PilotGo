@@ -9,13 +9,13 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-07 09:48:33
+  LastEditTime: 2022-04-07 11:37:57
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div class="cluster">
     <router-view v-if="$route.meta.breadcrumb"></router-view>
-    <div v-if="!$route.meta.breadcrumb">
+    <div style="width:100%;height:100%" v-if="!$route.meta.breadcrumb">
     <div class="dept panel">
       <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
     </div>
@@ -47,23 +47,23 @@
             </template>
           </el-table-column>
           <el-table-column prop="departname" label="部门"> 
-            <template slot-scope="scope">
+            <!-- <template slot-scope="scope">
               {{scope.row.departname}}
               <span v-if="showChange" title="变更部门" class="el-icon-edit-outline deptchange" @click="handleChange(scope.row)"></span>
-            </template>
+            </template> -->
           </el-table-column>
-          <el-table-column prop="cpu" label="cpu" width="130"> 
+          <el-table-column prop="cpu" label="cpu" width="220"> 
           </el-table-column>
           <el-table-column label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.state == 1">正常</span>
+              <span v-if="scope.row.state == 1">在线</span>
               <span v-if="scope.row.state == 2">离线</span>
-              <span v-if="scope.row.state == 3">空闲</span>
+              <span v-if="scope.row.state == 3">未分配</span>
             </template>
           </el-table-column>
            <el-table-column prop="systeminfo" label="系统信息"> 
           </el-table-column>
-          <el-table-column label="防火墙配置">
+          <!-- <el-table-column label="防火墙配置">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -71,7 +71,7 @@
                 <em class="el-icon-setting"></em>
               </el-button>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="mini" type="primary" plain 
@@ -79,8 +79,12 @@
                 监控
               </el-button>
               <el-button size="mini" type="primary" plain 
-                @click="handleUpdateIp(scope.row.ip)"> 
-                编辑 </el-button>
+                @click="handleFireWall(scope.row.ip)">
+                防火墙
+              </el-button>
+              <!-- <el-button size="mini" type="primary" plain 
+                @click="handleChange(scope.row)"> 
+                变更部门 </el-button> -->
             </template>
           </el-table-column>
         </template>
@@ -253,13 +257,16 @@ export default {
 <style scoped lang="scss">
 .cluster {
   height: 94%;
+  display: flex;
   margin-top: 10px;
   .dept {
-    width: 36%;
+    height: 100%;
+    width: 20%;
     display: inline-block;
   }
   .info {
-    width: 60%;
+    width: 78%;
+    height: 100%;
     float: right;
     .deptchange {
       cursor: pointer;

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-30 13:57:38
+  LastEditTime: 2022-04-07 13:24:36
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -150,7 +150,7 @@ export default {
   },
   mounted() {
     this.userName = this.$store.getters.userName;
-    let obj = this.params = {uuid:this.$route.params.uuid};
+    let obj = this.params = {uuid:this.$route.params.detail};
      getOS(obj).then((res) => {
       let result = res.data.data.os_info;
       this.basic.macPlatform = result.Platform;
