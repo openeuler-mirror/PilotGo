@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-03-30 16:38:56
+  LastEditTime: 2022-04-07 12:45:30
  -->
 <template>
   <div class="panel">
@@ -63,6 +63,17 @@ export default {
           min: 0,
           boundaryGap: [0, '100%'],
         },
+        dataZoom: [
+          {
+            type: 'inside',
+            start: 0,
+            end: 20
+          },
+          {
+            start: 0,
+            end: 20
+          }
+        ],
         series: [{
           name: 'memory',
           type: 'line',

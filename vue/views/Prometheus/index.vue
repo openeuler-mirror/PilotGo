@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-04-06 16:58:19
+  LastEditTime: 2022-04-07 13:20:45
  -->
 <template>
   <div class="overview">
@@ -50,10 +50,10 @@
       </div>
       <!-- 图表展示区 -->
       <div class="charts flex">
-        <cpu-chart v-show="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
-        <mem-chart v-show="memShow" @close="handleClose"  ref="memchart"></mem-chart>
-        <disk-chart v-show="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
-        <net-chart v-show="netShow" @close="handleClose"  ref="netchart"></net-chart>
+        <cpu-chart class="space"  v-show="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
+        <mem-chart class="space"  v-show="memShow" @close="handleClose"  ref="memchart"></mem-chart>
+        <disk-chart class="space"  v-show="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
+        <net-chart class="space"  v-show="netShow" @close="handleClose"  ref="netchart"></net-chart>
       </div>
     </div>
   </div>
@@ -111,8 +111,8 @@ export default {
   },
   mounted() {
     this.macIp = this.$store.getters.selectIp.split(':')[0];
-    this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.4;
-    this.chartH = document.getElementsByClassName("charts")[0].clientHeight/2;
+    this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
+    this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
     this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
     this.$refs.memchart.resize({width:this.chartW,height: this.chartH});   
   },
@@ -189,6 +189,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.cluster {
+  width: 100%;
+
 .overview {
   width: 100%;
   height: 100%;
@@ -206,7 +209,7 @@ export default {
     .choice {
       width: 92%;
       margin: 0 auto;
-      height: 16%;
+      height: 20%;
       input {
         cursor: pointer;
       }
@@ -215,13 +218,16 @@ export default {
       }
     }
     .charts {
-      width: 98%;
-      height: 80%;
-      flex-flow: wrap;
-      flex-direction: column;
-      align-content: space-around;
+      width: 100%;
+      height: 70%;
+      flex-wrap: wrap;
+      // flex-direction: column;
       overflow-y: auto;
+      .space {
+        margin-bottom: 2%;
+      }
     }
   }
+}
 }
 </style>
