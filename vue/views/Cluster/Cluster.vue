@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-07 11:37:57
+  LastEditTime: 2022-04-07 14:50:40
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -31,9 +31,18 @@
           <div>{{ departName }}</div>
         </template>
         <template v-slot:table_action>
-          <auth-button name="rpm_install"  @click="handleIssue" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm下发 </auth-button>
-          <auth-button name="rpm_uninstall"  @click="handleUnInstall" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> rpm卸载 </auth-button>
           <auth-button name="create_batch"  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </auth-button>
+          <el-dropdown trigger="click">
+            <el-button class="kylin-item-button">
+              批量配置<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <auth-drop @click.native="handleChange" name="rpm_install"> 变更部门 </auth-drop>
+              <auth-drop @click.native="handleIssue" name="rpm_install"> rpm下发 </auth-drop>
+              <auth-drop @click.native="handleUnInstall" name="rpm_uninstall"> rpm卸载 </auth-drop>
+              <!-- <auth-drop @click.native="handleFireWall" name="rpm_uninstall"> 防火墙配置 </auth-drop> -->
+            </el-dropdown-menu>
+          </el-dropdown>
           <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
             <auth-button name="cluster_delete"  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
           </el-popconfirm>
@@ -78,10 +87,10 @@
                 @click="handleProme(scope.row.ip)">               
                 监控
               </el-button>
-              <el-button size="mini" type="primary" plain 
+              <!-- <el-button size="mini" type="primary" plain 
                 @click="handleFireWall(scope.row.ip)">
                 防火墙
-              </el-button>
+              </el-button> -->
               <!-- <el-button size="mini" type="primary" plain 
                 @click="handleChange(scope.row)"> 
                 变更部门 </el-button> -->
@@ -95,10 +104,10 @@
       :title="title"
       :before-close="handleClose" 
       :visible.sync="display" 
-      width="560px"
+      width="760px"
     >
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
-     <change-form v-if="type === 'change'" :row='row' @click="handleClose"></change-form>   
+     <change-form v-if="type === 'change'" :machines='batchMAcs' @click="handleClose"></change-form>   
      <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='batchMAcs' @click="handleClose"></batch-form>   
      <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>   
     </el-dialog>
@@ -110,6 +119,7 @@
 import kyTable from "@/components/KyTable";
 import kyTree from "@/components/KyTree";
 import AuthButton from "@/components/AuthButton";
+import AuthDrop from "@/components/AuthDrop";
 import UpdateForm from "./form/updateForm";
 import BatchForm from "./form/batchForm";
 import ChangeForm from "./form/changeForm";
@@ -125,6 +135,7 @@ export default {
     kyTable,
     kyTree,
     AuthButton,
+    AuthDrop,
   },
   data() {  
     return {
@@ -175,11 +186,11 @@ export default {
         this.$refs.table.handleSearch();
       }
     },
-    handleChange(row) {
+    handleChange() {
       this.display = true;
       this.title = "变更部门";
       this.type = "change"; 
-      this.row = row;
+      this.machines = this.$refs.table.selectRow.rows;
     },
     handleUpdateIp(ip) {
       this.display = true;

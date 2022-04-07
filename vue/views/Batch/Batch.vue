@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height:100%">
   <router-view v-if="$route.meta.breadcrumb"></router-view>
   <div v-if="!$route.meta.breadcrumb" class="panel">
     <ky-table
@@ -136,5 +136,7 @@ export default {
 </script>
 
 <style scoped>
-
+.panel {
+  height: 100%;
+}
 </style>
