@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-04-06 16:31:40
+ * LastEditTime: 2022-04-06 18:58:09
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -350,24 +350,33 @@ func ImportUser(c *gin.Context) {
 			for rowIndex, row := range sheet.Rows {
 				user := model.User{}
 				depart := model.DepartNode{}
+				role := model.UserRole{}
 
 				//跳过第一行表头信息
 				if rowIndex == 0 {
 					continue
 				}
-				user.Username = row.Cells[0].Value
-				user.Phone = row.Cells[1].Value
-				user.Email = row.Cells[2].Value
+				user.Username = row.Cells[0].Value //1:用户名
+				user.Phone = row.Cells[1].Value    //2：手机号
+				user.Email = row.Cells[2].Value    //3：邮箱
 				if dao.IsEmailExist(user.Email) {
 					UserExit = append(UserExit, user.Email)
 					continue
 				}
 				// 设置默认密码为123456
 				user.Password = "123456"
-				user.DepartName = row.Cells[3].Value
+				user.DepartName = row.Cells[3].Value //4：部门
 				mysqlmanager.DB.Where("depart=?", user.DepartName).Find(&depart)
 				user.DepartSecond = depart.ID
 				user.DepartFirst = depart.PID
+				user_role := row.Cells[4].Value //5：角色
+				mysqlmanager.DB.Where("role = ?", user_role).Find(&role)
+				user.RoleID = strconv.Itoa(role.ID)
+				if role.ID > 3 {
+					user.UserType = 3
+				} else {
+					user.UserType = role.ID - 1
+				}
 				mysqlmanager.DB.Save(&user)
 			}
 		}
