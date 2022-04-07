@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-03-24 17:58:25
+  LastEditTime: 2022-04-06 16:26:39
  -->
 <template>
   <div>
@@ -22,6 +22,9 @@
       <template v-slot:table_search>
         <div>角色列表</div>
       </template>
+      <template v-slot:table_action>
+        <el-button  @click="handleCreate"> 添加 </el-button>
+      </template>
       <template v-slot:table>
         <el-table-column prop="id" label="编号">
         </el-table-column>
@@ -32,9 +35,24 @@
             {{ [0,1,2].includes(scope.row.type)  ? "是" : "否"}}
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column  prop="description" label="描述">
+        </el-table-column>
+        <el-table-column label="权限">
           <template slot-scope="scope">
-            <el-button class="editBtn"  type="primary" plain size="mini" @click="handleOpen(scope.row)">查看权限</el-button>
+            <el-button v-if="[3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</el-button>
+            <el-button v-if="![3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleChange(scope.row)">变更</el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120">
+          <template slot-scope="scope">
+            <el-button :disabled="[3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-popconfirm 
+              title="确定删除此用户?"
+              cancel-button-type="default"
+              confirm-button-type="danger"
+              @confirm="handleDelete(scope.row.id)">
+              <el-button :disabled="[3,1,2].includes(scope.row.id)" slot="reference" class="editBtn"  type="primary" plain size="mini"> 删除 </el-button>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </template>
@@ -46,27 +64,47 @@
       :direction="direction"
       :destroy-on-close="destroy"
       :before-close="handleClose">
-      <role-detail :row="row"></role-detail>
+      <role-detail @click="handleClose" :showPop="showPop" :row="row"></role-detail>
     </el-drawer>
+
+    <el-dialog 
+      :title="roleTitle"
+      :before-close="handleRoleClose" 
+      :visible.sync="showRole" 
+      width="560px"
+    >
+      <add-form v-if="type === 'create'"  @click="handleRoleClose"></add-form>
+      <update-form ref="updateRole" v-if="type === 'update'" :row="row"  @click="handleRoleClose"></update-form>
+    </el-dialog>
 
   </div>
 </template>
 
 <script>
 import kyTable from "@/components/KyTable";
+import AuthButton from "@/components/AuthButton";
 import RoleDetail from "./detail/detail.vue";
-import { getRoles } from "@/request/role"
+import AddForm from "./form/addForm.vue";
+import UpdateForm from "./form/updateForm.vue";
+import { getRoles, delRole } from "@/request/role"
 export default {
   components: {
     kyTable,
+    AuthButton,
+    AddForm,
+    UpdateForm,
     RoleDetail
   },
   data() {
     return {
       row: {},
+      showRole: false,
+      roleTitle: "",
       display: false,
       destroy: true,
       title: "",
+      type: "",
+      showPop: true,
       direction: "rtl",
       searchData: {
         showSelect: false
@@ -77,15 +115,52 @@ export default {
     getRoles,
     handleClose() {
       this.display = false;
-      this.row = {};
       this.title = "";
+      this.$refs.table.handleSearch();
+    },
+    handleRoleClose(type) {
+       this.showRole = false;
+       this.roleTitle = "";
+       this.type = "";
+       if(type === 'success') {
+        this.$refs.table.handleSearch();
+      }
+    },
+    handleCreate() {
+      this.showRole = true;
+      this.type = 'create';
+      this.roleTitle = "新增角色";
+    },
+    handleEdit(row) {
+      this.row = row;
+      this.showRole = true;
+      this.type = 'update';
+      this.roleTitle = "编辑角色";
     },
     handleOpen(row) {
       this.row = row;
       this.display = true;
+      this.showPop = true;
       this.title = "权限详情";
     },
-  }
+    handleChange(row) {
+      this.row = row;
+      this.display = true;
+      this.showPop = false;
+      this.title = "变更权限";
+    },
+    handleDelete(id) {
+      delRole({id: id}).then(res => {
+        if(res.status === 200) {
+          this.$message.success(res.data.msg);
+          this.$refs.table.handleSearch();
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      })
+    }
+  },
+  
 }
 </script>
 

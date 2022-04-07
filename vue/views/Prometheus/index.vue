@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-03-30 15:55:59
+  LastEditTime: 2022-04-06 16:58:19
  -->
 <template>
   <div class="overview">
@@ -17,6 +17,9 @@
       <!-- 选择区 -->
       <div class="choice">
         <el-form ref="form" :model="form">
+          <el-form-item label="机器 IP:">
+            {{macIp}}
+          </el-form-item>
           <el-form-item label="监控时间:">
             <el-row :gutter="20">
               <el-col :span="7">
@@ -71,6 +74,7 @@ export default {
   },
   data() {
     return {
+      macIp: '',
       prome: '',
       promes: [
         {
@@ -106,6 +110,7 @@ export default {
     };
   },
   mounted() {
+    this.macIp = this.$store.getters.selectIp.split(':')[0];
     this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.4;
     this.chartH = document.getElementsByClassName("charts")[0].clientHeight/2;
     this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});

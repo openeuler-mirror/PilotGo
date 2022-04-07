@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-03-24 17:00:10
+  LastEditTime: 2022-04-07 09:14:40
  -->
 <template>
   <div>
@@ -25,6 +25,7 @@
       </el-form-item>
       <el-form-item label="密码:" prop="password">
         <el-input
+          type="password"
           class="ipInput"
           controls-position="right"
           v-model="form.password"
@@ -50,9 +51,9 @@
           <el-select v-model="form.role" multiple placeholder="请选择">
             <el-option
               v-for="item in roles"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              :key="item.ID"
+              :label="item.role"
+              :value="item.ID"
             >
             </el-option>
           </el-select>
@@ -85,6 +86,7 @@
 <script>
 import kyTree from "@/components/KyTree";
 import { addUser } from "@/request/user";
+import { getAllRole } from "@/request/role";
 import { getChildNode } from "@/request/cluster";
 import { checkEmail, checkPhone } from "@/rules/check"
 export default {
@@ -160,6 +162,14 @@ export default {
       },
     };
   },
+  mounted() {
+    getAllRole({paged: false}).then(res => {
+      this.roles = [];
+      if(res.data.code === 200) {
+        this.roles = res.data.data.role;
+      }
+    })
+  },
   methods: {
     getChildNode,
     handleCancel() {
@@ -175,9 +185,19 @@ export default {
       }
     },
     handleAdd() {
+      let params = {
+        username: this.form.username,
+        password: this.form.password,
+        phone: this.form.phone,
+        email: this.form.email,
+        departName: this.form.departName,
+        departId: this.form.departId,
+        departPid: this.form.departPid,
+        role: this.form.role.toString(),
+      }
       this.$refs.form.validate((valid) => {
         if (valid) {
-          addUser(this.form)
+          addUser(params)
             .then((res) => {
               if (res.data.code === 200) {
                 this.$emit("click","success");
@@ -188,11 +208,8 @@ export default {
               }
             })
             .catch((res) => {
-              this.$message.error("添加失败，请检查输入内容");
+              this.$message.error("添加失败, 请检查输入内容");
             });
-        } else {
-          this.$message.error("添加失败，请检查输入内容");
-          return false;
         }
       });
     },
