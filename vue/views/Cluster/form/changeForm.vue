@@ -9,17 +9,38 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-25 10:03:53
-  LastEditTime: 2022-03-25 10:46:10
+  LastEditTime: 2022-04-07 14:34:23
  -->
 <template>
-  <div>
+  <div class="content">
+    <div class="mac">
+        <div slot="header" class="clearfix">
+          <span>已选机器列表:</span>
+        </div>
+        <small-table
+            ref="stable"
+            :data="machineArr"
+            :height="tHeight">
+            <template v-slot:content>
+            <el-table-column
+              prop="ip"
+              label="ip">
+            </el-table-column>
+            <el-table-column
+              prop="departname"
+              label="原部门">
+            </el-table-column>
+            </template>
+          </small-table>
+    </div>
     <el-form
         :model="form"
         :rules="rules"
         ref="form"
         label-width="100px"
+        class="dept"
       >
-        <el-form-item label="IP:" prop="ip">
+        <!-- <el-form-item label="IP:" prop="ip">
           <el-input
             class="ipInput"
             type="text"
@@ -38,8 +59,8 @@
             :disabled="disabled"
             autocomplete="off"
           ></el-input>
-        </el-form-item>
-        <el-form-item label="新部门:" prop="currentDept">
+        </el-form-item> -->
+        <el-form-item label="部门:" prop="currentDept">
           <el-input
             class="ipInput"
             controls-position="right"
@@ -58,6 +79,7 @@
 
       <div class="dialog-footer">
         <el-button @click="handleCancel">取 消</el-button>
+        <el-button type="primary" @click="handleContinue">继续选择</el-button>
         <el-button type="primary" @click="handleChange">确 定</el-button>
       </div>
   </div>
@@ -65,39 +87,29 @@
 <script>
 import kyTree from "@/components/KyTree";
 import { getChildNode, changeMacDept } from "@/request/cluster";
+import SmallTable from "@/components/SmallTable";
 export default {
   name: 'ChangeForm',
   components: {
     kyTree,
+    SmallTable
   },
   props: {
-    row: {
-      type: Object
+    machines: {
+      type: Array,
     }
   },
   data() {
    return {
+      machineArr: [],
+      tHeight: 340,
       disabled: true,
       machineid: 0,
       departid: 0,
       form: {
-        ip: '',
-        formerDept: '',
         currentDept: ''
       },
       rules: {
-        ip: [
-          { 
-            required: true, 
-            message: "ip未识别到",
-            trigger: "blur" 
-          }],
-        formerDept: [
-          { 
-            required: true, 
-            message: "原部门未识别到",
-            trigger: "blur" 
-          }],
         currentDept: [
         { 
           required: true, 
@@ -108,15 +120,19 @@ export default {
    }
   },
   mounted() {
-    this.form.ip = this.row.ip;
-    this.form.formerDept = this.row.departname;
-    this.departid = this.row.departid;
-    this.machineid = this.row.id;
+    let keys = {};
+    this.machines.forEach((item) => keys[item.ip]=item);
+    for(let key in keys) {
+      this.machineArr.push(keys[key])
+    }
   },
   methods: {
     getChildNode,
     handleCancel() {
       this.$refs.form.resetFields();
+      this.$emit("click");
+    },
+    handleContinue() {
       this.$emit("click");
     },
     handleSelectDept(data) {
@@ -126,8 +142,12 @@ export default {
       }
     },
     handleChange() {
+      let macIds = [];
+      this.machineArr.forEach(item => {
+        macIds.push(item.id)
+      })
       let params = {
-        "machineid": this.machineid,
+        "machineid": macIds.toString(),
         "departid": this.departid,
       }
       this.$refs.form.validate((valid) => {
@@ -150,3 +170,27 @@ export default {
   }
 }
 </script>
+<style scoped lang="scss">
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  .mac {
+      width: 50%;
+      max-height: 400px;
+      overflow:auto;
+      .clearfix {
+        font-size: 16px;
+      }
+      .text {
+        font-size: 16px;
+      }
+    }
+    .dept {
+      width: 40%;
+    }
+    .dialog-footer {
+      width: 100%;
+    }
+}
+  
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading">
+  <div v-loading="loading" style="height:100%">
     <ky-table
       :getData="getUsers"
       ref="table"
