@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-01-04 12:56:59
- * LastEditTime: 2022-03-03 17:33:17
+ * LastEditTime: 2022-04-07 13:28:41
  * Description: 部门管理数据库相关函数
  ******************************************************************************/
 package dao
@@ -109,6 +109,7 @@ func ModifyMachineDepart(M int, D int) {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
 		DepartId: D,
+		State:    model.Normal,
 	}
 	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
 }
