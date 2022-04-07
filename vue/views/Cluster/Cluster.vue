@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-03-30 15:36:45
+  LastEditTime: 2022-04-07 09:48:33
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -17,7 +17,7 @@
     <router-view v-if="$route.meta.breadcrumb"></router-view>
     <div v-if="!$route.meta.breadcrumb">
     <div class="dept panel">
-      <ky-tree :getData="getChildNode" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
+      <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
     </div>
     <div class="info panel">
       <ky-table
@@ -145,7 +145,7 @@ export default {
     };
   },
   mounted() {
-    this.showChange = [0,1].includes(this.$store.getters.userType);
+    this.showChange = true;//['0','1'].includes(this.$store.getters.userType);
     getClusters({DepartId: 1}).then(res => {
       if(res.data.code === 200 && res.data.total !== 0) {
         let name = res.data.data[0].departname;

@@ -146,9 +146,6 @@ export default {
             .catch((res) => {
               this.$message.error("添加失败，请检查输入内容");
             });
-        } else {
-          this.$message.error("添加失败，请检查输入内容");
-          return false;
         }
       });
     },
