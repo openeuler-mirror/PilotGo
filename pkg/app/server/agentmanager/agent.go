@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2022-03-04 02:33:13
+ * LastEditTime: 2022-04-07 14:08:33
  * Description: socket server's agentmanager
  ******************************************************************************/
 package agentmanager
@@ -19,8 +19,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
@@ -29,6 +31,7 @@ type AgentMessageHandler func(*Agent, *protocol.Message) error
 type Agent struct {
 	UUID             string
 	Version          string
+	IP               string
 	conn             net.Conn
 	MessageProcesser *protocol.MessageProcesser
 }
@@ -72,6 +75,11 @@ func (a *Agent) startListen() {
 		n, err := a.conn.Read(buff)
 		if err != nil {
 			logger.Error("read error:%s", err)
+			var Machine model.MachineNode
+			Ma := model.MachineNode{
+				State: model.OffLine,
+			}
+			mysqlmanager.DB.Model(&Machine).Where("ip=?", a.IP).Update(&Ma)
 			DeleteAgent(a.UUID)
 			return
 		}
@@ -111,7 +119,7 @@ func (a *Agent) Init() error {
 	d := data.(map[string]interface{})
 	logger.Debug("response agent info is %v", d)
 	a.UUID = d["agent_uuid"].(string)
-
+	a.IP = d["IP"].(string)
 	a.Version = d["agent_version"].(string)
 
 	// add agent to agent manager

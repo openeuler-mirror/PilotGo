@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-06 18:12:35
+ * LastEditTime: 2022-04-07 14:06:34
  * Description: agent main
  ******************************************************************************/
 package main
@@ -119,12 +119,19 @@ func regitsterHandler(c *network.SocketClient) {
 
 	c.BindHandler(protocol.AgentInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
+		IP, err := utils.RunCommand("hostname -I")
+		if err != nil {
+			fmt.Println("获取IP失败!")
+		}
+		str := strings.Split(IP, " ")
+		IP = str[0]
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
 			Data: map[string]string{
 				"agent_version": agent_version,
+				"IP":            IP,
 				"agent_uuid":    agent_uuid,
 			},
 		}

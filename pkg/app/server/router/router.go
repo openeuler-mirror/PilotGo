@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-04-06 19:01:04
+ * LastEditTime: 2022-04-07 10:52:55
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -152,11 +152,11 @@ func SetupRouter() *gin.Engine {
 	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
-	router.NoRoute(func(c *gin.Context) {
-		url := c.Request.RequestURI
-		c.Redirect(http.StatusFound, url)
-		router.StaticFile(url, "./dist/index.html")
-	})
+	// router.NoRoute(func(c *gin.Context) {
+	// 	url := c.Request.RequestURI
+	// 	c.Redirect(http.StatusFound, url)
+	// 	router.StaticFile(url, "./dist/index.html")
+	// })
 
 	// firewall := router.Group("firewall")
 	// {
