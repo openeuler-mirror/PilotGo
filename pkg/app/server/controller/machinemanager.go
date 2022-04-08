@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-07 14:38:02
+ * LastEditTime: 2022-04-08 13:01:58
  * Description: provide machine manager functions.
  ******************************************************************************/
 package controller
@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
@@ -395,53 +394,6 @@ func AddIP(c *gin.Context) {
 	response.Success(c, nil, "ip更新成功")
 }
 
-func AddAgents() {
-	var agent_list model.MachineNode
-	agents := agentmanager.GetAgentList()
-	for _, agent := range agents {
-		uuid := agent["agent_uuid"]
-		agent_uuid := agentmanager.GetAgent(uuid)
-		if agent_uuid == nil {
-			logger.Fatal("获取uuid失败!")
-			return
-		}
-		agent_OS, err := agent_uuid.GetAgentOSInfo()
-		if err != nil {
-			logger.Fatal("初始化系统信息失败!")
-			return
-		}
-		agentOS := strings.Split(agent_OS.(string), ";")
-		agent_list.MachineUUID = uuid
-		if dao.IsUUIDExist(uuid) {
-			logger.Warn("机器%s已经存在!", agentOS[0])
-			continue
-		}
-		agent_list.IP = agentOS[0]
-		if dao.IsIPExist(agentOS[0]) {
-			mysqlmanager.DB.Where("ip=?", agentOS[0]).Find(&agent_list)
-			if agent_list.DepartId != 2 {
-				Ma := model.MachineNode{
-					MachineUUID: uuid,
-					State:       model.Normal,
-				}
-				mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update(&Ma)
-			} else {
-				Ma := model.MachineNode{
-					MachineUUID: uuid,
-					State:       model.Free,
-				}
-				mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update(&Ma)
-			}
-			continue
-		}
-		agent_list.DepartId = 2
-		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
-		agent_list.CPU = agentOS[3]
-		agent_list.State = model.Free
-		mysqlmanager.DB.Save(&agent_list)
-	}
-}
-
 func ReturnID(id int) []int {
 	var depart []model.DepartNode
 	mysqlmanager.DB.Where("p_id=?", id).Find(&depart)
@@ -452,6 +404,7 @@ func ReturnID(id int) []int {
 	}
 	return res
 }
+
 func ReturnSpecifiedDepart(id int, res *[]int) {
 	if len(ReturnID(id)) == 0 {
 		return

@@ -9,16 +9,20 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-18 02:33:55
- * LastEditTime: 2022-04-07 13:58:39
+ * LastEditTime: 2022-04-08 12:59:40
  * Description: socket server
  ******************************************************************************/
 package agentmanager
 
 import (
 	"net"
+	"strings"
 	"sync"
 
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 // 用于管理server连接的agent
@@ -94,8 +98,43 @@ func AddandRunAgent(c net.Conn) {
 
 	AddAgent(agent)
 	logger.Info("Add new agent from:%s", c.RemoteAddr().String())
+	AddAgents2DB()
 }
 
 func StopAgentManager() {
 
+}
+
+func AddAgents2DB() {
+	var agent_list model.MachineNode
+	agents := GetAgentList()
+	for _, agent := range agents {
+		uuid := agent["agent_uuid"]
+		agent_uuid := GetAgent(uuid)
+		if agent_uuid == nil {
+			logger.Error("获取uuid失败!")
+			return
+		}
+		agent_OS, err := agent_uuid.GetAgentOSInfo()
+		if err != nil {
+			logger.Error("初始化系统信息失败!")
+			return
+		}
+		agentOS := strings.Split(agent_OS.(string), ";")
+		agent_list.DepartId = 1
+		agent_list.MachineUUID = uuid
+		if dao.IsUUIDExist(uuid) {
+			logger.Warn("机器%s已经存在!", agentOS[0])
+			continue
+		}
+		agent_list.IP = agentOS[0]
+		if dao.IsIPExist(agentOS[0]) {
+			mysqlmanager.DB.Where("ip=?", agentOS[0]).Unscoped().Delete(agent_list)
+			// mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update("state", model.OffLine)
+		}
+		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
+		agent_list.CPU = agentOS[3]
+		agent_list.State = model.Free
+		mysqlmanager.DB.Save(&agent_list)
+	}
 }

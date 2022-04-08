@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-04-06 19:23:17
+ * LastEditTime: 2022-04-08 13:08:25
  * Description: provide agent service functions.
  ******************************************************************************/
 package network
@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"net"
 
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	pnet "openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
@@ -25,6 +27,7 @@ type AgentMessageHandler func(*SocketClient, *protocol.Message) error
 
 type SocketClient struct {
 	conn             net.Conn
+	messageChan      chan *protocol.Message
 	MessageProcesser *protocol.MessageProcesser
 }
 
@@ -35,6 +38,22 @@ func (c *SocketClient) Connect(addr string) error {
 	}
 
 	c.conn = conn
+
+	go func(c *SocketClient) {
+		c.messageChan = make(chan *protocol.Message, 100)
+		for {
+			msg := <-c.messageChan
+			logger.Debug("send message response:%d, message length:%d", msg.Type, len(msg.String()))
+
+			data := msg.Encode()
+			sendData := protocol.TlvEncode(data)
+
+			err := pnet.Send(c.conn, sendData)
+			if err != nil {
+				logger.Error("send byte data error:%s", err.Error())
+			}
+		}
+	}(c)
 
 	go func(c *SocketClient) {
 		readBuff := []byte{}
@@ -48,13 +67,17 @@ func (c *SocketClient) Connect(addr string) error {
 			readBuff = append(readBuff, buff[:n]...)
 
 			//切割frame
-			i, f := protocol.TlvDecode(&readBuff)
-			if i != 0 {
-				readBuff = readBuff[i:]
-				go func() {
-					msg := protocol.ParseMessage(*f)
-					c.MessageProcesser.ProcessMessage(c, msg)
-				}()
+			for {
+				i, f := protocol.TlvDecode(&readBuff)
+				if i != 0 {
+					readBuff = readBuff[i:]
+					go func(c *SocketClient, f *[]byte) {
+						msg := protocol.ParseMessage(*f)
+						c.MessageProcesser.ProcessMessage(c, msg)
+					}(c, f)
+				} else {
+					break
+				}
 			}
 		}
 	}(c)
@@ -62,21 +85,7 @@ func (c *SocketClient) Connect(addr string) error {
 }
 
 func (c *SocketClient) Send(msg *protocol.Message) error {
-	data := msg.Encode()
-	sendData := protocol.TlvEncode(data)
-
-	data_length := len(sendData)
-	send_count := 0
-	for {
-		n, err := c.conn.Write(sendData[send_count:])
-		if err != nil {
-			return err
-		}
-		if n+send_count >= data_length {
-			send_count = send_count + n
-			break
-		}
-	}
+	c.messageChan <- msg
 	return nil
 }
 

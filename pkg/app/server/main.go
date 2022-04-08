@@ -9,11 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
-<<<<<<< Updated upstream
- * LastEditTime: 2022-04-06 16:42:06
-=======
- * LastEditTime: 2022-04-06 10:56:15
->>>>>>> Stashed changes
+ * LastEditTime: 2022-04-08 13:02:14
  * Description: server main
  ******************************************************************************/
 package main
@@ -101,12 +97,6 @@ EXIT:
 func sessionManagerInit(conf *sconfig.HttpServer) error {
 	var sessionManage net.SessionManage
 	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
-	go func() {
-		for {
-			controller.AddAgents()
-			time.Sleep(time.Second * 30)
-		}
-	}()
 	return nil
 }
 
