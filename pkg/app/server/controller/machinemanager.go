@@ -246,30 +246,101 @@ func Deletedepartdata(c *gin.Context) {
 	response.Success(c, nil, "部门删除成功")
 }
 
-func MachineInfo(c *gin.Context) {
-	departid := c.Query("DepartId")
-	machine := model.MachineNode{}
-	query := &model.PaginationQ{}
-	err := c.ShouldBindQuery(query)
+type Depart struct {
+	Page int `json:"page"`
+	Size int `json:"size"`
+	ID   int `json:"ID"`
+}
 
-	if model.HandleError(c, err) {
-		return
-	}
-	tmp, err := strconv.Atoi(departid)
+func MachineInfo(c *gin.Context) {
+	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
-			"部门ID输入格式有误")
+			err.Error())
 		return
 	}
-	list, total, err := machine.ReturnMachine(query, tmp)
-	if model.HandleError(c, err) {
+	var depart Depart
+	err = json.Unmarshal(j, &depart)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
 		return
 	}
-	// 返回数据开始拼装分页的json
-	model.JsonPagination(c, list, total, query)
+	a := ReturnID(depart.ID)
+	a = append(a, depart.ID)
+	machinelist := make([]model.Res, 0)
+	for _, value := range a {
+		list := &[]model.Res{}
+		mysqlmanager.DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
+			"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
+			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
+		for _, value1 := range *list {
+			if value1.Departid == value {
+				machinelist = append(machinelist, value1)
+			}
+		}
+	}
+	len := len(machinelist)
+	size := depart.Size
+	page := depart.Page
 
+	if len == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":  200,
+			"data":  MachineInfo,
+			"page":  page,
+			"size":  size,
+			"total": len,
+		})
+	}
+
+	num := size * (page - 1)
+	if num > len {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			"页码超出")
+	}
+
+	if page*size >= len {
+		c.JSON(http.StatusOK, gin.H{
+			"code":  200,
+			"data":  machinelist[num:],
+			"page":  page,
+			"size":  size,
+			"total": len,
+		})
+	} else {
+		if page*size < num {
+			response.Response(c, http.StatusUnprocessableEntity,
+				422,
+				nil,
+				"读取错误")
+		}
+
+		if page*size == 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"code":  200,
+				"data":  MachineInfo,
+				"page":  page,
+				"size":  size,
+				"total": len,
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":  200,
+				"data":  machinelist[num : page*size-1],
+				"page":  page,
+				"size":  size,
+				"total": len,
+			})
+		}
+
+	}
 }
 
 //资源池返回接口
