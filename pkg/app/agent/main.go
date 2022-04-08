@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-08 13:33:12
+ * LastEditTime: 2022-04-08 19:38:34
  * Description: agent main
  ******************************************************************************/
 package main
@@ -17,7 +17,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,7 +60,6 @@ func main() {
 	}
 
 	for {
-
 		if err := client.Connect(aconfig.Config().Server.Addr); err != nil {
 			fmt.Println("connect server failed, error:", err)
 
@@ -70,8 +71,25 @@ func main() {
 	regitsterHandler(client)
 
 	// go Send_heartbeat(client)
-	select {}
 
+	// 信号监听
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	for {
+		s := <-c
+		switch s {
+		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			logger.Info("signal interrupted: %s", s.String())
+			// TODO: DO EXIT
+
+			goto EXIT
+		default:
+			logger.Info("unknown signal: %s", s.String())
+		}
+	}
+
+EXIT:
+	logger.Info("exit system, bye~")
 }
 
 func Send_heartbeat(client *network.SocketClient) {
