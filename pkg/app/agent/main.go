@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-07 14:06:34
+ * LastEditTime: 2022-04-08 12:49:48
  * Description: agent main
  ******************************************************************************/
 package main
@@ -23,6 +23,7 @@ import (
 	"github.com/google/uuid"
 	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
@@ -45,6 +46,11 @@ func main() {
 	}
 
 	// 初始化日志
+	if err := logger.Init(&aconfig.Config().Logopts); err != nil {
+		fmt.Println("logger init failed, please check the config file")
+		os.Exit(-1)
+	}
+	logger.Info("Thanks to choose PilotGo!")
 
 	// 与server握手
 	client := &network.SocketClient{

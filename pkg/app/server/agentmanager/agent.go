@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2022-04-07 14:08:33
+ * LastEditTime: 2022-04-08 13:07:53
  * Description: socket server's agentmanager
  ******************************************************************************/
 package agentmanager
@@ -20,9 +20,9 @@ import (
 
 	"github.com/google/uuid"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
+	pnet "openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 )
 
@@ -34,6 +34,7 @@ type Agent struct {
 	IP               string
 	conn             net.Conn
 	MessageProcesser *protocol.MessageProcesser
+	messageChan      chan *protocol.Message
 }
 
 // 通过给定的conn连接初始化一个agent并启动监听
@@ -42,11 +43,20 @@ func NewAgent(conn net.Conn) (*Agent, error) {
 		UUID:             "agent",
 		conn:             conn,
 		MessageProcesser: protocol.NewMessageProcesser(),
+		messageChan:      make(chan *protocol.Message, 50),
 	}
 
-	go func() {
+	go func(agent *Agent) {
+		for {
+			msg := <-agent.messageChan
+			logger.Debug("send message:%s", msg.String())
+			pnet.Send(agent.conn, protocol.TlvEncode(msg.Encode()))
+		}
+	}(agent)
+
+	go func(agent *Agent) {
 		agent.startListen()
-	}()
+	}(agent)
 
 	if err := agent.Init(); err != nil {
 		return nil, err
@@ -89,10 +99,10 @@ func (a *Agent) startListen() {
 		i, f := protocol.TlvDecode(&readBuff)
 		if i != 0 {
 			readBuff = readBuff[i:]
-			go func() {
+			go func(a *Agent, f *[]byte) {
 				msg := protocol.ParseMessage(*f)
 				a.MessageProcesser.ProcessMessage(a, msg)
-			}()
+			}(a, f)
 		}
 	}
 }
@@ -121,9 +131,6 @@ func (a *Agent) Init() error {
 	a.UUID = d["agent_uuid"].(string)
 	a.IP = d["IP"].(string)
 	a.Version = d["agent_version"].(string)
-
-	// add agent to agent manager
-	AddAgent(a)
 
 	return nil
 }
@@ -159,15 +166,17 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 		waitChan := make(chan *protocol.Message)
 		a.MessageProcesser.WaitMap.Store(msg.UUID, waitChan)
 
-		network.Send(a.conn, protocol.TlvEncode(msg.Encode()))
+		// send message to data send channel
+		a.messageChan <- msg
 
 		// wail for response
 		data := <-waitChan
 		return data, nil
 	}
 
-	// just send data
-	return nil, network.Send(a.conn, protocol.TlvEncode(msg.Encode()))
+	// just send message to channel
+	a.messageChan <- msg
+	return nil, nil
 }
 
 // 远程获取agent端的系统信息

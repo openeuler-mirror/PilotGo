@@ -9,10 +9,10 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-03-04 02:28:58
+ * LastEditTime: 2022-04-08 13:05:57
  * Description: socket server send
  ******************************************************************************/
-package network
+package net
 
 import (
 	"net"
@@ -22,7 +22,7 @@ func Send(conn net.Conn, data []byte) error {
 	data_length := len(data)
 	send_count := 0
 	for {
-		n, err := conn.Write((data)[send_count:])
+		n, err := conn.Write(data[send_count:])
 		if err != nil {
 			return err
 		}
