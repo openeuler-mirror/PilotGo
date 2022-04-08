@@ -272,6 +272,23 @@ func MachineInfo(c *gin.Context) {
 
 }
 
+//资源池返回接口
+func FreeMachineSource(c *gin.Context) {
+	departid := 1
+	machine := model.MachineNode{}
+	query := &model.PaginationQ{}
+	err := c.ShouldBindQuery(query)
+
+	if model.HandleError(c, err) {
+		return
+	}
+	list, total, err := machine.ReturnMachine(query, departid)
+	if model.HandleError(c, err) {
+		return
+	}
+	// 返回数据开始拼装分页的json
+	model.JsonPagination(c, list, total, query)
+}
 func MachineAllData(c *gin.Context) {
 	AllData := model.MachineAllData()
 	c.JSON(http.StatusOK, gin.H{
