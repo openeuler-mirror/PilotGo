@@ -198,15 +198,22 @@ func Deletemachinedata(c *gin.Context) {
 
 func Deletedepartdata(c *gin.Context) {
 	a := c.Query("DepartID")
-	logger.Info("%s", a)
 	tmp, err := strconv.Atoi(a)
-	logger.Info("%d", tmp)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
 			"部门ID有误")
 		return
+	}
+	for _, n := range dao.MachineStore(tmp) {
+		dao.ModifyMachineDepart2(n.ID, 1)
+	}
+	for _, depart := range ReturnID(tmp) {
+		machine := dao.MachineStore(depart)
+		for _, m := range machine {
+			dao.ModifyMachineDepart2(m.ID, 1)
+		}
 	}
 	if !dao.IsDepartIDExist(tmp) {
 		response.Response(c, http.StatusUnprocessableEntity,
@@ -215,6 +222,7 @@ func Deletedepartdata(c *gin.Context) {
 			"不存在该机器")
 		return
 	}
+
 	needdelete := make([]int, 0)
 	DepartInfo := dao.GetPid(a)
 	needdelete = append(needdelete, tmp)
@@ -405,6 +413,7 @@ func ReturnID(id int) []int {
 	return res
 }
 
+//返回所有子部门函数
 func ReturnSpecifiedDepart(id int, res *[]int) {
 	if len(ReturnID(id)) == 0 {
 		return
