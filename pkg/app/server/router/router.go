@@ -104,7 +104,7 @@ func SetupRouter() *gin.Engine {
 	machinemanager := router.Group("machinemanager")
 	{
 		machinemanager.GET("/departinfo", controller.DepartInfo)
-		machinemanager.GET("/machineinfo", controller.MachineInfo)
+		machinemanager.POST("/machineinfo", controller.MachineInfo)
 		machinemanager.GET("/depart", controller.Dep)
 		machinemanager.GET("/test", controller.AddIP)
 		machinemanager.GET("/machinealldata", controller.MachineAllData)

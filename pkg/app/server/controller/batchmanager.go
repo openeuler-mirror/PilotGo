@@ -265,26 +265,11 @@ func Batchmachineinfo(c *gin.Context) {
 			err.Error())
 		return
 	}
-	// tmp, err := strconv.Atoi(batchid.ID)
-	// if err != nil {
-	// 	response.Response(c, http.StatusUnprocessableEntity,
-	// 		422,
-	// 		nil,
-	// 		"批次ID有误")
-	// 	return
-	// }
+
 	machinelist := dao.GetMachineID(batchid.ID)
 	logger.Info("%+v", MachineInfo)
 	MachineInfo := make([]model.MachineNode, 0)
 	for _, value := range machinelist {
-		// tmp1, err := strconv.Atoi(value)
-		// if err != nil {
-		// 	response.Response(c, http.StatusUnprocessableEntity,
-		// 		422,
-		// 		nil,
-		// 		"批次ID有误")
-		// 	return
-		// }
 		m := dao.MachineData(value)
 		MachineInfo = append(MachineInfo, m)
 	}
@@ -302,8 +287,6 @@ func Batchmachineinfo(c *gin.Context) {
 			"total": len,
 		})
 	}
-	// page, _ := strconv.Atoi(batchid.Page)
-	// size, _ := strconv.Atoi(batchid.Size)
 
 	num := size * (page - 1)
 	if num > len {
