@@ -113,6 +113,14 @@ func ModifyMachineDepart(M int, D int) {
 	}
 	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
 }
+func ModifyMachineDepart2(M int, D int) {
+	var Machine model.MachineNode
+	Ma := model.MachineNode{
+		DepartId: D,
+		State:    model.Free,
+	}
+	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
+}
 func MachineData(MachineIP string) model.MachineNode {
 	var m model.MachineNode
 	mysqlmanager.DB.Where("ip=?", MachineIP).Find(&m)
