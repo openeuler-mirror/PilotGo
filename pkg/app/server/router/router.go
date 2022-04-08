@@ -104,7 +104,7 @@ func SetupRouter() *gin.Engine {
 	machinemanager := router.Group("machinemanager")
 	{
 		machinemanager.GET("/departinfo", controller.DepartInfo)
-		machinemanager.POST("/machineinfo", controller.MachineInfo)
+		machinemanager.GET("/machineinfo", controller.MachineInfo)
 		machinemanager.GET("/depart", controller.Dep)
 		machinemanager.GET("/test", controller.AddIP)
 		machinemanager.GET("/machinealldata", controller.MachineAllData)
@@ -114,8 +114,8 @@ func SetupRouter() *gin.Engine {
 	batchmanager := router.Group("batchmanager")
 	{
 		batchmanager.POST("/createbatch", controller.CreateBatch)
-		batchmanager.GET("/batchinfo", controller.BatchInform)
-		batchmanager.POST("/batchmachineinfo", controller.Batchmachineinfo)
+		batchmanager.GET("/batchinfo", controller.BatchInform) 
+		batchmanager.GET("/batchmachineinfo", controller.Batchmachineinfo)
 	}
 	prometheus := router.Group("prometheus")
 	{
