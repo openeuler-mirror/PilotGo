@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-08 12:49:48
+ * LastEditTime: 2022-04-08 13:33:12
  * Description: agent main
  ******************************************************************************/
 package main
@@ -186,7 +186,8 @@ func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.SysctlInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 
-		sysctlinfo := uos.GetSysConfig()
+		// TODO: process error
+		sysctlinfo, _ := uos.GetSysctlConfig()
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,

@@ -1,7 +1,6 @@
 package os
 
 import (
-	"bufio"
 	"fmt"
 	"strings"
 
@@ -9,30 +8,30 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
-// sysctl -p /etc/sysctl.conf 载入配置文件
-func GetSysConfig() []map[string]string {
-	tmp, err := utils.RunCommand("sysctl -p /etc/sysctl.conf")
+func GetSysctlConfig() ([]map[string]string, error) {
+	tmp, err := utils.RunCommand("sysctl -a")
 	if err != nil {
 		logger.Error("获取内核配置文件失败!%s", err.Error())
+		return nil, err
 	}
-	reader := strings.NewReader(tmp)
-	scanner := bufio.NewScanner(reader)
-
+	// TODO: 修正数据结构
 	var sysConfig []map[string]string
-	for {
-		if !scanner.Scan() {
-			break
-		}
-		line := scanner.Text()
+	lines := strings.Split(tmp, "\n")
+	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		strSlice := strings.Split(line, " = ")
+		if line == "" {
+			continue
+		}
 
+		strSlice := strings.Split(line, " =")
+		key := strSlice[0]
+		value := strings.TrimLeft(line[len(key)+2:], " ")
 		sysPars := map[string]string{
-			strSlice[0]: strSlice[1],
+			key: value,
 		}
 		sysConfig = append(sysConfig, sysPars)
 	}
-	return sysConfig
+	return sysConfig, nil
 }
 
 // sysctl -w net.ipv4.ip_forward=1  临时修改系统参数
