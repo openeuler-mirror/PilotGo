@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-08 13:01:58
+ * LastEditTime: 2022-04-09 17:58:35
  * Description: provide machine manager functions.
  ******************************************************************************/
 package controller
@@ -247,29 +247,22 @@ func Deletedepartdata(c *gin.Context) {
 }
 
 type Depart struct {
-	Page int `json:"page"`
-	Size int `json:"size"`
-	ID   int `json:"ID"`
+	Page       int  `form:"page"`
+	Size       int  `form:"size"`
+	ID         int  `form:"DepartId"`
+	ShowSelect bool `form:"ShowSelect"`
 }
 
 func MachineInfo(c *gin.Context) {
-	j, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
+	depart := &Depart{}
+	if c.ShouldBind(depart) != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
-			err.Error())
+			"parameter error")
 		return
 	}
-	var depart Depart
-	err = json.Unmarshal(j, &depart)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
+
 	a := ReturnID(depart.ID)
 	a = append(a, depart.ID)
 	machinelist := make([]model.Res, 0)
@@ -291,11 +284,12 @@ func MachineInfo(c *gin.Context) {
 	if len == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code":  200,
-			"data":  MachineInfo,
+			"data":  &[]model.Res{},
 			"page":  page,
 			"size":  size,
 			"total": len,
 		})
+		return
 	}
 
 	num := size * (page - 1)
@@ -304,6 +298,7 @@ func MachineInfo(c *gin.Context) {
 			422,
 			nil,
 			"页码超出")
+		return
 	}
 
 	if page*size >= len {
@@ -314,22 +309,25 @@ func MachineInfo(c *gin.Context) {
 			"size":  size,
 			"total": len,
 		})
+		return
 	} else {
 		if page*size < num {
 			response.Response(c, http.StatusUnprocessableEntity,
 				422,
 				nil,
 				"读取错误")
+			return
 		}
 
 		if page*size == 0 {
 			c.JSON(http.StatusOK, gin.H{
 				"code":  200,
-				"data":  MachineInfo,
+				"data":  &[]model.Res{},
 				"page":  page,
 				"size":  size,
 				"total": len,
 			})
+			return
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"code":  200,
@@ -338,6 +336,7 @@ func MachineInfo(c *gin.Context) {
 				"size":  size,
 				"total": len,
 			})
+			return
 		}
 
 	}
