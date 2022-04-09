@@ -9,15 +9,15 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-04-08 13:08:25
+ * LastEditTime: 2022-04-09 17:24:42
  * Description: provide agent service functions.
  ******************************************************************************/
 package network
 
 import (
-	"fmt"
 	"net"
 
+	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeluer.org/PilotGo/PilotGo/pkg/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
@@ -29,18 +29,44 @@ type SocketClient struct {
 	conn             net.Conn
 	messageChan      chan *protocol.Message
 	MessageProcesser *protocol.MessageProcesser
+	exitChan         chan struct{}
+	exitError        error
 }
 
-func (c *SocketClient) Connect(addr string) error {
+func NewSocketClient() *SocketClient {
+	return &SocketClient{
+		MessageProcesser: protocol.NewMessageProcesser(),
+		messageChan:      make(chan *protocol.Message, 100),
+		exitChan:         make(chan struct{}),
+	}
+}
+
+// 启动Socket
+func (c *SocketClient) Run(conf *config.Server) error {
+	if err := c.connect(conf.Addr); err != nil {
+		logger.Error("connect server error:%s", err.Error())
+		return err
+	}
+
+	<-c.exitChan
+	c.conn.Close()
+	return nil
+}
+
+// 启动Socket
+func (c *SocketClient) exitWithError(err error) {
+	c.exitError = err
+	c.exitChan <- struct{}{}
+}
+
+func (c *SocketClient) connect(addr string) error {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return err
 	}
-
 	c.conn = conn
 
 	go func(c *SocketClient) {
-		c.messageChan = make(chan *protocol.Message, 100)
 		for {
 			msg := <-c.messageChan
 			logger.Debug("send message response:%d, message length:%d", msg.Type, len(msg.String()))
@@ -51,6 +77,8 @@ func (c *SocketClient) Connect(addr string) error {
 			err := pnet.Send(c.conn, sendData)
 			if err != nil {
 				logger.Error("send byte data error:%s", err.Error())
+				c.exitWithError(err)
+				return
 			}
 		}
 	}(c)
@@ -59,9 +87,10 @@ func (c *SocketClient) Connect(addr string) error {
 		readBuff := []byte{}
 		for {
 			buff := make([]byte, 1024)
-			n, err := conn.Read(buff)
+			n, err := c.conn.Read(buff)
 			if err != nil {
-				fmt.Println("read error:", err)
+				logger.Error("socket read data error:", err)
+				c.exitWithError(err)
 				return
 			}
 			readBuff = append(readBuff, buff[:n]...)
