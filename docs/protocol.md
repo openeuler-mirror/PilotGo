@@ -71,3 +71,55 @@
 
 
 ## PilotGo server http API 协议
+### 部门管理 API
+#### 新增部门
+描述：向部门管理树中添加新的部门
+Request Method：POST
+uri：/machinemanager/adddepart
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|PID|string|上一级部门ID|y||
+|ParentDepart|string|上一级部门名称|y||
+|Depart|string|部门名称|y||
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "部门信息入库成功"
+}
+```
+#### 部门信息
+描述：获取全部部门信息
+Request Method：GET
+uri：/machinemanager/departinfo
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+
+示例：
+```json
+{
+	"code": 200,
+	"data": {
+		"label": "xx",
+		"id": 1,
+		"pid": 0,
+		"children": [
+			{
+				"label": "",
+				"id": 2,
+				"pid": 1,
+				"children": null
+			},
+			{
+				"label": "xx",
+				"id": 3,
+				"pid": 1,
+				"children": null
+			}
+		]
+	}
+}
+```
