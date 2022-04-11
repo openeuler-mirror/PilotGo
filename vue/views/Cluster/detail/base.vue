@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
-  LastEditTime: 2022-04-11 16:56:58
+  LastEditTime: 2022-04-11 17:43:11
  -->
 <template>
  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -39,22 +39,25 @@ export default {
     return {
       params: {},
       diskData: [
-        {
-          id: 1,
-          name: '磁盘1',
-          progress: '60%',
-        },
-        {
-          id: 2,
-          name: '磁盘2',
-          progress: '40%',
-        },
-        {
-          id: 3,
-          name: '磁盘3',
-          progress: '80%',
-        }
-      ],
+      {
+        "device": "/dev/dm-0",
+        "fileSystem": "/dev/dm-0(挂载点：/)",
+        "fstype": "xfs",
+        "path": "/",
+        "total": "64G",
+        "used": "45G",
+        "usedPercent": "71%"
+      },
+      {
+        "device": "/dev/sda1",
+        "fileSystem": "/dev/sda1(挂载点：/boot)",
+        "fstype": "xfs",
+        "path": "/boot",
+        "total": "0G",
+        "used": "0G",
+        "usedPercent": "20%"
+      }
+    ],
       basic: {
         IP: '127.0.0.1',
         dept: '麒麟',
