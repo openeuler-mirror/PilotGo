@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-03-25 10:49:48
+ * @LastEditTime: 2022-04-11 17:11:42
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
@@ -126,6 +126,15 @@ export function getDeviceInfo(data) {
   })
 }
 
+// 获取机器基本信息
+export function getBasicInfo(data) {
+  return request({
+    url: 'api/os_basic',
+    method: 'get',
+    params: data
+  })
+}
+
 // 获取OS
 export function getOS(data) {
   return request({
@@ -184,8 +193,8 @@ export function getserviceList(data) {
 export function serviceStart(data) {
   return request({
     url: 'agent/service_start',
-    method: 'get',
-    params: data
+    method: 'post',
+    data
   })
 }
 
@@ -193,8 +202,17 @@ export function serviceStart(data) {
 export function serviceStop(data) {
   return request({
     url: 'agent/service_stop',
-    method: 'get',
-    params: data
+    method: 'post',
+    data
+  })
+}
+
+// 重启一项服务
+export function serviceRestart(data) {
+  return request({
+    url: 'agent/service_restart',
+    method: 'post',
+    data
   })
 }
 
@@ -220,6 +238,42 @@ export function changeSyskernel(data) {
 export function getDisk(data) {
   return request({
     url: 'api/disk_use',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取网络信息io
+export function getNetwork(data) {
+  return request({
+    url: 'api/net_io',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取网络信息nic
+export function getNetNic(data) {
+  return request({
+    url: 'api/net_nic',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取网络信息tcp
+export function getNetTcp(data) {
+  return request({
+    url: 'api/net_tcp',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取网络信息udp
+export function getNetUdp(data) {
+  return request({
+    url: 'api/net_udp',
     method: 'get',
     params: data
   })

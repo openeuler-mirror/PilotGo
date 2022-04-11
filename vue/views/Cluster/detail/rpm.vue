@@ -8,8 +8,8 @@
   EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
-  Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-04-11 13:08:16
+  Date: 2022-04-11 13:09:12
+  LastEditTime: 2022-04-11 16:22:14
  -->
 <template>
  <div>
@@ -18,7 +18,7 @@
 </template>
 <script>
 export default {
-  name: "UserInfo",
+  name: "RpmInfo",
   data() {
     return {
     }

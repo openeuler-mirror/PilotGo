@@ -9,11 +9,11 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-03-25 11:43:11
+  LastEditTime: 2022-04-08 16:43:02
   Description: provide agent log manager of pilotgo
  -->
 <template>
- <div style="width: 100%">
+ <div style="width: 100%;height:100%">
    <ky-table
         class="cluster-table"
         ref="table"
@@ -24,6 +24,7 @@
           <div>日志列表</div>
         </template>
         <template v-slot:table_action>
+          <el-button @click="handleConsole">console</el-button>
           <el-popconfirm 
           title="确定删除此日志？"
           cancel-button-type="default"
@@ -46,8 +47,7 @@
                 text-inside
                 :stroke-width="strokeW"
                 :format="format"
-                :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : 
-                    scope.row.status.split(',')[2] * 100 " 
+                :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 " 
                 :status="scope.row.status.split(',')[2] === '0.00' ? 'exception' : 
                     scope.row.status.split(',')[2] === '1.00' ? 'success' : 'warning' ">
               </el-progress>
@@ -78,11 +78,13 @@
         width="560px"
       >
         <log-detail v-if="type === 'detail'" :log="log" @click="handleClose"></log-detail>
+        <ky-terminal v-if="type === 'console'" @click="handleClose"></ky-terminal>
       </el-dialog>
  </div>
 </template>
 <script>
 import kyTable from "@/components/KyTable";
+import KyTerminal from "@/components/KyTerminal";
 import LogDetail from "./form/detail.vue"
 import { getLogs, deleteLog } from "@/request/log";
 export default {
@@ -90,6 +92,7 @@ export default {
   components: {
     kyTable,
     LogDetail,
+    KyTerminal,
   },
   data() {
     return {
@@ -125,6 +128,11 @@ export default {
       this.title = "日志详情";
       this.type = "detail";
       this.log = row;
+    },
+    handleConsole() {
+      this.display = true;
+      this.title = "控制台";
+      this.type = "console";
     },
     handleDelete() {
       deleteLog({ids: this.$refs.table.selectRow.ids}).then(res => {
@@ -162,9 +170,5 @@ export default {
 }
 </script>
 <style scoped>
-.cluster-table {
-  width: 100%;
-  height: 96%;
-  overflow: auto;
-}
+
 </style>

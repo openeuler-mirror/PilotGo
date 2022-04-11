@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 18:26:25
-  LastEditTime: 2022-03-24 17:33:56
+  LastEditTime: 2022-04-08 11:30:49
  -->
 <template>
   <div id="dept" style="width:100%;height:100%">
@@ -43,7 +43,7 @@ export default {
         },
         legend: {
           show: true,
-          data: ["在线","离线","空闲"]
+          data: ["在线","离线","未分配"]
         },
         xAxis: {
           type: 'category',
@@ -85,7 +85,7 @@ export default {
             },
           },
           {
-            name: '空闲',
+            name: '未分配',
             data: this.free,
             type: 'bar',
             itemStyle: {
