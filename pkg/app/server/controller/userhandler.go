@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-04-06 18:58:09
+ * LastEditTime: 2022-04-11 16:15:51
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -220,15 +220,54 @@ func UserAll(c *gin.Context) {
 // 高级搜索
 func UserSearch(c *gin.Context) {
 	var user model.User
-	var users []model.User
 	c.Bind(&user)
 	var email = user.Email
 
+	query := &model.PaginationQ{}
+	err := c.ShouldBindQuery(query)
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		return
+	}
+
+	var users []model.User
 	mysqlmanager.DB.Where("email LIKE ?", "%"+email+"%").Find(&users)
-	response.Response(c, http.StatusOK,
-		200,
-		gin.H{"data": users},
-		"查询成功!")
+
+	datas := make([]map[string]interface{}, 0)
+	for _, user := range users {
+		data := make(map[string]interface{})
+		data["id"] = user.ID
+		data["departPId"] = user.DepartFirst
+		data["departid"] = user.DepartSecond
+		data["departName"] = user.DepartName
+		data["username"] = user.Username
+		data["phone"] = user.Phone
+		data["email"] = user.Email
+		data["userType"] = user.UserType
+		roleids := user.RoleID
+		roleId := strings.Split(roleids, ",")
+		var roles []string
+		for _, id := range roleId {
+			userRole := model.UserRole{}
+			i, err := strconv.Atoi(id)
+			if err != nil {
+				response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+				return
+			}
+			mysqlmanager.DB.Where("id = ?", i).Find(&userRole)
+			role := userRole.Role
+			roles = append(roles, role)
+		}
+		data["role"] = roles
+		datas = append(datas, data)
+	}
+	common.Reverse(&datas)
+	total, data, err := model.SearchAll(query, datas)
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		return
+	}
+	model.JsonPagination(c, data, total, query)
 }
 
 // 重置密码
@@ -250,7 +289,7 @@ func ResetPassword(c *gin.Context) {
 
 // 删除用户
 type Userdel struct {
-	Emails []string `gorm:"type:varchar(30);not null" json:"email,omitempty" form:"email"`
+	Emails []string `json:"email"`
 }
 
 func DeleteUser(c *gin.Context) {
@@ -306,7 +345,7 @@ func UpdateUser(c *gin.Context) {
 			"用户信息修改成功")
 		return
 	}
-	if user.DepartName != departName && user.Phone != phone {
+	if user.DepartName == departName && user.Phone != phone {
 		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
 		response.Response(c, http.StatusOK,
 			200,

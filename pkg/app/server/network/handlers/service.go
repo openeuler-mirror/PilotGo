@@ -9,12 +9,17 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-16 09:28:46
- * LastEditTime: 2022-03-25 01:59:30
+ * LastEditTime: 2022-04-11 17:07:55
  * Description: provide agent service manager functions.
  ******************************************************************************/
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
@@ -56,30 +61,51 @@ func ServiceStatusHandler(c *gin.Context) {
 	response.Success(c, gin.H{"service_status": service_status}, "Success")
 }
 
-func ServiceStartHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-	service := c.Query("service")
-	username := c.Query("userName")
+type AgentService struct {
+	UUID     string `json:"uuid"`
+	Service  string `json:"service"`
+	UserName string `json:"userName"`
+}
 
+func ServiceStartHandler(c *gin.Context) {
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var AS AgentService
+	bodys := string(body)
+	err = json.Unmarshal([]byte(bodys), &AS)
+	fmt.Println(bodys)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
 	var logParent model.AgentLogParent
 	var user model.User
 	var log model.AgentLog
 	var machineNode model.MachineNode
 
 	logParent.Type = "运行服务"
-	logParent.UserName = username
-	mysqlmanager.DB.Where("email = ?", username).Find(&user)
+	logParent.UserName = AS.UserName
+	mysqlmanager.DB.Where("email = ?", AS.UserName).Find(&user)
 	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+	mysqlmanager.DB.Where("machine_uuid=?", AS.UUID).Find(&machineNode)
 
 	log.IP = machineNode.IP
-	log.OperationObject = service
+	log.OperationObject = AS.Service
 	log.Action = model.ServiceStart
 	log.LogParentID = logParent.ID
 
-	agent := agentmanager.GetAgent(uuid)
+	agent := agentmanager.GetAgent(AS.UUID)
 	if agent == nil {
 		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
 
@@ -91,7 +117,7 @@ func ServiceStartHandler(c *gin.Context) {
 		return
 	}
 
-	service_start, Err, err := agent.ServiceStart(service)
+	service_start, Err, err := agent.ServiceStart(AS.Service)
 	if len(Err) != 0 || err != nil {
 		response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
 
@@ -110,9 +136,24 @@ func ServiceStartHandler(c *gin.Context) {
 	mysqlmanager.DB.Save(&logParent)
 }
 func ServiceStopHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-	service := c.Query("service")
-	username := c.Query("userName")
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var AS AgentService
+	bodys := string(body)
+	err = json.Unmarshal([]byte(bodys), &AS)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
 
 	var logParent model.AgentLogParent
 	var user model.User
@@ -120,19 +161,19 @@ func ServiceStopHandler(c *gin.Context) {
 	var machineNode model.MachineNode
 
 	logParent.Type = "运行服务"
-	logParent.UserName = username
-	mysqlmanager.DB.Where("email = ?", username).Find(&user)
+	logParent.UserName = AS.UserName
+	mysqlmanager.DB.Where("email = ?", AS.UserName).Find(&user)
 	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+	mysqlmanager.DB.Where("machine_uuid=?", AS.UUID).Find(&machineNode)
 
 	log.IP = machineNode.IP
-	log.OperationObject = service
+	log.OperationObject = AS.Service
 	log.Action = model.ServiceStop
 	log.LogParentID = logParent.ID
 
-	agent := agentmanager.GetAgent(uuid)
+	agent := agentmanager.GetAgent(AS.UUID)
 	if agent == nil {
 		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
 
@@ -144,7 +185,7 @@ func ServiceStopHandler(c *gin.Context) {
 		return
 	}
 
-	service_stop, Err, err := agent.ServiceStop(service)
+	service_stop, Err, err := agent.ServiceStop(AS.Service)
 	if len(Err) != 0 || err != nil {
 		response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
 
@@ -163,9 +204,24 @@ func ServiceStopHandler(c *gin.Context) {
 	mysqlmanager.DB.Save(&logParent)
 }
 func ServiceRestartHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-	service := c.Query("service")
-	username := c.Query("userName")
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	var AS AgentService
+	bodys := string(body)
+	err = json.Unmarshal([]byte(bodys), &AS)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
 
 	var logParent model.AgentLogParent
 	var user model.User
@@ -173,19 +229,19 @@ func ServiceRestartHandler(c *gin.Context) {
 	var machineNode model.MachineNode
 
 	logParent.Type = "运行服务"
-	logParent.UserName = username
-	mysqlmanager.DB.Where("email = ?", username).Find(&user)
+	logParent.UserName = AS.UserName
+	mysqlmanager.DB.Where("email = ?", AS.UserName).Find(&user)
 	logParent.DepartName = user.DepartName
 	mysqlmanager.DB.Save(&logParent)
 
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
+	mysqlmanager.DB.Where("machine_uuid=?", AS.UUID).Find(&machineNode)
 
 	log.IP = machineNode.IP
-	log.OperationObject = service
+	log.OperationObject = AS.Service
 	log.Action = model.ServiceRestart
 	log.LogParentID = logParent.ID
 
-	agent := agentmanager.GetAgent(uuid)
+	agent := agentmanager.GetAgent(AS.UUID)
 	if agent == nil {
 		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
 
@@ -197,7 +253,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		return
 	}
 
-	service_restart, Err, err := agent.ServiceRestart(service)
+	service_restart, Err, err := agent.ServiceRestart(AS.Service)
 	if len(Err) != 0 || err != nil {
 		response.Success(c, gin.H{"code": 400, "error": Err}, "重启服务失败!")
 		log.StatusCode = 400
