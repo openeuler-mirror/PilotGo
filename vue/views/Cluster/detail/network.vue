@@ -8,8 +8,8 @@
   EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
-  Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-04-11 13:08:16
+  Date: 2022-04-11 13:07:46
+  LastEditTime: 2022-04-11 16:39:14
  -->
 <template>
  <div>
@@ -17,11 +17,27 @@
  </div>
 </template>
 <script>
+import { getNetwork, getNetNic, getNetTcp, getNetUdp } from '@/request/cluster';
 export default {
-  name: "UserInfo",
+  name: "NetworkInfo",
   data() {
     return {
+      netData: [],
     }
+  },
+  mounted() {
+    getNetwork({uuid:this.$route.params.detail}).then(res => {
+      this.netData = res.data.data.net_io;
+    })
+    getNetNic({uuid:this.$route.params.detail}).then(res =>{
+      
+    })
+    getNetTcp({uuid:this.$route.params.detail}).then(res =>{
+      
+    })
+    getNetUdp({uuid:this.$route.params.detail}).then(res =>{
+      
+    })
   }
 }
 </script>

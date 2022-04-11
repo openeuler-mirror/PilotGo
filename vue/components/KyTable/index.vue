@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-04-07 11:13:23
+  LastEditTime: 2022-04-08 17:33:00
   Description: 'Components Table'
  -->
 <template>
@@ -204,10 +204,11 @@ export default {
   height: 96%;
   .header {
     width: 100%;
-    padding: 5px 0;
+    height: 8%;
     border-radius: 6px 6px 0 0;
     background: linear-gradient(to right,rgb(11, 35, 117) 0%, rgb(96, 122, 207) 100%,);
     .header_content {
+      height: 100%;
       margin: 0 10px;
       display: flex;
       justify-content: space-between;
@@ -221,12 +222,13 @@ export default {
     }
   }
   .content {
-    height: 92%;
+    height: 89%;
+    overflow-y: auto;
   }
   .el-table {
     border: 1px solid #ebeef5;
     .line-color {
-      background-color: #f2f7ff;
+      background-color: #fff;
     }
     th, td {
       text-align: center;

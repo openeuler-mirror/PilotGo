@@ -296,7 +296,9 @@ a {
     }
   }
 }
-
+.el-checkbox__inner {
+  border: 1px solid rgba(82, 108, 193,.6);
+}
 .el-table__expand-icon {
   -webkit-transform: rotate(0deg);
   transform: rotate(0deg);
@@ -305,6 +307,11 @@ a {
   .cell {
     height: 25px;
   }
+}
+.el-table td.el-table__cell, 
+.el-table th.el-table__cell.is-leaf {
+  // border: 1px solid red;
+  border-bottom: 1px solid rgb(236, 239, 248);
 }
 .el-table__expand-icon .el-icon-arrow-right:before {
   content: "\e6d9";
@@ -393,6 +400,13 @@ a {
   font-size: 16px;
 }
 
+.el-breadcrumb__inner a, .el-breadcrumb__inner.is-link {
+  color:rgb(11, 35, 117)
+}
+.el-breadcrumb__inner a:hover, .el-breadcrumb__inner.is-link:hover {
+  color:rgb(241, 139, 14);
+}
+
 .flex {
   display: flex;
   flex-flow: wrap;
@@ -426,4 +440,58 @@ a {
       font-weight: 100;
     }
   }
+}
+
+.el-tabs__nav {
+  width: 100%;
+}
+.el-tabs--border-card>.el-tabs__header {
+  background-color: rgba(11, 35, 117,.9);
+  border-bottom: 1px solid #FFF;
+  border-radius: 10px;
+}
+.el-tabs--border-card>.el-tabs__header .el-tabs__item {
+  width: 16.7%;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+}
+.el-tabs--border-card>.el-tabs__header .el-tabs__item:not(.is-disabled):hover {
+  color: #FFF;
+}
+.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active:hover {
+  color: rgba(11, 35, 117,.9);
+}
+.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active {
+  color: rgba(11, 35, 117,.9);
+  border-radius: 10px 10px 0 0;
+  width: 17.1%;
+  background-color: #FFF;
+  border-right-color: #FFF; 
+  border-left-color: #FFF;
+}
+.el-tabs--border-card>.el-tabs__content {
+  height: 94%;
+  width: 100%;
+  overflow-y: auto;
+}
+
+
+.el-descriptions .is-bordered {
+  table-layout: fixed;
+}
+.el-descriptions__body {
+  color: #000;
+  text-align: center;
+}
+.el-descriptions .is-bordered .el-descriptions-item__cell {
+  text-align: center;
+  border: 2px solid #EBEEF5;
+}
+.el-descriptions-item__label.is-bordered-label {
+  color: rgba(0, 0, 0, .7);
+  width: 14%;
+  white-space: normal;
+  word-break: break-word;
 }

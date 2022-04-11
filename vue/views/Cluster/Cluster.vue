@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-07 14:50:40
+  LastEditTime: 2022-04-11 17:29:41
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -34,16 +34,15 @@
           <auth-button name="create_batch"  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </auth-button>
           <el-dropdown trigger="click">
             <el-button class="kylin-item-button">
-              批量配置<i class="el-icon-arrow-down el-icon--right"></i>
+              批量配置<em class="el-icon-arrow-down el-icon--right"></em>
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <auth-drop @click.native="handleChange" name="rpm_install"> 变更部门 </auth-drop>
               <auth-drop @click.native="handleIssue" name="rpm_install"> rpm下发 </auth-drop>
               <auth-drop @click.native="handleUnInstall" name="rpm_uninstall"> rpm卸载 </auth-drop>
-              <!-- <auth-drop @click.native="handleFireWall" name="rpm_uninstall"> 防火墙配置 </auth-drop> -->
             </el-dropdown-menu>
           </el-dropdown>
-          <el-popconfirm title="确定删除所选项目吗？" @confirm="handleDelete">
+          <el-popconfirm title="确定删除所选项目吗?" @confirm="handleDelete">
             <auth-button name="cluster_delete"  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
           </el-popconfirm>
         </template>
@@ -55,45 +54,25 @@
               </router-link>
             </template>
           </el-table-column>
-          <el-table-column prop="departname" label="部门"> 
-            <!-- <template slot-scope="scope">
-              {{scope.row.departname}}
-              <span v-if="showChange" title="变更部门" class="el-icon-edit-outline deptchange" @click="handleChange(scope.row)"></span>
-            </template> -->
+          <el-table-column prop="departname" label="部门">
           </el-table-column>
           <el-table-column prop="cpu" label="cpu" width="220"> 
           </el-table-column>
           <el-table-column label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.state == 1">在线</span>
-              <span v-if="scope.row.state == 2">离线</span>
-              <span v-if="scope.row.state == 3">未分配</span>
+              <span class="statusSpan" style="background: rgb(16, 197, 91);" v-if="scope.row.state == 1">在线</span>
+              <span class="statusSpan" style="background: gray;" v-if="scope.row.state == 2">离线</span>
+              <span class="statusSpan" style="background: rgb(73, 99, 183);" v-if="scope.row.state == 3">未分配</span>
             </template>
           </el-table-column>
            <el-table-column prop="systeminfo" label="系统信息"> 
           </el-table-column>
-          <!-- <el-table-column label="防火墙配置">
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                @click="handleFireWall(scope.row.ip)">
-                <em class="el-icon-setting"></em>
-              </el-button>
-            </template>
-          </el-table-column> -->
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="mini" type="primary" plain 
                 @click="handleProme(scope.row.ip)">               
                 监控
               </el-button>
-              <!-- <el-button size="mini" type="primary" plain 
-                @click="handleFireWall(scope.row.ip)">
-                防火墙
-              </el-button> -->
-              <!-- <el-button size="mini" type="primary" plain 
-                @click="handleChange(scope.row)"> 
-                变更部门 </el-button> -->
             </template>
           </el-table-column>
         </template>
@@ -267,9 +246,8 @@ export default {
 
 <style scoped lang="scss">
 .cluster {
-  height: 94%;
+  height: 95%;
   display: flex;
-  margin-top: 10px;
   .dept {
     height: 100%;
     width: 20%;
@@ -279,6 +257,12 @@ export default {
     width: 78%;
     height: 100%;
     float: right;
+    .statusSpan {
+      display: inline-block;
+      width: 70%; 
+      color: #fff;
+      border-radius:10px;
+    }
     .deptchange {
       cursor: pointer;
     }

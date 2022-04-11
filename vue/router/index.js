@@ -52,20 +52,20 @@ export const routes = [
                 { name: '防火墙配置'}], 
             }
           },
-          {
-            path: '/prometheus',
-            name: 'Prometheus',
-            component: _import('Prometheus/index'),
-            meta: {
-              header_title: "性能监控", 
-              panel: "cluster", 
-              breadcrumb: [
-                  { name: '机器管理', path: '/cluster' },
-                  { name: '性能监控'}
-              ],
-              icon_class: ''
-            }
-          },
+          // {
+          //   path: '/prometheus',
+          //   name: 'Prometheus',
+          //   component: _import('Prometheus/index'),
+          //   meta: {
+          //     header_title: "性能监控", 
+          //     panel: "cluster", 
+          //     breadcrumb: [
+          //         { name: '机器管理', path: '/cluster' },
+          //         { name: '性能监控'}
+          //     ],
+          //     icon_class: ''
+          //   }
+          // },
           {
             path: '/cluster:detail',
             name: 'MacDetail',
@@ -81,6 +81,12 @@ export const routes = [
             }
           },
         ]
+      },
+      {
+        path: '/prometheus',
+        name: 'Prometheus',
+        component: _import('Prometheus/index'),
+        meta: { title: 'prometheus', header_title: "性能监控", panel: "prometheus", icon_class: 'el-icon-s-marketing' }
       },
       {
         path: '/batch',
@@ -103,19 +109,6 @@ export const routes = [
         },
         ]
       }, 
-          
-      /*{
-        path: '/plug_in',
-        name: 'PlugIn',
-        component:  _import('Plug-in/Plug-in'),
-        meta: { title: 'plug_in', header_title: "插件管理", panel: "plug_in", icon_class: 'el-icon-document' }
-      }, 
-      {
-        path: '/cockpit',
-        name: 'Cockpit',
-        component: Cockpit
-        //icon_class: 'el-icon-setting'
-      },*/
       {
         path: '/usermanager',
         name: 'UserManager',

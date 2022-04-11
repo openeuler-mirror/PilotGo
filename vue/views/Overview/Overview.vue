@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 11:17:06
-  LastEditTime: 2022-03-24 17:58:49
+  LastEditTime: 2022-04-08 11:30:01
  -->
 <template>
  <div class="content flex">
@@ -138,7 +138,7 @@ export default {
       return `离线:${percentage}`;
     },
     macFree(percentage) {
-      return `空闲:${percentage}`;
+      return `未分配:${percentage}`;
     },
   },
   filters: {

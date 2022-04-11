@@ -17,6 +17,7 @@
     "element-ui": "^2.15.6",
     "file-saver": "^2.0.5",
     "js-cookie": "^3.0.1",
+    "lodash": "^4.17.21",
     "mockjs": "^1.1.0",
     "requestjs": "^1.0.3",
     "vue": "^2.5.2",
@@ -24,7 +25,9 @@
     "vue-router": "^3.0.1",
     "vuejs": "^3.0.1",
     "vuex": "^3.6.2",
-    "xlsx": "^0.17.5"
+    "xlsx": "^0.17.5",
+    "xterm": "^4.18.0",
+    "xterm-addon-fit": "^0.5.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

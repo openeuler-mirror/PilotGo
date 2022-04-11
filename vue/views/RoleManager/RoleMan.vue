@@ -9,12 +9,11 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-04-06 16:26:39
+  LastEditTime: 2022-04-08 16:40:28
  -->
 <template>
-  <div>
+  <div style="width: 100%; height: 100%" class="panel">
     <ky-table
-      class="panel"
       :getData="getRoles"
       :searchData="searchData"
       ref="table"
@@ -26,24 +25,24 @@
         <el-button  @click="handleCreate"> 添加 </el-button>
       </template>
       <template v-slot:table>
-        <el-table-column prop="id" label="编号">
+        <el-table-column prop="id" label="编号" width="120">
         </el-table-column>
         <el-table-column  prop="role" label="角色名">
         </el-table-column>
-        <el-table-column  prop="username" label="平台自带">
+        <el-table-column  prop="username" label="平台自带"  width="120">
           <template slot-scope="scope">
             {{ [0,1,2].includes(scope.row.type)  ? "是" : "否"}}
           </template>
         </el-table-column>
         <el-table-column  prop="description" label="描述">
         </el-table-column>
-        <el-table-column label="权限">
+        <el-table-column label="权限" width="120">
           <template slot-scope="scope">
             <el-button v-if="[3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</el-button>
             <el-button v-if="![3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleChange(scope.row)">变更</el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="200">
           <template slot-scope="scope">
             <el-button :disabled="[3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</el-button>
             <el-popconfirm 
@@ -165,17 +164,11 @@ export default {
 </script>
 
 <style scoped>
-.search-form{
-  margin-bottom: 12px;
-}
 .el-table .warning-row {
   background: oldlace;
 }
 
 .el-table .success-row {
   background: #f0f9eb;
-}
-.editBtn {
-  padding: 10px;
 }
 </style>

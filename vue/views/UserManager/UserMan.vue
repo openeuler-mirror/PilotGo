@@ -1,10 +1,9 @@
 <template>
-  <div v-loading="loading" style="height:100%">
+  <div v-loading="loading" class="panel" style="height:100%">
     <ky-table
       :getData="getUsers"
       ref="table"
       id="exportTab"
-      class="panel"
     >
       <template v-slot:table_search>
         <el-input placeholder="请输入邮箱名进行搜索..." prefix-icon="el-icon-search"
@@ -132,7 +131,7 @@ export default {
     searchUser() {
       searchUser({'email':this.emailInput}).then((res) => {
         if(res.data.code === 200) {
-          this.$refs.table.handleLoadSearch(res.data.data.data);
+          this.$refs.table.handleLoadSearch(res.data.data);
         }
       })
     },
@@ -209,7 +208,7 @@ export default {
 
 <style scoped>
 .search-form{
-  margin-bottom: 12px;
+  /* margin-bottom: 12px; */
 }
 .el-table .warning-row {
   background: oldlace;
@@ -217,8 +216,5 @@ export default {
 
 .el-table .success-row {
   background: #f0f9eb;
-}
-.editBtn {
-  padding: 10px;
 }
 </style>
