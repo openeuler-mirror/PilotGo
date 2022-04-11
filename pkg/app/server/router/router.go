@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-04-09 17:59:40
+ * LastEditTime: 2022-04-11 17:17:33
  * Description: Interface routing forwarding
  ******************************************************************************/
 package router
@@ -59,6 +59,7 @@ func SetupRouter() *gin.Engine {
 		group.GET("/net_nic", handlers.NetNICConfigHandler)
 		group.GET("/user_info", handlers.CurrentUserInfoHandler)
 		group.GET("/user_all", handlers.AllUserInfoHandler)
+		group.GET("/os_basic", handlers.OsBasic)
 	}
 	cluster := router.Group("/cluster")
 	{
@@ -68,9 +69,9 @@ func SetupRouter() *gin.Engine {
 	agent := router.Group("/agent")
 	{
 		agent.GET("/sysctl_change", handlers.SysctlChangeHandler)
-		agent.GET("/service_stop", handlers.ServiceStopHandler)
-		agent.GET("/service_start", handlers.ServiceStartHandler)
-		agent.GET("/service_restart", handlers.ServiceRestartHandler)
+		agent.POST("/service_stop", handlers.ServiceStopHandler)
+		agent.POST("/service_start", handlers.ServiceStartHandler)
+		agent.POST("/service_restart", handlers.ServiceRestartHandler)
 		agent.POST("/rpm_install", handlers.InstallRpmHandler)
 		agent.POST("/rpm_remove", handlers.RemoveRpmHandler)
 		agent.GET("/disk_path", handlers.DiskCreatPathHandler)
@@ -114,7 +115,7 @@ func SetupRouter() *gin.Engine {
 	batchmanager := router.Group("batchmanager")
 	{
 		batchmanager.POST("/createbatch", controller.CreateBatch)
-		batchmanager.GET("/batchinfo", controller.BatchInform) 
+		batchmanager.GET("/batchinfo", controller.BatchInform)
 		batchmanager.GET("/batchmachineinfo", controller.Batchmachineinfo)
 	}
 	prometheus := router.Group("prometheus")
@@ -153,11 +154,11 @@ func SetupRouter() *gin.Engine {
 	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
-	// router.NoRoute(func(c *gin.Context) {
-	// 	url := c.Request.RequestURI
-	// 	c.Redirect(http.StatusFound, url)
-	// 	router.StaticFile(url, "./dist/index.html")
-	// })
+	router.NoRoute(func(c *gin.Context) {
+		url := c.Request.RequestURI
+		c.Redirect(http.StatusFound, url)
+		router.StaticFile(url, "./dist/index.html")
+	})
 
 	// firewall := router.Group("firewall")
 	// {

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-18 02:33:55
- * LastEditTime: 2022-04-08 12:59:40
+ * LastEditTime: 2022-04-11 16:27:35
  * Description: socket server
  ******************************************************************************/
 package agentmanager
@@ -121,7 +121,7 @@ func AddAgents2DB() {
 			return
 		}
 		agentOS := strings.Split(agent_OS.(string), ";")
-		agent_list.DepartId = 1
+		agent_list.DepartId = 2
 		agent_list.MachineUUID = uuid
 		if dao.IsUUIDExist(uuid) {
 			logger.Warn("机器%s已经存在!", agentOS[0])

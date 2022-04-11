@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2022-03-21 17:02:19
+ * LastEditTime: 2022-04-11 09:31:56
  * Description: 用户数据存储结构体
  ******************************************************************************/
 package model
@@ -30,5 +30,4 @@ type User struct {
 	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
 	UserType     int    `json:"userType,omitempty"`
 	RoleID       string `json:"role,omitempty"`
-	Enable       string `gorm:"size:10;not null" json:"enable,omitempty"`
 }
