@@ -74,8 +74,10 @@
 ### 部门管理 API
 #### 新增部门
 描述：向部门管理树中添加新的部门
-Request Method：POST
-uri：/machinemanager/adddepart
+请求方法：POST
+url：/machinemanager/adddepart
+请求参数：
+类型：json
 字段描述：
 |名称|类型|说明|是否必须|备注|
 |-|-|-|-|-|
@@ -93,10 +95,20 @@ uri：/machinemanager/adddepart
 ```
 #### 部门信息
 描述：获取全部部门信息
-Request Method：GET
-uri：/machinemanager/departinfo
+请求方法：GET
+url：/machinemanager/departinfo
+请求参数：无
+
+
+响应结果：
+类型：json
+字段：
 |名称|类型|说明|是否必须|备注|
 |-|-|-|-|-|
+|label|string|部门名称|y||
+|id|int|部门id|y||
+|pid|int|上级部门id|y||
+|children|[]MachineNode|下一级部门节点|y||
 
 示例：
 ```json
