@@ -247,22 +247,13 @@ type BatchId struct {
 }
 
 func Batchmachineinfo(c *gin.Context) {
-	j, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
+	batchid := &BatchId{}
+	if c.ShouldBind(batchid) != nil {
+
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
-			err.Error())
-		return
-	}
-	var batchid BatchId
-	err = json.Unmarshal(j, &batchid)
-	logger.Info("%+v", batchid)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
+			"parameter error")
 		return
 	}
 
