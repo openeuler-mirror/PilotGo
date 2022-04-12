@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-04-07 13:20:45
+  LastEditTime: 2022-04-12 15:54:47
  -->
 <template>
   <div class="overview">
@@ -74,7 +74,7 @@ export default {
   },
   data() {
     return {
-      macIp: '',
+      macIp: 'localhost:9090',
       prome: '',
       promes: [
         {
@@ -110,7 +110,7 @@ export default {
     };
   },
   mounted() {
-    this.macIp = this.$store.getters.selectIp.split(':')[0];
+    this.macIp = this.$store.getters.selectIp && this.$store.getters.selectIp.split(':')[0] || 'localhost:9090';
     this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
     this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
     this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
@@ -189,9 +189,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cluster {
-  width: 100%;
-
 .overview {
   width: 100%;
   height: 100%;
@@ -228,6 +225,5 @@ export default {
       }
     }
   }
-}
 }
 </style>

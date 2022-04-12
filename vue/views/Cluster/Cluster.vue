@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-11 17:29:41
+  LastEditTime: 2022-04-12 16:26:24
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -18,12 +18,16 @@
     <div style="width:100%;height:100%" v-if="!$route.meta.breadcrumb">
     <div class="dept panel">
       <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
+      <span class="sourceBtn" @click="getSourcePool">未分配资源池</span>
     </div>
     <div class="info panel">
       <ky-table
         class="cluster-table"
         ref="table"
+        :isSource="isSource"
+        :showSelect="showSelect"
         :getData="getClusters"
+        :getSourceData="getSourceMac"
         :searchData="searchData"
         :treeNodes="checkedNode"
       >
@@ -103,7 +107,7 @@ import UpdateForm from "./form/updateForm";
 import BatchForm from "./form/batchForm";
 import ChangeForm from "./form/changeForm";
 import RpmIssue from "./form/rpmIssue";
-import { getClusters, deleteIp, getChildNode } from "@/request/cluster";
+import { getClusters, deleteIp, getChildNode, getSourceMac } from "@/request/cluster";
 export default {
   name: "Cluster",
   components: {
@@ -126,7 +130,7 @@ export default {
       showChange: false,
       isBatch: false,
       checkedNode: [],
-      departName: '',
+      departName: '机器列表',
       departInfo: {},
       machines: [],
       batchMAcs: [],
@@ -134,24 +138,17 @@ export default {
       disabled: false,
       searchData: {
         DepartId: 1,
-        showSelect: true,
       },
+      isSource: false,
+      showSelect: true,
     };
   },
   mounted() {
     this.showChange = true;//['0','1'].includes(this.$store.getters.userType);
-    getClusters({DepartId: 1}).then(res => {
-      if(res.data.code === 200 && res.data.total !== 0) {
-        let name = res.data.data[0].departname;
-        this.departName = name === '' ? '机器列表' : name + '机器列表';
-      } else {
-        this.departName = "机器列表"
-      }
-    })
-    this.showSelect = ['0','1'].includes(this.$store.getters.userType) ? true : false;
   },
   methods: {
     getClusters,
+    getSourceMac,
     getChildNode,
     handleClose(params) {
       this.display = false;
@@ -210,10 +207,11 @@ export default {
     },
     handleSelectDept(data) {
       if(data) {
+        this.isSource = false;
         this.departName = data.label + '机器列表';
         this.searchData.DepartId = data.id;
         this.departInfo = data;
-        this.$refs.table.handleSearch();
+        this.$refs.table.handleSearch(this.searchData);
       }
     },
     handleNodeCheck(data) {
@@ -221,6 +219,10 @@ export default {
       if(data) {
         this.checkedNode = data.checkedKeys;
       }
+    },
+    getSourcePool() {
+      this.isSource = true;
+      this.departName = "未分配资源池";
     },
     handleFireWall(ip) {
       this.$router.push({
@@ -239,8 +241,11 @@ export default {
   watch: {
     machines: function(newValue,oldValue) {
       this.batchMAcs = newValue.concat(oldValue)
+    },
+    isSource: function(newV,oldV) {
+      console.log(newV,oldV)
     }
-  }
+  },
 };
 </script>
 
@@ -252,6 +257,17 @@ export default {
     height: 100%;
     width: 20%;
     display: inline-block;
+    .sourceBtn {
+      display: block;
+      background: rgb(45, 69, 153);
+      color: #fff;
+      width: 80%;
+      padding: 4px;
+      border-radius: 6px;
+      margin: 10% auto 0;
+      text-align: center;
+      cursor: pointer;
+    }
   }
   .info {
     width: 78%;

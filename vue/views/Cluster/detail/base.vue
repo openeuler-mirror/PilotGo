@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
-  LastEditTime: 2022-04-11 17:43:11
+  LastEditTime: 2022-04-12 13:36:07
  -->
 <template>
  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -23,7 +23,7 @@
     <el-descriptions-item label="内存">{{basic.macMEM}}</el-descriptions-item>
     <el-descriptions-item label="内核版本">{{basic.osVersion}}</el-descriptions-item>
     <el-descriptions-item :label="item.device" :span="2" v-for="item in diskData" :key="item.$index">
-      <span class="diskMount">{{"挂载点: "+item.path+"("+item.total+")"}}</span>
+      <span class="diskMount">{{"挂载点："+item.path+"("+item.total+")"}}</span>
       <p class="progress">
         <span :style="{width: item.usedPercent}">{{item.usedPercent}}</span>
       </p>
@@ -53,7 +53,7 @@ export default {
         "fileSystem": "/dev/sda1(挂载点：/boot)",
         "fstype": "xfs",
         "path": "/boot",
-        "total": "0G",
+        "total": "40G",
         "used": "0G",
         "usedPercent": "20%"
       }
@@ -74,28 +74,30 @@ export default {
   },
   mounted() {
     let obj = this.params = {uuid:this.$route.params.detail};
-    getBasicInfo(obj).then(res => {
-      this.basic.IP = res.data.data.IP;
-      this.basic.dept = res.data.data.depart;
-      this.basic.status = res.data.data.state === 1? '在线': res.data.data.state === 2? '离线':'未分配';
-    })
-     getOS(obj).then((res) => {
-      let result = res.data.data.os_info;
-      this.basic.macPlatform = result.Platform;
-      this.basic.mackernel = result.KernelArch;
-    })
-    
-    getCpu(obj).then((res) => {
-      this.basic.macCPU = res.data.data.CPU_info.CpuNum + '核 ' + res.data.data.CPU_info.ModelName;
-    })
-    getMemory(obj).then((res) => {
-      let memTotal = 0;
-      memTotal = res.data.data.memory_info.MemTotal / 1024 / 1024;
-      this.basic.macMEM = memTotal.toFixed(2) + 'G';
-    })
-    getDisk(obj).then((res) => {
-      this.diskData = res.data.data.disk_use;
-    })
+    if(this.$route.params.detail != undefined) {
+      getBasicInfo(obj).then(res => {
+        this.basic.IP = res.data.data.IP;
+        this.basic.dept = res.data.data.depart;
+        this.basic.status = res.data.data.state === 1? '在线': res.data.data.state === 2? '离线':'未分配';
+      })
+      getOS(obj).then((res) => {
+        let result = res.data.data.os_info;
+        this.basic.macPlatform = result.Platform + ' ' + result.PlatformVersion;
+        this.basic.mackernel = result.KernelArch;
+      })
+      
+      getCpu(obj).then((res) => {
+        this.basic.macCPU = res.data.data.CPU_info.CpuNum + '核 ' + res.data.data.CPU_info.ModelName;
+      })
+      getMemory(obj).then((res) => {
+        let memTotal = 0;
+        memTotal = res.data.data.memory_info.MemTotal / 1024 / 1024;
+        this.basic.macMEM = memTotal.toFixed(2) + 'G';
+      })
+      getDisk(obj).then((res) => {
+        this.diskData = res.data.data.disk_use;
+      })
+    }
   }
 }
 </script>
@@ -103,8 +105,10 @@ export default {
 .content {
   .diskMount {
     display: inline-block;
-    width:16%;
-    text-align: right;
+    font-size: 12px;
+    word-break: break-all;
+    width:22%;
+    text-align: center;
   }
   .progress {
     display: inline-block;

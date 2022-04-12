@@ -1,6 +1,6 @@
 <template>
   <div class="firewall_content">
-    <div class="firewall-conditions panel">
+    <div class="firewall-conditions">
       <div>
         <el-form :model="firewallForm" ref="firewallForm" :rules="rules">
               <el-form-item prop="ip" label="主机IP:" class="p_text">
@@ -319,9 +319,11 @@ export default {
   justify-content: space-around;
   .firewall-conditions {
     width: 45%;
+    height: 100%;
   }
   .firewall-config {
     width: 50%;
+    height: 100%;
   }
 }
 

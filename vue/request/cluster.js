@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-04-11 17:11:42
+ * @LastEditTime: 2022-04-12 16:58:30
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
@@ -42,16 +42,16 @@ export function addDepart(data) {
 export function updateDepart(data) {
   return request({
     url: 'machinemanager/updatedepart',
-    method: 'get',
-    params: data
+    method: 'post',
+    data
   })
 }
 // 删除节点
 export function deleteDepart(data) {
   return request({
-    url: 'machinemanager/t',
-    method: 'get',
-    params: data
+    url: 'machinemanager/deletedepartdata',
+    method: 'post',
+    data
   })
 }
 // 拖拽节点
@@ -64,6 +64,14 @@ export function getClusters(data) {
       params: data
     })
   }
+
+// 获取资源池列表接口
+export function getSourceMac() {
+  return request({
+    url: 'machinemanager/sourcepool',
+    method: 'get',
+  })
+}
 
   // 更换机器所属部门
 export function changeMacDept(data) {
@@ -95,6 +103,24 @@ export function deleteIp(data) {
   return request({
     url: '/machinemanager/deletemachinedata',
     method: 'post',
+    params: data
+  })
+}
+
+// rpm列表
+export function rpmAll(data) {
+  return request({
+    url: '/api/rpm_all',
+    method: 'get',
+    params: data
+  })
+}
+
+// rpm详情
+export function getDetail(data) {
+  return request({
+    url: '/api/rpm_info',
+    method: 'get',
     params: data
   })
 }
