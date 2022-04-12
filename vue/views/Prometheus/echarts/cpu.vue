@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-04-06 18:43:43
+  LastEditTime: 2022-04-12 11:55:46
  -->
 <template>
   <div class="panel">
@@ -30,7 +30,7 @@ export default {
     }
   },
   mounted() {
-    this.macIp = this.$store.getters.selectIp;
+    this.macIp = this.$store.getters.selectIp || 'localhost:9090';
     this.cpuChart = this.$echarts.init(document.getElementById('cpu'))
     this.getCpu({starttime: parseInt(this.now - 60*60*6) + '', endtime: parseInt(this.now - 0) + ''});
   },

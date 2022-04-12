@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-04-08 17:33:00
+  LastEditTime: 2022-04-12 14:09:39
   Description: 'Components Table'
  -->
 <template>
@@ -40,7 +40,7 @@
           type="selection"
           width="55"
           align="center"
-          v-if="searchData.showSelect"
+          v-if="showSelect"
           :selectable="checkSelectTable"
         >
         </el-table-column>
@@ -68,14 +68,35 @@ export default {
     rowClassName: {
       type: Function,
     },
+    isLoadTable: {
+      type: Boolean,
+      default: function() {
+        return true;
+      }
+    },
+    isSource: {
+      type: Boolean,
+      default: function() {
+        return false;
+      }
+    },
     getData: {
       type: Function,
+    },
+    getSourceData: {
+      type: Function,
+    },
+    showSelect: {
+      type: Boolean,
+      default: function() {
+        return true;
+      }
     },
     searchData: {
       type: Object,
       default: function() {
         return {
-          showSelect: true,
+          
         };
       }
     },
@@ -105,19 +126,35 @@ export default {
     };
   },
   activated() {
+    this.isSource = false;
+    this.isLoadTable = true;
     this.refresh();
   },
   mounted() {
-    if(this.searchData.load == 'false'){
+    if(!this.isLoadTable){
       return;
     } else {
-      this.loadData({ ...this.objSearch, ...this.$route.query });
+      this.loadData({ ...this.objSearch });
+    }
+  },
+  watch: {
+    isSource: function(newV,oldV){
+      this.$nextTick(() => {
+        if(newV) {
+          this.getSData({...this.objSearch, page: 1})
+        }
+      })
+    },
+    isLoadTable: function(newV) {
+      if(newV) {
+        this.loadData({...this.objSearch, page: 1})
+      }
     }
   },
   methods: {
-    loadData(data) {
-      // this.loading = true;
-      this.getData({ ...data, ...this.searchData }).then((response) => {
+    loadData(pageParams) {
+      this.tableData = [];
+      this.getData({...pageParams,...this.searchData}).then((response) => {
         const res = response.data;
         if (res.code === 200) {
           this.total = res.total;
@@ -131,6 +168,31 @@ export default {
           });
         }
       });
+
+    },
+    getSData(data) {
+      this.tableData = [];
+      this.getSourceData(data).then((response) => {
+        const res = response.data;
+        if (res.code === 200) {
+          this.total = res.total;
+          this.objSearch.page = res.page;
+          this.loading = false;
+          this.tableData = res.data;
+        } else {
+          this.$message({
+            type: "error",
+            message: "数据格式错误",
+          });
+        }
+      });
+    },
+    handleSearch() {
+      this.checked = false;
+      this.$refs.multipleTable.clearSelection();
+      this.selectRow.ids = [];
+      this.selectRow.rows = [];
+      this.loadData({...this.objSearch, page: 1});
     },
     handleLoadSearch(data) {
       // 渲染高级搜索后的数据
@@ -167,13 +229,6 @@ export default {
           this.selectRow.rows.push(item);
         });
       }
-    },
-    handleSearch() {
-      this.checked = false;
-      this.$refs.multipleTable.clearSelection();
-      this.selectRow.ids = [];
-      this.selectRow.rows = [];
-      this.loadData({...this.objSearch, page: 1});
     },
     refresh() {
       this.checked = false;

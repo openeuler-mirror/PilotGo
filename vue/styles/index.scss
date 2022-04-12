@@ -299,6 +299,9 @@ a {
 .el-checkbox__inner {
   border: 1px solid rgba(82, 108, 193,.6);
 }
+.el-table .el-table__cell {
+  text-align: center;
+}
 .el-table__expand-icon {
   -webkit-transform: rotate(0deg);
   transform: rotate(0deg);
@@ -487,6 +490,7 @@ a {
 }
 .el-descriptions .is-bordered .el-descriptions-item__cell {
   text-align: center;
+  word-break: break-all;
   border: 2px solid #EBEEF5;
 }
 .el-descriptions-item__label.is-bordered-label {

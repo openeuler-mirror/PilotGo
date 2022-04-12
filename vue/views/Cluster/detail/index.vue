@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:22
-  LastEditTime: 2022-04-11 17:31:41
+  LastEditTime: 2022-04-12 11:11:01
  -->
 <template>
  <div class="content">
@@ -61,7 +61,7 @@ export default {
   data() {
     return {
     }
-  }
+  },
 }
 </script>
 <style scoped lang="scss">
@@ -72,6 +72,9 @@ export default {
     width: 98%;
     height: 100%;
     margin: 0 auto;
+    .el-tab-pane {
+      height: 100%;
+    }
   }
 }
 </style>

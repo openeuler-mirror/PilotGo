@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-04-08 16:43:02
+  LastEditTime: 2022-04-12 09:47:22
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -17,6 +17,8 @@
    <ky-table
         class="cluster-table"
         ref="table"
+        :isLoadTable="isLoadTable"
+        :showSelect="showSelect"
         :getData="getLogs"
         :searchData="searchData"
       >
@@ -103,9 +105,9 @@ export default {
       strokeW: 12,
       searchData: {
         departId: '',
-        showSelect: true,
-        load: 'false'
-      }
+      },
+      isLoadTable: false,
+      showSelect: true,
     }
   },
   mounted() {

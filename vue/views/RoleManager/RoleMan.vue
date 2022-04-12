@@ -9,13 +9,13 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-04-08 16:40:28
+  LastEditTime: 2022-04-12 09:37:26
  -->
 <template>
   <div style="width: 100%; height: 100%" class="panel">
     <ky-table
       :getData="getRoles"
-      :searchData="searchData"
+      :showSelect="showSelect"
       ref="table"
     >
       <template v-slot:table_search>
@@ -105,9 +105,7 @@ export default {
       type: "",
       showPop: true,
       direction: "rtl",
-      searchData: {
-        showSelect: false
-      },
+      showSelect: false
     }
   },
   methods: {

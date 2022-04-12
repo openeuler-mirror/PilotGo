@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:07
-  LastEditTime: 2022-04-11 17:41:30
+  LastEditTime: 2022-04-12 11:06:39
  -->
 <template>
  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -157,9 +157,11 @@ export default {
     }
   },
   mounted() {
+    if(this.$route.params.detail != undefined) {
     getAllUser({uuid:this.$route.params.detail}).then((res) => {
       this.userData = res.data.data.user_all;
     })
+    }
   }
 }
 </script>

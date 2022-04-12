@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:34
-  LastEditTime: 2022-04-11 17:44:33
+  LastEditTime: 2022-04-12 11:06:54
  -->
 <template>
  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -209,9 +209,11 @@ export default {
   },
   mounted() {
     this.userName = this.$store.getters.userName;
+    if(this.$route.params.detail != undefined) {
     getserviceList({uuid:this.$route.params.detail}).then((res) => {
       this.serviceData = res.data.data.service_list;
     })
+    }
   },
   methods: {
     handleStart(sericeName) {
