@@ -206,7 +206,6 @@ func UpdateBatch(c *gin.Context) {
 	}
 	var batchinfo Batchupdate
 	err = json.Unmarshal(j, &batchinfo)
-	logger.Info("%+v", batchinfo)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,

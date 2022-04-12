@@ -142,10 +142,10 @@ func SetupRouter() *gin.Engine {
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
 		user.POST("/import", controller.ImportUser)
-		machinemanager.GET("/t", controller.Deletedepartdata)
+		machinemanager.POST("/deletedepartdata", controller.Deletedepartdata)
 		machinemanager.POST("/deletemachinedata", controller.Deletemachinedata)
 		machinemanager.POST("/adddepart", controller.AddDepart)
-		machinemanager.GET("/updatedepart", controller.UpdateDepart)
+		machinemanager.POST("/updatedepart", controller.UpdateDepart)
 		batchmanager.POST("/updatebatch", controller.UpdateBatch)
 		batchmanager.POST("/deletebatch", controller.DeleteBatch)
 	}

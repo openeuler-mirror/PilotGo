@@ -93,7 +93,48 @@ url：/machinemanager/adddepart
 	"msg": "部门信息入库成功"
 }
 ```
-#### 部门信息
+#### 修改部门名称
+描述：修改部门管理树中部门的名称
+请求方法：POST
+url：/machinemanager/updatedepart
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|DepartID|int|部门ID|y||
+|DepartName|string|修改的部门名称|y||
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "部门更新成功"
+}
+```
+
+#### 删除部门信息
+描述：删除部门管理树中的指定部门
+请求方法：POST
+url：/machinemanager/deletedepartdata
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|DepartID|int|部门ID|y||
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "部门删除成功"
+}
+```
+
+#### 返回全部部门信息
 描述：获取全部部门信息
 请求方法：GET
 url：/machinemanager/departinfo
@@ -135,3 +176,6 @@ url：/machinemanager/departinfo
 	}
 }
 ```
+#### 特定部门信息
+描述：获取全部部门信息
+请求方法：GET
