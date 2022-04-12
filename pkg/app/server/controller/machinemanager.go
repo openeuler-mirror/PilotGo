@@ -263,7 +263,8 @@ func MachineInfo(c *gin.Context) {
 		return
 	}
 
-	a := ReturnID(depart.ID)
+	var a []int
+	ReturnSpecifiedDepart(depart.ID, &a)
 	a = append(a, depart.ID)
 	machinelist := make([]model.Res, 0)
 	for _, value := range a {
