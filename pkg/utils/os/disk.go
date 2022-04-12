@@ -21,7 +21,6 @@ type DiskIOInfo struct {
 }
 
 type DiskUsageINfo struct {
-	Filesystem  string `json:"fileSystem"`
 	Device      string `json:"device"`
 	Path        string `json:"path"`
 	Fstype      string `json:"fstype"`
@@ -30,38 +29,39 @@ type DiskUsageINfo struct {
 	UsedPercent string `json:"usedPercent"`
 }
 
+const (
+	CapacitySize = 1
+)
+
 // 获取磁盘的使用情况
 func GetDiskUsageInfo() []DiskUsageINfo {
-	var fileTypes = map[string]bool{
-		"/dev/dm-0": true,
-		"devtmpfs":  true,
-		"tmpfs":     true,
-		"/dev/sda1": true,
-		"/dev/sda2": true,
-	}
 	diskusage := make([]DiskUsageINfo, 0)
-	parts, err := disk.Partitions(true)
-
+	parts, err := disk.Partitions(false)
 	if err != nil {
 		logger.Error("get Partitions failed, err:%v\n", err.Error())
 		return nil
 	}
 	for _, part := range parts {
-		if _, ok := fileTypes[part.Device]; !ok {
-			continue
-		}
 		diskInfo, _ := disk.Usage(part.Mountpoint)
 		device := part.Device
 		path := diskInfo.Path
 		fstype := diskInfo.Fstype
-		total := strconv.FormatUint(diskInfo.Total/(1024*1024*1024), 10) + "G"
-		used := strconv.FormatUint(diskInfo.Used/(1024*1024*1024), 10) + "G"
-		usedPercent := int(math.Floor(diskInfo.UsedPercent))
-		if usedPercent < 10 {
-			continue
+		t := diskInfo.Total / (1024 * 1024 * 1024)
+		var total string
+		if t > CapacitySize { //判断磁盘容量是否大于1G
+			total = strconv.FormatUint(diskInfo.Total/(1024*1024*1024), 10) + "G"
+		} else {
+			total = strconv.FormatUint(diskInfo.Total/(1024*1024), 10) + "M"
 		}
+		u := diskInfo.Used / (1024 * 1024 * 1024)
+		var used string
+		if u > CapacitySize { //判断磁盘已用容量是否大于1G
+			used = strconv.FormatUint(diskInfo.Used/(1024*1024*1024), 10) + "G"
+		} else {
+			used = strconv.FormatUint(diskInfo.Used/(1024*1024), 10) + "M"
+		}
+		usedPercent := int(math.Floor(diskInfo.UsedPercent))
 		tmp := DiskUsageINfo{
-			Filesystem:  device + "(挂载点：" + path + ")",
 			Device:      device,
 			Path:        path,
 			Fstype:      fstype,
