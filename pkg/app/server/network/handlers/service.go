@@ -32,16 +32,16 @@ func ServiceListHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	service_list, err := agent.ServiceList()
 	if err != nil {
-		response.Fail(c, nil, "获取服务列表失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取服务列表失败!")
 		return
 	}
-	response.Success(c, gin.H{"service_list": service_list}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"service_list": service_list}, "Success")
 }
 func ServiceStatusHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -49,16 +49,16 @@ func ServiceStatusHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	service_status, err := agent.ServiceStatus(service)
 	if err != nil {
-		response.Fail(c, nil, "获取服务状态失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取服务状态失败!")
 		return
 	}
-	response.Success(c, gin.H{"service_status": service_status}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"service_status": service_status}, "Success")
 }
 
 type AgentService struct {
@@ -70,7 +70,7 @@ type AgentService struct {
 func ServiceStartHandler(c *gin.Context) {
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -81,7 +81,7 @@ func ServiceStartHandler(c *gin.Context) {
 	err = json.Unmarshal([]byte(bodys), &AS)
 	fmt.Println(bodys)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -107,7 +107,7 @@ func ServiceStartHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(AS.UUID)
 	if agent == nil {
-		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
@@ -119,7 +119,7 @@ func ServiceStartHandler(c *gin.Context) {
 
 	service_start, Err, err := agent.ServiceStart(AS.Service)
 	if len(Err) != 0 || err != nil {
-		response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
+		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
 		log.StatusCode = 400
 		log.Message = Err
@@ -128,7 +128,7 @@ func ServiceStartHandler(c *gin.Context) {
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
-	response.Success(c, gin.H{"code": 200, "service_start": service_start}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"service_start": service_start}, "Success")
 	log.StatusCode = 200
 	log.Message = "启动服务成功"
 	mysqlmanager.DB.Save(&log)
@@ -138,7 +138,7 @@ func ServiceStartHandler(c *gin.Context) {
 func ServiceStopHandler(c *gin.Context) {
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -148,7 +148,7 @@ func ServiceStopHandler(c *gin.Context) {
 	bodys := string(body)
 	err = json.Unmarshal([]byte(bodys), &AS)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -175,7 +175,7 @@ func ServiceStopHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(AS.UUID)
 	if agent == nil {
-		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
@@ -187,7 +187,7 @@ func ServiceStopHandler(c *gin.Context) {
 
 	service_stop, Err, err := agent.ServiceStop(AS.Service)
 	if len(Err) != 0 || err != nil {
-		response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
+		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
 		log.StatusCode = 400
 		log.Message = Err
@@ -196,7 +196,7 @@ func ServiceStopHandler(c *gin.Context) {
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
-	response.Success(c, gin.H{"code": 200, "service_stop": service_stop}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"service_stop": service_stop}, "Success")
 	log.StatusCode = 200
 	log.Message = "关闭服务成功"
 	mysqlmanager.DB.Save(&log)
@@ -206,7 +206,7 @@ func ServiceStopHandler(c *gin.Context) {
 func ServiceRestartHandler(c *gin.Context) {
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -216,7 +216,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	bodys := string(body)
 	err = json.Unmarshal([]byte(bodys), &AS)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -243,7 +243,7 @@ func ServiceRestartHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(AS.UUID)
 	if agent == nil {
-		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
@@ -255,7 +255,7 @@ func ServiceRestartHandler(c *gin.Context) {
 
 	service_restart, Err, err := agent.ServiceRestart(AS.Service)
 	if len(Err) != 0 || err != nil {
-		response.Success(c, gin.H{"code": 400, "error": Err}, "重启服务失败!")
+		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "重启服务失败!")
 		log.StatusCode = 400
 		log.Message = Err
 		mysqlmanager.DB.Save(&log)
@@ -263,7 +263,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
-	response.Success(c, gin.H{"code": 200, "service_restart": service_restart}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"service_restart": service_restart}, "Success")
 	log.StatusCode = 200
 	log.Message = "重启服务成功"
 	mysqlmanager.DB.Save(&log)

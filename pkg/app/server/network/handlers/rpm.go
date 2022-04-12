@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-17 02:43:29
- * LastEditTime: 2022-03-25 01:51:51
+ * LastEditTime: 2022-04-13 01:51:51
  * Description: provide agent rpm manager functions.
  ******************************************************************************/
 package handlers
@@ -33,16 +33,16 @@ func AllRpmHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	rpm_all, err := agent.AllRpm()
 	if err != nil {
-		response.Fail(c, nil, "获取已安装rpm包列表失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取已安装rpm包列表失败!")
 		return
 	}
-	response.Success(c, gin.H{"rpm_all": rpm_all}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"rpm_all": rpm_all}, "Success")
 }
 func RpmSourceHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -50,16 +50,16 @@ func RpmSourceHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	rpm_source, err := agent.RpmSource(rpmname)
 	if err != nil {
-		response.Fail(c, nil, "获取源软件包名以及源失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取源软件包名以及源失败!")
 		return
 	}
-	response.Success(c, gin.H{"rpm_source": rpm_source}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"rpm_source": rpm_source}, "Success")
 }
 func RpmInfoHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -67,16 +67,16 @@ func RpmInfoHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	rpm_info, Err, err := agent.RpmInfo(rpmname)
 	if len(Err) != 0 || err != nil {
-		response.Fail(c, gin.H{"error": Err}, "获取源软件包信息失败!")
+		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "获取源软件包信息失败!")
 		return
 	} else {
-		response.Success(c, gin.H{"rpm_info": rpm_info}, "Success")
+		response.Response(c, http.StatusOK, 200, gin.H{"rpm_info": rpm_info}, "Success")
 	}
 
 }
@@ -96,7 +96,7 @@ func InstallRpmHandler(c *gin.Context) {
 
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -107,7 +107,7 @@ func InstallRpmHandler(c *gin.Context) {
 
 	err = json.Unmarshal([]byte(bodys), &rpm)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -131,7 +131,7 @@ func InstallRpmHandler(c *gin.Context) {
 
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+			response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
 			log.StatusCode = 400
 			log.Message = "获取uuid失败"
@@ -141,7 +141,7 @@ func InstallRpmHandler(c *gin.Context) {
 		}
 		rpm_install, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
-			response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
+			response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
 			log.StatusCode = 400
 			log.Message = Err
@@ -149,7 +149,7 @@ func InstallRpmHandler(c *gin.Context) {
 			StatusCodes = append(StatusCodes, "400")
 			continue
 		} else {
-			response.Success(c, gin.H{"code": 200, "install": rpm_install}, "该rpm包安装成功!")
+			response.Response(c, http.StatusOK, 200, gin.H{"install": rpm_install}, "该rpm包安装成功!")
 			log.StatusCode = 200
 			StatusCodes = append(StatusCodes, "200")
 			log.Message = "安装成功"
@@ -176,7 +176,7 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	body, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -186,7 +186,7 @@ func RemoveRpmHandler(c *gin.Context) {
 	bodys := string(body)
 	err = json.Unmarshal([]byte(bodys), &rpm)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -209,7 +209,7 @@ func RemoveRpmHandler(c *gin.Context) {
 
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+			response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 			log.StatusCode = 400
 			log.Message = "获取uuid失败"
 			mysqlmanager.DB.Save(&log)
@@ -219,7 +219,7 @@ func RemoveRpmHandler(c *gin.Context) {
 
 		rpm_remove, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
-			response.Success(c, gin.H{"code": 400, "error": Err}, "Failed!")
+			response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
 			log.StatusCode = 400
 			log.Message = Err
@@ -227,7 +227,7 @@ func RemoveRpmHandler(c *gin.Context) {
 			StatusCodes = append(StatusCodes, "400")
 			continue
 		} else {
-			response.Success(c, gin.H{"code": 200, "remove": rpm_remove}, "卸载成功")
+			response.Response(c, http.StatusOK, 200, gin.H{"remove": rpm_remove}, "卸载成功")
 			log.StatusCode = 200
 			StatusCodes = append(StatusCodes, "200")
 			log.Message = "卸载成功"
