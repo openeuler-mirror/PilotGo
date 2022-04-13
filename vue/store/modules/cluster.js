@@ -9,22 +9,30 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-03-30 15:53:46
+ * @LastEditTime: 2022-04-13 10:20:51
  */
 const cluster = {
     state: {
         selectIp: '',
+        tableTitle: '',
     },
     mutations: {
         SET_SELECTIP(state, ip) {
             state.selectIp = ip;
         },
+        SET_TABLETITLE(state,title) {
+            state.tableTitle = new String(title);
+        },
     },
     actions: {
         setSelectIp({commit}, ip) {
             commit('SET_SELECTIP',ip + ':9100');
+        },
+        setTableTitle({commit}, title) {
+            commit('SET_TABLETITLE', title);
         }
     },
+    
 }
 
 export default cluster;

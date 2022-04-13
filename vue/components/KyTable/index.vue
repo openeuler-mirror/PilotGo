@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-04-12 14:09:39
+  LastEditTime: 2022-04-13 09:43:48
   Description: 'Components Table'
  -->
 <template>
@@ -75,9 +75,9 @@ export default {
       }
     },
     isSource: {
-      type: Boolean,
+      type: Number,
       default: function() {
-        return false;
+        return 1;
       }
     },
     getData: {
@@ -126,7 +126,7 @@ export default {
     };
   },
   activated() {
-    this.isSource = false;
+    this.isSource = 1;
     this.isLoadTable = true;
     this.refresh();
   },
@@ -139,7 +139,7 @@ export default {
   },
   watch: {
     isSource: function(newV,oldV){
-      this.$nextTick(() => {
+      this.$nextTick(() => {  
         if(newV) {
           this.getSData({...this.objSearch, page: 1})
         }

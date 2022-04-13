@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-02-28 14:26:51
+ * @LastEditTime: 2022-04-13 11:04:55
  * @Description: provide agent log manager of pilotgo
  */
 import axios from 'axios'
@@ -51,7 +51,8 @@ export function request(config) {
             path: '/login'
             //登录成功后跳入浏览的当前页面
             // query: {redirect: router.currentRoute.fullPath}
-          })
+          });
+        case 400: console.log(error.response)
       }
       // 返回接口返回的错误信息
       return Promise.reject(error.response.data);
