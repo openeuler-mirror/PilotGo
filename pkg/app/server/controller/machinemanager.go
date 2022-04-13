@@ -30,6 +30,9 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
+// 新注册机器添加到部门根节点
+const UncateloguedDepartId = 1
+
 func AddDepart(c *gin.Context) {
 	pid := c.Query("PID")
 	parentDepart := c.Query("ParentDepart")

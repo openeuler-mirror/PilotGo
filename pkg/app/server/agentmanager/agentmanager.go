@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync"
 
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
@@ -121,7 +122,7 @@ func AddAgents2DB() {
 			return
 		}
 		agentOS := strings.Split(agent_OS.(string), ";")
-		agent_list.DepartId = 2
+
 		agent_list.MachineUUID = uuid
 		if dao.IsUUIDExist(uuid) {
 			logger.Warn("机器%s已经存在!", agentOS[0])
@@ -129,9 +130,24 @@ func AddAgents2DB() {
 		}
 		agent_list.IP = agentOS[0]
 		if dao.IsIPExist(agentOS[0]) {
-			mysqlmanager.DB.Where("ip=?", agentOS[0]).Unscoped().Delete(agent_list)
-			// mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update("state", model.OffLine)
+			// mysqlmanager.DB.Where("ip=?", agentOS[0]).Unscoped().Delete(agent_list)
+			mysqlmanager.DB.Where("ip=?", agentOS[0]).Find(&agent_list)
+			if agent_list.DepartId != controller.UncateloguedDepartId {
+				Ma := model.MachineNode{
+					MachineUUID: uuid,
+					State:       model.Normal,
+				}
+				mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update(&Ma)
+			} else {
+				Ma := model.MachineNode{
+					MachineUUID: uuid,
+					State:       model.Free,
+				}
+				mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update(&Ma)
+			}
+			continue
 		}
+		agent_list.DepartId = controller.UncateloguedDepartId
 		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
 		agent_list.CPU = agentOS[3]
 		agent_list.State = model.Free
