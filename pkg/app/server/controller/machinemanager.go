@@ -196,26 +196,40 @@ func Deletemachinedata(c *gin.Context) {
 	}
 }
 
+type DeleteDepart struct {
+	DepartID int `json:"DepartID"`
+}
+
 func Deletedepartdata(c *gin.Context) {
-	a := c.Query("DepartID")
-	tmp, err := strconv.Atoi(a)
+	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
-			"部门ID有误")
+			err.Error())
 		return
 	}
-	for _, n := range dao.MachineStore(tmp) {
+	var a DeleteDepart
+	err = json.Unmarshal(j, &a)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	tmp := strconv.Itoa(a.DepartID)
+
+	for _, n := range dao.MachineStore(a.DepartID) {
 		dao.ModifyMachineDepart2(n.ID, 1)
 	}
-	for _, depart := range ReturnID(tmp) {
+	for _, depart := range ReturnID(a.DepartID) {
 		machine := dao.MachineStore(depart)
 		for _, m := range machine {
 			dao.ModifyMachineDepart2(m.ID, 1)
 		}
 	}
-	if !dao.IsDepartIDExist(tmp) {
+	if !dao.IsDepartIDExist(a.DepartID) {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
@@ -224,8 +238,8 @@ func Deletedepartdata(c *gin.Context) {
 	}
 
 	needdelete := make([]int, 0)
-	DepartInfo := dao.GetPid(a)
-	needdelete = append(needdelete, tmp)
+	DepartInfo := dao.GetPid(tmp)
+	needdelete = append(needdelete, a.DepartID)
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
 	}
@@ -424,19 +438,31 @@ func Dep(c *gin.Context) {
 	})
 }
 
+type NewDepart struct {
+	DepartID   int    `json:"DepartID"`
+	DepartName string `json:"DepartName"`
+}
+
 func UpdateDepart(c *gin.Context) {
-	DepartID := c.Query("DepartID")
-	DepartName := c.Query("DepartName")
-	tmp, err := strconv.Atoi(DepartID)
+	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		response.Response(c, http.StatusUnprocessableEntity,
 			422,
 			nil,
-			"部门ID有误")
+			err.Error())
 		return
 	}
-	dao.UpdateDepart(tmp, DepartName)
-	dao.UpdateParentDepart(tmp, DepartName)
+	var new NewDepart
+	err = json.Unmarshal(j, &new)
+	if err != nil {
+		response.Response(c, http.StatusUnprocessableEntity,
+			422,
+			nil,
+			err.Error())
+		return
+	}
+	dao.UpdateDepart(new.DepartID, new.DepartName)
+	dao.UpdateParentDepart(new.DepartID, new.DepartName)
 	response.Success(c, nil, "部门更新成功")
 }
 
