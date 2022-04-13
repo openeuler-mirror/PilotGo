@@ -1,3 +1,17 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: wanghao
+ * Date: 2022-02-17 02:43:29
+ * LastEditTime: 2022-04-13 01:51:51
+ * Description: get agent network information.
+ ******************************************************************************/
 package os
 
 import (
@@ -110,7 +124,7 @@ func GetNICConfig() ([]NetInterfaceCard, error) {
 		line = strings.TrimSpace(line)
 
 		reg1 := regexp.MustCompile(`[A-Fa-f0-9]{2}(:[A-Fa-f0-9]{2}){5}`)
-		reg2 := regexp.MustCompile(`([0-9]{1,3}.){3}[0-9]`)
+		reg2 := regexp.MustCompile(`([0-9]{1,3}.){3}[0-9]{1,3}`)
 		reg3 := regexp.MustCompile(`[a-zA-Z0-9]+$`)
 		x := reg1.FindAllString(line, -1)
 		y := reg2.FindAllString(line, -1)

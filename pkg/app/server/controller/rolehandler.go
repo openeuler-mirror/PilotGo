@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-03-07 15:32:38
- * LastEditTime: 2022-04-06 14:52:38
+ * LastEditTime: 2022-04-12 14:10:09
  * Description: 权限控制
  ******************************************************************************/
 package controller
@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/common"
 	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
@@ -111,37 +110,6 @@ func GetPolicy(c *gin.Context) {
 		return
 	}
 	model.JsonPagination(c, data, total, query)
-}
-
-// 给用户添加角色
-func AddPermission(c *gin.Context) {
-	var role model.AddRole //Data verification
-	var user model.User
-	c.Bind(&role)
-	email := role.Email
-	addrole := role.RoleID
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
-	if !dao.IsEmailExist(email) {
-		response.Fail(c, nil, "无此用户!")
-		return
-	}
-	roleid := user.RoleID
-	if dao.IsContain(roleid, addrole) {
-		response.Response(c,
-			http.StatusOK,
-			400,
-			nil,
-			"用户已拥有该权限!")
-		return
-	} else {
-		roleid = roleid + "," + strconv.Itoa(addrole)
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("roleId", roleid)
-
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": user},
-			"用户角色添加成功!")
-	}
 }
 
 // 获取登录用户权限

@@ -15,6 +15,8 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
@@ -27,16 +29,16 @@ func SysInfoHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	sysctl_info, err := agent.GetSysctlInfo()
 	if err != nil {
-		response.Fail(c, nil, "获取内核配置失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取内核配置失败!")
 		return
 	}
-	response.Success(c, gin.H{"sysctl_info": sysctl_info}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"sysctl_info": sysctl_info}, "Success")
 }
 func SysctlChangeHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -63,7 +65,7 @@ func SysctlChangeHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Success(c, gin.H{"code": 400}, "获取uuid失败")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
 		log.StatusCode = 400
 		log.Message = "获取uuid失败"
@@ -75,7 +77,7 @@ func SysctlChangeHandler(c *gin.Context) {
 
 	sysctl_change, err := agent.ChangeSysctl(args)
 	if err != nil {
-		response.Success(c, gin.H{"code": 400, "error": err}, "修改内核运行时参数失败!")
+		response.Response(c, http.StatusOK, 400, gin.H{"error": err}, "修改内核运行时参数失败!")
 		log.StatusCode = 400
 		log.Message = err.Error()
 		mysqlmanager.DB.Save(&log)
@@ -83,7 +85,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		mysqlmanager.DB.Save(&logParent)
 		return
 	}
-	response.Success(c, gin.H{"code": 200, "sysctl_change": sysctl_change}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"sysctl_change": sysctl_change}, "Success")
 	log.StatusCode = 200
 	log.Message = "修改成功"
 	mysqlmanager.DB.Save(&log)
@@ -96,14 +98,14 @@ func SysctlViewHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
 		return
 	}
 
 	sysctl_view, err := agent.SysctlView(args)
 	if err != nil {
-		response.Fail(c, nil, "获取该参数的值失败!")
+		response.Response(c, http.StatusOK, 400, nil, "获取该参数的值失败!")
 		return
 	}
-	response.Success(c, gin.H{"sysctl_view": sysctl_view}, "Success")
+	response.Response(c, http.StatusOK, 200, gin.H{"sysctl_view": sysctl_view}, "Success")
 }
