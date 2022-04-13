@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:07:46
-  LastEditTime: 2022-04-13 10:45:54
+  LastEditTime: 2022-04-13 14:29:59
  -->
 <template>
  <div>
@@ -69,50 +69,18 @@ export default {
         textAlign:'center',
       },
       netData: [],
-      tableData: [
-      {
-        "BytesRecv": 279388688,
-        "BytesSent": 279388688,
-        "Name": "lo",
-        "PacketsRecv": 609763,
-        "PacketsSent": 609763,
-        "nic": []
-      },
-      {
-        "BytesRecv": 0,
-        "BytesSent": 0,
-        "Name": "docker0",
-        "PacketsRecv": 0,
-        "PacketsSent": 0,
-        "nic": []
-      },
-      {
-        "BytesRecv": 78693640,
-        "BytesSent": 136977291,
-        "Name": "ens33",
-        "PacketsRecv": 479573,
-        "PacketsSent": 440120,
-        "nic": [
-          /* {
-            "IPAddr": "192.168.160.2",
-            "MacAddr": "00:50:56:e6:e3:0e",
-            "Name": "ens33"
-          },
-          {
-            "IPAddr": "192.168.160.1",
-            "MacAddr": "00:50:56:c0:00:08",
-            "Name": "ens33"
-          } */
-        ]
-      }
-    ]
+      tableData: []
     }
   },
   mounted() {
     if(this.$route.params.detail != undefined) {
     getNetwork({uuid:this.$route.params.detail}).then(res => {
-      res.data.data.net_io.forEach(item => item.nic = []);
-      this.tableData = res.data.data.net_io;
+      if(res.data.code === 200) {
+        res.data.data.net_io.forEach(item => item.nic = []);
+        this.tableData = res.data.data.net_io;
+      } else {
+        console.log(res.data.msg)
+      }
     })
     getNetNic({uuid:this.$route.params.detail}).then(res =>{
       if(res.data.code === 200) {

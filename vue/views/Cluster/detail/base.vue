@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
-  LastEditTime: 2022-04-12 13:36:07
+  LastEditTime: 2022-04-13 14:29:01
  -->
 <template>
  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -47,15 +47,6 @@ export default {
         "total": "64G",
         "used": "45G",
         "usedPercent": "71%"
-      },
-      {
-        "device": "/dev/sda1",
-        "fileSystem": "/dev/sda1(挂载点：/boot)",
-        "fstype": "xfs",
-        "path": "/boot",
-        "total": "40G",
-        "used": "0G",
-        "usedPercent": "20%"
       }
     ],
       basic: {
@@ -76,26 +67,46 @@ export default {
     let obj = this.params = {uuid:this.$route.params.detail};
     if(this.$route.params.detail != undefined) {
       getBasicInfo(obj).then(res => {
-        this.basic.IP = res.data.data.IP;
-        this.basic.dept = res.data.data.depart;
-        this.basic.status = res.data.data.state === 1? '在线': res.data.data.state === 2? '离线':'未分配';
+        if(res.data.code === 200) {
+          this.basic.IP = res.data.data.IP;
+          this.basic.dept = res.data.data.depart;
+          this.basic.status = res.data.data.state === 1? '在线': res.data.data.state === 2? '离线':'未分配';
+        } else {
+          console.log(res.data.msg)
+        }
       })
       getOS(obj).then((res) => {
-        let result = res.data.data.os_info;
-        this.basic.macPlatform = result.Platform + ' ' + result.PlatformVersion;
-        this.basic.mackernel = result.KernelArch;
+        if(res.data.code === 200){
+          let result = res.data.data.os_info;
+          this.basic.macPlatform = result.Platform + ' ' + result.PlatformVersion;
+          this.basic.mackernel = result.KernelArch;
+        } else {
+          console.log(res.data.msg)
+        }
       })
       
       getCpu(obj).then((res) => {
-        this.basic.macCPU = res.data.data.CPU_info.CpuNum + '核 ' + res.data.data.CPU_info.ModelName;
+        if(res.data.code === 200) {
+          this.basic.macCPU = res.data.data.CPU_info.CpuNum + '核 ' + res.data.data.CPU_info.ModelName;
+        } else {
+          console.log(res.data.msg)
+        }
       })
       getMemory(obj).then((res) => {
         let memTotal = 0;
-        memTotal = res.data.data.memory_info.MemTotal / 1024 / 1024;
-        this.basic.macMEM = memTotal.toFixed(2) + 'G';
+        if(res.data.code === 200) {
+          memTotal = res.data.data.memory_info.MemTotal / 1024 / 1024;
+          this.basic.macMEM = memTotal.toFixed(2) + 'G';
+        } else {
+          console.log(res.data.msg)
+        }
       })
       getDisk(obj).then((res) => {
-        this.diskData = res.data.data.disk_use;
+        if(res.data.code === 200) {
+          this.diskData = res.data.data.disk_use;
+        } else {
+          console.log(res.data.msg)
+        }
       })
     }
   }
