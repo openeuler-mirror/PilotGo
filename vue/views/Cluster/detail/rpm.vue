@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-04-12 17:49:35
+  LastEditTime: 2022-04-13 11:11:01
  -->
 <template>
  <div class="content">
@@ -79,8 +79,9 @@ export default {
     let obj = this.params = {uuid:this.$route.params.detail};
     if(this.$route.params.detail != undefined) {
       rpmAll(obj).then(res => {
-        this.totalPackages = res.data.data.rpm_all.length;
-        res.data.data.rpm_all.forEach(item => {
+        let result = res.data.data && res.data.data.rpm_all;
+        this.totalPackages = result.length;
+        result.forEach(item => {
           this.rpmData.push({'value':item})
         })
       })
@@ -96,10 +97,12 @@ export default {
     },
     handleSelect(item) {
       this.display = true;
-      let rpmName = (item && item.value) || this.state;
+      let rpmName = (item && item.value) || this.packageName;
       getDetail({uuid: this.$route.params.detail,rpm: rpmName}).then(res => {
-        if(res.data.code == 200) {
-          this.rpmInfo = res.data.data.rpm_info;
+        if(res.data.code == 200) {  
+          this.rpmInfo = res.data.data && res.data.data.rpm_info;
+        } else {
+          this.$message.error((res.data.data && res.data.data.error) || res.data.msg)
         }
       })
     },

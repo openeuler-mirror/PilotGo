@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-03-16 10:24:14
+ * @LastEditTime: 2022-04-13 10:16:48
  */
 const getters = {
     token: state => state.user.token,
@@ -20,6 +20,7 @@ const getters = {
     UserDepartName: state => state.user.departName,
     activePanel: state => state.permissions.activePanel,
     selectIp: state => state.cluster.selectIp,
+    tableTitle: state => state.cluster.tableTitle,
 }
 
 export default getters

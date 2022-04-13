@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:07:46
-  LastEditTime: 2022-04-12 11:06:17
+  LastEditTime: 2022-04-13 10:45:54
  -->
 <template>
  <div>
@@ -111,7 +111,8 @@ export default {
   mounted() {
     if(this.$route.params.detail != undefined) {
     getNetwork({uuid:this.$route.params.detail}).then(res => {
-      this.netData = res.data.data.net_io;
+      res.data.data.net_io.forEach(item => item.nic = []);
+      this.tableData = res.data.data.net_io;
     })
     getNetNic({uuid:this.$route.params.detail}).then(res =>{
       if(res.data.code === 200) {

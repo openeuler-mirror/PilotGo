@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-12 16:26:24
+  LastEditTime: 2022-04-13 10:31:41
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -42,8 +42,8 @@
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <auth-drop @click.native="handleChange" name="rpm_install"> 变更部门 </auth-drop>
-              <auth-drop @click.native="handleIssue" name="rpm_install"> rpm下发 </auth-drop>
-              <auth-drop @click.native="handleUnInstall" name="rpm_uninstall"> rpm卸载 </auth-drop>
+              <!-- <auth-drop @click.native="handleIssue" name="rpm_install"> rpm下发 </auth-drop>
+              <auth-drop @click.native="handleUnInstall" name="rpm_uninstall"> rpm卸载 </auth-drop> -->
             </el-dropdown-menu>
           </el-dropdown>
           <el-popconfirm title="确定删除所选项目吗?" @confirm="handleDelete">
@@ -92,7 +92,7 @@
      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
      <change-form v-if="type === 'change'" :machines='batchMAcs' @click="handleClose"></change-form>   
      <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='batchMAcs' @click="handleClose"></batch-form>   
-     <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>   
+     <!-- <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>    -->
     </el-dialog>
   </div>
   </div>
@@ -130,7 +130,7 @@ export default {
       showChange: false,
       isBatch: false,
       checkedNode: [],
-      departName: '机器列表',
+      departName: '',
       departInfo: {},
       machines: [],
       batchMAcs: [],
@@ -139,12 +139,25 @@ export default {
       searchData: {
         DepartId: 1,
       },
-      isSource: false,
+      isSource: 1,
       showSelect: true,
     };
   },
   mounted() {
     this.showChange = true;//['0','1'].includes(this.$store.getters.userType);
+    this.departName = this.$store.getters.tableTitle || '机器列表';
+  },
+  watch: {
+    machines: function(newValue,oldValue) {
+      this.batchMAcs = newValue.concat(oldValue)
+    },
+    '$route': {
+      handler() {
+        if(this.$route.name == 'MacDetail') {
+           this.departName = "机器列表";
+        }
+      }
+    }
   },
   methods: {
     getClusters,
@@ -180,7 +193,7 @@ export default {
       this.type = "batch"; 
       this.machines = this.$refs.table.selectRow.rows;
     },
-    handleIssue() {
+    /* handleIssue() {
       this.machines = [];
       this.display = true;
       this.title = "软件包下发";
@@ -193,7 +206,7 @@ export default {
       this.title = "软件包卸载";
       this.type = "issue"; 
       this.machines = this.$refs.table.selectRow.rows;
-    },
+    }, */
     handleDelete() {
       let ids = this.$refs.table.selectRow.rows[0];
       deleteIp({ uuid: ids }).then((res) => {
@@ -207,7 +220,6 @@ export default {
     },
     handleSelectDept(data) {
       if(data) {
-        this.isSource = false;
         this.departName = data.label + '机器列表';
         this.searchData.DepartId = data.id;
         this.departInfo = data;
@@ -221,7 +233,7 @@ export default {
       }
     },
     getSourcePool() {
-      this.isSource = true;
+      this.isSource = (Math.random()+1)*100;
       this.departName = "未分配资源池";
     },
     handleFireWall(ip) {
@@ -236,14 +248,6 @@ export default {
         name: 'Prometheus',
         query: { ip: ip }
       })
-    }
-  },
-  watch: {
-    machines: function(newValue,oldValue) {
-      this.batchMAcs = newValue.concat(oldValue)
-    },
-    isSource: function(newV,oldV) {
-      console.log(newV,oldV)
     }
   },
 };

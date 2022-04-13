@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:22
-  LastEditTime: 2022-04-12 11:11:01
+  LastEditTime: 2022-04-13 09:56:37
  -->
 <template>
  <div class="content">
@@ -61,6 +61,14 @@ export default {
   data() {
     return {
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (to.path == "/cluster") {
+      this.$store.dispatch('setTableTitle', '机器列表')
+    } else {
+      
+    }
+    next();
   },
 }
 </script>
