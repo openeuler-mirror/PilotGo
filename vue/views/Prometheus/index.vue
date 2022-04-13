@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-04-12 15:54:47
+  LastEditTime: 2022-04-13 11:36:16
  -->
 <template>
   <div class="overview">
@@ -19,6 +19,15 @@
         <el-form ref="form" :model="form">
           <el-form-item label="机器 IP:">
             {{macIp}}
+            <!-- <el-select v-model="form.IP" multiple placeholder="请选择">
+              <el-option
+                v-for="item in ips"
+                :key="item.ID"
+                :label="item.ip"
+                :value="item.ip"
+              >
+              </el-option>
+            </el-select> -->
           </el-form-item>
           <el-form-item label="监控时间:">
             <el-row :gutter="20">
@@ -75,6 +84,7 @@ export default {
   data() {
     return {
       macIp: 'localhost:9090',
+      ips: [],
       prome: '',
       promes: [
         {
@@ -102,6 +112,7 @@ export default {
       chartW: 0,
       chartH: 0,
       form: {
+        IP: '',
         dateSD: '',
         dateST: '',
         dateED: '',
@@ -110,6 +121,7 @@ export default {
     };
   },
   mounted() {
+
     this.macIp = this.$store.getters.selectIp && this.$store.getters.selectIp.split(':')[0] || 'localhost:9090';
     this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
     this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;

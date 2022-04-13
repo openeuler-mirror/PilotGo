@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-04-12 16:58:30
+ * @LastEditTime: 2022-04-13 14:40:50
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
@@ -66,10 +66,12 @@ export function getClusters(data) {
   }
 
 // 获取资源池列表接口
-export function getSourceMac() {
+export function getSourceMac(data) {
+  console.log(data)
   return request({
     url: 'machinemanager/sourcepool',
     method: 'get',
+    params: data
   })
 }
 
