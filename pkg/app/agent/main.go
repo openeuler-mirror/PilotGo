@@ -9,13 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-08 19:38:34
+ * LastEditTime: 2022-04-13 14:42:44
  * Description: agent main
  ******************************************************************************/
 package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
@@ -40,7 +41,6 @@ func main() {
 	// init agent info
 
 	// 加载系统配置
-
 	err := aconfig.Init()
 	if err != nil {
 		fmt.Println("failed to load configure, exit..", err)
@@ -54,23 +54,24 @@ func main() {
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
-	// 与server握手
-	client := &network.SocketClient{
-		MessageProcesser: protocol.NewMessageProcesser(),
-	}
+	go func(conf *aconfig.Server) {
+		// 与server握手
+		client := network.NewSocketClient()
+		regitsterHandler(client)
 
-	for {
-		if err := client.Connect(aconfig.Config().Server.Addr); err != nil {
-			fmt.Println("connect server failed, error:", err)
+		for {
+			logger.Info("start to connect server")
+			err = client.Run(&aconfig.Config().Server)
+			if err != nil {
+				logger.Error("socket client exit, error:%s", err.Error())
+			}
 
-			time.Sleep(time.Second * 5)
-			continue
+			// 延迟5s+5s内随机时间
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			delayTime := time.Second*5 + time.Duration(r.Uint32()%5000*uint32(time.Millisecond))
+			time.Sleep(delayTime)
 		}
-		break
-	}
-	regitsterHandler(client)
-
-	// go Send_heartbeat(client)
+	}(&aconfig.Config().Server)
 
 	// 信号监听
 	c := make(chan os.Signal, 1)
