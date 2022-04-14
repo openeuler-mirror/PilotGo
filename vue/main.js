@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-12 16:12:15
- * @LastEditTime: 2022-04-07 15:51:42
+ * @LastEditTime: 2022-04-14 10:25:47
  */
 import Vue from 'vue'
 import App from './App'
@@ -22,6 +22,7 @@ import * as echarts from 'echarts'; //echarts 5.0 导入方式
 import 'xterm/css/xterm.css'; // 引入terminal终端样式
 import './permission';
 import './styles/index.scss'
+import './iconfont/iconfont.js'
 import './iconfont/iconfont.css'
 // import './mock/index.js' //引入mockjs,上线后注掉
 

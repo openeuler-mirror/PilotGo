@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-04-13 14:31:40
+  LastEditTime: 2022-04-14 10:30:54
  -->
 <template>
  <div class="content">
@@ -30,7 +30,7 @@
      <div class="detail" v-if="display">
        <p class="title">软件包详情：</p>
        <el-descriptions :column="3" size="medium" border>
-        <el-descriptions-item label="软件报名">{{ rpmInfo.Name }}</el-descriptions-item>
+        <el-descriptions-item label="软件包名">{{ rpmInfo.Name }}</el-descriptions-item>
         <el-descriptions-item label="Version">{{ rpmInfo.Version }}</el-descriptions-item>
         <el-descriptions-item label="Release">{{ rpmInfo.Release }}</el-descriptions-item>
         <el-descriptions-item label="Architecture">{{ rpmInfo.Architecture }}</el-descriptions-item>

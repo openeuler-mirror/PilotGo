@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-12 14:29:31
+  LastEditTime: 2022-04-13 15:32:04
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -44,9 +44,9 @@
       </el-aside>
       <el-main>
         <bread-crumb></bread-crumb>
-        <keep-alive>
+        <!-- <keep-alive exclude='Prometheus'> -->
           <router-view></router-view>
-        </keep-alive>
+        <!-- </keep-alive> -->
       </el-main>
     </el-container>
   </el-container>

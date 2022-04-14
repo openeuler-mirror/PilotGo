@@ -52,20 +52,6 @@ export const routes = [
                 { name: '防火墙配置'}], 
             }
           },
-          // {
-          //   path: '/prometheus',
-          //   name: 'Prometheus',
-          //   component: _import('Prometheus/index'),
-          //   meta: {
-          //     header_title: "性能监控", 
-          //     panel: "cluster", 
-          //     breadcrumb: [
-          //         { name: '机器管理', path: '/cluster' },
-          //         { name: '性能监控'}
-          //     ],
-          //     icon_class: ''
-          //   }
-          // },
           {
             path: '/cluster:detail',
             name: 'MacDetail',
@@ -121,22 +107,12 @@ export const routes = [
         component:  _import('RoleManager/RoleMan'),
         meta: { title: 'rolemanager', header_title: "角色管理", panel: "rolemanager", icon_class: 'el-icon-s-custom' }
       },
-      /* {
-        path: '/Message',
-        name: 'Message',
-        component:  _import('Message/message'),
-        meta: { title: 'Message', header_title: "监控告警", panel: "message", icon_class: 'el-icon-s-promotion' }
-      }, */
       {
         path: '/log',
         name: 'Log',
         component:  _import('Log/Log'),
         meta: { title: 'log', header_title: "日志管理", panel: "log", icon_class: 'el-icon-s-order' }
       },
-      // {
-      //   path: '', 
-      //   redirect: '/overview'
-      // },
     ]
   },
 ]
