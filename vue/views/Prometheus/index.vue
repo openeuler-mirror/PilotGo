@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-04-13 11:36:16
+  LastEditTime: 2022-04-13 15:18:16
  -->
 <template>
   <div class="overview">
@@ -194,6 +194,13 @@ export default {
     prome: function(newValue) {
       if(newValue) {
         this.handleAppend(newValue);
+      }
+    },
+    '$route': {
+      handler() {
+        if(this.$route.name) {
+          console.log("跳转",this.$store.getters.selectIp)
+        }
       }
     }
   }

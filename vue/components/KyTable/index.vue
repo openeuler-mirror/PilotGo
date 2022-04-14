@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-04-13 14:34:29
+  LastEditTime: 2022-04-13 15:42:56
   Description: 'Components Table'
  -->
 <template>
@@ -125,15 +125,8 @@ export default {
       },
     };
   },
-  activated() {
-    this.refresh();
-  },
   mounted() {
-    if(!this.isLoadTable){
-      return;
-    } else {
-      this.loadData({ ...this.objSearch });
-    }
+    this.loadData({ ...this.objSearch });
   },
   watch: {
     isSource: function(newV,oldV){
@@ -143,11 +136,6 @@ export default {
         }
       })
     },
-    isLoadTable: function(newV) {
-      if(newV) {
-        this.loadData({...this.objSearch, page: 1})
-      }
-    }
   },
   methods: {
     loadData(pageParams) {

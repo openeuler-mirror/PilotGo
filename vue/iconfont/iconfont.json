@@ -6,6 +6,62 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1096338",
+      "name": "应用图标_信号掉线",
+      "font_class": "yingyongtubiaoxinhaodiaoxian",
+      "unicode": "e996",
+      "unicode_decimal": 59798
+    },
+    {
+      "icon_id": "5183565",
+      "name": "告警",
+      "font_class": "icon-test",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "5423468",
+      "name": "设备_本地信号掉线",
+      "font_class": "diaoxian",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "15356131",
+      "name": "当前用户",
+      "font_class": "dangqianyonghu",
+      "unicode": "e7df",
+      "unicode_decimal": 59359
+    },
+    {
+      "icon_id": "23065433",
+      "name": "当前用户数",
+      "font_class": "dangqianyonghushu",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "7145682",
+      "name": "成功",
+      "font_class": "chenggong",
+      "unicode": "e63e",
+      "unicode_decimal": 58942
+    },
+    {
+      "icon_id": "7145711",
+      "name": "失败",
+      "font_class": "shibai",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "28375902",
+      "name": "预警",
+      "font_class": "yujing-copy",
+      "unicode": "fcfe",
+      "unicode_decimal": 64766
+    },
+    {
       "icon_id": "17967618",
       "name": "反馈",
       "font_class": "fankui",
@@ -48,13 +104,6 @@
       "unicode_decimal": 61131
     },
     {
-      "icon_id": "25007066",
-      "name": "用户权限",
-      "font_class": "yonghuquanxian",
-      "unicode": "fce9",
-      "unicode_decimal": 64745
-    },
-    {
       "icon_id": "25007068",
       "name": "用户管理",
       "font_class": "yonghuguanli",
@@ -95,27 +144,6 @@
       "font_class": "gailan",
       "unicode": "e612",
       "unicode_decimal": 58898
-    },
-    {
-      "icon_id": "6345513",
-      "name": "异常",
-      "font_class": "yichang",
-      "unicode": "e741",
-      "unicode_decimal": 59201
-    },
-    {
-      "icon_id": "10884095",
-      "name": "正常",
-      "font_class": "zhengchang",
-      "unicode": "e663",
-      "unicode_decimal": 58979
-    },
-    {
-      "icon_id": "26945576",
-      "name": "空闲中",
-      "font_class": "kongxianzhong",
-      "unicode": "e624",
-      "unicode_decimal": 58916
     }
   ]
 }
