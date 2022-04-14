@@ -32,6 +32,7 @@
 |message_type|int|消息类型，1|y||
 |agent_version|string|agent版本字符串|y||
 |up_time|string|xxx格式时间字符串|y||
+
 示例：
 
     {
@@ -57,6 +58,7 @@
 |os_arch|string|os架构|y||
 |kernel_version|string|kernel版本|y||
 |os_uptime|string|os启动时间|y||
+
 示例：
 
     {
@@ -179,3 +181,1373 @@ url：/machinemanager/departinfo
 #### 特定部门信息
 描述：获取全部部门信息
 请求方法：GET
+
+
+### 用户管理 API
+#### 用户登录
+描述：用户登录PilotGo系统  
+请求方法：POST
+url：/user/login
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|email|string|登录用户账号邮箱|y||
+|password|string|用户密码|y||  
+
+请求示例：
+
+    {
+        "email":"test@qq.com",
+        "password":"1234"
+    }
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|departId|int|部门id|y||
+|departName|string|部门名字|y||
+|roleId|string|用户角色|y||
+|token|string|用户身份令牌|y||
+|userType|string|用户类型|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":
+            {
+                "departId":1,
+                "departName":"麒麟",
+                "roleId":"1",
+                "token":"xxxxx",
+                "userType":0
+            },
+        "msg":"登陆成功!"
+    }
+#### 用户退出
+描述：用户退出系统  
+请求方法：GET
+url：/user/logout
+请求参数：无  
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"退出成功!"
+    }
+#### 查询所有用户
+描述：返回数据库中所有的用户  
+请求方法：GET
+url：/user/searchAll
+请求参数：page、size
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|page|int|页码数|y||
+|size|int|每页数量|y||
+
+请求示例：
+
+    user/searchAll?page=1&size=10  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|departName|string|部门名字|y||
+|departPId|int|部门父id|y||
+|departid|string|部门id|y||
+|email|string|用户账号邮箱|y||
+|id|int||y||
+|phone|string|手机号|y||
+|role|[]string|用户角色id|y|数组|
+|userType|int|用户类型|y||
+|username|string|用户名|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":[
+            {
+                "departName":"xxx",
+                "departPId":13,
+                "departid":15,
+                "email":"xxx",
+                "id":5,
+                "phone":"xxx",
+                "role":["xxx"],
+                "userType":3,
+                "username":"xxx"
+            },
+        ],
+        "ok": true, 
+        "page": 1, 
+        "size": 10, 
+        "total": 1
+    }
+#### 用户信息高级搜索
+描述：根据用户邮箱模糊查询出符合搜索要求的用户数据  
+请求方法：POST
+url：/user/userSearch
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|email|string|用户账号邮箱相关字符|y|模糊查询条件|  
+
+请求示例：
+
+    {
+        "email":"xxxx"
+    }
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|departName|string|部门名字|y||
+|departPId|int|部门父id|y||
+|departid|string|部门id|y||
+|email|string|用户账号邮箱|y||
+|id|int||y||
+|phone|string|手机号|y||
+|role|[]string|用户角色id|y|数组|
+|userType|int|用户类型|y||
+|username|string|用户名|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":[
+            {
+                "departName":"xxx",
+                "departPId":13,
+                "departid":15,
+                "email":"xxx",
+                "id":5,
+                "phone":"xxx",
+                "role":["xxx"],
+                "userType":3,
+                "username":"xxx"
+            },
+        ],
+        "ok": true, 
+        "page": 1, 
+        "size": 10, 
+        "total": 1
+    }
+
+#### 添加用户
+描述：添加新用户  
+请求方法：POST
+url：/user/register
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|username|string|用户名|y||
+|password|string|密码|y||
+|phone|string|手机号|y||
+|email|string|用户账号邮箱|y||
+|departName|string|部门名字|y||
+|departPId|int|部门父id|y||
+|departid|string|部门id|y||
+|role|[]string|用户角色id|y|数组|
+|userType|int|用户类型|y||  
+
+请求示例:
+
+    {
+        "username":"xxx",
+        "password":"xxx",
+        "phone":"xxx",
+        "email":"xxx",
+        "departName":"xxx",
+        "departPId":13,
+        "departid":15,
+        "role":["xxx"],
+        "userType":3
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"添加用户成功!"
+    }
+#### 重置密码
+描述：用户重置密码  
+请求方法：POST
+url：/user/reset
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|email|string|用户邮箱|y||
+
+请求示例：
+
+    {
+        "email":"xxxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"密码重置成功!"
+    }
+#### 删除用户
+描述：删除用户  
+请求方法：POST
+url：/user/delete
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|email|[]string|用户账号邮箱|y|数组|
+
+请求示例:
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"密码重置成功!"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"用户删除成功!"
+    }
+#### 修改用户信息
+描述：修改用户信息  
+请求方法：POST
+url：/user/update
+请求类型：json   
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Pid|int|部门父id|n||
+|id|int|部门id|n||
+|phone|string|手机号|n||
+|departName|string|部门名字|n||
+
+请求示例:
+
+    {
+        "Pid":2,
+        "id":1,
+        "phone":"xxxx",
+        "departName":"xxxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"用户信息修改成功!"
+    }
+#### 批量添加用户
+描述：批量添加新用户  
+请求方法：POST
+url：/user/import
+请求体：.xlsx文件  
+字段描述：（上传文件中各字段必须严格按照以下顺序）  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|username|string|用户名|y||
+|phone|string|手机号|y||
+|email|string|用户账号邮箱|y||
+|DepartName|string|部门|y||
+|RoleID|string|角色|y||  
+
+响应结果：  
+类型：json  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"批量添加用户成功!"
+    }
+### 日志模块管理 API
+#### 删除日志
+描述：删除父日志及所有子日志  
+请求方法：POST
+url：/agent/delete
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|ids|[]int|父日志id|y|数组|  
+
+请求示例:
+
+    {
+        "ids":[2,3,4]
+    }
+响应结果：  
+类型：json  
+字段描述：无    
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"日志删除成功!"
+    }
+
+#### 父日志查询
+描述：查询所有的父日志  
+请求方法：GET
+url：/agent/log_all
+请求参数：departId、page、size
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|page|int|页码数|y||
+|size|int|每页数量|y||
+|departId|int|部门id|y||
+
+请求示例：
+
+    /agent/log_all?page=1&size=10&departId=1  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|created_at|string|日志产生时间|y||
+|userName|string|操作机器用户|y||
+|departName|string|用户所属部门|y||
+|type|string|用户操作机器类型|y|软件包安装或者服务重启等|
+|status|string|操作状态|y|成功数，操作的机器总数，成功率|  
+
+示例：
+
+    {
+        "code":200,
+        "data":[
+            {
+                "id":1,
+                "created_at":"2022-03-18T15:27:32+08:00",
+                "userName":"test@qq.com",
+                "departName":"xxx",
+                "type":"xxx",
+                "status":"2,3,0.67"
+            },
+        ],
+        "ok":true,
+        "page":1,
+        "size":10,
+        "total":20
+    }
+
+#### 子日志查询
+描述：查询所有的子日志  
+请求方法：GET
+url：/agent/logs
+请求参数：id
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|条目id|y||
+  
+请求示例：
+
+    /agent/logs?id=1  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|logparent_id|int|父日志的id|y||
+|ip|string|机器ip|y||
+|code|int|状态码|y||
+|object|string|操作对象|y|服务名字或者软件包名字|
+|action|string|操作类型|y|软件包安装或者服务重启等|
+|message|string|状态返回消息|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":[
+            {
+                "id":1,
+                "logparent_id":1,
+                "ip":"xxx.xxx.xxx.xxx",
+                "code":400,
+                "object":"kernel",
+                "action":"软件包安装",
+                "message":"获取uuid失败"
+            },
+        ],
+        "ok":true,
+        "page":1,
+        "size":10,
+        "total":1
+    }
+
+### 权限角色管理 API
+#### 获取登录用户权限
+描述：获取登录用户权限  
+请求方法：POST
+url：/user/permission
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|roleId|[]int|角色id|y|数组|  
+
+请求示例:
+
+    {
+        "roleId":[2,3,4]
+    }
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|button|[]string|登陆用户拥有的权限按钮|y|数组|
+|menu|[]string|登录用户拥有的权限菜单|y|数组|
+|userType|string|用户类型|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":
+            {
+                "button":["xxx","xxxx"],
+                "menu":["xxx","xxxx"],
+                "userType":1
+            },
+        "msg":"用户权限列表"
+    }
+
+#### 角色查询
+描述：查询所有角色的权限  
+请求方法：GET
+url：/user/roles
+请求参数：无  
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|button|[]string|登陆用户拥有的权限按钮|y|数组|
+|menu|[]string|登录用户拥有的权限菜单|y|数组|
+|type|string|用户类型|y||
+|role|string|用户角色|y||
+|description|string|用户信息描述|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":[
+            {
+                "buttons":["xxx","xxx"],
+                "description":"超级管理员",
+                "id":1,
+                "menus":["xx","xxx"],
+                "role":"超级用户",
+                "type":0
+            },
+        ],
+        "ok":true,
+        "page":1,
+        "size":10,
+        "total":1
+    }
+
+#### 获取用户角色
+描述：获取所有用户的角色  
+请求方法：GET
+url：/user/role
+请求参数：无   
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|role|string|用户角色名称|y||
+|type|int|用户类型|y||
+|description|string|用户角色信息描述|y||    
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "role":[
+                {
+                    "ID":1,
+                    "role":"超级用户",
+                    "type":0,
+                    "description":"超级管理员"
+                },
+            ]
+        },
+        "msg":"获取用户角色"
+    }
+
+#### 变更角色权限
+描述：角色权限变更  
+请求方法：POST
+url：/user/roleChange
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|角色id|y||
+|menus|[]string|权限菜单|y|数组|
+|buttonId|[]string|权限按钮|y|数组|  
+
+请求示例:
+
+    {
+        "id":3,
+        "menus":["xxx","xxx"],
+        "buttonId":["xxx","xx"]
+    }
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|角色id|y||
+|menus|string|权限菜单|y||
+|buttonId|string|权限按钮|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "data":{
+                "ID":0,
+                "menus":"xxx,xxx",
+                "buttonId":"xxx,xx"
+            }
+        },
+        "msg":"角色权限变更成功"
+    }
+
+#### 添加角色
+描述：添加用户角色  
+请求方法：POST
+url：/user/addRole
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Role|string|角色名称|y||
+|Description|string|角色描述|y||  
+
+请求示例:
+
+    {
+        "Role":"xxx",
+        "Description":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Role|string|角色名称|y||
+|Type|int|用户类型|y||
+|Description|string|角色描述|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"新增角色成功!"
+    }
+
+#### 删除用户角色
+描述：删除用户角色  
+请求方法：POST
+url：/user/delRole
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|角色id|y||  
+
+请求示例:
+
+    {
+        "id":2
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"角色删除成功!"
+    }
+
+#### 编辑角色信息
+描述：编辑角色信息  
+请求方法：POST
+url：/user/roleChange
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Role|string|角色名称|n||
+|Description|string|角色描述|n||  
+
+请求示例:
+
+    {
+        "Role":"xxx",
+        "Description":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|角色id|y||
+|Role|string|角色名称|y||
+|Description|string|角色描述|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "data":{
+                "ID":1,
+                "role":"test1",
+                "description":"12342"
+            }
+        },
+        "msg":"角色信息修改成功"
+    }
+
+### Agent机器管理 API
+#### agent注册列表
+描述：agent注册列表  
+请求方法：GET
+url：/api/agent_list
+请求参数：无    
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|IP|string|agent的ip|y||
+|agent_uuid|string|agent的uuid|y||
+|agent_version|string|agent版本字符串|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":[
+            {
+            "IP": "xxx.xxx.xxx.xxx",
+            "agent_uuid": "xxxx",
+            "agent_version": "v0.0.1"
+            },
+        ]
+    }
+
+#### 机器OS信息
+描述：agent系统信息  
+请求方法：GET
+url：/api/os_info
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/os_info?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|IP|string|agent的ip|y||
+|KernelArch|string|平台架构|y||
+|KernelVersion|string|内核版本|y||
+|Platform|string|系统|y||
+|PlatformVersion|string|系统平台版本|y||
+|Uptime|string|系统启动时间|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "os_info":{
+                "IP":"xxx.xxx.xxx.xxx",
+                "KernelArch":"x86_64",
+                "KernelVersion":"5.10.0",
+                "Platform":"openeuler",
+                "PlatformVersion":"21.03",
+                "Uptime":"2022年 01月 11日 星期x 10:10:10 CST"
+            }
+        },
+        "msg":"Success"
+    }
+
+#### 机器CPU信息
+描述：agent CPU信息  
+请求方法：GET
+url：/api/cpu_info
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/cpu_info?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|CpuNum|int|agent的cpu核数|y||
+|ModelName|string|机器cpu型号|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "CPU_info":{
+                "CpuNum":4,
+                "ModelName":"Intel(R) Core(TM) i5"
+            }
+        },
+        "msg":"Success"
+    }
+
+#### 机器内存信息
+描述：agent 内存信息  
+请求方法：GET
+url：/api/memory_info
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/memory_info?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|MemFree|int|agent的空闲内存|y||
+|MemTotal|int|机器内存大小|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "memory_info":{
+                "MemFree":1200,
+                "MemTotal":1234
+            }
+        },
+        "msg":"Success"
+    }
+
+#### 机器服务信息
+描述：agent 服务列表信息  
+请求方法：GET
+url：/api/service_list
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/service_list?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Active|string|服务状态|y||
+|Name|string|服务名称|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "service_list":[
+                {
+                    "Active":"active",
+                    "Name":"dev-cdrom.device"
+                }]
+        },
+        "msg":"Success"
+    }
+
+#### 机器服务状态信息
+描述：agent 服务状态信息  
+请求方法：GET
+url：/api/service_status
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/service_status?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Active|string|服务状态|y||
+|Name|string|服务名称|y||  
+
+示例：
+
+    {
+        "code": 200,
+        "data": {
+            "service_status": "inactive"
+        },
+        "msg": "Success"
+    }
+
+#### 机器服务启动信息
+描述：agent 服务启动信息  
+请求方法：POST
+url：/agent/service_start
+请求类型：json  
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器uuid|y||
+|service|string|服务名称|y||
+|userName|string|操作用户名称|y||
+
+请求示例:
+
+    {
+        "uuid":"xxx",
+        "service":"xxx",
+        "userName":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code": 200,
+        "data": {
+            "service_start": null
+        },
+        "msg": "Success"
+    }
+
+#### 机器服务重启信息
+描述：agent 服务重启信息  
+请求方法：POST
+url：/agent/service_restart
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器uuid|y||
+|service|string|服务名称|y||
+|userName|string|操作用户名称|y||
+
+请求示例:
+
+    {
+        "uuid":"xxx",
+        "service":"xxx",
+        "userName":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code": 200,
+        "data": {
+            "service_restart": null
+        },
+        "msg": "Success"
+    }
+
+#### 机器服务停止信息
+描述：agent 服务停止信息  
+请求方法：POST
+url：/agent/service_stop
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器uuid|y||
+|service|string|服务名称|y||
+|userName|string|操作用户名称|y||
+
+请求示例:
+
+    {
+        "uuid":"xxx",
+        "service":"xxx",
+        "userName":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code": 200,
+        "data": {
+            "service_stop": null
+        },
+        "msg": "Success"
+    }
+
+#### 机器磁盘使用信息
+描述：agent 磁盘使用信息  
+请求方法：GET
+url：/api/disk_use
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/disk_use?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|device|string|磁盘分区名字|y||
+|fstype|string|文件类型|y||
+|path|string|挂载点|y||
+|total|string|磁盘总大小|y||
+|used|string|已使用大小|y||
+|usedPercent|string|使用率|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "disk_use":[{
+                "device":"/dev/dm-0",
+                "fstype":"ext2/ext3",
+                "path":"/",
+                "total":"16G",
+                "used":"11G",
+                "usedPercent":"xx%"
+            }]
+        },
+        "msg":"Success"
+    }
+
+#### 机器注册用户信息
+描述：agent 所有注册用户信息  
+请求方法：GET
+url：/api/user_all
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/user_all?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Username|string|用户名字|y||
+|ShellType|string|shell类型|y||
+|HomeDir|string|家目录|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "user_all":[{
+                "HomeDir":"/root",
+                "ShellType":"/bin/bash",
+                "Username":"root"
+            }]
+        },
+        "msg":"获取机器所有用户数据成功!"
+    }
+
+#### 机器当前登录用户信息
+描述：agent 当前登录用户信息  
+请求方法：GET
+url：/api/user_info
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/user_info?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Userid|string|用户id|y||
+|Groupid|string|用户组id|y||
+|GroupName|string|用户组名字|y||
+|HomeDir|string|家目录|y||
+|Username|string|用户名|y||  
+
+示例：
+
+    {
+        "code": 200,
+        "data": {
+            "user_info": {
+                "GroupName": "root",
+                "Groupid": "0",
+                "HomeDir": "/root",
+                "Userid": "0",
+                "Username": "root"
+            }
+        },
+        "msg": "获取当前登录用户信息成功!"
+    }
+
+#### 机器网卡IO信息
+描述：agent 网卡IO信息  
+请求方法：GET
+url：/api/net_io
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/net_io?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Name|string|网卡名字|y||
+|BytesRecv|string|接收字节数|y||
+|BytesSent|string|发送字节数|y||
+|PacketsRecv|string|接收包|y||
+|PacketsSent|string|发送包|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "net_io":[{
+                "BytesRecv":55745202,
+                "BytesSent":91099990,
+                "Name":"ens33",
+                "PacketsRecv":176816,
+                "PacketsSent":475332
+            }]
+        },
+        "msg":"Success"
+    }
+
+#### 机器网卡信息
+描述：agent 网卡信息  
+请求方法：GET
+url：/api/net_nic
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/net_nic?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Name|string|网卡名字|y||
+|IPAddr|string|IP地址|y||
+|MacAddr|string|机器mac地址|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "net_nic":[{
+                "IPAddr":"192.168.160.134",
+                "MacAddr":"00:00:00:00:00:00",
+                "Name":"ens33"
+            }]
+        },
+        "msg":"Success"
+    }
+
+#### 机器安装所有软件包
+描述：agent 所有软件包  
+请求方法：GET
+url：/api/rpm_all
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/rpm_all?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|rpm|string|软件包名字|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "rpm_all":[
+                "kernal",
+                "docker"
+            ]
+        },
+        "msg":"Success"
+    }
+
+#### 机器某个软件包详细信息
+描述：获取agent某个软件包详细信息  
+请求方法：GET
+url：/api/rpm_info
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/rpm_info?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Name|string|软件包名字|y||
+|Version|string|软件包版本|y||
+|Release|string|软件包发行版|y||
+|Architecture|string|架构|y||
+|Summary|string|软件包说明|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "rpm_info":{
+                "Architecture":"x86_64",
+                "Name":"gnupg2",
+                "Release":"1.oe1",
+                "Summary":"xxxxx",
+                "Version":"4.4"
+            }
+        },
+        "msg":"Success"
+    }
+
+#### 机器软件包卸载
+描述：agent软件包卸载  
+请求方法：POST
+url：/agent/rpm_remove
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|UUIDs|[]string|机器uuid|y|批量机器卸载，数组|
+|RPM|string|软件包名字|y||
+|UserName|string|操作机器用户|y||  
+
+请求示例:
+
+    {
+        "uuid":"xxx,xxxx",
+        "RPM":"xxx",
+        "userName":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"软件包卸载成功"
+    }
+
+#### 机器软件包安装
+描述：agent软件包安装  
+请求方法：POST
+url：/agent/rpm_install
+请求类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|UUIDs|[]string|机器uuid|y|批量机器安装，数组|
+|RPM|string|软件包名字|y||
+|UserName|string|操作机器用户|y||  
+
+请求示例:
+
+    {
+        "uuid":"xxx,xxxx",
+        "RPM":"xxx",
+        "userName":"xxx"
+    }
+响应结果：  
+类型：json  
+字段描述：无  
+示例：
+
+    {
+        "code":200,
+        "data":null,
+        "msg":"软件包安装成功"
+    }
+
+#### 机器基础信息
+描述：agent 基础信息  
+请求方法：GET
+url：/api/os_basic
+请求参数：uuid
+
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器唯一标识|y||
+
+请求示例：
+
+    api/os_basic?uuid=xxxxxxx  
+
+响应结果：  
+类型：json  
+字段描述：  
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|IP|string|机器IP|y||
+|state|int|机器状态|y|离线/在线/未分配|
+|depart|string|机器所属部门|y||  
+
+示例：
+
+    {
+        "code":200,
+        "data":{
+            "IP":"192.168.100.10",
+            "depart":"xxx",
+            "state":3
+        },
+        "msg":"Success"
+    }
