@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-13 14:42:44
+ * LastEditTime: 2022-04-18 16:02:48
  * Description: agent main
  ******************************************************************************/
 package main
@@ -25,6 +25,7 @@ import (
 
 	"github.com/google/uuid"
 	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
@@ -32,13 +33,10 @@ import (
 	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
-var agent_uuid = uuid.New().String()
 var agent_version = "v0.0.1"
 
 func main() {
 	fmt.Println("Start PilotGo agent.")
-
-	// init agent info
 
 	// 加载系统配置
 	err := aconfig.Init()
@@ -53,6 +51,13 @@ func main() {
 		os.Exit(-1)
 	}
 	logger.Info("Thanks to choose PilotGo!")
+
+	// init agent info
+	if err := localstorage.Init(); err != nil {
+		fmt.Println("local storage init failed")
+		os.Exit(-1)
+	}
+	logger.Info("agent uuid is:%s", localstorage.AgentUUID())
 
 	go func(conf *aconfig.Server) {
 		// 与server握手
@@ -157,7 +162,7 @@ func regitsterHandler(c *network.SocketClient) {
 			Data: map[string]string{
 				"agent_version": agent_version,
 				"IP":            IP,
-				"agent_uuid":    agent_uuid,
+				"agent_uuid":    localstorage.AgentUUID(),
 			},
 		}
 		return c.Send(resp_msg)
