@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-08 13:02:14
+ * LastEditTime: 2022-04-18 15:16:10
  * Description: server main
  ******************************************************************************/
 package main
@@ -48,7 +48,7 @@ func main() {
 
 	// db初始化
 	if err := dbInit(&sconfig.Config().Dbinfo); err != nil {
-		logger.Error("logger init failed, please check the config file")
+		logger.Error("database init failed, please check the config file")
 		os.Exit(-1)
 	}
 
