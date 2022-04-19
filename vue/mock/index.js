@@ -9,16 +9,18 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-10 17:57:39
- * @LastEditTime: 2022-03-18 14:20:15
+ * @LastEditTime: 2022-04-18 17:59:12
  */
 // 使用 Mock
 import Mock from 'mockjs';
-import loginAPI from './login'
 
-Mock.mock(/\/api\/login/, 'post', loginAPI.loginByUsername)
-
-Mock.mock(/\/api\/logout/, 'get', loginAPI.logout)
-
-Mock.mock(/\/api\/permission/, 'post', loginAPI.getPermission)
+//使用mockjs模拟数据
+Mock.mock('/api/test', 'get', {
+    "code":200,
+    "data":
+      {
+        "firewall_config|1-50": " item:test \n",//随机生成日期时间
+      }
+});
 
 export default Mock

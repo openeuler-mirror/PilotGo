@@ -41,18 +41,6 @@ export const routes = [
         meta: { title: 'cluster', header_title: "机器管理", panel: "cluster", icon_class: 'el-icon-s-platform' },
         children:[
           {
-            path: '/firewall',
-            name: 'Firewall',
-            component:  _import('Firewall/Firewall'),
-            meta: {  
-              header_title: "防火墙配置", 
-              panel: "cluster", 
-              breadcrumb: [
-                { name: '机器管理', path: '/cluster' },
-                { name: '防火墙配置'}], 
-            }
-          },
-          {
             path: '/cluster:detail',
             name: 'MacDetail',
             component: _import('Cluster/detail/index'),

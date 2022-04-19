@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-04-13 15:17:51
+ * @LastEditTime: 2022-04-18 15:17:55
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
