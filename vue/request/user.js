@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-03 17:00:36
- * @LastEditTime: 2022-03-16 15:18:40
+ * @LastEditTime: 2022-04-15 15:37:25
  * @Description: provide agent log manager of pilotgo
  */
 import { request } from './request'
@@ -80,8 +80,8 @@ export function delUser(data) {
 export function resetPwd(data) {
   return request({
     url: '/user/reset',
-    method: 'get',
-    params: data
+    method: 'post',
+    data
   })
 }
 // 批量导入用户

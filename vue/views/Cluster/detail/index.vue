@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:22
-  LastEditTime: 2022-04-13 11:33:57
+  LastEditTime: 2022-04-14 17:11:31
  -->
 <template>
  <div class="content">
@@ -47,7 +47,7 @@ import UserInfo from './user.vue'
 import ServiceInfo from './service.vue'
 import NetworkInfo from './network.vue'
 import RpmInfo from './rpm.vue'
-import FirewallInfo from '../../Firewall/Firewall.vue'
+import FirewallInfo from './firewall.vue'
 export default {
   name: "Detail",
   components: {

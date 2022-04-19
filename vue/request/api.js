@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-15 17:02:23
- * @LastEditTime: 2022-03-04 16:56:49
+ * @LastEditTime: 2022-04-19 09:46:46
  * @Description: provide agent log manager of pilotgo
  */
 // api请求接口文件
@@ -27,61 +27,5 @@ export function getChart(url) {
   return request({
     url: API1 + url,
     method: 'get',
-  })
-}
-
-export function FirewallConfig(data) {
-  return request({
-    url: '/firewall/config',
-    method: 'post',
-    data
-  })
-}
-
-export function FirewallStop(data) {
-  return request({
-    url: '/firewall/stop',
-    method: 'post',
-    data
-  })
-}
-
-export function FirewallRestart(data) {
-  return request({
-    url: '/firewall/restart',
-    method: 'post',
-    data
-  })
-}
-
-export function FirewallReload(data) {
-  return request({
-    url: '/firewall/reload',
-    method: 'post',
-    data
-  })
-}
-
-export function FirewallAddZonePort(data) {
-  return request({
-    url: '/firewall/addzp',
-    method: 'post',
-    data
-  })
-}
-
-export function FirewallDelZonePort(data) {
-  return request({
-    url: '/firewall/delzp',
-    method: 'post',
-    data
-  })
-}
-
-export function FirewallAddZonePortPermanent(data) {
-  return request({
-    url: '/firewall/addzpp',
-    method: 'post',
-    data
   })
 }

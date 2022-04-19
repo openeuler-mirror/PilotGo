@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-04-14 10:30:54
+  LastEditTime: 2022-04-14 16:48:50
  -->
 <template>
  <div class="content">
@@ -44,7 +44,7 @@
         <el-descriptions-item label="执行动作">{{ action }}</el-descriptions-item>
         <el-descriptions-item label="结果">
           {{result+":"}}
-          <p class="progress">
+          <p class="progress" v-show="result != ''">
             <span :style="{background: result === '成功' ? 'rgb(109, 123, 172)' : 'rgb(223, 96, 88)'}">100%</span>
           </p>
         </el-descriptions-item>
@@ -63,7 +63,7 @@ export default {
       totalPackages: 0,
       display: true,
       packageName: '',
-      result: '暂无',
+      result: '',
       action: '暂无',
       rpmData: [],
       rpmInfo: {

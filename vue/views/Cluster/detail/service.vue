@@ -9,24 +9,51 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:34
-  LastEditTime: 2022-04-13 14:30:39
+  LastEditTime: 2022-04-14 16:56:23
  -->
 <template>
- <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
-   <el-descriptions :column="3" size="medium" border>
-     <el-descriptions-item labelStyle="width:20%;background:rgb(109, 123, 172);color: #FFF;font-size:15px; font-weight:bold;" contentStyle="background:rgb(109, 123, 172);color: #FFF;font-weight:bold; font-size:15px;" label="服务名">状态</el-descriptions-item>
-     <el-descriptions-item labelStyle="width:20%;background:rgb(109, 123, 172);color: #FFF;font-size:15px; font-weight:bold;" contentStyle="background:rgb(109, 123, 172);color: #FFF;font-weight:bold; font-size:15px;" label="服务名">状态</el-descriptions-item>
-     <el-descriptions-item labelStyle="width:20%;background:rgb(109, 123, 172);color: #FFF;font-size:15px; font-weight:bold;" contentStyle="background:rgb(109, 123, 172);color: #FFF;font-weight:bold; font-size:15px;" label="服务名">状态</el-descriptions-item>
-    <el-descriptions-item 
-      v-for="item in serviceData" 
-      :key="item.$index" 
-      :label="item.Name">  
-      <span class="statusBtn">{{ item.Active === 'active'? '正在运行': '已停止' }}</span><br/><br/>
-        <el-button class="smallBtn" size="mini" plain type="primary" @click="handleStart(item.Name)">启动</el-button>
-        <el-button class="smallBtn" size="mini" plain type="primary" @click="handleStop(item.Name)">停止</el-button>
-        <el-button class="smallBtn" size="mini" plain type="primary" @click="handleRestart(item.Name)">重启</el-button>
-    </el-descriptions-item>
-   </el-descriptions>
+ <div class="content">
+    <div class="services">
+      <el-autocomplete
+        style="width:50%"
+        class="inline-input"
+        v-model="serviceName"
+        :fetch-suggestions="querySearch"
+        placeholder="请输入服务名称"
+        @select="handleSelect"
+      ></el-autocomplete>
+      <el-button plain  type="primary" @click="handleSelect">搜索</el-button>
+      <el-button plain  type="primary" @click="handleStart">启动</el-button>
+      <el-button plain type="primary" @click="handleStop">停止</el-button>
+      <el-button plain type="primary" @click="handleRestart">重启</el-button>
+   </div>
+   <div class="info">
+     <div class="detail" v-if="display">
+       <p class="title">服务详情：</p>
+       <el-descriptions :column="2" size="medium" border>
+        <el-descriptions-item label="服务名">{{ serviceInfo.Name }}</el-descriptions-item>
+        <el-descriptions-item label="状态">{{ serviceInfo.Active ==="active" ? "正在运行" : "已停止" }}</el-descriptions-item>
+        <el-descriptions-item label="模块是否加载">{{ serviceInfo.LOAD === "loaded" ? "已加载" : "未加载" }}</el-descriptions-item>
+        <el-descriptions-item label="SUB">{{ serviceInfo.SUB }}</el-descriptions-item>
+      </el-descriptions>
+     </div>
+     <div class="result" v-else>
+       <p class="title">执行结果：</p>
+       <el-descriptions :column="2" size="medium" border>
+        <el-descriptions-item label="软件包名">{{ serviceName }}</el-descriptions-item>
+        <el-descriptions-item label="执行动作">{{ action }}</el-descriptions-item>
+        <el-descriptions-item label="结果">
+          {{result+":"}}
+          <p class="progress" v-show="result != ''">
+            <span :style="{background: result === '成功' ? 'rgb(109, 123, 172)' : 'rgb(223, 96, 88)'}">100%</span>
+          </p>
+        </el-descriptions-item>
+      </el-descriptions>
+     </div>
+   </div>
+
+
+
  </div>
 </template>
 <script>
@@ -35,184 +62,34 @@ export default {
   name: "ServiceInfo",
   data() {
     return {
-      serviceData: [
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-block-8:3.device",
-        "SUB": "plugged"
+      params: {},
+      serviceName:"",
+      serviceData: [],
+      allService: [],
+      action: '',
+      result: '',
+      display: true,
+      serviceInfo: {
+        Architecture: "",
+        Name: "",
+        Signature: "",
+        Summary: "",
+        Version: "",
       },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-cdrom.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-ata\\x2dVMware_Virtual_SATA_CDRW_Drive_01000000000000000001.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-dm\\x2dname\\x2dklas\\x2droot.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-dm\\x2dname\\x2dklas\\x2dswap.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-dm\\x2duuid\\x2dLVM\\x2d7xxzeEXx4pYZGobYEfVfDLo94GpvRW1Do9O9Aopt7HBqBeX36lYS8c5gdWYNnTEf.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-dm\\x2duuid\\x2dLVM\\x2d7xxzeEXx4pYZGobYEfVfDLo94GpvRW1DQxrJ3cZcwYaWM21OZeaAzAcdEp380BQY.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-lvm\\x2dpv\\x2duuid\\x2d0f1bNE\\x2dtMeE\\x2d0dId\\x2dGqIC\\x2d2iw1\\x2duudL\\x2drsnHGQ.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2did-lvm\\x2dpv\\x2duuid\\x2dsmpxkP\\x2dObgV\\x2dwEo1\\x2dUcj8\\x2d5JPC\\x2dzL2y\\x2dNv81Ul.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpartuuid-c2e6d7a8\\x2d01.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpartuuid-c2e6d7a8\\x2d02.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpartuuid-c2e6d7a8\\x2d03.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpath-pci\\x2d0000:00:10.0\\x2dscsi\\x2d0:0:0:0.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpath-pci\\x2d0000:00:10.0\\x2dscsi\\x2d0:0:0:0\\x2dpart1.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpath-pci\\x2d0000:00:10.0\\x2dscsi\\x2d0:0:0:0\\x2dpart2.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpath-pci\\x2d0000:00:10.0\\x2dscsi\\x2d0:0:0:0\\x2dpart3.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2dpath-pci\\x2d0000:02:05.0\\x2data\\x2d2.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2duuid-020f054b\\x2d172b\\x2d49ac\\x2da4a9\\x2d86546a953365.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2duuid-3f250f7e\\x2d202b\\x2d4b1a\\x2da40b\\x2d32772238f5ac.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-disk-by\\x2duuid-d5246dd2\\x2dc66f\\x2d4109\\x2da968\\x2d805b44e7ca72.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-dm\\x2d0.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-dm\\x2d1.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-klas-root.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-klas-swap.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-mapper-klas\\x2droot.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-mapper-klas\\x2dswap.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-rfkill.device",
-        "SUB": "plugged"
-      },
-      {
-        "Active": "active",
-        "LOAD": "loaded",
-        "Name": "dev-sda.device",
-        "SUB": "plugged"
-      }],
-      userName: ''
     }
   },
   mounted() {
-    this.userName = this.$store.getters.userName;
+    this.params = {
+      uuid:this.$route.params.detail, 
+      userName:this.$store.getters.userName,
+    }
     if(this.$route.params.detail != undefined) {
     getserviceList({uuid:this.$route.params.detail}).then((res) => {
       if(res.data.code === 200) {
-        this.serviceData = res.data.data.service_list;
+        let result = this.allService = res.data.data && res.data.data.service_list;
+         result.forEach(item => {
+            this.serviceData.push({'value':item.Name})
+          })
       } else {
         console.log(res.data.msg)
       }
@@ -220,47 +97,98 @@ export default {
     }
   },
   methods: {
-    handleStart(sericeName) {
-      serviceStart({uuid:this.$route.params.detail, userName:this.userName, service: sericeName}).then(res => {
-        if(res.data.code === 200) {
-          this.$message.success(res.data.msg);
-        } else {
-           this.$message.error(res.data.msg);
-        }
+    querySearch(queryString, cb) {
+      var serviceData = this.serviceData;
+      var results = queryString ? serviceData.filter((item) => {
+        return item.value.indexOf(queryString) === 0;
+      }): serviceData;
+      cb(results);
+    },
+    handleSelect(item) {
+      let serviceName = (item && item.value) || this.serviceName;
+      let serviceDetail = this.allService.filter(item => item.Name === serviceName);
+      if(serviceDetail.length > 0) {
+        this.serviceInfo = serviceDetail[0];
+      } else {
+        this.$message.error("未获取到"+serviceName+"的服务信息")
+      }
+    },
+    handleResult(res) {
+      this.result = res.data.code === 200 ? '成功' : '失败';
+    },
+    handleStart() {
+      this.action = "开启服务";
+      this.display = false;
+      serviceStart({...this.params, service: this.sericeName}).then(res => {
+        this.handleResult(res)
       })
     },
-    handleStop(sericeName) {
-      serviceStop({uuid:this.$route.params.detail,userName:this.userName, service: sericeName}).then(res => {
-        if(res.data.code === 200) {
-          this.$message.success(res.data.msg);
-        } else {
-           this.$message.error(res.data.msg);
-        }
+    handleStop() {
+      this.action = "停止服务";
+      this.display = false;
+      serviceStop({...this.params, service: this.sericeName}).then(res => {
+        this.handleResult(res)
       })
     },
-    handleRestart(sericeName) {
-      serviceRestart({uuid:this.$route.params.detail,userName:this.userName, service: sericeName}).then(res => {
-        if(res.data.code === 200) {
-          this.$message.success(res.data.msg);
-        } else {
-           this.$message.error(res.data.msg);
-        }
+    handleRestart() {
+      this.action = "重启服务";
+      this.display = false;
+      serviceRestart({...this.params, service: this.sericeName}).then(res => {
+        this.handleResult(res)
       })
     },
   }
 }
 </script>
 <style scoped lang="scss">
-.statusBtn {
-  display: inline-block;
-  width:70px; 
-  font-size: 12px;
-  border-radius:11px; 
-  background: rgb(109, 123, 172);
-  color:#fff;
-}
-.smallBtn {
-  padding: 6px;
-  margin-left: 1%;
+.content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  .services {
+    width: 98%;
+    height: 16%;
+  }
+  .info {
+    width: 98%;
+    height: 80%;
+    overflow: hidden;
+    .detail {
+      width: 100%;
+      height: 100%;
+      .title {
+        width: 30%;
+        margin: 2% 0;
+      }
+    }
+    .result {
+      width: 100%;
+      height: 100%;
+      .title {
+        width: 30%;
+        margin: 2% 0;
+      }
+      .progress {
+        display: inline-block;
+        width:74%; 
+        margin-left: 2%;
+        border: 1px solid rgba(11, 35, 117,.5);  
+        background: #fff; 
+        border-radius: 10px; 
+        text-align:left;
+        span {
+          display: inline-block;
+          text-align:center;
+          color: #fff;
+          width: 100%;
+          border: 1px solid #fff;
+          border-radius: 10px;
+        }
+      }
+    }
+  }
 }
 </style>
