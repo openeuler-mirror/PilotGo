@@ -8,35 +8,52 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
- * Date: 2022-04-05 10:28:34
- * LastEditTime: 2022-04-06 15:08:42
+ * Date: 2022-03-28 19:04:37
+ * LastEditTime: 2022-04-01 13:59:42
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
-
-package config
+package logger
 
 import (
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Server struct {
-	Addr string `yaml:"addr"`
-}
+// 用户操作请求打印到终端
+func LoggerToFile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 开始时间
+		startTime := time.Now()
 
-type AgentConfig struct {
-	Server  Server         `yaml:"server"`
-	Logopts logger.LogOpts `yaml:"log"`
-}
+		// 处理请求
+		c.Next()
 
-const config_file = "./config_agent.yaml"
+		// 结束时间
+		endTime := time.Now()
 
-var global_config AgentConfig
+		// 执行时间
+		latencyTime := endTime.Sub(startTime)
 
-func Init() error {
-	return utils.Load(config_file, &global_config)
-}
+		// 请求方式
+		reqMethod := c.Request.Method
 
-func Config() *AgentConfig {
-	return &global_config
+		// 请求路由
+		reqUri := c.Request.RequestURI
+
+		// 状态码
+		statusCode := c.Writer.Status()
+
+		// 请求IP
+		clientIP := c.ClientIP()
+
+		// 日志格式
+		Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
+			statusCode,
+			latencyTime,
+			clientIP,
+			reqMethod,
+			reqUri,
+		)
+	}
 }

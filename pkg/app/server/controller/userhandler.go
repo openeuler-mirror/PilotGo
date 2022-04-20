@@ -26,11 +26,9 @@ import (
 	"github.com/tealeg/xlsx"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/common"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/dto"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func GetUserRole(c *gin.Context) {
@@ -52,7 +50,7 @@ func Register(c *gin.Context) {
 	roleId := user.RoleID
 
 	if len(username) == 0 { //Data verification
-		username = utils.RandomString(5)
+		username = service.RandomString(5)
 	}
 	if len(password) == 0 {
 		password = "123456"
@@ -126,7 +124,7 @@ func Login(c *gin.Context) {
 	}
 	bpassword := []byte(password)
 	bemail := []byte(email)
-	bbpassword, err := common.JsAesDecrypt(bpassword, bemail)
+	bbpassword, err := service.JsAesDecrypt(bpassword, bemail)
 	if err != nil {
 		response.Response(c, http.StatusOK,
 			400,
@@ -142,7 +140,7 @@ func Login(c *gin.Context) {
 			"密码错误!")
 		return
 	}
-	token, err := common.ReleaseToken(user) // Issue token
+	token, err := service.ReleaseToken(user) // Issue token
 	if err != nil {
 		response.Response(c, http.StatusInternalServerError,
 			500,
@@ -165,7 +163,7 @@ func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
-		"data": gin.H{"user": dto.ToUserDto(user.(model.User))},
+		"data": gin.H{"user": model.ToUserDto(user.(model.User))},
 	})
 }
 
@@ -208,7 +206,7 @@ func UserAll(c *gin.Context) {
 		data["role"] = roles
 		datas = append(datas, data)
 	}
-	common.Reverse(&datas)
+	service.Reverse(&datas)
 	total, data, err := model.SearchAll(query, datas)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
@@ -261,7 +259,7 @@ func UserSearch(c *gin.Context) {
 		data["role"] = roles
 		datas = append(datas, data)
 	}
-	common.Reverse(&datas)
+	service.Reverse(&datas)
 	total, data, err := model.SearchAll(query, datas)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
@@ -431,5 +429,4 @@ func ImportUser(c *gin.Context) {
 				"UserExit": UserExit,
 			}, "以上用户已经存在")
 	}
-
 }

@@ -8,31 +8,29 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-03-16 15:25:41
- * Description: 用户模块相关数据验证
+ * Date: 2022-01-24 15:08:08
+ * LastEditTime: 2022-04-20 13:05:57
+ * Description: 封装response的返回参数
  ******************************************************************************/
-package dao
+package response
 
 import (
-	"strconv"
-	"strings"
+	"net/http"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"github.com/gin-gonic/gin"
 )
 
-func IsEmailExist(email string) bool {
-	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
-	return user.ID != 0
+func Response(c *gin.Context, httpStatus int, code int, data gin.H, msg string) {
+	c.JSON(httpStatus, gin.H{
+		"code": code,
+		"data": data,
+		"msg":  msg})
 }
-func IsContain(str string, substr int) bool {
-	strs := strings.Split(str, ",")
-	for _, value := range strs {
-		if value == strconv.Itoa(substr) {
-			return true
-		}
-	}
-	return false
+
+func Success(c *gin.Context, data gin.H, msg string) {
+	Response(c, http.StatusOK, 200, data, msg)
+}
+
+func Fail(c *gin.Context, data gin.H, msg string) {
+	Response(c, http.StatusBadRequest, 400, data, msg)
 }

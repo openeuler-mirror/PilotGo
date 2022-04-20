@@ -9,14 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
  * Date: 2022-04-06 13:27:45
- * LastEditTime: 2022-04-06 14:32:28
+ * LastEditTime: 2022-04-20 14:32:28
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
 package config
 
 import (
-	"openeluer.org/PilotGo/PilotGo/pkg/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type HttpServer struct {
@@ -52,7 +52,7 @@ const config_file = "./config_server.yaml"
 var global_config ServerConfig
 
 func Init() error {
-	return config.Load(config_file, &global_config)
+	return utils.Load(config_file, &global_config)
 }
 
 func Config() *ServerConfig {

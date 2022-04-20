@@ -31,3 +31,20 @@ type User struct {
 	UserType     int    `json:"userType,omitempty"`
 	RoleID       string `json:"role,omitempty"`
 }
+
+type UserDto struct {
+	Name     string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Phone    string `json:"phone,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Enable   string `json:"enable,omitempty"`
+}
+
+func ToUserDto(user User) UserDto {
+	return UserDto{
+		Name:     user.Username,
+		Password: user.Password,
+		Phone:    user.Phone,
+		Email:    user.Email,
+	}
+}

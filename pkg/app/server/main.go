@@ -28,9 +28,9 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/net"
 )
 
 func main() {
@@ -95,7 +95,7 @@ EXIT:
 }
 
 func sessionManagerInit(conf *sconfig.HttpServer) error {
-	var sessionManage net.SessionManage
+	var sessionManage service.SessionManage
 	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
 	return nil
 }

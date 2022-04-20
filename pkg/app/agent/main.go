@@ -28,8 +28,8 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/protocol"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
 )
 

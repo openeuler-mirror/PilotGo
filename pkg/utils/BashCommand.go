@@ -8,31 +8,24 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-03-16 15:25:41
- * Description: 用户模块相关数据验证
+ * Date: 2021-11-18 13:03:16
+ * LastEditTime: 2022-04-20 14:10:23
+ * Description: Execute instruction function
  ******************************************************************************/
-package dao
+package utils
 
 import (
-	"strconv"
-	"strings"
-
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"bytes"
+	"os/exec"
 )
 
-func IsEmailExist(email string) bool {
-	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
-	return user.ID != 0
-}
-func IsContain(str string, substr int) bool {
-	strs := strings.Split(str, ",")
-	for _, value := range strs {
-		if value == strconv.Itoa(substr) {
-			return true
-		}
-	}
-	return false
+func RunCommand(s string) (string, error) {
+
+	cmd := exec.Command("/bin/bash", "-c", s)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+
+	return out.String(), err
 }

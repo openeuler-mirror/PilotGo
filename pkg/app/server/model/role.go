@@ -15,7 +15,7 @@
 package model
 
 import (
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
 type UserRole struct {

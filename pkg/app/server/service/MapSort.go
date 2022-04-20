@@ -8,31 +8,19 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-03-16 15:25:41
- * Description: 用户模块相关数据验证
+ * Date: 2022-03-21 15:32:50
+ * LastEditTime: 2022-03-21 15:37:48
+ * Description: 对map结构体进行倒序
  ******************************************************************************/
-package dao
+package service
 
-import (
-	"strconv"
-	"strings"
-
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-)
-
-func IsEmailExist(email string) bool {
-	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
-	return user.ID != 0
-}
-func IsContain(str string, substr int) bool {
-	strs := strings.Split(str, ",")
-	for _, value := range strs {
-		if value == strconv.Itoa(substr) {
-			return true
-		}
+// []map倒序函数
+func Reverse(arr *[]map[string]interface{}) {
+	var temp map[string]interface{}
+	length := len(*arr)
+	for i := 0; i < length/2; i++ {
+		temp = (*arr)[i]
+		(*arr)[i] = (*arr)[length-1-i]
+		(*arr)[length-1-i] = temp
 	}
-	return false
 }
