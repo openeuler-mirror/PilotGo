@@ -20,12 +20,12 @@ import (
 	"github.com/casbin/casbin"
 	gormadapter "github.com/casbin/gorm-adapter"
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network/handlers"
-	"openeluer.org/PilotGo/PilotGo/pkg/common"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/middleware"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
 )
 
 func SetupRouter() *gin.Engine {
@@ -38,33 +38,33 @@ func SetupRouter() *gin.Engine {
 
 	group := router.Group("/api")
 	{
-		group.GET("/agent_info", handlers.AgentInfoHandler)
-		group.GET("/agent_list", handlers.AgentListHandler)
-		group.GET("/run_script", handlers.RunScript)
-		group.GET("/os_info", handlers.OSInfoHandler)
-		group.GET("/cpu_info", handlers.CPUInfoHandler)
-		group.GET("/memory_info", handlers.MemoryInfoHandler)
-		group.GET("/sysctl_info", handlers.SysInfoHandler)
-		group.GET("/sysctl_view", handlers.SysctlViewHandler)
-		group.GET("/service_list", handlers.ServiceListHandler)
-		group.GET("/service_status", handlers.ServiceStatusHandler)
-		group.GET("/rpm_all", handlers.AllRpmHandler)
-		group.GET("/rpm_source", handlers.RpmSourceHandler)
-		group.GET("/rpm_info", handlers.RpmInfoHandler)
-		group.GET("/disk_use", handlers.DiskUsageHandler)
-		group.GET("/disk_info", handlers.DiskInfoHandler)
-		group.GET("/net_tcp", handlers.NetTCPHandler)
-		group.GET("/net_udp", handlers.NetUDPHandler)
-		group.GET("/net_io", handlers.NetIOCounterHandler)
-		group.GET("/net_nic", handlers.NetNICConfigHandler)
-		group.GET("/user_info", handlers.CurrentUserInfoHandler)
-		group.GET("/user_all", handlers.AllUserInfoHandler)
-		group.GET("/os_basic", handlers.OsBasic)
-		group.GET("/firewall_config", handlers.FirewalldConfig)
-		group.GET("/firewall_restart", handlers.FirewalldRestart)
-		group.GET("/firewall_stop", handlers.FirewalldStop)
-		group.POST("/firewall_addzp", handlers.FirewalldZonePortAdd)
-		group.POST("/firewall_delzp", handlers.FirewalldZonePortDel)
+		group.GET("/agent_info", agentcontroller.AgentInfoHandler)
+		group.GET("/agent_list", agentcontroller.AgentListHandler)
+		group.GET("/run_script", agentcontroller.RunScript)
+		group.GET("/os_info", agentcontroller.OSInfoHandler)
+		group.GET("/cpu_info", agentcontroller.CPUInfoHandler)
+		group.GET("/memory_info", agentcontroller.MemoryInfoHandler)
+		group.GET("/sysctl_info", agentcontroller.SysInfoHandler)
+		group.GET("/sysctl_view", agentcontroller.SysctlViewHandler)
+		group.GET("/service_list", agentcontroller.ServiceListHandler)
+		group.GET("/service_status", agentcontroller.ServiceStatusHandler)
+		group.GET("/rpm_all", agentcontroller.AllRpmHandler)
+		group.GET("/rpm_source", agentcontroller.RpmSourceHandler)
+		group.GET("/rpm_info", agentcontroller.RpmInfoHandler)
+		group.GET("/disk_use", agentcontroller.DiskUsageHandler)
+		group.GET("/disk_info", agentcontroller.DiskInfoHandler)
+		group.GET("/net_tcp", agentcontroller.NetTCPHandler)
+		group.GET("/net_udp", agentcontroller.NetUDPHandler)
+		group.GET("/net_io", agentcontroller.NetIOCounterHandler)
+		group.GET("/net_nic", agentcontroller.NetNICConfigHandler)
+		group.GET("/user_info", agentcontroller.CurrentUserInfoHandler)
+		group.GET("/user_all", agentcontroller.AllUserInfoHandler)
+		group.GET("/os_basic", agentcontroller.OsBasic)
+		group.GET("/firewall_config", agentcontroller.FirewalldConfig)
+		group.GET("/firewall_restart", agentcontroller.FirewalldRestart)
+		group.GET("/firewall_stop", agentcontroller.FirewalldStop)
+		group.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
+		group.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
 	}
 	cluster := router.Group("/cluster")
 	{
@@ -73,20 +73,20 @@ func SetupRouter() *gin.Engine {
 	}
 	agent := router.Group("/agent")
 	{
-		agent.GET("/sysctl_change", handlers.SysctlChangeHandler)
-		agent.POST("/service_stop", handlers.ServiceStopHandler)
-		agent.POST("/service_start", handlers.ServiceStartHandler)
-		agent.POST("/service_restart", handlers.ServiceRestartHandler)
-		agent.POST("/rpm_install", handlers.InstallRpmHandler)
-		agent.POST("/rpm_remove", handlers.RemoveRpmHandler)
-		agent.GET("/disk_path", handlers.DiskCreatPathHandler)
-		agent.GET("/disk_mount", handlers.DiskMountHandler)
-		agent.GET("/disk_umount", handlers.DiskUMountHandler)
-		agent.GET("/disk_format", handlers.DiskFormatHandler)
-		agent.GET("/user_add", handlers.AddLinuxUserHandler)
-		agent.GET("/user_del", handlers.DelUserHandler)
-		agent.GET("/user_ower", handlers.ChangeFileOwnerHandler)
-		agent.GET("/user_per", handlers.ChangePermissionHandler)
+		agent.GET("/sysctl_change", agentcontroller.SysctlChangeHandler)
+		agent.POST("/service_stop", agentcontroller.ServiceStopHandler)
+		agent.POST("/service_start", agentcontroller.ServiceStartHandler)
+		agent.POST("/service_restart", agentcontroller.ServiceRestartHandler)
+		agent.POST("/rpm_install", agentcontroller.InstallRpmHandler)
+		agent.POST("/rpm_remove", agentcontroller.RemoveRpmHandler)
+		agent.GET("/disk_path", agentcontroller.DiskCreatPathHandler)
+		agent.GET("/disk_mount", agentcontroller.DiskMountHandler)
+		agent.GET("/disk_umount", agentcontroller.DiskUMountHandler)
+		agent.GET("/disk_format", agentcontroller.DiskFormatHandler)
+		agent.GET("/user_add", agentcontroller.AddLinuxUserHandler)
+		agent.GET("/user_del", agentcontroller.DelUserHandler)
+		agent.GET("/user_ower", agentcontroller.ChangeFileOwnerHandler)
+		agent.GET("/user_per", agentcontroller.ChangePermissionHandler)
 		agent.GET("/log_all", controller.LogAll)
 		agent.GET("/logs", controller.AgentLogs)
 		agent.POST("/delete", controller.DeleteLog)
@@ -136,10 +136,10 @@ func SetupRouter() *gin.Engine {
 		policy.POST("/add", controller.PolicyAdd)
 	}
 	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
-	common.E = casbin.NewEnforcer("./rbac_models.conf", a)
-	common.E.LoadPolicy()
+	service.E = casbin.NewEnforcer("./rbac_models.conf", a)
+	service.E.LoadPolicy()
 	Level := router.Group("")
-	Level.Use(common.CasbinHandler())
+	Level.Use(service.CasbinHandler())
 	{
 		user.POST("/register", controller.Register)
 		user.GET("/reset", controller.ResetPassword)

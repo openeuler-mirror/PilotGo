@@ -16,7 +16,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
 type Batch struct {

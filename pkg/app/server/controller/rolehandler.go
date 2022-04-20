@@ -24,9 +24,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/common"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func PolicyDelete(c *gin.Context) {
@@ -51,7 +51,7 @@ func PolicyDelete(c *gin.Context) {
 	role_type := Rule.RoleType
 	url := Rule.Url
 	method := Rule.Method
-	if ok := common.E.RemovePolicy(role_type, url, method); !ok {
+	if ok := service.E.RemovePolicy(role_type, url, method); !ok {
 		response.Response(c, http.StatusOK, 400, nil, "Pilocy不存在")
 	} else {
 		response.Success(c, gin.H{"code": 200}, "Pilocy删除成功")
@@ -81,7 +81,7 @@ func PolicyAdd(c *gin.Context) {
 	url := Rule.Url
 	method := Rule.Method
 
-	if ok := common.E.AddPolicy(role_type, url, method); !ok {
+	if ok := service.E.AddPolicy(role_type, url, method); !ok {
 		response.Response(c, http.StatusOK, 400, nil, "Pilocy已存在")
 	} else {
 		response.Success(c, gin.H{"code": 200}, "Pilocy添加成功")
@@ -97,7 +97,7 @@ func GetPolicy(c *gin.Context) {
 	if model.HandleError(c, err) {
 		return
 	}
-	list := common.E.GetPolicy()
+	list := service.E.GetPolicy()
 	for _, vlist := range list {
 		policy := make(map[string]interface{})
 		policy["role"] = vlist[0]

@@ -14,8 +14,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 type AlertMessage struct {

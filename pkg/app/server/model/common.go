@@ -20,7 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/common/response"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 type PageInfo struct {

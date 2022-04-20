@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
 type AgentLogParent struct {
