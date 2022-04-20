@@ -48,3 +48,7 @@ func ToUserDto(user User) UserDto {
 		Email:    user.Email,
 	}
 }
+
+type Userdel struct {
+	Emails []string `json:"email"`
+}

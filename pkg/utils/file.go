@@ -35,7 +35,7 @@ func FileSaveString(filePath string, data string) error {
 			return err
 		}
 		if n+send_count >= data_length {
-			send_count = send_count + n
+			send_count += n
 			break
 		}
 	}

@@ -17,6 +17,7 @@ package model
 import (
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type DepartNode struct {
@@ -84,7 +85,7 @@ type Res struct {
 	Systeminfo string `json:"systeminfo"`
 }
 
-func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, total uint, err error) {
+func (m *MachineNode) ReturnMachine(q *utils.PaginationQ, departid int) (list *[]Res, total uint, err error) {
 	list = &[]Res{}
 	// tx := mysqlmanager.DB.Where("depart_id=?", departid).Find(&list)
 	tx := mysqlmanager.DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
@@ -102,7 +103,7 @@ func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, 
 	// 	"a.cpu as cpu,a.state as state, a.systeminfo as systeminfo" +
 	// 	" FROM machine_node a LEFT JOIN depart_node b ON a.depart_id = b.id").Scan(&list).Order("ID desc")
 
-	total, err = CrudAll(q, tx, &res)
+	total, err = utils.CrudAll(q, tx, &res)
 	return
 }
 func MachineAllData() []Res {

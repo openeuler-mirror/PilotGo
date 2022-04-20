@@ -16,6 +16,7 @@ package model
 
 import (
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type UserRole struct {
@@ -37,9 +38,9 @@ type AddRole struct {
 	RoleID int    `json:"roleid"`
 }
 
-func (u *UserRole) All(q *PaginationQ) (list *[]UserRole, total uint, err error) {
+func (u *UserRole) All(q *utils.PaginationQ) (list *[]UserRole, total uint, err error) {
 	list = &[]UserRole{}
 	tx := mysqlmanager.DB.Find(list)
-	total, err = CrudAll(q, tx, list)
+	total, err = utils.CrudAll(q, tx, list)
 	return
 }

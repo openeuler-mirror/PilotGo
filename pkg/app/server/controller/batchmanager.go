@@ -13,6 +13,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -130,19 +131,19 @@ func CreateBatch(c *gin.Context) {
 
 func BatchInform(c *gin.Context) {
 	batch := model.Batch{}
-	query := &model.PaginationQ{}
+	query := &utils.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 
-	if model.HandleError(c, err) {
+	if utils.HandleError(c, err) {
 		return
 	}
 	list, total, err := batch.ReturnBatch(query)
 	logger.Info("%+v", list)
-	if model.HandleError(c, err) {
+	if utils.HandleError(c, err) {
 		return
 	}
 	// 返回数据开始拼装分页的json
-	model.JsonPagination(c, list, total, query)
+	utils.JsonPagination(c, list, total, query)
 }
 
 type Batchdel struct {

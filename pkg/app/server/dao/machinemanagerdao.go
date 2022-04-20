@@ -132,3 +132,10 @@ func AllMachine() []model.MachineNode {
 
 	return m
 }
+
+// 根据部门名字查询id和pid
+func GetPidAndId(depart string) (pid, id int) {
+	var dep model.DepartNode
+	mysqlmanager.DB.Where("depart=?", depart).Find(&dep)
+	return dep.PID, dep.ID
+}

@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -35,7 +36,7 @@ func LogAll(c *gin.Context) {
 		return
 	}
 	logParent := model.AgentLogParent{}
-	query := &model.PaginationQ{}
+	query := &utils.PaginationQ{}
 	err = c.ShouldBindQuery(query)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
@@ -57,7 +58,7 @@ func LogAll(c *gin.Context) {
 		return
 	}
 	// 返回数据开始拼装分页的json
-	model.JsonPagination(c, list, total, query)
+	utils.JsonPagination(c, list, total, query)
 }
 
 // 查询所有子日志
@@ -72,18 +73,18 @@ func AgentLogs(c *gin.Context) {
 		return
 	}
 	logs := model.AgentLog{}
-	query := &model.PaginationQ{}
+	query := &utils.PaginationQ{}
 	err = c.ShouldBindQuery(query)
-	if model.HandleError(c, err) {
+	if utils.HandleError(c, err) {
 		return
 	}
 
 	list, total, err := logs.AgentLog(query, parentId)
-	if model.HandleError(c, err) {
+	if utils.HandleError(c, err) {
 		return
 	}
 	// 返回数据开始拼装分页的json
-	model.JsonPagination(c, list, total, query)
+	utils.JsonPagination(c, list, total, query)
 }
 
 // 删除机器日志
