@@ -746,4 +746,122 @@ func regitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
+	c.BindHandler(protocol.FirewalldConfig, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		config, err := uos.Config()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   config,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldRestart, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		Restart := uos.Restart()
+		if !Restart {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  "重启防火墙失败",
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   Restart,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldStop, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		Stop := uos.Stop()
+		if !Stop {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  "关闭防火墙失败",
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   Stop,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldZonePortAdd, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		zp := msg.Data.(string)
+		zps := strings.Split(zp, ",")
+		zone := zps[0]
+		port := zps[1]
+		add, err := uos.AddZonePort(zone, port)
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   add,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldZonePortDel, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+		zp := msg.Data.(string)
+		zps := strings.Split(zp, ",")
+		zone := zps[0]
+		port := zps[1]
+		del, err := uos.DelZonePort(zone, port)
+
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   del,
+			}
+			return c.Send(resp_msg)
+		}
+	})
 }

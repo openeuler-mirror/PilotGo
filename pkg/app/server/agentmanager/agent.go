@@ -734,3 +734,83 @@ func (a *Agent) HeartBeat() (interface{}, error) {
 	}
 	return resp_message.Data, nil
 }
+
+// 获取防火墙配置
+func (a *Agent) FirewalldConfig() (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldConfig,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 重启防火墙
+func (a *Agent) FirewalldRestart() (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldRestart,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 关闭防火墙
+func (a *Agent) FirewalldStop() (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldStop,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 防火墙指定区域添加端口
+func (a *Agent) FirewalldZonePortAdd(zone, port string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldZonePortAdd,
+		Data: zone + "," + port,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 防火墙指定区域删除端口
+func (a *Agent) FirewalldZonePortDel(zone, port string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldZonePortDel,
+		Data: zone + "," + port,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}

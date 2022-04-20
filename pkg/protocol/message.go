@@ -98,6 +98,16 @@ const (
 	ChangeFileOwner = 43
 	// 获取agent必要信息
 	AgentOSInfo = 44
+	// 获取防火墙配置
+	FirewalldConfig = 45
+	// 重启防火墙
+	FirewalldRestart = 46
+	// 关闭防火墙
+	FirewalldStop = 47
+	// 删除区域和指定端口
+	FirewalldZonePortDel = 48
+	// 添加区域和指定端口
+	FirewalldZonePortAdd = 49
 )
 
 type Message struct {

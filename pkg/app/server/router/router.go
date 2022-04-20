@@ -60,6 +60,11 @@ func SetupRouter() *gin.Engine {
 		group.GET("/user_info", handlers.CurrentUserInfoHandler)
 		group.GET("/user_all", handlers.AllUserInfoHandler)
 		group.GET("/os_basic", handlers.OsBasic)
+		group.GET("/firewall_config", handlers.FirewalldConfig)
+		group.GET("/firewall_restart", handlers.FirewalldRestart)
+		group.GET("/firewall_stop", handlers.FirewalldStop)
+		group.POST("/firewall_addzp", handlers.FirewalldZonePortAdd)
+		group.POST("/firewall_delzp", handlers.FirewalldZonePortDel)
 	}
 	cluster := router.Group("/cluster")
 	{
@@ -159,24 +164,8 @@ func SetupRouter() *gin.Engine {
 		router.StaticFile(url, "./dist/index.html")
 	})
 
-	// firewall := router.Group("firewall")
-	// {
-	// 	firewall.POST("/config", controller.Config)
-	// 	firewall.POST("/stop", controller.Stop)
-	// 	firewall.POST("/restart", controller.Restart)
-	// 	firewall.POST("/reload", controller.Reload)
-	// 	firewall.POST("/addzp", controller.AddZonePort)
-	// 	firewall.POST("/delzp", controller.DelZonePort)
-	// 	firewall.POST("/addzpp", controller.AddZonePortPermanent)
-	// }
-
-	//router.LoadHTMLFiles("./static/index.html")
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
-	//router.POST("/login", net.MakeHandler("getLogin", net.GetLogin))
-	//router.Static("/static", "./static")
-	//router.GET("/", func(context *gin.Context) {
-	//	context.HTML(http.StatusOK, "index.html", nil)
-	//})
+
 	////注册session校验中间件
 	////r.Use(checkSession)
 	//

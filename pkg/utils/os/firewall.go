@@ -2,58 +2,55 @@ package os
 
 import (
 	"fmt"
+	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
-type ZonePort struct {
-	Zone string
-	Port int
+func Config() ([]string, error) {
+	tmp, err := utils.RunCommand("firewall-cmd --list-all")
+	if err != nil {
+		return nil, fmt.Errorf("FirewallD is not running")
+	}
+
+	tmp = strings.TrimSpace(tmp)
+	t := strings.Split(tmp, "\n")
+
+	return t, nil
 }
 
 func Restart() bool {
 	tmp, _ := utils.RunCommand("service firewalld restart")
-	if len(tmp) != 0 {
-		logger.Error("重启防火墙失败！")
-		return false
-	}
-	return true
-}
-
-func Config() bool {
-	tmp, _ := utils.RunCommand("firewall-cmd --list-all")
-	if len(tmp) != 0 {
-		logger.Error("获取防火墙配置失败！")
-		return false
-	}
-	return true
-}
-
-func Reload() bool {
-	tmp, _ := utils.RunCommand("firewall-cmd --reload")
-	if len(tmp) != 0 {
-		logger.Error("更新防火墙失败！")
-		return false
-	}
-	return true
+	return len(tmp) == 0
 }
 
 func Stop() bool {
 	tmp, _ := utils.RunCommand("service firewalld stop")
-	if len(tmp) != 0 {
-		logger.Error("关闭防火墙失败！")
-		return false
+	return len(tmp) == 0
+}
+
+func DelZonePort(zone, port string) (string, error) { //zone = block dmz drop external home internal public trusted work
+	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-port=%v/tcp", zone, port))
+	if err != nil {
+		return tmp, fmt.Errorf("FirewallD is not running")
 	}
-	return true
+	tmpp, err := utils.RunCommand("firewall-cmd --reload")
+	tmpp = strings.Replace(tmpp, "\n", "", -1)
+	if err != nil {
+		return "", fmt.Errorf("重新加载防火墙失败")
+	}
+	return tmpp, nil
 }
 
-func DelZonePort(zp *ZonePort) string { //zone = block dmz drop external home internal public trusted work
-	tmp, _ := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=public --remove-port=%v/tcp", zp.Port))
-	return tmp
-}
-
-func AddZonePortPermanent(zp *ZonePort) string { //zone = block dmz drop external home internal public trusted work
-	tmp, _ := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=public --add-port=%v/tcp", zp.Port))
-	return tmp
+func AddZonePort(zone, port string) (string, error) { //zone = block dmz drop external home internal public trusted work
+	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-port=%v/tcp", zone, port))
+	if err != nil {
+		return tmp, fmt.Errorf("FirewallD is not running")
+	}
+	tmpp, err := utils.RunCommand("firewall-cmd --reload")
+	tmpp = strings.Replace(tmpp, "\n", "", -1)
+	if err != nil {
+		return "", fmt.Errorf("重新加载防火墙失败")
+	}
+	return tmpp, nil
 }
