@@ -125,7 +125,7 @@ func Info(c *gin.Context) {
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	query := &utils.PaginationQ{}
+	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
@@ -133,14 +133,14 @@ func UserAll(c *gin.Context) {
 	}
 
 	users := dao.UserAll()
-	utils.Reverse(&users)
+	Reverse(&users)
 
-	total, data, err := utils.SearchAll(query, users)
+	total, data, err := SearchAll(query, users)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	utils.JsonPagination(c, data, total, query)
+	JsonPagination(c, data, total, query)
 }
 
 // 高级搜索
@@ -149,7 +149,7 @@ func UserSearch(c *gin.Context) {
 	c.Bind(&user)
 	var email = user.Email
 
-	query := &utils.PaginationQ{}
+	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
@@ -157,14 +157,14 @@ func UserSearch(c *gin.Context) {
 	}
 
 	users := dao.UserSearch(email)
-	utils.Reverse(&users)
+	Reverse(&users)
 
-	total, data, err := utils.SearchAll(query, users)
+	total, data, err := SearchAll(query, users)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	utils.JsonPagination(c, data, total, query)
+	JsonPagination(c, data, total, query)
 }
 
 // 重置密码
@@ -183,7 +183,7 @@ func ResetPassword(c *gin.Context) {
 // 删除用户
 func DeleteUser(c *gin.Context) {
 	var userdel model.Userdel
-	c.ShouldBind(&userdel)
+	c.Bind(&userdel)
 
 	for _, userEmail := range userdel.Emails {
 		dao.DeleteUser(userEmail)

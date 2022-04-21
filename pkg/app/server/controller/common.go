@@ -8,11 +8,11 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-03-17 14:55:44
+ * Date: 2022-02-23 17:44:00
+ * LastEditTime: 2022-04-22 14:18:14
  * Description: 公共函数
  ******************************************************************************/
-package utils
+package controller
 
 import (
 	"fmt"
@@ -20,32 +20,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-type PageInfo struct {
-	Page     int `json:"page" form:"page"`
-	PageSize int `json:"pageSize" form:"pageSize"`
-}
-
-type PageResult struct {
-	List     interface{} `json:"list"`
-	Total    int         `json:"total"`
-	Page     int         `json:"page"`
-	PageSize int         `json:"pageSize"`
-}
-
-//分页查询结构体
-type PaginationQ struct {
-	Ok             bool        `json:"ok"`
-	Size           uint        `form:"size" json:"size"`
-	CurrentPageNum uint        `form:"page" json:"page"`
-	Data           interface{} `json:"data" comment:"muster be a pointer of slice gorm.Model"` // save pagination list
-	TotalPage      uint        `json:"total"`
-}
-
 // gorm分页查询方法
-func CrudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
+func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -67,7 +47,7 @@ func CrudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
 }
 
 // map分页查询方法
-func SearchAll(p *PaginationQ, data []map[string]interface{}) (uint, []map[string]interface{}, error) {
+func SearchAll(p *model.PaginationQ, data []map[string]interface{}) (uint, []map[string]interface{}, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -108,7 +88,7 @@ func Reverse(arr *[]map[string]interface{}) {
 }
 
 // 拼装json 分页数据
-func JsonPagination(c *gin.Context, list interface{}, total uint, query *PaginationQ) {
+func JsonPagination(c *gin.Context, list interface{}, total uint, query *model.PaginationQ) {
 	c.AbortWithStatusJSON(200, gin.H{
 		"code":  200,
 		"ok":    true,

@@ -26,7 +26,6 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -92,10 +91,10 @@ func PolicyAdd(c *gin.Context) {
 func GetPolicy(c *gin.Context) {
 	casbin := make([]map[string]interface{}, 0)
 
-	query := &utils.PaginationQ{}
+	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 
-	if utils.HandleError(c, err) {
+	if HandleError(c, err) {
 		return
 	}
 	list := service.E.GetPolicy()
@@ -106,11 +105,11 @@ func GetPolicy(c *gin.Context) {
 		policy["method"] = vlist[2]
 		casbin = append(casbin, policy)
 	}
-	total, data, err := utils.SearchAll(query, casbin)
-	if utils.HandleError(c, err) {
+	total, data, err := SearchAll(query, casbin)
+	if HandleError(c, err) {
 		return
 	}
-	utils.JsonPagination(c, data, total, query)
+	JsonPagination(c, data, total, query)
 }
 
 // 获取登录用户权限
@@ -167,10 +166,10 @@ func GetLoginUserPermission(c *gin.Context) {
 
 func GetRoles(c *gin.Context) {
 	var roles []model.UserRole
-	query := &utils.PaginationQ{}
+	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 
-	if utils.HandleError(c, err) {
+	if HandleError(c, err) {
 		return
 	}
 	mysqlmanager.DB.Find(&roles)
@@ -204,11 +203,11 @@ func GetRoles(c *gin.Context) {
 		data["buttons"] = buts
 		datas = append(datas, data)
 	}
-	total, data, err := utils.SearchAll(query, datas)
-	if utils.HandleError(c, err) {
+	total, data, err := SearchAll(query, datas)
+	if HandleError(c, err) {
 		return
 	}
-	utils.JsonPagination(c, data, total, query)
+	JsonPagination(c, data, total, query)
 }
 
 func AddUserType(c *gin.Context) {
