@@ -14,11 +14,6 @@
  ******************************************************************************/
 package model
 
-import (
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
-)
-
 type UserRole struct {
 	ID          int    `gorm:"primary_key;AUTO_INCREMENT"`
 	Role        string `json:"role"` // 超管和部门等级
@@ -38,9 +33,9 @@ type AddRole struct {
 	RoleID int    `json:"roleid"`
 }
 
-func (u *UserRole) All(q *utils.PaginationQ) (list *[]UserRole, total uint, err error) {
-	list = &[]UserRole{}
-	tx := mysqlmanager.DB.Find(list)
-	total, err = utils.CrudAll(q, tx, list)
-	return
-}
+// func (u *UserRole) All(q *PaginationQ) (list *[]UserRole, total uint, err error) {
+// 	list = &[]UserRole{}
+// 	tx := mysqlmanager.DB.Find(list)
+// 	total, err = utils.CrudAll(q, tx, list)
+// 	return
+// }

@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type AgentLogParent struct {
@@ -50,7 +50,7 @@ const (
 	ServiceStart   = "开启服务"
 )
 
-func (p *AgentLogParent) LogAll(q *utils.PaginationQ, Dnames []string) (list []AgentLogParent, total uint, err error) {
+func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (list []AgentLogParent, total uint, err error) {
 	list = []AgentLogParent{}
 	lists := []AgentLogParent{}
 	for _, name := range Dnames {
@@ -61,13 +61,12 @@ func (p *AgentLogParent) LogAll(q *utils.PaginationQ, Dnames []string) (list []A
 	return
 }
 
-func (p *AgentLog) AgentLog(q *utils.PaginationQ, parentId int) (list *[]AgentLog, total uint, err error) {
+func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tx *gorm.DB) {
 	list = &[]AgentLog{}
-	tx := mysqlmanager.DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
-	total, err = utils.CrudAll(q, tx, list)
+	tx = mysqlmanager.DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	return
 }
-func SliceAll(p *utils.PaginationQ, data []AgentLogParent) ([]AgentLogParent, uint, error) {
+func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, uint, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
