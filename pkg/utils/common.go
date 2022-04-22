@@ -10,9 +10,9 @@
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
  * LastEditTime: 2022-03-17 14:55:44
- * Description: 分页查询及结构体定义
+ * Description: 公共函数
  ******************************************************************************/
-package model
+package utils
 
 import (
 	"fmt"
@@ -93,6 +93,17 @@ func SearchAll(p *PaginationQ, data []map[string]interface{}) (uint, []map[strin
 		} else {
 			return uint(total), data[num : p.CurrentPageNum*p.Size-1], nil
 		}
+	}
+}
+
+// []map倒序函数
+func Reverse(arr *[]map[string]interface{}) {
+	var temp map[string]interface{}
+	length := len(*arr)
+	for i := 0; i < length/2; i++ {
+		temp = (*arr)[i]
+		(*arr)[i] = (*arr)[length-1-i]
+		(*arr)[length-1-i] = temp
 	}
 }
 

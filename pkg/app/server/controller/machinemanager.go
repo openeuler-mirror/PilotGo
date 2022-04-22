@@ -27,6 +27,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -364,18 +365,18 @@ func MachineInfo(c *gin.Context) {
 func FreeMachineSource(c *gin.Context) {
 	departid := 1
 	machine := model.MachineNode{}
-	query := &model.PaginationQ{}
+	query := &utils.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 
-	if model.HandleError(c, err) {
+	if utils.HandleError(c, err) {
 		return
 	}
 	list, total, err := machine.ReturnMachine(query, departid)
-	if model.HandleError(c, err) {
+	if utils.HandleError(c, err) {
 		return
 	}
 	// 返回数据开始拼装分页的json
-	model.JsonPagination(c, list, total, query)
+	utils.JsonPagination(c, list, total, query)
 }
 func MachineAllData(c *gin.Context) {
 	AllData := model.MachineAllData()

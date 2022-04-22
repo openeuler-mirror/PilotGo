@@ -15,25 +15,19 @@
 package controller
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"github.com/tealeg/xlsx"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func GetUserRole(c *gin.Context) {
-	var roles []model.UserRole
-	mysqlmanager.DB.Find(&roles)
+	roles := dao.AllUserRole()
 	response.Success(c, gin.H{"role": roles}, "获取用户角色")
 }
 
@@ -56,40 +50,15 @@ func Register(c *gin.Context) {
 		password = "123456"
 	}
 	if len(email) == 0 {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			"邮箱不能为空!")
+		response.Response(c, http.StatusOK, 422, nil, "邮箱不能为空!")
 		return
 	}
 	if dao.IsEmailExist(email) {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			"邮箱已存在!")
+		response.Response(c, http.StatusOK, 422, nil, "邮箱已存在!")
 		return
 	}
-	roleIds := strings.Split(roleId, ",")
-	res := make([]int, len(roleIds))
 
-	for index, val := range roleIds {
-		res[index], _ = strconv.Atoi(val)
-	}
-
-	min := res[0]
-	if len(res) > 1 {
-		for _, v := range res {
-			if v < min {
-				min = v
-			}
-		}
-	}
-	var user_type int
-	if min > 3 {
-		user_type = 3
-	} else {
-		user_type = min - 1
-	}
+	user_type := service.UserType(roleId)
 
 	user = model.User{ //Create user
 		Username:     username,
@@ -102,54 +71,41 @@ func Register(c *gin.Context) {
 		UserType:     user_type,
 		RoleID:       roleId,
 	}
-	mysqlmanager.DB.Save(&user)
+	dao.AddUser(user)
 
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
 func Login(c *gin.Context) {
-
 	var user model.User //Data verification
 	c.Bind(&user)
 	email := user.Email
 	password := user.Password
-	mysqlmanager.DB.Where("email = ?", email).Find(&user)
 
-	if user.ID == 0 {
-		response.Response(c, http.StatusOK,
-			400,
-			nil,
-			"用户不存在!")
+	if !dao.IsEmailExist(email) {
+		response.Response(c, http.StatusOK, 400, nil, "用户不存在!")
 		return
 	}
-	bpassword := []byte(password)
-	bemail := []byte(email)
-	bbpassword, err := service.JsAesDecrypt(bpassword, bemail)
+
+	DecryptedPassword, err := utils.JsAesDecrypt(password, email)
 	if err != nil {
-		response.Response(c, http.StatusOK,
-			400,
-			nil,
-			"密码解密失败")
+		response.Response(c, http.StatusOK, 400, nil, "密码解密失败")
 		return
 	}
-	btspassword := string(bbpassword)
-	if user.Password != btspassword {
-		response.Response(c, http.StatusOK,
-			400,
-			nil,
-			"密码错误!")
+
+	DBpassword, departName, roleId, departId, userType := dao.UserPassword(email)
+	if DBpassword != DecryptedPassword {
+		response.Response(c, http.StatusOK, 400, nil, "密码错误!")
 		return
 	}
-	token, err := service.ReleaseToken(user) // Issue token
+
+	// Issue token
+	token, err := service.ReleaseToken(user)
 	if err != nil {
-		response.Response(c, http.StatusInternalServerError,
-			500,
-			nil,
-			"服务器内部错误!")
-		log.Printf("token生成错误:%v", err)
+		response.Response(c, http.StatusInternalServerError, 500, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"token": token, "departName": user.DepartName, "departId": user.DepartSecond, "userType": user.UserType, "roleId": user.RoleID}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
 }
 
 // 退出
@@ -169,50 +125,22 @@ func Info(c *gin.Context) {
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	var users []model.User
-	query := &model.PaginationQ{}
+	query := &utils.PaginationQ{}
 	err := c.ShouldBindQuery(query)
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		return
+	}
 
+	users := dao.UserAll()
+	utils.Reverse(&users)
+
+	total, data, err := utils.SearchAll(query, users)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	mysqlmanager.DB.Find(&users)
-	datas := make([]map[string]interface{}, 0)
-	for _, user := range users {
-		data := make(map[string]interface{})
-		data["id"] = user.ID
-		data["departPId"] = user.DepartFirst
-		data["departid"] = user.DepartSecond
-		data["departName"] = user.DepartName
-		data["username"] = user.Username
-		data["phone"] = user.Phone
-		data["email"] = user.Email
-		data["userType"] = user.UserType
-		roleids := user.RoleID
-		roleId := strings.Split(roleids, ",")
-		var roles []string
-		for _, id := range roleId {
-			userRole := model.UserRole{}
-			i, err := strconv.Atoi(id)
-			if err != nil {
-				response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
-				return
-			}
-			mysqlmanager.DB.Where("id = ?", i).Find(&userRole)
-			role := userRole.Role
-			roles = append(roles, role)
-		}
-		data["role"] = roles
-		datas = append(datas, data)
-	}
-	service.Reverse(&datas)
-	total, data, err := model.SearchAll(query, datas)
-	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
-		return
-	}
-	model.JsonPagination(c, data, total, query)
+	utils.JsonPagination(c, data, total, query)
 }
 
 // 高级搜索
@@ -221,102 +149,46 @@ func UserSearch(c *gin.Context) {
 	c.Bind(&user)
 	var email = user.Email
 
-	query := &model.PaginationQ{}
+	query := &utils.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	var users []model.User
-	mysqlmanager.DB.Where("email LIKE ?", "%"+email+"%").Find(&users)
+	users := dao.UserSearch(email)
+	utils.Reverse(&users)
 
-	datas := make([]map[string]interface{}, 0)
-	for _, user := range users {
-		data := make(map[string]interface{})
-		data["id"] = user.ID
-		data["departPId"] = user.DepartFirst
-		data["departid"] = user.DepartSecond
-		data["departName"] = user.DepartName
-		data["username"] = user.Username
-		data["phone"] = user.Phone
-		data["email"] = user.Email
-		data["userType"] = user.UserType
-		roleids := user.RoleID
-		roleId := strings.Split(roleids, ",")
-		var roles []string
-		for _, id := range roleId {
-			userRole := model.UserRole{}
-			i, err := strconv.Atoi(id)
-			if err != nil {
-				response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
-				return
-			}
-			mysqlmanager.DB.Where("id = ?", i).Find(&userRole)
-			role := userRole.Role
-			roles = append(roles, role)
-		}
-		data["role"] = roles
-		datas = append(datas, data)
-	}
-	service.Reverse(&datas)
-	total, data, err := model.SearchAll(query, datas)
+	total, data, err := utils.SearchAll(query, users)
 	if err != nil {
 		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
 		return
 	}
-	model.JsonPagination(c, data, total, query)
+	utils.JsonPagination(c, data, total, query)
 }
 
 // 重置密码
 func ResetPassword(c *gin.Context) {
 	var user model.User
-	email := c.Query("email")
-
-	if dao.IsEmailExist(email) {
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", "123456")
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": user},
-			"密码重置成功!")
-		return
+	c.Bind(&user)
+	var email = user.Email
+	u, err := dao.ResetPassword(email)
+	if err != nil {
+		response.Response(c, http.StatusOK, 400, nil, err.Error())
 	} else {
-		response.Fail(c, nil, "无此用户!")
+		response.Response(c, http.StatusOK, 200, gin.H{"data": u}, "密码重置成功!")
 	}
 }
 
 // 删除用户
-type Userdel struct {
-	Emails []string `json:"email"`
-}
-
 func DeleteUser(c *gin.Context) {
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	var userdel Userdel
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &userdel)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	var user model.User
+	var userdel model.Userdel
+	c.ShouldBind(&userdel)
+
 	for _, userEmail := range userdel.Emails {
-		mysqlmanager.DB.Where("email=?", userEmail).Unscoped().Delete(user)
+		dao.DeleteUser(userEmail)
 	}
-	response.Response(c, http.StatusOK,
-		200,
-		nil,
-		"用户删除成功!")
+	response.Response(c, http.StatusOK, 200, nil, "用户删除成功!")
 }
 
 //修改用户信息
@@ -328,40 +200,23 @@ func UpdateUser(c *gin.Context) {
 	Pid := user.DepartFirst
 	id := user.DepartSecond
 	departName := user.DepartName
-	mysqlmanager.DB.Where("email = ?", email).Find(&user)
-	if user.DepartName != departName && user.Phone != phone {
-		u := model.User{
-			DepartFirst:  Pid,
-			DepartSecond: id,
-			DepartName:   departName,
-		}
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Updates(&u)
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": user},
-			"用户信息修改成功")
+
+	u := dao.UserInfo(email)
+
+	if u.DepartName != departName && u.Phone != phone {
+		dao.UpdateUserDepart(email, departName, Pid, id)
+		dao.UpdateUserPhone(email, phone)
+		response.Response(c, http.StatusOK, 200, gin.H{"data": user}, "用户信息修改成功")
 		return
 	}
-	if user.DepartName == departName && user.Phone != phone {
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": user},
-			"用户信息修改成功")
+	if u.DepartName == departName && u.Phone != phone {
+		dao.UpdateUserPhone(email, phone)
+		response.Response(c, http.StatusOK, 200, gin.H{"data": user}, "用户信息修改成功")
 		return
 	}
-	if user.DepartName != departName && user.Phone == phone {
-		u := model.User{
-			DepartFirst:  Pid,
-			DepartSecond: id,
-			DepartName:   departName,
-		}
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Updates(&u)
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": user},
-			"用户信息修改成功")
+	if u.DepartName != departName && u.Phone == phone {
+		dao.UpdateUserDepart(email, departName, Pid, id)
+		response.Response(c, http.StatusOK, 200, gin.H{"data": user}, "用户信息修改成功")
 	}
 }
 
@@ -371,62 +226,25 @@ func ImportUser(c *gin.Context) {
 
 	files := form.File["upload"]
 	if files == nil {
-		response.Fail(c, nil, "Please select a file first!")
+		response.Response(c, http.StatusOK, 400, nil, "请先选择要上传的文件")
 		return
 	}
 	UserExit := make([]string, 0)
 	for _, file := range files {
 		name := file.Filename
 		c.SaveUploadedFile(file, name)
+
 		xlFile, error := xlsx.OpenFile(name)
 		if error != nil {
 			return
 		}
-		for _, sheet := range xlFile.Sheets {
 
-			for rowIndex, row := range sheet.Rows {
-				user := model.User{}
-				depart := model.DepartNode{}
-				role := model.UserRole{}
-
-				//跳过第一行表头信息
-				if rowIndex == 0 {
-					continue
-				}
-				user.Username = row.Cells[0].Value //1:用户名
-				user.Phone = row.Cells[1].Value    //2：手机号
-				user.Email = row.Cells[2].Value    //3：邮箱
-				if dao.IsEmailExist(user.Email) {
-					UserExit = append(UserExit, user.Email)
-					continue
-				}
-				// 设置默认密码为123456
-				user.Password = "123456"
-				user.DepartName = row.Cells[3].Value //4：部门
-				mysqlmanager.DB.Where("depart=?", user.DepartName).Find(&depart)
-				user.DepartSecond = depart.ID
-				user.DepartFirst = depart.PID
-				user_role := row.Cells[4].Value //5：角色
-				mysqlmanager.DB.Where("role = ?", user_role).Find(&role)
-				user.RoleID = strconv.Itoa(role.ID)
-				if role.ID > 3 {
-					user.UserType = 3
-				} else {
-					user.UserType = role.ID - 1
-				}
-				mysqlmanager.DB.Save(&user)
-			}
-		}
+		UserExit = service.ReadFile(xlFile, UserExit)
 	}
+
 	if len(UserExit) == 0 {
-		response.Response(c, http.StatusOK,
-			200,
-			nil,
-			"import success")
+		response.Response(c, http.StatusOK, 200, nil, "导入用户信息成功")
 	} else {
-		response.Response(c, http.StatusOK,
-			200, gin.H{
-				"UserExit": UserExit,
-			}, "以上用户已经存在")
+		response.Response(c, http.StatusOK, 200, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

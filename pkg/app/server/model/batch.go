@@ -17,6 +17,7 @@ package model
 import (
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type Batch struct {
@@ -29,10 +30,10 @@ type Batch struct {
 	DepartName  string `gorm:"type:varchar(100)"`
 }
 
-func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, total uint, err error) {
+func (b *Batch) ReturnBatch(q *utils.PaginationQ) (list *[]Batch, total uint, err error) {
 	list = &[]Batch{}
 	tx := mysqlmanager.DB.Order("created_at desc").Find(&list)
-	total, err = CrudAll(q, tx, list)
+	total, err = utils.CrudAll(q, tx, list)
 	return
 }
 

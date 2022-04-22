@@ -142,7 +142,7 @@ func SetupRouter() *gin.Engine {
 	Level.Use(service.CasbinHandler())
 	{
 		user.POST("/register", controller.Register)
-		user.GET("/reset", controller.ResetPassword)
+		user.POST("/reset", controller.ResetPassword)
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
 		user.POST("/import", controller.ImportUser)
