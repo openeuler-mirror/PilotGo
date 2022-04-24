@@ -163,7 +163,7 @@ func SetupRouter() *gin.Engine {
 		c.Redirect(http.StatusFound, url)
 		router.StaticFile(url, "./dist/index.html")
 	})
-
+	router.GET("/ws", controller.ShellWs)
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 
 	////注册session校验中间件
