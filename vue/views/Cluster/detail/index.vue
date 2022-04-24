@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:22
-  LastEditTime: 2022-04-14 17:11:31
+  LastEditTime: 2022-04-22 15:02:41
  -->
 <template>
  <div class="content">
@@ -38,6 +38,10 @@
       <span slot="label"> 防火墙信息</span>
       <firewall-info></firewall-info>
     </el-tab-pane>
+    <el-tab-pane>
+      <span slot="label"> 终端信息</span>
+      <terminal-info></terminal-info>
+    </el-tab-pane>
   </el-tabs>
  </div>
 </template>
@@ -48,6 +52,7 @@ import ServiceInfo from './service.vue'
 import NetworkInfo from './network.vue'
 import RpmInfo from './rpm.vue'
 import FirewallInfo from './firewall.vue'
+import TerminalInfo from './terminal.vue'
 export default {
   name: "Detail",
   components: {
@@ -57,6 +62,7 @@ export default {
     NetworkInfo,
     RpmInfo,
     FirewallInfo,
+    TerminalInfo,
   },
   data() {
     return {

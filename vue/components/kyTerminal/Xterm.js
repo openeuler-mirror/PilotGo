@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-04-07 15:57:12
- * @LastEditTime: 2022-04-07 15:57:26
+ * @LastEditTime: 2022-04-22 15:54:09
  */
 import { Terminal } from 'xterm'
 import * as fit from 'xterm/lib/addons/fit/fit'
