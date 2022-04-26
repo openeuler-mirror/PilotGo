@@ -111,9 +111,18 @@ func DepartInfo(c *gin.Context) {
 		})
 		return
 	}
-	var root model.MachineTreeNode
+	ptrchild, departRoot := Returnptrchild(depart)
+	MakeTree(&departRoot, ptrchild)
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": departRoot,
+	})
+}
+
+//返回全部的部门指针数组
+func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.MachineTreeNode, root model.MachineTreeNode) {
 	departnode := make([]model.MachineTreeNode, 0)
-	ptrchild := make([]*model.MachineTreeNode, 0)
+	ptrchild = make([]*model.MachineTreeNode, 0)
 
 	for _, value := range depart {
 		if value.NodeLocate == 0 {
@@ -137,19 +146,16 @@ func DepartInfo(c *gin.Context) {
 		a = &departnode[key]
 		ptrchild = append(ptrchild, a)
 	}
-	node := &root
-	makeTree(node, ptrchild)
-	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"data": node,
-	})
+	return ptrchild, root
 }
-func makeTree(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) {
+
+//生成部门树
+func MakeTree(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) {
 	childs := findchild(node, ptrchild)
 	for _, value := range childs {
 		node.Children = append(node.Children, value)
 		if IsChildExist(value, ptrchild) {
-			makeTree(value, ptrchild)
+			MakeTree(value, ptrchild)
 		}
 	}
 }
@@ -169,6 +175,7 @@ func IsChildExist(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode
 	}
 	return false
 }
+
 func LoopTree(node *model.MachineTreeNode, ID int, res **model.MachineTreeNode) {
 	if node.Children != nil {
 		for _, value := range node.Children {
@@ -194,7 +201,10 @@ func Deletemachinedata(c *gin.Context) {
 			"不存在该机器")
 		return
 	} else {
-		dao.Deleteuuid(uuid)
+		if dao.Deleteuuid(mysqlmanager.DB, uuid) != nil {
+			logger.Error("机器删除失败")
+			return
+		}
 		response.Success(c, nil, "机器删除成功")
 	}
 }
@@ -425,7 +435,7 @@ func Dep(c *gin.Context) {
 		ptrchild = append(ptrchild, a)
 	}
 	node := &root
-	makeTree(node, ptrchild)
+	MakeTree(node, ptrchild)
 	var d *model.MachineTreeNode
 	if node.Id != tmp {
 		LoopTree(node, tmp, &d)
