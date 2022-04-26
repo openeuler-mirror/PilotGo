@@ -22,12 +22,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // gorm分页查询方法
-func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (uint, error) {
+func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -35,7 +34,7 @@ func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (uint, er
 		p.CurrentPageNum = 1
 	}
 
-	var total uint
+	var total int
 	err := queryTx.Count(&total).Error
 	if err != nil {
 		return 0, err
@@ -48,51 +47,47 @@ func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (uint, er
 	return total, err
 }
 
-// map分页查询方法
-func SearchAll(p *model.PaginationQ, data []map[string]interface{}) (uint, []map[string]interface{}, error) {
+// 结构体分页查询方法
+func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{}, error) {
+	data := make([]interface{}, 0)
+	if reflect.TypeOf(list).Kind() == reflect.Slice {
+		s := reflect.ValueOf(list)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			data = append(data, ele.Interface())
+		}
+	}
 	if p.Size < 1 {
 		p.Size = 10
 	}
 	if p.CurrentPageNum < 1 {
 		p.CurrentPageNum = 1
 	}
-	total := len(data)
 	if total == 0 {
 		p.TotalPage = 1
 	}
 	num := p.Size * (p.CurrentPageNum - 1)
 	if num > uint(total) {
-		return uint(total), nil, fmt.Errorf("页码超出")
+		return nil, fmt.Errorf("页码超出")
 	}
 	if p.Size*p.CurrentPageNum > uint(total) {
-		return uint(total), data[num:], nil
+		return data[num:], nil
 	} else {
 		if p.Size*p.CurrentPageNum < num {
-			return uint(total), nil, fmt.Errorf("读取错误")
+			return nil, fmt.Errorf("读取错误")
 		}
 		if p.Size*p.CurrentPageNum == 0 {
-			return uint(total), data, nil
+			return data, nil
 		} else {
-			return uint(total), data[num : p.CurrentPageNum*p.Size-1], nil
+			return data[num : p.CurrentPageNum*p.Size], nil
 		}
-	}
-}
-
-// []map倒序函数
-func Reverse(arr *[]map[string]interface{}) {
-	var temp map[string]interface{}
-	length := len(*arr)
-	for i := 0; i < length/2; i++ {
-		temp = (*arr)[i]
-		(*arr)[i] = (*arr)[length-1-i]
-		(*arr)[length-1-i] = temp
 	}
 }
 
 // 拼装json 分页数据
-func JsonPagination(c *gin.Context, list interface{}, total uint, query *model.PaginationQ) {
-	c.AbortWithStatusJSON(200, gin.H{
-		"code":  200,
+func JsonPagination(c *gin.Context, list interface{}, total int, query *model.PaginationQ) {
+	c.AbortWithStatusJSON(http.StatusOK, gin.H{
+		"code":  http.StatusOK,
 		"ok":    true,
 		"data":  list,
 		"total": total,
@@ -102,49 +97,8 @@ func JsonPagination(c *gin.Context, list interface{}, total uint, query *model.P
 
 func HandleError(c *gin.Context, err error) bool {
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return true
 	}
 	return false
-}
-func TointerfaceSlice(list interface{}) []interface{} {
-	res := make([]interface{}, 0)
-	if reflect.TypeOf(list).Kind() == reflect.Slice {
-		s := reflect.ValueOf(list)
-		for i := 0; i < s.Len(); i++ {
-			ele := s.Index(i)
-			res = append(res, ele.Interface())
-		}
-	}
-	logger.Info("%v", res)
-	return res
-
-}
-func Paging(len int, size int, page int, Res *[]interface{}) error {
-
-	if len == 0 {
-		*Res = nil
-		return nil
-	}
-	num := size * (page - 1)
-	if num > len {
-		return fmt.Errorf("page overflow")
-	}
-	if page*size >= len {
-		*Res = (*Res)[num:]
-		return nil
-	} else {
-		if page*size < num {
-			return fmt.Errorf("Read error")
-		}
-		if page*size == 0 {
-			*Res = nil
-			return nil
-		} else {
-			*Res = (*Res)[num : page*size]
-			return nil
-		}
-
-	}
-
 }

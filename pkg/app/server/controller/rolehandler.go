@@ -15,272 +15,110 @@
 package controller
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
+// 删除过滤策略
 func PolicyDelete(c *gin.Context) {
 	var Rule model.CasbinRule
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			421,
-			nil,
-			err.Error())
-		return
-	}
-	err = json.Unmarshal(body, &Rule)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
+	c.Bind(&Rule)
 
-	role_type := Rule.RoleType
-	url := Rule.Url
-	method := Rule.Method
-	if ok := service.E.RemovePolicy(role_type, url, method); !ok {
-		response.Response(c, http.StatusOK, 400, nil, "Pilocy不存在")
+	if ok := service.PolicyRemove(Rule); !ok {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy不存在")
 	} else {
-		response.Success(c, gin.H{"code": 200}, "Pilocy删除成功")
+		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy删除成功")
 	}
 }
 
+// 增加过滤策略
 func PolicyAdd(c *gin.Context) {
 	var Rule model.CasbinRule
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			421,
-			nil,
-			err.Error())
-		return
-	}
-	err = json.Unmarshal(body, &Rule)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
+	c.Bind(&Rule)
 
-	role_type := Rule.RoleType
-	url := Rule.Url
-	method := Rule.Method
-
-	if ok := service.E.AddPolicy(role_type, url, method); !ok {
-		response.Response(c, http.StatusOK, 400, nil, "Pilocy已存在")
+	if ok := service.PolicyAdd(Rule); !ok {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy已存在")
 	} else {
-		response.Success(c, gin.H{"code": 200}, "Pilocy添加成功")
+		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy添加成功")
 	}
 }
 
+// 获取所有过滤策略
 func GetPolicy(c *gin.Context) {
-	casbin := make([]map[string]interface{}, 0)
-
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		return
+	}
 
-	if HandleError(c, err) {
+	policy, total := service.AllPolicy()
+
+	data, err := DataPaging(query, policy, total)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	list := service.E.GetPolicy()
-	for _, vlist := range list {
-		policy := make(map[string]interface{})
-		policy["role"] = vlist[0]
-		policy["url"] = vlist[1]
-		policy["method"] = vlist[2]
-		casbin = append(casbin, policy)
-	}
-	total, data, err := SearchAll(query, casbin)
-	if HandleError(c, err) {
-		return
-	}
+
 	JsonPagination(c, data, total, query)
 }
 
 // 获取登录用户权限
-type RoleID struct {
-	RoleId []int `json:"roleId"`
-}
-
 func GetLoginUserPermission(c *gin.Context) {
-	var role model.UserRole
+	var RoleId model.RoleID
+	c.Bind(&RoleId)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	var RoleId RoleID
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &RoleId)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	min := RoleId.RoleId[0]
-	if len(RoleId.RoleId) > 1 {
-		for _, v := range RoleId.RoleId {
-			if v < min {
-				min = v
-			}
-		}
-	}
-	mysqlmanager.DB.Where("id=?", min).Find(&role)
-	ID := role.ButtonID
-	IDs := strings.Split(ID, ",")
-	var buttons []string
-	for _, id := range IDs {
-		var SubButton model.RoleButton
-		i, err := strconv.Atoi(id)
-		if err != nil {
-			response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
-			return
-		}
-		mysqlmanager.DB.Where("id = ?", i).Find(&SubButton)
-		button := SubButton.Button
-		buttons = append(buttons, button)
-	}
-	response.Response(c, http.StatusOK, 200, gin.H{"userType": role.Type, "menu": role.Menus, "button": buttons}, "用户权限列表")
+	roleId := service.RoleId(RoleId) //用户的最高权限
+
+	userRole := dao.RoleIdToGetAllInfo(roleId)
+	buttons := dao.PermissionButtons(userRole.ButtonID)
+
+	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"userType": userRole.Type, "menu": userRole.Menus, "button": buttons}, "用户权限列表")
 }
 
 func GetRoles(c *gin.Context) {
-	var roles []model.UserRole
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
-
-	if HandleError(c, err) {
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	mysqlmanager.DB.Find(&roles)
-	datas := make([]map[string]interface{}, 0)
 
-	for _, role := range roles {
-		data := make(map[string]interface{})
-		data["id"] = role.ID
-		data["role"] = role.Role
-		data["type"] = role.Type
-		data["description"] = role.Description
-		data["menus"] = role.Menus
-		buttons := role.ButtonID
-		if len(buttons) == 0 {
-			data["buttons"] = []string{}
-			datas = append(datas, data)
-			continue
-		}
-		buttonss := strings.Split(buttons, ",")
-		buts := make([]string, 0)
-		for _, button := range buttonss {
-			var but model.RoleButton
-			i, err := strconv.Atoi(button)
-			if err != nil {
-				response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
-				return
-			}
-			mysqlmanager.DB.Where("id=?", i).Find(&but)
-			buts = append(buts, but.Button)
-		}
-		data["buttons"] = buts
-		datas = append(datas, data)
-	}
-	total, data, err := SearchAll(query, datas)
-	if HandleError(c, err) {
+	roles, total := dao.GetAllRoles()
+
+	data, err := DataPaging(query, roles, total)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
 	JsonPagination(c, data, total, query)
 }
 
-func AddUserType(c *gin.Context) {
+func AddUserRole(c *gin.Context) {
 	var userRole model.UserRole
 	c.Bind(&userRole)
-	role := userRole.Role
-	if len(role) == 0 {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			"用户角色不能为空")
-		return
-	}
-	user_type := userRole.Type
-	description := userRole.Description
-	userRole = model.UserRole{ //Create user
-		Role:        role,
-		Type:        user_type,
-		Description: description,
-	}
-	mysqlmanager.DB.Save(&userRole)
 
+	err := dao.AddRole(userRole)
+	if err != nil {
+		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
+	}
 	response.Success(c, nil, "新增角色成功")
 }
 
-type Roledel struct {
-	ID int `json:"id"`
-}
-
 func DeleteUserRole(c *gin.Context) {
-	var roledel Roledel
 	var UserRole model.UserRole
-	var users []model.User
+	c.Bind(&UserRole)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &roledel)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	mysqlmanager.DB.Find(&users)
-	var contain []string
-	for _, user := range users {
-		id := user.RoleID
-		if find := strings.Contains(id, strconv.Itoa(roledel.ID)); find {
-			contain = append(contain, user.Email)
-			break
-		}
-	}
-
-	if len(contain) == 0 {
-		mysqlmanager.DB.Where("id = ?", roledel.ID).Unscoped().Delete(UserRole)
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			"角色删除成功")
+	if ok := dao.IsUserBindingRole(UserRole.ID); !ok {
+		dao.DeleteRole(UserRole.ID)
+		response.Success(c, nil, "角色删除成功")
 	} else {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			"有用户绑定此角色，不可删除")
+		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 	}
 }
 
@@ -290,82 +128,30 @@ func UpdateUserRole(c *gin.Context) {
 	id := UserRole.ID
 	role := UserRole.Role
 	description := UserRole.Description
-	mysqlmanager.DB.Where("id = ?", id).Find(&UserRole)
-	if UserRole.Role != role && UserRole.Description != description {
-		r := model.UserRole{
-			Role:        role,
-			Description: description,
-		}
-		mysqlmanager.DB.Model(&UserRole).Where("id = ?", id).Update(&r)
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": UserRole},
-			"角色信息修改成功")
-		return
-	}
-	if UserRole.Role == role && UserRole.Description != description {
-		r := model.UserRole{
-			Description: description,
-		}
-		mysqlmanager.DB.Model(&UserRole).Where("id = ?", id).Update(&r)
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": UserRole},
-			"角色信息修改成功")
-		return
-	}
-	if UserRole.Role != role && UserRole.Description == description {
-		r := model.UserRole{
-			Role: role,
-		}
-		mysqlmanager.DB.Model(&UserRole).Where("id = ?", id).Update(&r)
-		response.Response(c, http.StatusOK,
-			200,
-			gin.H{"data": UserRole},
-			"角色信息修改成功")
-		return
-	}
-}
 
-type RoleChange struct {
-	RoleID   int      `json:"id"`
-	Menus    []string `json:"menus"`
-	ButtonId []string `json:"buttonId"`
+	userRole := dao.RoleIdToGetAllInfo(id)
+	if userRole.Role != role && userRole.Description != description {
+		dao.UpdateRoleName(id, role)
+		dao.UpdateRoleDescription(id, description)
+		response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
+		return
+	}
+	if userRole.Role == role && userRole.Description != description {
+		dao.UpdateRoleDescription(id, description)
+		response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
+		return
+	}
+	if userRole.Role != role && userRole.Description == description {
+		dao.UpdateRoleName(id, role)
+		response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
+		return
+	}
 }
 
 func RolePermissionChange(c *gin.Context) {
-	var userRole model.UserRole
-	var roleChange RoleChange
+	var roleChange model.RolePermissionChange
+	c.Bind(&roleChange)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &roleChange)
-	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422333,
-			nil,
-			err.Error())
-		return
-	}
-	// 数组切片转为string
-	menus := strings.Replace(strings.Trim(fmt.Sprint(roleChange.Menus), "[]"), " ", ",", -1)
-	buttonId := strings.Replace(strings.Trim(fmt.Sprint(roleChange.ButtonId), "[]"), " ", ",", -1)
-
-	r := model.UserRole{
-		Menus:    menus,
-		ButtonID: buttonId,
-	}
-	mysqlmanager.DB.Model(&userRole).Where("id = ?", roleChange.RoleID).Update(&r)
-	response.Response(c, http.StatusOK,
-		200,
-		gin.H{"data": userRole},
-		"角色权限变更成功")
+	userRole := dao.UpdateRolePermission(roleChange)
+	response.Success(c, gin.H{"data": userRole}, "角色权限变更成功")
 }

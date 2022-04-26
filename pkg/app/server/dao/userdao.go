@@ -52,23 +52,25 @@ func UserInfo(email string) model.User {
 }
 
 // 查询所有的用户
-func UserAll() []map[string]interface{} {
+func UserAll() ([]model.ReturnUser, int) {
 	var users []model.User
-	mysqlmanager.DB.Find(&users)
-	datas := make([]map[string]interface{}, 0)
+	var redisUser []model.ReturnUser
+
+	// 先从redis缓存中读取
+	// data, err := redismanager.Get("users", &redisUser)
+	// if err == nil {
+	// 	resByre, _ := json.Marshal(data)
+	// 	json.Unmarshal(resByre, &redisUser)
+	// 	logger.Debug("%+v", "从缓存中读取")
+	// 	return redisUser
+	// } else {
+	mysqlmanager.DB.Order("id desc").Find(&users)
+	totals := len(users)
 	for _, user := range users {
-		data := make(map[string]interface{})
-		data["id"] = user.ID
-		data["departPId"] = user.DepartFirst
-		data["departid"] = user.DepartSecond
-		data["departName"] = user.DepartName
-		data["username"] = user.Username
-		data["phone"] = user.Phone
-		data["email"] = user.Email
-		data["userType"] = user.UserType
+		var roles []string
+		// 查找角色
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
-		var roles []string
 		for _, id := range roleId {
 			userRole := model.UserRole{}
 			i, _ := strconv.Atoi(id)
@@ -76,31 +78,36 @@ func UserAll() []map[string]interface{} {
 			role := userRole.Role
 			roles = append(roles, role)
 		}
-		data["role"] = roles
-		datas = append(datas, data)
+		u := model.ReturnUser{
+			ID:           user.ID,
+			DepartFirst:  user.DepartFirst,
+			DepartSecond: user.DepartSecond,
+			DepartName:   user.DepartName,
+			Username:     user.Username,
+			Phone:        user.Phone,
+			Email:        user.Email,
+			UserType:     user.UserType,
+			Roles:        roles,
+		}
+		redisUser = append(redisUser, u)
 	}
-	return datas
+	// redismanager.Set("users", &redisUser)
+	return redisUser, totals
+	// }
 }
 
 // 根据用户邮箱模糊查询
-func UserSearch(email string) []map[string]interface{} {
+func UserSearch(email string) ([]model.ReturnUser, int) {
 	var users []model.User
-	mysqlmanager.DB.Where("email LIKE ?", "%"+email+"%").Find(&users)
+	var redisUser []model.ReturnUser
 
-	datas := make([]map[string]interface{}, 0)
+	mysqlmanager.DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users)
+	totals := len(users)
 	for _, user := range users {
-		data := make(map[string]interface{})
-		data["id"] = user.ID
-		data["departPId"] = user.DepartFirst
-		data["departid"] = user.DepartSecond
-		data["departName"] = user.DepartName
-		data["username"] = user.Username
-		data["phone"] = user.Phone
-		data["email"] = user.Email
-		data["userType"] = user.UserType
+		var roles []string
+		// 查找角色
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
-		var roles []string
 		for _, id := range roleId {
 			userRole := model.UserRole{}
 			i, _ := strconv.Atoi(id)
@@ -108,10 +115,20 @@ func UserSearch(email string) []map[string]interface{} {
 			role := userRole.Role
 			roles = append(roles, role)
 		}
-		data["role"] = roles
-		datas = append(datas, data)
+		u := model.ReturnUser{
+			ID:           user.ID,
+			DepartFirst:  user.DepartFirst,
+			DepartSecond: user.DepartSecond,
+			DepartName:   user.DepartName,
+			Username:     user.Username,
+			Phone:        user.Phone,
+			Email:        user.Email,
+			UserType:     user.UserType,
+			Roles:        roles,
+		}
+		redisUser = append(redisUser, u)
 	}
-	return datas
+	return redisUser, totals
 }
 
 // 重置密码
