@@ -9,14 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-02-18 13:03:16
- * LastEditTime: 2022-04-09 17:58:35
+ * LastEditTime: 2022-04-27 09:58:35
  * Description: provide machine manager functions.
  ******************************************************************************/
 package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -25,13 +24,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-// 新注册机器添加到部门根节点
-const UncateloguedDepartId = 1
+const (
+	UncateloguedDepartId = 1 // 新注册机器添加到部门根节点
+	Departroot           = 0
+	DepartUnroot         = 1
+)
 
 func AddDepart(c *gin.Context) {
 	pid := c.Query("PID")
@@ -39,21 +42,21 @@ func AddDepart(c *gin.Context) {
 	depart := c.Query("Depart")
 	tmp, err := strconv.Atoi(pid)
 	if len(pid) != 0 && err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"pid识别失败")
 		return
 	}
 	if len(pid) != 0 && !dao.IsDepartIDExist(tmp) {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"部门PID有误,数据库中不存在该部门PID")
 		return
 	}
 	if len(pid) == 0 && len(parentDepart) != 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"请输入PID")
@@ -65,39 +68,45 @@ func AddDepart(c *gin.Context) {
 		Depart:       depart,
 	}
 	if dao.IsDepartNodeExist(parentDepart, depart) {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"该部门节点已存在")
 		return
 	}
 	if len(parentDepart) != 0 && !dao.IsParentDepartExist(parentDepart) {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"该部门上级部门不存在")
 		return
 	}
 	if len(depart) == 0 {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"部门节点不能为空")
 		return
 	} else if len(parentDepart) == 0 {
 		if dao.IsRootExist() {
-			response.Response(c, http.StatusUnprocessableEntity,
+			response.Response(c, http.StatusOK,
 				422,
 				nil,
 				"已存在根节点,即组织名称")
 			return
 		} else {
-			departNode.NodeLocate = 0
-			mysqlmanager.DB.Create(&departNode)
+			departNode.NodeLocate = Departroot
+			if dao.AddDepart(mysqlmanager.DB, &departNode) != nil {
+				logger.Error("部门节点添加失败")
+				return
+			}
 		}
 	} else {
-		departNode.NodeLocate = 1
-		mysqlmanager.DB.Create(&departNode)
+		departNode.NodeLocate = DepartUnroot
+		if dao.AddDepart(mysqlmanager.DB, &departNode) != nil {
+			logger.Error("部门节点添加失败")
+			return
+		}
 	}
 	response.Success(c, nil, "部门信息入库成功")
 }
@@ -111,121 +120,26 @@ func DepartInfo(c *gin.Context) {
 		})
 		return
 	}
-	ptrchild, departRoot := Returnptrchild(depart)
-	MakeTree(&departRoot, ptrchild)
+	ptrchild, departRoot := service.Returnptrchild(depart)
+	service.MakeTree(&departRoot, ptrchild)
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
-		"data": departRoot,
-	})
-}
-
-//返回全部的部门指针数组
-func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.MachineTreeNode, root model.MachineTreeNode) {
-	departnode := make([]model.MachineTreeNode, 0)
-	ptrchild = make([]*model.MachineTreeNode, 0)
-
-	for _, value := range depart {
-		if value.NodeLocate == 0 {
-			root = model.MachineTreeNode{
-				Label: value.Depart,
-				Id:    value.ID,
-				Pid:   0,
-			}
-		} else {
-			departnode = append(departnode, model.MachineTreeNode{
-				Label: value.Depart,
-				Id:    value.ID,
-				Pid:   value.PID,
-			})
-		}
-
-	}
-	ptrchild = append(ptrchild, &root)
-	var a *model.MachineTreeNode
-	for key := range departnode {
-		a = &departnode[key]
-		ptrchild = append(ptrchild, a)
-	}
-	return ptrchild, root
-}
-
-//生成部门树
-func MakeTree(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) {
-	childs := findchild(node, ptrchild)
-	for _, value := range childs {
-		node.Children = append(node.Children, value)
-		if IsChildExist(value, ptrchild) {
-			MakeTree(value, ptrchild)
-		}
-	}
-}
-func findchild(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) (ret []*model.MachineTreeNode) {
-	for _, value := range ptrchild {
-		if node.Id == value.Pid {
-			ret = append(ret, value)
-		}
-	}
-	return
-}
-func IsChildExist(node *model.MachineTreeNode, ptrchild []*model.MachineTreeNode) bool {
-	for _, child := range ptrchild {
-		if node.Id == child.Pid {
-			return true
-		}
-	}
-	return false
-}
-
-func LoopTree(node *model.MachineTreeNode, ID int, res **model.MachineTreeNode) {
-	if node.Children != nil {
-		for _, value := range node.Children {
-			if value.Id == ID {
-				*res = value
-			}
-
-			LoopTree(value, ID, res)
-
-		}
-
-	}
-}
-func Deletemachinedata(c *gin.Context) {
-	uuid := c.Query("uuid")
-	logger.Info("%s", uuid)
-	var Machine model.MachineNode
-	logger.Info("%+v", Machine)
-	if !dao.IsUUIDExist(uuid) {
-		response.Response(c, http.StatusUnprocessableEntity,
-			422,
-			nil,
-			"不存在该机器")
-		return
-	} else {
-		if dao.Deleteuuid(mysqlmanager.DB, uuid) != nil {
-			logger.Error("机器删除失败")
-			return
-		}
-		response.Success(c, nil, "机器删除成功")
-	}
-}
-
-type DeleteDepart struct {
-	DepartID int `json:"DepartID"`
+		"data": departRoot})
 }
 
 func Deletedepartdata(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
 		return
 	}
-	var a DeleteDepart
+	var a model.DeleteDepart
 	err = json.Unmarshal(j, &a)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -243,47 +157,24 @@ func Deletedepartdata(c *gin.Context) {
 		}
 	}
 	if !dao.IsDepartIDExist(a.DepartID) {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"不存在该机器")
 		return
 	}
 
-	needdelete := make([]int, 0)
 	DepartInfo := dao.GetPid(tmp)
-	needdelete = append(needdelete, a.DepartID)
-	for _, value := range DepartInfo {
-		needdelete = append(needdelete, value.ID)
-	}
-
-	for {
-		if len(needdelete) == 0 {
-			break
-		}
-		logger.Info("%d", needdelete[0])
-		dao.Deletedepartdata(needdelete)
-		str := fmt.Sprintf("%d", needdelete[0])
-		needdelete = needdelete[1:]
-		dao.Insertdepartlist(needdelete, str)
-
-	}
+	service.Deletedepartnode(DepartInfo, a.DepartID)
 	var user model.User
 	mysqlmanager.DB.Where("depart_second=?", a).Unscoped().Delete(user)
 	response.Success(c, nil, "部门删除成功")
 }
 
-type Depart struct {
-	Page       int  `form:"page"`
-	Size       int  `form:"size"`
-	ID         int  `form:"DepartId"`
-	ShowSelect bool `form:"ShowSelect"`
-}
-
 func MachineInfo(c *gin.Context) {
-	depart := &Depart{}
+	depart := &model.Depart{}
 	if c.ShouldBind(depart) != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"parameter error")
@@ -305,69 +196,30 @@ func MachineInfo(c *gin.Context) {
 			}
 		}
 	}
-	len := len(machinelist)
+	lens := len(machinelist)
 	size := depart.Size
 	page := depart.Page
-
-	if len == 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"code":  200,
-			"data":  &[]model.Res{},
-			"page":  page,
-			"size":  size,
-			"total": len,
-		})
-		return
+	var interfaceSlice []interface{} = make([]interface{}, lens)
+	for i, d := range machinelist {
+		interfaceSlice[i] = d
 	}
+	err := Paging(lens, size, page, &interfaceSlice)
 
-	num := size * (page - 1)
-	if num > len {
-		response.Response(c, http.StatusUnprocessableEntity,
+	if err != nil {
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
-			"页码超出")
+			err.Error())
 		return
 	}
 
-	if page*size >= len {
-		c.JSON(http.StatusOK, gin.H{
-			"code":  200,
-			"data":  machinelist[num:],
-			"page":  page,
-			"size":  size,
-			"total": len,
-		})
-		return
-	} else {
-		if page*size < num {
-			response.Response(c, http.StatusUnprocessableEntity,
-				422,
-				nil,
-				"读取错误")
-			return
-		}
+	c.JSON(http.StatusOK, gin.H{
+		"code":  200,
+		"data":  &interfaceSlice,
+		"page":  page,
+		"size":  size,
+		"total": lens})
 
-		if page*size == 0 {
-			c.JSON(http.StatusOK, gin.H{
-				"code":  200,
-				"data":  &[]model.Res{},
-				"page":  page,
-				"size":  size,
-				"total": len,
-			})
-			return
-		} else {
-			c.JSON(http.StatusOK, gin.H{
-				"code":  200,
-				"data":  machinelist[num : page*size-1],
-				"page":  page,
-				"size":  size,
-				"total": len,
-			})
-			return
-		}
-
-	}
 }
 
 //资源池返回接口
@@ -401,7 +253,7 @@ func Dep(c *gin.Context) {
 	departID := c.Query("DepartID")
 	tmp, err := strconv.Atoi(departID)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			"部门ID有误")
@@ -413,7 +265,7 @@ func Dep(c *gin.Context) {
 	ptrchild := make([]*model.MachineTreeNode, 0)
 
 	for _, value := range depart {
-		if value.NodeLocate == 0 {
+		if value.NodeLocate == Departroot {
 			root = model.MachineTreeNode{
 				Label: value.Depart,
 				Id:    value.ID,
@@ -435,10 +287,10 @@ func Dep(c *gin.Context) {
 		ptrchild = append(ptrchild, a)
 	}
 	node := &root
-	MakeTree(node, ptrchild)
+	service.MakeTree(node, ptrchild)
 	var d *model.MachineTreeNode
 	if node.Id != tmp {
-		LoopTree(node, tmp, &d)
+		service.LoopTree(node, tmp, &d)
 		node = d
 	}
 	if node == nil {
@@ -462,7 +314,7 @@ type NewDepart struct {
 func UpdateDepart(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())
@@ -471,7 +323,7 @@ func UpdateDepart(c *gin.Context) {
 	var new NewDepart
 	err = json.Unmarshal(j, &new)
 	if err != nil {
-		response.Response(c, http.StatusUnprocessableEntity,
+		response.Response(c, http.StatusOK,
 			422,
 			nil,
 			err.Error())

@@ -107,3 +107,13 @@ func MachineAllData() []Res {
 		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch)
 	return mch
 }
+
+type DeleteDepart struct {
+	DepartID int `json:"DepartID"`
+}
+type Depart struct {
+	Page       int  `form:"page"`
+	Size       int  `form:"size"`
+	ID         int  `form:"DepartId"`
+	ShowSelect bool `form:"ShowSelect"`
+}

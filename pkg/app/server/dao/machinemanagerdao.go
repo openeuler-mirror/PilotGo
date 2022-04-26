@@ -15,6 +15,7 @@
 package dao
 
 import (
+	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
@@ -138,4 +139,10 @@ func GetPidAndId(depart string) (pid, id int) {
 	var dep model.DepartNode
 	mysqlmanager.DB.Where("depart=?", depart).Find(&dep)
 	return dep.PID, dep.ID
+}
+
+//添加部门
+func AddDepart(db *gorm.DB, depart *model.DepartNode) error {
+	err := db.Create(depart).Error
+	return err
 }
