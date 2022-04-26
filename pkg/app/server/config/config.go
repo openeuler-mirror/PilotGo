@@ -15,6 +15,8 @@
 package config
 
 import (
+	"time"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -31,7 +33,7 @@ type Monitor struct {
 	PrometheusAddr   string `yaml:"prometheus_addr"`
 	AlertManagerAddr string `yaml:"alertmanager_addr"`
 }
-type DbInfo struct {
+type MysqlDBInfo struct {
 	HostName string `yaml:"host_name"`
 	UserName string `yaml:"user_name"`
 	Password string `yaml:"password"`
@@ -39,12 +41,21 @@ type DbInfo struct {
 	Port     int    `yaml:"port"`
 }
 
+type RedisDBInfo struct {
+	RedisConn   string        `yaml:"redis_conn"`
+	RedisPwd    string        `yaml:"redis_pwd"`
+	DefaultDB   int           `yaml:"defaultDB"`
+	DialTimeout time.Duration `yaml:"dialTimeout"`
+	EnableRedis bool          `yaml:"enableRedis"`
+}
+
 type ServerConfig struct {
 	HttpServer   HttpServer     `yaml:"http_server"`
 	SocketServer SocketServer   `yaml:"socket_server"`
 	Monitor      Monitor        `yaml:"monitor"`
 	Logopts      logger.LogOpts `yaml:"log"`
-	Dbinfo       DbInfo         `yaml:"database"`
+	MysqlDBinfo  MysqlDBInfo    `yaml:"mysql"`
+	RedisDBinfo  RedisDBInfo    `yaml:"redis"`
 }
 
 const config_file = "./config_server.yaml"

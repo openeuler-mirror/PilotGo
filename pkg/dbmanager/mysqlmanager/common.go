@@ -1,31 +1,22 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2021-10-26 09:05:39
+ * LastEditTime: 2022-04-25 16:00:43
+ * Description: mysql客户端结构体
+ ******************************************************************************/
 package mysqlmanager
 
 import (
-	"time"
-
 	"github.com/jinzhu/gorm"
 )
-
-type MachInfo struct {
-	Id               int       `json:"id"`
-	Ip               string    `json:"ip"`
-	SystemStatus     int       `json:"system_status"`
-	SystemInfo       string    `json:"system_info"`
-	SystemVersion    string    `json:"system_version"`
-	Arch             string    `json:"arch"`
-	InstallationTime time.Time `json:"installation_time"`
-	MachineType      int       `json:"machine_type"`
-}
-
-type PluginInfo struct {
-	Id          int
-	Name        string
-	Description string
-	Url         string
-	Port        string
-	Protocol    string
-	Version     string
-}
 
 type MysqlManager struct {
 	ip       string
@@ -34,12 +25,4 @@ type MysqlManager struct {
 	passWord string
 	dbName   string
 	db       *gorm.DB
-}
-
-func (m *MachInfo) CheckStatus() int {
-	return checkMachineOnline(m.Ip)
-}
-
-func checkMachineOnline(remote string) int {
-	return 1
 }
