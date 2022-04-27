@@ -7,7 +7,7 @@
  * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
- * Author: zhanghan
+ * Author: zhang&wang
  * Date: 2022-02-23 17:44:00
  * LastEditTime: 2022-04-22 14:18:14
  * Description: 公共函数
@@ -104,4 +104,32 @@ func HandleError(c *gin.Context, err error) bool {
 		return true
 	}
 	return false
+}
+func Paging(len int, size int, page int, Res *[]interface{}) error {
+
+	if len == 0 {
+		*Res = nil
+		return nil
+	}
+	num := size * (page - 1)
+	if num > len {
+		return fmt.Errorf("page overflow")
+	}
+	if page*size >= len {
+		*Res = (*Res)[num:]
+		return nil
+	} else {
+		if page*size < num {
+			return fmt.Errorf("Read error")
+		}
+		if page*size == 0 {
+			*Res = nil
+			return nil
+		} else {
+			*Res = (*Res)[num : page*size-1]
+			return nil
+		}
+
+	}
+
 }

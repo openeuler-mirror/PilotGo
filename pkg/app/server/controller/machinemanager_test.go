@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jinzhu/gorm"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
@@ -15,11 +16,6 @@ type v1Suite struct {
 	mock       sqlmock.Sqlmock
 	departnode model.DepartNode
 }
-
-// type Departnode struct {
-// 	ID  int `gorm:"primary_key;AUTO_INCREMENT"`
-// 	PID int `gorm:"type:int(100);not null" json:"pid"`
-// }
 
 func TestGORMV1(t *testing.T) {
 	s := &v1Suite{}
@@ -70,8 +66,8 @@ func TestGORMV1(t *testing.T) {
 			AddRow(s.departnode.ID))
 
 	s.mock.ExpectCommit()
-
-	if err = s.db.Create(&s.departnode).Error; err != nil {
+	//s.db.Create(&s.departnode).Error
+	if err = dao.AddDepart(s.db, &(s.departnode)); err != nil {
 		t.Errorf("Failed to insert to gorm db, got error: %v", err)
 	}
 
