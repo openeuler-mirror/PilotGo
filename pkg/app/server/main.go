@@ -30,6 +30,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -46,9 +47,15 @@ func main() {
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
-	// db初始化
-	if err := dbInit(&sconfig.Config().Dbinfo); err != nil {
-		logger.Error("database init failed, please check the config file")
+	// redis db初始化
+	if err := redisdbInit(&sconfig.Config().RedisDBinfo); err != nil {
+		logger.Error("redis db init failed, please check the config file")
+		os.Exit(-1)
+	}
+
+	// mysql db初始化
+	if err := mysqldbInit(&sconfig.Config().MysqlDBinfo); err != nil {
+		logger.Error("mysql db init failed, please check the config file")
 		os.Exit(-1)
 	}
 
@@ -83,6 +90,7 @@ func main() {
 			// TODO: DO EXIT
 
 			mysqlmanager.DB.Close()
+			redismanager.Redis.Close()
 
 			goto EXIT
 		default:
@@ -100,10 +108,23 @@ func sessionManagerInit(conf *sconfig.HttpServer) error {
 	return nil
 }
 
-func dbInit(conf *sconfig.DbInfo) error {
-	var menus string = "cluster,batch,usermanager,rolemanager,overview,firewall,log"
+func redisdbInit(conf *sconfig.RedisDBInfo) error {
+	err := redismanager.RedisInit(
+		conf.RedisConn,
+		conf.RedisPwd,
+		conf.DefaultDB,
+		conf.DialTimeout,
+		conf.EnableRedis)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	_, err := mysqlmanager.Init(
+func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
+	var menus string = "cluster,batch,usermanager,rolemanager,overview,firewall,log,prometheus"
+
+	_, err := mysqlmanager.MysqlInit(
 		conf.HostName,
 		conf.UserName,
 		conf.Password,
@@ -113,7 +134,6 @@ func dbInit(conf *sconfig.DbInfo) error {
 		return err
 	}
 
-	// mysqlmanager.DB.Delete(&model.MachineNode{})
 	mysqlmanager.DB.AutoMigrate(&model.User{})
 	mysqlmanager.DB.AutoMigrate(&model.UserRole{})
 
@@ -159,7 +179,6 @@ func dbInit(conf *sconfig.DbInfo) error {
 	mysqlmanager.DB.AutoMigrate(&model.Batch{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
-	// defer mysqlmanager.DB.Close()
 
 	return nil
 }
@@ -184,7 +203,6 @@ func httpServerInit(conf *sconfig.HttpServer) error {
 
 	go func() {
 		r := router.SetupRouter()
-		// server_url := ":" + strconv.Itoa(conf.S.ServerPort)
 		r.Run(conf.Addr)
 
 		err := http.ListenAndServe(conf.Addr, nil) // listen and serve
