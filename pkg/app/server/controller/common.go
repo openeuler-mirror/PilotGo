@@ -7,7 +7,7 @@
  * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
- * Author: zhang&wang
+ * Author: zhanghan
  * Date: 2022-02-23 17:44:00
  * LastEditTime: 2022-04-22 14:18:14
  * Description: 公共函数
@@ -17,10 +17,12 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -105,6 +107,19 @@ func HandleError(c *gin.Context, err error) bool {
 	}
 	return false
 }
+func TointerfaceSlice(list interface{}) []interface{} {
+	res := make([]interface{}, 0)
+	if reflect.TypeOf(list).Kind() == reflect.Slice {
+		s := reflect.ValueOf(list)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			res = append(res, ele.Interface())
+		}
+	}
+	logger.Info("%v", res)
+	return res
+
+}
 func Paging(len int, size int, page int, Res *[]interface{}) error {
 
 	if len == 0 {
@@ -126,7 +141,7 @@ func Paging(len int, size int, page int, Res *[]interface{}) error {
 			*Res = nil
 			return nil
 		} else {
-			*Res = (*Res)[num : page*size-1]
+			*Res = (*Res)[num : page*size]
 			return nil
 		}
 

@@ -43,21 +43,21 @@ func AddDepart(c *gin.Context) {
 	tmp, err := strconv.Atoi(pid)
 	if len(pid) != 0 && err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"pid识别失败")
 		return
 	}
 	if len(pid) != 0 && !dao.IsDepartIDExist(tmp) {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"部门PID有误,数据库中不存在该部门PID")
 		return
 	}
 	if len(pid) == 0 && len(parentDepart) != 0 {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"请输入PID")
 		return
@@ -69,28 +69,28 @@ func AddDepart(c *gin.Context) {
 	}
 	if dao.IsDepartNodeExist(parentDepart, depart) {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"该部门节点已存在")
 		return
 	}
 	if len(parentDepart) != 0 && !dao.IsParentDepartExist(parentDepart) {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"该部门上级部门不存在")
 		return
 	}
 	if len(depart) == 0 {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"部门节点不能为空")
 		return
 	} else if len(parentDepart) == 0 {
 		if dao.IsRootExist() {
 			response.Response(c, http.StatusOK,
-				422,
+				http.StatusUnprocessableEntity,
 				nil,
 				"已存在根节点,即组织名称")
 			return
@@ -115,7 +115,7 @@ func DepartInfo(c *gin.Context) {
 	depart := dao.DepartStore()
 	if len(depart) == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"code": 200,
+			"code": http.StatusOK,
 			"data": model.MachineTreeNode{},
 		})
 		return
@@ -123,7 +123,7 @@ func DepartInfo(c *gin.Context) {
 	ptrchild, departRoot := service.Returnptrchild(depart)
 	service.MakeTree(&departRoot, ptrchild)
 	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
+		"code": http.StatusOK,
 		"data": departRoot})
 }
 
@@ -131,7 +131,7 @@ func Deletedepartdata(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
@@ -140,7 +140,7 @@ func Deletedepartdata(c *gin.Context) {
 	err = json.Unmarshal(j, &a)
 	if err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
@@ -158,7 +158,7 @@ func Deletedepartdata(c *gin.Context) {
 	}
 	if !dao.IsDepartIDExist(a.DepartID) {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"不存在该机器")
 		return
@@ -175,7 +175,7 @@ func MachineInfo(c *gin.Context) {
 	depart := &model.Depart{}
 	if c.ShouldBind(depart) != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"parameter error")
 		return
@@ -199,22 +199,23 @@ func MachineInfo(c *gin.Context) {
 	lens := len(machinelist)
 	size := depart.Size
 	page := depart.Page
-	var interfaceSlice []interface{} = make([]interface{}, lens)
-	for i, d := range machinelist {
-		interfaceSlice[i] = d
-	}
+	// var interfaceSlice []interface{} = make([]interface{}, lens)
+	// for i, d := range machinelist {
+	// 	interfaceSlice[i] = d
+	// }
+	interfaceSlice := TointerfaceSlice(machinelist)
 	err := Paging(lens, size, page, &interfaceSlice)
 
 	if err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":  200,
+		"code":  http.StatusOK,
 		"data":  &interfaceSlice,
 		"page":  page,
 		"size":  size,
@@ -245,7 +246,7 @@ func FreeMachineSource(c *gin.Context) {
 func MachineAllData(c *gin.Context) {
 	AllData := model.MachineAllData()
 	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
+		"code": http.StatusOK,
 		"data": AllData,
 	})
 }
@@ -254,7 +255,7 @@ func Dep(c *gin.Context) {
 	tmp, err := strconv.Atoi(departID)
 	if err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"部门ID有误")
 		return
@@ -295,13 +296,13 @@ func Dep(c *gin.Context) {
 	}
 	if node == nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			"部门ID有误")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
+		"code": http.StatusOK,
 		"data": node,
 	})
 }
@@ -315,7 +316,7 @@ func UpdateDepart(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
@@ -324,7 +325,7 @@ func UpdateDepart(c *gin.Context) {
 	err = json.Unmarshal(j, &new)
 	if err != nil {
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
@@ -345,19 +346,18 @@ func ModifyMachineDepart(c *gin.Context) {
 	if err != nil {
 		logger.Error("%s", err.Error())
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
 	}
 	var M modify
 	err = json.Unmarshal(j, &M)
-	logger.Info("%+v", M)
 
 	if err != nil {
 		logger.Error("%s", err.Error())
 		response.Response(c, http.StatusOK,
-			422,
+			http.StatusUnprocessableEntity,
 			nil,
 			err.Error())
 		return
