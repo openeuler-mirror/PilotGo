@@ -15,7 +15,6 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -41,6 +40,10 @@ type AgentLog struct {
 	Message         string `json:"message"`
 }
 
+type AgentLogDel struct {
+	IDs []int `json:"ids"`
+}
+
 const (
 	RPMInstall     = "软件包安装"
 	RPMRemove      = "软件包卸载"
@@ -50,47 +53,18 @@ const (
 	ServiceStart   = "开启服务"
 )
 
-func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (list []AgentLogParent, total int, err error) {
-	list = []AgentLogParent{}
-	lists := []AgentLogParent{}
+func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (lists []AgentLogParent, total int) {
+	list := &[]AgentLogParent{}
+	lists = make([]AgentLogParent, 0)
 	for _, name := range Dnames {
 		mysqlmanager.DB.Order("created_at desc").Where("depart_name = ?", name).Find(&list)
-		lists = append(lists, list...)
+		lists = append(lists, *list...)
 	}
-	list, total, err = SliceAll(q, lists)
-	return
+	return lists, len(lists)
 }
 
 func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tx *gorm.DB) {
 	list = &[]AgentLog{}
 	tx = mysqlmanager.DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	return
-}
-func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, int, error) {
-	if p.Size < 1 {
-		p.Size = 10
-	}
-	if p.CurrentPageNum < 1 {
-		p.CurrentPageNum = 1
-	}
-	total := len(data)
-	if total == 0 {
-		p.TotalPage = 1
-	}
-	num := p.Size * (p.CurrentPageNum - 1)
-	if num > uint(total) {
-		return nil, total, fmt.Errorf("页码超出")
-	}
-	if p.Size*p.CurrentPageNum > uint(total) {
-		return data[num:], total, nil
-	} else {
-		if p.Size*p.CurrentPageNum < num {
-			return nil, total, fmt.Errorf("读取错误")
-		}
-		if p.Size*p.CurrentPageNum == 0 {
-			return data, total, nil
-		} else {
-			return data[num : p.CurrentPageNum*p.Size], total, nil
-		}
-	}
 }
