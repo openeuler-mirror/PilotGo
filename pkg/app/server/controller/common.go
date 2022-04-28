@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -81,6 +82,17 @@ func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{},
 		} else {
 			return data[num : p.CurrentPageNum*p.Size], nil
 		}
+	}
+}
+
+//返回所有子部门id
+func ReturnSpecifiedDepart(id int, res *[]int) {
+	if len(dao.SubDepartId(id)) == 0 {
+		return
+	}
+	for _, value := range dao.SubDepartId(id) {
+		*res = append(*res, value)
+		ReturnSpecifiedDepart(value, res)
 	}
 }
 

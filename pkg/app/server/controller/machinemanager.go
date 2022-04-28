@@ -150,7 +150,7 @@ func Deletedepartdata(c *gin.Context) {
 	for _, n := range dao.MachineStore(a.DepartID) {
 		dao.ModifyMachineDepart2(n.ID, 1)
 	}
-	for _, depart := range ReturnID(a.DepartID) {
+	for _, depart := range dao.SubDepartId(a.DepartID) {
 		machine := dao.MachineStore(depart)
 		for _, m := range machine {
 			dao.ModifyMachineDepart2(m.ID, 1)
@@ -372,26 +372,4 @@ func AddIP(c *gin.Context) {
 	}
 	mysqlmanager.DB.Model(&MachineInfo).Where("machine_uuid=?", uuid).Update(&Machine)
 	response.Success(c, nil, "ip更新成功")
-}
-
-func ReturnID(id int) []int {
-	var depart []model.DepartNode
-	mysqlmanager.DB.Where("p_id=?", id).Find(&depart)
-
-	res := make([]int, 0)
-	for _, value := range depart {
-		res = append(res, value.ID)
-	}
-	return res
-}
-
-//返回所有子部门函数
-func ReturnSpecifiedDepart(id int, res *[]int) {
-	if len(ReturnID(id)) == 0 {
-		return
-	}
-	for _, value := range ReturnID(id) {
-		*res = append(*res, value)
-		ReturnSpecifiedDepart(value, res)
-	}
 }
