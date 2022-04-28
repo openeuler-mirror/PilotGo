@@ -17,6 +17,7 @@ package service
 import (
 	"github.com/casbin/casbin"
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -42,5 +43,35 @@ func CasbinHandler() gin.HandlerFunc {
 			logger.Fatal("很遗憾,权限验证没有通过")
 			c.Abort()
 		}
+	}
+}
+
+func AllPolicy() (interface{}, int) {
+	casbin := make([]map[string]interface{}, 0)
+	list := E.GetPolicy()
+	for _, vlist := range list {
+		policy := make(map[string]interface{})
+		policy["role"] = vlist[0]
+		policy["url"] = vlist[1]
+		policy["method"] = vlist[2]
+		casbin = append(casbin, policy)
+	}
+	total := len(casbin)
+	return casbin, total
+}
+
+func PolicyRemove(rule model.CasbinRule) bool {
+	if ok := E.RemovePolicy(rule.RoleType, rule.Url, rule.Method); !ok {
+		return false
+	} else {
+		return true
+	}
+}
+
+func PolicyAdd(rule model.CasbinRule) bool {
+	if ok := E.AddPolicy(rule.RoleType, rule.Url, rule.Method); !ok {
+		return false
+	} else {
+		return true
 	}
 }

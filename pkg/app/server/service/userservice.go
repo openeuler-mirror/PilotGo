@@ -56,8 +56,8 @@ func UserType(s string) int {
 	}
 
 	var user_type int
-	if min > 3 {
-		user_type = 3
+	if min > model.OrdinaryUserRoleId {
+		user_type = model.OtherUserType
 	} else {
 		user_type = min - 1
 	}
@@ -84,7 +84,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
 
 			userRole := row.Cells[4].Value                          // 5：角色
 			roleId, user_type := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
-			password := "123456"                                    // 设置默认密码为123456
+			password := model.DefaultUserPassword                   // 设置默认密码为123456
 			u := model.User{
 				Username:     userName,
 				Phone:        phone,

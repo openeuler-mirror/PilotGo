@@ -172,6 +172,13 @@ func Deletedepartdata(c *gin.Context) {
 }
 
 func MachineInfo(c *gin.Context) {
+	query := &model.PaginationQ{}
+	err := c.ShouldBindQuery(query)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		return
+	}
+
 	depart := &model.Depart{}
 	if c.ShouldBind(depart) != nil {
 		response.Response(c, http.StatusOK,
@@ -197,30 +204,13 @@ func MachineInfo(c *gin.Context) {
 		}
 	}
 	lens := len(machinelist)
-	size := depart.Size
-	page := depart.Page
-	// var interfaceSlice []interface{} = make([]interface{}, lens)
-	// for i, d := range machinelist {
-	// 	interfaceSlice[i] = d
-	// }
-	interfaceSlice := TointerfaceSlice(machinelist)
-	err := Paging(lens, size, page, &interfaceSlice)
 
+	data, err := DataPaging(query, machinelist, lens)
 	if err != nil {
-		response.Response(c, http.StatusOK,
-			http.StatusUnprocessableEntity,
-			nil,
-			err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":  http.StatusOK,
-		"data":  &interfaceSlice,
-		"page":  page,
-		"size":  size,
-		"total": lens})
-
+	JsonPagination(c, data, lens, query)
 }
 
 //资源池返回接口

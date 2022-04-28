@@ -50,7 +50,7 @@ const (
 	ServiceStart   = "开启服务"
 )
 
-func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (list []AgentLogParent, total uint, err error) {
+func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (list []AgentLogParent, total int, err error) {
 	list = []AgentLogParent{}
 	lists := []AgentLogParent{}
 	for _, name := range Dnames {
@@ -66,7 +66,7 @@ func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tx 
 	tx = mysqlmanager.DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	return
 }
-func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, uint, error) {
+func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, int, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -79,18 +79,18 @@ func SliceAll(p *PaginationQ, data []AgentLogParent) ([]AgentLogParent, uint, er
 	}
 	num := p.Size * (p.CurrentPageNum - 1)
 	if num > uint(total) {
-		return nil, uint(total), fmt.Errorf("页码超出")
+		return nil, total, fmt.Errorf("页码超出")
 	}
 	if p.Size*p.CurrentPageNum > uint(total) {
-		return data[num:], uint(total), nil
+		return data[num:], total, nil
 	} else {
 		if p.Size*p.CurrentPageNum < num {
-			return nil, uint(total), fmt.Errorf("读取错误")
+			return nil, total, fmt.Errorf("读取错误")
 		}
 		if p.Size*p.CurrentPageNum == 0 {
-			return data, uint(total), nil
+			return data, total, nil
 		} else {
-			return data[num : p.CurrentPageNum*p.Size], uint(total), nil
+			return data[num : p.CurrentPageNum*p.Size], total, nil
 		}
 	}
 }

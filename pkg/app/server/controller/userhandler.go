@@ -47,14 +47,14 @@ func Register(c *gin.Context) {
 		username = service.RandomString(5)
 	}
 	if len(password) == 0 {
-		password = "123456"
+		password = model.DefaultUserPassword
 	}
 	if len(email) == 0 {
-		response.Response(c, http.StatusOK, 422, nil, "邮箱不能为空!")
+		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "邮箱不能为空!")
 		return
 	}
 	if dao.IsEmailExist(email) {
-		response.Response(c, http.StatusOK, 422, nil, "邮箱已存在!")
+		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "邮箱已存在!")
 		return
 	}
 
@@ -83,26 +83,26 @@ func Login(c *gin.Context) {
 	password := user.Password
 
 	if !dao.IsEmailExist(email) {
-		response.Response(c, http.StatusOK, 400, nil, "用户不存在!")
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "用户不存在!")
 		return
 	}
 
 	DecryptedPassword, err := utils.JsAesDecrypt(password, email)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "密码解密失败")
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "密码解密失败")
 		return
 	}
 
 	DBpassword, departName, roleId, departId, userType := dao.UserPassword(email)
 	if DBpassword != DecryptedPassword {
-		response.Response(c, http.StatusOK, 400, nil, "密码错误!")
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "密码错误!")
 		return
 	}
 
 	// Issue token
 	token, err := service.ReleaseToken(user)
 	if err != nil {
-		response.Response(c, http.StatusInternalServerError, 500, nil, err.Error())
+		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
 		return
 	}
 	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
@@ -118,7 +118,7 @@ func Logout(c *gin.Context) {
 func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
+		"code": http.StatusOK,
 		"data": gin.H{"user": model.ToUserDto(user.(model.User))},
 	})
 }
@@ -128,16 +128,15 @@ func UserAll(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	users := dao.UserAll()
-	Reverse(&users)
+	users, total := dao.UserAll()
 
-	total, data, err := SearchAll(query, users)
+	data, err := DataPaging(query, users, total)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
 	JsonPagination(c, data, total, query)
@@ -152,16 +151,15 @@ func UserSearch(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	users := dao.UserSearch(email)
-	Reverse(&users)
+	users, total := dao.UserSearch(email)
 
-	total, data, err := SearchAll(query, users)
+	data, err := DataPaging(query, users, total)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"status": false}, err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
 	JsonPagination(c, data, total, query)
@@ -174,9 +172,9 @@ func ResetPassword(c *gin.Context) {
 	var email = user.Email
 	u, err := dao.ResetPassword(email)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, err.Error())
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
 	} else {
-		response.Response(c, http.StatusOK, 200, gin.H{"data": u}, "密码重置成功!")
+		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": u}, "密码重置成功!")
 	}
 }
 
@@ -188,7 +186,7 @@ func DeleteUser(c *gin.Context) {
 	for _, userEmail := range userdel.Emails {
 		dao.DeleteUser(userEmail)
 	}
-	response.Response(c, http.StatusOK, 200, nil, "用户删除成功!")
+	response.Response(c, http.StatusOK, http.StatusOK, nil, "用户删除成功!")
 }
 
 //修改用户信息
@@ -206,17 +204,17 @@ func UpdateUser(c *gin.Context) {
 	if u.DepartName != departName && u.Phone != phone {
 		dao.UpdateUserDepart(email, departName, Pid, id)
 		dao.UpdateUserPhone(email, phone)
-		response.Response(c, http.StatusOK, 200, gin.H{"data": user}, "用户信息修改成功")
+		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": user}, "用户信息修改成功")
 		return
 	}
 	if u.DepartName == departName && u.Phone != phone {
 		dao.UpdateUserPhone(email, phone)
-		response.Response(c, http.StatusOK, 200, gin.H{"data": user}, "用户信息修改成功")
+		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": user}, "用户信息修改成功")
 		return
 	}
 	if u.DepartName != departName && u.Phone == phone {
 		dao.UpdateUserDepart(email, departName, Pid, id)
-		response.Response(c, http.StatusOK, 200, gin.H{"data": user}, "用户信息修改成功")
+		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": user}, "用户信息修改成功")
 	}
 }
 
@@ -226,7 +224,7 @@ func ImportUser(c *gin.Context) {
 
 	files := form.File["upload"]
 	if files == nil {
-		response.Response(c, http.StatusOK, 400, nil, "请先选择要上传的文件")
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "请先选择要上传的文件")
 		return
 	}
 	UserExit := make([]string, 0)
@@ -243,8 +241,8 @@ func ImportUser(c *gin.Context) {
 	}
 
 	if len(UserExit) == 0 {
-		response.Response(c, http.StatusOK, 200, nil, "导入用户信息成功")
+		response.Response(c, http.StatusOK, http.StatusOK, nil, "导入用户信息成功")
 	} else {
-		response.Response(c, http.StatusOK, 200, gin.H{"UserExit": UserExit}, "以上用户已经存在")
+		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

@@ -101,7 +101,7 @@ func SetupRouter() *gin.Engine {
 		user.POST("/permission", controller.GetLoginUserPermission)
 		user.GET("/roles", controller.GetRoles)
 		user.GET("/role", controller.GetUserRole)
-		user.POST("/addRole", controller.AddUserType)
+		user.POST("/addRole", controller.AddUserRole)
 		user.POST("/delRole", controller.DeleteUserRole)
 		user.POST("/updateRole", controller.UpdateUserRole)
 		user.POST("/roleChange", controller.RolePermissionChange)
