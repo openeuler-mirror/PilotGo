@@ -37,3 +37,13 @@ func SubDepartId(id int) []int {
 	}
 	return res
 }
+
+// 获取所有的一级部门id
+func FirstDepartId() (departIds []int) {
+	departs := []model.DepartNode{}
+	mysqlmanager.DB.Where("p_id = ?", model.UncateloguedDepartId).Find(&departs)
+	for _, depart := range departs {
+		departIds = append(departIds, depart.ID)
+	}
+	return
+}

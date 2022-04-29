@@ -127,11 +127,23 @@ func MachineData(MachineIP string) model.MachineNode {
 	mysqlmanager.DB.Where("ip=?", MachineIP).Find(&m)
 	return m
 }
+
+// 获取所有机器
 func AllMachine() []model.MachineNode {
 	var m []model.MachineNode
 	mysqlmanager.DB.Find(&m)
 
 	return m
+}
+
+// 获取某一级部门下的所有机器
+func SomeDepartMachine(Departids []int) (lists []model.MachineNode) {
+	for _, id := range Departids {
+		list := []model.MachineNode{}
+		mysqlmanager.DB.Where("depart_id = ?", id).Find(&list)
+		lists = append(lists, list...)
+	}
+	return
 }
 
 // 根据部门名字查询id和pid
