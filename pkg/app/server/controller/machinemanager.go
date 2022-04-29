@@ -30,12 +30,6 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-const (
-	UncateloguedDepartId = 1 // 新注册机器添加到部门根节点
-	Departroot           = 0
-	DepartUnroot         = 1
-)
-
 func AddDepart(c *gin.Context) {
 	pid := c.Query("PID")
 	parentDepart := c.Query("ParentDepart")
@@ -95,14 +89,14 @@ func AddDepart(c *gin.Context) {
 				"已存在根节点,即组织名称")
 			return
 		} else {
-			departNode.NodeLocate = Departroot
+			departNode.NodeLocate = model.Departroot
 			if dao.AddDepart(mysqlmanager.DB, &departNode) != nil {
 				logger.Error("部门节点添加失败")
 				return
 			}
 		}
 	} else {
-		departNode.NodeLocate = DepartUnroot
+		departNode.NodeLocate = model.DepartUnroot
 		if dao.AddDepart(mysqlmanager.DB, &departNode) != nil {
 			logger.Error("部门节点添加失败")
 			return
@@ -256,7 +250,7 @@ func Dep(c *gin.Context) {
 	ptrchild := make([]*model.MachineTreeNode, 0)
 
 	for _, value := range depart {
-		if value.NodeLocate == Departroot {
+		if value.NodeLocate == model.Departroot {
 			root = model.MachineTreeNode{
 				Label: value.Depart,
 				Id:    value.ID,

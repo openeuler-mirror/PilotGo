@@ -53,14 +53,10 @@ const (
 	ServiceStart   = "开启服务"
 )
 
-func (p *AgentLogParent) LogAll(q *PaginationQ, Dnames []string) (lists []AgentLogParent, total int) {
-	list := &[]AgentLogParent{}
-	lists = make([]AgentLogParent, 0)
-	for _, name := range Dnames {
-		mysqlmanager.DB.Order("created_at desc").Where("depart_name = ?", name).Find(&list)
-		lists = append(lists, *list...)
-	}
-	return lists, len(lists)
+func (p *AgentLogParent) LogAll(q *PaginationQ) (list *[]AgentLogParent, tx *gorm.DB) {
+	list = &[]AgentLogParent{}
+	tx = mysqlmanager.DB.Order("created_at desc").Find(&list)
+	return
 }
 
 func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tx *gorm.DB) {

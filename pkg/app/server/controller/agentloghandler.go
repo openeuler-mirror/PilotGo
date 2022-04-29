@@ -32,38 +32,20 @@ func LogAll(c *gin.Context) {
 		return
 	}
 
-	Id := c.Query("departId")
-	departId, err := strconv.Atoi(Id)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-
-	departIds := make([]int, 0)
-	departIds = append(departIds, departId)
-	ReturnSpecifiedDepart(departId, &departIds)
-
-	// 获取部门名字
-	departNames := make([]string, 0)
-	for _, id := range departIds {
-		departName := dao.DepartIdToGetDepartName(id)
-		departNames = append(departNames, departName)
-	}
-
 	logParent := model.AgentLogParent{}
-	list, total := logParent.LogAll(query, departNames)
+	list, tx := logParent.LogAll(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	data, err := DataPaging(query, list, total)
+	total, err := CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	// 返回数据开始拼装分页的json
-	JsonPagination(c, data, total, query)
+	JsonPagination(c, list, total, query)
 }
 
 // 查询所有子日志

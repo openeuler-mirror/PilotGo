@@ -9,110 +9,57 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-03-24 00:46:05
- * LastEditTime: 2022-03-24 06:29:44
+ * LastEditTime: 2022-04-29 11:29:44
  * Description: 集群概览
  ******************************************************************************/
 package controller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func ClusterInfo(c *gin.Context) {
-	var agents []model.MachineNode
-	var nolmal, Offline, free int
-	data := make(map[string]interface{})
-	mysqlmanager.DB.Find(&agents)
-	total := len(agents)
-	if total == 0 {
-		response.Response(c, http.StatusOK, 400, gin.H{"data": data}, "未获取到机器")
+	machines := dao.AllMachine()
+	if len(machines) == 0 {
+		response.Fail(c, nil, "未获取到机器")
 	}
-	data["total"] = total
-	for _, agent := range agents {
-		state := agent.State
-		switch state {
-		case model.Free:
-			free++
-		case model.OffLine:
-			Offline++
-		case model.Normal:
-			nolmal++
-		default:
-			continue
-		}
-	}
-	data["normal"] = nolmal
-	data["offline"] = Offline
-	data["free"] = free
-	response.Response(c, http.StatusOK, 200, gin.H{"data": data}, "集群概览获取成功")
+
+	normal, Offline, free := service.AgentStatusCounts(machines)
+
+	data := model.ClusterInfo{}
+	data.AgentTotal = len(machines)
+	data.AgentStatus.Normal = normal
+	data.AgentStatus.OffLine = Offline
+	data.AgentStatus.Free = free
+
+	response.Success(c, gin.H{"data": data}, "集群概览获取成功")
 }
 
 func DepartClusterInfo(c *gin.Context) {
-	var agents []model.MachineNode
-	mysqlmanager.DB.Find(&agents)
-	departId := make([]int, 0)
-	for _, agent := range agents {
-		depart := model.DepartNode{}
-		mysqlmanager.DB.Where("id = ?", agent.DepartId).Find(&depart)
-		if depart.PID == 1 {
-			departId = append(departId, depart.ID)
-		}
-	}
-	departs := make([]AgentStatus, 0)
-	departId = RemoveRepeated(departId)
-	for _, depart_Id := range departId {
-		Dids := make([]int, 0)
-		ReturnSpecifiedDepart(depart_Id, &Dids)
-		Dids = append(Dids, depart_Id)
-		list := []model.MachineNode{}
-		lists := []model.MachineNode{}
-		for _, id := range Dids {
-			mysqlmanager.DB.Where("depart_id = ?", id).Find(&list)
-			lists = append(lists, list...)
-		}
-		dep := model.DepartNode{}
-		mysqlmanager.DB.Where("id = ?", depart_Id).Find(&dep)
-		status := AgentStatus{}
-		status.Depart = dep.Depart
-		for _, list := range lists {
-			state := list.State
-			switch state {
-			case model.Free:
-				status.Free++
-			case model.OffLine:
-				status.OffLine++
-			case model.Normal:
-				status.Normal++
-			default:
-				continue
-			}
-		}
-		departs = append(departs, status)
-	}
-	response.Response(c, http.StatusOK, 200, gin.H{"data": departs}, "获取各部门集群状态成功")
-}
+	var departs []model.DepartMachineInfo
 
-// 去重
-func RemoveRepeated(s []int) []int {
-	result := make([]int, 0)
-	m := make(map[int]bool) //map的值不重要
-	for _, v := range s {
-		if _, ok := m[v]; !ok {
-			result = append(result, v)
-			m[v] = true
-		}
-	}
-	return result
-}
+	FirstDepartIds := dao.FirstDepartId()
+	for _, depart_Id := range FirstDepartIds {
+		Departids := make([]int, 0)
+		Departids = append(Departids, depart_Id)
+		ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
 
-type AgentStatus struct {
-	Depart  string `json:"depart"`
-	Normal  int    `json:"normal"`
-	OffLine int    `json:"offline"`
-	Free    int    `json:"free"`
+		lists := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
+
+		departName := dao.DepartIdToGetDepartName(depart_Id)
+		normal, Offline, free := service.AgentStatusCounts(lists)
+
+		departInfo := model.DepartMachineInfo{}
+		departInfo.DepartName = departName
+		departInfo.AgentStatus.Normal = normal
+		departInfo.AgentStatus.OffLine = Offline
+		departInfo.AgentStatus.Free = free
+
+		departs = append(departs, departInfo)
+	}
+	response.Success(c, gin.H{"data": departs}, "获取各部门集群状态成功")
 }

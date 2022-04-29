@@ -19,7 +19,6 @@ import (
 	"strings"
 	"sync"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
@@ -132,7 +131,7 @@ func AddAgents2DB() {
 		if dao.IsIPExist(agentOS[0]) {
 			// mysqlmanager.DB.Where("ip=?", agentOS[0]).Unscoped().Delete(agent_list)
 			mysqlmanager.DB.Where("ip=?", agentOS[0]).Find(&agent_list)
-			if agent_list.DepartId != controller.UncateloguedDepartId {
+			if agent_list.DepartId != model.UncateloguedDepartId {
 				Ma := model.MachineNode{
 					MachineUUID: uuid,
 					State:       model.Normal,
@@ -147,7 +146,7 @@ func AddAgents2DB() {
 			}
 			continue
 		}
-		agent_list.DepartId = controller.UncateloguedDepartId
+		agent_list.DepartId = model.UncateloguedDepartId
 		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
 		agent_list.CPU = agentOS[3]
 		agent_list.State = model.Free

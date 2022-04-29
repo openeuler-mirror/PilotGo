@@ -57,7 +57,14 @@ const (
 	OffLine = 2
 	// 空闲
 	Free = 3
+	// 新注册机器添加到部门根节点
+	UncateloguedDepartId = 1
+	// 是否为部门根节点
+	Departroot   = 0
+	DepartUnroot = 1
 )
+
+const ()
 
 type MachineInfo struct {
 	RPM        string `json:"rpm"`
