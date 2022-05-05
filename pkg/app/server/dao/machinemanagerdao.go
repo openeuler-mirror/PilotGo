@@ -57,10 +57,48 @@ func IsIPExist(ip string) bool {
 	mysqlmanager.DB.Where("ip=?", ip).Find(&Machine)
 	return Machine.DepartId != 0
 }
-func Deleteuuid(uuid string) {
+
+// 根据uuid获取部门id
+func UUIDForDepartId(uuid string) int {
 	var Machine model.MachineNode
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Delete(Machine)
+	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&Machine)
+	return Machine.DepartId
 }
+
+// agent机器断开
+func MachineStatusToOffline(uuid string) {
+	var Machine model.MachineNode
+	Ma := model.MachineNode{
+		State: model.OffLine,
+	}
+	mysqlmanager.DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+}
+
+// agent机器未分配
+func MachineStatusToFree(uuid, ip string) {
+	var Machine model.MachineNode
+	Ma := model.MachineNode{
+		State: model.Free,
+		IP:    ip,
+	}
+	mysqlmanager.DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+}
+
+// agent机器连接正常
+func MachineStatusToNormal(uuid, ip string) {
+	var Machine model.MachineNode
+	Ma := model.MachineNode{
+		State: model.Normal,
+		IP:    ip,
+	}
+	mysqlmanager.DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+}
+
+// 新增agent机器
+func AddNewMachine(Machine model.MachineNode) {
+	mysqlmanager.DB.Save(&Machine)
+}
+
 func MachineStore(departid int) []model.MachineNode {
 	var Machineinfo []model.MachineNode
 	mysqlmanager.DB.Where("depart_id=?", departid).Find(&Machineinfo)
