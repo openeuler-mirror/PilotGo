@@ -19,8 +19,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeluer.org/PilotGo/PilotGo/pkg/utils/message/net"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
@@ -31,7 +30,6 @@ type AgentMessageHandler func(*Agent, *protocol.Message) error
 type Agent struct {
 	UUID             string
 	Version          string
-	IP               string
 	conn             net.Conn
 	MessageProcesser *protocol.MessageProcesser
 	messageChan      chan *protocol.Message
@@ -85,11 +83,7 @@ func (a *Agent) startListen() {
 		n, err := a.conn.Read(buff)
 		if err != nil {
 			logger.Error("read error:%s", err)
-			var Machine model.MachineNode
-			Ma := model.MachineNode{
-				State: model.OffLine,
-			}
-			mysqlmanager.DB.Model(&Machine).Where("ip=?", a.IP).Update(&Ma)
+			dao.MachineStatusToOffline(a.UUID)
 			DeleteAgent(a.UUID)
 			return
 		}
@@ -129,7 +123,6 @@ func (a *Agent) Init() error {
 	d := data.(map[string]interface{})
 	logger.Debug("response agent info is %v", d)
 	a.UUID = d["agent_uuid"].(string)
-	a.IP = d["IP"].(string)
 	a.Version = d["agent_version"].(string)
 
 	return nil

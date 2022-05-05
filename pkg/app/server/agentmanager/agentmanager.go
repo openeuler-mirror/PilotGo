@@ -21,7 +21,6 @@ import (
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -72,7 +71,6 @@ func GetAgentList() []map[string]string {
 		func(uuid interface{}, agent interface{}) bool {
 			agentInfo := map[string]string{}
 			agentInfo["agent_version"] = agent.(*Agent).Version
-			agentInfo["IP"] = agent.(*Agent).IP
 			agentInfo["agent_uuid"] = agent.(*Agent).UUID
 
 			agentList = append(agentList, agentInfo)
@@ -98,58 +96,44 @@ func AddandRunAgent(c net.Conn) {
 
 	AddAgent(agent)
 	logger.Info("Add new agent from:%s", c.RemoteAddr().String())
-	AddAgents2DB()
+	AddAgents2DB(agent)
 }
 
 func StopAgentManager() {
 
 }
 
-func AddAgents2DB() {
-	var agent_list model.MachineNode
-	agents := GetAgentList()
-	for _, agent := range agents {
-		uuid := agent["agent_uuid"]
-		agent_uuid := GetAgent(uuid)
-		if agent_uuid == nil {
-			logger.Error("获取uuid失败!")
-			return
-		}
-		agent_OS, err := agent_uuid.GetAgentOSInfo()
-		if err != nil {
-			logger.Error("初始化系统信息失败!")
-			return
-		}
-		agentOS := strings.Split(agent_OS.(string), ";")
-
-		agent_list.MachineUUID = uuid
-		if dao.IsUUIDExist(uuid) {
-			logger.Warn("机器%s已经存在!", agentOS[0])
-			continue
-		}
-		agent_list.IP = agentOS[0]
-		if dao.IsIPExist(agentOS[0]) {
-			// mysqlmanager.DB.Where("ip=?", agentOS[0]).Unscoped().Delete(agent_list)
-			mysqlmanager.DB.Where("ip=?", agentOS[0]).Find(&agent_list)
-			if agent_list.DepartId != model.UncateloguedDepartId {
-				Ma := model.MachineNode{
-					MachineUUID: uuid,
-					State:       model.Normal,
-				}
-				mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update(&Ma)
-			} else {
-				Ma := model.MachineNode{
-					MachineUUID: uuid,
-					State:       model.Free,
-				}
-				mysqlmanager.DB.Model(&agent_list).Where("ip=?", agentOS[0]).Update(&Ma)
-			}
-			continue
-		}
-		agent_list.DepartId = model.UncateloguedDepartId
-		agent_list.Systeminfo = agentOS[1] + " " + agentOS[2]
-		agent_list.CPU = agentOS[3]
-		agent_list.State = model.Free
-		mysqlmanager.DB.Save(&agent_list)
+func AddAgents2DB(a *Agent) {
+	agent_uuid := GetAgent(a.UUID)
+	if agent_uuid == nil {
+		logger.Error("获取uuid失败!")
+		return
 	}
+	agent_OS, err := agent_uuid.GetAgentOSInfo()
+	if err != nil {
+		logger.Error("初始化系统信息失败!")
+		return
+	}
+	agentOS := strings.Split(agent_OS.(string), ";")
+
+	if dao.IsUUIDExist(a.UUID) {
+		logger.Warn("机器%s已经存在!", agentOS[0])
+		departId := dao.UUIDForDepartId(a.UUID)
+		if departId != model.UncateloguedDepartId {
+			dao.MachineStatusToNormal(a.UUID, agentOS[0])
+		} else {
+			dao.MachineStatusToFree(a.UUID, agentOS[0])
+		}
+		return
+	}
+
+	agent_list := model.MachineNode{
+		IP:          agentOS[0],
+		MachineUUID: a.UUID,
+		DepartId:    model.UncateloguedDepartId,
+		Systeminfo:  agentOS[1] + " " + agentOS[2],
+		CPU:         agentOS[3],
+		State:       model.Free,
+	}
+	dao.AddNewMachine(agent_list)
 }
