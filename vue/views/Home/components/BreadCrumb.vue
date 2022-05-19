@@ -9,26 +9,45 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-02-25 17:40:04
+  LastEditTime: 2022-05-18 11:02:19
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div>
-    <el-breadcrumb
-      separator=">"
-      v-if="$route.meta.breadcrumb"
-    >
-      <template v-for="item in $route.meta.breadcrumb">
+    <el-breadcrumb separator="/">
+      <el-breadcrumb-item to="/overview">
+        <em class="el-icon-s-home"></em>
+          <span class="el-dropdown-link">
+            首页
+          </span>
+      </el-breadcrumb-item>
+        
+      <template v-for="item in $route.meta.breadcrumb" >
         <el-breadcrumb-item
           :key="item.name"
-          v-if="item.path"
+          v-if="item.path && !item.hidden && item.children"
+        >
+          <el-dropdown @command="handleMenuCommand">
+            <span class="el-dropdown-link">
+              {{ item.name }}<em class="el-icon-arrow-down el-icon--right"></em>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item v-for="route in item.children" v-if="!route.hidden" :key="route.name" :command="route.name">
+                {{ route.menuName }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </el-breadcrumb-item>
+        <el-breadcrumb-item
+          :key="item.name"
+          v-if="item.path && !item.hidden && !item.children"
           :to="{ path:item.path }"
         >
           {{ item.name }}
         </el-breadcrumb-item>
         <el-breadcrumb-item
           :key="item.name"
-          v-else
+          v-if="!item.path && !item.hidden"
         >
           {{ item.name }}
         </el-breadcrumb-item>
@@ -40,12 +59,28 @@
 <script>
 export default {
   name: "BreadCrumb",
+  data() {
+    return {
+
+    }
+  },
+  methods: {
+    handleMenuCommand(command) {
+      this.$router.push({
+        name: command,
+      })
+    }
+  }
 };
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 .el-breadcrumb {
-    font-size: 16px;
-    margin-bottom: 12px;
+  font-size: 15px;
+  .el-breadcrumb__item:last-child {
+    .el-breadcrumb__inner {
+      color: rgb(11, 35, 117)
+    }
   }
+}
 </style>

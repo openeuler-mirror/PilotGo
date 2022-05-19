@@ -9,92 +9,85 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-13 10:31:41
+  LastEditTime: 2022-05-19 10:41:36
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div class="cluster">
-    <router-view v-if="$route.meta.breadcrumb"></router-view>
-    <div style="width:100%;height:100%" v-if="!$route.meta.breadcrumb">
-    <div class="dept panel">
-      <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
-      <span class="sourceBtn" @click="getSourcePool">未分配资源池</span>
-    </div>
-    <div class="info panel">
-      <ky-table
-        class="cluster-table"
-        ref="table"
-        :isSource="isSource"
-        :showSelect="showSelect"
-        :getData="getClusters"
-        :getSourceData="getSourceMac"
-        :searchData="searchData"
-        :treeNodes="checkedNode"
-      >
-        <template v-slot:table_search>
-          <div>{{ departName }}</div>
-        </template>
-        <template v-slot:table_action>
-          <auth-button name="create_batch"  @click="handleAddBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 创建批次 </auth-button>
-          <el-dropdown trigger="click">
-            <el-button class="kylin-item-button">
-              批量配置<em class="el-icon-arrow-down el-icon--right"></em>
-            </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <auth-drop @click.native="handleChange" name="rpm_install"> 变更部门 </auth-drop>
-              <!-- <auth-drop @click.native="handleIssue" name="rpm_install"> rpm下发 </auth-drop>
-              <auth-drop @click.native="handleUnInstall" name="rpm_uninstall"> rpm卸载 </auth-drop> -->
-            </el-dropdown-menu>
-          </el-dropdown>
-          <el-popconfirm title="确定删除所选项目吗?" @confirm="handleDelete">
-            <auth-button name="cluster_delete"  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
-          </el-popconfirm>
-        </template>
-        <template v-slot:table>
-          <el-table-column label="ip">
-            <template slot-scope="scope">
-              <router-link :to="$route.path + scope.row.uuid">
-                {{ scope.row.ip }}
-              </router-link>
-            </template>
-          </el-table-column>
-          <el-table-column prop="departname" label="部门">
-          </el-table-column>
-          <el-table-column prop="cpu" label="cpu" width="220"> 
-          </el-table-column>
-          <el-table-column label="状态">
-            <template slot-scope="scope">
-              <span class="statusSpan" style="background: rgb(16, 197, 91);" v-if="scope.row.state == 1">在线</span>
-              <span class="statusSpan" style="background: gray;" v-if="scope.row.state == 2">离线</span>
-              <span class="statusSpan" style="background: rgb(73, 99, 183);" v-if="scope.row.state == 3">未分配</span>
-            </template>
-          </el-table-column>
-           <el-table-column prop="systeminfo" label="系统信息"> 
-          </el-table-column>
-          <el-table-column label="操作">
-            <template slot-scope="scope">
-              <el-button size="mini" type="primary" plain 
-                @click="handleProme(scope.row.ip)">               
-                监控
-              </el-button>
-            </template>
-          </el-table-column>
-        </template>
-      </ky-table>
-    </div>
+    <transition name="fade-transform" mode="out-in">
+      <router-view v-if="$route.name=='MacDetail' || $route.name=='createBatch' || $route.name=='prometheus'"></router-view>
+    </transition>
+    <div style="width:100%;height:100%" v-if="$route.name=='macList'">
+      <div class="dept panel">
+        <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
+        <span class="sourceBtn" @click="getSourcePool">未分配资源池</span>
+      </div>
+      <div class="info panel">
+        <ky-table
+          class="cluster-table"
+          ref="table"
+          :isSource="isSource"
+          :showSelect="showSelect"
+          :getData="getClusters"
+          :getSourceData="getSourceMac"
+          :searchData="searchData"
+          :treeNodes="checkedNode"
+        >
+          <template v-slot:table_search>
+            <div>{{ departName }}</div>
+          </template>
+          <template v-slot:table_action>
+            <auth-button 
+              name="rpm_install" 
+              :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" 
+              @click="handleChange"> 变更部门 </auth-button>
+            <el-popconfirm title="确定删除所选项目吗?" @confirm="handleDelete">
+              <auth-button name="cluster_delete"  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
+            </el-popconfirm>
+          </template>
+          <template v-slot:table>
+            <el-table-column label="ip" width="140">
+              <template slot-scope="scope" >
+                <router-link :to="'/cluster/macList/' +scope.row.uuid">
+                  {{ scope.row.ip }}
+                </router-link>
+              </template>
+            </el-table-column>
+            <el-table-column prop="departname" label="部门">
+            </el-table-column>
+            <el-table-column prop="cpu" label="cpu" width="220"> 
+            </el-table-column>
+            <el-table-column label="状态">
+              <template slot-scope="scope">
+                <state-dot :state="scope.row.state"></state-dot>
+              </template>
+            </el-table-column>
+            <el-table-column prop="systeminfo" label="系统信息" width="140"> 
+            </el-table-column>
+            <el-table-column label="操作" fixed="right" width="160">
+              <template slot-scope="scope">
+                <el-button size="mini" type="primary" plain 
+                  @click="handleProme(scope.row.ip)">               
+                  监控
+                </el-button>
+              </template>
+            </el-table-column>
+          </template>
+        </ky-table>
+      </div>
 
-    <el-dialog 
-      :title="title"
-      :before-close="handleClose" 
-      :visible.sync="display" 
-      width="760px"
-    >
-     <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
-     <change-form v-if="type === 'change'" :machines='batchMAcs' @click="handleClose"></change-form>   
-     <batch-form v-if="type === 'batch'" :departInfo='departInfo' :machines='batchMAcs' @click="handleClose"></batch-form>   
-     <!-- <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>    -->
+      <el-dialog 
+        :title="title"
+        top="10vh"
+        :before-close="handleClose" 
+        :visible.sync="display" 
+        :width="dialogWidth"
+        :fullscreen="isFull"
+      >
+      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
+      <change-form v-if="type === 'change'" :machines='batchMAcs' @click="handleClose"></change-form>      
     </el-dialog>
-  </div>
+    </div>
   </div>
 </template>
 
@@ -103,8 +96,8 @@ import kyTable from "@/components/KyTable";
 import kyTree from "@/components/KyTree";
 import AuthButton from "@/components/AuthButton";
 import AuthDrop from "@/components/AuthDrop";
+import StateDot from "@/components/StateDot";
 import UpdateForm from "./form/updateForm";
-import BatchForm from "./form/batchForm";
 import ChangeForm from "./form/changeForm";
 import RpmIssue from "./form/rpmIssue";
 import { getClusters, deleteIp, getChildNode, getSourceMac } from "@/request/cluster";
@@ -112,13 +105,13 @@ export default {
   name: "Cluster",
   components: {
     UpdateForm,
-    BatchForm,
     ChangeForm,
     RpmIssue,
     kyTable,
     kyTree,
     AuthButton,
     AuthDrop,
+    StateDot,
   },
   data() {  
     return {
@@ -127,6 +120,8 @@ export default {
       ip: '',
       row: {},
       acType: '',
+      isFull: false,
+      dialogWidth: '760px',
       showChange: false,
       isBatch: false,
       checkedNode: [],
@@ -179,34 +174,16 @@ export default {
       this.display = true;
       this.title = "变更部门";
       this.type = "change"; 
+      this.dialogWidth = "760px";
       this.machines = this.$refs.table.selectRow.rows;
     },
     handleUpdateIp(ip) {
       this.display = true;
       this.title = "编辑IP";
       this.type = "update"; 
+      this.dialogWidth = "760px";
       this.ip = ip;
     },
-    handleAddBatch() {
-      this.display = true;
-      this.title = "创建批次";
-      this.type = "batch"; 
-      this.machines = this.$refs.table.selectRow.rows;
-    },
-    /* handleIssue() {
-      this.machines = [];
-      this.display = true;
-      this.title = "软件包下发";
-      this.type = "issue"; 
-      this.machines = this.$refs.table.selectRow.rows;
-    },
-    handleUnInstall() {
-      this.machines = [];
-      this.display = true;
-      this.title = "软件包卸载";
-      this.type = "issue"; 
-      this.machines = this.$refs.table.selectRow.rows;
-    }, */
     handleDelete() {
       let ids = this.$refs.table.selectRow.rows[0];
       deleteIp({ uuid: ids }).then((res) => {
@@ -236,16 +213,10 @@ export default {
       this.isSource = (Math.random()+1)*100;
       this.departName = "未分配资源池";
     },
-    handleFireWall(ip) {
-      this.$router.push({
-        name: 'Firewall',
-        query: { ip: ip }
-      })
-    },
     handleProme(ip) {
       this.$store.dispatch('setSelectIp', ip)
       this.$router.push({
-        name: 'Prometheus',
+        name: 'prometheus',
         query: { ip: ip }
       })
     }
@@ -255,7 +226,8 @@ export default {
 
 <style scoped lang="scss">
 .cluster {
-  height: 95%;
+  width: 100%;
+  height: 100%;
   display: flex;
   .dept {
     height: 100%;
@@ -277,12 +249,6 @@ export default {
     width: 78%;
     height: 100%;
     float: right;
-    .statusSpan {
-      display: inline-block;
-      width: 70%; 
-      color: #fff;
-      border-radius:10px;
-    }
     .deptchange {
       cursor: pointer;
     }
@@ -290,7 +256,36 @@ export default {
       color: rgb(108, 173, 228)
     }
   }
-
+  .term  {
+      width: 100%;
+      height: 100%;
+      .term_head {
+        position: relative;
+        width: 100%;
+        font-size: 16px;
+        border: 1px solid rgb(109, 123, 172);
+        border-radius: 10px 10px 0 0;
+        background: rgb(109, 123, 172);
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+      }
+      .termTitle {
+        display: inline-block;
+        width: 30%;
+        padding: 0.3% 0 0 1%;
+      }
+      .closeChart {
+        display: inline-block;
+        width: 4px;
+        height: 4px;
+        position: absolute;
+        top: 2%;
+        right: 2%;
+        z-index: 1;
+        cursor: pointer;
+      }
+    }
   .deleteHostText {
     margin-left: 10px;
     .del-host {

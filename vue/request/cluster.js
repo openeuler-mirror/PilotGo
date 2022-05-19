@@ -9,15 +9,15 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-04-18 15:17:55
+ * @LastEditTime: 2022-05-18 15:09:44
  * @Description: provide agent log manager of pilotgo
  */
-import { request } from './request'
+import request from './request'
 
 // 请求组织树接口
 export function getDeparts(data) {
   return request({
-    url: 'machinemanager/departinfo',
+    url: 'macList/departinfo',
     method: 'get',
     params: data
   })
@@ -25,7 +25,7 @@ export function getDeparts(data) {
 // 点击获取当前子节点接口
 export function getChildNode(data) {
   return request({
-    url: 'machinemanager/depart',
+    url: 'macList/depart',
     method: 'get',
     params: data
   })
@@ -33,7 +33,7 @@ export function getChildNode(data) {
 // 添加节点
 export function addDepart(data) {
   return request({
-    url: 'machinemanager/adddepart',
+    url: 'macList/adddepart',
     method: 'post',
     params: data
   })
@@ -41,7 +41,7 @@ export function addDepart(data) {
 // 编辑节点
 export function updateDepart(data) {
   return request({
-    url: 'machinemanager/updatedepart',
+    url: 'macList/updatedepart',
     method: 'post',
     data
   })
@@ -49,7 +49,7 @@ export function updateDepart(data) {
 // 删除节点
 export function deleteDepart(data) {
   return request({
-    url: 'machinemanager/deletedepartdata',
+    url: 'macList/deletedepartdata',
     method: 'post',
     data
   })
@@ -59,7 +59,7 @@ export function deleteDepart(data) {
 // 点击部门刷新列表接口
 export function getClusters(data) {
     return request({
-      url: 'machinemanager/machineinfo',
+      url: 'macList/machineinfo',
       method: 'get',
       params: data
     })
@@ -68,7 +68,7 @@ export function getClusters(data) {
 // 获取资源池列表接口
 export function getSourceMac(data) {
   return request({
-    url: 'machinemanager/sourcepool',
+    url: 'macList/sourcepool',
     method: 'get',
     params: data
   })
@@ -77,7 +77,7 @@ export function getSourceMac(data) {
   // 更换机器所属部门
 export function changeMacDept(data) {
   return request({
-    url: 'machinemanager/modifydepart',
+    url: 'macList/modifydepart',
     method: 'post',
     data
   })
@@ -86,7 +86,7 @@ export function changeMacDept(data) {
 // 添加ip接口
 export function insertIp(data) {
   return request({
-    url: '/machinemanager/addmachine',
+    url: 'macList/addmachine',
     method: 'post',
     data
   })
@@ -102,8 +102,17 @@ export function updateIp({ip, ...data}) {
 // 删除ip接口
 export function deleteIp(data) {
   return request({
-    url: '/machinemanager/deletemachinedata',
+    url: 'macList/deletemachinedata',
     method: 'post',
+    data
+  })
+}
+
+// 创建批次时通过deptId获取IP列表  macList/machinealldata
+export function getMacIps(data) {
+  return request({
+    url: 'macList/selectmachine',
+    method: 'get',
     params: data
   })
 }
@@ -111,7 +120,7 @@ export function deleteIp(data) {
 // rpm列表
 export function rpmAll(data) {
   return request({
-    url: '/api/rpm_all',
+    url: 'api/rpm_all',
     method: 'get',
     params: data
   })
@@ -120,7 +129,7 @@ export function rpmAll(data) {
 // rpm详情
 export function getDetail(data) {
   return request({
-    url: '/api/rpm_info',
+    url: 'api/rpm_info',
     method: 'get',
     params: data
   })
@@ -129,7 +138,7 @@ export function getDetail(data) {
 // rpm下发
 export function rpmIssue(data) {
   return request({
-    url: '/agent/rpm_install',
+    url: 'agent/rpm_install',
     method: 'post',
     data
   })
@@ -138,7 +147,7 @@ export function rpmIssue(data) {
 // rpm卸载
 export function rpmUnInstall(data) {
   return request({
-    url: '/agent/rpm_remove',
+    url: 'agent/rpm_remove',
     method: 'post',
     data
   })
@@ -147,7 +156,7 @@ export function rpmUnInstall(data) {
 // 根据ip获取机器信息
 export function getDeviceInfo(data) {
   return request({
-    url: 'machinemanager/deviceinfo',
+    url: 'macList/deviceinfo',
     method: 'get',
     params: data
   })
@@ -244,9 +253,18 @@ export function serviceRestart(data) {
 }
 
 // 获取内核信息
-export function getSyskernel(data) {
+export function getSyskernels(data) {
   return request({
     url: 'api/sysctl_info',
+    method: 'get',
+    params: data
+  })
+}
+
+// 获取一个内核信息
+export function getOneSyskernel(data) {
+  return request({
+    url: 'api/sysctl_view',
     method: 'get',
     params: data
   })
@@ -303,5 +321,41 @@ export function getNetUdp(data) {
     url: 'api/net_udp',
     method: 'get',
     params: data
+  })
+}
+
+// 获取任务列表
+export function getCronList(data) {
+  return request({
+    url: 'api/cron_list',
+    method: 'get',
+    params: data
+  })
+}
+
+// 新建任务信息
+export function createCron(data) {
+  return request({
+    url: 'api/cron_create',
+    method: 'post',
+    data
+  })
+}
+
+// 修改任务信息
+export function updateCron(data) {
+  return request({
+    url: 'api/cron_update',
+    method: 'post',
+    data
+  })
+}
+
+// 删除任务信息
+export function delCron(data) {
+  return request({
+    url: 'api/cron_delete',
+    method: 'post',
+    data
   })
 }

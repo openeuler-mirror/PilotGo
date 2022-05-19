@@ -9,11 +9,11 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-15 17:02:23
- * @LastEditTime: 2022-04-19 09:46:46
+ * @LastEditTime: 2022-05-16 15:23:21
  * @Description: provide agent log manager of pilotgo
  */
 // api请求接口文件
-import { request } from './request'
+import request from './request'
 
 const API1 = '/plugin/prometheus/api/v1'
 export function getChartName(time) {

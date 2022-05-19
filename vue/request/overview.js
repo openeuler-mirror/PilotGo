@@ -9,9 +9,9 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-04 16:56:07
- * @LastEditTime: 2022-03-24 17:25:12
+ * @LastEditTime: 2022-05-18 11:18:14
  */
-import { request } from './request'
+import request from './request'
 export function getData(data) {
   return request({
     url: '/prometheus/queryrange',
@@ -53,14 +53,14 @@ export function sendMessage(data) {
 // 获取首页看板机器数据总量
 export function getPanelDatas() {
   return request({
-    url: '/cluster/info',
+    url: '/overview/info',
     method: 'get',
   })
 }
 // 获取首页看板给部门机器数据
 export function getDeptDatas() {
   return request({
-    url: '/cluster/depart_info',
+    url: '/overview/depart_info',
     method: 'get',
   })
 }

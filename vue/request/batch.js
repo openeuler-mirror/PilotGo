@@ -9,14 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-04-12 14:06:39
+ * @LastEditTime: 2022-05-18 15:56:02
  * @Description: provide agent log manager of pilotgo
  */
-import { request } from './request'
+import request from './request'
 // 创建批次
 export function createBatch(data) {
   return request({
-    url: 'batchmanager/createbatch',
+    url: 'macList/createbatch',
     method: 'post',
     data
   })

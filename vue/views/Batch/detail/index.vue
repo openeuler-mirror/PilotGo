@@ -9,11 +9,11 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-04-13 15:42:28
+  LastEditTime: 2022-05-19 14:54:49
   Description: provide agent log manager of pilotgo
  -->
 <template>
- <div>
+ <div style="height: 100%">
    <ky-table
         class="cluster-table"
         ref="table"
@@ -35,9 +35,7 @@
           </el-table-column>
           <el-table-column label="状态" width="150">
             <template slot-scope="scope">
-              <span v-if="scope.row.state == 1">正常</span>
-              <span v-if="scope.row.state == 2">离线</span>
-              <span v-if="scope.row.state == 3">空闲</span>
+              <state-dot :state="scope.row.state"></state-dot>
             </template>
           </el-table-column>
            <el-table-column prop="sysinfo" label="系统信息"> 
@@ -59,12 +57,14 @@ import { getBatchDetail } from "@/request/batch";
 import RpmIssue from "../form/rpmIssue";
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
+import StateDot from "@/components/StateDot";
 export default {
   name: "BatchDetail",
   components: {
     kyTable,
     AuthButton,
-    RpmIssue
+    RpmIssue,
+    StateDot,
   },
   data() {
     return {
@@ -80,7 +80,7 @@ export default {
     }
   },
   mounted() {
-    getBatchDetail({ ID: this.searchData.ID }).then(res => {
+    getBatchDetail({ ID: parseInt(this.$route.params.id) }).then(res => {
       this.machines = [];
       if(res.data.code === 200) {
         this.machines = res.data.data;

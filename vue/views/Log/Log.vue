@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-04-22 14:42:49
+  LastEditTime: 2022-05-18 13:59:03
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -53,7 +53,7 @@
               </el-progress>
             </template> 
           </el-table-column>
-          <el-table-column prop="created_at" label="创建时间">
+          <el-table-column prop="created_at" label="创建时间" sortable>
             <template slot-scope="scope">
               <span>{{scope.row.created_at | dateFormat}}</span>
             </template>

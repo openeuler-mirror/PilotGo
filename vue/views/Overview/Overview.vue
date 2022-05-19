@@ -9,13 +9,13 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 11:17:06
-  LastEditTime: 2022-04-08 11:30:01
+  LastEditTime: 2022-05-10 13:55:26
  -->
 <template>
  <div class="content flex">
-   <div class="flag_header">
+   <!-- <div class="flag_header">
      <p class="panel">机器信息看板<span class="icon iconfont icon-tongjiguanli"></span></p>
-   </div>
+   </div> -->
    <div class="total panel flex" ref="total">
      <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :width="epWidth" type="circle" :percentage="total" :format="format"></el-progress>
      <div class="macStatus">
@@ -95,9 +95,9 @@ export default {
       if(res.data.code === 200) {
         let data = res.data.data.data;
         this.total = data.total;
-        this.offline = data.offline;
-        this.free = data.free;
-        this.normal = data.normal
+        this.offline = data.AgentStatus.offline;
+        this.free = data.AgentStatus.free;
+        this.normal = data.AgentStatus.normal
       }
     }) 
     this.getAlerts();

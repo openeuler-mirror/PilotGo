@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:07
-  LastEditTime: 2022-04-14 10:51:32
+  LastEditTime: 2022-05-11 16:44:16
  -->
 <template>
  <div class="content">
@@ -136,6 +136,10 @@ export default {
         float: left;
         display: flex;
         align-items: center;
+        svg {
+          width: 36%;
+          height: 100%;
+        }
       }
       .search {
         width: 70%;
