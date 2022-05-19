@@ -18,12 +18,12 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // gorm分页查询方法
@@ -107,10 +107,13 @@ func JsonPagination(c *gin.Context, list interface{}, total int, query *model.Pa
 		"size":  query.Size})
 }
 
-func HandleError(c *gin.Context, err error) bool {
-	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
-		return true
+// string数组转为int数组
+func String2Int(strArr []string) []int {
+	res := make([]int, len(strArr))
+
+	for index, val := range strArr {
+		res[index], _ = strconv.Atoi(val)
 	}
-	return false
+
+	return res
 }
