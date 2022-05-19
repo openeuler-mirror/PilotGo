@@ -1,7 +1,7 @@
 <template>
   <div style="height:100%">
-  <router-view v-if="$route.meta.breadcrumb"></router-view>
-  <div v-if="!$route.meta.breadcrumb" class="panel">
+  <router-view v-if="$route.name == 'BatchDetail'"></router-view>
+  <div v-if="$route.name == 'Batch'" class="panel">
     <ky-table
         class="cluster-table"
         ref="table"
@@ -31,7 +31,7 @@
           </el-table-column>
           <el-table-column prop="DepartName" label="部门"> 
           </el-table-column>
-          <el-table-column prop="CreatedAt" label="创建时间">
+          <el-table-column prop="CreatedAt" label="创建时间" sortable>
             <template slot-scope="scope">
               <span>{{scope.row.CreatedAt | dateFormat}}</span>
             </template>
@@ -102,7 +102,7 @@ export default {
     handleDelete() {
       let delDatas = [];
       delDatas = this.$refs.table.selectRow.ids.map(item => {
-        return item.toString();
+        return item;
       });
       delBatches({BatchID: delDatas}).then(res => {
         if(res.data.code === 200) {

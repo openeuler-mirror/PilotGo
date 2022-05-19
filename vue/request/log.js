@@ -9,14 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-28 14:26:23
- * @LastEditTime: 2022-03-03 13:48:35
- * @Description: provide agent log manager of pilotgo
+ * @LastEditTime: 2022-05-18 11:17:42
+ * @Description: provide log log manager of pilotgo
  */
-import { request } from './request'
+import request from './request'
 // 日志列表
 export function getLogs(data) {
   return request({
-    url: 'agent/log_all',
+    url: 'log/log_all',
     method: 'get',
     params: data
   })
@@ -25,7 +25,7 @@ export function getLogs(data) {
 // 日志详情
 export function getLogDetail(data) {
   return request({
-    url: 'agent/logs',
+    url: 'log/logs',
     method: 'get',
     params: data
   })
@@ -34,7 +34,7 @@ export function getLogDetail(data) {
 // 日志删除
 export function deleteLog(data) {
   return request({
-    url: 'agent/delete',
+    url: 'log/delete',
     method: 'post',
     data
   })

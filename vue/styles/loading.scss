@@ -1,0 +1,12 @@
+//设置遮罩层颜色
+.el-loading-mask{
+  background-color: rgba(255,255,255,0.8);
+}
+//设置图标颜色
+.el-loading-spinner .path{
+  stroke: #fff;
+}
+//设置文字颜色
+.el-loading-spinner .el-loading-text{
+  // color: #fff;
+}

@@ -9,10 +9,10 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-03 17:00:36
- * @LastEditTime: 2022-04-15 15:37:25
+ * @LastEditTime: 2022-05-16 15:24:44
  * @Description: provide agent log manager of pilotgo
  */
-import { request } from './request'
+import request from './request'
 // 用户登录
 export function loginByEmail(data) {
   return request({

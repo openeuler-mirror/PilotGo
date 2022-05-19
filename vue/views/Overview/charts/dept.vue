@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 18:26:25
-  LastEditTime: 2022-04-08 11:30:49
+  LastEditTime: 2022-04-29 15:13:48
  -->
 <template>
   <div id="dept" style="width:100%;height:100%">
@@ -108,9 +108,9 @@ export default {
         let data = res.data.data.data;
         data.forEach(item => {
           this.xAxis.push(item.depart);
-          this.normal.push(item.normal);
-          this.offline.push(item.offline);
-          this.free.push(item.free);
+          this.normal.push(item.AgentStatus.normal);
+          this.offline.push(item.AgentStatus.offline);
+          this.free.push(item.AgentStatus.free);
         })
       }
     })

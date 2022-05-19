@@ -9,9 +9,9 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-04-18 15:18:50
- * @LastEditTime: 2022-04-18 15:47:40
+ * @LastEditTime: 2022-05-16 15:24:07
  */
-import { request } from './request'
+import request from './request'
 // 重启防火墙
 export function reStart(data) {
   return request({

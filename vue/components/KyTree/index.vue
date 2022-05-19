@@ -9,19 +9,22 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-04-12 14:13:56
+  LastEditTime: 2022-05-18 13:54:23
  -->
 <template>
   <div class="ky-tree">
     <div class="content">
       <el-tree
        class="treeitems"
-       empty-text="暂无数据"
+       empty-text="空"
        node-key="id"
        :props="defaultProps"
        :load="loadNode"
        :highlight-current="true"
        lazy
+       :check-strictly="true"
+       @check-change="handleCheckChange"
+       :show-checkbox="showSelect"
        :default-expanded-keys="[1]"
        :expand-on-click-node="false"
        :render-after-expand="isRender"
@@ -46,6 +49,12 @@ export default {
   props: {
     getData: {
       type: Function,
+    },
+    showSelect: {
+      type: Boolean,
+      default() {
+        return false
+      }
     },
     showEdit: {
       type: Boolean,
@@ -194,10 +203,17 @@ export default {
     //第一级节点不允许拖拽
      return draggingNode.level !== 1;
     },
+    setCheckedKeys(){
+      this.$refs.multipleTree.setCheckedKeys([])
+    },
     handleNodeClick(node,data) {
       // 获取当前分支与上级分支的数据
       this.$emit("nodeClick",node);
     },
+    handleCheckChange(data,checked,indeterminate) {
+      // 获取复选框选中数据
+      this.$emit("checkClick",{data:data,checked:checked,indeterminate:indeterminate});
+    }
   },
 };
 </script>
@@ -212,14 +228,14 @@ export default {
     font-size: 16px;
     padding-right: 8px;
     em {
-      color: rgb(11, 35, 117)
+      // color: rgb(11, 35, 117)
     }
   }
-  .el-icon-caret-right:before {
+/*   .el-icon-caret-right:before {
     content: "\27a7";
     font-size: 18px;
     font-weight: bold;
     color: rgb(11, 35, 117);
-}
+} */
 }
 </style>

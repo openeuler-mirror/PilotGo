@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-04-12 09:37:26
+  LastEditTime: 2022-05-18 13:58:45
  -->
 <template>
   <div style="width: 100%; height: 100%" class="panel">
@@ -25,7 +25,7 @@
         <el-button  @click="handleCreate"> 添加 </el-button>
       </template>
       <template v-slot:table>
-        <el-table-column prop="id" label="编号" width="120">
+        <el-table-column prop="id" label="编号" width="120" sortable>
         </el-table-column>
         <el-table-column  prop="role" label="角色名">
         </el-table-column>
@@ -46,7 +46,7 @@
           <template slot-scope="scope">
             <el-button :disabled="[3,1,2].includes(scope.row.id)" class="editBtn"  type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</el-button>
             <el-popconfirm 
-              title="确定删除此用户?"
+              title="确定删除此角色?"
               cancel-button-type="default"
               confirm-button-type="danger"
               @confirm="handleDelete(scope.row.id)">

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-04-13 15:42:56
+  LastEditTime: 2022-05-18 13:52:06
   Description: 'Components Table'
  -->
 <template>
@@ -24,11 +24,12 @@
         </div>
       </div>
     </div>
-    <div class="content">
+    <div class="content" v-loading="loading" element-loading-text="数据加载中" 
+      element-loading-spinner="el-icon-loading">
       <el-table
+        height="100%"
         :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
         :cell-style="{ color: 'black' }"
-        v-loading="loading"
         ref="multipleTable"
         :data="tableData"
         tooltip-effect="dark"
@@ -140,9 +141,11 @@ export default {
   methods: {
     loadData(pageParams) {
       this.tableData = [];
+      this.loading = true;
       this.getData({...pageParams,...this.searchData}).then((response) => {
         const res = response.data;
         if (res.code === 200) {
+          this.loading = false;
           this.total = res.total;
           this.objSearch.page = res.page;
           this.loading = false;

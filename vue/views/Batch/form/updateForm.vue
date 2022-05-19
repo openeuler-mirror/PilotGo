@@ -72,9 +72,9 @@ export default {
     },
     handleSubmitForm() {
       let params = {
-        BatchID: this.row.ID + '',
+        BatchID: this.row.ID,
         BatchName: this.form.name,
-        Descrip: this.form.description,
+        Description: this.form.description,
       }
       this.$refs.form.validate((valid) => {
         if (valid) {

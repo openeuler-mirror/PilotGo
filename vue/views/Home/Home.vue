@@ -9,44 +9,50 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-04-13 15:32:04
+  LastEditTime: 2022-05-19 10:22:47
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <el-container>
-    <el-header>
-      <div class="header-logoName"><img src="../../assets/logo.png" alt="">运维平台</div>
-      <div class="header-function">
-        <el-dropdown class="header-function__username" trigger="click">
-          <div>
-            <em class="el-icon-s-custom"></em>
-            <span>{{username}}</span>
-          </div>
-          <el-dropdown-menu slot="dropdown" >
-            <el-dropdown-item @click.native="updatePwd">修改密码</el-dropdown-item>
-            <el-dropdown-item @click.native="handleLogOut">注销登录</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+    <el-aside style="width: 12%">
+      <div class="logo"> 
+        <img src="../../assets/logo.png" alt=""> 
+        <span>PilotGo</span>
       </div>
-    </el-header>
+      <el-menu id="el-menu"
+        :collapse="isCollapse"
+        :unique-opened="true"
+        @select="handleSelect"
+        class="el-menu-vertical-demo"
+        background-color="#fff"
+        :default-active="activePanel">
+        <sidebar-item :routes="routesData"></sidebar-item>
+      </el-menu>
+    </el-aside>
     <el-container>
-      <el-aside style="width: 12%">
-        <el-menu
-          id="el-menu"
-          :uniqueOpened="true"
-          @select="handleSelect"
-          class="el-menu-vertical-demo"
-          background-color="#fff"
-          :default-active="activePanel"
-        >
-          <sidebar-item :routes="routesData"></sidebar-item>
-        </el-menu>
-      </el-aside>
+      <el-header style="height: 8%">
+        <bread-crumb class="breadCrumb"></bread-crumb>
+        <div class="header-function">
+          <el-dropdown class="header-function__username">
+            <div :title="username">
+              <em class="el-icon-s-custom"></em>
+              <span>{{username.length > 16 ? username.split('@')[0] : username}}</span>
+            </div>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item @click.native="updatePwd">修改密码</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <div class="logOut" title="退出" @click="handleLogOut">
+            <em class="el-icon-s-unfold"></em>
+          </div>
+        </div>
+      </el-header>
       <el-main>
-        <bread-crumb></bread-crumb>
-        <!-- <keep-alive exclude='Prometheus'> -->
-          <router-view></router-view>
-        <!-- </keep-alive> -->
+        <div class="bodyContent">
+          <transition name="fade-transform" mode="out-in">
+            <router-view></router-view>
+          </transition>
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -64,6 +70,7 @@ export default {
   data() {
     return {
       crumbs: [],
+      isCollapse: false
     };
   },
   computed: {
@@ -71,6 +78,7 @@ export default {
         return this.$store.getters.getPaths
     },
     activePanel() {
+      console.log(this.$store.getters.activePanel)
         return this.$store.getters.activePanel
     },
     menuKey() {
@@ -104,12 +112,7 @@ export default {
         this.$store.dispatch("logOut").then((res) => {
           this.$router.push("/login");
         });
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消操作'
-        });
-      });
+      })
     },
     updatePwd() {
       this.$prompt('请输入邮箱', '提示', {
@@ -135,69 +138,35 @@ export default {
 
 <style lang="scss" scope>
 .el-container {
-  position: relative;
   height: calc(100%);
   width: calc(100%);
   overflow: hidden;
-  .el-header {
-    padding-left: 0;
-    border-radius: 6px;
-    border: 1px solid #FFF;
-    width: 98%;
-    margin: 0.6% auto;
-    .header-logoName {
-      height: 100%;
-      font-size: 28px;
-      color: #fff;
-      float: left;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      img {
-      height: 120%;
-    }
-    }
-    .header-function {
-      float: right;
-      color: #ffffff;
-      font-size: 28px;
-      line-height: 60px;
-      margin-right: 10px;
-      .header-function__translate {
-        margin-right: 30px;
-      }
-
-      .header-function__username {
-        float: left;
-        font-size: 18px;
-        color: #ffffff;
-        margin-left: 10px;
-        span {
-          font-size: 16px;
-        }
-      }
-    }
-  }
+  
   .el-aside {
-    width: 16%;
-    .el-menu {
-      width: 88%;
-      height: 98%;
-      border-radius: 6px;
-      margin-left: 5.6%;
+    height: 100%;
+    .logo {
+      width: 100%;
+      height: 10%;
+      font-size: 2.5em;
+      font-family: fantasy;
+      color: rgb(241, 139, 14);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      position: relative;
+      z-index: 9999;
+      background: rgb(11, 35, 117);
+      img {
+        width: 50%;
+      }
+      span {
+        display: inline-block;
+        margin-left: -19%;
+      }
     }
-    .el-menu::after {
-      content: '';
-      position: fixed;
-      z-index: 999;
-      display: block;
-      width: 0;
-      height: 0;
-      border: 10px solid transparent;
-      border-left: 10px solid #fff;
-      left: 11.2%;
-      top: 46%;
-      clear: both;
+    .el-menu {
+      width: 100%;
+      height: 90%;
     }
     .aside-footer {
       position: absolute;
@@ -214,21 +183,96 @@ export default {
       }
     }
   }
-
-  .el-main {
-    height: 98%;
-    width: 80%;
-    border-radius: 6px;
-    margin-right: 0.8%;
-    padding: 12px;
-    overflow: auto;
+  .el-container {
+    width: 88%;
+    height: 100%;
+    overflow: hidden;
     background: #fff;
-    .cockpit {
+    .el-header {
       width: 100%;
-      height: 100%;
-    }
-  }
-  
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: solid 1px #e6e6e6;
+      .header-logoName {
+        height: 100%;
+        font-size: 28px;
+        color: #fff;
+        float: left;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        img {
+        height: 120%;
+      }
+      }
+      .header-function {
+        width: 20%;
+        height: 100%;
+        float: right;
+        display: flex;
+        justify-content: end;
+        align-items: center;
 
+        .header-function__username {
+          width: 30px;
+          height: 30px;
+          text-align: center;
+          color: rgb(241, 139, 14);
+          font-size: 24px;
+          border-radius: 30px;
+          background-color: #fff;
+          transition: width 500ms ease-in-out;
+          span {
+            display: none;
+          }
+        }
+        .header-function__username:hover {
+          border: 1px solid rgb(241, 139, 14);
+          width: 70%;
+          span {
+            animation: text 1s 1;
+            font-size: 16px;
+            display: inline-block;
+          }
+          @keyframes text {
+            0% {
+              color: transparent;
+            }
+            100% {
+              color: rgb(241, 139, 14);
+            }
+          }
+        }
+        .logOut {
+          cursor: pointer;
+          font-size: 24px;
+          margin: 0 0 0 6px;
+          color: rgb(241, 139, 14);
+        }
+        .logOut:hover {
+          color: rgb(202, 205, 210);
+        }
+      }
+    }
+    .el-main {
+      height: 92%;
+      padding: 8px;
+      .bodyContent {
+        width: 100%;
+        height: 100%;
+      }
+      .breadCrumb {
+        width: 100%;
+        height: 8%;
+        .el-breadcrumb {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+}
 }
 </style>

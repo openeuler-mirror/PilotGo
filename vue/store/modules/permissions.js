@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-03-18 14:32:58
+ * @LastEditTime: 2022-05-09 11:34:00
  */
 import { constantRouterMap, routes } from '@/router'
 import { getPermission } from "@/request/user"
@@ -97,12 +97,12 @@ const permission = {
             return state.menus
         },
         getOperations: state => {
-            return state.operations
+            return state.operations 
         },
         getPaths: state => {
             return state.routers[1].children.filter(item => {
                 return item.meta != undefined;
-            }).map(item => item.meta)
+            }).map(item => item)
         }
     }
 }

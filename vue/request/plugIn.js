@@ -1,4 +1,4 @@
-import { request } from './request'
+import request from './request'
 
 // 获取插件列表
 export function getPlugins() {

@@ -9,9 +9,9 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-15 10:12:29
- * @LastEditTime: 2022-04-06 16:52:37
+ * @LastEditTime: 2022-05-16 15:24:37
  */
-import { request } from './request'
+import request from './request'
 // 获取角色列表
 export function getRoles() {
   return request({

@@ -6,11 +6,11 @@
   "description": "",
   "glyphs": [
     {
-      "icon_id": "1096338",
-      "name": "应用图标_信号掉线",
-      "font_class": "yingyongtubiaoxinhaodiaoxian",
-      "unicode": "e996",
-      "unicode_decimal": 59798
+      "icon_id": "586972",
+      "name": "logout",
+      "font_class": "logout",
+      "unicode": "e77b",
+      "unicode_decimal": 59259
     },
     {
       "icon_id": "5183565",
@@ -18,20 +18,6 @@
       "font_class": "icon-test",
       "unicode": "e650",
       "unicode_decimal": 58960
-    },
-    {
-      "icon_id": "5423468",
-      "name": "设备_本地信号掉线",
-      "font_class": "diaoxian",
-      "unicode": "e600",
-      "unicode_decimal": 58880
-    },
-    {
-      "icon_id": "15356131",
-      "name": "当前用户",
-      "font_class": "dangqianyonghu",
-      "unicode": "e7df",
-      "unicode_decimal": 59359
     },
     {
       "icon_id": "23065433",
@@ -53,13 +39,6 @@
       "font_class": "shibai",
       "unicode": "e645",
       "unicode_decimal": 58949
-    },
-    {
-      "icon_id": "28375902",
-      "name": "预警",
-      "font_class": "yujing-copy",
-      "unicode": "fcfe",
-      "unicode_decimal": 64766
     },
     {
       "icon_id": "17967618",
@@ -95,13 +74,6 @@
       "font_class": "wode",
       "unicode": "eeca",
       "unicode_decimal": 61130
-    },
-    {
-      "icon_id": "17967666",
-      "name": "预警",
-      "font_class": "yujing",
-      "unicode": "eecb",
-      "unicode_decimal": 61131
     },
     {
       "icon_id": "25007068",
