@@ -185,18 +185,7 @@ func MachineInfo(c *gin.Context) {
 	var a []int
 	ReturnSpecifiedDepart(depart.ID, &a)
 	a = append(a, depart.ID)
-	machinelist := make([]model.Res, 0)
-	for _, value := range a {
-		list := &[]model.Res{}
-		mysqlmanager.DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
-			"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
-		for _, value1 := range *list {
-			if value1.Departid == value {
-				machinelist = append(machinelist, value1)
-			}
-		}
-	}
+	machinelist := dao.MachineList(a)
 	lens := len(machinelist)
 
 	data, err := DataPaging(query, machinelist, lens)
@@ -209,18 +198,18 @@ func MachineInfo(c *gin.Context) {
 
 //资源池返回接口
 func FreeMachineSource(c *gin.Context) {
-	departid := 1
 	machine := model.MachineNode{}
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
-
-	if HandleError(c, err) {
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	list, tx, res := machine.ReturnMachine(query, departid)
+	list, tx, res := machine.ReturnMachine(query, model.UncateloguedDepartId)
 	total, err := CrudAll(query, tx, &res)
-	if HandleError(c, err) {
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
@@ -229,12 +218,9 @@ func FreeMachineSource(c *gin.Context) {
 }
 func MachineAllData(c *gin.Context) {
 	AllData := model.MachineAllData()
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": AllData,
-	})
+	response.JSON(c, http.StatusOK, http.StatusOK, AllData, "获取所有的机器数据")
 }
-func Dep(c *gin.Context) {
+func Dept(c *gin.Context) {
 	departID := c.Query("DepartID")
 	tmp, err := strconv.Atoi(departID)
 	if err != nil {

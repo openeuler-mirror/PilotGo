@@ -25,7 +25,7 @@ func GetBatchID(name string) uint {
 
 func DeleteBatch(departid int) {
 	var batch model.Batch
-	mysqlmanager.DB.Where("id=?", departid).Delete(&batch)
+	mysqlmanager.DB.Where("id=?", departid).Unscoped().Delete(&batch)
 }
 
 func UpdateBatch(BatchID int, BatchName string, Descrip string) {
@@ -42,4 +42,9 @@ func GetMachineID(BatchID int) []string {
 	mysqlmanager.DB.Where("id=?", BatchID).Find(&Batch)
 	str := strings.Split(Batch.Machinelist, ",")
 	return str
+}
+
+// 创建批次
+func CreateBatch(batch model.Batch) {
+	mysqlmanager.DB.Create(&batch)
 }

@@ -24,9 +24,29 @@ type Batch struct {
 	Name        string `gorm:"type:varchar(100);not null" json:"name"`
 	Description string `gorm:"type:varchar(100)" json:"description"`
 	Manager     string `gorm:"type:varchar(100)" json:"manager"`
-	Machinelist string `gorm:"type:varchar(100)" json:"machinelist"`
+	Machinelist string `json:"machinelist"`
 	Depart      string `gorm:"type:varchar(100)"`
 	DepartName  string `gorm:"type:varchar(100)"`
+}
+
+type CreateBatch struct {
+	Name        string   `json:"Name"`
+	Description string   `json:"Description"`
+	Manager     string   `json:"Manager"`
+	DepartName  []string `json:"DepartName"`
+	DepartID    []int    `json:"DepartID"`
+	Machines    []int    `json:"Machines"`
+	DepartIDs   []int    `json:"deptids"`
+}
+
+type BatchUpdate struct {
+	BatchId     int    `json:"BatchID"`
+	BatchName   string `json:"BatchName"`
+	Description string `json:"Description"`
+}
+
+type BatchDel struct {
+	BatchID []int `json:"BatchID"`
 }
 
 func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, tx *gorm.DB) {
@@ -34,10 +54,3 @@ func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, tx *gorm.DB) {
 	tx = mysqlmanager.DB.Order("created_at desc").Find(&list)
 	return
 }
-
-// type GetBatch struct {
-// 	Name        string
-// 	Description string
-// 	manager     string
-// 	Depart      []string
-// }

@@ -26,6 +26,16 @@ func DepartIdToGetDepartName(id int) string {
 	return departNames.Depart
 }
 
+// 根据部门ids查询所属部门
+func DepartIdsToGetDepartNames(ids []int) (names []string) {
+	for _, id := range ids {
+		var depart model.DepartNode
+		mysqlmanager.DB.Where("id = ?", id).Find(&depart)
+		names = append(names, depart.Depart)
+	}
+	return
+}
+
 // 获取下级部门id
 func SubDepartId(id int) []int {
 	var depart []model.DepartNode

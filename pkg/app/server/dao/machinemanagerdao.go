@@ -18,7 +18,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func IsParentDepartExist(parent string) bool {
@@ -99,17 +98,31 @@ func AddNewMachine(Machine model.MachineNode) {
 	mysqlmanager.DB.Save(&Machine)
 }
 
+// 获取该部门下的所有机器
+func MachineList(departId []int) (machinelist []model.Res) {
+	for _, value := range departId {
+		list := &[]model.Res{}
+		mysqlmanager.DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
+			"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
+			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
+		for _, value1 := range *list {
+			if value1.Departid == value {
+				machinelist = append(machinelist, value1)
+			}
+		}
+	}
+	return
+}
+
 func MachineStore(departid int) []model.MachineNode {
 	var Machineinfo []model.MachineNode
 	mysqlmanager.DB.Where("depart_id=?", departid).Find(&Machineinfo)
-	logger.Info("%v", Machineinfo)
 	return Machineinfo
 }
 
 func GetPid(departid string) []model.DepartNode {
 	var DepartInfo []model.DepartNode
 	mysqlmanager.DB.Where("p_id=?", departid).Find(&DepartInfo)
-	// logger.Info("%v", DepartInfo)
 	return DepartInfo
 }
 
@@ -122,7 +135,6 @@ func Deletedepartdata(needdelete []int) {
 func Insertdepartlist(needdelete []int, str string) []int {
 	var DepartInfo []model.DepartNode
 
-	// needdelete = append(needdelete[:0], needdelete[1:]...)
 	mysqlmanager.DB.Where("p_id=?", str).Find(&DepartInfo)
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
@@ -160,9 +172,11 @@ func ModifyMachineDepart2(M int, D int) {
 	}
 	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
 }
-func MachineData(MachineIP string) model.MachineNode {
+
+// 根据机器id获取机器信息
+func MachineData(MacId int) model.MachineNode {
 	var m model.MachineNode
-	mysqlmanager.DB.Where("ip=?", MachineIP).Find(&m)
+	mysqlmanager.DB.Where("id=?", MacId).Find(&m)
 	return m
 }
 

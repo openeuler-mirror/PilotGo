@@ -36,61 +36,87 @@ func SetupRouter() *gin.Engine {
 
 	// TODO: 此处绑定 http api handler
 
-	group := router.Group("/api")
+	overview := router.Group("/overview")
 	{
-		group.GET("/agent_info", agentcontroller.AgentInfoHandler)
-		group.GET("/agent_list", agentcontroller.AgentListHandler)
-		group.GET("/run_script", agentcontroller.RunScript)
-		group.GET("/os_info", agentcontroller.OSInfoHandler)
-		group.GET("/cpu_info", agentcontroller.CPUInfoHandler)
-		group.GET("/memory_info", agentcontroller.MemoryInfoHandler)
-		group.GET("/sysctl_info", agentcontroller.SysInfoHandler)
-		group.GET("/sysctl_view", agentcontroller.SysctlViewHandler)
-		group.GET("/service_list", agentcontroller.ServiceListHandler)
-		group.GET("/service_status", agentcontroller.ServiceStatusHandler)
-		group.GET("/rpm_all", agentcontroller.AllRpmHandler)
-		group.GET("/rpm_source", agentcontroller.RpmSourceHandler)
-		group.GET("/rpm_info", agentcontroller.RpmInfoHandler)
-		group.GET("/disk_use", agentcontroller.DiskUsageHandler)
-		group.GET("/disk_info", agentcontroller.DiskInfoHandler)
-		group.GET("/net_tcp", agentcontroller.NetTCPHandler)
-		group.GET("/net_udp", agentcontroller.NetUDPHandler)
-		group.GET("/net_io", agentcontroller.NetIOCounterHandler)
-		group.GET("/net_nic", agentcontroller.NetNICConfigHandler)
-		group.GET("/user_info", agentcontroller.CurrentUserInfoHandler)
-		group.GET("/user_all", agentcontroller.AllUserInfoHandler)
-		group.GET("/os_basic", agentcontroller.OsBasic)
-		group.GET("/firewall_config", agentcontroller.FirewalldConfig)
-		group.GET("/firewall_restart", agentcontroller.FirewalldRestart)
-		group.GET("/firewall_stop", agentcontroller.FirewalldStop)
-		group.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
-		group.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
+		overview.GET("/info", controller.ClusterInfo)
+		overview.GET("/depart_info", controller.DepartClusterInfo)
 	}
-	cluster := router.Group("/cluster")
+
+	macList := router.Group("cluster/macList")
 	{
-		cluster.GET("/info", controller.ClusterInfo)
-		cluster.GET("/depart_info", controller.DepartClusterInfo)
+		macList.GET("/selectmachine", controller.MachineList)
+		macList.POST("/createbatch", controller.CreateBatch)
+		macList.GET("/departinfo", controller.DepartInfo)
+		macList.GET("/machineinfo", controller.MachineInfo)
+		macList.GET("/depart", controller.Dept)
+		macList.GET("/test", controller.AddIP)
+		macList.GET("/machinealldata", controller.MachineAllData)
+		macList.POST("/modifydepart", controller.ModifyMachineDepart)
+		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
-	agent := router.Group("/agent")
+	macDetails := router.Group("cluster/macList/api")
 	{
-		agent.GET("/sysctl_change", agentcontroller.SysctlChangeHandler)
-		agent.POST("/service_stop", agentcontroller.ServiceStopHandler)
-		agent.POST("/service_start", agentcontroller.ServiceStartHandler)
-		agent.POST("/service_restart", agentcontroller.ServiceRestartHandler)
-		agent.POST("/rpm_install", agentcontroller.InstallRpmHandler)
-		agent.POST("/rpm_remove", agentcontroller.RemoveRpmHandler)
-		agent.GET("/disk_path", agentcontroller.DiskCreatPathHandler)
-		agent.GET("/disk_mount", agentcontroller.DiskMountHandler)
-		agent.GET("/disk_umount", agentcontroller.DiskUMountHandler)
-		agent.GET("/disk_format", agentcontroller.DiskFormatHandler)
-		agent.GET("/user_add", agentcontroller.AddLinuxUserHandler)
-		agent.GET("/user_del", agentcontroller.DelUserHandler)
-		agent.GET("/user_ower", agentcontroller.ChangeFileOwnerHandler)
-		agent.GET("/user_per", agentcontroller.ChangePermissionHandler)
-		agent.GET("/log_all", controller.LogAll)
-		agent.GET("/logs", controller.AgentLogs)
-		agent.POST("/delete", controller.DeleteLog)
+		macDetails.GET("/agent_info", agentcontroller.AgentInfoHandler)
+		macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
+		macDetails.GET("/run_script", agentcontroller.RunScript)
+		macDetails.GET("/os_info", agentcontroller.OSInfoHandler)
+		macDetails.GET("/cpu_info", agentcontroller.CPUInfoHandler)
+		macDetails.GET("/memory_info", agentcontroller.MemoryInfoHandler)
+		macDetails.GET("/sysctl_info", agentcontroller.SysInfoHandler)
+		macDetails.GET("/sysctl_view", agentcontroller.SysctlViewHandler)
+		macDetails.GET("/service_list", agentcontroller.ServiceListHandler)
+		macDetails.GET("/service_status", agentcontroller.ServiceStatusHandler)
+		macDetails.GET("/rpm_all", agentcontroller.AllRpmHandler)
+		macDetails.GET("/rpm_source", agentcontroller.RpmSourceHandler)
+		macDetails.GET("/rpm_info", agentcontroller.RpmInfoHandler)
+		macDetails.GET("/disk_use", agentcontroller.DiskUsageHandler)
+		macDetails.GET("/disk_info", agentcontroller.DiskInfoHandler)
+		macDetails.GET("/net_tcp", agentcontroller.NetTCPHandler)
+		macDetails.GET("/net_udp", agentcontroller.NetUDPHandler)
+		macDetails.GET("/net_io", agentcontroller.NetIOCounterHandler)
+		macDetails.GET("/net_nic", agentcontroller.NetNICConfigHandler)
+		macDetails.GET("/user_info", agentcontroller.CurrentUserInfoHandler)
+		macDetails.GET("/user_all", agentcontroller.AllUserInfoHandler)
+		macDetails.GET("/os_basic", agentcontroller.OsBasic)
+		macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
+		macDetails.GET("/firewall_restart", agentcontroller.FirewalldRestart)
+		macDetails.GET("/firewall_stop", agentcontroller.FirewalldStop)
+		macDetails.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
+		macDetails.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
 	}
+
+	macBasicModify := router.Group("cluster/macList/agent")
+	{
+		macBasicModify.GET("/sysctl_change", agentcontroller.SysctlChangeHandler)
+		macBasicModify.POST("/service_stop", agentcontroller.ServiceStopHandler)
+		macBasicModify.POST("/service_start", agentcontroller.ServiceStartHandler)
+		macBasicModify.POST("/service_restart", agentcontroller.ServiceRestartHandler)
+		macBasicModify.POST("/rpm_install", agentcontroller.InstallRpmHandler)
+		macBasicModify.POST("/rpm_remove", agentcontroller.RemoveRpmHandler)
+		macBasicModify.GET("/disk_path", agentcontroller.DiskCreatPathHandler)
+		macBasicModify.GET("/disk_mount", agentcontroller.DiskMountHandler)
+		macBasicModify.GET("/disk_umount", agentcontroller.DiskUMountHandler)
+		macBasicModify.GET("/disk_format", agentcontroller.DiskFormatHandler)
+		macBasicModify.GET("/user_add", agentcontroller.AddLinuxUserHandler)
+		macBasicModify.GET("/user_del", agentcontroller.DelUserHandler)
+		macBasicModify.GET("/user_ower", agentcontroller.ChangeFileOwnerHandler)
+		macBasicModify.GET("/user_per", agentcontroller.ChangePermissionHandler)
+	}
+
+	monitor := router.Group("prometheus")
+	{
+		monitor.POST("/queryrange", controller.Queryrange)
+		monitor.POST("/query", controller.Query)
+		monitor.GET("/alert", controller.ListenALert)
+		monitor.POST("/alertmanager", controller.AlertMessageConfig)
+	}
+
+	batchmanager := router.Group("batchmanager")
+	{
+		batchmanager.GET("/batchinfo", controller.BatchInfo)
+		batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfo)
+	}
+
 	user := router.Group("user")
 	{
 		user.POST("/login", controller.Login)
@@ -106,29 +132,14 @@ func SetupRouter() *gin.Engine {
 		user.POST("/updateRole", controller.UpdateUserRole)
 		user.POST("/roleChange", controller.RolePermissionChange)
 	}
-	machinemanager := router.Group("machinemanager")
+	userLog := router.Group("log")
 	{
-		machinemanager.GET("/departinfo", controller.DepartInfo)
-		machinemanager.GET("/machineinfo", controller.MachineInfo)
-		machinemanager.GET("/depart", controller.Dep)
-		machinemanager.GET("/test", controller.AddIP)
-		machinemanager.GET("/machinealldata", controller.MachineAllData)
-		machinemanager.POST("/modifydepart", controller.ModifyMachineDepart)
-		machinemanager.GET("/sourcepool", controller.FreeMachineSource)
+		userLog.GET("/log_all", controller.LogAll)
+		userLog.GET("/logs", controller.AgentLogs)
+		userLog.POST("/delete", controller.DeleteLog)
 	}
-	batchmanager := router.Group("batchmanager")
-	{
-		batchmanager.POST("/createbatch", controller.CreateBatch)
-		batchmanager.GET("/batchinfo", controller.BatchInform)
-		batchmanager.GET("/batchmachineinfo", controller.Batchmachineinfo)
-	}
-	prometheus := router.Group("prometheus")
-	{
-		prometheus.POST("/queryrange", controller.Queryrange)
-		prometheus.POST("/query", controller.Query)
-		prometheus.GET("/alert", controller.ListenALert)
-		prometheus.POST("/alertmanager", controller.AlertMessageConfig)
-	}
+
+	// 此处绑定casbin过滤规则
 	policy := router.Group("casbin")
 	{
 		policy.GET("/get", controller.GetPolicy)
@@ -146,9 +157,9 @@ func SetupRouter() *gin.Engine {
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
 		user.POST("/import", controller.ImportUser)
-		machinemanager.POST("/deletedepartdata", controller.Deletedepartdata)
-		machinemanager.POST("/adddepart", controller.AddDepart)
-		machinemanager.POST("/updatedepart", controller.UpdateDepart)
+		macList.POST("/deletedepartdata", controller.Deletedepartdata)
+		macList.POST("/adddepart", controller.AddDepart)
+		macList.POST("/updatedepart", controller.UpdateDepart)
 		batchmanager.POST("/updatebatch", controller.UpdateBatch)
 		batchmanager.POST("/deletebatch", controller.DeleteBatch)
 	}
@@ -162,24 +173,8 @@ func SetupRouter() *gin.Engine {
 		c.Redirect(http.StatusFound, url)
 		router.StaticFile(url, "./dist/index.html")
 	})
-	router.GET("/ws", controller.ShellWs)
+	router.GET("/ws", controller.ShellWs) // 终端
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
-
-	////注册session校验中间件
-	////r.Use(checkSession)
-	//
-	//// PilotGo server端plugin处理
-	//router.GET("/plugin", net.MakeHandler("pluginOpsHandler", net.PluginOpsHandler))
-	//router.DELETE("/plugin", net.MakeHandler("pluginDeleteHandler", net.PluginDeleteHandler))
-	//router.POST("/plugin", net.MakeHandler("pluginPutHandler", net.PluginAddHandler))
-	//
-	//// 转发到plugin server端处理
-	//router.GET("/plugin/*any", net.PluginHandler)
-	////获取机器列表
-	//router.GET("/hosts", net.MakeHandler("hostGetHandler", net.HostsGetHandler))
-	//router.POST("/hosts", net.MakeHandler("hostPutHandler", net.HostAddHandler))
-	//router.DELETE("/hosts", net.MakeHandler("hostDeleteHandler", net.HostDeleteHandler))
-	//router.GET("/overview", net.MakeHandler("overview", net.HostsOverview))
 
 	return router
 }
