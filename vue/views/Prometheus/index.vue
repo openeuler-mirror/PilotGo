@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-04-13 15:18:16
+  LastEditTime: 2022-05-20 10:49:36
  -->
 <template>
   <div class="overview">
@@ -18,16 +18,13 @@
       <div class="choice">
         <el-form ref="form" :model="form">
           <el-form-item label="机器 IP:">
-            {{macIp}}
-            <!-- <el-select v-model="form.IP" multiple placeholder="请选择">
-              <el-option
-                v-for="item in ips"
-                :key="item.ID"
-                :label="item.ip"
-                :value="item.ip"
-              >
-              </el-option>
-            </el-select> -->
+            <el-autocomplete
+              style="width:30%"
+              class="inline-input"
+              v-model="macIp"
+              :fetch-suggestions="querySearch"
+              placeholder="请输入ip关键字"
+            ></el-autocomplete>
           </el-form-item>
           <el-form-item label="监控时间:">
             <el-row :gutter="20">
@@ -73,6 +70,8 @@ import CpuChart from './echarts/cpu.vue';
 import MemChart from './echarts/memory.vue';
 import DiskChart from './echarts/diskIO.vue';
 import NetChart from './echarts/network.vue';
+import merge from 'webpack-merge';
+import { getallMacIps } from '@/request/cluster'
 export default {
   name: "Prometheus",
   components: {
@@ -85,6 +84,7 @@ export default {
     return {
       macIp: 'localhost:9090',
       ips: [],
+      ipData: [],
       prome: '',
       promes: [
         {
@@ -113,10 +113,10 @@ export default {
       chartH: 0,
       form: {
         IP: '',
-        dateSD: '',
-        dateST: '',
-        dateED: '',
-        dateET: '',
+        dateSD: new Date(),
+        dateST: new Date(),
+        dateED: new Date(),
+        dateET: new Date(),
       }
     };
   },
@@ -126,9 +126,26 @@ export default {
     this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
     this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
     this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
-    this.$refs.memchart.resize({width:this.chartW,height: this.chartH});   
+    this.$refs.memchart.resize({width:this.chartW,height: this.chartH});
+    getallMacIps().then(res => {
+      this.ips = [];
+      this.ipData = [];
+      if(res.data.code === 200) {
+        this.ips = res.data.data && res.data.data;
+        this.ips.forEach(item => {
+            this.ipData.push({'value':item.ip})
+          })
+      }
+    })   
   },
   methods: {
+    querySearch(queryString, cb) {
+      var ipData = this.ipData;
+      var results = queryString ? ipData.filter((item) => {
+        return item.value.indexOf(queryString) === 0;
+      }): ipData;
+      cb(results);
+    },
     handleAppend(key) {
       switch (key) {
         case 1:
@@ -170,6 +187,10 @@ export default {
       }
     },
     handleConfirm() {
+      this.$store.dispatch('setSelectIp', this.macIp);
+      this.$router.push({
+        query:merge(this.$route.query,{'ip': this.macIp})
+      })
       let sTime = new Date(this.form.dateSD).getFullYear()+'-'+
           (new Date(this.form.dateSD).getMonth()+ 1) +'-'+new Date(this.form.dateSD).getDate()+' '+
           new Date(this.form.dateST).getHours()+':'+new Date(this.form.dateST).getMinutes()+':'+
@@ -199,7 +220,7 @@ export default {
     '$route': {
       handler() {
         if(this.$route.name) {
-          console.log("跳转",this.$store.getters.selectIp)
+          console.log("监控ip",this.$store.getters.selectIp)
         }
       }
     }

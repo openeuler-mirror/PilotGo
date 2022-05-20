@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-05-19 10:22:47
+  LastEditTime: 2022-05-20 17:46:41
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -78,7 +78,6 @@ export default {
         return this.$store.getters.getPaths
     },
     activePanel() {
-      console.log(this.$store.getters.activePanel)
         return this.$store.getters.activePanel
     },
     menuKey() {
@@ -144,6 +143,7 @@ export default {
   
   .el-aside {
     height: 100%;
+    overflow: hidden;
     .logo {
       width: 100%;
       height: 10%;
