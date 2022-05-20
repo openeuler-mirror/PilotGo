@@ -15,34 +15,39 @@
 package agentcontroller
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
+
+type RPMS struct {
+	UUIDs        []string `json:"uuid"`
+	RPM          string   `json:"rpm"`
+	UserName     string   `json:"userName"`
+	UserDeptName string   `json:"userDept"`
+}
 
 func AllRpmHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	rpm_all, err := agent.AllRpm()
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取已安装rpm包列表失败!")
+		response.Fail(c, nil, "获取已安装rpm包列表失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"rpm_all": rpm_all}, "Success")
+	response.Success(c, gin.H{"rpm_all": rpm_all}, "Success")
 }
 func RpmSourceHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -50,16 +55,16 @@ func RpmSourceHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	rpm_source, err := agent.RpmSource(rpmname)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取源软件包名以及源失败!")
+		response.Fail(c, nil, "获取源软件包名以及源失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"rpm_source": rpm_source}, "Success")
+	response.Success(c, gin.H{"rpm_source": rpm_source}, "Success")
 }
 func RpmInfoHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -67,181 +72,151 @@ func RpmInfoHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	rpm_info, Err, err := agent.RpmInfo(rpmname)
 	if len(Err) != 0 || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "获取源软件包信息失败!")
+		response.Fail(c, gin.H{"error": Err}, "获取源软件包信息失败!")
 		return
 	} else {
-		response.Response(c, http.StatusOK, 200, gin.H{"rpm_info": rpm_info}, "Success")
+		response.Success(c, gin.H{"rpm_info": rpm_info}, "Success")
 	}
 
-}
-
-type RPMS struct {
-	UUIDs    []string `json:"uuid"`
-	RPM      string   `json:"rpm"`
-	UserName string   `json:"userName"`
 }
 
 func InstallRpmHandler(c *gin.Context) {
 	var rpm RPMS
-	var user model.User
-	var logParent model.AgentLogParent
-	var log model.AgentLog
-	var machineNode model.MachineNode
+	c.Bind(&rpm)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
+	logParent := model.AgentLogParent{
+		UserName:   rpm.UserName,
+		DepartName: rpm.UserDeptName,
+		Type:       model.LogTypeRPM,
 	}
+	logParentId := dao.ParentAgentLog(logParent)
 
-	bodys := string(body)
-
-	err = json.Unmarshal([]byte(bodys), &rpm)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-
-	logParent.Type = "软件包安装/卸载"
-	logParent.UserName = rpm.UserName
-	mysqlmanager.DB.Where("email = ?", rpm.UserName).Find(&user)
-	logParent.DepartName = user.DepartName
-	mysqlmanager.DB.Save(&logParent)
 	StatusCodes := make([]string, 0)
 
 	for _, uuid := range rpm.UUIDs {
-		mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
-
-		log.IP = machineNode.IP
-		log.OperationObject = rpm.RPM
-		log.Action = model.RPMInstall
-		log.LogParentID = logParent.ID
-
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
-			log.StatusCode = 400
-			log.Message = "获取uuid失败"
-			mysqlmanager.DB.Save(&log)
-			StatusCodes = append(StatusCodes, "400")
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: rpm.RPM,
+				Action:          model.RPMInstall,
+				StatusCode:      http.StatusBadRequest,
+				Message:         "获取uuid失败",
+			}
+			dao.AgentLog(log)
+			response.Fail(c, nil, "获取uuid失败")
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
+
 		rpm_install, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
-			response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
-			log.StatusCode = 400
-			log.Message = Err
-			mysqlmanager.DB.Save(&log)
-			StatusCodes = append(StatusCodes, "400")
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: rpm.RPM,
+				Action:          model.RPMInstall,
+				StatusCode:      http.StatusBadRequest,
+				Message:         Err,
+			}
+			dao.AgentLog(log)
+			response.Fail(c, gin.H{"error": Err}, "Failed!")
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			response.Response(c, http.StatusOK, 200, gin.H{"install": rpm_install}, "该rpm包安装成功!")
-			log.StatusCode = 200
-			StatusCodes = append(StatusCodes, "200")
-			log.Message = "安装成功"
-			mysqlmanager.DB.Save(&log)
+
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: rpm.RPM,
+				Action:          model.RPMInstall,
+				StatusCode:      http.StatusOK,
+				Message:         "安装成功",
+			}
+			dao.AgentLog(log)
+			response.Success(c, gin.H{"install": rpm_install}, "该rpm包安装成功!")
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
-	var s int
-	for _, success := range StatusCodes {
-		if success == "200" {
-			s++
-		}
-	}
-	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(s)/float64(len(StatusCodes))), 64)
-	rate := strconv.FormatFloat(num, 'f', 2, 64)
-	logParent.Status = strconv.Itoa(s) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
-	mysqlmanager.DB.Save(&logParent)
+	status := service.BatchActionStatus(StatusCodes)
+	dao.UpdateParentAgentLog(logParentId, status)
 }
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
-	var user model.User
-	var logParent model.AgentLogParent
-	var log model.AgentLog
-	var machineNode model.MachineNode
+	c.Bind(&rpm)
 
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
+	logParent := model.AgentLogParent{
+		UserName:   rpm.UserName,
+		DepartName: rpm.UserDeptName,
+		Type:       model.LogTypeRPM,
 	}
+	logParentId := dao.ParentAgentLog(logParent)
 
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &rpm)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-
-	logParent.Type = "软件包安装/卸载"
-	logParent.UserName = rpm.UserName
-	mysqlmanager.DB.Where("email = ?", rpm.UserName).Find(&user)
-	logParent.DepartName = user.DepartName
-	mysqlmanager.DB.Save(&logParent)
 	StatusCodes := make([]string, 0)
 	for _, uuid := range rpm.UUIDs {
-		mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
-
-		log.IP = machineNode.IP
-		log.OperationObject = rpm.RPM
-		log.Action = model.RPMRemove
-		log.LogParentID = logParent.ID
 
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
-			log.StatusCode = 400
-			log.Message = "获取uuid失败"
-			mysqlmanager.DB.Save(&log)
-			StatusCodes = append(StatusCodes, "400")
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: rpm.RPM,
+				Action:          model.RPMRemove,
+				StatusCode:      http.StatusBadRequest,
+				Message:         "获取uuid失败",
+			}
+			dao.AgentLog(log)
+			response.Fail(c, nil, "获取uuid失败")
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
 		rpm_remove, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
-			response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
-			log.StatusCode = 400
-			log.Message = Err
-			mysqlmanager.DB.Save(&log)
-			StatusCodes = append(StatusCodes, "400")
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: rpm.RPM,
+				Action:          model.RPMRemove,
+				StatusCode:      http.StatusBadRequest,
+				Message:         Err,
+			}
+			dao.AgentLog(log)
+			response.Fail(c, gin.H{"error": Err}, "Failed!")
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			response.Response(c, http.StatusOK, 200, gin.H{"remove": rpm_remove}, "卸载成功")
-			log.StatusCode = 200
-			StatusCodes = append(StatusCodes, "200")
-			log.Message = "卸载成功"
-			mysqlmanager.DB.Save(&log)
+
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: rpm.RPM,
+				Action:          model.RPMRemove,
+				StatusCode:      http.StatusOK,
+				Message:         "卸载成功",
+			}
+			dao.AgentLog(log)
+			response.Success(c, gin.H{"remove": rpm_remove}, "该rpm包卸载成功!")
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
-	var s int
-	for _, success := range StatusCodes {
-		if success == "200" {
-			s++
-		}
-	}
-	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(s)/float64(len(StatusCodes))), 64)
-	rate := strconv.FormatFloat(num, 'f', 2, 64)
-	logParent.Status = strconv.Itoa(s) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
-	mysqlmanager.DB.Save(&logParent)
+
+	status := service.BatchActionStatus(StatusCodes)
+	dao.UpdateParentAgentLog(logParentId, status)
 }

@@ -28,3 +28,21 @@ func LogDelete(PLogIds []int) {
 		mysqlmanager.DB.Where("id=?", id).Unscoped().Delete(logparent)
 	}
 }
+
+// 存储父日志
+func ParentAgentLog(PLog model.AgentLogParent) int {
+	mysqlmanager.DB.Save(&PLog)
+	return PLog.ID
+}
+
+// 存储子日志
+func AgentLog(Log model.AgentLog) {
+	mysqlmanager.DB.Save(&Log)
+}
+
+// 修改父日志的操作状态
+func UpdateParentAgentLog(PLogId int, status string) {
+	var ParentLog model.AgentLogParent
+	mysqlmanager.DB.Model(&ParentLog).Where("id=?", PLogId).Update("status", status)
+
+}

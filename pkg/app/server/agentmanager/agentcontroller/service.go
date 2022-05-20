@@ -15,33 +15,37 @@
 package agentcontroller
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
+
+type AgentService struct {
+	UUID         string `json:"uuid"`
+	Service      string `json:"service"`
+	UserName     string `json:"userName"`
+	UserDeptName string `json:"userDept"`
+}
 
 func ServiceListHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	service_list, err := agent.ServiceList()
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取服务列表失败!")
+		response.Fail(c, nil, "获取服务列表失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"service_list": service_list}, "Success")
+	response.Success(c, gin.H{"service_list": service_list}, "Success")
 }
 func ServiceStatusHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -49,224 +53,195 @@ func ServiceStatusHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	service_status, err := agent.ServiceStatus(service)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取服务状态失败!")
+		response.Fail(c, nil, "获取服务状态失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"service_status": service_status}, "Success")
-}
-
-type AgentService struct {
-	UUID     string `json:"uuid"`
-	Service  string `json:"service"`
-	UserName string `json:"userName"`
+	response.Success(c, gin.H{"service_status": service_status}, "Success")
 }
 
 func ServiceStartHandler(c *gin.Context) {
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
+	var agentservice AgentService
+	c.Bind(&agentservice)
+
+	logParent := model.AgentLogParent{
+		UserName:   agentservice.UserName,
+		DepartName: agentservice.UserDeptName,
+		Type:       model.LogTypeService,
 	}
-	var AS AgentService
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &AS)
-	fmt.Println(bodys)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	var logParent model.AgentLogParent
-	var user model.User
-	var log model.AgentLog
-	var machineNode model.MachineNode
+	logParentId := dao.ParentAgentLog(logParent)
 
-	logParent.Type = "运行服务"
-	logParent.UserName = AS.UserName
-	mysqlmanager.DB.Where("email = ?", AS.UserName).Find(&user)
-	logParent.DepartName = user.DepartName
-	mysqlmanager.DB.Save(&logParent)
-
-	mysqlmanager.DB.Where("machine_uuid=?", AS.UUID).Find(&machineNode)
-
-	log.IP = machineNode.IP
-	log.OperationObject = AS.Service
-	log.Action = model.ServiceStart
-	log.LogParentID = logParent.ID
-
-	agent := agentmanager.GetAgent(AS.UUID)
+	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
-		log.StatusCode = 400
-		log.Message = "获取uuid失败"
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(agentservice.UUID),
+			OperationObject: agentservice.Service,
+			Action:          model.ServiceStart,
+			StatusCode:      http.StatusBadRequest,
+			Message:         "获取uuid失败",
+		}
+		dao.AgentLog(log)
+		response.Fail(c, nil, "获取uuid失败")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
 
-	service_start, Err, err := agent.ServiceStart(AS.Service)
+	service_start, Err, err := agent.ServiceStart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
-		log.StatusCode = 400
-		log.Message = Err
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(agentservice.UUID),
+			OperationObject: agentservice.Service,
+			Action:          model.ServiceStart,
+			StatusCode:      http.StatusBadRequest,
+			Message:         Err,
+		}
+		dao.AgentLog(log)
+		response.Fail(c, gin.H{"error": Err}, "Failed!")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"service_start": service_start}, "Success")
-	log.StatusCode = 200
-	log.Message = "启动服务成功"
-	mysqlmanager.DB.Save(&log)
-	logParent.Status = "1,1,1.00"
-	mysqlmanager.DB.Save(&logParent)
+
+	log := model.AgentLog{
+		LogParentID:     logParentId,
+		IP:              dao.UUID2MacIP(agentservice.UUID),
+		OperationObject: agentservice.Service,
+		Action:          model.ServiceStart,
+		StatusCode:      http.StatusOK,
+		Message:         "启动服务成功",
+	}
+	dao.AgentLog(log)
+	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+
+	response.Success(c, gin.H{"service_start": service_start}, "Success")
 }
 func ServiceStopHandler(c *gin.Context) {
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
+	var agentservice AgentService
+	c.Bind(&agentservice)
+
+	logParent := model.AgentLogParent{
+		UserName:   agentservice.UserName,
+		DepartName: agentservice.UserDeptName,
+		Type:       model.LogTypeService,
 	}
-	var AS AgentService
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &AS)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
+	logParentId := dao.ParentAgentLog(logParent)
 
-	var logParent model.AgentLogParent
-	var user model.User
-	var log model.AgentLog
-	var machineNode model.MachineNode
-
-	logParent.Type = "运行服务"
-	logParent.UserName = AS.UserName
-	mysqlmanager.DB.Where("email = ?", AS.UserName).Find(&user)
-	logParent.DepartName = user.DepartName
-	mysqlmanager.DB.Save(&logParent)
-
-	mysqlmanager.DB.Where("machine_uuid=?", AS.UUID).Find(&machineNode)
-
-	log.IP = machineNode.IP
-	log.OperationObject = AS.Service
-	log.Action = model.ServiceStop
-	log.LogParentID = logParent.ID
-
-	agent := agentmanager.GetAgent(AS.UUID)
+	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
-		log.StatusCode = 400
-		log.Message = "获取uuid失败"
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(agentservice.UUID),
+			OperationObject: agentservice.Service,
+			Action:          model.ServiceStop,
+			StatusCode:      http.StatusBadRequest,
+			Message:         "获取uuid失败",
+		}
+		dao.AgentLog(log)
+		response.Fail(c, nil, "获取uuid失败")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
 
-	service_stop, Err, err := agent.ServiceStop(AS.Service)
+	service_stop, Err, err := agent.ServiceStop(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "Failed!")
 
-		log.StatusCode = 400
-		log.Message = Err
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(agentservice.UUID),
+			OperationObject: agentservice.Service,
+			Action:          model.ServiceStop,
+			StatusCode:      http.StatusBadRequest,
+			Message:         Err,
+		}
+		dao.AgentLog(log)
+		response.Fail(c, gin.H{"error": Err}, "Failed!")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"service_stop": service_stop}, "Success")
-	log.StatusCode = 200
-	log.Message = "关闭服务成功"
-	mysqlmanager.DB.Save(&log)
-	logParent.Status = "1,1,1.00"
-	mysqlmanager.DB.Save(&logParent)
+
+	log := model.AgentLog{
+		LogParentID:     logParentId,
+		IP:              dao.UUID2MacIP(agentservice.UUID),
+		OperationObject: agentservice.Service,
+		Action:          model.ServiceStop,
+		StatusCode:      http.StatusOK,
+		Message:         "关闭服务成功",
+	}
+	dao.AgentLog(log)
+	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+
+	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
 }
 func ServiceRestartHandler(c *gin.Context) {
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
+	var agentservice AgentService
+	c.Bind(&agentservice)
+
+	logParent := model.AgentLogParent{
+		UserName:   agentservice.UserName,
+		DepartName: agentservice.UserDeptName,
+		Type:       model.LogTypeService,
 	}
-	var AS AgentService
-	bodys := string(body)
-	err = json.Unmarshal([]byte(bodys), &AS)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
+	logParentId := dao.ParentAgentLog(logParent)
 
-	var logParent model.AgentLogParent
-	var user model.User
-	var log model.AgentLog
-	var machineNode model.MachineNode
-
-	logParent.Type = "运行服务"
-	logParent.UserName = AS.UserName
-	mysqlmanager.DB.Where("email = ?", AS.UserName).Find(&user)
-	logParent.DepartName = user.DepartName
-	mysqlmanager.DB.Save(&logParent)
-
-	mysqlmanager.DB.Where("machine_uuid=?", AS.UUID).Find(&machineNode)
-
-	log.IP = machineNode.IP
-	log.OperationObject = AS.Service
-	log.Action = model.ServiceRestart
-	log.LogParentID = logParent.ID
-
-	agent := agentmanager.GetAgent(AS.UUID)
+	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
-		log.StatusCode = 400
-		log.Message = "获取uuid失败"
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(agentservice.UUID),
+			OperationObject: agentservice.Service,
+			Action:          model.ServiceRestart,
+			StatusCode:      http.StatusBadRequest,
+			Message:         "获取uuid失败",
+		}
+		dao.AgentLog(log)
+		response.Fail(c, nil, "获取uuid失败")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
 
-	service_restart, Err, err := agent.ServiceRestart(AS.Service)
+	service_restart, Err, err := agent.ServiceRestart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": Err}, "重启服务失败!")
-		log.StatusCode = 400
-		log.Message = Err
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(agentservice.UUID),
+			OperationObject: agentservice.Service,
+			Action:          model.ServiceRestart,
+			StatusCode:      http.StatusBadRequest,
+			Message:         Err,
+		}
+		dao.AgentLog(log)
+		response.Fail(c, gin.H{"error": Err}, "Failed!")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"service_restart": service_restart}, "Success")
-	log.StatusCode = 200
-	log.Message = "重启服务成功"
-	mysqlmanager.DB.Save(&log)
-	logParent.Status = "1,1,1.00"
-	mysqlmanager.DB.Save(&logParent)
+
+	log := model.AgentLog{
+		LogParentID:     logParentId,
+		IP:              dao.UUID2MacIP(agentservice.UUID),
+		OperationObject: agentservice.Service,
+		Action:          model.ServiceRestart,
+		StatusCode:      http.StatusOK,
+		Message:         "重启服务成功",
+	}
+	dao.AgentLog(log)
+	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+
+	response.Success(c, gin.H{"service_restart": service_restart}, "Success")
 }

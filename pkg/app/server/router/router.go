@@ -49,7 +49,6 @@ func SetupRouter() *gin.Engine {
 		macList.GET("/departinfo", controller.DepartInfo)
 		macList.GET("/machineinfo", controller.MachineInfo)
 		macList.GET("/depart", controller.Dept)
-		macList.GET("/test", controller.AddIP)
 		macList.GET("/machinealldata", controller.MachineAllData)
 		macList.POST("/modifydepart", controller.ModifyMachineDepart)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
