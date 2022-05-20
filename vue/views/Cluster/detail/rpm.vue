@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-04-14 16:48:50
+  LastEditTime: 2022-05-20 11:06:36
  -->
 <template>
  <div class="content">
@@ -119,7 +119,8 @@ export default {
       let params = {
         uuid: [this.$route.params.detail],
         rpm: this.state,
-        userName: this.$store.getters.userName
+        userName: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
       }
       rpmIssue(params).then(res => {
         this.handleResult(res)
@@ -133,7 +134,8 @@ export default {
       let params = {
         uuid: [this.$route.params.detail],
         rpm: this.state,
-        userName: this.$store.getters.userName
+        userName: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
       }
       rpmUnInstall(params).then(res => {
         this.handleResult(res)

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-04-12 11:56:01
+  LastEditTime: 2022-05-20 10:27:34
  -->
 <template>
   <div class="panel">
@@ -96,7 +96,7 @@ export default {
     },
     getMem(timeRange) {
       let params= {
-        machineip: this.macIp,
+        machineip: this.$store.getters.selectIp,
         query: 2,
       }
       getData({...params, ...timeRange}).then(res => {

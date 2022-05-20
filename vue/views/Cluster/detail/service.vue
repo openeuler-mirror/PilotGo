@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:34
-  LastEditTime: 2022-04-14 16:56:23
+  LastEditTime: 2022-05-20 16:05:27
  -->
 <template>
  <div class="content">
@@ -119,21 +119,36 @@ export default {
     handleStart() {
       this.action = "开启服务";
       this.display = false;
-      serviceStart({...this.params, service: this.sericeName}).then(res => {
+      let params = {
+        service: this.sericeName,
+        userName: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
+      }
+      serviceStart({...this.params, ...params}).then(res => {
         this.handleResult(res)
       })
     },
     handleStop() {
       this.action = "停止服务";
       this.display = false;
-      serviceStop({...this.params, service: this.sericeName}).then(res => {
+      let params = {
+        service: this.sericeName,
+        userName: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
+      }
+      serviceStop({...this.params, ...params}).then(res => {
         this.handleResult(res)
       })
     },
     handleRestart() {
       this.action = "重启服务";
       this.display = false;
-      serviceRestart({...this.params, service: this.sericeName}).then(res => {
+      let params = {
+        service: this.sericeName,
+        userName: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
+      }
+      serviceRestart({...this.params, ...params}).then(res => {
         this.handleResult(res)
       })
     },

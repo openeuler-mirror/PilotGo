@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-05-18 15:09:44
+ * @LastEditTime: 2022-05-20 09:41:39
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -105,6 +105,14 @@ export function deleteIp(data) {
     url: 'macList/deletemachinedata',
     method: 'post',
     data
+  })
+}
+
+// 获取所有的机器列表
+export function getallMacIps() {
+  return request({
+    url: 'macList/machinealldata',
+    method: 'get',
   })
 }
 
