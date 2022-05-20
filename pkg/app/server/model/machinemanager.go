@@ -88,7 +88,7 @@ type Res struct {
 	IP         string `json:"ip"`
 	UUID       string `json:"uuid"`
 	CPU        string `json:"cpu"`
-	State      string `json:"state"`
+	State      int    `json:"state"`
 	Systeminfo string `json:"systeminfo"`
 }
 

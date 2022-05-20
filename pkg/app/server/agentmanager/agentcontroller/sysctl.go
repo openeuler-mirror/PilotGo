@@ -19,8 +19,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -29,68 +29,76 @@ func SysInfoHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	sysctl_info, err := agent.GetSysctlInfo()
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取内核配置失败!")
+		response.Fail(c, nil, "获取内核配置失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"sysctl_info": sysctl_info}, "Success")
+	response.Success(c, gin.H{"sysctl_info": sysctl_info}, "Success")
 }
 func SysctlChangeHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 	args := c.Query("args")
 	username := c.Query("userName")
+	userDeptName := c.Query("userDept")
 
-	var logParent model.AgentLogParent
-	var user model.User
-	var log model.AgentLog
-	var machineNode model.MachineNode
-
-	logParent.Type = "配置内核参数"
-	logParent.UserName = username
-	mysqlmanager.DB.Where("email = ?", username).Find(&user)
-	logParent.DepartName = user.DepartName
-	mysqlmanager.DB.Save(&logParent)
-
-	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&machineNode)
-
-	log.IP = machineNode.IP
-	log.OperationObject = args
-	log.Action = model.ServiceStart
-	log.LogParentID = logParent.ID
+	logParent := model.AgentLogParent{
+		UserName:   username,
+		DepartName: userDeptName,
+		Type:       model.LogTypeSysctl,
+	}
+	logParentId := dao.ParentAgentLog(logParent)
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败")
 
-		log.StatusCode = 400
-		log.Message = "获取uuid失败"
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(uuid),
+			OperationObject: args,
+			Action:          model.SysctlChange,
+			StatusCode:      http.StatusBadRequest,
+			Message:         "获取uuid失败",
+		}
+		dao.AgentLog(log)
+		response.Fail(c, nil, "获取uuid失败")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
 
 	sysctl_change, err := agent.ChangeSysctl(args)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": err}, "修改内核运行时参数失败!")
-		log.StatusCode = 400
-		log.Message = err.Error()
-		mysqlmanager.DB.Save(&log)
-		logParent.Status = "0,1,0.00"
-		mysqlmanager.DB.Save(&logParent)
+		log := model.AgentLog{
+			LogParentID:     logParentId,
+			IP:              dao.UUID2MacIP(uuid),
+			OperationObject: args,
+			Action:          model.SysctlChange,
+			StatusCode:      http.StatusBadRequest,
+			Message:         err.Error(),
+		}
+		dao.AgentLog(log)
+		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
+
+		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"sysctl_change": sysctl_change}, "Success")
-	log.StatusCode = 200
-	log.Message = "修改成功"
-	mysqlmanager.DB.Save(&log)
-	logParent.Status = "1,1,1.00"
-	mysqlmanager.DB.Save(&logParent)
+	log := model.AgentLog{
+		LogParentID:     logParentId,
+		IP:              dao.UUID2MacIP(uuid),
+		OperationObject: args,
+		Action:          model.SysctlChange,
+		StatusCode:      http.StatusOK,
+		Message:         "修改成功",
+	}
+	dao.AgentLog(log)
+	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+
+	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")
 }
 func SysctlViewHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -98,14 +106,14 @@ func SysctlViewHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	sysctl_view, err := agent.SysctlView(args)
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取该参数的值失败!")
+		response.Fail(c, nil, "获取该参数的值失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"sysctl_view": sysctl_view}, "Success")
+	response.Success(c, gin.H{"sysctl_view": sysctl_view}, "Success")
 }

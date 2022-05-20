@@ -8,31 +8,28 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2022-02-17 02:43:29
- * LastEditTime: 2022-04-13 01:51:51
- * Description: provide agent rpm manager functions.
+ * Date: 2021-05-20 09:08:08
+ * LastEditTime: 2022-05-20 16:25:41
+ * Description: 机器操作日志业务逻辑
  ******************************************************************************/
-package agentcontroller
+package service
 
 import (
-	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
+	"fmt"
+	"net/http"
+	"strconv"
 )
 
-func OSInfoHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
-		return
+// 计算批量机器操作的状态：成功数，总数目，比率
+func BatchActionStatus(StatusCodes []string) (status string) {
+	var StatusOKCounts int
+	for _, success := range StatusCodes {
+		if success == strconv.Itoa(http.StatusOK) {
+			StatusOKCounts++
+		}
 	}
-
-	os_info, err := agent.GetOSInfo()
-	if err != nil {
-		response.Fail(c, nil, "获取系统信息失败!")
-		return
-	}
-	response.Success(c, gin.H{"os_info": os_info}, "Success")
+	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(StatusOKCounts)/float64(len(StatusCodes))), 64)
+	rate := strconv.FormatFloat(num, 'f', 2, 64)
+	status = strconv.Itoa(StatusOKCounts) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
+	return
 }

@@ -15,8 +15,6 @@
 package agentcontroller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
@@ -27,14 +25,14 @@ func MemoryInfoHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	memory_info, err := agent.GetMemoryInfo()
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取系统内存信息失败!")
+		response.Fail(c, nil, "获取系统内存信息失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"memory_info": memory_info}, "Success")
+	response.Success(c, gin.H{"memory_info": memory_info}, "Success")
 }

@@ -15,8 +15,6 @@
 package agentcontroller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
@@ -27,16 +25,16 @@ func DiskUsageHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	disk_use, err := agent.DiskUsage()
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取磁盘的使用情况失败!")
+		response.Fail(c, nil, "获取磁盘的使用情况失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"disk_use": disk_use}, "Success")
+	response.Success(c, gin.H{"disk_use": disk_use}, "Success")
 }
 
 func DiskInfoHandler(c *gin.Context) {
@@ -44,16 +42,16 @@ func DiskInfoHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	disk_info, err := agent.DiskInfo()
 	if err != nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取磁盘的IO信息失败!")
+		response.Fail(c, nil, "获取磁盘的IO信息失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"disk_info": disk_info}, "Success")
+	response.Success(c, gin.H{"disk_info": disk_info}, "Success")
 }
 func DiskCreatPathHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -61,16 +59,16 @@ func DiskCreatPathHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	disk_path, err := agent.DiskCreatPath(mountpath)
 	if disk_path != nil || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": disk_path}, "创建挂载目录失败!")
+		response.Fail(c, gin.H{"error": disk_path}, "创建挂载目录失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"disk_path": disk_path}, "Success")
+	response.Success(c, gin.H{"disk_path": disk_path}, "Success")
 }
 func DiskMountHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -79,16 +77,16 @@ func DiskMountHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	disk_mount, err := agent.DiskMount(sourceDisk, destPath)
 	if disk_mount != nil || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": disk_mount}, "挂载磁盘失败!")
+		response.Fail(c, gin.H{"error": disk_mount}, "挂载磁盘失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"disk_mount": disk_mount}, "Success")
+	response.Success(c, gin.H{"disk_mount": disk_mount}, "Success")
 }
 func DiskUMountHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -96,16 +94,16 @@ func DiskUMountHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	disk_umount, err := agent.DiskUMount(diskPath)
 	if disk_umount != nil || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": disk_umount}, "卸载磁盘失败!")
+		response.Fail(c, gin.H{"error": disk_umount}, "卸载磁盘失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"disk_umount": disk_umount}, "Success")
+	response.Success(c, gin.H{"disk_umount": disk_umount}, "Success")
 }
 func DiskFormatHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
@@ -114,14 +112,14 @@ func DiskFormatHandler(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		response.Response(c, http.StatusOK, 400, nil, "获取uuid失败!")
+		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
 	disk_format, err := agent.DiskFormat(fileType, diskPath)
 	if disk_format != nil || err != nil {
-		response.Response(c, http.StatusOK, 400, gin.H{"error": disk_format}, "格式化磁盘失败!")
+		response.Fail(c, gin.H{"error": disk_format}, "格式化磁盘失败!")
 		return
 	}
-	response.Response(c, http.StatusOK, 200, gin.H{"disk_format": disk_format}, "Success")
+	response.Success(c, gin.H{"disk_format": disk_format}, "Success")
 }

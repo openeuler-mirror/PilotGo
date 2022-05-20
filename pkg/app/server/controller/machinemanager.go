@@ -343,13 +343,3 @@ func ModifyMachineDepart(c *gin.Context) {
 	}
 	response.Success(c, nil, "机器部门修改成功")
 }
-func AddIP(c *gin.Context) {
-	IP := c.Query("ip")
-	uuid := c.Query("uuid")
-	var MachineInfo model.MachineNode
-	Machine := model.MachineNode{
-		IP: IP,
-	}
-	mysqlmanager.DB.Model(&MachineInfo).Where("machine_uuid=?", uuid).Update(&Machine)
-	response.Success(c, nil, "ip更新成功")
-}

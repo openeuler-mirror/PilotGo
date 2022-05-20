@@ -51,11 +51,6 @@ func IsUUIDExist(uuid string) bool {
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&Machine)
 	return Machine.DepartId != 0
 }
-func IsIPExist(ip string) bool {
-	var Machine model.MachineNode
-	mysqlmanager.DB.Where("ip=?", ip).Find(&Machine)
-	return Machine.DepartId != 0
-}
 
 // 根据uuid获取部门id
 func UUIDForDepartId(uuid string) int {
@@ -209,4 +204,20 @@ func GetPidAndId(depart string) (pid, id int) {
 func AddDepart(db *gorm.DB, depart *model.DepartNode) error {
 	err := db.Create(depart).Error
 	return err
+}
+
+// 根据uuid获取机器的ip、状态和部门
+func MachineBasic(uuid string) (ip string, state int, dept string) {
+	var machine model.MachineNode
+	var depart model.DepartNode
+	mysqlmanager.DB.Where("machine_uuid = ?", uuid).Find(&machine)
+	mysqlmanager.DB.Where("id = ?", machine.DepartId).Find(&depart)
+	return machine.IP, machine.State, depart.Depart
+}
+
+// 根据uuid获取机器的ip
+func UUID2MacIP(uuid string) (ip string) {
+	var machine model.MachineNode
+	mysqlmanager.DB.Where("machine_uuid = ?", uuid).Find(&machine)
+	return machine.IP
 }

@@ -19,8 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -49,9 +48,6 @@ func AgentListHandler(c *gin.Context) {
 
 func OsBasic(c *gin.Context) {
 	uuid := c.Query("uuid")
-	var machine model.MachineNode
-	var depart model.DepartNode
-	mysqlmanager.DB.Where("machine_uuid = ?", uuid).Find(&machine)
-	mysqlmanager.DB.Where("id = ?", machine.DepartId).Find(&depart)
-	response.Response(c, http.StatusOK, 200, gin.H{"IP": machine.IP, "state": machine.State, "depart": depart.Depart}, "Success")
+	ip, state, dept := dao.MachineBasic(uuid)
+	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"IP": ip, "state": state, "depart": dept}, "Success")
 }
