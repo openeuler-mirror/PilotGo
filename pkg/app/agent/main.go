@@ -19,6 +19,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -51,6 +52,12 @@ func main() {
 		os.Exit(-1)
 	}
 	logger.Info("Thanks to choose PilotGo!")
+
+	// 定时任务初始化
+	if err := uos.CronInit(); err != nil {
+		logger.Error("cron init failed")
+		os.Exit(-1)
+	}
 
 	// init agent info
 	if err := localstorage.Init(); err != nil {
@@ -860,6 +867,60 @@ func regitsterHandler(c *network.SocketClient) {
 				Type:   msg.Type,
 				Status: 0,
 				Data:   del,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.CronStart, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		msgg := msg.Data.(string)
+		message := strings.Split(msgg, ",")
+		id, _ := strconv.Atoi(message[0])
+		spec := message[1]
+		command := message[2]
+
+		err := uos.CronStart(id, spec, command)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "任务已开始",
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.CronStopAndDel, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		msgg := msg.Data.(string)
+		message := strings.Split(msgg, ",")
+		id, _ := strconv.Atoi(message[0])
+
+		err := uos.StopAndDel(id)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   "任务已暂停",
 			}
 			return c.Send(resp_msg)
 		}

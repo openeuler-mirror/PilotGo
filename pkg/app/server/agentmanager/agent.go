@@ -16,6 +16,7 @@ package agentmanager
 
 import (
 	"net"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -806,4 +807,36 @@ func (a *Agent) FirewalldZonePortDel(zone, port string) (interface{}, string, er
 		return nil, "", err
 	}
 	return resp_message.Data, resp_message.Error, nil
+}
+
+// 开启定时任务
+func (a *Agent) CronStart(id int, spec string, command string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.CronStart,
+		Data: strconv.Itoa(id) + "," + spec + "," + command,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 暂停定时任务
+func (a *Agent) CronStopAndDel(id int) (interface{}, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.CronStopAndDel,
+		Data: strconv.Itoa(id),
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
 }

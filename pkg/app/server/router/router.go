@@ -100,6 +100,11 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.GET("/user_del", agentcontroller.DelUserHandler)
 		macBasicModify.GET("/user_ower", agentcontroller.ChangeFileOwnerHandler)
 		macBasicModify.GET("/user_per", agentcontroller.ChangePermissionHandler)
+		macBasicModify.POST("cron_new", agentcontroller.CreatCron)
+		macBasicModify.POST("/cron_del", agentcontroller.DeleteCronTask)
+		macBasicModify.POST("/cron_update", agentcontroller.UpdateCron)
+		macBasicModify.POST("/cron_status", agentcontroller.CronTaskStatus)
+		macBasicModify.GET("/cron_list", agentcontroller.CronTaskList)
 	}
 
 	monitor := router.Group("prometheus")
