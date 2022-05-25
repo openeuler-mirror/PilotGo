@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
@@ -165,4 +166,33 @@ func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole 
 	}
 	mysqlmanager.DB.Model(&userRole).Where("id = ?", permission.RoleID).Update(&r)
 	return userRole
+}
+
+// 创建超级管理员账户
+func CreateSuperAdministratorUser() {
+	var menus string = "cluster,batch,usermanager,rolemanager,overview,firewall,log,prometheus"
+
+	var user model.User
+	var role model.UserRole
+	mysqlmanager.DB.Where("type =?", model.AdminUserType).Find(&role)
+	if role.ID == 0 {
+		role = model.UserRole{
+			Role:  "超级管理员",
+			Type:  model.AdminUserType,
+			Menus: menus,
+		}
+		mysqlmanager.DB.Create(&role)
+		user = model.User{
+			CreatedAt:    time.Time{},
+			DepartFirst:  model.Departroot,
+			DepartSecond: model.UncateloguedDepartId,
+			DepartName:   "超级用户",
+			Username:     "admin",
+			Password:     model.DefaultUserPassword,
+			Email:        "admin@123.com",
+			UserType:     model.AdminUserType,
+			RoleID:       strconv.Itoa(role.ID),
+		}
+		mysqlmanager.DB.Create(&user)
+	}
 }

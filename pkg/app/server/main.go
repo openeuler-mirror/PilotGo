@@ -25,6 +25,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
@@ -122,8 +123,6 @@ func redisdbInit(conf *sconfig.RedisDBInfo) error {
 }
 
 func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
-	var menus string = "cluster,batch,usermanager,rolemanager,overview,firewall,log,prometheus"
-
 	_, err := mysqlmanager.MysqlInit(
 		conf.HostName,
 		conf.UserName,
@@ -134,46 +133,16 @@ func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
 		return err
 	}
 
+	// 创建超级管理员账户
 	mysqlmanager.DB.AutoMigrate(&model.User{})
 	mysqlmanager.DB.AutoMigrate(&model.UserRole{})
+	dao.CreateSuperAdministratorUser()
 
-	var user model.User
-	var role model.UserRole
-	pid := 0
-	mysqlmanager.DB.Where("depart_first=?", pid).Find(&user)
-	if user.ID == 0 {
-		user = model.User{
-			CreatedAt:    time.Time{},
-			DepartFirst:  0,
-			DepartSecond: 1,
-			DepartName:   "超级用户",
-			Username:     "admin",
-			Password:     "1234",
-			Email:        "admin@123.com",
-			UserType:     0,
-			RoleID:       "1",
-		}
-		mysqlmanager.DB.Create(&user)
-		role = model.UserRole{
-			Role:  "超级管理员",
-			Type:  0,
-			Menus: menus,
-		}
-		mysqlmanager.DB.Create(&role)
-	}
-
+	// 创建公司组织
 	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
-	var Depart model.DepartNode
-	mysqlmanager.DB.Where("p_id=?", pid).Find(&Depart)
-	if Depart.ID == 0 {
-		Depart = model.DepartNode{
-			PID:          0,
-			ParentDepart: "",
-			Depart:       "组织名",
-			NodeLocate:   0,
-		}
-		mysqlmanager.DB.Save(&Depart)
-	}
+	dao.CreateOrganization()
+
+	mysqlmanager.DB.AutoMigrate(&model.CrontabList{})
 	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
 	mysqlmanager.DB.AutoMigrate(&model.RoleButton{})
 	mysqlmanager.DB.AutoMigrate(&model.Batch{})
@@ -189,7 +158,7 @@ func socketServerInit(conf *sconfig.SocketServer) error {
 		OnAccept: agentmanager.AddandRunAgent,
 		OnStop:   agentmanager.StopAgentManager,
 	}
-	// url := conf.S.ServerIP + ":" + strconv.Itoa(conf.SocketPort)
+
 	go func() {
 		server.Run(conf.Addr)
 	}()

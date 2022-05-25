@@ -57,3 +57,18 @@ func FirstDepartId() (departIds []int) {
 	}
 	return
 }
+
+// 创建公司组织
+func CreateOrganization() {
+	var Depart model.DepartNode
+	mysqlmanager.DB.Where("p_id=?", model.Departroot).Find(&Depart)
+	if Depart.ID == 0 {
+		Depart = model.DepartNode{
+			PID:          model.Departroot,
+			ParentDepart: "",
+			Depart:       "组织名",
+			NodeLocate:   model.Departroot,
+		}
+		mysqlmanager.DB.Save(&Depart)
+	}
+}

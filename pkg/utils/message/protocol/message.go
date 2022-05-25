@@ -108,6 +108,10 @@ const (
 	FirewalldZonePortDel = 48
 	// 添加区域和指定端口
 	FirewalldZonePortAdd = 49
+	// 开启定时任务
+	CronStart = 50
+	// 暂停定时任务
+	CronStopAndDel = 51
 )
 
 type Message struct {
