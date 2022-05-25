@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-22 14:39:30
-  LastEditTime: 2022-04-24 16:51:10
+  LastEditTime: 2022-05-25 17:53:51
  -->
 <template>
     <div class="content">
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-  import KyTerminal from "@/components/kyTerminal";
+  import KyTerminal from "@/components/KyTerminal";
   import { checkPort, checkIP } from "@/rules/check";
   export default {
       name: 'TerminalInfo',
@@ -67,7 +67,7 @@
           ruleForm: {
             pass: "",
             port: 22,
-            ipaddress: "",
+            ipaddress: this.$store.getters.selectIp.split(':')[0] || "",
             username: "root"
           },
           rules: {

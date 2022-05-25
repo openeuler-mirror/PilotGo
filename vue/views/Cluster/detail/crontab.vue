@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-28 14:15:30
-  LastEditTime: 2022-04-29 15:48:56
+  LastEditTime: 2022-05-24 17:10:32
  -->
     <!-- 定时任务
       1.增删改
@@ -19,101 +19,115 @@
       表格：任务名、脚本、状态、创建日期、上次启动、上次花费、上次执行结果、操作（删除、开关、编辑）
      -->
 <template>
- <div>
-   <div class="filter">
-     <el-autocomplete
-        style="width:50%"
-        class="inline-input"
-        v-model="cronName"
-        :fetch-suggestions="querySearch"
-        placeholder="请输入任务名称"
-      >
-      <el-switch
-          style="display: block"
-          active-color="#13ce66"
-          inactive-color="#ff4949"
-          active-text="开启"
-          inactive-text="禁用"
-          slot="append"
-          @change="handlefilterChange">
-        </el-switch>
-      </el-autocomplete>
-     <el-button @click="handleShowCreate" v-show="showAddBtn">新增</el-button>
-   </div>
-   <br/>
-   <el-form v-show="showForm" :model="form" label-width="80px">
-      <el-form-item style="margin-top: -10px; margin-bottom:0px;">
-       <span style="color: rgb(241, 139, 14); font-size: 14px;">corn从左到右(用空格隔开):秒 分 小时 月份中的日期 月份 星期中的日期 年份</span>
-       <cron v-if="showCronBox" v-model="form.cronExpression"></cron>
-     </el-form-item>
-     <el-form-item label="Cron:">
-       <el-input v-model="form.cronExpression" auto-complete="off" @focus="showCronBox = true" @blur="showCronBox = false">
-          <el-button slot="append" @click="handleCreate" title="确定">确定</el-button>
-       </el-input>
-     </el-form-item>
-    </el-form>
-   <el-table
-    :data="tableData"
-    :header-cell-style="hStyle"
-    style="width: 100%">
-    <el-table-column
-      style="background:rgb(109, 123, 172);"
-      label="任务编号"
-      prop="id">
-    </el-table-column>
-    <el-table-column
-      label="任务名称"
-      prop="name">
-    </el-table-column>
-    <el-table-column
-      label="Cron表达式"
-      prop="cron">
-    </el-table-column>
-    <el-table-column
-      label="作业状态"
-      prop="status">
-      <template slot-scope="scope">
-        <el-switch
-          style="display: block"
-          :value="scope.row.status === 1"
-          active-color="#13ce66"
-          inactive-color="#ff4949"
-          active-text="开启"
-          inactive-text="禁用"
-          @change="handleChange(scope.row)">
-        </el-switch>
+ <div style="height: 100%">
+  <!--  <div class="operation">
+     <el-button @click="handleShowCreate" type="primary" size="medium" icon="el-icon-plus">新增</el-button>
+     <el-button @click="handleDel" type="danger" size="medium" icon="el-icon-delete">删除</el-button>
+   </div><br/> -->
+   <ky-table
+    ref="table"
+    :getData="getCronList"
+    :searchData="searchData"
+    >
+      <template v-slot:table_action>
+        <el-button @click="handleShowCreate" plain icon="el-icon-plus" title="添加"></el-button>
+        <el-popconfirm title="确定删除所选任务吗?" @confirm="handleDel">
+          <el-button  icon="el-icon-delete" title="删除"  slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"></el-button>
+        </el-popconfirm>
       </template>
-    </el-table-column>
-    <el-table-column
-      label="创建时间"
-      prop="createdAt">
-    </el-table-column>
-    <el-table-column
-      label="更新时间"
-      prop="updatedAt">
-    </el-table-column>
-    <el-table-column
-      label="操作">
-      <template slot-scope="scope">
-        <el-button type="primary" size="medium" icon="el-icon-edit" circle @click="handleEdit(scope.row)"></el-button>
-        <el-button type="danger" size="medium" icon="el-icon-delete" circle @click="handleDel(scope.row)"></el-button>
-      </template>
-    </el-table-column>
-  </el-table>
-    
-  </div>
+    <template v-slot:table>
+      <el-table-column
+        style="background:rgb(109, 123, 172);"
+        label="任务编号"
+        prop="ID" width="60">
+      </el-table-column>
+      <el-table-column
+        label="任务名称"
+        prop="taskname">
+      </el-table-column>
+      <el-table-column
+        label="执行脚本"
+        prop="cmd" width="160">
+      </el-table-column>
+      <el-table-column
+        label="Cron表达式"
+        width="160">
+        <template slot-scope="scope">
+          <span class="cmd">{{scope.row.spec}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="作业状态"
+        prop="status" width="160">
+        <template slot-scope="scope">
+          <el-switch
+            style="display: block"
+            :value="scope.row.status"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-text="开启"
+            inactive-text="关闭"
+            :loading="true"
+            @change="handleChange(scope.row)">
+          </el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        prop="CreatedAt">
+        <template slot-scope="scope">
+          <span>{{scope.row.CreatedAt | dateFormat}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="更新时间"
+        prop="UpdatedAt">
+        <template slot-scope="scope">
+          <span>{{scope.row.UpdatedAt | dateFormat}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="操作" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="primary" size="medium" plain @click="handleEdit(scope.row)">编辑</el-button>
+        </template>
+      </el-table-column>
+    </template>
+  </ky-table>
+  <el-dialog 
+    :title="title"
+    top="10vh"
+    :before-close="handleClose" 
+    :visible.sync="display" 
+    :width="dialogWidth"
+  >
+    <add-form v-if="type === 'create'" @click="handleClose"></add-form>   
+    <update-form v-if="type === 'update'" :row="row" @click="handleClose"></update-form>      
+  </el-dialog>
+</div>
 </template>
 <script>
-import cron  from '@/components/VueCron';
-import { getCronList, createCron, updateCron, delCron } from '@/request/cluster';
+import kyTable from "@/components/KyTable";
+import AddForm from "../form/cron/addForm";
+import UpdateForm from "../form/cron/updateForm";
+import { getCronList, changeCStatus, delCron } from '@/request/cluster';
 export default {
   name: "CrontabInfo",
-  components: { 
-    cron,
+  components: {
+    kyTable,
+    AddForm,
+    UpdateForm
   },
   data() {
     return {
+      title: '',
+      display: false,
+      type: '',
       cronName: '',
+      uuid: '',
+      row: {},
+      dialogWidth: '760px',
+      filterStatus: true,
       hStyle: {
         background:'rgb(109, 123, 172)',
         color:'#fff',
@@ -124,72 +138,85 @@ export default {
       },
       tableData: [],
       cronData: [],
-      showForm: false,
-      showAddBtn: true,
-      showCronBox: false,
-      form: {
-        cronExpression: '',
-      }
-    }
-  },
-  async mounted() {
-    if(this.$route.params.detail != undefined) {
-      await this.$http.get('/api/cron_list').then(res => {
-        if(res.data.code == 200) {
-          this.tableData = res.data.cron_info;
-          this.tableData.forEach(item => {
-            this.cronData.push({'value': item.name})
-          })
-        }
-      })
+      searchData: {
+        uuid: this.$route.params.detail || 'test',
+      },
     }
   },
   methods: {
-    querySearch(queryString, cb) {
-      let cronData = this.cronData;
-      var results = queryString ? cronData.filter((item) => {
-        return item.value.indexOf(queryString) === 0;
-      }): cronData;
-      cb(results);
+    getCronList,
+    handleClose() {
+      this.display = false;
+      this.title = "";
+      this.type = "";
+      this.$refs.table.handleSearch();
     },
     handleEdit(row) {
-
+      this.row = row;
+      this.display = true;
+      this.title = "编辑任务";
+      this.type = "update";
     },
-    handleDel(row) {
-
-    },
-    handlefilterChange() {
-      // 
-      // this.cronName
+    handleDel() {
+      let ids = this.$refs.table.selectRow.ids;
+      delCron({ids:ids}).then(res => {
+        if (res.data.code === 200) {
+          this.$refs.table.handleSearch();
+          this.$message.success("删除成功");
+        } else {
+          this.$message.success("删除失败");
+        }
+      })
     },
     handleChange(row) {
-
-    },
-    handleCreate() {
-      this.showAddBtn = true;
-      this.showForm = false;
-      console.log(this.cronName)
+      changeCStatus({id: row.ID, uuid: this.$route.params.detail, status: row.status}).then(res => {
+        if(res.data.code === 200) {
+          this.$refs.table.handleSearch();
+          this.$message.success("状态修改成功");
+        } else {
+          this.$message.success("状态修改失败");
+        }
+      })
     },
     handleShowCreate() {
-      this.showForm = true;
-      this.showAddBtn = false;
+      this.display = true;
+      this.title = "新增任务";
+      this.type = "create";
+      this.dialogWidth = '70%';
+    },
+
+
+  },
+  filters: {
+    dateFormat: function(value) {
+      let date = new Date(value);
+      let y = date.getFullYear();
+      let MM = date.getMonth() + 1;
+      MM = MM < 10 ? "0" + MM : MM;
+      let d = date.getDate();
+      d = d < 10 ? "0" + d : d;
+      let h = date.getHours();
+      h = h < 10 ? "0" + h : h;
+      let m = date.getMinutes();
+      m = m < 10 ? "0" + m : m;
+      let s = date.getSeconds();
+      s = s < 10 ? "0" + s : s;
+      return y + "-" + MM + "-" + d + " " + h + ":" + m;
     }
-
-
-  }
+  },
 }
 </script>
 <style scoped lang="scss">
-.demo-table-expand {
-    font-size: 0;
-  }
-  .demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
-  }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-  }
+.operation {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.cmd {
+  width: 100%;
+  color: #fff;
+  display: inline-block;
+  background-color: rgb(19, 206, 102);
+  border-radius: 16px;
+}
 </style>
