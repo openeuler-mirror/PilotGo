@@ -53,7 +53,7 @@
 </template>
 
 <script>
-  import KyTerminal from "@/components/KyTerminal";
+  import KyTerminal from "@/components/kyTerminal";
   import { checkPort, checkIP } from "@/rules/check";
   export default {
       name: 'TerminalInfo',
