@@ -109,8 +109,8 @@ func SetupRouter() *gin.Engine {
 
 	monitor := router.Group("prometheus")
 	{
-		monitor.POST("/queryrange", controller.Queryrange)
-		monitor.POST("/query", controller.Query)
+		monitor.GET("/queryrange", controller.QueryRange)
+		monitor.GET("/query", controller.Query)
 		monitor.GET("/alert", controller.ListenALert)
 		monitor.POST("/alertmanager", controller.AlertMessageConfig)
 	}
@@ -172,11 +172,11 @@ func SetupRouter() *gin.Engine {
 	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
-	router.NoRoute(func(c *gin.Context) {
-		url := c.Request.RequestURI
-		c.Redirect(http.StatusFound, url)
-		router.StaticFile(url, "./dist/index.html")
-	})
+	// router.NoRoute(func(c *gin.Context) {
+	// 	url := c.Request.RequestURI
+	// 	c.Redirect(http.StatusFound, url)
+	// 	router.StaticFile(url, "./dist/index.html")
+	// })
 	router.GET("/ws", controller.ShellWs) // 终端
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 

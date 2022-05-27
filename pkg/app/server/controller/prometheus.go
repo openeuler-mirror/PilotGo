@@ -379,7 +379,7 @@ type IO2 struct {
 	Label Res    `json:"label"`
 }
 
-func Query(c *gin.Context) {
+func Query2(c *gin.Context) {
 	j, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		response.Response(c, http.StatusOK,
@@ -701,7 +701,7 @@ func WritePrometheusYml(a []map[string]string) error {
 		write.WriteString("\n  - job_name: '" + value.JobName + "'")
 		write.WriteString("\n    static_configs:")
 		for _, value2 := range value.StaticConfigs {
-			a := strings.TrimSpace("- targets: ['" + value2.Targets[0] + ":9090']")
+			a := strings.TrimSpace("- targets: ['" + value2.Targets[0] + ":9100']")
 			write.WriteString("\n      " + a)
 		}
 	}

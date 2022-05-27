@@ -207,20 +207,20 @@ func GetRpmInfo(rpm string) (RpmInfo, error, error) {
 		return RpmInfo{}, fmt.Errorf("读取rpm包Release属性失败"), err
 	}
 	rpminfo.Release = str
-	reader = strings.NewReader(result)
-	str, err = readInfo(reader, `^Architecture.*`)
-	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Architecture属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Architecture属性失败"), err
-	}
-	rpminfo.Architecture = str
+	// reader = strings.NewReader(result)
+	// str, err = readInfo(reader, `^Architecture.*`)
+	// if err != nil && len(str) != 0 {
+	// 	logger.Error("读取rpm包Architecture属性失败")
+	// 	return RpmInfo{}, fmt.Errorf("读取rpm包Architecture属性失败"), err
+	// }
+	rpminfo.Architecture = strings.Split(rpm, ".")[len(strings.Split(rpm, "."))-1]
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Install Date.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包InstallDate属性失败")
 		return RpmInfo{}, fmt.Errorf("读取rpm包InstallDate属性失败"), err
 	}
-	rpminfo.Architecture = str
+	rpminfo.InstallDate = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Size.*`)
 	if err != nil && len(str) != 0 {
