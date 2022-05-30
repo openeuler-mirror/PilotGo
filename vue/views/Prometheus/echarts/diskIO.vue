@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-05-20 10:27:25
+  LastEditTime: 2022-05-26 14:49:38
  -->
 <template>
   <div class="panel">
@@ -19,6 +19,7 @@
 </template>
 <script>
 import { getData } from "@/request/overview";
+import { formatDate } from '@/utils/dateFormat';
 export default {
   data() {
     return {
@@ -32,9 +33,9 @@ export default {
   mounted() {
     this.macIp = this.$store.getters.selectIp || 'localhost:9090';
     this.diskChart = this.$echarts.init(document.getElementById('io'))
-    this.getStepData(this.inData,3,{starttime: parseInt(this.now - 60*60*6) + '',
+    this.getStepData('write',this.inData,'irate(node_disk_writes_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
         endtime: parseInt(this.now - 0) + '',});
-    this.getStepData(this.outData,4,{starttime: parseInt(this.now - 60*60*6) + '',
+    this.getStepData('read',this.outData,'irate(node_disk_reads_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
         endtime: parseInt(this.now - 0) + '',});
   },
   computed: {
@@ -101,46 +102,48 @@ export default {
       this.diskChart.resize(params)
       this.diskChart.setOption(this.option,true)
     },
-    handleClose() {
-      this.$emit('close',3);
+    handleClose() {      this.$emit('close',3);
     },
     getDisk(rangeTime) {
-      this.getStepData(this.inData,3,rangeTime);
-      this.getStepData(this.outData,4,rangeTime);
+      this.getStepData('write',this.inData,'irate(node_disk_writes_completed_total[1m])',rangeTime);
+      this.getStepData('read',this.outData,'irate(node_disk_reads_completed_total[1m])',rangeTime);
     },
-    getStepData(thisData,itemIndex,rangeTime) {
+    getStepData(type,thisData,querySql,rangeTime) {
       let params= {
-        machineip: this.$store.getters.selectIp,
-        query: itemIndex,
+        query: querySql,
+        start: rangeTime.starttime,
+        end: rangeTime.endtime,
+        step: '10s'
       }
-      getData({...params, ...rangeTime}).then(res => {
-        if(res.data.code === 200) {
+      getData(params).then(res => {
+        if(res.data.status === 'success') {
           let legend = [];
           let index = 0;
-          for(let i of res.data.data) {
+          let currDiskData = res.data.data.result.filter(item => item.metric.instance === this.$store.getters.selectIp);
+          for(let i of currDiskData) {
             index++;
             let resArr = []; 
-            i.label.forEach(item => {
+            i.values.forEach(item => {
               resArr.push({
-                time: item.time,
-                value: [item.time, parseInt(item.value).toFixed(2)],
-                name: i.device
+                time: item[0]*1000,
+                value: [formatDate(item[0], 'yyyy-MM-dd hh:mm:ss'), parseInt(item[1]).toFixed(2)],
+                name: i.metric.device
               })
             })
-            legend.push(i.device)
-            switch (itemIndex) {
-              case 3:
+            legend.push(i.metric.device)
+            switch (type) {
+              case 'write':
                 this.option.series[index]= {
-                  neme: i.device,
+                  neme: i.metric.device,
                   smooth: true,
                   type: 'line',
                   showSymbol: false,
                   data: resArr,
                 }
                 break;
-              case 4:
+              case 'read':
                 this.option.series[index+4] = {
-                  name: i.device,
+                  name: i.metric.device,
                   smooth: true,
                   type: 'line',
                   showSymbol: false,

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-05-20 10:49:36
+  LastEditTime: 2022-05-26 15:04:22
  -->
 <template>
   <div class="overview">
@@ -56,10 +56,18 @@
       </div>
       <!-- 图表展示区 -->
       <div class="charts flex">
-        <cpu-chart class="space"  v-show="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
-        <mem-chart class="space"  v-show="memShow" @close="handleClose"  ref="memchart"></mem-chart>
-        <disk-chart class="space"  v-show="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
-        <net-chart class="space"  v-show="netShow" @close="handleClose"  ref="netchart"></net-chart>
+        <transition name="fade-transform" mode="out-in">
+          <cpu-chart class="space"  v-show="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
+        </transition>
+        <transition name="fade-transform" mode="out-in">
+          <mem-chart class="space"  v-show="memShow" @close="handleClose"  ref="memchart"></mem-chart>
+        </transition>
+        <transition name="fade-transform" mode="out-in">
+          <disk-chart class="space"  v-show="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
+        </transition>
+        <transition name="fade-transform" mode="out-in">
+          <net-chart class="space"  v-show="netShow" @close="handleClose"  ref="netchart"></net-chart>
+        </transition>
       </div>
     </div>
   </div>
@@ -92,7 +100,7 @@ export default {
           value: 1
         },
         {
-          label: 'memroy',
+          label: 'memory',
           value: 2
         },
         {
