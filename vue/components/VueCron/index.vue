@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-28 16:16:57
-  LastEditTime: 2022-04-28 17:35:20
+  LastEditTime: 2022-05-23 15:08:25
  -->
 <template lang="html">
   <div class="cron" :val="value_">
@@ -169,7 +169,7 @@ export default {
   position: absolute;
   z-index: 2;
   top: 200%;
-  width: 90%;
+  width: 100%;
   height: 600px;
   overflow: auto;
   text-align: left;

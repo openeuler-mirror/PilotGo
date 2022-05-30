@@ -103,7 +103,7 @@ export const routes = [
           },
           {
             path: '/cluster/prometheus',
-            name: 'prometheus',
+            name: 'Prometheus',
             component: _import('Prometheus/index'),
             meta: {  
               header_title: "性能监控", 

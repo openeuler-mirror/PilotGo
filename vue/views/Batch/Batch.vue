@@ -66,7 +66,7 @@ import AuthButton from "@/components/AuthButton";
 import UpdateForm from "./form/updateForm.vue"
 import { getBatches, delBatches } from "@/request/batch";
 export default {
-  name: "batch",
+  name: "Batch",
   components: {
     kyTable,
     AuthButton,

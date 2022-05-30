@@ -9,13 +9,13 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-05-19 10:41:36
+  LastEditTime: 2022-05-25 13:57:45
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div class="cluster">
     <transition name="fade-transform" mode="out-in">
-      <router-view v-if="$route.name=='MacDetail' || $route.name=='createBatch' || $route.name=='prometheus'"></router-view>
+      <router-view v-if="$route.name=='MacDetail' || $route.name=='createBatch' || $route.name=='Prometheus'"></router-view>
     </transition>
     <div style="width:100%;height:100%" v-if="$route.name=='macList'">
       <div class="dept panel">
@@ -41,9 +41,6 @@
               name="rpm_install" 
               :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" 
               @click="handleChange"> 变更部门 </auth-button>
-            <el-popconfirm title="确定删除所选项目吗?" @confirm="handleDelete">
-              <auth-button name="cluster_delete"  slot="reference" v-show="!isBatch" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
-            </el-popconfirm>
           </template>
           <template v-slot:table>
             <el-table-column label="ip" width="140">
@@ -123,7 +120,6 @@ export default {
       isFull: false,
       dialogWidth: '760px',
       showChange: false,
-      isBatch: false,
       checkedNode: [],
       departName: '',
       departInfo: {},
@@ -162,13 +158,7 @@ export default {
       this.display = false;
       this.title = "";
       this.type = "";
-      if(params.isBatch) {
-        this.isBatch = true;
-      } else {
-        this.isBatch = false;
-        this.machines = [];
-        this.$refs.table.handleSearch();
-      }
+      this.$refs.table.handleSearch();
     },
     handleChange() {
       this.display = true;
@@ -183,17 +173,6 @@ export default {
       this.type = "update"; 
       this.dialogWidth = "760px";
       this.ip = ip;
-    },
-    handleDelete() {
-      let ids = this.$refs.table.selectRow.rows[0];
-      deleteIp({ uuid: ids }).then((res) => {
-        if (res.data.code === 200) {
-          this.$refs.table.handleSearch();
-          this.$message.success("删除成功");
-        } else {
-          this.$message.success("删除失败");
-        }
-      });
     },
     handleSelectDept(data) {
       if(data) {
@@ -213,10 +192,13 @@ export default {
       this.isSource = (Math.random()+1)*100;
       this.departName = "未分配资源池";
     },
-    handleProme(ip) {
+    handleSelectIP(ip) {
       this.$store.dispatch('setSelectIp', ip)
+    },
+    handleProme(ip) {
+      this.handleSelectIP(ip);
       this.$router.push({
-        name: 'prometheus',
+        name: 'Prometheus',
         query: { ip: ip }
       })
     }

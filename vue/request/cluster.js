@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-05-20 09:41:39
+ * @LastEditTime: 2022-05-24 09:50:53
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -335,7 +335,7 @@ export function getNetUdp(data) {
 // 获取任务列表
 export function getCronList(data) {
   return request({
-    url: 'api/cron_list',
+    url: 'agent/cron_list',
     method: 'get',
     params: data
   })
@@ -344,7 +344,7 @@ export function getCronList(data) {
 // 新建任务信息
 export function createCron(data) {
   return request({
-    url: 'api/cron_create',
+    url: 'agent/cron_new',
     method: 'post',
     data
   })
@@ -353,7 +353,16 @@ export function createCron(data) {
 // 修改任务信息
 export function updateCron(data) {
   return request({
-    url: 'api/cron_update',
+    url: 'agent/cron_update',
+    method: 'post',
+    data
+  })
+}
+
+// 开启关闭任务状态
+export function changeCStatus(data) {
+  return request({
+    url: 'agent/cron_status',
     method: 'post',
     data
   })
@@ -362,8 +371,10 @@ export function updateCron(data) {
 // 删除任务信息
 export function delCron(data) {
   return request({
-    url: 'api/cron_delete',
+    url: 'agent/cron_del',
     method: 'post',
     data
   })
 }
+
+// 执行一条任务

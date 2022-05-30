@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-05-20 17:46:41
+  LastEditTime: 2022-05-24 17:45:17
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -46,11 +46,14 @@
             <em class="el-icon-s-unfold"></em>
           </div>
         </div>
+        <tags-view />
       </el-header>
       <el-main>
         <div class="bodyContent">
           <transition name="fade-transform" mode="out-in">
-            <router-view></router-view>
+            <keep-alive :include="cachedViews">
+              <router-view :key="key" />
+            </keep-alive>
           </transition>
         </div>
       </el-main>
@@ -61,19 +64,28 @@
 <script>
 import SidebarItem from "./components/SidebarItem";
 import BreadCrumb from "./components/BreadCrumb";
+import TagsView from "./components/TagsView";
 export default {
   name: "Home",
   components: {
     SidebarItem,
     BreadCrumb,
+    TagsView
   },
   data() {
     return {
       crumbs: [],
-      isCollapse: false
+      isCollapse: false,
+      // cachedViews: ['Batch','Overview','Prometheus']
     };
-  },
+  }, 
   computed: {
+    cachedViews() {
+      return this.$store.getters.cachedViews
+    },
+    key() {
+      return this.$route.path
+    },
     routesData() {
         return this.$store.getters.getPaths
     },
@@ -146,7 +158,7 @@ export default {
     overflow: hidden;
     .logo {
       width: 100%;
-      height: 10%;
+      height: 12.8%;
       font-size: 2.5em;
       font-family: fantasy;
       color: rgb(241, 139, 14);
@@ -154,14 +166,14 @@ export default {
       justify-content: space-around;
       align-items: center;
       position: relative;
-      z-index: 9999;
+      z-index: 1999;
       background: rgb(11, 35, 117);
       img {
-        width: 50%;
+        width: 62%;
       }
       span {
         display: inline-block;
-        margin-left: -19%;
+        margin-left: -30%;
       }
     }
     .el-menu {
@@ -189,6 +201,7 @@ export default {
     overflow: hidden;
     background: #fff;
     .el-header {
+      position: relative;
       width: 100%;
       display: flex;
       align-items: center;
@@ -257,7 +270,7 @@ export default {
     }
     .el-main {
       height: 92%;
-      padding: 8px;
+      padding: 3.6% 0 0;
       .bodyContent {
         width: 100%;
         height: 100%;
