@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-05-20 10:25:06
+  LastEditTime: 2022-05-26 15:00:52
  -->
 <template>
   <div class="panel">
@@ -20,6 +20,7 @@
 </template>
 <script>
 import { getData } from "@/request/overview";
+import { formatDate } from '@/utils/dateFormat';
 export default {
   data() {
     return {
@@ -97,15 +98,21 @@ export default {
     },
     getCpu(timeRange) {
       let params= {
-        machineip: this.$store.getters.selectIp,
-        query: 1,
+        query: '100-(avg by(instance)(irate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
+        start: timeRange.starttime,
+        end: timeRange.endtime,
+        step: '10s'
       }
-      getData({...params, ...timeRange}).then(res => {
-        if(res.data.code === 200) {
-          res.data.data.forEach(item => {
+      getData(params).then(res => {
+        this.cpuData = [];
+        if(res.data.status === 'success') {
+          res.data.data.result
+            .filter(item => item.metric.instance === this.$store.getters.selectIp)[0]
+            .values.forEach(item => {
+              let localTime = formatDate(item[0], 'yyyy-MM-dd hh:mm:ss');
               this.cpuData.push({
-                time: item.time,
-                value: [ item.time,parseInt(item.value).toFixed(2)]
+                time: item[0]*1000,
+                value: [localTime, parseInt(item[1]).toFixed(2)]
               })
             })
         }

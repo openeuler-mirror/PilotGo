@@ -9,14 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-04 16:56:07
- * @LastEditTime: 2022-05-18 11:18:14
+ * @LastEditTime: 2022-05-25 15:58:46
  */
 import request from './request'
 export function getData(data) {
   return request({
     url: '/prometheus/queryrange',
-    method: 'post',
-    data
+    method: 'get',
+    params: data
   })
 }
 export function getCurrData(data) {

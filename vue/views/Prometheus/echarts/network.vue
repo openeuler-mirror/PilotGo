@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-05-20 10:27:45
+  LastEditTime: 2022-05-26 14:49:48
  -->
 <template>
   <div class="panel">
@@ -19,6 +19,7 @@
 </template>
 <script>
 import { getData } from "@/request/overview";
+import { formatDate } from '@/utils/dateFormat';
 export default {
   data() {
     return {
@@ -32,9 +33,9 @@ export default {
   mounted() {
     this.macIp = this.$store.getters.selectIp  || 'localhost:9090';
     this.netChart = this.$echarts.init(document.getElementById('network'))
-    this.getStepData(this.netIn,5,{starttime: parseInt(this.now - 6*60*60) + '',
+    this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
         endtime: parseInt(this.now - 0) + ''});
-    this.getStepData(this.netOut,6,{starttime: parseInt(this.now - 6*60*60) + '',
+    this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
         endtime: parseInt(this.now - 0) + ''});
   },
   computed: {
@@ -105,42 +106,45 @@ export default {
       this.$emit('close',4);
     },
     getNet(rangeTime) {
-      this.getStepData(this.netIn,5,rangeTime);
-      this.getStepData(this.netOut,6,rangeTime);
+      this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',rangeTime);
+      this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',rangeTime);
     },
-    getStepData(thisData,itemIndex,rangeTime) {
+    getStepData(type,thisData,querySql,rangeTime) {
       let params= {
-        machineip: this.$store.getters.selectIp,
-        query: itemIndex,
+        query: querySql,
+        start: rangeTime.starttime,
+        end: rangeTime.endtime,
+        step: '10s'
       }
-      getData({...params, ...rangeTime}).then(res => {
-        if(res.data.code === 200) {
+      getData(params).then(res => {
+        if(res.data.status === 'success') {
           let legend = [];
           let index = 0;
-          for(let i of res.data.data) {
+          let currNetData = res.data.data.result.filter(item => item.metric.instance === this.$store.getters.selectIp);
+          for(let i of currNetData) {
             index++;
             let resArr = []; 
-            i.label.forEach(item => {
+            i.values.forEach(item => {
               resArr.push({
-                time: item.time,
-                value: [item.time, parseInt(item.value).toFixed(2)],
-                name: i.device
+                time: item[0]*1000,
+                value: [formatDate(item[0], 'yyyy-MM-dd hh:mm:ss'), parseInt(item[1]).toFixed(2)],
+                name: i.metric.device
               })
             })
-            legend.push(i.device)
-            switch (itemIndex) {
-              case 5:
+            legend.push(i.metric.device)
+            switch (type) {
+              case 'in':
                 this.option.series[index] = {
-                  name: i.device,
+                  name: i.metric.device,
                   smooth: true,
                   type: 'line',
                   showSymbol: false,
                   data: resArr
                 }
                 break;
-              case 6:
+              case 'out':
                 this.option.series[index+4] = {
-                  name: i.device,
+                  name: i.metric.device,
                   smooth: true,
                   type: 'line',
                   showSymbol: false,
