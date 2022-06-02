@@ -840,3 +840,35 @@ func (a *Agent) CronStopAndDel(id int) (interface{}, error) {
 	}
 	return resp_message.Data, nil
 }
+
+// 远程获取agent端的repo文件
+func (a *Agent) GetRepoFile() (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.GetRepoFile,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 查看配置文件内容
+func (a *Agent) ReadFile(filepath string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.ReadFile,
+		Data: filepath,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
