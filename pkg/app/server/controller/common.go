@@ -117,3 +117,17 @@ func String2Int(strArr []string) []int {
 
 	return res
 }
+
+// interface数据求len大小
+func DataSizeForInterface(list interface{}) (total int) {
+	datas := make([]interface{}, 0)
+	if reflect.TypeOf(list).Kind() == reflect.Slice {
+		s := reflect.ValueOf(list)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			datas = append(datas, ele.Interface())
+		}
+	}
+	total = len(datas)
+	return
+}

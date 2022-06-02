@@ -218,7 +218,11 @@ func FreeMachineSource(c *gin.Context) {
 }
 func MachineAllData(c *gin.Context) {
 	AllData := model.MachineAllData()
-	response.JSON(c, http.StatusOK, http.StatusOK, AllData, "获取所有的机器数据")
+	datas := make([]map[string]string, 0)
+	for _, data := range AllData {
+		datas = append(datas, map[string]string{"uuid": data.UUID, "ip_dept": data.IP + "-" + data.Departname, "ip": data.IP})
+	}
+	response.JSON(c, http.StatusOK, http.StatusOK, datas, "获取所有的机器数据")
 }
 func Dept(c *gin.Context) {
 	departID := c.Query("DepartID")
