@@ -1,16 +1,21 @@
+.el-main {
+  overflow: hidden;
+}
 .el-button + .el-button {
   margin-left: 0px;
 }
-
+// 卡片
 .el-card {
+  height: 99%;
   .el-card__header {
-    background-color: #34ade0;
-    color: #fff;
+    color: #777;
     padding: 10px 15px;
   }
   .el-card__body {
+    height: 100%;
     font-weight: 500;
     font-size: 14px;
+    padding-top: 0;
     .el-row {
       margin-bottom: 10px;
     }
@@ -169,7 +174,7 @@
   table-layout: fixed;
 }
 .el-descriptions__body {
-  color: #000;
+  // color: #000;
   text-align: center;
 }
 .el-descriptions .is-bordered .el-descriptions-item__cell {
@@ -270,4 +275,15 @@ display: none;
 .el-dropdown-menu__item:not(.is-disabled):hover{
   background-color:#e6f4fb;
   color:#f18b0e;
+}
+
+// 步骤条（config）
+.el-step__title {
+  font-size: 12px;
+  line-height: 26px;
+}
+
+// 分割线
+.el-divider--vertical {
+  height: 92%;
 }

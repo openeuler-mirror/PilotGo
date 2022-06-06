@@ -196,6 +196,7 @@ export const routes = [
         breadcrumb: [
           { name: '配置管理', path: '/config/repo', children:[
             {name:'sysctl',menuName:'内核参数配置'},
+            {name:'libconfig',menuName:'库配置文件'},
           ]},
           { name: 'repo配置'}
         ],},
@@ -214,6 +215,7 @@ export const routes = [
               breadcrumb: [
                   { name: '配置管理', path: '/repo', children:[
                     {name:'sysctl',menuName:'内核参数配置'},
+                    {name:'libconfig',menuName:'库配置文件'},
                   ]},
                   { name: 'repo配置'}
               ],
@@ -230,8 +232,26 @@ export const routes = [
               breadcrumb: [
                   { name: '配置管理', path: '/repo', children:[
                     {name:'repo',menuName:'repo配置'},
+                    {name:'libconfig',menuName:'库配置文件'},
                   ]},
                   { name: '内核参数配置'}
+              ],
+              icon_class: ''
+            }
+          },
+          {
+            path: '/config/libconfig',
+            name: 'libconfig',
+            component:_import('Config/detail/index'),
+            meta: {
+              header_title: "库配置文件", 
+              panel: "/config/libconfig", 
+              breadcrumb: [
+                  { name: '配置管理', path: '/libconfig', children:[
+                    {name:'repo',menuName:'repo配置'},
+                    {name:'sysctl',menuName:'内核参数配置'},
+                  ]},
+                  { name: '库配置文件'}
               ],
               icon_class: ''
             }
@@ -245,6 +265,10 @@ export const routes = [
           {
             name: '/config/sysctl',
             menuName: "内核参数配置", 
+          },
+          {
+            name: '/config/libconfig',
+            menuName: "库配置文件", 
           },
         ]
 
