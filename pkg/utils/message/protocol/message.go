@@ -116,6 +116,8 @@ const (
 	GetRepoFile = 52
 	// 读取配置文件内容
 	ReadFile = 53
+	// 编辑配置文件
+	EditFile = 54
 )
 
 type Message struct {

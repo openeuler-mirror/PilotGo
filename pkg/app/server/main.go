@@ -148,6 +148,8 @@ func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	mysqlmanager.DB.AutoMigrate(&model.Batch{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
 	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
+	mysqlmanager.DB.AutoMigrate(&model.Files{})
+	mysqlmanager.DB.AutoMigrate(&model.HistoryFiles{})
 
 	return nil
 }
