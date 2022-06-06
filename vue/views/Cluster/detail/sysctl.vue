@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-27 11:01:53
-  LastEditTime: 2022-05-20 16:18:15
+  LastEditTime: 2022-05-30 16:18:50
  -->
 <template>
  <div class="content">
@@ -23,7 +23,6 @@
         @select="handleSelect"
       ></el-autocomplete>
       <el-button plain  type="primary" @click="handleSelect">搜索</el-button>
-      <!-- <el-button plain  type="primary" @click="handleChange">修改</el-button> -->
    </div>
    <div class="info">
      <div class="detail" v-if="display">

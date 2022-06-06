@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-05-26 15:04:22
+  LastEditTime: 2022-06-01 11:49:49
  -->
 <template>
   <div class="overview">
@@ -24,6 +24,7 @@
               v-model="macIp"
               :fetch-suggestions="querySearch"
               placeholder="请输入ip关键字"
+              @select="handleSelect"
             ></el-autocomplete>
           </el-form-item>
           <el-form-item label="监控时间:">
@@ -90,7 +91,7 @@ export default {
   },
   data() {
     return {
-      macIp: 'localhost:9090',
+      macIp: '',
       ips: [],
       ipData: [],
       prome: '',
@@ -130,7 +131,7 @@ export default {
   },
   mounted() {
 
-    this.macIp = this.$store.getters.selectIp && this.$store.getters.selectIp.split(':')[0] || 'localhost:9090';
+    this.macIp = this.$store.getters.selectIp && this.$store.getters.selectIp.split(':')[0];
     this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
     this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
     this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
@@ -141,7 +142,7 @@ export default {
       if(res.data.code === 200) {
         this.ips = res.data.data && res.data.data;
         this.ips.forEach(item => {
-            this.ipData.push({'value':item.ip})
+            this.ipData.push({'value':item.ip_dept,'ip':item.ip})
           })
       }
     })   
@@ -193,6 +194,9 @@ export default {
         default:
           break;
       }
+    },
+    handleSelect(item) {
+      this.macIp = item && item.ip;
     },
     handleConfirm() {
       this.$store.dispatch('setSelectIp', this.macIp);
