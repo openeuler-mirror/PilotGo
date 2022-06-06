@@ -872,3 +872,23 @@ func (a *Agent) ReadFile(filepath string) (interface{}, string, error) {
 	}
 	return resp_message.Data, resp_message.Error, nil
 }
+
+// 更新配置文件
+func (a *Agent) UpdateFile(filepath string, filename string, text string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.EditFile,
+		Data: map[string]string{
+			"path": filepath,
+			"name": filename,
+			"text": text,
+		},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}

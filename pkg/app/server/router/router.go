@@ -49,10 +49,10 @@ func SetupRouter() *gin.Engine {
 		macList.GET("/departinfo", controller.DepartInfo)
 		macList.GET("/machineinfo", controller.MachineInfo)
 		macList.GET("/depart", controller.Dept)
-		macList.GET("/machinealldata", controller.MachineAllData)
 		macList.POST("/modifydepart", controller.ModifyMachineDepart)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
+
 	macDetails := router.Group("cluster/macList/api")
 	{
 		macDetails.GET("/agent_info", agentcontroller.AgentInfoHandler)
@@ -141,6 +141,14 @@ func SetupRouter() *gin.Engine {
 	{
 		configmanager.GET("/repos", agentcontroller.GetRepoFile)
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
+		configmanager.POST("/file_edit", agentcontroller.UpdateAgentFile)
+		configmanager.POST("/fileSaveAdd", agentcontroller.SaveFileToDatabase)
+		configmanager.GET("/file_all", agentcontroller.AllFiles)
+		configmanager.POST("/file_search", agentcontroller.FileSearch)
+		configmanager.POST("/file_update", agentcontroller.UpdateFile)
+		configmanager.POST("/file_delete", agentcontroller.DeleteFile)
+		configmanager.GET("/lastfile_all", agentcontroller.AllHistoryFiles)
+		configmanager.POST("/lastfile_search", agentcontroller.LastFileSearch)
 	}
 
 	userLog := router.Group("log")
@@ -179,11 +187,11 @@ func SetupRouter() *gin.Engine {
 	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
-	router.NoRoute(func(c *gin.Context) {
-		url := c.Request.RequestURI
-		c.Redirect(http.StatusFound, url)
-		router.StaticFile(url, "./dist/index.html")
-	})
+	// router.NoRoute(func(c *gin.Context) {
+	// 	url := c.Request.RequestURI
+	// 	c.Redirect(http.StatusFound, url)
+	// 	router.StaticFile(url, "./dist/index.html")
+	// })
 	router.GET("/ws", controller.ShellWs) // 终端
 	router.GET("/macList/machinealldata", controller.MachineAllData)
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
