@@ -1551,3 +1551,823 @@ url：/api/os_basic
         },
         "msg":"Success"
     }
+
+### 部门管理 API
+#### 新增部门
+描述：向部门管理树中添加新的部门
+请求方法：POST
+url：/machinemanager/adddepart
+请求参数：
+类型：form
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|PID|string|上一级部门ID|y||
+|ParentDepart|string|上一级部门名称|y||
+|Depart|string|部门名称|y||
+
+示例：
+
+	/machinemanager/adddepart?PID=1&ParentDepart=xx&Depart=xx
+
+
+响应结果：
+类型：json
+
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "部门信息入库成功"
+}
+```
+#### 修改部门名称
+描述：修改部门管理树中部门的名称
+请求方法：POST
+url：/machinemanager/updatedepart
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|DepartID|int|部门ID|y||
+|DepartName|string|修改的部门名称|y||
+
+
+示例：
+
+```json
+{
+    "DepartID": 1,
+    "DepartName": "xx"
+}
+```
+
+响应结果：
+类型：json
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "部门更新成功"
+}
+```
+
+#### 删除部门信息
+描述：删除部门管理树中的指定部门
+请求方法：POST
+url：/machinemanager/deletedepartdata
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|DepartID|int|部门ID|y||
+
+示例：
+```json
+{
+    "DepartID": 1
+}
+```
+
+响应结果：
+类型：json
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "部门删除成功"
+}
+```
+
+#### 返回全部部门信息
+描述：获取全部部门信息
+请求方法：GET
+url：/machinemanager/departinfo
+请求参数：无
+
+
+响应结果：
+类型：json
+字段：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|label|string|部门名称|y||
+|id|int|部门id|y||
+|pid|int|上级部门id|y||
+|children|[]Object|下级部门|y||
+
+
+示例：
+```json
+{
+	"code": 200,
+	"data": {
+		"label": "xx",
+		"id": 1,
+		"pid": 0,
+		"children": [
+			{
+				"label": "",
+				"id": 2,
+				"pid": 1,
+				"children": null
+			},
+			{
+				"label": "xx",
+				"id": 3,
+				"pid": 1,
+				"children": null
+			}
+		]
+	}
+}
+```
+
+#### 特定部门信息
+描述：获取指定部门及其子部门信息
+请求方法：GET
+url：/machinemanager/depart
+请求参数：
+类型：form
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|DepartID|int|部门id|y||
+
+示例：
+
+	/machinemanager/depart?DepartID=1
+
+
+响应结果：
+类型：json
+字段：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|label|string|部门名称|y||
+|id|int|部门id|y||
+|pid|int|上级部门id|y||
+|children|[]Object|下级部门|y||
+
+示例：
+```json
+{
+	"code": 200,
+	"data": {
+		"label": "xx",
+		"id": 1,
+		"pid": 0,
+		"children": [
+			{
+				"label": "",
+				"id": 2,
+				"pid": 1,
+				"children": null
+			},
+			{
+				"label": "xx",
+				"id": 3,
+				"pid": 1,
+				"children": null
+			}
+		]
+	}
+}
+```
+
+#### 修改部门信息
+描述：修改机器的所属部门
+请求方法：POST
+url：/machinemanager/modifydepart
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|machineid|int|机器ID|y|
+|departid|int|部门ID|y|
+
+示例：
+
+```json
+{
+    "machineid":"1",
+    "departid":6
+}
+```
+
+响应结果：
+类型：json
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "机器部门修改成功"
+}
+```
+
+#### 部门机器信息
+描述：获取指定部门及其子部门信息
+请求方法：GET
+url：/machinemanager/depart
+请求参数：
+类型：form
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|DepartID|int|部门id|y||
+|page|int|分页的页码|y||
+|size|int|分页的当页容量|y||
+|ShowSelect|bool||y||
+
+示例：
+
+	/machinemanager/machineinfo?DepartId=8&page=1&size=10&ShowSelect=true
+
+
+响应结果：
+类型：json
+字段：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|机器id|y||
+|departid|int|部门id|y||
+|departname|string|部门名称|y||
+
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"id": 6,
+			"departid": 9,
+			"departname": "xx",
+			"ip": "192.168.160.107",
+			"uuid": "7891234566",
+			"cpu": "intel i5",
+			"state": "1",
+			"systeminfo": "centos 6"
+		},
+		{
+			"id": 17,
+			"departid": 9,
+			"departname": "xx",
+			"ip": "192.168.160.118",
+			"uuid": "91234567817",
+			"cpu": "intel i7",
+			"state": "1",
+			"systeminfo": "centos 7"
+		},
+	],
+	"page": 1,
+	"size": 2,
+	"total": 6
+}
+```
+
+#### 未分配机器资源池
+描述：未分配的机器资源池
+请求方法：GET
+url：/machinemanager/sourcepool
+请求参数：
+类型：form
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|page|int|分页的页码|y||
+|size|int|分页的当页容量|y||
+
+示例：
+
+	/machinemanager/sourcepool?page=1&size=10
+
+响应参数：
+类型：json
+字段：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|机器id|y||
+|departid|int|部门id|y||
+|departname|string|部门名称|y||
+|ip|string|机器IP|y||
+|uuid|string|机器UUID|y||
+|cpu|string|机器cpu信息|y||
+|state|string|机器状态|y||
+|systeminfo|string|机器系统信息|y||
+
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"id": 1,
+			"departid": 1,
+			"departname": "麒麟",
+			"ip": "192.168.160.102",
+			"uuid": "2345678901",
+			"cpu": "intel i3 ",
+			"state": "1",
+			"systeminfo": "centos 7"
+		},
+		{
+			"id": 25,
+			"departid": 1,
+			"departname": "麒麟",
+			"ip": "192.168.160.126",
+			"uuid": "89123456725",
+			"cpu": "amd64",
+			"state": "1",
+			"systeminfo": "kylin v10"
+		},
+	],
+	"ok": true,
+	"page": 1,
+	"size": 10,
+	"total": 6
+}
+```
+
+#### 机器删除
+描述：机器删除
+请求方法：GET
+url：/machinemanager/deletemachinedata
+请求参数：
+类型：form
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|uuid|string|机器uuid|y||
+
+示例：
+
+	/machinemanager/deletemachinedata?uuid=a3fffcac-8626-4b4d-badc-3aaa9310a0d9
+
+
+响应参数：
+类型：json
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "机器删除成功"
+}
+```
+
+### 批次管理
+#### 批次建立
+描述：批次建立
+请求方法：POST
+url：/batchmanager/createbatch
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Name|string|批次名|y||
+|Description|string|批次描述|y||
+|Manager|string|创建人|y||
+|DepartID|[]string|部门ID|y||
+|DepartName|[]string|部门名|y||
+|Machine|[]string|机器ID|y||
+
+
+示例：
+
+```json
+{  
+    "Name":"new",
+    "Description":"这是一条测试信息",
+    "Manager":"wh",
+    "DepartID":["1"],
+    "DepartName":["xx","xx"],
+    "Machine": ["1","2"]
+}
+```
+
+响应参数：
+类型：json
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "批次入库成功"
+}
+```
+
+#### 修改批次信息
+描述：批次修改
+请求方法：POST
+url：/batchmanager/updatebatch
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|BatchID|string|批次ID|y||
+|BatchName|string|批次名|y||
+|Descrip|string|描述|y||
+
+示例：
+
+```json
+{
+    "BatchID": "1",
+    "BatchName": "kylin",
+    "Descrip": "update"
+}
+```
+
+响应参数：
+类型：json
+
+示例：
+
+```json
+{
+	"code": 422,
+	"data": null,
+	"msg": "批次修改成功"
+}
+```
+
+#### 删除批次
+描述：批次删除
+请求方法：POST
+url：/batchmanager/deletebatch
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|BatchID|string|批次ID|y||
+
+
+示例：
+
+```json
+{ 
+    "BatchID":["1"]
+}
+```
+
+响应参数：
+类型：json
+
+示例：
+
+```json
+{
+	"code": 422,
+	"data": null,
+	"msg": "批次删除成功"
+}
+```
+
+#### 批次信息
+描述：批次信息返回
+请求方法：GET
+url：/machinemanager/batchinfo
+请求参数：
+类型：form
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|page|int|分页的页码|y||
+|size|int|分页的当页容量|y||
+
+示例：
+
+	/machinemanager/sourcepool?page=1&size=10
+
+响应参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|CreatedAt|string|批次创建时间|y||
+|UpdatedAt|string|批次更新时间|y||
+|ID|int|批次ID|y||
+|description|string|批次描述|y||
+|manager|string|创建人|y||
+|DepartID|[]string|部门ID|y||
+|DepartName|[]string|部门名|y||
+|machinelist|[]string|机器ID|y||
+
+
+示例：
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"ID": 17,
+			"CreatedAt": "2022-04-13T04:00:45+08:00",
+			"UpdatedAt": "2022-04-13T04:00:45+08:00",
+			"DeletedAt": null,
+			"name": "new",
+			"description": "",
+			"manager": "xx",
+			"machinelist": "1,2",
+			"Depart": "1",
+			"DepartName": "xx"
+		},
+		{
+			"ID": 16,
+			"CreatedAt": "2022-04-12T13:55:57+08:00",
+			"UpdatedAt": "2022-04-12T13:55:57+08:00",
+			"DeletedAt": null,
+			"name": "test111",
+			"description": "",
+			"manager": "xx",
+			"machinelist": "xx",
+			"Depart": "1",
+			"DepartName": "xx"
+		},
+	],
+	"ok": true,
+	"page": 1,
+	"size": 10,
+	"total": 3
+}
+```
+
+#### 批次机器信息
+描述：返回该批次机器信息
+请求方法：GET
+url：/machinemanager/batchinfo
+请求参数：
+类型：json
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|page|int|分页的页码|y||
+|size|int|分页的当页容量|y||
+|ID|int|批次ID|y||
+
+示例：
+```json
+{
+    "page":1,
+    "size":10,
+    "ID":5
+}
+```
+
+响应参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|id|int|机器id|y||
+|departid|int|部门id|y||
+|ip|string|机器IP|y||
+|machineuuid|string|机器UUID|y||
+|CPU|string|机器cpu信息|y||
+|state|string|机器状态|y||
+|sysinfo|string|机器系统信息|y||
+
+
+示例：
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"id": 7,
+			"departid": 10,
+			"ip": "192.168.160.108",
+			"machineuuid": "8912345677",
+			"CPU": "intel i7",
+			"state": 1,
+			"sysinfo": "centos 6"
+		},
+		{
+			"id": 18,
+			"departid": 10,
+			"ip": "192.168.160.119",
+			"machineuuid": "12345678918",
+			"CPU": "and 64",
+			"state": 1,
+			"sysinfo": "suse"
+		},
+		
+	],
+	"page": 0,
+	"size": 0,
+	"total": 4
+}
+```
+
+### 监控接口
+#### 范围查询
+描述：对一个时间段进行监控数据查询
+请求方法：POST
+url：
+请求参数：/prometheus/queryrange
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|machineip|string|查询的机器ip|y||
+|query|int|查询对应的序号|y||
+|starttime|string|开始时间|y||
+|endtime|string|结束时间|y||
+
+
+示例：
+
+```json
+{
+    "machineip":"192.xxx.xxx.xx:9100",
+    "query":6,
+    "starttime":"1648620854",
+    "endtime":"1648621000"
+}
+```
+
+响应参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|time|string|当前时间|y||
+|value|string|查询对应的序号|y||
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"device": "docker0",
+			"label": [
+				{
+					"time": "2022-03-30 14:14:14",
+					"value": "0"
+				},
+				{
+					"time": "2022-03-30 14:14:24",
+					"value": "0"
+				},
+				{
+					"time": "2022-03-30 14:14:34",
+					"value": "0"
+				},
+			]
+		},
+	]
+}
+```
+
+#### 当前时间查询
+描述：对当前时间的监控数据获取
+请求方法：POST
+url：/prometheus/query
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|machineip|string|查询的机器ip|y||
+|query|int|查询对应的序号|y||
+|time|string|时间|y||
+
+示例：
+
+```json
+{
+    "machineip":"192.xxx.xxx.xx:9100",
+    "query":3,
+    "time":"1648620552"
+}
+```
+
+响应参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|time|string|当前时间|y||
+|value|string|查询对应的序号|y||
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"device": "dm-0",
+			"label": {
+				"time": "2022-03-30 14:09:12",
+				"value": "1.799640071985603"
+			}
+		},
+		{
+			"device": "dm-1",
+			"label": {
+				"time": "2022-03-30 14:09:12",
+				"value": "0"
+			}
+		},
+	]
+}
+```
+
+#### 告警获取
+描述：返回当前的所有告警信息
+请求方法：GET
+url：/prometheus/alert
+请求参数：无
+
+
+响应结果：
+类型：json 
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|alertname|string|告警名称|y||
+|instance|string|节点名称|y||
+|job|string|工作名称|y||
+|annotations|string|注释|y||
+|state|string|机器状态|y||
+|activeAt|string|机器活跃时间|y||
+
+示例：
+
+```json
+{
+	"code": 200,
+	"data": [
+		{
+			"alertname": "InstanceDown",
+			"instance": "192.xx.160.xx:9090",
+			"job": "12345678936",
+			"annotations": "Instance 192.168.160.137:9090 down",
+			"state": "firing",
+			"activeAt": "2022-04-12T11:11:56.02661039Z"
+		}
+	]
+}
+```
+
+#### 告警邮件发送
+描述：发送邮件
+请求方法：POST
+url：/prometheus/query
+请求参数：
+类型：json
+字段描述：
+|名称|类型|说明|是否必须|备注|
+|-|-|-|-|-|
+|Email|string|邮箱地址|y||
+|alertname|string|名称|y||
+|IP|string|报警IP|y||
+|summary|string|报警描述|y||
+|StartsAt|string|开始时间|y||
+|EndsAt|string|结束时间|y||
+
+示例:
+
+```json
+{
+    "Email": ["xx@qq.com"],
+    "Labels": {
+        "alertname": "短信服务",    
+        "IP": "192.168.1.1"   
+    },
+    "Annotations": {
+        "summary": "短信账号全部欠费了，无法切换可用服务，发不出短信"   
+    },
+    "StartsAt": "2022-03-18T07:54:52.898371829Z",   
+    "EndsAt": "2022-03-18T12:58:52.898371829Z"      
+}
+```
+
+响应结果：
+类型：json
+
+示例：
+```json
+{
+	"code": 200,
+	"data": null,
+	"msg": "success"
+}
+```
