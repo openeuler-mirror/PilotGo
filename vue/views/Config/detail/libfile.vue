@@ -36,6 +36,11 @@
         </el-table-column>
         <el-table-column  prop="description" label="描述">
         </el-table-column>
+        <el-table-column label="操作" width="180">
+          <template slot-scope="scope">
+            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+          </template>
+        </el-table-column>
       </template>
     </ky-table>
     
@@ -43,7 +48,7 @@
       :title="title"
       :before-close="handleClose" 
       :visible.sync="display" 
-      width="560px"
+      :width="dialogWidth"
     >
      <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
     </el-dialog>
@@ -52,18 +57,21 @@
 </template>
 
 <script>
+import UpdateForm from "../form/updateForm.vue"
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
 import { libFileList, delLibFile,libFileSearch } from "@/request/config"
 export default {
   components: {
     kyTable,
+    UpdateForm,
     AuthButton,
   },
   data() {
     return {
       loading: false,
       display: false,
+      dialogWidth: '70%',
       searchInput: '',
       title: "",
       type: "",
@@ -90,6 +98,12 @@ export default {
           this.$refs.table.handleLoadSearch(res.data.data);
         }
       })
+    },
+    handleEdit(row) {
+      this.rowData = row;
+      this.display = true;
+      this.title = "编辑文件";
+      this.type = "update";
     },
     handleDelete() {
       delLibFile({ids: this.$refs.table.selectRow.ids}).then(res => {

@@ -18,11 +18,13 @@
       <template v-slot:table>
         <el-table-column  prop="id" label="编号" sortable width="80">
         </el-table-column>
+        <el-table-column  prop="ipDept" label="部门">
+        </el-table-column>
+        <el-table-column  prop="ip" label="IP">
+        </el-table-column>
         <el-table-column  prop="path" label="路径">
         </el-table-column>
         <el-table-column  prop="name" label="文件名">
-        </el-table-column>
-        <el-table-column  prop="uuid" label="UUID">
         </el-table-column>
       </template>
     </ky-table>
