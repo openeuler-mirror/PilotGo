@@ -97,11 +97,7 @@ func ListenALert(c *gin.Context) {
 		}
 		res = append(res, Al)
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"data": res,
-	})
-
+	response.JSON(c, http.StatusOK, http.StatusOK, res, "Alerts have got!")
 }
 
 func WritePrometheusYml(a []map[string]string) error {
@@ -154,6 +150,45 @@ func PrometheusConfigReload(addr string) error {
 	logger.Debug("%+v", response)
 	return err
 }
+
+func InitPromeYml() error {
+	FilePath := "/root/prometheus.yml"
+	os.Remove(FilePath)
+	os.Create(FilePath)
+	var prometheusYml Prometheusyml
+	prometheusYml.Global.ScrapeInterval = "15s"
+	prometheusYml.Global.EvaluationInterval = "15s"
+	prometheusYml.RuleFiles = []string{"/etc/prometheus/alert.rules"}
+
+	file, err := os.OpenFile(FilePath, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		logger.Error("文件打开失败" + err.Error())
+		return err
+	}
+	defer file.Close()
+	write := bufio.NewWriter(file)
+	write.WriteString(
+		"global:" +
+			"\n scrape_interval: " + prometheusYml.Global.ScrapeInterval +
+			"\n evaluation_interval: " + prometheusYml.Global.EvaluationInterval + "\n")
+	write.WriteString("rule_files:")
+	for _, value := range prometheusYml.RuleFiles {
+		write.WriteString("\n - " + value)
+	}
+	write.WriteString("\nscrape_configs:")
+	write.WriteString("\n  - job_name: 'file_sd_test'")
+	write.WriteString("\n    file_sd_configs:")
+	write.WriteString("\n            - files:")
+	write.WriteString("\n	     - '/root/file_sd/file_sd.yml'")
+	write.Flush()
+	return nil
+}
+
+// scrape_configs:
+//   - job_name: "file_sd_test"
+//     file_sd_configs:
+//             - files:
+//               - '/opt/prometheus/file_sd/test.yml'
 
 // # Alertmanager configuration
 // alerting:
