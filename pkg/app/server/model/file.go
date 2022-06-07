@@ -22,7 +22,7 @@ import (
 )
 
 type Files struct {
-	ID          uint `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	ID          int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	CreatedAt   time.Time
 	SourcePath  string `json:"path"`
 	FileName    string `json:"name"`
@@ -31,8 +31,9 @@ type Files struct {
 }
 
 type HistoryFiles struct {
-	ID       uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	ID       int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	IP       string `json:"ip"`
+	IPDept   string `json:"ipDept"`
 	UUID     string `json:"uuid"`
 	Path     string `json:"path"`
 	FileName string `json:"name"`

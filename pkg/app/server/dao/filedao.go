@@ -15,6 +15,8 @@
 package dao
 
 import (
+	"strings"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
@@ -47,4 +49,27 @@ func SaveFile(file model.Files) {
 
 func SaveHistoryFile(file model.HistoryFiles) {
 	mysqlmanager.DB.Save(&file)
+}
+
+func FileView(id int) (text string) {
+	file := model.Files{}
+	mysqlmanager.DB.Where("id = ?", id).Find(&file)
+	return file.File
+}
+func LastFileView(id int) (text string) {
+	file := model.HistoryFiles{}
+	mysqlmanager.DB.Where("id = ?", id).Find(&file)
+	return file.File
+}
+func FindLastVersionFile(uuid, filename string) []model.HistoryFiles {
+	var files []model.HistoryFiles
+	var lastfiles []model.HistoryFiles
+
+	mysqlmanager.DB.Where("uuid = ? ", uuid).Find(&files)
+	for _, file := range files {
+		if ok := strings.Contains(file.FileName, filename); ok {
+			lastfiles = append(lastfiles, file)
+		}
+	}
+	return lastfiles
 }
