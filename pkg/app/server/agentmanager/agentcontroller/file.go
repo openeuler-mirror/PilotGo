@@ -17,6 +17,7 @@ package agentcontroller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
@@ -111,6 +112,7 @@ func UpdateAgentFile(c *gin.Context) {
 	ip := file.IP
 	uuid := file.UUID
 	path := file.Path
+	ipdept := file.IPDept
 	if len(path) == 0 {
 		response.Fail(c, nil, "请检查配置文件路径")
 		return
@@ -142,6 +144,7 @@ func UpdateAgentFile(c *gin.Context) {
 	time := service.NowTime()
 	fd := model.HistoryFiles{
 		IP:       ip,
+		IPDept:   ipdept,
 		UUID:     uuid,
 		Path:     path,
 		FileName: filename + "-" + time,
@@ -252,11 +255,11 @@ func UpdateFile(c *gin.Context) {
 	filename := file.FileName
 	description := file.Description
 	text := file.File
-	if !dao.IsExistID(int(file.ID)) {
+	if !dao.IsExistId(file.ID) {
 		response.Fail(c, nil, "id有误,请重新确认该文件是否存在")
 		return
 	}
-	dao.UpdateFile(int(file.ID), path, filename, description, text)
+	dao.UpdateFile(file.ID, path, filename, description, text)
 
 	response.Success(c, nil, "配置文件修改成功")
 }
@@ -269,4 +272,33 @@ func DeleteFile(c *gin.Context) {
 		dao.DeleteFile(fileId)
 	}
 	response.Success(c, nil, "储存的文件已从数据库中删除")
+}
+
+func FileView(c *gin.Context) {
+	fileId := c.Query("id")
+	id, err := strconv.Atoi(fileId)
+	if err != nil {
+		response.Fail(c, nil, "id有误,请重新确认参数")
+	}
+
+	text := dao.FileView(id)
+	response.Success(c, gin.H{"text": text}, "配置文件内容获取成功")
+}
+
+func FindLastVersionFile(c *gin.Context) {
+	uuid := c.Query("uuid")
+	filename := c.Query("name")
+	lastfiles := dao.FindLastVersionFile(uuid, filename)
+	response.Success(c, gin.H{"oldfiles": lastfiles}, "获取该文件的历史版本")
+}
+
+func LastFileView(c *gin.Context) {
+	fileId := c.Query("id")
+	id, err := strconv.Atoi(fileId)
+	if err != nil {
+		response.Fail(c, nil, "id有误,请重新确认参数")
+	}
+
+	text := dao.LastFileView(id)
+	response.Success(c, gin.H{"text": text}, "配置文件内容获取成功")
 }
