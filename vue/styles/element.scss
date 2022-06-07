@@ -287,3 +287,8 @@ display: none;
 .el-divider--vertical {
   height: 92%;
 }
+
+// 输入框textarea
+.el-textarea__inner {
+  min-height: 220px !important;
+}

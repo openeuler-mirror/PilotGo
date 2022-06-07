@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-01 16:12:35
+  LastEditTime: 2022-06-07 10:46:53
  -->
 <template>
   <div>
@@ -22,7 +22,7 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
-      <el-form-item label="repo名:" prop="name">
+      <el-form-item label="文件名:" prop="name">
         <el-input
           controls-position="right"
           v-model="form.name"
@@ -36,9 +36,10 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
-      <el-form-item label="详情:" prop="file">
+      <el-form-item label="内容:" prop="file">
         <el-input
           type="textarea"
+          placeholder="请按格式输入"
           v-model="form.file"
         ></el-input>
       </el-form-item>
@@ -60,6 +61,10 @@ export default {
       default: {}
     },
     uuid: {
+      type: String,
+      default: ''
+    },
+    macIp: {
       type: String,
       default: ''
     }
@@ -117,7 +122,7 @@ export default {
     handleconfirm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          saveRepo(this.form)
+          saveRepo({...this.form,ip:this.macIp})
             .then((res) => {
               if (res.data.code === 200) {
                 this.$emit("click","success");

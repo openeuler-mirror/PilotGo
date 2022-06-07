@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-06-06 17:13:43
+  LastEditTime: 2022-06-07 10:29:48
  -->
 <template>
  <div class="panel" style="height:100%">
@@ -82,7 +82,7 @@
         :before-close="handleClose" 
         :visible.sync="display" 
         :width="dialogWidth">
-        <download-form v-if="type === 'download'" :uuid="searchData.uuid" :row="row" @click="handleClose"></download-form>
+        <download-form v-if="type === 'download'" :ipDept="ipDept" :macIp="macIp" :uuid="searchData.uuid" :row="row" @click="handleClose"></download-form>
       </el-dialog>
    </div>
  </div>
@@ -107,6 +107,7 @@ export default {
       title: '',
       type: '',
       macIp: '',
+      ipDept: '',
       row: {},
       compareWidth: '54%',
       init: 'file empty',
@@ -114,7 +115,7 @@ export default {
       oldValue: 'asdsd/n',
       newValue: 'axc/nasdaasd',
       rightTtile: '文件详情',
-      uuid: 'c11d8252-eac3-4c07-ac0e-99d8080d0a05',
+      uuid: '',
       dialogWidth: '70%',
       display: false,
       showEdit: false,
@@ -122,7 +123,7 @@ export default {
       showCompare: false,
       rowData: [],
       searchData: {
-        uuid: 'c11d8252-eac3-4c07-ac0e-99d8080d0a05'
+        uuid: ''
       },
       customToolbar: [
       ["bold", "italic", "underline"],
@@ -154,6 +155,7 @@ export default {
     handleSelect(mac) {
       this.searchData.uuid = mac && mac.uuid;
       this.macIp = mac && mac.ip;
+      this.ipDept = mac && mac.value.split('-')[1];
       this.$refs.table.handleSearch();
     },
     handleClose() {
@@ -209,6 +211,7 @@ export default {
         name: this.row.name,
         file: this.detail.replace(/<[^>]+>/g, ''),
         ip: this.macIp,
+        ipDept: this.ipDept,
       }
       updateRepo(params).then(res => {
         if(res.data.code === 200) {

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-05-30 17:58:40
+  LastEditTime: 2022-06-07 10:21:02
   Description: 'Components Table'
  -->
 <template>
@@ -151,10 +151,11 @@ export default {
           this.loading = false;
           this.tableData = res.data;
         } else {
-          this.$message({
+          /* this.$message({
             type: "error",
             message: "数据格式错误",
-          });
+          }); */
+          this.loading = false;
         }
       });
 
