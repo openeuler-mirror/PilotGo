@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-05-12 15:28:36
- * @LastEditTime: 2022-06-06 16:35:23
+ * @LastEditTime: 2022-06-08 13:48:40
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -101,5 +101,14 @@ export function lastFileSearch(data) {
     url: '/config/lastfile_search',
     method: 'post',
     data
+  })
+}
+
+// 文件历史修改列表查询
+export function getFileHistories(data) {
+  return request({
+    url: '/config/file_old',
+    method: 'get',
+    params: data
   })
 }

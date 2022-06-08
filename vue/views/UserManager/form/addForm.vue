@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-04-07 09:14:40
+  LastEditTime: 2022-06-08 14:10:35
  -->
 <template>
   <div>
@@ -48,16 +48,16 @@
         </ky-tree>
       </el-form-item>
       <el-form-item label="用户角色:" prop="role">
-          <el-select v-model="form.role" multiple placeholder="请选择">
-            <el-option
-              v-for="item in roles"
-              :key="item.ID"
-              :label="item.role"
-              :value="item.ID"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
+        <el-select v-model="form.role" multiple placeholder="请选择">
+          <el-option
+            v-for="item in roles"
+            :key="item.ID"
+            :label="item.role"
+            :value="item.ID"
+          >
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="手机号:" prop="phone">
         <el-input
           class="ipInput"
