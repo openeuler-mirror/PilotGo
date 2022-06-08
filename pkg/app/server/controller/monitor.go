@@ -178,8 +178,41 @@ func InitPromeYml() error {
 	write.WriteString("\nscrape_configs:")
 	write.WriteString("\n  - job_name: 'file_sd_test'")
 	write.WriteString("\n    file_sd_configs:")
-	write.WriteString("\n            - files:")
-	write.WriteString("\n	     - '/root/file_sd/file_sd.yml'")
+	write.WriteString("\n    - files:")
+	write.WriteString("\n      - '/root/file_sd/file_sd.yml'")
+	write.WriteString("\n      refresh_interval: 20s")
+	write.Flush()
+	return nil
+}
+func WriteYml(a []map[string]string) error {
+	FilePath := "/root/file_sd/file_sd.yml"
+	os.Remove(FilePath)
+	os.Create(FilePath)
+	var prometheusYml Prometheusyml
+	var tmp static_configs
+	for _, value := range a {
+		for key, value2 := range value {
+			tmp.JobName = key
+			x := make([]target, 0)
+			x = append(x, target{[]string{value2}})
+			tmp.StaticConfigs = x
+			prometheusYml.ScrapeConfigs = append(prometheusYml.ScrapeConfigs, tmp)
+		}
+	}
+	file, err := os.OpenFile(FilePath, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		logger.Error("文件打开失败" + err.Error())
+		return err
+	}
+	defer file.Close()
+	write := bufio.NewWriter(file)
+	write.WriteString("- targets:")
+	for _, value := range prometheusYml.ScrapeConfigs {
+		for _, value2 := range value.StaticConfigs {
+			a := strings.TrimSpace("- '" + value2.Targets[0] + ":9100'")
+			write.WriteString("\n      " + a)
+		}
+	}
 	write.Flush()
 	return nil
 }

@@ -187,27 +187,28 @@ func httpServerInit(conf *sconfig.HttpServer) error {
 
 func monitorInit(conf *sconfig.Monitor) error {
 	go func() {
+		err := controller.InitPromeYml()
+		if err != nil {
+			logger.Error("初始化promethues配置文件失败")
+		}
 		logger.Info("start monitor")
 		for {
 			// TODO: 重构为事件触发机制
-			// a := make([]map[string]string, 0)
-			// var m []model.MachineNode
-			// mysqlmanager.DB.Find(&m)
-			// for _, value := range m {
-			// 	r := map[string]string{}
-			// 	r[value.MachineUUID] = value.IP
-			// 	a = append(a, r)
-			// }
-			// err := controller.WritePrometheusYml(a)
-			err := controller.InitPromeYml()
-			if err != nil {
-				logger.Error("初始化promethues配置文件失败")
+			a := make([]map[string]string, 0)
+			var m []model.MachineNode
+			mysqlmanager.DB.Find(&m)
+			for _, value := range m {
+				r := map[string]string{}
+				r[value.MachineUUID] = value.IP
+				a = append(a, r)
 			}
+			// err := controller.WritePrometheusYml(a)
 
+			err := controller.WriteYml(a)
 			// err = controller.PrometheusConfigReload(conf.PrometheusAddr)
-			// if err != nil {
-			// 	logger.Error("%s", err.Error())
-			// }
+			if err != nil {
+				logger.Error("%s", err.Error())
+			}
 			time.Sleep(100 * time.Second)
 		}
 
