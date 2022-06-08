@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-06-07 10:29:48
+  LastEditTime: 2022-06-07 18:06:47
  -->
 <template>
  <div class="panel" style="height:100%">
@@ -60,9 +60,14 @@
             <el-button v-if="showEdit" style="float: right; padding: 3px 0" type="text" @click="handleEditConfirm">确认</el-button>
             <el-button v-if="showCompare" style="float: right; padding: 3px 0" type="text" @click="handleDetail">退出</el-button>
           </div>
-          <div class="edit" v-if="showEdit">
-            <br/>
-            <vue-editor v-model="detail" id="container" :editor-toolbar="customToolbar"/>
+          <div class="editor" v-if="showEdit">
+            <quill-editor
+              class="ql-editor"
+              :options="editorOptions"
+              v-model="detail"
+              ref="myQuillEditor"
+              @change="onEditorChange($event)">
+          </quill-editor>
           </div>
           <div class="detail" v-if="showDetail">
             <pre>{{detail || '点击文件名查看详情'}}</pre>
@@ -91,7 +96,8 @@
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
 import DownloadForm from "./form/downloadForm.vue";
-import { VueEditor } from "vue2-editor";
+import { quillEditor } from 'vue-quill-editor'
+import 'quill/dist/quill.snow.css'
 import { getallMacIps } from '@/request/cluster'
 import { getRepos, getRepoDetail, updateRepo } from "@/request/config"
 export default {
@@ -100,7 +106,7 @@ export default {
     kyTable,
     AuthButton,
     DownloadForm,
-    VueEditor,
+    quillEditor,
   },
   data() {
     return {
@@ -125,10 +131,14 @@ export default {
       searchData: {
         uuid: ''
       },
-      customToolbar: [
-      ["bold", "italic", "underline"],
-      [{'align': ["","center", "right","justify"]}],
-    ]
+      editorOptions: {
+        modules:{
+          toolbar:[
+            ['bold', 'italic', 'underline'],
+            ['code-block']
+          ]
+        }
+      }
     }
   },
   mounted() {
@@ -204,12 +214,16 @@ export default {
       this.row = row;
       this.getDetail(row);
     },
+    //内容改变事件
+    onEditorChange({ quill, html, text }) {
+      this.detail = text;
+    },
     handleEditConfirm() {
       let params = {
         path: this.row.path,
         uuid: this.searchData.uuid,
         name: this.row.name,
-        file: this.detail.replace(/<[^>]+>/g, ''),
+        file: this.detail.replace(/<[^>]+>/g, '\n[1]'),
         ip: this.macIp,
         ipDept: this.ipDept,
       }
@@ -248,10 +262,13 @@ export default {
   .rightInfo {
     width: 54%;
     height: 100%;
-    .edit {
+    .editor {
       width: 100%;
-      height: 90%;
-      overflow: auto;
+      height: 96%;
+      .ql-editor {
+        padding: 0;
+        overflow: hidden;
+      }
     }
     .detail {
       height: 100%;
