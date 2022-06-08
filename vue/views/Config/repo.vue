@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-06-07 18:06:47
+  LastEditTime: 2022-06-08 11:21:53
  -->
 <template>
  <div class="panel" style="height:100%">
@@ -64,7 +64,7 @@
             <quill-editor
               class="ql-editor"
               :options="editorOptions"
-              v-model="detail"
+              :content="detail"
               ref="myQuillEditor"
               @change="onEditorChange($event)">
           </quill-editor>
@@ -118,6 +118,7 @@ export default {
       compareWidth: '54%',
       init: 'file empty',
       detail: '',
+      content: '',
       oldValue: 'asdsd/n',
       newValue: 'axc/nasdaasd',
       rightTtile: '文件详情',
@@ -136,8 +137,8 @@ export default {
           toolbar:[
             ['bold', 'italic', 'underline'],
             ['code-block']
-          ]
-        }
+          ],
+        },
       }
     }
   },
@@ -214,16 +215,16 @@ export default {
       this.row = row;
       this.getDetail(row);
     },
-    //内容改变事件
+    //editor内容改变事件
     onEditorChange({ quill, html, text }) {
-      this.detail = text;
+      this.content = text;
     },
     handleEditConfirm() {
       let params = {
         path: this.row.path,
         uuid: this.searchData.uuid,
         name: this.row.name,
-        file: this.detail.replace(/<[^>]+>/g, '\n[1]'),
+        file: this.content,
         ip: this.macIp,
         ipDept: this.ipDept,
       }

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-07 10:46:53
+  LastEditTime: 2022-06-08 10:02:27
  -->
 <template>
   <div>
@@ -58,7 +58,7 @@ export default {
   props: {
     row: {
       type: Object,
-      default: {}
+      default: null
     },
     uuid: {
       type: String,
@@ -103,13 +103,15 @@ export default {
     };
   },
   mounted() {
-    getRepoDetail({uuid: this.uuid,file: this.row.path+'/'+this.row.name}).then(res => {
-      if(res.data.code === 200) {
-        this.form.file = res.data && res.data.data.file;
-      }
-    })
-    this.form.name = this.row.name;
-    this.form.path = this.row.path;
+    if(this.row) {
+      getRepoDetail({uuid: this.uuid,file: this.row.path+'/'+this.row.name}).then(res => {
+        if(res.data.code === 200) {
+          this.form.file = res.data && res.data.data.file;
+        }
+      })
+      this.form.name = this.row.name;
+      this.form.path = this.row.path;
+    }
   },
   methods: {
     handleCancel() {

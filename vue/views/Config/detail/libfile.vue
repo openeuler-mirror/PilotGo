@@ -14,6 +14,7 @@
         </el-button>
       </template>
       <template v-slot:table_action>
+        <auth-button name="user_del" @click="handleCreate"> 新增 </auth-button>
         <el-popconfirm 
           title="确定删除此文件？"
           cancel-button-type="default"
@@ -23,11 +24,22 @@
         </el-popconfirm>
       </template>
       <template v-slot:table>
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <el-input
+              type="textarea"
+              v-model="props.row.file"
+            ></el-input>
+          </template>
+        </el-table-column>
         <el-table-column  prop="id" label="编号" sortable width="80">
         </el-table-column>
         <el-table-column  prop="path" label="路径">
         </el-table-column>
         <el-table-column  prop="name" label="文件名">
+          <template slot-scope="scope">
+            <span title="详情" class="repoDetail" @click="handleDetail(scope.row)">{{scope.row.name}}</span>
+          </template>
         </el-table-column>
         <el-table-column prop="CreatedAt" label="创建时间" sortable>
           <template slot-scope="scope">
@@ -50,7 +62,8 @@
       :visible.sync="display" 
       :width="dialogWidth"
     >
-     <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
+      <download-form v-if="type === 'download'"  @click="handleClose"></download-form>
+      <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
     </el-dialog>
 
   </div>
@@ -58,6 +71,7 @@
 
 <script>
 import UpdateForm from "../form/updateForm.vue"
+import DownloadForm from "../form/downloadForm.vue";
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
 import { libFileList, delLibFile,libFileSearch } from "@/request/config"
@@ -65,6 +79,7 @@ export default {
   components: {
     kyTable,
     UpdateForm,
+    DownloadForm,
     AuthButton,
   },
   data() {
@@ -98,6 +113,11 @@ export default {
           this.$refs.table.handleLoadSearch(res.data.data);
         }
       })
+    },
+    handleCreate() {
+      this.display = true;
+      this.title = '新增配置文件';
+      this.type = 'download';
     },
     handleEdit(row) {
       this.rowData = row;
