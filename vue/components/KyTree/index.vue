@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-05-18 13:54:23
+  LastEditTime: 2022-06-08 14:01:22
  -->
 <template>
   <div class="ky-tree">
@@ -127,13 +127,20 @@ export default {
        confirmButtonText: '确定',
        cancelButtonText: '取消',
        }).then(({value}) => {
-         addDepart({'PID':data.id,'ParentDepart':data.label,'Depart':value}).then((data)=>{
-           this.$message({
-             type: 'success',
-             message: '新建成功'
-           }); 
-          node.loaded = false;
-          node.expand();
+         addDepart({'PID':data.id,'ParentDepart':data.label,'Depart':value}).then((res)=>{
+           if(res.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '新建成功'
+              }); 
+              node.loaded = false;
+              node.expand();
+           } else {
+              this.$message({
+                type: 'error',
+                message: res.data.msg
+              }); 
+           }
          })
          .catch(()=>{
            this.$message({
@@ -149,13 +156,20 @@ export default {
        confirmButtonText: '确定',
        cancelButtonText: '取消',
        }).then(({ value }) => {
-         updateDepart({'DepartID': data.id, 'DepartName': value}).then((data)=>{
-           this.$message({
-             type: 'success',
-             message: '修改成功'
-           }); 
-          node.parent.loaded = false;
-          node.parent.expand();
+         updateDepart({'DepartID': data.id, 'DepartName': value}).then((res)=>{
+           if(res.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '修改成功'
+              });
+              node.parent.loaded = false;
+              node.parent.expand();
+           } else {
+              this.$message({
+                type: 'error',
+                message: res.data.msg
+              }); 
+           }
          })
          .catch(()=>{
            this.$message({
@@ -173,12 +187,19 @@ export default {
           type: 'warning'
         }).then(() => {
           deleteDepart({'DepartID':data.id}).then((data)=>{
-           this.$message({
-             type: 'success',
-             message: '删除成功'
-           }); 
-          node.parent.loaded = false;
-          node.parent.expand();
+            if(data.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '删除成功'
+              }); 
+              node.parent.loaded = false;
+              node.parent.expand();
+            } else {
+              this.$message({
+                type: 'error',
+                message: res.data.msg
+              }); 
+           } 
          })
          .catch(()=>{
            this.$message({

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-06-08 11:21:53
+  LastEditTime: 2022-06-08 14:27:25
  -->
 <template>
  <div class="panel" style="height:100%">
@@ -73,11 +73,7 @@
             <pre>{{detail || '点击文件名查看详情'}}</pre>
           </div>
           <div class="compare" v-if="showCompare">
-            <code-diff
-              :old-string="init"
-              :new-string="detail"
-              file-name="test.txt"
-              output-format="side-by-side"/>
+           <compare-form :detail="detail" :files="files"/>
           </div> 
         </el-card>
         
@@ -96,16 +92,18 @@
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
 import DownloadForm from "./form/downloadForm.vue";
+import CompareForm from "./form/compareForm.vue";
 import { quillEditor } from 'vue-quill-editor'
 import 'quill/dist/quill.snow.css'
 import { getallMacIps } from '@/request/cluster'
-import { getRepos, getRepoDetail, updateRepo } from "@/request/config"
+import { getRepos, getRepoDetail, updateRepo, getFileHistories } from "@/request/config"
 export default {
   name: "repoConfig",
   components: {
     kyTable,
     AuthButton,
     DownloadForm,
+    CompareForm,
     quillEditor,
   },
   data() {
@@ -116,13 +114,10 @@ export default {
       ipDept: '',
       row: {},
       compareWidth: '54%',
-      init: 'file empty',
       detail: '',
       content: '',
-      oldValue: 'asdsd/n',
-      newValue: 'axc/nasdaasd',
+      files: [],
       rightTtile: '文件详情',
-      uuid: '',
       dialogWidth: '70%',
       display: false,
       showEdit: false,
@@ -130,7 +125,7 @@ export default {
       showCompare: false,
       rowData: [],
       searchData: {
-        uuid: ''
+        uuid: 'c11d8252-eac3-4c07-ac0e-99d8080d0a05'
       },
       editorOptions: {
         modules:{
@@ -195,6 +190,16 @@ export default {
       }
     },
     handleCompare(row) {
+      this.getDetail(row);
+      getFileHistories({uuid: this.searchData.uuid,name:row.name}).then(res=> {
+        if(res.data.code === 200) {
+          this.files = res.data.data && res.data.data.oldfiles;
+          this.compareDisplay();
+        }
+      })
+      
+    },
+    compareDisplay() {
       this.showEdit = false;
       this.showDetail = false;
       this.showCompare = true;
