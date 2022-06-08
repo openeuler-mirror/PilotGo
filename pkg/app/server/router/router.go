@@ -44,11 +44,10 @@ func SetupRouter() *gin.Engine {
 
 	macList := router.Group("cluster/macList")
 	{
+		macList.GET("/depart", controller.Dept)
 		macList.GET("/selectmachine", controller.MachineList)
 		macList.POST("/createbatch", controller.CreateBatch)
-		macList.GET("/departinfo", controller.DepartInfo)
 		macList.GET("/machineinfo", controller.MachineInfo)
-		macList.GET("/depart", controller.Dept)
 		macList.POST("/modifydepart", controller.ModifyMachineDepart)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
@@ -180,7 +179,7 @@ func SetupRouter() *gin.Engine {
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
 		user.POST("/import", controller.ImportUser)
-		macList.POST("/deletedepartdata", controller.Deletedepartdata)
+		macList.POST("/deletedepartdata", controller.DeleteDepartData)
 		macList.POST("/adddepart", controller.AddDepart)
 		macList.POST("/updatedepart", controller.UpdateDepart)
 		batchmanager.POST("/updatebatch", controller.UpdateBatch)
@@ -196,8 +195,12 @@ func SetupRouter() *gin.Engine {
 		c.Redirect(http.StatusFound, url)
 		router.StaticFile(url, "./dist/index.html")
 	})
-	router.GET("/ws", controller.ShellWs) // 终端
+
+	// 全局通用接口
+	router.GET("/ws", controller.ShellWs)
 	router.GET("/macList/machinealldata", controller.MachineAllData)
+	router.GET("/macList/departinfo", controller.DepartInfo)
+	router.GET("/macList/depart", controller.Dept)
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 
 	return router
