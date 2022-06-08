@@ -15,37 +15,10 @@
 package dao
 
 import (
-	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
-func IsParentDepartExist(parent string) bool {
-	var Depart model.DepartNode
-	mysqlmanager.DB.Where("depart=? ", parent).Find(&Depart)
-	return Depart.ID != 0
-}
-func IsDepartNodeExist(parent string, depart string) bool {
-	var Depart model.DepartNode
-	mysqlmanager.DB.Where("depart=? and parent_depart=?", depart, parent).Find(&Depart)
-	// mysqlmanager.DB.Where("", parent).Find(&Depart)
-	return Depart.ID != 0
-}
-func IsDepartIDExist(ID int) bool {
-	var Depart model.DepartNode
-	mysqlmanager.DB.Where("id=?", ID).Find(&Depart)
-	return Depart.ID != 0
-}
-func DepartStore() []model.DepartNode {
-	var Depart []model.DepartNode
-	mysqlmanager.DB.Find(&Depart)
-	return Depart
-}
-func IsRootExist() bool {
-	var Depart model.DepartNode
-	mysqlmanager.DB.Where("node_locate=?", 0).Find(&Depart)
-	return Depart.ID != 0
-}
 func IsUUIDExist(uuid string) bool {
 	var Machine model.MachineNode
 	mysqlmanager.DB.Where("machine_uuid=?", uuid).Find(&Machine)
@@ -115,57 +88,21 @@ func MachineStore(departid int) []model.MachineNode {
 	return Machineinfo
 }
 
-func GetPid(departid string) []model.DepartNode {
-	var DepartInfo []model.DepartNode
-	mysqlmanager.DB.Where("p_id=?", departid).Find(&DepartInfo)
-	return DepartInfo
-}
-
-func Deletedepartdata(needdelete []int) {
-	var DepartInfo []model.DepartNode
-	mysqlmanager.DB.Where("id=?", needdelete[0]).Delete(&DepartInfo)
-}
-
-//向需要删除的depart的组内增加需要删除的子节点
-func Insertdepartlist(needdelete []int, str string) []int {
-	var DepartInfo []model.DepartNode
-
-	mysqlmanager.DB.Where("p_id=?", str).Find(&DepartInfo)
-	for _, value := range DepartInfo {
-		needdelete = append(needdelete, value.ID)
-	}
-	return needdelete
-}
-
-func UpdateDepart(DepartID int, DepartName string) {
-	var DepartInfo model.DepartNode
-	Depart := model.DepartNode{
-		Depart: DepartName,
-	}
-	mysqlmanager.DB.Model(&DepartInfo).Where("id=?", DepartID).Update(&Depart)
-}
-func UpdateParentDepart(DepartID int, DepartName string) {
-	var DepartInfo model.DepartNode
-	Depart := model.DepartNode{
-		ParentDepart: DepartName,
-	}
-	mysqlmanager.DB.Model(&DepartInfo).Where("p_id=?", DepartID).Update(&Depart)
-}
-func ModifyMachineDepart(M int, D int) {
+func ModifyMachineDepart(MadId int, DeptId int) {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
-		DepartId: D,
+		DepartId: DeptId,
 		State:    model.Normal,
 	}
-	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
+	mysqlmanager.DB.Model(&Machine).Where("id=?", MadId).Update(&Ma)
 }
-func ModifyMachineDepart2(M int, D int) {
+func ModifyMachineDepart2(MadId int, DeptId int) {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
-		DepartId: D,
+		DepartId: DeptId,
 		State:    model.Free,
 	}
-	mysqlmanager.DB.Model(&Machine).Where("id=?", M).Update(&Ma)
+	mysqlmanager.DB.Model(&Machine).Where("id=?", MadId).Update(&Ma)
 }
 
 // 根据机器id获取机器信息
@@ -183,6 +120,14 @@ func AllMachine() []model.MachineNode {
 	return m
 }
 
+func MachineAllData() []model.Res {
+	var mch []model.Res
+	mysqlmanager.DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
+		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
+		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch)
+	return mch
+}
+
 // 获取某一级部门下的所有机器
 func SomeDepartMachine(Departids []int) (lists []model.MachineNode) {
 	for _, id := range Departids {
@@ -191,19 +136,6 @@ func SomeDepartMachine(Departids []int) (lists []model.MachineNode) {
 		lists = append(lists, list...)
 	}
 	return
-}
-
-// 根据部门名字查询id和pid
-func GetPidAndId(depart string) (pid, id int) {
-	var dep model.DepartNode
-	mysqlmanager.DB.Where("depart=?", depart).Find(&dep)
-	return dep.PID, dep.ID
-}
-
-//添加部门
-func AddDepart(db *gorm.DB, depart *model.DepartNode) error {
-	err := db.Create(depart).Error
-	return err
 }
 
 // 根据uuid获取机器的ip、状态和部门

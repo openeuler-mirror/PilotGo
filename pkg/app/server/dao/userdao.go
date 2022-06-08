@@ -170,3 +170,8 @@ func UpdateUserPhone(email, phone string) {
 	var user model.User
 	mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
 }
+
+func DelUser(deptId int) {
+	var user model.User
+	mysqlmanager.DB.Where("depart_second=?", deptId).Unscoped().Delete(user)
+}

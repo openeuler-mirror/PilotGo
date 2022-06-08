@@ -20,36 +20,6 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
-type DepartNode struct {
-	ID           int    `gorm:"primary_key;AUTO_INCREMENT"`
-	PID          int    `gorm:"type:int(100);not null" json:"pid"`
-	ParentDepart string `gorm:"type:varchar(100);not null" json:"parentdepart"`
-	Depart       string `gorm:"type:varchar(100);not null" json:"depart"`
-	NodeLocate   int    `gorm:"type:int(100);not null" json:"nodelocate"`
-	//根节点为0,普通节点为1
-}
-type MachineNode struct {
-	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	DepartId    int    `gorm:"type:int(100);not null" json:"departid"`
-	IP          string `gorm:"type:varchar(100)" json:"ip"`
-	MachineUUID string `gorm:"type:varchar(100);not null" json:"machineuuid"`
-	CPU         string `gorm:"type:varchar(100)" json:"CPU"`
-	State       int    `gorm:"type:varchar(100)" json:"state"`
-	Systeminfo  string `gorm:"type:varchar(100)" json:"sysinfo"`
-}
-
-type MachineTreeNode struct {
-	Label    string             `json:"label"`
-	Id       int                `json:"id"`
-	Pid      int                `json:"pid"`
-	Children []*MachineTreeNode `json:"children"`
-}
-
-func GetMachList() (mi []MachineNode, e error) {
-	mysqlmanager.DB.Find(&mi)
-	return mi, nil
-}
-
 const (
 	// 机器运行
 	Normal = 1
@@ -64,21 +34,14 @@ const (
 	DepartUnroot = 1
 )
 
-const ()
-
-type MachineInfo struct {
-	RPM        string `json:"rpm"`
-	Service    string `json:"service"`
-	SysctlArgs string `json:"args"`
-	MountPath  string `json:"mountpath"`
-	SourceDisk string `json:"source"`
-	DestPath   string `json:"dest"`
-	File       string `json:"file"`
-	FileType   string `json:"type"`
-	DiskPath   string `json:"path"`
-	UserName   string `json:"username"`
-	Password   string `json:"password"`
-	Permission string `json:"per"`
+type MachineNode struct {
+	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	DepartId    int    `gorm:"type:int(100);not null" json:"departid"`
+	IP          string `gorm:"type:varchar(100)" json:"ip"`
+	MachineUUID string `gorm:"type:varchar(100);not null" json:"machineuuid"`
+	CPU         string `gorm:"type:varchar(100)" json:"CPU"`
+	State       int    `gorm:"type:varchar(100)" json:"state"`
+	Systeminfo  string `gorm:"type:varchar(100)" json:"sysinfo"`
 }
 
 type Res struct {
@@ -106,21 +69,4 @@ func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, 
 		}
 	}
 	return
-}
-func MachineAllData() []Res {
-	var mch []Res
-	mysqlmanager.DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
-		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch)
-	return mch
-}
-
-type DeleteDepart struct {
-	DepartID int `json:"DepartID"`
-}
-type Depart struct {
-	Page       int  `form:"page"`
-	Size       int  `form:"size"`
-	ID         int  `form:"DepartId"`
-	ShowSelect bool `form:"ShowSelect"`
 }
