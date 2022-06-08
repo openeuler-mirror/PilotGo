@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-06-01 10:49:22
+ * @LastEditTime: 2022-06-08 11:32:12
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -17,7 +17,7 @@ import request from './request'
 // 请求组织树接口
 export function getDeparts(data) {
   return request({
-    url: 'macList/departinfo',
+    url: '/macList/departinfo',
     method: 'get',
     params: data
   })
@@ -35,7 +35,7 @@ export function addDepart(data) {
   return request({
     url: 'macList/adddepart',
     method: 'post',
-    params: data
+    data
   })
 }
 // 编辑节点
