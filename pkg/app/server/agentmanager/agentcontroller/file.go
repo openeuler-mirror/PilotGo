@@ -17,7 +17,7 @@ package agentcontroller
 
 import (
 	"net/http"
-	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
@@ -45,7 +45,7 @@ func ReadFile(c *gin.Context) {
 	response.Success(c, gin.H{"file": result}, "Success")
 }
 
-func GetRepoFile(c *gin.Context) {
+func GetAgentFiles(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -59,19 +59,31 @@ func GetRepoFile(c *gin.Context) {
 		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
+
+	var datas []interface{}
+	// 获取repo文件
 	repos, Err, err := agent.GetRepoFile()
 	if err != nil {
 		response.Fail(c, nil, Err)
 		return
 	}
+	repo := controller.InterfaceToSlice(repos)
+	datas = append(datas, repo...)
 
-	total := controller.DataSizeForInterface(repos)
-	data, err := controller.DataPaging(query, repos, total)
+	// 获取网络配置文件
+	network, Err, err := agent.GetNetWorkFile()
+	if err != nil {
+		response.Fail(c, nil, Err)
+		return
+	}
+	datas = append(datas, network)
+
+	data, err := controller.DataPaging(query, datas, len(datas))
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	controller.JsonPagination(c, data, total, query)
+	controller.JsonPagination(c, data, len(datas), query)
 }
 
 func SaveFileToDatabase(c *gin.Context) {
@@ -175,7 +187,6 @@ func AllFiles(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	// 返回数据开始拼装分页的json
 	controller.JsonPagination(c, list, total, query)
 }
 
@@ -199,7 +210,6 @@ func AllHistoryFiles(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	// 返回数据开始拼装分页的json
 	controller.JsonPagination(c, list, total, query)
 }
 
@@ -274,17 +284,6 @@ func DeleteFile(c *gin.Context) {
 	response.Success(c, nil, "储存的文件已从数据库中删除")
 }
 
-func FileView(c *gin.Context) {
-	fileId := c.Query("id")
-	id, err := strconv.Atoi(fileId)
-	if err != nil {
-		response.Fail(c, nil, "id有误,请重新确认参数")
-	}
-
-	text := dao.FileView(id)
-	response.Success(c, gin.H{"text": text}, "配置文件内容获取成功")
-}
-
 func FindLastVersionFile(c *gin.Context) {
 	uuid := c.Query("uuid")
 	filename := c.Query("name")
@@ -292,13 +291,60 @@ func FindLastVersionFile(c *gin.Context) {
 	response.Success(c, gin.H{"oldfiles": lastfiles}, "获取该文件的历史版本")
 }
 
-func LastFileView(c *gin.Context) {
-	fileId := c.Query("id")
-	id, err := strconv.Atoi(fileId)
-	if err != nil {
-		response.Fail(c, nil, "id有误,请重新确认参数")
+func LastFileRollBack(c *gin.Context) {
+	var file model.HistoryFiles
+	c.Bind(&file)
+
+	ip := file.IP
+	uuid := file.UUID
+	path := file.Path
+	ipdept := file.IPDept
+	if len(path) == 0 {
+		response.Fail(c, nil, "请检查配置文件路径")
+		return
+	}
+	text := file.File
+	if len(text) == 0 {
+		response.Fail(c, nil, "请重新检查文件内容")
+		return
 	}
 
-	text := dao.LastFileView(id)
-	response.Success(c, gin.H{"text": text}, "配置文件内容获取成功")
+	agent := agentmanager.GetAgent(uuid)
+	if agent == nil {
+		response.Fail(c, nil, "server端获取uuid失败!")
+		return
+	}
+
+	filename := file.FileName
+	if len(filename) == 0 {
+		response.Fail(c, nil, "请检查配置文件名字")
+		return
+	}
+	name := strings.Split(filename, "-")[0]
+	if ok := dao.IsFileLatest(name, uuid); !ok {
+		LatestVersion, Err, err := agent.UpdateFile(path, name, text)
+		if len(Err) != 0 || err != nil {
+			response.Fail(c, nil, Err)
+			return
+		}
+		//  保存最新版本
+		fd := model.HistoryFiles{
+			IP:       ip,
+			IPDept:   ipdept,
+			UUID:     uuid,
+			Path:     path,
+			FileName: filename + "-latest",
+			File:     LatestVersion.(string),
+		}
+		dao.SaveHistoryFile(fd)
+		response.JSON(c, http.StatusOK, http.StatusOK, LatestVersion, "已回退到历史版本")
+		return
+	}
+
+	_, Err, err := agent.UpdateFile(path, name, text)
+	if len(Err) != 0 || err != nil {
+		response.Fail(c, nil, Err)
+		return
+	}
+	response.JSON(c, http.StatusOK, http.StatusOK, nil, "已回退到历史版本")
 }

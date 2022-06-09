@@ -940,13 +940,45 @@ func regitsterHandler(c *network.SocketClient) {
 		} else {
 			datas := make([]map[string]string, 0)
 			for _, repo := range repos {
-				datas = append(datas, map[string]string{"path": uos.RepoPath, "name": repo})
+				if ok := strings.Contains(repo, ".repo"); !ok {
+					continue
+				}
+				datas = append(datas, map[string]string{"path": uos.RepoPath, "type": "repo", "name": repo})
 			}
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: 0,
 				Data:   datas,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.GetNetWorkFile, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		network, err := uos.GetFiles(uos.NetWorkPath)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			data := make(map[string]string, 0)
+			for _, n := range network {
+				if ok := strings.Contains(n, "ifcfg-e"); !ok {
+					continue
+				}
+				data = map[string]string{"path": uos.NetWorkPath, "type": "network", "name": n}
+			}
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   data,
 			}
 			return c.Send(resp_msg)
 		}

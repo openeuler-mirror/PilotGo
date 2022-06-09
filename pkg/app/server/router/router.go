@@ -138,19 +138,17 @@ func SetupRouter() *gin.Engine {
 
 	configmanager := router.Group("config")
 	{
-		configmanager.GET("/repos", agentcontroller.GetRepoFile)
+		configmanager.GET("/files", agentcontroller.GetAgentFiles)
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
 		configmanager.POST("/file_edit", agentcontroller.UpdateAgentFile)
 		configmanager.POST("/fileSaveAdd", agentcontroller.SaveFileToDatabase)
 		configmanager.GET("/file_all", agentcontroller.AllFiles)
-		configmanager.GET("/file_view", agentcontroller.FileView)
 		configmanager.GET("/file_old", agentcontroller.FindLastVersionFile)
 		configmanager.POST("/file_search", agentcontroller.FileSearch)
 		configmanager.POST("/file_update", agentcontroller.UpdateFile)
 		configmanager.POST("/file_delete", agentcontroller.DeleteFile)
 		configmanager.GET("/lastfile_all", agentcontroller.AllHistoryFiles)
-		configmanager.GET("/lastfile_view", agentcontroller.LastFileView)
-		// configmanager.POST("/lastfile_rollback", agentcontroller.LastFileRollBack)
+		configmanager.POST("/lastfile_rollback", agentcontroller.LastFileRollBack)
 		configmanager.POST("/lastfile_search", agentcontroller.LastFileSearch)
 	}
 

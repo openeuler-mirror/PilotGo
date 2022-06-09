@@ -118,6 +118,8 @@ const (
 	ReadFile = 53
 	// 编辑配置文件
 	EditFile = 54
+	// 获取网络配置文件
+	GetNetWorkFile = 55
 )
 
 type Message struct {
