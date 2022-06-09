@@ -9,15 +9,15 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-05-12 15:28:36
- * @LastEditTime: 2022-06-08 13:48:40
+ * @LastEditTime: 2022-06-09 15:30:42
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
 
-// 获取所有repo源
-export function getRepos(data) {
+// 获取所有agent配置文件
+export function getAllFiles(data) {
   return request({
-    url: '/config/repos',
+    url: '/config/files',
     method: 'get',
     params: data
   })
@@ -110,5 +110,14 @@ export function getFileHistories(data) {
     url: '/config/file_old',
     method: 'get',
     params: data
+  })
+}
+
+// 配置文件回滚
+export function fileRollback(data) {
+  return request({
+    url: '/config/lastfile_rollback',
+    method: 'post',
+    data
   })
 }

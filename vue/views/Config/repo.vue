@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-06-08 14:27:25
+  LastEditTime: 2022-06-09 16:00:54
  -->
 <template>
  <div class="panel" style="height:100%">
@@ -20,7 +20,7 @@
       <div class="repoList" v-show="!showCompare">
         <div class="select"><span>请选择机器：</span>
         <el-autocomplete
-          style="width:50%"
+          style="width:40%"
           class="inline-input"
           v-model="macIp"
           :fetch-suggestions="querySearch"
@@ -28,26 +28,47 @@
           @select="handleSelect"
         ></el-autocomplete></div>
         <ky-table
-          :getData="getRepos"
+          :getData="getAllFiles"
           :searchData="searchData"
           ref="table"
+          :isRowClick="openRowClick"
         >
         <template v-slot:table_search>
-          <div>repo列表</div>
+          <div>配置文件列表</div>
         </template>
         <template v-slot:table>
-          <el-table-column prop="path" label="repo路径" width="140">
+          <el-table-column type="expand" width="2">
+            <template>
+              <el-steps 
+                :active="files.length"
+                align-center 
+                v-loading="loading" 
+                element-loading-text="文件请求中"
+                element-loading-spinner="el-icon-loading"
+                element-loading-background="rgba(255, 255, 255, 0.8)">
+                <el-step v-for="item in files" 
+                  @click.native="selectRollbackFile(item)"
+                  class="step"
+                  :key="item.id" 
+                  :description="item.name"/>
+              </el-steps>
+            </template>
           </el-table-column>
-          <el-table-column prop="name" label="repo名" width="120">
+          <el-table-column prop="path" label="文件路径" width="220">
+          </el-table-column>
+          <el-table-column prop="name" label="文件名" width="160">
             <template slot-scope="scope">
               <span title="详情" class="repoDetail" @click="handleDetail(scope.row)">{{scope.row.name}}</span>
             </template>
+          </el-table-column>
+          <el-table-column prop="type" label="文件类型">
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text"  size="mini" @click="handleEdit(scope.row)">编辑</el-button>   
               <el-button type="text"  size="mini" @click="handleDowlond(scope.row)">下载到库</el-button>   
               <el-button type="text"  size="mini" @click="handleCompare(scope.row)">对比</el-button>   
+              <el-button type="text"  size="mini" @click="getRollbackFile(scope.row)">回滚</el-button>   
             </template>
           </el-table-column>
         </template>
@@ -57,7 +78,22 @@
         <el-card class="box-card">
           <div slot="header" class="clearfix">
             <span>{{rightTtile}}</span>
-            <el-button v-if="showEdit" style="float: right; padding: 3px 0" type="text" @click="handleEditConfirm">确认</el-button>
+             <el-popconfirm 
+              v-if="showRollback"
+              title="确定回滚当前文件版本？"
+              cancel-button-type="default"
+              confirm-button-type="danger"
+              @confirm="handleRollBack">
+              <el-button  slot="reference" style="float: right; padding: 3px 0" type="text">回滚</el-button>
+             </el-popconfirm>
+              <el-popconfirm 
+              v-if="showEdit"
+              title="确定使用当前文件？"
+              cancel-button-type="default"
+              confirm-button-type="danger"
+              @confirm="handleEditConfirm">
+              <el-button  slot="reference" style="float: right; padding: 3px 0" type="text">确认</el-button>
+             </el-popconfirm>
             <el-button v-if="showCompare" style="float: right; padding: 3px 0" type="text" @click="handleDetail">退出</el-button>
           </div>
           <div class="editor" v-if="showEdit">
@@ -69,7 +105,7 @@
               @change="onEditorChange($event)">
           </quill-editor>
           </div>
-          <div class="detail" v-if="showDetail">
+          <div class="detail" v-if="showDetail || showRollback">
             <pre>{{detail || '点击文件名查看详情'}}</pre>
           </div>
           <div class="compare" v-if="showCompare">
@@ -96,7 +132,7 @@ import CompareForm from "./form/compareForm.vue";
 import { quillEditor } from 'vue-quill-editor'
 import 'quill/dist/quill.snow.css'
 import { getallMacIps } from '@/request/cluster'
-import { getRepos, getRepoDetail, updateRepo, getFileHistories } from "@/request/config"
+import { getAllFiles, getRepoDetail, updateRepo, getFileHistories, fileRollback } from "@/request/config"
 export default {
   name: "repoConfig",
   components: {
@@ -108,25 +144,36 @@ export default {
   },
   data() {
     return {
+      loading: true,
       title: '',
       type: '',
       macIp: '',
       ipDept: '',
       row: {},
-      compareWidth: '54%',
+      compareWidth: '46%',
       detail: '',
       content: '',
       files: [],
+      historyFiles: [
+        {id:1,name:'fairy-2022/4/21',description:'test file'},
+        {id:2,name:'test-2022/4/21',description:'test file2'},
+        {id:3,name:'test33-2022/4/21',description:'test file3'},
+        {id:4,name:'test33-2022/4/21',description:'test file3'},
+        {id:5,name:'test33-2022/4/21',description:'test file3'},
+        {id:6,name:'test33-2022/4/21',description:'test file3'},
+      ],
       rightTtile: '文件详情',
       dialogWidth: '70%',
       display: false,
       showEdit: false,
       showDetail: true,
       showCompare: false,
+      showRollback: false,
       rowData: [],
       searchData: {
         uuid: 'c11d8252-eac3-4c07-ac0e-99d8080d0a05'
       },
+      openRowClick: true,
       editorOptions: {
         modules:{
           toolbar:[
@@ -150,7 +197,7 @@ export default {
     })
   },
   methods: {
-    getRepos,
+    getAllFiles,
     querySearch(queryString, cb) {
       var ipData = this.ipData;
       var results = queryString ? ipData.filter((item) => {
@@ -170,6 +217,46 @@ export default {
       this.type = '';
       this.$refs.table.handleSearch();
     },
+    getRollbackFile(row) {
+      this.row = row;
+      this.$refs.table.changeExpandRow(row);
+      getFileHistories({uuid: this.searchData.uuid,name:row.name}).then(res=> {
+        if(res.data.code === 200) {
+          this.loading = false;
+          this.files = res.data.data && res.data.data.oldfiles;
+        }
+      })
+    },
+    selectRollbackFile(currFile) {
+      this.showEdit = false;
+      this.showDetail = false;
+      this.showCompare = false;
+      this.showRollback = true;
+      this.rightTtile = '文件详情'+' - '+ currFile.name;
+      this.detail = currFile.file;
+    },
+    handleRollBack() {
+      let params = {
+        path: this.row.path,
+        uuid: this.searchData.uuid,
+        name: this.row.name,
+        file: this.detail,
+        ip: this.macIp,
+        ipDept: this.ipDept,
+      }
+      fileRollback(params).then(res => {
+        if(res.data.code === 200) {
+          this.rightTtile = '文件详情';
+          this.showDetail = true;
+          this.showRollback = false;
+          this.detail = '';
+          this.$message.success(res.data.msg)
+          this.handleClose();
+        } else {
+          this.$message.error(res.data.msg)
+        }
+      })
+    },
     getDetail(row) {
       getRepoDetail({uuid: this.searchData.uuid,file: row.path+'/'+row.name}).then(res => {
         if(res.data.code === 200) {
@@ -178,10 +265,11 @@ export default {
       })
     },
     handleDetail(row) {
-      this.compareWidth = '54%';
+      this.compareWidth = '46%';
       this.showEdit = false;
       this.showDetail = true;
       this.showCompare = false;
+      this.showRollback = false;
       if(row) {
         this.rightTtile = '文件详情'+' - '+ row.name;
         this.getDetail(row);
@@ -203,6 +291,7 @@ export default {
       this.showEdit = false;
       this.showDetail = false;
       this.showCompare = true;
+      this.showRollback = false;
       this.rightTtile = '文件对比';
       this.compareWidth = '96%'
     },
@@ -217,6 +306,7 @@ export default {
       this.showEdit = true;
       this.showDetail = false;
       this.showCompare = false;
+      this.showRollback = false;
       this.row = row;
       this.getDetail(row);
     },
@@ -252,7 +342,7 @@ export default {
   display: flex;
   justify-content: space-evenly;
   .repoList {
-    width: 44%;
+    width: 52%;
     height: 100%;
     .select {
       height: 6%;
@@ -266,7 +356,7 @@ export default {
     }
   }
   .rightInfo {
-    width: 54%;
+    width: 46%;
     height: 100%;
     .editor {
       width: 100%;
@@ -296,5 +386,8 @@ export default {
   .repoDetail:hover {
     color: rgb(64, 158, 255);
   }
+}
+.step :hover {
+  cursor: pointer;
 }
 </style>

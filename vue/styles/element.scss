@@ -76,6 +76,14 @@
 .el-checkbox__inner {
   border: 1px solid rgba(82, 108, 193,.6);
 }
+
+// el-table
+.row-expand .el-table__expand-column {
+  pointer-events: none;
+}
+.row-expand .el-table__expand-column .el-icon {
+  visibility: hidden;
+}
 .el-table .el-table__cell {
   text-align: center;
 }
@@ -291,4 +299,9 @@ display: none;
 // 输入框textarea
 .el-textarea__inner {
   min-height: 220px !important;
+}
+
+//步骤条step
+.el-step__icon:hover {
+  color: orange;
 }

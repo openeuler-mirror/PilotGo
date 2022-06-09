@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-06-08 11:32:12
+ * @LastEditTime: 2022-06-08 17:35:58
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -263,7 +263,7 @@ export function serviceRestart(data) {
 // 获取内核信息
 export function getSyskernels(data) {
   return request({
-    url: '/api/sysctl_info',
+    url: 'api/sysctl_info',
     method: 'get',
     params: data
   })

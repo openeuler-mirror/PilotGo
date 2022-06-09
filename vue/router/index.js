@@ -198,7 +198,7 @@ export const routes = [
             {name:'sysctl',menuName:'内核参数配置'},
             {name:'libconfig',menuName:'库配置文件'},
           ]},
-          { name: 'repo配置'}
+          { name: '配置文件'}
         ],},
         children:[
           {
@@ -210,14 +210,14 @@ export const routes = [
             name: 'repo',
             component:_import('Config/repo'),
             meta: {
-              header_title: "repo配置", 
+              header_title: "配置文件", 
               panel: "/config/repo", 
               breadcrumb: [
                   { name: '配置管理', path: '/repo', children:[
                     {name:'sysctl',menuName:'内核参数配置'},
                     {name:'libconfig',menuName:'库配置文件'},
                   ]},
-                  { name: 'repo配置'}
+                  { name: '配置文件'}
               ],
               icon_class: ''
             }
@@ -231,7 +231,7 @@ export const routes = [
               panel: "/config/sysctl", 
               breadcrumb: [
                   { name: '配置管理', path: '/repo', children:[
-                    {name:'repo',menuName:'repo配置'},
+                    {name:'repo',menuName:'配置文件'},
                     {name:'libconfig',menuName:'库配置文件'},
                   ]},
                   { name: '内核参数配置'}
@@ -248,7 +248,7 @@ export const routes = [
               panel: "/config/libconfig", 
               breadcrumb: [
                   { name: '配置管理', path: '/libconfig', children:[
-                    {name:'repo',menuName:'repo配置'},
+                    {name:'repo',menuName:'配置文件'},
                     {name:'sysctl',menuName:'内核参数配置'},
                   ]},
                   { name: '库配置文件'}
@@ -260,7 +260,7 @@ export const routes = [
         submenu: [
           {
             name: '/config/repo',
-            menuName: "repo配置", 
+            menuName: "配置文件", 
           },
           {
             name: '/config/sysctl',

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-07 09:52:50
+  LastEditTime: 2022-06-08 17:22:16
  -->
 <template>
   <div>
@@ -22,7 +22,7 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
-      <el-form-item label="repo名:" prop="name">
+      <el-form-item label="文件名:" prop="name">
         <el-input
           controls-position="right"
           v-model="form.name"
@@ -36,7 +36,7 @@
           autocomplete="off"
         ></el-input>
       </el-form-item>
-      <el-form-item label="详情:" prop="file">
+      <el-form-item label="内容:" prop="file">
         <el-input
           type="textarea"
           v-model="form.file"
@@ -82,7 +82,7 @@ export default {
           }],
         name: [{ 
             required: true, 
-            message: "请输入repo名",
+            message: "请输入文件名",
             trigger: "blur" 
           }],
         description: [{ 
