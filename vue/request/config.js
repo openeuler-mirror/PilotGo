@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-05-12 15:28:36
- * @LastEditTime: 2022-06-09 15:30:42
+ * @LastEditTime: 2022-06-09 17:21:36
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -81,6 +81,15 @@ export function updateLibFile(data) {
 export function delLibFile(data) {
   return request({
     url: '/config/file_delete',
+    method: 'post',
+    data
+  })
+}
+
+// 下发库文件
+export function installFile(data) {
+  return request({
+    url: '/config/file_broadcast',
     method: 'post',
     data
   })

@@ -51,6 +51,7 @@
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
           </template>
         </el-table-column>
       </template>
@@ -62,7 +63,8 @@
       :visible.sync="display" 
       :width="dialogWidth"
     >
-      <download-form v-if="type === 'download'"  @click="handleClose"></download-form>
+      <download-form  v-if="type === 'download'"  @click="handleClose"></download-form>
+      <install-form :row="rowData" v-if="type === 'install'"  @click="handleClose"></install-form>
       <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
     </el-dialog>
 
@@ -72,14 +74,16 @@
 <script>
 import UpdateForm from "../form/updateForm.vue"
 import DownloadForm from "../form/downloadForm.vue";
+import InstallForm from "../form/installForm.vue";
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
-import { libFileList, delLibFile,libFileSearch } from "@/request/config"
+import { libFileList, delLibFile, libFileSearch } from "@/request/config"
 export default {
   components: {
     kyTable,
     UpdateForm,
     DownloadForm,
+    InstallForm,
     AuthButton,
   },
   data() {
@@ -124,6 +128,12 @@ export default {
       this.display = true;
       this.title = "编辑文件";
       this.type = "update";
+    },
+    handleInstall(row){
+      this.rowData = row;
+      this.display = true;
+      this.title = "文件下发";
+      this.type = "install";
     },
     handleDelete() {
       delLibFile({ids: this.$refs.table.selectRow.ids}).then(res => {
