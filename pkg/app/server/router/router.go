@@ -150,6 +150,7 @@ func SetupRouter() *gin.Engine {
 		configmanager.GET("/lastfile_all", agentcontroller.AllHistoryFiles)
 		configmanager.POST("/lastfile_rollback", agentcontroller.LastFileRollBack)
 		configmanager.POST("/lastfile_search", agentcontroller.LastFileSearch)
+		configmanager.POST("/file_broadcast", agentcontroller.FileBroadcastToAgents)
 	}
 
 	userLog := router.Group("log")

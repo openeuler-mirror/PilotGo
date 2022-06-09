@@ -17,6 +17,7 @@ package agentcontroller
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -347,4 +348,97 @@ func LastFileRollBack(c *gin.Context) {
 		return
 	}
 	response.JSON(c, http.StatusOK, http.StatusOK, nil, "已回退到历史版本")
+}
+
+func FileBroadcastToAgents(c *gin.Context) {
+	var fb model.FileBroadcast
+	c.Bind(&fb)
+
+	path := fb.Path
+	filename := fb.FileName
+	text := fb.Text
+
+	if len(path) == 0 {
+		response.Fail(c, nil, "路径为空，请检查配置文件路径")
+		return
+	}
+	if len(filename) == 0 {
+		response.Fail(c, nil, "文件名为空，请检查配置文件名字")
+		return
+	}
+	if len(text) == 0 {
+		response.Fail(c, nil, "文件内容为空，请重新检查文件内容")
+		return
+	}
+
+	logParent := model.AgentLogParent{
+		UserName:   fb.User,
+		DepartName: fb.UserDept,
+		Type:       model.LogTypeBroadcast,
+	}
+	logParentId := dao.ParentAgentLog(logParent)
+
+	StatusCodes := make([]string, 0)
+
+	for _, uuid := range fb.UUID {
+		agent := agentmanager.GetAgent(uuid)
+		if agent == nil {
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: filename,
+				Action:          model.BroadcastFile,
+				StatusCode:      http.StatusBadRequest,
+				Message:         "获取uuid失败",
+			}
+			dao.AgentLog(log)
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			continue
+		}
+
+		result, Err, err := agent.UpdateFile(path, filename, text)
+		if len(Err) != 0 || err != nil {
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: filename,
+				Action:          model.BroadcastFile,
+				StatusCode:      http.StatusBadRequest,
+				Message:         Err,
+			}
+			dao.AgentLog(log)
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			continue
+		} else {
+			log := model.AgentLog{
+				LogParentID:     logParentId,
+				IP:              dao.UUID2MacIP(uuid),
+				OperationObject: filename,
+				Action:          model.BroadcastFile,
+				StatusCode:      http.StatusOK,
+				Message:         "配置文件下发成功",
+			}
+			dao.AgentLog(log)
+
+			// 保存历史版本
+			time := service.NowTime()
+			ip, _, ipdept := dao.MachineBasic(uuid)
+			fd := model.HistoryFiles{
+				IP:       ip,
+				IPDept:   ipdept,
+				UUID:     uuid,
+				Path:     path,
+				FileName: filename + "-" + time,
+				File:     result.(string),
+			}
+			dao.SaveHistoryFile(fd)
+
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
+		}
+	}
+	status := service.BatchActionStatus(StatusCodes)
+	dao.UpdateParentAgentLog(logParentId, status)
+	response.Success(c, nil, "配置文件下发完成!")
 }

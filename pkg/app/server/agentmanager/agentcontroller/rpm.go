@@ -112,13 +112,12 @@ func InstallRpmHandler(c *gin.Context) {
 				Message:         "获取uuid失败",
 			}
 			dao.AgentLog(log)
-			response.Fail(c, nil, "获取uuid失败")
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
-		rpm_install, Err, err := agent.InstallRpm(rpm.RPM)
+		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
 
 			log := model.AgentLog{
@@ -130,7 +129,6 @@ func InstallRpmHandler(c *gin.Context) {
 				Message:         Err,
 			}
 			dao.AgentLog(log)
-			response.Fail(c, gin.H{"error": Err}, "Failed!")
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -145,13 +143,13 @@ func InstallRpmHandler(c *gin.Context) {
 				Message:         "安装成功",
 			}
 			dao.AgentLog(log)
-			response.Success(c, gin.H{"install": rpm_install}, "该rpm包安装成功!")
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 	status := service.BatchActionStatus(StatusCodes)
 	dao.UpdateParentAgentLog(logParentId, status)
+	response.Success(c, nil, "该rpm包安装完成!")
 }
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
@@ -178,13 +176,12 @@ func RemoveRpmHandler(c *gin.Context) {
 				Message:         "获取uuid失败",
 			}
 			dao.AgentLog(log)
-			response.Fail(c, nil, "获取uuid失败")
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
-		rpm_remove, Err, err := agent.RemoveRpm(rpm.RPM)
+		_, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
 
 			log := model.AgentLog{
@@ -196,7 +193,6 @@ func RemoveRpmHandler(c *gin.Context) {
 				Message:         Err,
 			}
 			dao.AgentLog(log)
-			response.Fail(c, gin.H{"error": Err}, "Failed!")
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -211,7 +207,6 @@ func RemoveRpmHandler(c *gin.Context) {
 				Message:         "卸载成功",
 			}
 			dao.AgentLog(log)
-			response.Success(c, gin.H{"remove": rpm_remove}, "该rpm包卸载成功!")
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
@@ -219,4 +214,5 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	status := service.BatchActionStatus(StatusCodes)
 	dao.UpdateParentAgentLog(logParentId, status)
+	response.Success(c, nil, "该rpm包卸载完成!")
 }
