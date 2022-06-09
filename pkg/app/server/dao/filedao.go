@@ -27,6 +27,13 @@ func IsExistId(id int) bool {
 	return file.ID != 0
 }
 
+func IsFileLatest(filename, uuid string) bool {
+	var file model.HistoryFiles
+	fullname := filename + "-latest"
+	mysqlmanager.DB.Where("uuid = ? AND file_name = ?", uuid, fullname).Find(&file)
+	return file.ID != 0
+}
+
 func UpdateFile(id int, path string, filename string, descrip string, text string) {
 	var file model.Files
 	f := model.Files{

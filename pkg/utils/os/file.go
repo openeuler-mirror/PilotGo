@@ -23,6 +23,8 @@ import (
 const (
 	// repo路径
 	RepoPath = "/etc/yum.repos.d"
+	// 网络配置
+	NetWorkPath = "/etc/sysconfig/network-scripts"
 )
 
 func GetFiles(filePath string) (fs []string, err error) {
