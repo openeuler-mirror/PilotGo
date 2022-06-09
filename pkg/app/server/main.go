@@ -187,11 +187,12 @@ func httpServerInit(conf *sconfig.HttpServer) error {
 
 func monitorInit(conf *sconfig.Monitor) error {
 	go func() {
+		logger.Info("start monitor")
 		err := controller.InitPromeYml()
 		if err != nil {
 			logger.Error("初始化promethues配置文件失败")
 		}
-		logger.Info("start monitor")
+		
 		for {
 			// TODO: 重构为事件触发机制
 			a := make([]map[string]string, 0)
@@ -202,10 +203,7 @@ func monitorInit(conf *sconfig.Monitor) error {
 				r[value.MachineUUID] = value.IP
 				a = append(a, r)
 			}
-			// err := controller.WritePrometheusYml(a)
-
 			err := controller.WriteYml(a)
-			// err = controller.PrometheusConfigReload(conf.PrometheusAddr)
 			if err != nil {
 				logger.Error("%s", err.Error())
 			}
