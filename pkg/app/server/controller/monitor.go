@@ -16,9 +16,6 @@ package controller
 
 import (
 	"bufio"
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
@@ -28,7 +25,6 @@ import (
 	"github.com/gin-gonic/gin"
 	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func Query(c *gin.Context) {
@@ -55,101 +51,60 @@ func QueryRange(c *gin.Context) {
 }
 
 func ListenALert(c *gin.Context) {
-	// url := conf.S.ServerIP + "/api/v1/alerts"
-	// logger.Debug("%s", url)
-	resp, err := http.Get("http://" + sconfig.Config().Monitor.PrometheusAddr + "/api/v1/alerts")
+	target := "http://" + sconfig.Config().Monitor.PrometheusAddr //转向的host
+	remote, err := url.Parse(target)
 	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
+		logger.Info("parse", err)
 		return
 	}
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-	var result Alert
-	err = json.Unmarshal(body, &result)
-	logger.Debug("%v", result)
-	if err != nil {
-		response.Response(c, http.StatusOK,
-			422,
-			nil,
-			err.Error())
-		return
-	}
-
-	res := []Alertmanager{}
-	for _, value := range result.Data.Alerts {
-		Al := Alertmanager{
-			value.Labels.Alertname,
-			value.Labels.Instance,
-			value.Labels.Job,
-			value.Annotations.Summary,
-			value.State,
-			value.ActiveAt,
-		}
-		res = append(res, Al)
-	}
-	response.JSON(c, http.StatusOK, http.StatusOK, res, "Alerts have got!")
+	proxy := httputil.NewSingleHostReverseProxy(remote)
+	c.Request.URL.Path = "/api/v1/alerts" //请求API
+	proxy.ServeHTTP(c.Writer, c.Request)
 }
 
-func WritePrometheusYml(a []map[string]string) error {
-	FilePath := "/root/prometheus.yml"
-	os.Remove(FilePath)
-	os.Create(FilePath)
-	var prometheusYml Prometheusyml
-	prometheusYml.Global.ScrapeInterval = "15s"
-	prometheusYml.Global.EvaluationInterval = "15s"
-	prometheusYml.RuleFiles = []string{"/etc/prometheus/alert.rules"}
-	var tmp static_configs
-	for _, value := range a {
-		for key, value2 := range value {
-			tmp.JobName = key
-			x := make([]target, 0)
-			x = append(x, target{[]string{value2}})
-			tmp.StaticConfigs = x
-			prometheusYml.ScrapeConfigs = append(prometheusYml.ScrapeConfigs, tmp)
-		}
-	}
-	file, err := os.OpenFile(FilePath, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		logger.Error("文件打开失败" + err.Error())
-		return err
-	}
-	defer file.Close()
-	write := bufio.NewWriter(file)
-	write.WriteString(
-		"global:" +
-			"\n scrape_interval: " + prometheusYml.Global.ScrapeInterval +
-			"\n evaluation_interval: " + prometheusYml.Global.EvaluationInterval + "\n")
-	write.WriteString("rule_files:")
-	for _, value := range prometheusYml.RuleFiles {
-		write.WriteString("\n - " + value)
-	}
-	write.WriteString("\nscrape_configs:")
-	for _, value := range prometheusYml.ScrapeConfigs {
-		write.WriteString("\n  - job_name: '" + value.JobName + "'")
-		write.WriteString("\n    static_configs:")
-		for _, value2 := range value.StaticConfigs {
-			a := strings.TrimSpace("- targets: ['" + value2.Targets[0] + ":9100']")
-			write.WriteString("\n      " + a)
-		}
-	}
-	write.Flush()
-	return nil
-}
-func PrometheusConfigReload(addr string) error {
-	response, err := http.PostForm("http://"+addr+"/-/reload", url.Values{})
-	logger.Debug("%+v", response)
-	return err
-}
+// func ListenALert(c *gin.Context) {
+// 	resp, err := http.Get("http://" + sconfig.Config().Monitor.PrometheusAddr + "/api/v1/alerts")
+// 	if err != nil {
+// 		response.Response(c, http.StatusOK,
+// 			422,
+// 			nil,
+// 			err.Error())
+// 		return
+// 	}
+// 	defer resp.Body.Close()
+// 	body, _ := ioutil.ReadAll(resp.Body)
+// 	if err != nil {
+// 		response.Response(c, http.StatusOK,
+// 			422,
+// 			nil,
+// 			err.Error())
+// 		return
+// 	}
+// 	var result Alert
+// 	err = json.Unmarshal(body, &result)
+// 	logger.Debug("%v", result)
+// 	if err != nil {
+// 		response.Response(c, http.StatusOK,
+// 			422,
+// 			nil,
+// 			err.Error())
+// 		return
+// 	}
+
+// 	res := []Alertmanager{}
+// 	for _, value := range result.Data.Alerts {
+// 		Al := Alertmanager{
+// 			value.Labels.Alertname,
+// 			value.Labels.Instance,
+// 			value.Labels.Job,
+// 			value.Annotations.Summary,
+// 			value.State,
+// 			value.ActiveAt,
+// 		}
+// 		res = append(res, Al)
+// 	}
+// 	response.JSON(c, http.StatusOK, http.StatusOK, res, "Alerts have got!")
+// }
 
 func InitPromeYml() error {
 	FilePath := "/root/prometheus.yml"
