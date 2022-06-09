@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-06-07 10:21:02
+  LastEditTime: 2022-06-09 11:34:20
   Description: 'Components Table'
  -->
 <template>
@@ -66,9 +66,6 @@
 <script>
 export default {
   props: {
-    rowClassName: {
-      type: Function,
-    },
     isLoadTable: {
       type: Boolean,
       default: function() {
@@ -105,6 +102,12 @@ export default {
       type: Array,
       default: function() {
         return []
+      }
+    },
+    isRowClick: {
+      type: Boolean,
+      default: function() {
+        return false
       }
     }
   },
@@ -188,6 +191,9 @@ export default {
       this.selectRow.rows = [];
       this.loadData({...this.objSearch, page: 1});
     },
+    changeExpandRow(row){
+      this.$refs.multipleTable.toggleRowExpansion(row);
+    },
     handleLoadSearch(data) {
       // 渲染高级搜索后的数据
       this.tableData = data;
@@ -232,11 +238,11 @@ export default {
       this.loadData({ ...this.objSearch});
     },
     tableRowClassName({ row, rowIndex }) {
-      let className = this.rowClassName ? this.rowClassName(row) : "";
-      if (rowIndex % 2 == 1) {
-        return "line-color " + className;
-      }
-      return className;
+      // rowIndex备用，隔行显示颜色不同的时候用
+      if(this.isRowClick) {
+        return ['row-expand'];
+      } 
+  
     },
     handleClose() {
       this.display = false;
