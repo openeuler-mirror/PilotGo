@@ -52,13 +52,15 @@ const (
 	ServiceRestart = "重启服务"
 	ServiceStop    = "关闭服务"
 	ServiceStart   = "开启服务"
+	BroadcastFile  = "文件下发"
 )
 
 // 日志存储类型
 const (
-	LogTypeRPM     = "软件包安装/卸载"
-	LogTypeService = "运行服务"
-	LogTypeSysctl  = "配置内核参数"
+	LogTypeRPM       = "软件包安装/卸载"
+	LogTypeService   = "运行服务"
+	LogTypeSysctl    = "配置内核参数"
+	LogTypeBroadcast = "配置文件下发"
 )
 
 // 单机操作成功状态:是否成功，机器数量，比率

@@ -48,6 +48,15 @@ type SearchFile struct {
 	Search string `json:"search"`
 }
 
+type FileBroadcast struct {
+	UUID     []string `json:"uuids"`
+	Path     string   `json:"path"`
+	FileName string   `json:"name"`
+	User     string   `json:"user"`
+	UserDept string   `json:"userDept"`
+	Text     string   `json:"file"`
+}
+
 func (f *Files) AllFiles(q *PaginationQ) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
 	tx = mysqlmanager.DB.Order("created_at desc").Find(&list)
