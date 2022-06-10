@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-05-18 13:59:03
+  LastEditTime: 2022-06-09 14:34:19
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -75,7 +75,7 @@
         :title="title"
         :before-close="handleClose" 
         :visible.sync="display" 
-        width="560px"
+        :width="dialogWidth"
       >
         <log-detail v-if="type === 'detail'" :log="log" @click="handleClose"></log-detail>
       </el-dialog>
@@ -93,6 +93,7 @@ export default {
   },
   data() {
     return {
+      dialogWidth: '70%',
       display: false,
       title: '',
       type: '',
