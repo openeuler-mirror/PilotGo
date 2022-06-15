@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-06-01 13:58:01
+  LastEditTime: 2022-06-14 15:49:27
  -->
 <template>
   <div class="panel">
@@ -33,7 +33,9 @@ export default {
   mounted() {
     this.macIp = this.$store.getters.selectIp || 'localhost:9090';
     this.cpuChart = this.$echarts.init(document.getElementById('cpu'))
-    this.getCpu({starttime: parseInt(this.now - 60*60*6) + '', endtime: parseInt(this.now - 0) + ''});
+    if(this.$store.getters.selectIp) {
+      this.getCpu({starttime: parseInt(this.now - 60*60*6) + '', endtime: parseInt(this.now - 0) + ''});
+    }
   },
   computed: {
     option() {
@@ -105,7 +107,7 @@ export default {
       }
       getData(params).then(res => {
         this.cpuData = [];
-        if(res.data.status === 'success') {
+        if(res.data.status === 'success' && res.data.data.result.length > 0) {
           res.data.data.result
             .filter(item => item.metric.instance === this.$store.getters.selectIp)[0]
             .values.forEach(item => {

@@ -9,12 +9,12 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-05-24 17:45:17
+  LastEditTime: 2022-06-14 14:43:15
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <el-container>
-    <el-aside style="width: 12%">
+    <el-aside style="width: 10%">
       <div class="logo"> 
         <img src="../../assets/logo.png" alt=""> 
         <span>PilotGo</span>
@@ -30,7 +30,7 @@
       </el-menu>
     </el-aside>
     <el-container>
-      <el-header style="height: 8%">
+      <el-header style="height: 6%">
         <bread-crumb class="breadCrumb"></bread-crumb>
         <div class="header-function">
           <el-dropdown class="header-function__username">
@@ -65,6 +65,7 @@
 import SidebarItem from "./components/SidebarItem";
 import BreadCrumb from "./components/BreadCrumb";
 import TagsView from "./components/TagsView";
+import Config from '../../../config/index.js'; //Config.dev.proxyTable['/'].target.split('//')[1]
 export default {
   name: "Home",
   components: {
@@ -79,6 +80,9 @@ export default {
       // cachedViews: ['Batch','Overview','Prometheus']
     };
   }, 
+  mounted() {
+    this.create();
+  },
   computed: {
     cachedViews() {
       return this.$store.getters.cachedViews
@@ -143,6 +147,27 @@ export default {
         });
       });
     },
+    create() {
+      let es = new EventSource(Config.dev.proxyTable['/'].target+'/event');
+      es.addEventListener('message', event => {
+          this.$notify({
+          title: '警告',
+          message: event.data,
+          type: 'warning',
+          duration: 0
+        });
+      });
+      es.addEventListener('error', event => {
+          if (event.readyState == EventSource.CLOSED) {
+              console.log('event was closed');
+          };
+      });
+      es.addEventListener('close', event => {
+          console.log(event.type);
+          es.close();
+      });
+    }
+
   },
 };
 </script>
@@ -158,8 +183,8 @@ export default {
     overflow: hidden;
     .logo {
       width: 100%;
-      height: 12.8%;
-      font-size: 2.5em;
+      height: 10%;
+      font-size: 3em;
       font-family: fantasy;
       color: rgb(241, 139, 14);
       display: flex;
@@ -169,7 +194,7 @@ export default {
       z-index: 1999;
       background: rgb(11, 35, 117);
       img {
-        width: 62%;
+        width: 50%;
       }
       span {
         display: inline-block;

@@ -38,7 +38,7 @@
           </el-table-column>
            <el-table-column prop="description" label="备注"> 
           </el-table-column>
-          <el-table-column prop="operation" label="操作" width="200">
+          <el-table-column prop="operation" label="操作"  fixed="right">
             <template slot-scope="scope">
               <auth-button name="batch_edit" size="mini" type="primary" plain @click="handleEdit(scope.row)">
                 编辑

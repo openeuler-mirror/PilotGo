@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-24 15:59:44
-  LastEditTime: 2022-03-24 17:08:39
+  LastEditTime: 2022-06-14 14:23:38
  -->
 <template>
   <div>
@@ -123,9 +123,9 @@ export default {
   },
   mounted() {
     if(this.row) {
-      this.form.alertname = this.row.alertname;
-      this.form.instance = this.row.instance.split(':')[0];
-      this.form.annotations = this.row.annotations;
+      this.form.alertname = this.row.labels.alertname;
+      this.form.instance = this.row.labels.instance.split(':')[0];
+      this.form.annotations = this.row.annotations.description;
       this.form.activeAt = this.row.activeAt;
     }
     getUsers().then(res => {

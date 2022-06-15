@@ -121,7 +121,7 @@ export default {
 
 .login-page {
   height: 100%;
-  background: url(../assets/bg.png);
+  background: url(~@/assets/bg.png);
   background-size: cover;
   position: relative;
 

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-05-26 14:49:38
+  LastEditTime: 2022-06-14 15:41:23
  -->
 <template>
   <div class="panel">
@@ -33,10 +33,12 @@ export default {
   mounted() {
     this.macIp = this.$store.getters.selectIp || 'localhost:9090';
     this.diskChart = this.$echarts.init(document.getElementById('io'))
-    this.getStepData('write',this.inData,'irate(node_disk_writes_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
-        endtime: parseInt(this.now - 0) + '',});
-    this.getStepData('read',this.outData,'irate(node_disk_reads_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
-        endtime: parseInt(this.now - 0) + '',});
+    if(this.$store.getters.selectIp){
+      this.getStepData('write',this.inData,'irate(node_disk_writes_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
+          endtime: parseInt(this.now - 0) + '',});
+      this.getStepData('read',this.outData,'irate(node_disk_reads_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
+          endtime: parseInt(this.now - 0) + '',});
+    }
   },
   computed: {
     option() {

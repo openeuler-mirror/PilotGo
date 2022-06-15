@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-05-25 13:57:45
+  LastEditTime: 2022-06-14 10:30:01
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -43,7 +43,7 @@
               @click="handleChange"> 变更部门 </auth-button>
           </template>
           <template v-slot:table>
-            <el-table-column label="ip" width="140">
+            <el-table-column label="ip">
               <template slot-scope="scope" >
                 <router-link :to="'/cluster/macList/' +scope.row.uuid">
                   {{ scope.row.ip }}
@@ -52,16 +52,16 @@
             </el-table-column>
             <el-table-column prop="departname" label="部门">
             </el-table-column>
-            <el-table-column prop="cpu" label="cpu" width="220"> 
+            <el-table-column prop="cpu" label="cpu"> 
             </el-table-column>
             <el-table-column label="状态">
               <template slot-scope="scope">
                 <state-dot :state="scope.row.state"></state-dot>
               </template>
             </el-table-column>
-            <el-table-column prop="systeminfo" label="系统信息" width="140"> 
+            <el-table-column prop="systeminfo" label="系统信息"> 
             </el-table-column>
-            <el-table-column label="操作" fixed="right" width="160">
+            <el-table-column label="操作" fixed="right">
               <template slot-scope="scope">
                 <el-button size="mini" type="primary" plain 
                   @click="handleProme(scope.row.ip)">               
@@ -217,7 +217,7 @@ export default {
     display: inline-block;
     .sourceBtn {
       display: block;
-      background: rgb(45, 69, 153);
+      background: rgb(255, 191, 0);
       color: #fff;
       width: 80%;
       padding: 4px;

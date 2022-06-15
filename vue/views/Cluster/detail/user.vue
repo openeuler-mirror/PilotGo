@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:07
-  LastEditTime: 2022-05-11 16:44:16
+  LastEditTime: 2022-06-10 14:15:24
  -->
 <template>
  <div class="content">
@@ -70,7 +70,7 @@ export default {
       let obj = {uuid:this.$route.params.detail};
       getUser(obj).then(res => {
         if(res.data.code === 200) {
-          this.currentUser = res.data.data.user_info.Username;
+          this.currentUser = res.data.data && res.data.data.user_info.Username;
         } else {
           console.log(res.data.msg)
         }

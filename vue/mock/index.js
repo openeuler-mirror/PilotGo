@@ -9,44 +9,10 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-03-10 17:57:39
- * @LastEditTime: 2022-05-12 16:28:33
+ * @LastEditTime: 2022-05-31 11:02:45
  */
 // 使用 Mock
 import Mock from 'mockjs';
-import { cron_list } from './cluster'
-
-//使用mockjs模拟数据
-Mock.mock('/api/cron_list','get', {
-  code: 200,
-  cron_info: [
-    {
-      id: 1,
-      name: 'test1',
-      cron: '0 * * * *',
-      createdAt: Mock.mock('@date()'),
-      updatedAt: Mock.mock('@date()'),
-      status: 1,
-      description: '测似例1'
-    },
-    {
-      id: 2,
-      name: 'test2',
-      cron: '0 0 * * *',
-      createdAt: Mock.mock('@date()'),
-      updatedAt: Mock.mock('@date()'),
-      status: 0,
-      description: '测似例2'
-    },
-
-  ]
-});
-Mock.mock('/api/test', 'get', {
-    "code":200,
-    "data":
-      {
-        "firewall_config|1-50": " item:test \n",//随机生成日期时间
-      }
-});
 
 Mock.mock('/macmanager/getIps', 'post', {
   "code":200,
@@ -79,13 +45,13 @@ Mock.mock('/macmanager/getIps', 'post', {
     ]
     
 });
-
 Mock.mock('/config/allRepos', 'get', {
   "code":200,
-  "data":
+  "data|3":[
     {
-      "firewall_config|1-50": " item:test \n",//随机生成日期时间
-    }
+      "repoName|1": ["openEuler.repo","CentOs.repo","test.repo"],
+      "path|1": ["/etc/yum.repos.d","/test/yum.repos.d","/admin/yum.repos.d"],
+      "description": Mock.mock('@cparagraph(1, 2)'),
+    }]
 });
-
 export default Mock

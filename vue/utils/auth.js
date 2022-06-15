@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-03-17 10:11:08
+ * @LastEditTime: 2022-06-13 15:06:28
  * @Description: provide agent log manager of pilotgo
  */
 import Cookies from 'js-cookie'
@@ -85,7 +85,7 @@ export function removeUserType() {
     return Cookies.remove(UserType)
 }
 export function setUserType(usertype) {
-    if (usertype) {
+    if (usertype != 'undefined') {
         return Cookies.set(UserType, usertype)
     }
 }

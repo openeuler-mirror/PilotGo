@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-06-09 11:34:20
+  LastEditTime: 2022-06-14 16:44:37
   Description: 'Components Table'
  -->
 <template>
@@ -33,15 +33,18 @@
         ref="multipleTable"
         :data="tableData"
         tooltip-effect="dark"
+        row-key="name"    
+        :expand-row-keys="expands"
+        @expand-change="expandSelect"
         :row-class-name="tableRowClassName"
         @select="handleSelectionChange"
         @select-all="handleSelectAll"
       >
         <el-table-column
           type="selection"
+          v-if="showSelect"
           width="55"
           align="center"
-          v-if="showSelect"
           :selectable="checkSelectTable"
         >
         </el-table-column>
@@ -117,6 +120,7 @@ export default {
         ids: [],
         rows: []
       },
+      expands: [],
       checked: false,
       displayTip: false,
       total: 0,
@@ -194,6 +198,12 @@ export default {
     changeExpandRow(row){
       this.$refs.multipleTable.toggleRowExpansion(row);
     },
+    expandSelect(row, expandedRows) {
+      this.expands = []
+      if (expandedRows.length > 0) {
+        row ? this.expands.push(row.name) : ''
+      }
+    },
     handleLoadSearch(data) {
       // 渲染高级搜索后的数据
       this.tableData = data;
@@ -259,7 +269,7 @@ export default {
   height: 96%;
   .header {
     width: 100%;
-    height: 8%;
+    height: 6%;
     border-radius: 6px 6px 0 0;
     background: linear-gradient(to right,rgb(11, 35, 117) 0%, rgb(96, 122, 207) 100%,);
     .header_content {
@@ -277,11 +287,10 @@ export default {
     }
   }
   .content {
-    height: 89%;
+    height: 92%;
     overflow-y: auto;
   }
   .el-table {
-    border: 1px solid #ebeef5;
     .line-color {
       background-color: #fff;
     }

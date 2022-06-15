@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 11:17:06
-  LastEditTime: 2022-05-10 13:55:26
+  LastEditTime: 2022-06-14 16:03:05
  -->
 <template>
  <div class="content flex">
@@ -17,11 +17,25 @@
      <p class="panel">机器信息看板<span class="icon iconfont icon-tongjiguanli"></span></p>
    </div> -->
    <div class="total panel flex" ref="total">
-     <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :width="epWidth" type="circle" :percentage="total" :format="format"></el-progress>
-     <div class="macStatus">
-       <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :percentage="normal" :format="macOn"></el-progress>
-       <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :percentage="offline" :format="macOff"></el-progress>
-       <el-progress color="rgb(92, 123, 217)" :stroke-width="strokeW" :percentage="free" :format="macFree"></el-progress>
+     <div class="bottom">
+       <div class="curr" ref="curr">
+         <span>欢迎您：{{userName}}</span>
+         <span>所属部门：{{userDeptName}}</span>
+         <span>您的身份：{{userType}}</span>
+       </div>
+       <div class="mac">
+          <el-carousel ref="carousel" trigger="click" :interval="8000" :height="carHeight" indicator-position="none">
+            <el-carousel-item v-for="item in tooltips" :key="item.id">
+              <h4 class="small">{{ item.name }}</h4>
+              <p>{{item.description}}</p>
+            </el-carousel-item>
+          </el-carousel>
+       </div>
+     </div>
+     <div class="top">
+       <div class="top_panel zx"><span>在线机器</span><p style="color:rgb(92, 123, 217)">{{normal}}</p></div>
+       <div class="top_panel lx"><span>离线机器</span><p style="color:rgb(138, 138, 138)">{{offline}}</p></div>
+       <div class="top_panel kx"><span>未分配机器</span><p style="color: rgb(253,190,0)">{{free}}</p></div>
      </div>
    </div>
    <div class="recent panel">
@@ -33,10 +47,10 @@
     <el-timeline :reverse="reverse">
       <el-timeline-item v-for="item in Message" :key="item.$index" :timestamp="item.activeAt | dateFormat" color="rgb(92, 123, 217)" size="large" placement="top">
         <el-card>
-          <h4 style="display: inline-block">{{ item.alertname }}</h4> 
+          <h4 style="display: inline-block">{{ item.labels.alertname }}</h4> 
           <span style="color:rgb(11, 35, 117); cursor:pointer" v-if="item.state" @click="handleDetail(item)">&emsp;>>详情</span>
           <br/><br/>
-          <p>{{ item.annotations }}</p>
+          <p>{{ item.annotations.summary }}</p>
         </el-card>
       </el-timeline-item>
     </el-timeline>
@@ -49,7 +63,7 @@
     :title="title"
     :before-close="handleClose" 
     :visible.sync="display" 
-    width="560px"
+    width="70%"
   >
     <alert-detail v-if="type === 'detail'" :row="row" @click="handleClose"></alert-detail>
   </el-dialog>
@@ -68,10 +82,29 @@ export default {
   },
   data() {
     return {
+      userName: '暂无',
+      userDeptName: '暂无',
+      userType: '暂无',
+      tooltips: [
+        {
+          id: 1,
+          name: '系统',
+          description: '按部门树节点查看一台机器各指标详情，监控性能变化，创建批次方便批量操作'
+        },
+        {
+          id: 2,
+          name: '批次',
+          description: '查看创建批次，执行下发rpm包动作'
+        },
+        {
+          id: 3,
+          name: '日志',
+          description: '查看执行动作的结果以及失败的具体原因'
+        }
+      ],
+      carHeight: '',
       row: {},
-      reverse: true,
-      epWidth: 146,
-      strokeW: 16, // 进度条宽度
+      reverse: false,
       display: false,
       title: '',
       type: '',
@@ -81,16 +114,24 @@ export default {
       free: 0,
       Message: [{
           activeAt: '',
-          alertname: '暂无',
-          annotations: '暂无'
+          labels: {
+            alertname: '暂无',
+          },
+          annotations: {
+            summary: '暂无'
+          }
       }],
     }
   },
+  activated() {
+    window.addEventListener("resize", this.resize);
+  },
   mounted() {
-    let cWidth = document.getElementsByClassName('dept')[0].clientWidth;
-    let cHeight = document.getElementsByClassName('dept')[0].clientHeight;
-    this.$refs.dept.resize({width:cWidth,height:cHeight})
-    this.epWidth = this.$refs.total.clientWidth/3 + 14;
+    this.userName = this.$store.getters.userName;
+    this.userDeptName = this.$store.getters.UserDepartName;
+    this.userType = this.$store.getters.userType === 0 ? 
+      '超级管理员': this.$store.getters.userType === 1 ? 
+      '部门管理员' : this.$store.getters.userType === 2 ? '普通用户' : '暂无';
     getPanelDatas().then(res => {
       if(res.data.code === 200) {
         let data = res.data.data.data;
@@ -101,12 +142,20 @@ export default {
       }
     }) 
     this.getAlerts();
+    this.resize();
+    window.addEventListener("resize", this.resize);
+    this.carHeight = this.$refs.curr.clientHeight + 'px';
   },
   methods: {
+    resize() {
+      let cWidth = document.getElementsByClassName('dept')[0].clientWidth;
+      let cHeight = document.getElementsByClassName('dept')[0].clientHeight;
+      this.$refs.dept.resize({width:cWidth,height:cHeight})
+    },
     getAlerts() {
       getAlerts().then(res => {
-        if(res.data.code === 200) {
-          this.Message = res.data.data;
+        if(res.data.status === 'success') {
+          this.Message = res.data.data.alerts;
         }
       })
       /* setInterval(function() {
@@ -128,18 +177,6 @@ export default {
       this.type = "detail";
       this.row = row;
     },
-    format(percentage) {
-      return percentage + "台";
-    },
-    macOn(percentage) {
-      return `在线:${percentage}`;
-    },
-    macOff(percentage) {
-      return `离线:${percentage}`;
-    },
-    macFree(percentage) {
-      return `未分配:${percentage}`;
-    },
   },
   filters: {
     dateFormat: function(value) {
@@ -154,6 +191,13 @@ export default {
       }
     }
   },
+  deactivated() {
+    window.removeEventListener("resize", this.resize);
+  },
+  beforeDestroy() {
+    //keep-alive关闭的话生效
+    window.removeEventListener("resize", this.resize);
+  }
 }
 </script>
 <style scoped lang="scss">
@@ -163,12 +207,84 @@ export default {
     .total {
       width: 48%;
       height: 40%;
-      .macStatus {
-        width: 50%;
-        height: 80%;
+      .top {
+        width: 100%;
+        height: 50%;
         display: flex;
-        flex-direction: column;
-        justify-content: space-around;
+        justify-content: space-evenly;
+        align-items: center;
+        .top_panel {
+          width: 28%;
+          height: 64%;
+          border: 1px dashed #aaa;
+          border-radius: 6%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-evenly;
+          align-items: flex-end;
+          color: rgb(106, 106, 106);
+          span {
+            display: inline-block;
+            width: 68%;
+            font-size: 16px;
+            text-align: center;
+          }
+          p {
+            width: 68%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+          }
+        }
+        .zx {
+          background: url(~@/assets/overview/zx.png) no-repeat left center;
+          background-size: 72%;
+          }
+        .lx {
+            background: url(~@/assets/overview/lx.png) no-repeat left center;
+            background-size: 72%;
+          }
+        .kx {
+            background: url(~@/assets/overview/kx.png) no-repeat left center;
+            background-size: 72%;
+          }
+      }
+      .bottom {
+        width: 96%;
+        margin: 0 auto;
+        height: 50%;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        .curr,.mac {
+          width: 46%;
+          height: 90%;
+          border-radius: 3%;
+          border: 1px dashed #aaa;
+          color: rgb(106, 106, 106);
+        }
+        .curr {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-evenly;
+          align-items: center;
+          span {
+            display: inline-block;
+            width: 80%;
+          }
+        }
+        .mac {
+          /* width: 46%;
+          margin: 0 auto; */
+          padding-top: 2%;
+          h4 {
+            padding: 0 0 0 2%;
+          }
+          p {
+            font-size: 14px;
+            padding: 2% 0 0 2%;
+          }
+        }
       }
     }
     .recent {
