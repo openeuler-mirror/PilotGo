@@ -81,6 +81,7 @@ func main() {
 	logger.Info("start to serve.")
 
 	// 信号监听
+	agentmanager.WARN_MSG = make(chan interface{})
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	for {
@@ -192,7 +193,6 @@ func monitorInit(conf *sconfig.Monitor) error {
 		if err != nil {
 			logger.Error("初始化promethues配置文件失败")
 		}
-		
 		for {
 			// TODO: 重构为事件触发机制
 			a := make([]map[string]string, 0)

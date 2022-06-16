@@ -58,7 +58,6 @@ func UpdateFile(path, filename, data interface{}) (lastversion interface{}, err 
 	if err != nil {
 		return nil, err
 	}
-	utils.RunCommand("rm -rf " + fullname)
 	err = utils.FileSaveString(fullname, data.(string))
 	if err != nil {
 		return lastversion, err

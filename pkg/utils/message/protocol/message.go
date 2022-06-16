@@ -120,6 +120,8 @@ const (
 	EditFile = 54
 	// 获取网络配置文件
 	GetNetWorkFile = 55
+	// 文件修改监控
+	FileMonitor = 56
 )
 
 type Message struct {

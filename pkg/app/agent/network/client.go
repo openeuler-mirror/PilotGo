@@ -89,7 +89,7 @@ func (c *SocketClient) connect(addr string) error {
 			buff := make([]byte, 1024)
 			n, err := c.conn.Read(buff)
 			if err != nil {
-				logger.Error("socket read data error:", err)
+				logger.Error("socket read data error:%s", err)
 				c.exitWithError(err)
 				return
 			}

@@ -19,11 +19,13 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"path"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
@@ -35,6 +37,7 @@ import (
 )
 
 var agent_version = "v0.0.1"
+var RESP_MSG = make(chan interface{})
 
 func main() {
 	fmt.Println("Start PilotGo agent.")
@@ -55,7 +58,7 @@ func main() {
 
 	// 定时任务初始化
 	if err := uos.CronInit(); err != nil {
-		logger.Error("cron init failed")
+		fmt.Println("cron init failed")
 		os.Exit(-1)
 	}
 
@@ -70,6 +73,7 @@ func main() {
 		// 与server握手
 		client := network.NewSocketClient()
 		regitsterHandler(client)
+		go FileMonitor(client)
 
 		for {
 			logger.Info("start to connect server")
@@ -84,6 +88,13 @@ func main() {
 			time.Sleep(delayTime)
 		}
 	}(&aconfig.Config().Server)
+
+	// 文件监控初始化
+	RESP_MSG = make(chan interface{})
+	if err := FileMonitorInit(); err != nil {
+		fmt.Println("config file monitor init failed")
+		os.Exit(-1)
+	}
 
 	// 信号监听
 	c := make(chan os.Signal, 1)
@@ -103,6 +114,89 @@ func main() {
 
 EXIT:
 	logger.Info("exit system, bye~")
+}
+
+func FileMonitorInit() error {
+	//获取IP
+	IP, err := utils.RunCommand("hostname -I")
+	if err != nil {
+		return fmt.Errorf("can not to get IP")
+	}
+	str := strings.Split(IP, " ")
+	IP = str[0]
+
+	// 1、NewWatcher 初始化一个 watcher
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+	defer watcher.Close()
+
+	// 2、使用 watcher 的 Add 方法增加需要监听的文件或目录到监听队列中
+	go func() {
+		err = watcher.Add(uos.RepoPath)
+		if err != nil {
+			fmt.Println("failed to monitor repo")
+		}
+		logger.Info("start to monitor repo")
+	}()
+
+	go func() {
+		err = watcher.Add(uos.NetWorkPath)
+		if err != nil {
+			fmt.Println("failed to monitor network")
+		}
+		logger.Info("start to monitor network")
+	}()
+
+	//3、创建新的 goroutine，等待管道中的事件或错误
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case e, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				fileExt := path.Ext(e.Name)
+				if strings.Contains(fileExt, ".sw") || strings.Contains(fileExt, "~") || strings.Contains(e.Name, "~") {
+					continue
+				}
+
+				if e.Op&fsnotify.Write == fsnotify.Write {
+					RESP_MSG <- fmt.Sprintf("机器 %s 上的文件已被修改 : %s", IP, e.Name)
+				}
+
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				logger.Error("error:", err)
+			}
+		}
+	}()
+	<-done
+	return nil
+}
+
+func FileMonitor(client *network.SocketClient) {
+	for data := range RESP_MSG {
+		if data == nil {
+			continue
+		}
+
+		msg := &protocol.Message{
+			UUID:   uuid.New().String(),
+			Type:   protocol.FileMonitor,
+			Status: 0,
+			Data:   data,
+		}
+
+		if err := client.Send(msg); err != nil {
+			fmt.Println("send message failed, error:", err)
+		}
+
+	}
 }
 
 func Send_heartbeat(client *network.SocketClient) {

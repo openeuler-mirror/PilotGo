@@ -28,6 +28,8 @@ import (
 
 type AgentMessageHandler func(*Agent, *protocol.Message) error
 
+var WARN_MSG chan interface{}
+
 type Agent struct {
 	UUID             string
 	Version          string
@@ -104,10 +106,16 @@ func (a *Agent) startListen() {
 
 // 远程获取agent端的信息进行初始化
 func (a *Agent) Init() error {
+	// WARN_MSG = make(chan interface{})
 	// TODO: 此处绑定所有的消息处理函数
 	a.bindHandler(protocol.Heartbeat, func(a *Agent, msg *protocol.Message) error {
 		logger.Info("process heartbeat from processor, remote addr:%s, data:%s",
 			a.conn.RemoteAddr().String(), msg.String())
+		return nil
+	})
+	a.bindHandler(protocol.FileMonitor, func(a *Agent, msg *protocol.Message) error {
+		logger.Info("process file monitor from processor:%s", msg.String())
+		WARN_MSG <- msg.Data.(string)
 		return nil
 	})
 
