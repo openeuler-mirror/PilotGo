@@ -35,3 +35,4 @@ yarn-error.log*
 config_server.yaml
 config_agent.yaml
 config.json
+.pilotgo-agent.data

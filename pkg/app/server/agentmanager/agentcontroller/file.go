@@ -153,6 +153,10 @@ func UpdateAgentFile(c *gin.Context) {
 		return
 	}
 
+	if ok, id := dao.IsFileLatest(filename, uuid); ok {
+		dao.DeleteLastFile(id)
+	}
+
 	// 保存历史版本
 	time := service.NowTime()
 	fd := model.HistoryFiles{
@@ -289,6 +293,10 @@ func FindLastVersionFile(c *gin.Context) {
 	uuid := c.Query("uuid")
 	filename := c.Query("name")
 	lastfiles := dao.FindLastVersionFile(uuid, filename)
+	if lastfiles == nil {
+		response.Success(c, gin.H{"oldfiles": []interface{}{}}, "获取该文件的历史版本")
+		return
+	}
 	response.Success(c, gin.H{"oldfiles": lastfiles}, "获取该文件的历史版本")
 }
 
@@ -322,7 +330,7 @@ func LastFileRollBack(c *gin.Context) {
 		return
 	}
 	name := strings.Split(filename, "-")[0]
-	if ok := dao.IsFileLatest(name, uuid); !ok {
+	if ok, _ := dao.IsFileLatest(name, uuid); !ok {
 		LatestVersion, Err, err := agent.UpdateFile(path, name, text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
