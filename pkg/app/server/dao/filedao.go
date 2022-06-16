@@ -27,6 +27,12 @@ func IsExistId(id int) bool {
 	return file.ID != 0
 }
 
+func IsExistFile(filename string) bool {
+	var file model.Files
+	mysqlmanager.DB.Where("file_name = ?", filename).Find(&file)
+	return file.ID != 0
+}
+
 func IsFileLatest(filename, uuid string) (bool, int) {
 	var file model.HistoryFiles
 	fullname := filename + "-latest"
@@ -34,14 +40,23 @@ func IsFileLatest(filename, uuid string) (bool, int) {
 	return file.ID != 0, file.ID
 }
 
-func UpdateFile(id int, path string, filename string, descrip string, text string) {
+func SaveHistoryFile(id int) {
 	var file model.Files
-	f := model.Files{
-		SourcePath:  path,
-		FileName:    filename,
-		Description: descrip,
-		File:        text,
+	mysqlmanager.DB.Where("id=?", id).Find(&file)
+
+	lastversion := model.HistoryFiles{
+		FileID:      id,
+		UserUpdate:  file.UserUpdate,
+		UserDept:    file.UserDept,
+		FileName:    file.FileName,
+		Description: file.Description,
+		File:        file.File,
 	}
+	mysqlmanager.DB.Save(&lastversion)
+}
+
+func UpdateFile(id int, f model.Files) {
+	var file model.Files
 	mysqlmanager.DB.Model(&file).Where("id = ?", id).Update(&f)
 }
 
@@ -50,16 +65,12 @@ func DeleteFile(id int) {
 	mysqlmanager.DB.Where("id = ?", id).Unscoped().Delete(file)
 }
 
-func DeleteLastFile(id int) {
+func DeleteHistoryFile(filePId int) {
 	var file model.HistoryFiles
-	mysqlmanager.DB.Where("id = ?", id).Unscoped().Delete(file)
+	mysqlmanager.DB.Where("file_id = ?", filePId).Unscoped().Delete(file)
 }
 
 func SaveFile(file model.Files) {
-	mysqlmanager.DB.Save(&file)
-}
-
-func SaveHistoryFile(file model.HistoryFiles) {
 	mysqlmanager.DB.Save(&file)
 }
 

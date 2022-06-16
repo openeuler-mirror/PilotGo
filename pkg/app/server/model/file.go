@@ -21,23 +21,31 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
+const (
+	ConfigRepo = "repo配置"
+)
+
 type Files struct {
-	ID          int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	CreatedAt   time.Time
-	SourcePath  string `json:"path"`
-	FileName    string `json:"name"`
-	Description string `json:"description"`
-	File        string `gorm:"type:text" json:"file"`
+	ID              int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	FileName        string `json:"name"`
+	Type            string `json:"type"`
+	Description     string `json:"description"`
+	UserUpdate      string `json:"user"`
+	UserDept        string `json:"userDept"`
+	UpdatedAt       time.Time
+	ControlledBatch string `json:"batchId"`
+	File            string `gorm:"type:text" json:"file"`
 }
 
 type HistoryFiles struct {
-	ID       int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	IP       string `json:"ip"`
-	IPDept   string `json:"ipDept"`
-	UUID     string `json:"uuid"`
-	Path     string `json:"path"`
-	FileName string `json:"name"`
-	File     string `gorm:"type:text" json:"file"`
+	ID          int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	FileID      int `json:"filePId"`
+	UpdatedAt   time.Time
+	UserUpdate  string `json:"user"`
+	UserDept    string `json:"userDept"`
+	FileName    string `json:"name"`
+	Description string `json:"description"`
+	File        string `gorm:"type:text" json:"file"`
 }
 
 type DeleteFiles struct {
@@ -59,32 +67,21 @@ type FileBroadcast struct {
 
 func (f *Files) AllFiles(q *PaginationQ) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = mysqlmanager.DB.Order("created_at desc").Find(&list)
+	tx = mysqlmanager.DB.Order("id desc").Find(&list)
 	return
 }
 
 func (f *SearchFile) FileSearch(q *PaginationQ, search string) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = mysqlmanager.DB.Order("created_at desc").Where("source_path LIKE ?", "%"+search+"%").Find(&list)
+	tx = mysqlmanager.DB.Order("updated_at desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
 	if len(*list) == 0 {
-		tx = mysqlmanager.DB.Order("created_at desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
+		tx = mysqlmanager.DB.Order("updated_at desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
 	}
 	return
 }
 
-func (f *HistoryFiles) AllHistoryFiles(q *PaginationQ) (list *[]HistoryFiles, tx *gorm.DB) {
+func (f *HistoryFiles) HistoryFiles(q *PaginationQ, fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
 	list = &[]HistoryFiles{}
-	tx = mysqlmanager.DB.Order("id desc").Find(&list)
-	return
-}
-func (f *SearchFile) LastFileSearch(q *PaginationQ, search string) (list *[]HistoryFiles, tx *gorm.DB) {
-	list = &[]HistoryFiles{}
-	tx = mysqlmanager.DB.Order("id desc").Where("path LIKE ?", "%"+search+"%").Find(&list)
-	if len(*list) == 0 {
-		tx = mysqlmanager.DB.Order("id desc").Where("ip LIKE ?", "%"+search+"%").Find(&list)
-		if len(*list) == 0 {
-			tx = mysqlmanager.DB.Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
-		}
-	}
+	tx = mysqlmanager.DB.Order("updated_at desc").Where("file_id=?", fileId).Find(&list)
 	return
 }
