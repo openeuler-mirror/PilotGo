@@ -9,23 +9,22 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-08 10:02:27
+  LastEditTime: 2022-06-16 14:37:39
  -->
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="路径:" prop="path">
-        <el-input
-          type="text"
-          size="medium"
-          v-model="form.path"
-          autocomplete="off"
-        ></el-input>
-      </el-form-item>
       <el-form-item label="文件名:" prop="name">
         <el-input
           controls-position="right"
           v-model="form.name"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="文件类型:" prop="type">
+        <el-input
+          controls-position="right"
+          v-model="form.type"
           autocomplete="off"
         ></el-input>
       </el-form-item>
@@ -72,21 +71,20 @@ export default {
   data() {
     return {
       form: {
-        path: '',
         name: '',
+        type: '',
         description: '',
         file: ''
       },
       rules: {
-        path: [
-          { 
-            required: true, 
-            message: "请输入路径",
-            trigger: "blur" 
-          }],
         name: [{ 
             required: true, 
             message: "请输入repo名",
+            trigger: "blur" 
+          }],
+        type: [{ 
+            required: true, 
+            message: "请输入文件类型",
             trigger: "blur" 
           }],
         description: [{ 
@@ -122,9 +120,13 @@ export default {
       
     },
     handleconfirm() {
+      let params = {
+        user: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
+      }
       this.$refs.form.validate((valid) => {
         if (valid) {
-          saveRepo({...this.form,ip:this.macIp})
+          saveRepo({...this.form,...params})
             .then((res) => {
               if (res.data.code === 200) {
                 this.$emit("click","success");

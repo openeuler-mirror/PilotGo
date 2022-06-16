@@ -191,66 +191,25 @@ export const routes = [
       },
       {
         path: '/config',
-        component:  _import('Config/repo'),
+        component:  _import('Config/libfile'),
         meta: { title: 'config', header_title: "配置管理", panel: "config", icon_class: 'el-icon-s-tools' , submenu: true,
         breadcrumb: [
-          { name: '配置管理', path: '/config/repo', children:[
-            {name:'sysctl',menuName:'内核参数配置'},
-            {name:'libconfig',menuName:'库配置文件'},
-          ]},
-          { name: '配置文件'}
+          { name: '配置管理'}
         ],},
         children:[
           {
             path: '',
-            redirect: 'repo'
-          },
-          {
-            path: '/config/repo',
-            name: 'repo',
-            component:_import('Config/repo'),
-            meta: {
-              header_title: "配置文件", 
-              panel: "/config/repo", 
-              breadcrumb: [
-                  { name: '配置管理', path: '/repo', children:[
-                    {name:'sysctl',menuName:'内核参数配置'},
-                    {name:'libconfig',menuName:'库配置文件'},
-                  ]},
-                  { name: '配置文件'}
-              ],
-              icon_class: ''
-            }
-          },
-          {
-            path: '/config/sysctl',
-            name: 'sysctl',
-            component:_import('Config/sysctl'),
-            meta: {
-              header_title: "内核参数配置", 
-              panel: "/config/sysctl", 
-              breadcrumb: [
-                  { name: '配置管理', path: '/repo', children:[
-                    {name:'repo',menuName:'配置文件'},
-                    {name:'libconfig',menuName:'库配置文件'},
-                  ]},
-                  { name: '内核参数配置'}
-              ],
-              icon_class: ''
-            }
+            redirect: 'libconfig'
           },
           {
             path: '/config/libconfig',
             name: 'libconfig',
-            component:_import('Config/detail/index'),
+            component:_import('Config/libfile'),
             meta: {
               header_title: "库配置文件", 
               panel: "/config/libconfig", 
               breadcrumb: [
-                  { name: '配置管理', path: '/libconfig', children:[
-                    {name:'repo',menuName:'配置文件'},
-                    {name:'sysctl',menuName:'内核参数配置'},
-                  ]},
+                  { name: '配置管理', path: '/config/libconfig'},
                   { name: '库配置文件'}
               ],
               icon_class: ''
@@ -258,14 +217,6 @@ export const routes = [
           },
         ],
         submenu: [
-          {
-            name: '/config/repo',
-            menuName: "配置文件", 
-          },
-          {
-            name: '/config/sysctl',
-            menuName: "内核参数配置", 
-          },
           {
             name: '/config/libconfig',
             menuName: "库配置文件", 

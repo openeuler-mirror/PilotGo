@@ -9,18 +9,18 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-09 17:31:51
+  LastEditTime: 2022-06-16 14:47:27
  -->
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="机器:" prop="macIp">
-        <el-select class="select" v-model="form.macIp" collapse-tags multiple placeholder="请选择机器ip">
+      <el-form-item label="批次:" prop="batches">
+        <el-select class="select" v-model="form.batches" collapse-tags multiple placeholder="请选择下发批次">
           <el-option
-            v-for="item in macs"
-            :key="item.uuid"
-            :label="item.ip_dept"
-            :value="item.ip"
+            v-for="item in batches"
+            :key="item.ID"
+            :label="item.name"
+            :value="item.ID"
           >
           </el-option>
         </el-select>
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { getallMacIps } from '@/request/cluster'
+import { getBatches } from "@/request/batch";
 import { installFile } from "@/request/config"
 export default {
   props: {
@@ -75,24 +75,21 @@ export default {
   },
   data() {
     return {
-      ips: [],
-      uuids: [],
-      macs: [],
+      batches: [],
       form: {
-        macIp: [],
+        batches: [],
         path: '',
         name: '',
         description: '',
         file: ''
       },
       rules: {
-        macIp: [
-          {
-            required: true,
-            message: '请选择至少一个ip',
-            trigger: "blur"
-          }
-        ],
+        batches: [
+          { 
+            required: true, 
+            message: "至少选择一个批次",
+            trigger: "blur" 
+          }],
         path: [
           { 
             required: true, 
@@ -122,10 +119,10 @@ export default {
     this.form.path = this.row.path;
     this.form.description = this.row.description;
     this.form.file = this.row.file;
-    getallMacIps().then(res => {
-      this.macs = [];
+    getBatches().then(res => {
+      this.batches = [];
       if(res.data.code === 200) {
-        this.macs = res.data.data && res.data.data;
+        this.batches = res.data.data && res.data.data;
       }
     })
   },
@@ -135,16 +132,8 @@ export default {
       this.$emit("click");
     },
     handleconfirm() {
-      let selectMacs = [];
-      this.uuids = [];
-      this.form.macIp.forEach(item => {
-        selectMacs.push(...this.macs.filter(mac => mac.ip === item))
-      })
-      selectMacs.forEach(item => {
-        this.uuids.push(item.uuid)
-      })
       let params = {
-        uuids: this.uuids,
+        batches:this.form.batches,
         path: this.form.path,
         name: this.form.name,
         file: this.form.file,
