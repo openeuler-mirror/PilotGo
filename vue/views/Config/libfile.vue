@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" style="height:100%">
+  <div style="height:100%">
     <ky-table
       :getData="libFileList"
       ref="table"
@@ -32,18 +32,21 @@
             ></el-input>
           </template>
         </el-table-column>
-        <!-- <el-table-column  prop="id" label="编号" sortable>
-        </el-table-column> -->
-        <el-table-column  prop="path" label="路径">
-        </el-table-column>
-        <el-table-column  prop="name" label="文件名">
+        <el-table-column  prop="name" label="名称">
           <template slot-scope="scope">
             <span title="详情" class="repoDetail" @click="handleDetail(scope.row)">{{scope.row.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="CreatedAt" label="创建时间" sortable>
+        <el-table-column  prop="type" label="类型">
+        </el-table-column>
+        <el-table-column prop="UpdatedAt" label="更新时间" sortable>
           <template slot-scope="scope">
-            <span>{{scope.row.CreatedAt | dateFormat}}</span>
+            <span>{{scope.row.UpdatedAt | dateFormat}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column  prop="batchId" label="管控批次">
+          <template slot-scope="scope">
+            <span>{{scope.row.batchId || '暂无'}}</span>
           </template>
         </el-table-column>
         <el-table-column  prop="description" label="描述">
@@ -51,6 +54,7 @@
         <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleHistory(scope.row)">历史版本</auth-button>
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
           </template>
         </el-table-column>
@@ -66,15 +70,17 @@
       <download-form  v-if="type === 'download'"  @click="handleClose"></download-form>
       <install-form :row="rowData" v-if="type === 'install'"  @click="handleClose"></install-form>
       <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
+      <history-file :row="rowData" v-if="type === 'history'" @click="handleClose"></history-file>
     </el-dialog>
 
   </div>
 </template>
 
 <script>
-import UpdateForm from "../form/updateForm.vue"
-import DownloadForm from "../form/downloadForm.vue";
-import InstallForm from "../form/installForm.vue";
+import UpdateForm from "./form/updateForm.vue"
+import DownloadForm from "./form/downloadForm.vue"; //新增
+import InstallForm from "./form/installForm.vue";
+import HistoryFile from "./detail/index.vue";
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
 import { libFileList, delLibFile, libFileSearch } from "@/request/config"
@@ -84,11 +90,11 @@ export default {
     UpdateForm,
     DownloadForm,
     InstallForm,
+    HistoryFile,
     AuthButton,
   },
   data() {
     return {
-      loading: false,
       display: false,
       dialogWidth: '70%',
       searchInput: '',
@@ -104,6 +110,7 @@ export default {
       this.display = false;
       this.title = "";
       this.type = "";
+      this.dialogWidth="70%";
       if(type === 'success') {
         this.refresh();
       }
@@ -128,6 +135,13 @@ export default {
       this.display = true;
       this.title = "编辑文件";
       this.type = "update";
+    },
+    handleHistory(row) {
+      this.rowData = row;
+      this.display = true;
+      this.dialogWidth = '80%';
+      this.title = row.name + "配置历史版本";
+      this.type = "history";
     },
     handleInstall(row){
       this.rowData = row;

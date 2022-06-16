@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-06-14 16:44:37
+  LastEditTime: 2022-06-16 09:38:21
   Description: 'Components Table'
  -->
 <template>
@@ -33,9 +33,6 @@
         ref="multipleTable"
         :data="tableData"
         tooltip-effect="dark"
-        row-key="name"    
-        :expand-row-keys="expands"
-        @expand-change="expandSelect"
         :row-class-name="tableRowClassName"
         @select="handleSelectionChange"
         @select-all="handleSelectAll"

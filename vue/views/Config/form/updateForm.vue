@@ -9,23 +9,22 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-08 17:22:16
+  LastEditTime: 2022-06-16 14:30:32
  -->
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="路径:" prop="path">
-        <el-input
-          type="text"
-          size="medium"
-          v-model="form.path"
-          autocomplete="off"
-        ></el-input>
-      </el-form-item>
       <el-form-item label="文件名:" prop="name">
         <el-input
           controls-position="right"
           v-model="form.name"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="文件类型:" prop="tyep">
+        <el-input
+          controls-position="right"
+          v-model="form.type"
           autocomplete="off"
         ></el-input>
       </el-form-item>
@@ -70,19 +69,19 @@ export default {
       form: {
         path: '',
         name: '',
+        type: '',
         description: '',
         file: ''
       },
       rules: {
-        path: [
-          { 
-            required: true, 
-            message: "请输入路径",
-            trigger: "blur" 
-          }],
         name: [{ 
             required: true, 
             message: "请输入文件名",
+            trigger: "blur" 
+          }],
+        type: [{ 
+            required: true, 
+            message: "请输入文件类型",
             trigger: "blur" 
           }],
         description: [{ 
@@ -100,7 +99,7 @@ export default {
   },
   mounted() {
     this.form.name = this.row.name;
-    this.form.path = this.row.path;
+    this.form.type = this.row.type;
     this.form.description = this.row.description;
     this.form.file = this.row.file;
     this.id = this.row.id;
