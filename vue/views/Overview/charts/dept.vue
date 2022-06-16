@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 18:26:25
-  LastEditTime: 2022-04-29 15:13:48
+  LastEditTime: 2022-06-14 15:10:57
  -->
 <template>
   <div id="dept" style="width:100%;height:100%">
@@ -63,7 +63,7 @@ export default {
             data: this.normal,
             type: 'bar',
             itemStyle: {
-              color: 'rgb(11, 35, 117)',
+              color: 'rgb(92, 123, 217)',
               borderRadius: [9, 9, 0, 0]
             },
             label: {
@@ -89,7 +89,7 @@ export default {
             data: this.free,
             type: 'bar',
             itemStyle: {
-              color: 'rgb(92, 123, 207)',
+              color: 'rgb(253, 190, 0)',
               borderRadius: [9, 9, 0, 0]
             },
             label: {
@@ -102,7 +102,7 @@ export default {
     }
   },
   mounted() {
-    this.deptChart = this.$echarts.init(document.getElementById('dept'))
+    this.deptChart = this.$echarts.init(document.getElementById('dept'));
     getDeptDatas().then(res => {
       if(res.data.code === 200) {
         let data = res.data.data.data;
@@ -120,12 +120,12 @@ export default {
       this.deptChart.resize(params)
       this.deptChart.setOption(this.option,true)
     },
-    getDept() {
-      
-  },
+    clear() {
+      this.deptChart.clear();
+    }
   
-},
-watch: {
+  },
+  watch: {
     option: function() {
       this.deptChart.setOption(this.option,true)
     }

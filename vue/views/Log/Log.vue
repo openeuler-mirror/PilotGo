@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-06-09 14:34:19
+  LastEditTime: 2022-06-13 17:41:18
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -25,13 +25,13 @@
           <div>日志列表</div>
         </template>
         <template v-slot:table_action>
-          <el-popconfirm 
+          <!-- <el-popconfirm 
           title="确定删除此日志？"
           cancel-button-type="default"
           confirm-button-type="danger"
           @confirm="handleDelete">
           <el-button slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
-        </el-popconfirm>
+        </el-popconfirm> -->
         </template>
         <template v-slot:table>
           <el-table-column prop="type" label="日志名称">
@@ -47,7 +47,7 @@
                 text-inside
                 :stroke-width="strokeW"
                 :format="format"
-                :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 " 
+                :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 || 0" 
                 :status="scope.row.status.split(',')[2] === '0.00' ? 'exception' : 
                     scope.row.status.split(',')[2] === '1.00' ? 'success' : 'warning' ">
               </el-progress>
@@ -98,7 +98,7 @@ export default {
       title: '',
       type: '',
       log: {},
-      strokeW: 12,
+      strokeW: 15,
       searchData: {
         departId: this.$store.getters.UserDepartId || '',
       },

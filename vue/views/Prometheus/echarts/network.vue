@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-05-26 14:49:48
+  LastEditTime: 2022-06-14 15:42:06
  -->
 <template>
   <div class="panel">
@@ -33,10 +33,12 @@ export default {
   mounted() {
     this.macIp = this.$store.getters.selectIp  || 'localhost:9090';
     this.netChart = this.$echarts.init(document.getElementById('network'))
-    this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
-        endtime: parseInt(this.now - 0) + ''});
-    this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
-        endtime: parseInt(this.now - 0) + ''});
+    if(this.$store.getters.selectIp) {
+      this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
+          endtime: parseInt(this.now - 0) + ''});
+      this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
+          endtime: parseInt(this.now - 0) + ''});
+    }
   },
   computed: {
     option() {

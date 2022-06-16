@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-14 10:41:07
-  LastEditTime: 2022-03-21 16:02:17
+  LastEditTime: 2022-06-14 09:41:14
  -->
 <template>
   <div id="app">
@@ -30,12 +30,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
 }
 html,
-body,
-#app,
-.el-container{
+body{
   padding: 0px;
   margin: 0px;
-  height: 100%;
+  /* height: 100%; */
   background-color: rgb(11, 35, 117);
+  width: 100vw; 
+  height: 100vh; 
+  transform-origin: 0 0 0; /*指定缩放的基本点*/
+  -moz-transform-origin: 0 0 0;
+  -ms-transform-origin: 0 0 0;
+  -webkit-transform-origin: 0 0 0;
+  -o-transform-origin: 0 0 0;
+  overflow: hidden;
 }
 </style>

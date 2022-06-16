@@ -50,7 +50,7 @@
         </el-table-column>
         <el-table-column  prop="email" label="邮箱">
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
             <auth-button name="user_edit" class="editBtn" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
             <auth-button name="user_reset" class="editBtn" type="primary" plain size="mini" @click="handleReset(scope.row.email)">重置密码</auth-button>

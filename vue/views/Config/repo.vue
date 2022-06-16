@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-17 09:41:31
-  LastEditTime: 2022-06-09 16:00:54
+  LastEditTime: 2022-06-10 14:04:34
  -->
 <template>
  <div class="panel" style="height:100%">
@@ -18,15 +18,6 @@
    </transition>
    <div class="info" v-if="$route.name == 'repo'">
       <div class="repoList" v-show="!showCompare">
-        <div class="select"><span>请选择机器：</span>
-        <el-autocomplete
-          style="width:40%"
-          class="inline-input"
-          v-model="macIp"
-          :fetch-suggestions="querySearch"
-          placeholder="请输入ip关键字"
-          @select="handleSelect"
-        ></el-autocomplete></div>
         <ky-table
           :getData="getAllFiles"
           :searchData="searchData"
@@ -34,7 +25,15 @@
           :isRowClick="openRowClick"
         >
         <template v-slot:table_search>
-          <div>配置文件列表</div>
+          <span>配置文件列表</span>
+          <el-autocomplete
+            class="inline-input"
+            v-model="macIp"
+            prefix-icon="el-icon-search"
+            :fetch-suggestions="querySearch"
+            placeholder="请输入ip查找配置文件"
+            @select="handleSelect"
+          ></el-autocomplete>
         </template>
         <template v-slot:table>
           <el-table-column type="expand" width="2">
@@ -80,6 +79,7 @@
             <span>{{rightTtile}}</span>
              <el-popconfirm 
               v-if="showRollback"
+              prefix-icon="el-icon-search"
               title="确定回滚当前文件版本？"
               cancel-button-type="default"
               confirm-button-type="danger"
@@ -154,14 +154,6 @@ export default {
       detail: '',
       content: '',
       files: [],
-      historyFiles: [
-        {id:1,name:'fairy-2022/4/21',description:'test file'},
-        {id:2,name:'test-2022/4/21',description:'test file2'},
-        {id:3,name:'test33-2022/4/21',description:'test file3'},
-        {id:4,name:'test33-2022/4/21',description:'test file3'},
-        {id:5,name:'test33-2022/4/21',description:'test file3'},
-        {id:6,name:'test33-2022/4/21',description:'test file3'},
-      ],
       rightTtile: '文件详情',
       dialogWidth: '70%',
       display: false,
@@ -185,6 +177,7 @@ export default {
     }
   },
   mounted() {
+    this.files = [{id:0,name:'暂无'}];
     getallMacIps().then(res => {
       this.ips = [];
       this.ipData = [];
@@ -218,12 +211,22 @@ export default {
       this.$refs.table.handleSearch();
     },
     getRollbackFile(row) {
+      this.files = [{id:0,name:'暂无'}];
       this.row = row;
       this.$refs.table.changeExpandRow(row);
       getFileHistories({uuid: this.searchData.uuid,name:row.name}).then(res=> {
-        if(res.data.code === 200) {
+        if(res.data.code === 200 && res.data.data.oldfiles.length > 0) {
+          this.files = res.data.data.oldfiles && res.data.data.oldfiles;
           this.loading = false;
-          this.files = res.data.data && res.data.data.oldfiles;
+        } else {
+          this.loading = false;
+          this.$refs.table.changeExpandRow(row);
+          const h = this.$createElement;
+          this.$notify({
+            title: '提示:',
+            message: h('i', { style: 'color: #fff'}, row.name + '无历史版本'),
+            showClose: false
+          });
         }
       })
     },
@@ -344,15 +347,12 @@ export default {
   .repoList {
     width: 52%;
     height: 100%;
-    .select {
+    .inline-input {
       height: 6%;
-      margin: 4px;
+      margin: 0 4px;
     }
     .ky-table {
-      height: 90%;
-      .header {
-        height: 6%;
-      }
+      height: 97%;
     }
   }
   .rightInfo {

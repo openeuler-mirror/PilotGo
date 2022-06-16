@@ -196,11 +196,10 @@ export default {
   top: 100%;
   left: 0;
   z-index: 1;
-  height: 62%;
+  height: 70%;
   width: 100%;
   display: flex;
   align-items: center;
-  background: #fff;
   border-bottom: 1px solid #d8dce5;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
   .tags-view-wrapper {
@@ -216,7 +215,6 @@ export default {
       padding: 0 8px;
       font-size: 12px;
       margin-left: 5px;
-      margin-top: 4px;
       &:first-of-type {
         margin-left: 15px;
       }

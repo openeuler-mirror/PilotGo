@@ -32,8 +32,8 @@
             ></el-input>
           </template>
         </el-table-column>
-        <el-table-column  prop="id" label="编号" sortable width="80">
-        </el-table-column>
+        <!-- <el-table-column  prop="id" label="编号" sortable>
+        </el-table-column> -->
         <el-table-column  prop="path" label="路径">
         </el-table-column>
         <el-table-column  prop="name" label="文件名">
@@ -48,7 +48,7 @@
         </el-table-column>
         <el-table-column  prop="description" label="描述">
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>

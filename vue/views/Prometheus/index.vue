@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-06-01 11:49:49
+  LastEditTime: 2022-06-14 16:04:58
  -->
 <template>
   <div class="overview">
@@ -129,13 +129,11 @@ export default {
       }
     };
   },
+  activated() {
+    window.addEventListener("resize", this.resize);
+  },
   mounted() {
-
     this.macIp = this.$store.getters.selectIp && this.$store.getters.selectIp.split(':')[0];
-    this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
-    this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
-    this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
-    this.$refs.memchart.resize({width:this.chartW,height: this.chartH});
     getallMacIps().then(res => {
       this.ips = [];
       this.ipData = [];
@@ -146,6 +144,8 @@ export default {
           })
       }
     })   
+    this.resize();
+    window.addEventListener("resize", this.resize);
   },
   methods: {
     querySearch(queryString, cb) {
@@ -154,6 +154,18 @@ export default {
         return item.value.indexOf(queryString) === 0;
       }): ipData;
       cb(results);
+    },
+    resize() {
+      this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
+      this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
+      this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
+      this.$refs.memchart.resize({width:this.chartW,height: this.chartH});
+      if(this.diskShow) {
+        this.$refs.diskchart.resize({width:this.chartW,height: this.chartH});
+      }
+      if(this.netShow) {
+        this.$refs.netchart.resize({width:this.chartW,height: this.chartH});
+      }
     },
     handleAppend(key) {
       switch (key) {
@@ -236,6 +248,12 @@ export default {
         }
       }
     }
+  },
+  deactivated() {
+    window.removeEventListener('resize', this.resize);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.resize);
   }
 };
 </script>
@@ -268,9 +286,9 @@ export default {
     }
     .charts {
       width: 100%;
-      height: 70%;
+      height: 78%;
       flex-wrap: wrap;
-      // flex-direction: column;
+      border-top: 1px dashed #bbb;
       overflow-y: auto;
       .space {
         margin-bottom: 2%;
