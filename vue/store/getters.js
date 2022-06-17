@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-06-01 11:34:16
+ * @LastEditTime: 2022-06-17 15:49:24
  */
 const getters = {
     token: state => state.user.token,
@@ -24,6 +24,8 @@ const getters = {
     visitedViews: state => state.tagsView.visitedViews,
     cachedViews: state => state.tagsView.cachedViews,
     messageNum: state => state.message.messageNum,
+    agentPath: state => state.config.agentPath,
+    configType: state => state.config.configType,
 }
 
 export default getters

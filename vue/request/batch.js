@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-05-18 15:56:02
+ * @LastEditTime: 2022-06-17 16:25:47
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -27,6 +27,13 @@ export function getBatches(data) {
     url: '/batchmanager/batchinfo',
     method: 'get',
     params: data
+  })
+}
+// 获取批次-不分页
+export function getAllBatches() {
+  return request({
+    url: '/batchmanager/selectbatch',
+    method: 'get',
   })
 }
 // 获取批次详情
