@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-06-14 16:04:58
+  LastEditTime: 2022-06-17 17:34:43
  -->
 <template>
   <div class="overview">
@@ -56,18 +56,18 @@
         </el-form>
       </div>
       <!-- 图表展示区 -->
-      <div class="charts flex">
+      <div class="charts">
         <transition name="fade-transform" mode="out-in">
-          <cpu-chart class="space"  v-show="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
+          <cpu-chart class="space"  v-if="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
         </transition>
         <transition name="fade-transform" mode="out-in">
-          <mem-chart class="space"  v-show="memShow" @close="handleClose"  ref="memchart"></mem-chart>
+          <mem-chart class="space"  v-if="memShow" @close="handleClose"  ref="memchart"></mem-chart>
         </transition>
         <transition name="fade-transform" mode="out-in">
-          <disk-chart class="space"  v-show="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
+          <disk-chart class="space"  v-if="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
         </transition>
         <transition name="fade-transform" mode="out-in">
-          <net-chart class="space"  v-show="netShow" @close="handleClose"  ref="netchart"></net-chart>
+          <net-chart class="space"  v-if="netShow" @close="handleClose"  ref="netchart"></net-chart>
         </transition>
       </div>
     </div>
@@ -144,7 +144,7 @@ export default {
           })
       }
     })   
-    this.resize();
+    // this.resize();
     window.addEventListener("resize", this.resize);
   },
   methods: {
@@ -177,11 +177,9 @@ export default {
           break;
         case 3:
           this.diskShow = true;
-          this.$refs.diskchart.resize({width:this.chartW,height: this.chartH});
           break;
         case 4:
           this.netShow = true;
-          this.$refs.netchart.resize({width:this.chartW,height: this.chartH});
           break;
       
         default:
@@ -266,17 +264,17 @@ export default {
   .content {
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
+    background: url(~@/assets/prometheus/background.png);
+    background-size: cover;
     .flag_header {
       width: 16%;
       height: 8%;
     }
     .choice {
-      width: 92%;
-      margin: 0 auto;
-      height: 20%;
+      width: 100%;
+      height: 22%;
+      padding:0 0 4% 11%;
+      background: rgba(255,255,255,0);
       input {
         cursor: pointer;
       }
@@ -287,11 +285,16 @@ export default {
     .charts {
       width: 100%;
       height: 78%;
+      padding: 10px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: row;
       flex-wrap: wrap;
+      justify-content: space-evenly;
       border-top: 1px dashed #bbb;
-      overflow-y: auto;
+      overflow: auto;
       .space {
-        margin-bottom: 2%;
+       margin-bottom: 2%;
       }
     }
   }

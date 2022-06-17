@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-12 16:12:15
- * @LastEditTime: 2022-06-13 18:16:55
+ * @LastEditTime: 2022-06-17 11:05:05
  */
 import Vue from 'vue'
 import App from './App'
@@ -25,6 +25,8 @@ import './permission';
 import './styles/index.scss'
 import './iconfont/iconfont.js'
 import './iconfont/iconfont.css'
+import VueDraggableResizable from 'vue-draggable-resizable'//引入可拖拽组件
+import 'vue-draggable-resizable/dist/VueDraggableResizable.css'
 // import './mock/index.js' //引入mockjs,上线后注掉
 
 Vue.prototype.$http = axios  
@@ -33,6 +35,7 @@ Vue.prototype.$echarts = echarts
 Vue.use(ElementUI);  
 Vue.use(echarts);
 Vue.use(CodeDiff);
+Vue.component('vue-draggable-resizable', VueDraggableResizable)
 
 Vue.config.productionTip = false
 
