@@ -17,7 +17,6 @@ package model
 import (
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 const (
@@ -61,7 +60,6 @@ func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, 
 	tx = mysqlmanager.DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
 		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
-	logger.Debug("%+v", list)
 	res = make([]Res, 0)
 	for _, value := range *list {
 		if value.Departid == departid {

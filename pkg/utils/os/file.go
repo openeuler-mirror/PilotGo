@@ -20,13 +20,6 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
-const (
-	// repo路径
-	RepoPath = "/etc/yum.repos.d"
-	// 网络配置
-	NetWorkPath = "/etc/sysconfig/network-scripts"
-)
-
 func GetFiles(filePath string) (fs []string, err error) {
 	files, err := ioutil.ReadDir(filePath)
 	if err != nil {

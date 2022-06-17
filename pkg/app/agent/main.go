@@ -30,6 +30,7 @@ import (
 	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
@@ -134,7 +135,7 @@ func FileMonitorInit() error {
 
 	// 2、使用 watcher 的 Add 方法增加需要监听的文件或目录到监听队列中
 	go func() {
-		err = watcher.Add(uos.RepoPath)
+		err = watcher.Add(model.RepoPath)
 		if err != nil {
 			fmt.Println("failed to monitor repo")
 		}
@@ -142,7 +143,7 @@ func FileMonitorInit() error {
 	}()
 
 	go func() {
-		err = watcher.Add(uos.NetWorkPath)
+		err = watcher.Add(model.NetWorkPath)
 		if err != nil {
 			fmt.Println("failed to monitor network")
 		}
@@ -1022,7 +1023,7 @@ func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.GetRepoFile, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 
-		repos, err := uos.GetFiles(uos.RepoPath)
+		repos, err := uos.GetFiles(model.RepoPath)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
@@ -1037,7 +1038,7 @@ func regitsterHandler(c *network.SocketClient) {
 				if ok := strings.Contains(repo, ".repo"); !ok {
 					continue
 				}
-				datas = append(datas, map[string]string{"path": uos.RepoPath, "type": "repo", "name": repo})
+				datas = append(datas, map[string]string{"path": model.RepoPath, "type": "repo", "name": repo})
 			}
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
@@ -1051,7 +1052,7 @@ func regitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.GetNetWorkFile, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 
-		network, err := uos.GetFiles(uos.NetWorkPath)
+		network, err := uos.GetFiles(model.NetWorkPath)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
@@ -1066,7 +1067,7 @@ func regitsterHandler(c *network.SocketClient) {
 				if ok := strings.Contains(n, "ifcfg-e"); !ok {
 					continue
 				}
-				data = map[string]string{"path": uos.NetWorkPath, "type": "network", "name": n}
+				data = map[string]string{"path": model.NetWorkPath, "type": "network", "name": n}
 			}
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
