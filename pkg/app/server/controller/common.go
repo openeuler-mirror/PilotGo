@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -105,17 +104,6 @@ func JsonPagination(c *gin.Context, list interface{}, total int, query *model.Pa
 		"total": total,
 		"page":  query.CurrentPageNum,
 		"size":  query.Size})
-}
-
-// string数组转为int数组
-func String2Int(strArr []string) []int {
-	res := make([]int, len(strArr))
-
-	for index, val := range strArr {
-		res[index], _ = strconv.Atoi(val)
-	}
-
-	return res
 }
 
 // interface to []interface

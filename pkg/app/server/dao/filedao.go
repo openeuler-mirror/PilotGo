@@ -33,11 +33,15 @@ func IsExistFile(filename string) bool {
 	return file.ID != 0
 }
 
-func IsFileLatest(filename, uuid string) (bool, int) {
-	var file model.HistoryFiles
-	fullname := filename + "-latest"
-	mysqlmanager.DB.Where("uuid = ? AND file_name = ?", uuid, fullname).Find(&file)
-	return file.ID != 0, file.ID
+func IsExistFileLatest(fileId int) (bool, int, string) {
+	var files []model.HistoryFiles
+	mysqlmanager.DB.Order("id desc").Where("file_id = ?", fileId).Find(&files)
+	for _, file := range files {
+		if ok := strings.Contains(file.FileName, "latest"); ok {
+			return true, file.ID, file.FileName
+		}
+	}
+	return false, 0, ""
 }
 
 func SaveHistoryFile(id int) {
@@ -55,11 +59,38 @@ func SaveHistoryFile(id int) {
 	mysqlmanager.DB.Save(&lastversion)
 }
 
+func SaveLatestFile(id int) {
+	var file model.Files
+	mysqlmanager.DB.Where("id = ?", id).Find(&file)
+
+	lastversion := model.HistoryFiles{
+		FileID:      id,
+		UserUpdate:  file.UserUpdate,
+		UserDept:    file.UserDept,
+		FileName:    file.FileName + "-latest",
+		Description: file.Description,
+		File:        file.File,
+	}
+	mysqlmanager.DB.Save(&lastversion)
+}
+
 func UpdateFile(id int, f model.Files) {
 	var file model.Files
 	mysqlmanager.DB.Model(&file).Where("id = ?", id).Update(&f)
 }
 
+func UpdateLastFile(id int, f model.HistoryFiles) {
+	var file model.HistoryFiles
+	mysqlmanager.DB.Model(&file).Where("id = ?", id).Update(&f)
+}
+
+func RollBackFile(id int, text string) {
+	var file model.Files
+	fd := model.Files{
+		File: text,
+	}
+	mysqlmanager.DB.Model(&file).Where("id = ?", id).Update(&fd)
+}
 func DeleteFile(id int) {
 	var file model.Files
 	mysqlmanager.DB.Where("id = ?", id).Unscoped().Delete(file)
@@ -74,12 +105,12 @@ func SaveFile(file model.Files) {
 	mysqlmanager.DB.Save(&file)
 }
 
-func FileView(id int) (text string) {
+func FileText(id int) (text string) {
 	file := model.Files{}
 	mysqlmanager.DB.Where("id = ?", id).Find(&file)
 	return file.File
 }
-func LastFileView(id int) (text string) {
+func LastFileText(id int) (text string) {
 	file := model.HistoryFiles{}
 	mysqlmanager.DB.Where("id = ?", id).Find(&file)
 	return file.File

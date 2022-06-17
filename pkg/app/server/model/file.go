@@ -21,8 +21,17 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
+// 配置文件类型
 const (
 	ConfigRepo = "repo配置"
+)
+
+// 配置文件源路径
+const (
+	// repo路径
+	RepoPath = "/etc/yum.repos.d"
+	// 网络配置
+	NetWorkPath = "/etc/sysconfig/network-scripts"
 )
 
 type Files struct {
@@ -48,6 +57,13 @@ type HistoryFiles struct {
 	File        string `gorm:"type:text" json:"file"`
 }
 
+type RollBackFiles struct {
+	HistoryFileID int    `json:"id"`
+	FileID        int    `json:"filePId"`
+	UserUpdate    string `json:"user"`
+	UserDept      string `json:"userDept"`
+}
+
 type DeleteFiles struct {
 	FileIDs []int `json:"ids"`
 }
@@ -57,12 +73,12 @@ type SearchFile struct {
 }
 
 type FileBroadcast struct {
-	UUID     []string `json:"uuids"`
-	Path     string   `json:"path"`
-	FileName string   `json:"name"`
-	User     string   `json:"user"`
-	UserDept string   `json:"userDept"`
-	Text     string   `json:"file"`
+	BatchId  []int  `json:"batches"`
+	Path     string `json:"path"`
+	FileName string `json:"name"`
+	User     string `json:"user"`
+	UserDept string `json:"userDept"`
+	Text     string `json:"file"`
 }
 
 func (f *Files) AllFiles(q *PaginationQ) (list *[]Files, tx *gorm.DB) {
@@ -73,15 +89,15 @@ func (f *Files) AllFiles(q *PaginationQ) (list *[]Files, tx *gorm.DB) {
 
 func (f *SearchFile) FileSearch(q *PaginationQ, search string) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = mysqlmanager.DB.Order("updated_at desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
+	tx = mysqlmanager.DB.Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
 	if len(*list) == 0 {
-		tx = mysqlmanager.DB.Order("updated_at desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
+		tx = mysqlmanager.DB.Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
 	}
 	return
 }
 
 func (f *HistoryFiles) HistoryFiles(q *PaginationQ, fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
 	list = &[]HistoryFiles{}
-	tx = mysqlmanager.DB.Order("updated_at desc").Where("file_id=?", fileId).Find(&list)
+	tx = mysqlmanager.DB.Order("id desc").Where("file_id=?", fileId).Find(&list)
 	return
 }

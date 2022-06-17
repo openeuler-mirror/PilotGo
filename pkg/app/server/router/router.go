@@ -140,14 +140,13 @@ func SetupRouter() *gin.Engine {
 	{
 		configmanager.GET("/files", agentcontroller.GetAgentFiles)
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
-		configmanager.POST("/file_edit", agentcontroller.UpdateAgentFile)
 		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabase)
 		configmanager.GET("/file_all", controller.AllFiles)
 		configmanager.POST("/file_search", controller.FileSearch)
 		configmanager.POST("/file_update", controller.UpdateFile)
 		configmanager.POST("/file_delete", controller.DeleteFile)
 		configmanager.GET("/lastfile_all", controller.HistoryFiles)
-		// configmanager.POST("/lastfile_rollback", controller.LastFileRollBack)
+		configmanager.POST("/lastfile_rollback", controller.LastFileRollBack)
 		configmanager.POST("/file_broadcast", agentcontroller.FileBroadcastToAgents)
 	}
 
@@ -198,6 +197,7 @@ func SetupRouter() *gin.Engine {
 	router.GET("/macList/machinealldata", controller.MachineAllData)
 	router.GET("/macList/departinfo", controller.DepartInfo)
 	router.GET("/macList/depart", controller.Dept)
+	router.GET("/batchmanager/selectbatch", controller.SelectBatch)
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 
 	return router
