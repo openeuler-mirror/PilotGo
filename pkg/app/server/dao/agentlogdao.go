@@ -40,6 +40,13 @@ func AgentLog(Log model.AgentLog) {
 	mysqlmanager.DB.Save(&Log)
 }
 
+// 查询子日志
+func Id2AgentLog(id int) []model.AgentLog {
+	var Log []model.AgentLog
+	mysqlmanager.DB.Where("log_parent_id = ?", id).Find(&Log)
+	return Log
+}
+
 // 修改父日志的操作状态
 func UpdateParentAgentLog(PLogId int, status string) {
 	var ParentLog model.AgentLogParent

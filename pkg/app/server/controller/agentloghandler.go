@@ -15,6 +15,7 @@
 package controller
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -50,12 +51,6 @@ func LogAll(c *gin.Context) {
 
 // 查询所有子日志
 func AgentLogs(c *gin.Context) {
-	query := &model.PaginationQ{}
-	err := c.ShouldBindQuery(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
 
 	ParentId := c.Query("id")
 	parentId, err := strconv.Atoi(ParentId)
@@ -64,16 +59,9 @@ func AgentLogs(c *gin.Context) {
 		return
 	}
 
-	logs := model.AgentLog{}
-	list, tx := logs.AgentLog(query, parentId)
+	agentlog := dao.Id2AgentLog(parentId)
 
-	total, err := CrudAll(query, tx, list)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	// 返回数据开始拼装分页的json
-	JsonPagination(c, list, total, query)
+	response.JSON(c, http.StatusOK, http.StatusOK, agentlog, "子日志查询成功!")
 }
 
 // 删除机器日志
