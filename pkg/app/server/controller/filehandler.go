@@ -17,6 +17,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
@@ -100,6 +101,13 @@ func UpdateFile(c *gin.Context) {
 		response.Fail(c, nil, "id有误,请重新确认该文件是否存在")
 		return
 	}
+	if ok, lastfileId, fileName := dao.IsExistFileLatest(id); ok {
+		fname := strings.Split(fileName, "-")
+		f := model.HistoryFiles{
+			FileName: fname[0],
+		}
+		dao.UpdateLastFile(lastfileId, f)
+	}
 	f := model.Files{
 		Type:            file.Type,
 		FileName:        filename,
@@ -130,16 +138,22 @@ func AllFiles(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
+
 	var filetype []string
 	filetype = append(filetype, model.ConfigRepo)
+
+	var BroadcastPath []string
+	BroadcastPath = append(BroadcastPath, model.RepoPath, model.NetWorkPath)
+
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"code":  http.StatusOK,
-		"ok":    true,
-		"data":  list,
-		"total": total,
-		"page":  query.CurrentPageNum,
-		"size":  query.Size,
-		"type":  filetype})
+		"code":      http.StatusOK,
+		"ok":        true,
+		"data":      list,
+		"total":     total,
+		"page":      query.CurrentPageNum,
+		"size":      query.Size,
+		"type":      filetype,
+		"agentPath": BroadcastPath})
 }
 
 func FileSearch(c *gin.Context) {
@@ -188,4 +202,28 @@ func HistoryFiles(c *gin.Context) {
 		return
 	}
 	JsonPagination(c, list, total, query)
+}
+
+func LastFileRollBack(c *gin.Context) {
+	var file model.RollBackFiles
+	c.Bind(&file)
+
+	lastfileId := file.HistoryFileID
+	fileId := file.FileID
+	user := file.UserUpdate
+	userDept := file.UserDept
+
+	lastfileText := dao.LastFileText(lastfileId)
+
+	if ok, _, _ := dao.IsExistFileLatest(fileId); !ok {
+		dao.SaveLatestFile(fileId)
+	}
+
+	fd := model.Files{
+		UserUpdate: user,
+		UserDept:   userDept,
+		File:       lastfileText,
+	}
+	dao.UpdateFile(fileId, fd)
+	response.JSON(c, http.StatusOK, http.StatusOK, nil, "已回退到历史版本")
 }

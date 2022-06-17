@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -179,7 +180,7 @@ func BatchMachineInfo(c *gin.Context) {
 	}
 
 	machinelist := dao.GetMachineID(batchid)
-	machineIdlist := String2Int(machinelist) // 获取批次里所有机器的id
+	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
 
 	// 获取机器的所有信息
 	MachinesInfo := make([]model.MachineNode, 0)
@@ -194,4 +195,13 @@ func BatchMachineInfo(c *gin.Context) {
 		return
 	}
 	JsonPagination(c, data, len(MachinesInfo), query)
+}
+
+func SelectBatch(c *gin.Context) {
+	batch := dao.GetBatch()
+	if len(batch) == 0 {
+		response.Fail(c, nil, "未获取到批次信息")
+	}
+	response.Success(c, gin.H{"data": batch}, "批次信息获取成功")
+
 }
