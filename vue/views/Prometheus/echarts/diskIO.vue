@@ -9,13 +9,27 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-06-14 15:41:23
+  LastEditTime: 2022-06-17 15:31:55
  -->
 <template>
-  <div class="panel">
-    <span @click="handleClose" class="closeChart">✕</span>
-    <div id="io"></div>
-  </div>
+  <vue-draggable-resizable
+    :w="width"
+    :h="height"
+    :x="x"
+    :y="y"
+    :min-width="400"
+    :min-height="200"
+    :parent="false"
+    :grid="[10,10]"
+    class-name="dragging1"
+    @dragging="onDrag"
+    @resizing="onResize"
+  >
+    <div class="panel">
+      <span @click="handleClose" class="closeChart">✕</span>
+      <div id="io"></div>
+    </div>
+  </vue-draggable-resizable>
 </template>
 <script>
 import { getData } from "@/request/overview";
@@ -23,7 +37,10 @@ import { formatDate } from '@/utils/dateFormat';
 export default {
   data() {
     return {
-      macIp: '',
+      x: 0,
+      y: 0,
+      width: 700,
+      height: 400,
       diskChart: {},
       inData: [],
       outData: [],
@@ -31,7 +48,11 @@ export default {
     }
   },
   mounted() {
-    this.macIp = this.$store.getters.selectIp || 'localhost:9090';
+    this.$nextTick(() => {
+      let width = document.getElementsByClassName('charts')[0].clientWidth/2.1;
+      let height = document.getElementsByClassName('charts')[0].clientHeight/1.6;
+      this.resize({width: width,height:height})
+    })
     this.diskChart = this.$echarts.init(document.getElementById('io'))
     if(this.$store.getters.selectIp){
       this.getStepData('write',this.inData,'irate(node_disk_writes_completed_total[1m])',{starttime: parseInt(this.now - 60*60*6) + '',
@@ -100,7 +121,18 @@ export default {
     },
   },
   methods: {
+    onResize(x, y, width, height) {
+      this.x = x;
+      this.y = y;
+      this.resize({width: width,height:height})
+    },
+    onDrag(x, y) {
+      this.x = x;
+      this.y = y;
+    },
     resize(params) {
+      this.width = params.width;
+      this.height = params.height;
       this.diskChart.resize(params)
       this.diskChart.setOption(this.option,true)
     },
@@ -166,7 +198,9 @@ export default {
   },
   watch: {
     inData: function() {
-      this.diskChart.setOption(this.option,true)
+      this.$nextTick(() => {
+        this.diskChart.setOption(this.option,true)
+      })
     }
   }
 }
@@ -174,6 +208,8 @@ export default {
 <style scoped lang="scss">
   .panel {
     position: relative;
+    background: transparent;
+    height: 100%;
     .closeChart {
       display: inline-block;
       width: 4px;
@@ -183,6 +219,10 @@ export default {
       right: 4%;
       z-index: 1;
       cursor: pointer;
+    }
+    #io {
+      width: 100%;
+      height: 100%;
     }
     .closeChart:hover {
       color: rgb(0, 163, 217)
