@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-17 16:05:10
+  LastEditTime: 2022-06-20 10:48:51
  -->
 <template>
   <div>
@@ -26,15 +26,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="路径:" prop="path">
-        <el-select class="select" v-model="form.path" placeholder="请选择路径">
-          <el-option
-            v-for="item in paths"
-            :key="item.$index"
-            :label="item"
-            :value="item"
-          >
-          </el-option>
-        </el-select>
+        <el-input
+          controls-position="right"
+          v-model="form.path"
+          autocomplete="off"
+          disabled
+        ></el-input>
       </el-form-item>
       <el-form-item label="文件名:" prop="name">
         <el-input
@@ -97,7 +94,7 @@ export default {
         path: [
           { 
             required: true, 
-            message: "请选择一个路径",
+            message: "请输入下发路径",
             trigger: "blur" 
           }],
         name: [{ 
@@ -123,8 +120,8 @@ export default {
       this.form.name = this.row.name;
       this.form.description = this.row.description;
       this.form.file = this.row.file;
+      this.form.path = this.row.path;
     }
-    this.paths = this.$store.getters.agentPath;
     getAllBatches().then(res => {
       this.batches = [];
       if(res.data.code === 200) {

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-16 14:30:32
+  LastEditTime: 2022-06-20 11:03:53
  -->
 <template>
   <div>
@@ -25,6 +25,20 @@
         <el-input
           controls-position="right"
           v-model="form.type"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="文件路径:" prop="path">
+        <el-input
+          controls-position="right"
+          v-model="form.path"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="生效方式:" prop="activeMode">
+        <el-input
+          controls-position="right"
+          v-model="form.activeMode"
           autocomplete="off"
         ></el-input>
       </el-form-item>
@@ -70,6 +84,7 @@ export default {
         path: '',
         name: '',
         type: '',
+        activeMode: '',
         description: '',
         file: ''
       },
@@ -82,6 +97,11 @@ export default {
         type: [{ 
             required: true, 
             message: "请输入文件类型",
+            trigger: "blur" 
+          }],
+        path: [{ 
+            required: true, 
+            message: "请输入文件路径",
             trigger: "blur" 
           }],
         description: [{ 
@@ -99,7 +119,9 @@ export default {
   },
   mounted() {
     this.form.name = this.row.name;
+    this.form.path = this.row.path;
     this.form.type = this.row.type;
+    this.form.activeMode = this.row.activeMode || '无';
     this.form.description = this.row.description;
     this.form.file = this.row.file;
     this.id = this.row.id;

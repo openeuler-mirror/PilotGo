@@ -15,29 +15,22 @@
       </template>
       <template v-slot:table_action>
         <auth-button name="user_del" @click="handleCreate"> 新增 </auth-button>
-        <el-popconfirm 
-          title="确定删除此文件？"
-          cancel-button-type="default"
-          confirm-button-type="danger"
-          @confirm="handleDelete">
-          <auth-button name="user_del" slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
-        </el-popconfirm>
+        <auth-button name="user_del" slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" @click="handleConfirm"> 删除 </auth-button>
       </template>
       <template v-slot:table>
-        <el-table-column type="expand">
-          <template slot-scope="props">
-            <el-input
-              type="textarea"
-              v-model="props.row.file"
-            ></el-input>
-          </template>
-        </el-table-column>
         <el-table-column  prop="name" label="名称">
           <template slot-scope="scope">
             <span title="详情" class="repoDetail" @click="handleDetail(scope.row)">{{scope.row.name}}</span>
           </template>
         </el-table-column>
+        <el-table-column  prop="path" label="路径">
+        </el-table-column>
         <el-table-column  prop="type" label="类型">
+        </el-table-column>
+        <el-table-column prop="active" label="生效方式">
+          <template slot-scope="scope">
+            <span>{{scope.row.active || '无'}}</span>
+          </template>
         </el-table-column>
         <el-table-column prop="UpdatedAt" label="更新时间" sortable>
           <template slot-scope="scope">
@@ -53,6 +46,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
+            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</auth-button>
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleHistory(scope.row)">历史版本</auth-button>
             <auth-button name="user_edit" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
@@ -67,6 +61,7 @@
       :visible.sync="display" 
       :width="dialogWidth"
     >
+      <detail-form :row="rowData" v-if="type === 'detail'"  @click="handleClose"></detail-form>
       <download-form  v-if="type === 'download'"  @click="handleClose"></download-form>
       <install-form :row="rowData" v-if="type === 'install'"  @click="handleClose"></install-form>
       <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
@@ -77,6 +72,7 @@
 </template>
 
 <script>
+import DetailForm from "./form/detailForm.vue"
 import UpdateForm from "./form/updateForm.vue"
 import DownloadForm from "./form/downloadForm.vue"; //新增
 import InstallForm from "./form/installForm.vue";
@@ -91,6 +87,7 @@ export default {
     DownloadForm,
     InstallForm,
     HistoryFile,
+    DetailForm,
     AuthButton,
   },
   data() {
@@ -126,6 +123,12 @@ export default {
         }
       })
     },
+    handleOpen(row) {
+      this.rowData = row;
+      this.display = true;
+      this.title = "文件内容";
+      this.type = "detail";
+    },
     handleCreate() {
       this.display = true;
       this.title = '新增配置文件';
@@ -149,6 +152,20 @@ export default {
       this.display = true;
       this.title = "文件下发";
       this.type = "install";
+    },
+    handleConfirm() {
+     this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.handleDelete();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
     },
     handleDelete() {
       delLibFile({ids: this.$refs.table.selectRow.ids}).then(res => {
