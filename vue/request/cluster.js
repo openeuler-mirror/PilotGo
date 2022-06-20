@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-06-08 17:35:58
+ * @LastEditTime: 2022-06-20 16:18:17
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -120,6 +120,15 @@ export function getallMacIps() {
 export function getMacIps(data) {
   return request({
     url: 'macList/selectmachine',
+    method: 'get',
+    params: data
+  })
+}
+
+// repo源
+export function repoAll(data) {
+  return request({
+    url: 'api/repos',
     method: 'get',
     params: data
   })

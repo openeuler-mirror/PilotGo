@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-28 14:22:36
-  LastEditTime: 2022-03-25 16:15:52
+  LastEditTime: 2022-06-17 17:42:52
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -24,8 +24,7 @@
       <small-table
         class="tab"
         ref="stable"
-        :data="result"
-        :height='theight'>
+        :data="result">
         <template v-slot:content>
         <el-table-column prop="ip" label="ip"></el-table-column>
         <el-table-column label="状态">
@@ -59,7 +58,6 @@ export default {
     return {
       result: [],
       type: '',
-      theight: 260,
       statusType: '',
       percent: '0/0',
       status: ''
@@ -86,13 +84,14 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: flex-start;
   .basic{
     width: 100%;
     text-align: center;
   }
   .tab {
     width: 100%;
+    height: 90%;
   }
 }
 </style>

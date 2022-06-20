@@ -9,13 +9,24 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-05-20 11:06:36
+  LastEditTime: 2022-06-20 16:41:10
  -->
 <template>
  <div class="content">
+   <div class="repo">
+     <small-table
+        class="tab"
+        ref="stable"
+        :data="totalRepo">
+        <template v-slot:content>
+        <el-table-column prop="name" label="repo名称"></el-table-column>
+        <el-table-column prop="baseurl" label="repo地址"></el-table-column>
+        </template>
+      </small-table>
+   </div>
    <div class="packages">
       <el-autocomplete
-        style="width:50%"
+        style="width:86%"
         class="inline-input"
         v-model="packageName"
         :fetch-suggestions="querySearch"
@@ -55,9 +66,13 @@
  </div>
 </template>
 <script>
-import { rpmAll, getDetail, rpmIssue, rpmUnInstall } from '@/request/cluster'
+import { rpmAll, getDetail, rpmIssue, rpmUnInstall, repoAll } from '@/request/cluster'
+import SmallTable from "@/components/SmallTable";
 export default {
   name: "RpmInfo",
+  components: {
+    SmallTable,
+  },
   data() {
     return {
       totalPackages: 0,
@@ -65,6 +80,7 @@ export default {
       packageName: '',
       result: '',
       action: '暂无',
+      totalRepo: [],
       rpmData: [],
       rpmInfo: {
         Architecture: "",
@@ -89,6 +105,13 @@ export default {
           console.log(res.data.msg)
         }
       })
+      repoAll(obj).then(res => {
+        if(res.data.code === 200) {
+          this.totalRepo = res.data.data && res.data.data;
+        } else {
+          console.log(res.data.msg)
+        }
+      })
     }
   },
   methods: {
@@ -109,6 +132,9 @@ export default {
           this.$message.error((res.data.data && res.data.data.error) || res.data.msg)
         }
       })
+    },
+    handleRepoChange(repo) {
+      console.log(repo)
     },
     handleResult(res) {
       this.result = res.data.code === 200 ? '成功' : '失败'
@@ -156,14 +182,20 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-evenly;
+  .repo {
+    width: 98%;
+    height: 30%;
+  }
   .packages {
     width: 98%;
-    height: 16%;
+    height: 6%;
+    display: flex;
+    align-items: center;
   }
   .info {
     width: 98%;
-    height: 80%;
+    height: 50%;
     overflow: hidden;
     .detail {
       width: 100%;

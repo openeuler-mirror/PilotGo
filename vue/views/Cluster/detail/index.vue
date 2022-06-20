@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:22
-  LastEditTime: 2022-06-10 10:19:39
+  LastEditTime: 2022-06-20 14:26:04
  -->
 <template>
  <div class="content">
@@ -27,7 +27,7 @@
       <service-info></service-info>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label"> 网络信息</span>
+      <span slot="label"> 网络配置</span>
       <network-info></network-info>
     </el-tab-pane>
     <el-tab-pane>
