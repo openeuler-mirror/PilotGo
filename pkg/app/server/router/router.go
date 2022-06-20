@@ -31,7 +31,7 @@ import (
 func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(logger.LoggerToFile())
+	router.Use(logger.LoggerDebug())
 	router.Use(gin.Recovery())
 
 	// TODO: 此处绑定 http api handler
@@ -77,10 +77,7 @@ func SetupRouter() *gin.Engine {
 		macDetails.GET("/user_all", agentcontroller.AllUserInfoHandler)
 		macDetails.GET("/os_basic", agentcontroller.OsBasic)
 		macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
-		macDetails.GET("/firewall_restart", agentcontroller.FirewalldRestart)
-		macDetails.GET("/firewall_stop", agentcontroller.FirewalldStop)
-		macDetails.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
-		macDetails.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
+		macDetails.GET("/repos", agentcontroller.GetAgentRepo)
 	}
 
 	macBasicModify := router.Group("cluster/macList/agent")
@@ -104,6 +101,10 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.POST("/cron_update", agentcontroller.UpdateCron)
 		macBasicModify.POST("/cron_status", agentcontroller.CronTaskStatus)
 		macBasicModify.GET("/cron_list", agentcontroller.CronTaskList)
+		macBasicModify.GET("/firewall_restart", agentcontroller.FirewalldRestart)
+		macBasicModify.GET("/firewall_stop", agentcontroller.FirewalldStop)
+		macBasicModify.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
+		macBasicModify.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
 	}
 
 	monitor := router.Group("prometheus")
@@ -138,7 +139,6 @@ func SetupRouter() *gin.Engine {
 
 	configmanager := router.Group("config")
 	{
-		configmanager.GET("/files", agentcontroller.GetAgentFiles)
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
 		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabase)
 		configmanager.GET("/file_all", controller.AllFiles)

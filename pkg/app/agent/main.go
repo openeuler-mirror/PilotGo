@@ -1020,10 +1020,11 @@ func regitsterHandler(c *network.SocketClient) {
 			return c.Send(resp_msg)
 		}
 	})
-	c.BindHandler(protocol.GetRepoFile, func(c *network.SocketClient, msg *protocol.Message) error {
+	c.BindHandler(protocol.GetRepoSource, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 
-		repos, err := uos.GetFiles(model.RepoPath)
+		repo, err := uos.GetRepoSource()
+
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
@@ -1033,18 +1034,11 @@ func regitsterHandler(c *network.SocketClient) {
 			}
 			return c.Send(resp_msg)
 		} else {
-			datas := make([]map[string]string, 0)
-			for _, repo := range repos {
-				if ok := strings.Contains(repo, ".repo"); !ok {
-					continue
-				}
-				datas = append(datas, map[string]string{"path": model.RepoPath, "type": "repo", "name": repo})
-			}
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: 0,
-				Data:   datas,
+				Data:   repo,
 			}
 			return c.Send(resp_msg)
 		}

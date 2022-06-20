@@ -37,12 +37,14 @@ const (
 type Files struct {
 	ID              int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	FileName        string `json:"name"`
+	FilePath        string `json:"path"`
 	Type            string `json:"type"`
 	Description     string `json:"description"`
 	UserUpdate      string `json:"user"`
 	UserDept        string `json:"userDept"`
 	UpdatedAt       time.Time
 	ControlledBatch string `json:"batchId"`
+	TakeEffect      string `json:"activeMode"`
 	File            string `gorm:"type:text" json:"file"`
 }
 

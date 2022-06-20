@@ -34,6 +34,13 @@ func SaveFileToDatabase(c *gin.Context) {
 		response.Fail(c, nil, "请输入配置文件名字")
 		return
 	}
+
+	filepath := file.FilePath
+	if len(filepath) == 0 {
+		response.Fail(c, nil, "请输入下发文件路径")
+		return
+	}
+
 	if !dao.IsExistFile(filename) {
 		response.Fail(c, nil, "文件名字已存在，请重新输入")
 		return
@@ -63,9 +70,11 @@ func SaveFileToDatabase(c *gin.Context) {
 		UserUpdate:      file.UserUpdate,
 		UserDept:        file.UserDept,
 		FileName:        filename,
+		FilePath:        filepath,
 		Type:            filetype,
 		Description:     description,
 		ControlledBatch: batchId,
+		TakeEffect:      file.TakeEffect,
 		File:            text,
 	}
 	dao.SaveFile(fd)
@@ -111,10 +120,12 @@ func UpdateFile(c *gin.Context) {
 	f := model.Files{
 		Type:            file.Type,
 		FileName:        filename,
+		FilePath:        file.FilePath,
 		Description:     description,
 		UserUpdate:      user,
 		UserDept:        userDept,
 		ControlledBatch: batchId,
+		TakeEffect:      file.TakeEffect,
 		File:            text,
 	}
 	dao.UpdateFile(id, f)
@@ -142,18 +153,14 @@ func AllFiles(c *gin.Context) {
 	var filetype []string
 	filetype = append(filetype, model.ConfigRepo)
 
-	var BroadcastPath []string
-	BroadcastPath = append(BroadcastPath, model.RepoPath, model.NetWorkPath)
-
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"code":      http.StatusOK,
-		"ok":        true,
-		"data":      list,
-		"total":     total,
-		"page":      query.CurrentPageNum,
-		"size":      query.Size,
-		"type":      filetype,
-		"agentPath": BroadcastPath})
+		"code":  http.StatusOK,
+		"ok":    true,
+		"data":  list,
+		"total": total,
+		"page":  query.CurrentPageNum,
+		"size":  query.Size,
+		"type":  filetype})
 }
 
 func FileSearch(c *gin.Context) {

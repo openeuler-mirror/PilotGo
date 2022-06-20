@@ -21,7 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
@@ -45,13 +44,7 @@ func ReadFile(c *gin.Context) {
 	response.Success(c, gin.H{"file": result}, "Success")
 }
 
-func GetAgentFiles(c *gin.Context) {
-	query := &model.PaginationQ{}
-	err := c.ShouldBindQuery(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
+func GetAgentRepo(c *gin.Context) {
 
 	uuid := c.Query("uuid")
 	agent := agentmanager.GetAgent(uuid)
@@ -60,30 +53,12 @@ func GetAgentFiles(c *gin.Context) {
 		return
 	}
 
-	var datas []interface{}
-	// 获取repo文件
-	repos, Err, err := agent.GetRepoFile()
-	if err != nil {
+	repos, Err, err := agent.GetRepoSource()
+	if len(Err) != 0 || err != nil {
 		response.Fail(c, nil, Err)
 		return
 	}
-	repo := controller.InterfaceToSlice(repos)
-	datas = append(datas, repo...)
-
-	// 获取网络配置文件
-	network, Err, err := agent.GetNetWorkFile()
-	if err != nil {
-		response.Fail(c, nil, Err)
-		return
-	}
-	datas = append(datas, network)
-
-	data, err := controller.DataPaging(query, datas, len(datas))
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	controller.JsonPagination(c, data, len(datas), query)
+	response.JSON(c, http.StatusOK, http.StatusOK, repos, "获取到repo源")
 }
 
 func FileBroadcastToAgents(c *gin.Context) {
