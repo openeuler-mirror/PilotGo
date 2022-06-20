@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-16 14:47:27
+  LastEditTime: 2022-06-17 16:05:10
  -->
 <template>
   <div>
@@ -26,12 +26,15 @@
         </el-select>
       </el-form-item>
       <el-form-item label="路径:" prop="path">
-        <el-input
-          type="text"
-          size="medium"
-          v-model="form.path"
-          autocomplete="off"
-        ></el-input>
+        <el-select class="select" v-model="form.path" placeholder="请选择路径">
+          <el-option
+            v-for="item in paths"
+            :key="item.$index"
+            :label="item"
+            :value="item"
+          >
+          </el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="文件名:" prop="name">
         <el-input
@@ -64,7 +67,7 @@
 </template>
 
 <script>
-import { getBatches } from "@/request/batch";
+import { getAllBatches } from "@/request/batch";
 import { installFile } from "@/request/config"
 export default {
   props: {
@@ -76,6 +79,7 @@ export default {
   data() {
     return {
       batches: [],
+      paths: [],
       form: {
         batches: [],
         path: '',
@@ -93,7 +97,7 @@ export default {
         path: [
           { 
             required: true, 
-            message: "请输入路径",
+            message: "请选择一个路径",
             trigger: "blur" 
           }],
         name: [{ 
@@ -115,14 +119,16 @@ export default {
     };
   },
   mounted() {
-    this.form.name = this.row.name;
-    this.form.path = this.row.path;
-    this.form.description = this.row.description;
-    this.form.file = this.row.file;
-    getBatches().then(res => {
+    if(this.row) {
+      this.form.name = this.row.name;
+      this.form.description = this.row.description;
+      this.form.file = this.row.file;
+    }
+    this.paths = this.$store.getters.agentPath;
+    getAllBatches().then(res => {
       this.batches = [];
       if(res.data.code === 200) {
-        this.batches = res.data.data && res.data.data;
+        this.batches = res.data.data && res.data.data.data;
       }
     })
   },

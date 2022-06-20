@@ -116,11 +116,7 @@
   text-overflow: unset;
 }
 
-.scroll-container {
-  .el-scrollbar__wrap {
-    scrollbar-width: none;
-  }
-}
+
 
 // 进度条
 .el-progress-bar__innerText {
@@ -132,11 +128,16 @@
 
 // 滚动条
 .el-scrollbar__wrap {
-  display: flex;
+ /*  display: flex;
   align-items: center;
   overflow: hidden;
   height: 100%;
-  margin: 0 !important;
+  margin: 0 !important; */
+}
+.scroll-container {
+  .el-scrollbar__wrap {
+    scrollbar-width: none;
+  }
 }
 
 //

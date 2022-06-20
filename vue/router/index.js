@@ -57,7 +57,7 @@ export const routes = [
               breadcrumb: [
                 { name: '系统', path: '/cluster', children: [
                   {name:'createBatch',menuName:'创建批次'},
-                  {name:'prometheus',menuName:'性能监控'},
+                  {name:'Prometheus',menuName:'性能监控'},
                 ]},
                 { name: '机器列表' },
               ],
@@ -94,7 +94,7 @@ export const routes = [
               breadcrumb: [
                   { name: '系统', path: '/cluster', children:[
                     {name:'macList',menuName:'机器列表'},
-                    {name:'prometheus',menuName:'性能监控'},
+                    {name:'Prometheus',menuName:'性能监控'},
                   ]},
                   { name: '创建批次'}
               ],

@@ -104,6 +104,9 @@ export default {
       tableData: []
     }
   },
+  mounted() {
+    this.$store.dispatch('getLibFileInfo', {page:1,size:10});
+  },
   methods: {
     libFileList,
     handleClose(type) {
@@ -111,9 +114,7 @@ export default {
       this.title = "";
       this.type = "";
       this.dialogWidth="70%";
-      if(type === 'success') {
-        this.refresh();
-      }
+      this.refresh();
     }, 
     refresh(){
       this.$refs.table.handleSearch();
