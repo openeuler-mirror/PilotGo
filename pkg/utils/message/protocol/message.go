@@ -112,8 +112,8 @@ const (
 	CronStart = 50
 	// 暂停定时任务
 	CronStopAndDel = 51
-	// 获取repo配置文件
-	GetRepoFile = 52
+	// 获取repo源
+	GetRepoSource = 52
 	// 读取配置文件内容
 	ReadFile = 53
 	// 编辑配置文件

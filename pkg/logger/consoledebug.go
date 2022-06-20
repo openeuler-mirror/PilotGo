@@ -21,7 +21,7 @@ import (
 )
 
 // 用户操作请求打印到终端
-func LoggerToFile() gin.HandlerFunc {
+func LoggerDebug() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 开始时间
 		startTime := time.Now()

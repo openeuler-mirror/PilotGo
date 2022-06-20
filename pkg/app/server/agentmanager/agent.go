@@ -850,10 +850,10 @@ func (a *Agent) CronStopAndDel(id int) (interface{}, error) {
 }
 
 // 远程获取agent端的repo文件
-func (a *Agent) GetRepoFile() (interface{}, string, error) {
+func (a *Agent) GetRepoSource() (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
-		Type: protocol.GetRepoFile,
+		Type: protocol.GetRepoSource,
 		Data: struct{}{},
 	}
 
