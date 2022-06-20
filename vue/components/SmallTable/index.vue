@@ -9,17 +9,16 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-04-11 19:36:30
+  LastEditTime: 2022-06-17 17:43:04
   Description: provide agent log manager of pilotgo
  -->
 <template>
-  <div>
+  <div class="smallTable">
     <el-table
-    class="panel"
+    class="panel table"
       :header-cell-style="hStyle"
       :cell-style="bstyle"
       :data="data"
-      :height="height"
       border
       style="width: 100%; padding:0px">
       <slot name="content"></slot>
@@ -34,11 +33,11 @@ export default {
       type: Array
     },
     height: {
-      type: Number,
+      type: Number || String,
       default: function() {
-        return 900;
+        return null;
       }
-    }
+    },
   },
   data() {
     return {
@@ -53,13 +52,22 @@ export default {
          textAlign:'center',
       },
     }
-  }
+  },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
 .el-table td.el-table__cell, 
 .el-table th.el-table__cell.is-leaf {
   border-bottom: 0px;
   text-align: center;
+}
+.smallTable {
+  width: 100%;
+  height: 100%;
+  .table {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+  }
 }
 </style>
