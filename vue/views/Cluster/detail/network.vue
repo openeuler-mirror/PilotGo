@@ -9,64 +9,66 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:07:46
-  LastEditTime: 2022-04-13 14:29:59
+  LastEditTime: 2022-06-20 16:45:39
  -->
 <template>
- <div>
-   <el-table
-    :data="tableData"
-    :header-cell-style="hStyle"
-    style="width: 100%">
-    <el-table-column type="expand">
-        <template slot-scope="props">
-          <el-table :data="props.row.nic" :header-cell-style="childHstyle">
-            <el-table-column label="IP地址" prop="IPAddr"></el-table-column>
-            <el-table-column label="Mac地址" prop="MacAddr"></el-table-column>
-          </el-table>  
-        </template>
-    </el-table-column>
-    <el-table-column
-      style="background:rgb(109, 123, 172);"
-      label="网卡名称"
-      prop="Name">
-    </el-table-column>
-    <el-table-column
-      label="接收字节"
-      prop="BytesRecv">
-    </el-table-column>
-    <el-table-column
-      label="发送字节"
-      prop="BytesSent">
-    </el-table-column>
-    <el-table-column
-      label="接收包"
-      prop="PacketsRecv">
-    </el-table-column>
-    <el-table-column
-      label="发送包"
-      prop="PacketsSent">
-    </el-table-column>
-  </el-table>
+  <div class="content">
+    <div class="operation">
+     <el-button plain  type="primary" size="medium" @click="handleEdit">编辑</el-button>
+   </div><br/>
+   <h3>IPv4:</h3><br/>
+   <el-descriptions :column="2" size="medium" border>
+    <el-descriptions-item label="IP分配">{{ net.IPdist }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4地址">{{ net.IPv4Addr }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4子网前缀长度">{{ net.IPv4SPL }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4网关">{{ net.IPv4gateway }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4首选DNS">{{net.IPv4DNS[0]}}</el-descriptions-item>
+    <el-descriptions-item label="IPv4备选DNS">{{net.IPv4DNS[1]}}</el-descriptions-item>
+    </el-descriptions><br/><br/><br/>
+    <h3>IPv6:</h3><br/>
+    <el-descriptions :column="2" size="medium" border>
+      <el-descriptions-item label="IP分配">{{ net.IPdist }}</el-descriptions-item>
+    <el-descriptions-item label="IPv6地址">{{ net.IPv6Addr }}</el-descriptions-item>
+    <el-descriptions-item label="IPv6子网前缀长度">{{ net.IPv6SPL }}</el-descriptions-item>
+    <el-descriptions-item label="IPv6网关">{{ net.IPv6gateway }}</el-descriptions-item>
+    <el-descriptions-item label="IPv6首选DNS">{{net.IPv6DNS[0]}}</el-descriptions-item>
+    <el-descriptions-item label="IPv6备选DNS">{{net.IPv6DNS[1]}}</el-descriptions-item>
+   </el-descriptions>
+   
+   <el-dialog 
+    :title="title"
+    top="10vh"
+    :before-close="handleClose" 
+    :visible.sync="display" 
+    width="70%"
+  >  
+    <update-form v-if="type === 'update'" :row="net" @click="handleClose"></update-form>      
+  </el-dialog>
  </div>
 </template>
 <script>
-import { getNetwork, getNetNic, getNetTcp, getNetUdp } from '@/request/cluster';
+import { getNetwork } from '@/request/cluster';
+import UpdateForm from "../form/network/updateForm";
 export default {
   name: "NetworkInfo",
+  components: {
+    UpdateForm
+  },
   data() {
     return {
-      hStyle: {
-        background:'rgb(109, 123, 172)',
-        color:'#fff',
-        textAlign:'center',
-        padding:'0',
-        height: '46px',
-        border: '1px solid #fff'
-      },
-      childHstyle: {
-        background:'rgba(109, 123, 172,.6)',
-        color:'#fff',
-        textAlign:'center',
+      title: '',
+      display: false,
+      type: '',
+      net: {
+        IPdist: '手动',
+        IPv4Addr: '172.17.127.29',
+        IPv4SPL: '24',
+        IPv4gateway: '172.17.127.252',
+        IPv4DNS: ['123.150.150.150','223.5.5.5'],
+        IPv6Addr: '172.17.127.291',
+        IPv6SPL: '4',
+        IPv6gateway: '172.17.127.222',
+        IPv6DNS: ['122.150.150.150','222.5.5.5'],
       },
       netData: [],
       tableData: []
@@ -82,32 +84,34 @@ export default {
         console.log(res.data.msg)
       }
     })
-    getNetNic({uuid:this.$route.params.detail}).then(res =>{
-      if(res.data.code === 200) {
-        res.data.data.net_nic.forEach(item => {
-          this.tableData.forEach(net => {
-            if(net.Name === item.Name) {
-              net.nic.push(item)
-            }
-          })
-        });
-      }
-    })
+    }
+  },
+  methods: {
+    handleClose() {
+      this.display = false;
+      this.title = "";
+      this.type = "";
+    },
+    handleEdit() {
+      this.display = true;
+      this.title = "修改网络配置";
+      this.type = "update";
+      this.row = this.net;
     }
   }
 }
 </script>
 <style scoped lang="scss">
-.demo-table-expand {
-    font-size: 0;
+.content {
+  width:96%; 
+  padding-top:20px; 
+  margin: 0 auto;
+  .operation {
+    width: 100%;
+    text-align: right;
   }
-  .demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
+  h3 {
+    color: rgb(145, 139, 139);
   }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-  }
+}
 </style>

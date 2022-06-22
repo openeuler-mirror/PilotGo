@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-16 14:37:39
+  LastEditTime: 2022-06-20 11:03:23
  -->
 <template>
   <div>
@@ -22,9 +22,27 @@
         ></el-input>
       </el-form-item>
       <el-form-item label="文件类型:" prop="type">
+        <el-select class="select" v-model="form.type" placeholder="请选择文件类型">
+          <el-option
+            v-for="item in types"
+            :key="item.$index"
+            :label="item"
+            :value="item"
+          >
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="文件路径:" prop="path">
         <el-input
           controls-position="right"
-          v-model="form.type"
+          v-model="form.path"
+          autocomplete="off"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="生效方式:" prop="activeMode">
+        <el-input
+          controls-position="right"
+          v-model="form.activeMode"
           autocomplete="off"
         ></el-input>
       </el-form-item>
@@ -70,9 +88,12 @@ export default {
   },
   data() {
     return {
+      types: [],
       form: {
         name: '',
-        type: '',
+        path: '',
+        type: [],
+        activeMode: '',
         description: '',
         file: ''
       },
@@ -82,9 +103,14 @@ export default {
             message: "请输入repo名",
             trigger: "blur" 
           }],
+        path: [{ 
+            required: true, 
+            message: "请输入文件路径",
+            trigger: "blur" 
+          }],
         type: [{ 
             required: true, 
-            message: "请输入文件类型",
+            message: "请选择文件类型",
             trigger: "blur" 
           }],
         description: [{ 
@@ -101,6 +127,7 @@ export default {
     };
   },
   mounted() {
+    this.types = this.$store.getters.configType;
     if(this.row) {
       getRepoDetail({uuid: this.uuid,file: this.row.path+'/'+this.row.name}).then(res => {
         if(res.data.code === 200) {

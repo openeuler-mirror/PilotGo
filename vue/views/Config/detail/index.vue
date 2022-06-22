@@ -10,17 +10,9 @@
         <span>历史版本</span>
       </template>
       <template v-slot:table_action>
-        <auth-button name="user_del" :disabled="$refs.table && $refs.table.selectRow.rows.length != 1" @click="handleCompare"> 对比 </auth-button>
+        <auth-button name="user_del" :disabled="$refs.table && $refs.table.selectRow.rows.length != 2" @click="handleCompare"> 对比 </auth-button>
       </template>
       <template v-slot:table>
-        <el-table-column type="expand">
-          <template slot-scope="props">
-            <el-input
-              type="textarea"
-              v-model="props.row.file"
-            ></el-input>
-          </template>
-        </el-table-column>
         <el-table-column  prop="name" label="名称">
         </el-table-column>
         <el-table-column  prop="user" label="修改人">
@@ -34,13 +26,24 @@
         </el-table-column>
         <el-table-column  prop="description" label="描述">
         </el-table-column>
+        <el-table-column label="操作" fixed="right">
+          <template slot-scope="scope">
+            <el-popconfirm 
+              title="确定要回滚到此版本?"
+              cancel-button-type="default"
+              confirm-button-type="danger"
+              @confirm="handleRollBack(scope.row)">
+            <auth-button name="user_del" type="primary" plain size="mini" slot="reference"> 回滚 </auth-button>
+          </el-popconfirm>
+          </template>
+        </el-table-column>
       </template>
     </ky-table>
     <div class="top" v-if="showCompare">
       <span style="color: rgb(242, 150, 38)">提示：请选择左右对比文件进行对比</span>
       <el-button plain type="primary"  @click="handleExit" icon="el-icon-back">返回</el-button>
     </div>
-    <compare-form :id="searchData.id" :row="rowData" v-if="showCompare" @click="handleClose"></compare-form>
+    <compare-form :id="searchData.id" :leftFile="leftFile" :rightFile="rightFile" v-if="showCompare" @click="handleClose"></compare-form>
 
   </div>
 </template>
@@ -49,7 +52,7 @@
 import CompareForm from "../form/compareForm.vue";
 import kyTable from "@/components/KyTable";
 import AuthButton from "@/components/AuthButton";
-import { lastFileList } from "@/request/config"
+import { lastFileList,fileRollback } from "@/request/config"
 export default {
   components: {
     kyTable,
@@ -67,7 +70,8 @@ export default {
   data() {
     return {
       showCompare: false,
-      rowData: {},
+      leftFile: '',
+      rightFile: '',
       searchData: {
         id: this.row.id,
       },
@@ -81,13 +85,31 @@ export default {
       this.type = "";
     }, 
     handleCompare() {
-      this.rowData = this.$refs.table.selectRow.rows[0];
+      this.leftFile = this.$refs.table.selectRow.rows[0];
+      this.rightFile = this.$refs.table.selectRow.rows[1];
       this.showCompare = true;
     },
     handleExit() {
-      this.rowData = {};
+      this.leftFile = '';
+      this.rightFile = '';
       this.showCompare = false;
-    }
+    },
+    handleRollBack(row) {
+      let params = {
+        id: row && row.id,
+        filePId: row && row.filePId,
+        user: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName,
+      }
+      fileRollback(params).then(res => {
+        if(res.data.code === 200) {
+          this.$emit("click");
+          this.$message.success(res.data.msg);
+        } else {
+          this.$message.error(res.data.msg)
+        }
+      })
+    },
   },
   filters: {
     dateFormat: function(value) {
