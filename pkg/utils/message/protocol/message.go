@@ -118,10 +118,16 @@ const (
 	ReadFile = 53
 	// 编辑配置文件
 	EditFile = 54
-	// 获取网络配置文件
-	GetNetWorkFile = 55
+	// 获取网络连接信息
+	GetNetWorkConnectInfo = 55
 	// 文件修改监控
 	FileMonitor = 56
+	// 基础网络连接配置
+	GetNetWorkConnInfo = 57
+	//重启网卡
+	RestartNetWork = 58
+	//获取网卡名字
+	GetNICName = 59
 )
 
 type Message struct {

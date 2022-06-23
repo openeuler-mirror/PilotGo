@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/net"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -43,6 +44,32 @@ type NetInterfaceCard struct {
 	Name    string
 	IPAddr  string
 	MacAddr string
+}
+
+type NetworkConfig struct {
+	NetworkType        string `json:"type"` //以太网、无线网
+	ProxyMethod        string `json:"proxy_method"`
+	BrowserOnly        string `json:"browser_only"`
+	DefRoute           string `json:"defroute"`
+	IPV4_Failure_Fatal string `json:"ipv4_failure_fatal"`
+	Name               string `json:"name"`   //接口名称
+	UUID               string `json:"uuid"`   //唯一识别码
+	Device             string `json:"device"` //网卡设备名字
+	OnBoot             string `json:"onboot"` //是否随网络服务启动当前网卡生效
+
+	IPV6Init           string `json:"ipv6_init"` //ipv6是否启用
+	IPV6_Autoconf      string `json:"ipv6_autoconf"`
+	IPV6_DefRoute      string `json:"ipv6_defroute"`
+	IPV6_Failure_Fatal string `json:"ipv6_failure_fatal"`
+	IPv6_Addr_Gen_Mode string `json:"ipv6_addr_gen_mode"`
+
+	MachineUUID string `json:"macUUID"`
+	BootProto   string `json:"BOOTPROTO"` //dhcp或者static
+	IPAddr      string `json:"IPADDR"`
+	NetMask     string `json:"NETMASK"`
+	GateWay     string `json:"GATEWAY"`
+	DNS1        string `json:"DNS1"`
+	DNS2        string `json:"DNS2"`
 }
 
 //获取当前TCP网络连接信息
@@ -139,4 +166,160 @@ func GetNICConfig() ([]NetInterfaceCard, error) {
 		NICConfig = append(NICConfig, tmp)
 	}
 	return NICConfig, nil
+}
+
+// 配置网络连接
+func ConfigNetworkConnect() (interface{}, error) {
+	filePath := "/home"
+	network, err := GetFiles(filePath)
+	if err != nil {
+		return "", fmt.Errorf("获取网络配置文件失败:%s", err)
+	}
+	var filename string
+	for _, n := range network {
+		if ok := strings.Contains(n, "ifcfg-e"); !ok {
+			continue
+		}
+		filename = n
+	}
+
+	text, err := utils.RunCommand("cat " + filePath + "/" + filename)
+	if err != nil {
+		return "", fmt.Errorf("读取网络配置数据失败:%s", err)
+	}
+
+	var oldnet []map[string]string
+	lines := strings.Split(text, "\n")
+	for _, line := range lines {
+		strSlice := strings.Split(line, "=")
+		if len(strSlice) == 1 {
+			continue
+		}
+		if strings.Contains(strSlice[0], "#") {
+			continue
+		}
+		net := map[string]string{
+			strSlice[0]: strSlice[1],
+		}
+		oldnet = append(oldnet, net)
+	}
+	return oldnet, nil
+}
+
+func GetNetworkConnInfo() (interface{}, error) {
+	netPath, err := GetFiles(model.NetWorkPath)
+	if err != nil {
+		return nil, fmt.Errorf("获取网络配置源文件失败:%s", err)
+	}
+	var filename string
+	for _, n := range netPath {
+		if ok := strings.Contains(n, "ifcfg-e"); !ok {
+			continue
+		}
+		filename = n
+	}
+
+	result, _ := utils.RunCommand("cat " + model.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
+	ip_assignment_method := strings.Split(result, "=")[1]
+
+	var network = &NetworkConfig{}
+	switch strings.Replace(ip_assignment_method, "\n", "", -1) {
+	case "static":
+		tmp, err := utils.RunCommand("cat " + model.NetWorkPath + "/" + filename)
+		if err != nil {
+			return nil, fmt.Errorf("读取网络配置源数据失败:%s", err)
+		}
+		lines := strings.Split(tmp, "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			strSlice := strings.Split(line, "=")
+			if len(strSlice) == 1 {
+				continue
+			}
+			ModuleMatch(strSlice[0], strSlice[1], network)
+		}
+	case "dhcp":
+		IP, err := utils.RunCommand("hostname -I")
+		if err != nil {
+			return nil, fmt.Errorf("获取IP失败:%s", err)
+		}
+		str := strings.Split(IP, " ")
+		ip := str[0]
+
+		gateway, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
+		if err != nil {
+			return nil, fmt.Errorf("获取网关失败:%s", err)
+		}
+
+		DNS, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
+		if err != nil {
+			return nil, fmt.Errorf("获取DNS失败:%s", err)
+		}
+		network.DNS1 = strings.Replace(DNS, "\n", "", -1)
+		network.BootProto = "dhcp"
+		network.IPAddr = ip
+		network.GateWay = strings.Replace(gateway, "\n", "", -1)
+
+	default:
+		tmp, err := utils.RunCommand("cat " + model.NetWorkPath + "/" + filename)
+		if err != nil {
+			return nil, fmt.Errorf("读取网络配置源数据失败:%s", err)
+		}
+		lines := strings.Split(tmp, "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			strSlice := strings.Split(line, "=")
+			if len(strSlice) == 1 {
+				continue
+			}
+			ModuleMatch(strSlice[0], strSlice[1], network)
+		}
+	}
+	return network, nil
+}
+
+func GetNICName() (interface{}, error) {
+	network, err := GetFiles(model.NetWorkPath)
+	if err != nil {
+		return nil, fmt.Errorf("获取网络配置文件失败:%s", err)
+	}
+	var filename string
+	for _, n := range network {
+		if ok := strings.Contains(n, "ifcfg-e"); !ok {
+			continue
+		}
+		filename = n
+	}
+
+	return filename, nil
+}
+
+func RestartNetwork(nic string) error {
+	_, err := utils.RunCommand("nmcli c reload")
+	if err != nil {
+		return fmt.Errorf("网络配置文件重载失败:%s", err)
+	}
+
+	str := "nmcli c up " + strings.Split(nic, "-")[1]
+	_, err = utils.RunCommand(str)
+	if err != nil {
+		return fmt.Errorf("网络配置文件未生效:%s", err)
+	}
+	return nil
+}
+
+func ModuleMatch(key string, value string, network *NetworkConfig) {
+	if key == "IPADDR" {
+		network.IPAddr = value
+	} else if key == "NetMask" {
+		network.NetMask = value
+	} else if key == "GateWay" {
+		network.GateWay = value
+	} else if key == "DNS1" {
+		network.DNS1 = value
+	} else if key == "DNS2" {
+		network.DNS2 = value
+	} else if key == "BootProto" {
+		network.BootProto = value
+	}
 }
