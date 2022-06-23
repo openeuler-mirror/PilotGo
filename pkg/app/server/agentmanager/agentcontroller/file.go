@@ -18,6 +18,7 @@ package agentcontroller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
@@ -96,6 +97,10 @@ func ConfigNetworkConnect(c *gin.Context) {
 	if len(ip_assignment) == 0 {
 		response.Fail(c, nil, "ipv4子网掩码不能为空")
 		return
+	}
+	if ok := strings.Contains(ipv4_netmask, "."); !ok {
+		prefix, _ := strconv.Atoi(ipv4_netmask)
+		ipv4_netmask = uos.LenToSubNetMask(prefix)
 	}
 	ipv4_gateway := network.GateWay
 	if len(ip_assignment) == 0 {

@@ -16,8 +16,10 @@ package os
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/shirou/gopsutil/net"
@@ -311,15 +313,37 @@ func RestartNetwork(nic string) error {
 func ModuleMatch(key string, value string, network *NetworkConfig) {
 	if key == "IPADDR" {
 		network.IPAddr = value
-	} else if key == "NetMask" {
+	} else if key == "NETMASK" {
 		network.NetMask = value
-	} else if key == "GateWay" {
+	} else if key == "GATEWAY" {
 		network.GateWay = value
 	} else if key == "DNS1" {
 		network.DNS1 = value
 	} else if key == "DNS2" {
 		network.DNS2 = value
-	} else if key == "BootProto" {
+	} else if key == "BOOTPROTO" {
 		network.BootProto = value
+	} else if key == "PREFIX" {
+		prefix, _ := strconv.Atoi(value)
+		network.NetMask = LenToSubNetMask(prefix)
 	}
+}
+
+// 网络长度转换成子网掩码
+func LenToSubNetMask(subnet int) string {
+	var buff bytes.Buffer
+	for i := 0; i < subnet; i++ {
+		buff.WriteString("1")
+	}
+	for i := subnet; i < 32; i++ {
+		buff.WriteString("0")
+	}
+	masker := buff.String()
+	a, _ := strconv.ParseUint(masker[:8], 2, 64)
+	b, _ := strconv.ParseUint(masker[8:16], 2, 64)
+	c, _ := strconv.ParseUint(masker[16:24], 2, 64)
+	d, _ := strconv.ParseUint(masker[24:32], 2, 64)
+	resultMask := fmt.Sprintf("%v.%v.%v.%v", a, b, c, d)
+	return resultMask
+
 }
