@@ -865,12 +865,60 @@ func (a *Agent) GetRepoSource() (interface{}, string, error) {
 	return resp_message.Data, resp_message.Error, nil
 }
 
-// 远程获取agent端的repo文件
-func (a *Agent) GetNetWorkFile() (interface{}, string, error) {
+// 远程获取agent端的网络连接信息
+func (a *Agent) GetNetWorkConnectInfo() (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
-		Type: protocol.GetNetWorkFile,
+		Type: protocol.GetNetWorkConnectInfo,
 		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 获取agent的基础网络配置
+func (a *Agent) GetNetWorkConnInfo() (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.GetNetWorkConnInfo,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 获取网卡名字
+func (a *Agent) GetNICName() (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.GetNICName,
+		Data: struct{}{},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 重启网卡配置
+func (a *Agent) RestartNetWork(NIC string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.RestartNetWork,
+		Data: NIC,
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)

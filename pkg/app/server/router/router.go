@@ -78,6 +78,7 @@ func SetupRouter() *gin.Engine {
 		macDetails.GET("/os_basic", agentcontroller.OsBasic)
 		macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
 		macDetails.GET("/repos", agentcontroller.GetAgentRepo)
+		macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
 	}
 
 	macBasicModify := router.Group("cluster/macList/agent")
@@ -105,6 +106,7 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.GET("/firewall_stop", agentcontroller.FirewalldStop)
 		macBasicModify.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
 		macBasicModify.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
+		macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
 	}
 
 	monitor := router.Group("prometheus")

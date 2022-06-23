@@ -38,6 +38,13 @@ func GetRepoSource() (interface{}, error) {
 
 	var repo string
 	for _, repo = range repos {
+		if SysPlatform == "centos" {
+			reg := regexp.MustCompile(`(?i)(` + SysPlatform + "-base" + `)`)
+			ok := reg.MatchString(repo)
+			if ok {
+				break
+			}
+		}
 		reg := regexp.MustCompile(`(?i)(` + SysPlatform + `)`)
 		ok := reg.MatchString(repo)
 		if ok {
@@ -51,16 +58,22 @@ func GetRepoSource() (interface{}, error) {
 	}
 
 	reg1 := regexp.MustCompile(`name=.*`)
-	reg2 := regexp.MustCompile(`baseurl=.*`)
-
 	textType := reg1.FindAllString(text, -1)
-	BaseURL := reg2.FindAllString(text, -1)
+
+	var reg2 *regexp.Regexp
+	var BaseURL []string
+	reg2 = regexp.MustCompile(`mirrorlist=http.*`)
+	BaseURL = reg2.FindAllString(text, -1)
+	if len(BaseURL) == 0 {
+		reg2 = regexp.MustCompile(`baseurl=.*`)
+		BaseURL = reg2.FindAllString(text, -1)
+	}
 
 	datas := make([]map[string]string, 0)
 	for i := 0; i < len(textType); i++ {
 		data := map[string]string{
 			"name":    strings.Split(textType[i], "=")[1],
-			"baseurl": strings.Split(BaseURL[i], "=")[1],
+			"baseurl": "http" + strings.Split(BaseURL[i], "http")[1],
 		}
 		datas = append(datas, data)
 	}
