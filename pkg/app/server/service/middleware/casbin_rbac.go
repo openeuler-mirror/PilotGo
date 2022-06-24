@@ -12,7 +12,7 @@
  * LastEditTime: 2022-03-14 10:35:54
  * Description: casbin权限控制
  ******************************************************************************/
-package service
+package middleware
 
 import (
 	"github.com/casbin/casbin"

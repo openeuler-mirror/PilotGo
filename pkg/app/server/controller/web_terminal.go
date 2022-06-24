@@ -26,7 +26,7 @@ import (
 )
 
 // 升级HTTP协议为WebSocket
-var upgrader = websocket.Upgrader{
+var Upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
@@ -55,7 +55,7 @@ func ShellWs(c *gin.Context) {
 		return
 	}
 	// 升级协议并获得socket连接
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.Error(err)
 		return

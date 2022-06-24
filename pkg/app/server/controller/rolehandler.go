@@ -21,6 +21,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -29,7 +30,7 @@ func PolicyDelete(c *gin.Context) {
 	var Rule model.CasbinRule
 	c.Bind(&Rule)
 
-	if ok := service.PolicyRemove(Rule); !ok {
+	if ok := middleware.PolicyRemove(Rule); !ok {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy不存在")
 	} else {
 		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy删除成功")
@@ -41,7 +42,7 @@ func PolicyAdd(c *gin.Context) {
 	var Rule model.CasbinRule
 	c.Bind(&Rule)
 
-	if ok := service.PolicyAdd(Rule); !ok {
+	if ok := middleware.PolicyAdd(Rule); !ok {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy已存在")
 	} else {
 		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy添加成功")
@@ -57,7 +58,7 @@ func GetPolicy(c *gin.Context) {
 		return
 	}
 
-	policy, total := service.AllPolicy()
+	policy, total := middleware.AllPolicy()
 
 	data, err := DataPaging(query, policy, total)
 	if err != nil {

@@ -12,12 +12,13 @@
  * LastEditTime: 2022-04-01 13:59:42
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
-package logger
+package middleware
 
 import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 用户操作请求打印到终端
@@ -48,7 +49,7 @@ func LoggerDebug() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 
 		// 日志格式
-		Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
+		logger.Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
 			statusCode,
 			latencyTime,
 			clientIP,
