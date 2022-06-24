@@ -77,15 +77,11 @@ import FileSaver from 'file-saver'
 import XLSX from 'xlsx'
 import AddForm from "./form/addForm.vue"
 import UpdateForm from "./form/updateForm.vue"
-import kyTable from "@/components/KyTable";
-import AuthButton from "@/components/AuthButton";
 import { getUsers, delUser, resetPwd, searchUser } from "@/request/user"
 export default {
   components: {
-    kyTable,
     AddForm,
     UpdateForm,
-    AuthButton,
   },
   data() {
     return {

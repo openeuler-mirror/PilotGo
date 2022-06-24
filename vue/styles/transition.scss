@@ -46,3 +46,12 @@
 .breadcrumb-leave-active {
   position: absolute;
 }
+
+
+
+// vue-grid-layout样式
+.vue-grid-item.vue-grid-placeholder {
+  background: rgba(11, 35, 117,.4) !important;
+  opacity: 1 !important;
+  border-radius: 6px;
+}

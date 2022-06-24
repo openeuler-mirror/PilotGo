@@ -9,21 +9,10 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-28 14:15:30
-  LastEditTime: 2022-05-24 17:10:32
+  LastEditTime: 2022-06-24 16:34:39
  -->
-    <!-- 定时任务
-      1.增删改
-      2.可查看状态和结果
-      3.可配置时间
-      4.具体的表达式
-      表格：任务名、脚本、状态、创建日期、上次启动、上次花费、上次执行结果、操作（删除、开关、编辑）
-     -->
 <template>
  <div style="height: 100%">
-  <!--  <div class="operation">
-     <el-button @click="handleShowCreate" type="primary" size="medium" icon="el-icon-plus">新增</el-button>
-     <el-button @click="handleDel" type="danger" size="medium" icon="el-icon-delete">删除</el-button>
-   </div><br/> -->
    <ky-table
     ref="table"
     :getData="getCronList"

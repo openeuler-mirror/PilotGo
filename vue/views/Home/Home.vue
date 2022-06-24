@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-06-16 14:22:07
+  LastEditTime: 2022-06-24 17:09:22
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -75,13 +75,14 @@ export default {
   },
   data() {
     return {
+      ws: null,
       crumbs: [],
       isCollapse: false,
       // cachedViews: ['Batch','Overview','Prometheus']
     };
   }, 
   mounted() {
-    // this.create();
+    this.initSocket();
   },
   computed: {
     cachedViews() {
@@ -112,6 +113,11 @@ export default {
       if(this.$route.params.id) {
         this.$route.meta.breadCrumb[1].name = this.$route.params.id
       }
+    },
+    socketUrl() {
+      return (location.protocol === "http:" ? "ws" : "wss") + "://" + 
+        Config.dev.proxyTable['/'].target.split('//')[1] + 
+        "/event";
     }
   },
   methods: {
@@ -147,26 +153,43 @@ export default {
         });
       });
     },
-    create() {
-      let es = new EventSource(Config.dev.proxyTable['/'].target+'/event');
-      es.addEventListener('message', event => {
-          this.$notify({
+    // socket
+    initSocket() {
+      this.ws = new WebSocket(this.socketUrl)
+      this.openSocket()
+      this.onmessage()
+      this.closeSocket()
+      this.errorSocket()
+    },
+    // 打开连接
+    openSocket() {
+      this.ws.onopen = () => {
+        console.log('打开连接')
+      }
+    },
+    // 接收消息
+    onmessage() {
+      this.ws.onmessage = (event) => {
+        this.$notify({
           title: '警告',
           message: event.data,
           type: 'warning',
           duration: 0
         });
-      });
-      es.addEventListener('error', event => {
-          if (event.readyState == EventSource.CLOSED) {
-              console.log('event was closed');
-          };
-      });
-      es.addEventListener('close', event => {
-          console.log(event.type);
-          es.close();
-      });
-    }
+      }
+    },
+    // 关闭连接
+    closeSocket() {
+      this.ws.onclose = () => {
+        console.log('关闭连接')
+      }
+    },
+    // 连接错误
+    errorSocket() {
+      this.ws.onerror = () => {
+        this.$message.error('websoket连接失败,请刷新!')
+      }
+    },
 
   },
 };

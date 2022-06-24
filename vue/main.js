@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-12 16:12:15
- * @LastEditTime: 2022-06-17 11:05:05
+ * @LastEditTime: 2022-06-24 16:23:42
  */
 import Vue from 'vue'
 import App from './App'
@@ -25,6 +25,8 @@ import './permission';
 import './styles/index.scss'
 import './iconfont/iconfont.js'
 import './iconfont/iconfont.css'
+import kyTable from "./components/KyTable";
+import AuthButton from "./components/AuthButton";
 import VueDraggableResizable from 'vue-draggable-resizable'//引入可拖拽组件
 import 'vue-draggable-resizable/dist/VueDraggableResizable.css'
 // import './mock/index.js' //引入mockjs,上线后注掉
@@ -36,6 +38,8 @@ Vue.use(ElementUI);
 Vue.use(echarts);
 Vue.use(CodeDiff);
 Vue.component('vue-draggable-resizable', VueDraggableResizable)
+Vue.component('auth-button', AuthButton)
+Vue.component('ky-table', kyTable)
 
 Vue.config.productionTip = false
 

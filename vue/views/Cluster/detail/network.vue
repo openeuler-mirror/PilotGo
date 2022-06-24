@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:07:46
-  LastEditTime: 2022-06-20 16:45:39
+  LastEditTime: 2022-06-22 16:12:18
  -->
 <template>
   <div class="content">
@@ -18,23 +18,14 @@
    </div><br/>
    <h3>IPv4:</h3><br/>
    <el-descriptions :column="2" size="medium" border>
-    <el-descriptions-item label="IP分配">{{ net.IPdist }}</el-descriptions-item>
-    <el-descriptions-item label="IPv4地址">{{ net.IPv4Addr }}</el-descriptions-item>
-    <el-descriptions-item label="IPv4子网前缀长度">{{ net.IPv4SPL }}</el-descriptions-item>
-    <el-descriptions-item label="IPv4网关">{{ net.IPv4gateway }}</el-descriptions-item>
-    <el-descriptions-item label="IPv4首选DNS">{{net.IPv4DNS[0]}}</el-descriptions-item>
-    <el-descriptions-item label="IPv4备选DNS">{{net.IPv4DNS[1]}}</el-descriptions-item>
-    </el-descriptions><br/><br/><br/>
-    <h3>IPv6:</h3><br/>
-    <el-descriptions :column="2" size="medium" border>
-      <el-descriptions-item label="IP分配">{{ net.IPdist }}</el-descriptions-item>
-    <el-descriptions-item label="IPv6地址">{{ net.IPv6Addr }}</el-descriptions-item>
-    <el-descriptions-item label="IPv6子网前缀长度">{{ net.IPv6SPL }}</el-descriptions-item>
-    <el-descriptions-item label="IPv6网关">{{ net.IPv6gateway }}</el-descriptions-item>
-    <el-descriptions-item label="IPv6首选DNS">{{net.IPv6DNS[0]}}</el-descriptions-item>
-    <el-descriptions-item label="IPv6备选DNS">{{net.IPv6DNS[1]}}</el-descriptions-item>
-   </el-descriptions>
-   
+    <el-descriptions-item label="IP分配">{{ net.BOOTPROTO === 'dhcp'? '动态DHCP' : '手动' }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4地址">{{ net.IPADDR }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4子网掩码">{{ net.NETMASK || '无'}}</el-descriptions-item>
+    <el-descriptions-item label="IPv4网关">{{ net.GATEWAY }}</el-descriptions-item>
+    <el-descriptions-item label="IPv4首选DNS">{{net.DNS1}}</el-descriptions-item>
+    <el-descriptions-item label="IPv4备选DNS">{{net.DNS2 || '无'}}</el-descriptions-item>
+    </el-descriptions>
+
    <el-dialog 
     :title="title"
     top="10vh"
@@ -42,7 +33,7 @@
     :visible.sync="display" 
     width="70%"
   >  
-    <update-form v-if="type === 'update'" :row="net" @click="handleClose"></update-form>      
+    <update-form v-if="type === 'update'" :net="net" @click="handleClose"></update-form>      
   </el-dialog>
  </div>
 </template>
@@ -60,15 +51,12 @@ export default {
       display: false,
       type: '',
       net: {
-        IPdist: '手动',
-        IPv4Addr: '172.17.127.29',
-        IPv4SPL: '24',
-        IPv4gateway: '172.17.127.252',
-        IPv4DNS: ['123.150.150.150','223.5.5.5'],
-        IPv6Addr: '172.17.127.291',
-        IPv6SPL: '4',
-        IPv6gateway: '172.17.127.222',
-        IPv6DNS: ['122.150.150.150','222.5.5.5'],
+        BOOTPROTO: '手动',
+        IPADDR: '172.17.127.29',
+        NETMASK: '24',
+        GATEWAY: '172.17.127.252',
+        DNS1: '123.150.150.150',
+        DNS2: '255.5.5.5',
       },
       netData: [],
       tableData: []
@@ -78,8 +66,7 @@ export default {
     if(this.$route.params.detail != undefined) {
     getNetwork({uuid:this.$route.params.detail}).then(res => {
       if(res.data.code === 200) {
-        res.data.data.net_io.forEach(item => item.nic = []);
-        this.tableData = res.data.data.net_io;
+        this.net = res.data.data;
       } else {
         console.log(res.data.msg)
       }
