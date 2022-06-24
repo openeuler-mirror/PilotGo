@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-05-25 17:52:50
-  LastEditTime: 2022-06-14 17:05:35
+  LastEditTime: 2022-06-17 09:52:09
  -->
 <template>
   <el-scrollbar ref="scrollContainer" :vertical="false" class="scroll-container" @wheel.native.prevent="handleScroll">
@@ -84,9 +84,8 @@ export default {
 .scroll-container {
   white-space: nowrap;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
   width: 100%;
-  height: 100%;
  ::v-deep {
     .el-scrollbar__bar {
       bottom: 0px;

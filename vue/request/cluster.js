@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-02-25 16:33:46
- * @LastEditTime: 2022-06-20 16:18:17
+ * @LastEditTime: 2022-06-22 15:55:16
  * @Description: provide agent log manager of pilotgo
  */
 import request from './request'
@@ -308,11 +308,21 @@ export function getDisk(data) {
 // 获取网络信息io
 export function getNetwork(data) {
   return request({
-    url: 'api/net_io',
+    url: 'api/net',
     method: 'get',
     params: data
   })
 }
+
+// 编辑网络配置
+export function updateNet(data) {
+  return request({
+    url: 'agent/network',
+    method: 'post',
+    data
+  })
+}
+
 
 // 获取网络信息nic
 export function getNetNic(data) {

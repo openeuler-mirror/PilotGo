@@ -9,27 +9,10 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-06-17 15:24:54
+  LastEditTime: 2022-06-23 11:13:49
  -->
 <template>
-  <vue-draggable-resizable
-    :w="width"
-    :h="height"
-    :x="x"
-    :y="y"
-    :min-width="400"
-    :min-height="200"
-    :parent="false"
-    :grid="[10,10]"
-    class-name="dragging1"
-    @dragging="onDrag"
-    @resizing="onResize"
-  >
-    <div class="panel">
-      <span @click="handleClose" class="closeChart">✕</span>
-      <div id="network"></div>
-    </div>
-  </vue-draggable-resizable>
+  <div id="network" ref="chartDom"></div>
 </template>
 <script>
 import { getData } from "@/request/overview";
@@ -48,23 +31,17 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      let width = document.getElementsByClassName('charts')[0].clientWidth/2.1;
-      let height = document.getElementsByClassName('charts')[0].clientHeight/1.6;
-      this.resize({width: width,height:height})
-    })
-    this.netChart = this.$echarts.init(document.getElementById('network'))
     if(this.$store.getters.selectIp) {
-      this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
+      this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',{starttime: parseInt(this.now - 2*60*60) + '',
           endtime: parseInt(this.now - 0) + ''});
-      this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',{starttime: parseInt(this.now - 6*60*60) + '',
+      this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',{starttime: parseInt(this.now - 2*60*60) + '',
           endtime: parseInt(this.now - 0) + ''});
     }
+    this.CreateChart();
   },
   computed: {
     option() {
       return {
-        title: {text: '网络平均速率'},
         tooltip: {
           trigger: 'axis',
         },
@@ -73,11 +50,17 @@ export default {
         },
         grid: [
           {
-            bottom: '60%'
+            bottom: '60%',
+            left: '7%',
+            top: '4%',
+            right: '3%'
           },
           {
-            top: '46%'
-          }
+            top: '46%',
+            left: '7%',
+            right: '3%',
+            bottom: '4%'
+          },
         ],
         xAxis: [{
           type: 'time',
@@ -108,12 +91,14 @@ export default {
         dataZoom: [
           {
             type: 'inside',
+            xAxisIndex:[0,1],
             start: 0,
-            end: 20
+            end: 100
           },
           {
+            xAxisIndex:[0,1],
             start: 0,
-            end: 20
+            end: 100
           }
         ],
         series: []
@@ -121,25 +106,18 @@ export default {
     },
   },
   methods: {
-    onResize(x, y, width, height) {
-      this.x = x;
-      this.y = y;
-      this.resize({width: width,height:height})
+    CreateChart(){
+      this.netChart = this.$echarts.init(this.$refs.chartDom)
+      setTimeout (()=>{
+        this.$nextTick(() => {
+          this.netChart.resize()
+        })
+      },0)
     },
-    onDrag(x, y) {
-      this.x = x;
-      this.y = y;
+    sizechange(params){
+      this.netChart.resize(params) 
     },
-    resize(params) {
-      this.width = params.width;
-      this.height = params.height;
-      this.netChart.resize(params)
-      this.netChart.setOption(this.option,true)
-    },
-    handleClose() {
-      this.$emit('close',4);
-    },
-    getNet(rangeTime) {
+    getAllData(rangeTime) {
       this.getStepData('in',this.netIn,'irate(node_network_receive_bytes_total[5m])',rangeTime);
       this.getStepData('out',this.netOut,'irate(node_network_transmit_bytes_total[5m])',rangeTime);
     },
@@ -199,6 +177,11 @@ export default {
   },
   watch: {
     netIn: function() {
+      this.$nextTick(() => {
+        this.netChart.setOption(this.option,true)
+      })
+    },
+    netOut: function() {
       this.$nextTick(() => {
         this.netChart.setOption(this.option,true)
       })

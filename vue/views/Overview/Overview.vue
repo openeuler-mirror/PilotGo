@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 11:17:06
-  LastEditTime: 2022-06-15 17:12:06
+  LastEditTime: 2022-06-21 09:27:53
  -->
 <template>
  <div class="content flex">
@@ -42,7 +42,9 @@
      <div class="message flex">
        &nbsp;
        <em class="el-icon-s-promotion"></em>
-       <span>&nbsp;消息提醒</span>
+       <el-badge :value="messageNum">
+         <span>&nbsp;消息提醒&nbsp;&nbsp;</span>
+       </el-badge>
      </div>
     <el-timeline :reverse="reverse">
       <el-timeline-item v-for="item in Message" :key="item.$index" :timestamp="item.activeAt | dateFormat" color="rgb(92, 123, 217)" size="large" placement="top">
@@ -85,6 +87,7 @@ export default {
       userName: '暂无',
       userDeptName: '暂无',
       userType: '暂无',
+      messageNum: 0,
       tooltips: [
         {
           id: 1,
@@ -154,8 +157,9 @@ export default {
     },
     getAlerts() {
       getAlerts().then(res => {
-        if(res.data.status === 'success') {
+        if(res.data.status === 'success' && res.data.data.alerts.length > 0) {
           this.Message = res.data.data.alerts;
+          this.messageNum = res.data.data.alerts.length;
         }
       })
       /* setInterval(function() {

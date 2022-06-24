@@ -6,105 +6,55 @@
         ref="form"
         label-width="100px"
       >
-      <el-form-item label="配置方式" prop="ip">
-        <el-select v-model="form.ip" @change="handleSelect">
+      <el-form-item label="配置方式" prop="BOOTPROTO">
+        <el-select v-model="form.BOOTPROTO" @change="handleSelect">
           <el-option
             v-for="item in type"
             :key="item.id"
-            :value="item.id"
+            :value="item.value"
             :label="item.name"
           >
           </el-option>
         </el-select>
       </el-form-item>
-        <el-form-item label="IPv4地址" prop="ip" v-show="showIPv4">
+        <el-form-item label="IPv4地址" prop="IPADDR" v-show="showIPv4">
           <el-input
             class="ipInput"
             type="text"
             size="medium"
-            v-model="form.ip"
+            v-model="form.IPADDR"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="IPv4子网前缀长度" prop="kernel" v-show="showIPv4">
+        <el-form-item label="IPv4子网掩码" prop="NETMASK" v-show="showIPv4">
           <el-input
             class="ipInput"
             controls-position="right"
-            v-model="form.kernel"
+            v-model="form.NETMASK"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="IPv4网关" prop="repo" v-show="showIPv4">
+        <el-form-item label="IPv4网关" prop="GATEWAY" v-show="showIPv4">
            <el-input
             class="ipInput"
             controls-position="right"
-            v-model="form.repo"
+            v-model="form.GATEWAY"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="IPv4首选DNS" prop="service" v-show="showIPv4">
+        <el-form-item label="IPv4首选DNS" prop="DNS1" v-show="showIPv4">
          <el-input
             class="ipInput"
             controls-position="right"
-            v-model="form.service"
+            v-model="form.DNS1"
             autocomplete="off"
           ></el-input>
         </el-form-item>
-        <el-form-item label="IPv4备选DNS" prop="kernel" v-show="showIPv4">
+        <el-form-item label="IPv4备选DNS" prop="DNS2" v-show="showIPv4">
           <el-input
             class="ipInput"
             controls-position="right"
-            v-model="form.kernel"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-
-        <el-form-item label="IPv6" prop="IPv6" v-show="showIPv4">
-        <el-switch
-          v-model="isIPv6"
-          active-text="开"
-          inactive-text="关"
-          @change="handle6Change">
-        </el-switch>
-      </el-form-item>
-        <el-form-item label="IPv6地址" prop="ip" v-show="showIPv6">
-          <el-input
-            class="ipInput"
-            type="text"
-            size="medium"
-            v-model="form.ip"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="IPv6子网前缀长度" prop="kernel" v-show="showIPv6">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="form.kernel"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="IPv6网关" prop="repo" v-show="showIPv6">
-           <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="form.repo"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="IPv6首选DNS" prop="service" v-show="showIPv6">
-         <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="form.service"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="IPv6备选DNS" prop="kernel" v-show="showIPv6">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="form.kernel"
+            v-model="form.DNS2"
             autocomplete="off"
           ></el-input>
         </el-form-item>
@@ -117,54 +67,75 @@
 </template>
 
 <script>
-import {  updateIp  } from "@/request/cluster";
+import {  updateNet  } from "@/request/cluster";
 export default {
   props: {
-    ip: {
-      type: String
-    } 
+    net: {
+      type: Object,
+    },
   },
   data() {
     return {
-      isIPv4: true,
-      isIPv6: false,
+      uuid: '',
       showIPv4: true,
-      showIPv6: false,
       type: [
         {
           id: 1,
-          name: '手动'
+          name: '手动',
+          value: 'static'
         },
         {
           id: 2,
-          name: '动态DHCP'
+          name: '动态DHCP',
+          value: 'dhcp'
         }
       ],
       form: {
-        ip: "",
-        repo: "",
-        kernel: "",
-        service: "",
+        BOOTPROTO: "",
+        IPADDR: "",
+        NETMASK: "",
+        GATEWAY: "",
+        DNS1: "",
+        DNS2: "",
       },
       rules: {
-        ip: [{ 
+        BOOTPROTO: [{ 
           required: true, 
-          message: "请输入IP",
+          message: "请选择分配方式",
           trigger: "blur"
         }],
-        kernel: [{ 
+        IPADDR: [{ 
           required: true, 
           trigger: "blur", 
-          message:"修改后需要重启生效" 
+          message:"请输入IP地址" 
+        }],
+        NETMASK: [{ 
+          required: true, 
+          trigger: "blur", 
+          message:"请输入子网掩码" 
+        }],
+        GATEWAY: [{ 
+          required: true, 
+          trigger: "blur", 
+          message:"请输入网关" 
+        }],
+        DNS1: [{ 
+          required: true, 
+          trigger: "blur", 
+          message:"请输入首选DNS" 
         }],
       },
-      disabled: true,
-      repos: [],
-      service: [],
     }
   },
   mounted() {
-    this.form.ip = this.ip;
+    this.form.BOOTPROTO = this.net.BOOTPROTO === '手动' ? 'static' : 'dhcp';
+    this.showIPv4 = this.net.BOOTPROTO === '手动' ? true : false;
+    this.form.IPADDR = this.net.IPADDR;
+    this.form.NETMASK = this.net.NETMASK;
+    this.form.GATEWAY = this.net.GATEWAY;
+    this.form.DNS1 = this.net.DNS1;
+    this.form.DNS2 = this.net.DNS2;
+    this.uuid = this.$route.params.detail;
   },
   methods: {
     handleCancel() {
@@ -172,29 +143,21 @@ export default {
       this.$emit("click");
     },
     handleSelect(type) {
-      this.showIPv4 = type === 1 ? true : false; 
-    },
-    handle6Change(value) {
-      this.showIPv6 = value;
+      this.showIPv4 = type === 'static' ? true : false; 
     },
     handleSubmitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          updateIp({ip: this.form.ip, data: this.form})
+          updateNet({macUUID: this.uuid, ...this.form})
             .then((res) => {
-              if (res.data.status === "success") {
+              if (res.data.code === 200) {
                 this.$emit("click");
+                this.$message.success(res.data.msg);
                 this.$refs.form.resetFields();
               } else {
-                this.$message.error(res.data.error);
+                this.$message.error(res.data.msg);
               }
             })
-            .catch((res) => {
-              this.$message.error("修改失败，请检查输入内容");
-            });
-        } else {
-          this.$message.error("修改失败，请检查输入内容");
-          return false;
         }
       });
     },

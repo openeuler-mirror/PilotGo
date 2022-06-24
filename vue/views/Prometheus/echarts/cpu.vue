@@ -9,28 +9,10 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-06-17 14:57:07
+  LastEditTime: 2022-06-24 17:13:47
  -->
 <template>
-  <vue-draggable-resizable
-    :w="width"
-    :h="height"
-    :x="x"
-    :y="y"
-    :min-width="400"
-    :min-height="200"
-    :parent="false"
-    :grid="[10,10]"
-    class-name="dragging1"
-    @dragging="onDrag"
-    @resizing="onResize"
-  >
-    <div class="panel">
-      <span @click="handleClose" class="closeChart">✕</span>
-      <div id="cpu">
-      </div>
-    </div>
-  </vue-draggable-resizable>
+  <div id="cpu" ref="chartDom"></div>
 </template>
 <script>
 import { getData } from "@/request/overview";
@@ -38,30 +20,22 @@ import { formatDate } from '@/utils/dateFormat';
 export default {
   data() {
     return {
-      x: 0,
-      y: 0,
-      width: 700,
-      height: 400,
+      colorList:['#37A2FF','#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', ],
+      querySQL: '100-(avg by(instance)(irate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
       cpuChart: {},
       cpuData: [],
       now: new Date()/1000,
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      let width = document.getElementsByClassName('charts')[0].clientWidth/2.1;
-      let height = document.getElementsByClassName('charts')[0].clientHeight/1.6;
-      this.resize({width: width,height:height})
-    })
-    this.cpuChart = this.$echarts.init(document.getElementById('cpu'))
+    this.CreateChart();
     if(this.$store.getters.selectIp) {
-      this.getCpu({starttime: parseInt(this.now - 60*60*6) + '', endtime: parseInt(this.now - 0) + ''});
+      this.getAllData({starttime: parseInt(this.now - 60*60*2) + '', endtime: parseInt(this.now - 0) + ''});
     }
   },
   computed: {
     option() {
       return {
-        title: {text:'cpu使用率'},
         tooltip: {
           trigger: 'axis',
           position: [10, 60],
@@ -76,6 +50,11 @@ export default {
             animation: false
           }
         },
+        grid:{
+          top:'4%',
+          left: '5%',
+          right: '3%',
+        },
         xAxis: {
           type: 'time',
           splitLine: {
@@ -84,19 +63,21 @@ export default {
         },
         yAxis: {
           type: 'value',
-          // max: 100,
+          splitLine: {
+            show: true,
+          },
           min: 0,
           boundaryGap: [0, '100%'],
         },
         dataZoom: [
           {
-            type: 'inside',
             start: 0,
-            end: 20
+            end: 100
           },
           {
+            type: 'inside',
             start: 0,
-            end: 20
+            end: 100
           }
         ],
         series: [{
@@ -104,7 +85,10 @@ export default {
           type: 'line',
           smooth: false,
           showSymbol: false,
-          lineStyle: {width: 1},
+          lineStyle: {
+            // color: 'rgb(92, 123, 217)',
+            width: 1
+          },
           areaStyle: {
             opacity: 0.1,
             color:  '#37A2FF'
@@ -115,22 +99,19 @@ export default {
     },
   },
   methods: {
-    onResize: function(x, y, width, height) {
-      this.x = x;
-      this.y = y;
-      this.resize({width: width,height:height})
+    CreateChart(){
+      this.cpuChart = this.$echarts.init(this.$refs.chartDom)
+      setTimeout (()=>{
+        this.$nextTick(() => {
+          this.cpuChart.resize()
+          // this.cpuChart.resize({width: 300,height:200})
+        })
+      },0)
     },
-    onDrag: function(x, y) {
-      this.x = x;
-      this.y = y;
+    sizechange(params){
+      this.cpuChart.resize(params) 
     },
-    resize(params) {
-      this.width = params.width;
-      this.height = params.height;
-      this.cpuChart.resize(params)
-      this.cpuChart.setOption(this.option,true)
-    },
-    getCpu(timeRange) {
+    getAllData(timeRange) {
       let params= {
         query: '100-(avg by(instance)(irate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
         start: timeRange.starttime,
@@ -152,9 +133,6 @@ export default {
         }
       })
     },
-    handleClose() {
-      this.$emit('close',1);
-    }
   },
   watch: {
     cpuData: function() {
@@ -166,27 +144,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-  .panel {
-    position: relative;
-    background: transparent;
+  #cpu {
+    width: 100%;
     height: 100%;
-    .closeChart {
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      position: absolute;
-      top: 2%;
-      right: 4%;
-      z-index: 1;
-      cursor: pointer;
-    }
-    #cpu {
-      width: 100%;
-      height: 100%;
-    }
-    .closeChart:hover {
-      color: rgb(0, 163, 217)
-    }
   }
   
 </style>

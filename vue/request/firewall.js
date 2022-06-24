@@ -9,13 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-04-18 15:18:50
- * @LastEditTime: 2022-05-16 15:24:07
+ * @LastEditTime: 2022-06-20 11:33:02
  */
 import request from './request'
 // 重启防火墙
 export function reStart(data) {
   return request({
-    url: 'api/firewall_restart',
+    url: 'agent/firewall_restart',
     method: 'get',
     params: data
   })
@@ -24,7 +24,7 @@ export function reStart(data) {
 // 关闭防火墙
 export function close(data) {
   return request({
-    url: 'api/firewall_stop',
+    url: 'agent/firewall_stop',
     method: 'get',
     params: data
   })
@@ -33,7 +33,7 @@ export function close(data) {
 // 指定区域开放端口
 export function openPort(data) {
   return request({
-    url: 'api/firewall_addzp',
+    url: 'agent/firewall_addzp',
     method: 'post',
     data
   })
@@ -43,7 +43,7 @@ export function openPort(data) {
 // 删除开放的端口
 export function deleteOpenPort(data) {
   return request({
-    url: 'api/firewall_delzp',
+    url: 'agent/firewall_delzp',
     method: 'post',
     data
   })

@@ -9,27 +9,10 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 16:02:18
-  LastEditTime: 2022-06-17 14:58:22
+  LastEditTime: 2022-06-23 11:12:57
  -->
 <template>
-  <vue-draggable-resizable
-    :w="width"
-    :h="height"
-    :x="x"
-    :y="y"
-    :min-width="400"
-    :min-height="200"
-    :parent="false"
-    :grid="[10,10]"
-    class-name="dragging1"
-    @dragging="onDrag"
-    @resizing="onResize"
-    >
-      <div class="panel">
-        <span @click="handleClose" class="closeChart">✕</span>
-        <div id="memory"></div>
-      </div>
-  </vue-draggable-resizable>
+  <div id="memory" ref="chartDom"></div>
 </template>
 <script>
 import { getData, getCurrData } from "@/request/overview";
@@ -47,20 +30,14 @@ export default {
     }
   },
   mounted() {
-      this.$nextTick(() => {
-      let width = document.getElementsByClassName('charts')[0].clientWidth/2.1;
-      let height = document.getElementsByClassName('charts')[0].clientHeight/1.6;
-      this.resize({width: width,height:height})
-    })
-      this.memChart = this.$echarts.init(document.getElementById('memory'))
-      if(this.$store.getters.selectIp){
-        this.getMem({starttime: parseInt(this.now - 6*60*60) + '', endtime: parseInt(this.now - 0) + ''})
-      }
+    if(this.$store.getters.selectIp){
+      this.getAllData({starttime: parseInt(this.now - 2*60*60) + '', endtime: parseInt(this.now - 0) + ''})
+    }
+    this.CreateChart();
   },
   computed: {
     option() {
       return {
-        title: {text:'内存使用率'},
         tooltip: {
           trigger: 'axis',
           position: [10, 60],
@@ -75,6 +52,11 @@ export default {
             animation: false
           }
         },
+        grid:{
+          top:'4%',
+          left: '5%',
+          right: '3%',
+        },
         xAxis: {
           type: 'time',
           splitLine: {
@@ -83,19 +65,18 @@ export default {
         },
         yAxis: {
           type: 'value',
-          // max: 100,
           min: 0,
           boundaryGap: [0, '100%'],
         },
         dataZoom: [
           {
-            type: 'inside',
             start: 0,
-            end: 20
+            end: 100
           },
           {
+            type: 'inside',
             start: 0,
-            end: 20
+            end: 100
           }
         ],
         series: [{
@@ -114,22 +95,18 @@ export default {
     },
   },
   methods: {
-    onResize: function(x, y, width, height) {
-      this.x = x;
-      this.y = y;
-      this.resize({width: width,height:height})
+    CreateChart(){
+        this.memChart = this.$echarts.init(this.$refs.chartDom)
+        setTimeout (()=>{
+            this.$nextTick(() => {
+                this.memChart.resize()
+            })
+        },0)
     },
-    onDrag: function(x, y) {
-      this.x = x;
-      this.y = y;
+    sizechange(params){
+      this.memChart.resize(params) 
     },
-    resize(params) {
-      this.width = params.width;
-      this.height = params.height;
-      this.memChart.resize(params)
-      this.memChart.setOption(this.option,true)
-    },
-    getMem(timeRange) {
+    getAllData(timeRange) {
       let params= {
         query: '(1-(node_memory_MemAvailable_bytes/(node_memory_MemTotal_bytes)))*100',
         start: timeRange.starttime,
@@ -138,7 +115,7 @@ export default {
       }
       getData(params).then(res => {
         this.memData = [];
-        if(res.data.status === 'success') {
+        if(res.data.status === 'success' && res.data.data.result.length > 0) {
           res.data.data.result
             .filter(item => item.metric.instance === this.$store.getters.selectIp)[0]
             .values.forEach(item => {
@@ -151,9 +128,6 @@ export default {
         }
       })
     },
-    handleClose() {
-      this.$emit('close',2);
-    },
   },
   watch: {
     memData: function() {
@@ -165,27 +139,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-  .panel {
-    position: relative;
-    background: transparent;
+  #memory {
+    width: 100%;
     height: 100%;
-    .closeChart {
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      position: absolute;
-      top: 2%;
-      right: 4%;
-      z-index: 1;
-      cursor: pointer;
-    }
-    #memory {
-      width: 100%;
-      height: 100%;
-    }
-    .closeChart:hover {
-      color: rgb(0, 163, 217)
-    }
   }
   
 </style>

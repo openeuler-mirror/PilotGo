@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-06-17 16:53:33
+  LastEditTime: 2022-06-24 16:39:58
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -25,13 +25,6 @@
           <div>日志列表</div>
         </template>
         <template v-slot:table_action>
-          <!-- <el-popconfirm 
-          title="确定删除此日志？"
-          cancel-button-type="default"
-          confirm-button-type="danger"
-          @confirm="handleDelete">
-          <el-button slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </el-button>
-        </el-popconfirm> -->
         </template>
         <template v-slot:table>
           <el-table-column prop="type" label="日志名称">
@@ -121,16 +114,6 @@ export default {
       this.title = "日志详情";
       this.type = "detail";
       this.log = row;
-    },
-    handleDelete() {
-      deleteLog({ids: this.$refs.table.selectRow.ids}).then(res => {
-        if(res.status === 200) {
-          this.$message.success(res.data.msg);
-          this.refresh();
-        } else {
-          this.$message.error(res.data.msg);
-        }
-      })
     },
     format(value) {
       if(value) {

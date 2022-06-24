@@ -9,17 +9,17 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-06-17 17:34:43
+  LastEditTime: 2022-06-24 11:32:29
  -->
 <template>
   <div class="overview">
     <div class="content">
       <!-- 选择区 -->
       <div class="choice">
-        <el-form ref="form" :model="form">
+        <el-form ref="form" :inline="true" class="flex">
           <el-form-item label="机器 IP:">
             <el-autocomplete
-              style="width:30%"
+              style="width:100%"
               class="inline-input"
               v-model="macIp"
               :fetch-suggestions="querySearch"
@@ -28,21 +28,19 @@
             ></el-autocomplete>
           </el-form-item>
           <el-form-item label="监控时间:">
-            <el-row :gutter="20">
-              <el-col :span="7">
-              <el-date-picker type="date" placeholder="开始日期" v-model="form.dateSD" style="width: 49%;"></el-date-picker>
-              <el-time-picker type="date" placeholder="开始时间" v-model="form.dateST" style="width: 49%;"></el-time-picker>
-            </el-col>
-            <el-col class="line" :span="1">-</el-col>
-            <el-col :span="7">
-              <el-date-picker placeholder="结束日期" v-model="form.dateED" style="width: 49%;"></el-date-picker>
-              <el-time-picker placeholder="结束时间" v-model="form.dateET" style="width: 49%;"></el-time-picker>
-            </el-col>
-              <el-col :span="4">
-                <el-button type="primary" @click="handleConfirm"> 确认 </el-button>
-                <el-button @click="resetForm">重置</el-button>
-              </el-col>
-            </el-row>
+            <el-date-picker
+              v-model="dateRange"
+              type="datetimerange"
+              prefix-icon="el-icon-date"
+              :picker-options="pickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              align="center"
+              size="large"
+              :default-time="['9:00:00', '18:00:00']"
+              @change="changeDate">
+            </el-date-picker>
           </el-form-item>
           <el-form-item label="新增指标:">
             <el-select v-model="prome" placeholder="请选择" @click="handleAppend">
@@ -53,22 +51,51 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item>
+            <el-button plain type="primary" @click="handleConfirm">确认</el-button>
+          </el-form-item>
         </el-form>
       </div>
       <!-- 图表展示区 -->
       <div class="charts">
-        <transition name="fade-transform" mode="out-in">
-          <cpu-chart class="space"  v-if="cpuShow" @close="handleClose" ref="cpuchart"></cpu-chart>
-        </transition>
-        <transition name="fade-transform" mode="out-in">
-          <mem-chart class="space"  v-if="memShow" @close="handleClose"  ref="memchart"></mem-chart>
-        </transition>
-        <transition name="fade-transform" mode="out-in">
-          <disk-chart class="space"  v-if="diskShow" @close="handleClose"  ref="diskchart"></disk-chart>
-        </transition>
-        <transition name="fade-transform" mode="out-in">
-          <net-chart class="space"  v-if="netShow" @close="handleClose"  ref="netchart"></net-chart>
-        </transition>
+        <grid-layout :layout.sync="layout"
+          :col-num="12"
+          :row-height="10"
+          :auto-size="true"
+          :is-draggable="draggable"
+          :is-resizable="resizable"
+          :vertical-compact="true"
+          :use-css-transforms="true"
+          >
+          <template>
+            <div v-for="(item, i) in layout" :key="i">
+            <grid-item
+              class="panel"
+              :static="item.static"
+              :x="item.x"
+              :y="item.y"
+              :w="item.w"
+              :h="item.h"
+              :min-w="4"
+              :min-h="8"
+              :i="item.i"
+              :key="item.i"
+              :ref="`chartParent${item.i}`"
+              drag-allow-from=".drag"
+              drag-ignore-from=".noDrag"
+              @resize="SizeAutoChange" 
+              @resized="SizeAutoChange"
+              v-if="item.display"
+            >
+              <div class="drag" title="可任意拖动">
+                <span class="title">{{item.title}}</span>
+                <span @click="item.display = false" class="closeChart">✕</span>
+              </div>
+              <component class="noDrag" style="width:100%;height:100%; padding-top:20px" :is="item.component" :ref="`chart${item.i}`"/>
+            </grid-item>
+            </div>
+          </template>
+        </grid-layout>
       </div>
     </div>
   </div>
@@ -80,7 +107,9 @@ import MemChart from './echarts/memory.vue';
 import DiskChart from './echarts/diskIO.vue';
 import NetChart from './echarts/network.vue';
 import merge from 'webpack-merge';
-import { getallMacIps } from '@/request/cluster'
+import { pickerOptions } from './datePicker';
+import { GridLayout, GridItem } from "vue-grid-layout";
+import { getallMacIps } from '@/request/cluster';
 export default {
   name: "Prometheus",
   components: {
@@ -88,45 +117,49 @@ export default {
     MemChart,
     DiskChart,
     NetChart,
+    GridLayout,
+    GridItem,
   },
   data() {
     return {
+      layout: [
+          {"x":0,"y":0,"w":6,"h":16,"i":"0", static: false, display: true, component:'CpuChart',title:'cpu使用率'},
+          {"x":6,"y":0,"w":6,"h":16,"i":"1", static: false, display:false, component:'MemChart',title:'内存使用率'},
+          {"x":0,"y":16,"w":6,"h":20,"i":"2", static: false, display:false, component:'DiskChart',title:'磁盘读写速率'},
+          {"x":6,"y":16,"w":6,"h":20,"i":"3", static: false, display:false, component:'NetChart',title:'网络平均输入输出速率'},
+      ],
+      draggable: true,
+      resizable: true,
+      pickerOptions: pickerOptions,
       macIp: '',
       ips: [],
       ipData: [],
+      label: 'data',
+      dateRange: [new Date()-2*60*60*1000, new Date()-0],
+      timeParams: {},
       prome: '',
       promes: [
         {
           label: 'cpu',
-          value: 1
+          value: 1,
+          querySQL: '100-(avg by(instance)(irate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
         },
         {
           label: 'memory',
-          value: 2
+          value: 2,
+          querySQL: '(1-(node_memory_MemAvailable_bytes/(node_memory_MemTotal_bytes)))*100',
         },
         {
           label: 'disk',
-          value: 3
+          value: 3,
+          querySQL:''
         },
         {
           label: 'network',
-          value: 4
+          value: 4,
+          querySQL:''
         }
       ],
-      cpuShow: true,
-      memShow: true,
-      diskShow: false,
-      netShow: false,
-      label: 'data',
-      chartW: 0,
-      chartH: 0,
-      form: {
-        IP: '',
-        dateSD: new Date(),
-        dateST: new Date(),
-        dateED: new Date(),
-        dateET: new Date(),
-      }
     };
   },
   activated() {
@@ -143,8 +176,7 @@ export default {
             this.ipData.push({'value':item.ip_dept,'ip':item.ip})
           })
       }
-    })   
-    // this.resize();
+    })
     window.addEventListener("resize", this.resize);
   },
   methods: {
@@ -155,83 +187,47 @@ export default {
       }): ipData;
       cb(results);
     },
-    resize() {
-      this.chartW = document.getElementsByClassName("charts")[0].clientWidth/2.1;
-      this.chartH = document.getElementsByClassName("charts")[0].clientHeight/1.6;
-      this.$refs.cpuchart.resize({width:this.chartW,height: this.chartH});
-      this.$refs.memchart.resize({width:this.chartW,height: this.chartH});
-      if(this.diskShow) {
-        this.$refs.diskchart.resize({width:this.chartW,height: this.chartH});
-      }
-      if(this.netShow) {
-        this.$refs.netchart.resize({width:this.chartW,height: this.chartH});
-      }
+    SizeAutoChange(i,x,y,newH,newW) {
+      var EchartId = `chart${i}`; 
+      eval(`this.$refs.${EchartId}[0].sizechange({width:${newW},height:${newH*0.92}})`)
     },
+    resize(){
+      let _this = this;
+      this.layout.forEach((i) => {
+        if(i.display) {
+          let EchartId = `chart${i.i}`;
+          let EchartPId = `chartParent${i.i}`;
+          let initW = parseInt(eval(`_this.$refs.${EchartPId}[0]`).style.width.split('p')[0]);
+          let initH = parseInt(eval(`_this.$refs.${EchartPId}[0]`).style.height.split('p')[0]);
+          eval(`_this.$refs.${EchartId}[0]`).sizechange({ width: initW, height: initH*0.9 });
+        }
+      })
+    },  
     handleAppend(key) {
-      switch (key) {
-        case 1:
-          this.cpuShow = true;
-          break;
-        case 2:
-          this.memShow = true;
-          break;
-        case 3:
-          this.diskShow = true;
-          break;
-        case 4:
-          this.netShow = true;
-          break;
-      
-        default:
-          break;
-      }
-    },
-    handleClose(value) {
-      switch (value) {
-        case 1:
-          this.cpuShow = false;
-          break;
-        case 2:
-          this.memShow = false;
-          break;
-        case 3:
-          this.diskShow = false;
-          break;
-        case 4:
-          this.netShow = false;
-          break;
-      
-        default:
-          break;
-      }
+      this.layout[key-1].display = true;
     },
     handleSelect(item) {
       this.macIp = item && item.ip;
+    },
+    changeDate(timeValue) {
+      this.timeParams = {
+        starttime: timeValue[0]/1000+'',
+        endtime: timeValue[1]/1000+''
+      }
     },
     handleConfirm() {
       this.$store.dispatch('setSelectIp', this.macIp);
       this.$router.push({
         query:merge(this.$route.query,{'ip': this.macIp})
       })
-      let sTime = new Date(this.form.dateSD).getFullYear()+'-'+
-          (new Date(this.form.dateSD).getMonth()+ 1) +'-'+new Date(this.form.dateSD).getDate()+' '+
-          new Date(this.form.dateST).getHours()+':'+new Date(this.form.dateST).getMinutes()+':'+
-          new Date(this.form.dateST).getSeconds();
-      let eTime = new Date(this.form.dateED).getFullYear()+'-'+
-          (new Date(this.form.dateED).getMonth()+ 1) +'-'+new Date(this.form.dateED).getDate()+' '+
-          new Date(this.form.dateET).getHours()+':'+new Date(this.form.dateET).getMinutes()+':'+
-          new Date(this.form.dateET).getSeconds();
-      this.$refs.cpuchart.getCpu({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
-      this.$refs.memchart.getMem({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
-      this.$refs.diskchart.getDisk({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
-      this.$refs.netchart.getNet({starttime: parseInt(new Date(sTime)/1000)+'', endtime: parseInt(new Date(eTime)/1000)+''})
+      let _this = this;
+      this.layout.forEach((i) => {
+        if(i.display) {
+           var EchartId = `chart${i.i}`; 
+          eval(`_this.$refs.${EchartId}[0]`).getAllData(this.timeParams);
+        }
+      })
     },
-    resetForm() {
-        this.form.dateSD = '';
-        this.form.dateST = '';
-        this.form.dateED = '';
-        this.form.dateET = '';
-      }
   },
   watch: {
     prome: function(newValue) {
@@ -264,16 +260,14 @@ export default {
   .content {
     width: 100%;
     height: 100%;
-    background: url(~@/assets/prometheus/background.png);
-    background-size: cover;
     .flag_header {
       width: 16%;
       height: 8%;
     }
     .choice {
-      width: 100%;
-      height: 22%;
-      padding:0 0 4% 11%;
+      width: 96%;
+      margin: 0 auto;
+      height: 6%;
       background: rgba(255,255,255,0);
       input {
         cursor: pointer;
@@ -284,17 +278,43 @@ export default {
     }
     .charts {
       width: 100%;
-      height: 78%;
-      padding: 10px;
-      backdrop-filter: blur(12px);
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: space-evenly;
+      height: 94%;
       border-top: 1px dashed #bbb;
       overflow: auto;
-      .space {
-       margin-bottom: 2%;
+      .vue-grid-item:not(.vue-grid-placeholder) {
+        background: #fff;
+        border-radius: 6px;
+        .drag{
+          width:100%;
+          height: 30px;
+          border-radius: 6px 6px 0 0;
+          position: absolute;
+          z-index: 9999;
+          .title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            color: rgb(133, 130, 130);
+            font-size: 16px;
+          }
+          .closeChart {
+            display: inline-block;
+            width: 2%;
+            position: absolute;
+            top: 2%;
+            right: 1%;
+            z-index: 1;
+            cursor: pointer;
+          }
+          .closeChart:hover {
+            color:#fff;
+          }
+        }
+        .drag:hover {
+          background: rgba(242, 150, 38,.6);
+        }
       }
     }
   }
