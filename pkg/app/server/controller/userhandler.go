@@ -22,6 +22,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -100,7 +101,7 @@ func Login(c *gin.Context) {
 	}
 
 	// Issue token
-	token, err := service.ReleaseToken(user)
+	token, err := middleware.ReleaseToken(user)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
 		return

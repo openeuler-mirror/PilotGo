@@ -22,16 +22,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(logger.LoggerDebug())
+	router.Use(middleware.LoggerDebug())
 	router.Use(gin.Recovery())
 
 	// TODO: 此处绑定 http api handler
@@ -167,10 +165,10 @@ func SetupRouter() *gin.Engine {
 		policy.POST("/add", controller.PolicyAdd)
 	}
 	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
-	service.E = casbin.NewEnforcer("./rbac_models.conf", a)
-	service.E.LoadPolicy()
+	middleware.E = casbin.NewEnforcer("./rbac_models.conf", a)
+	middleware.E.LoadPolicy()
 	Level := router.Group("")
-	Level.Use(service.CasbinHandler())
+	Level.Use(middleware.CasbinHandler())
 	{
 		user.POST("/register", controller.Register)
 		user.POST("/reset", controller.ResetPassword)
@@ -200,6 +198,7 @@ func SetupRouter() *gin.Engine {
 	router.GET("/macList/departinfo", controller.DepartInfo)
 	router.GET("/macList/depart", controller.Dept)
 	router.GET("/batchmanager/selectbatch", controller.SelectBatch)
+	router.GET("/event", controller.PushAlarmHandler)
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 
 	return router

@@ -43,26 +43,26 @@ func main() {
 	}
 
 	if err := logger.Init(&sconfig.Config().Logopts); err != nil {
-		fmt.Println("logger init failed, please check the config file")
+		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
 	// redis db初始化
 	if err := redisdbInit(&sconfig.Config().RedisDBinfo); err != nil {
-		logger.Error("redis db init failed, please check the config file")
+		logger.Error("redis db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
 
 	// mysql db初始化
 	if err := mysqldbInit(&sconfig.Config().MysqlDBinfo); err != nil {
-		logger.Error("mysql db init failed, please check the config file")
+		logger.Error("mysql db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
 
 	// 监控初始化
 	if err := monitorInit(&sconfig.Config().Monitor); err != nil {
-		logger.Error("monitor init failed")
+		logger.Error("monitor init failed: %s", err)
 		os.Exit(-1)
 	}
 

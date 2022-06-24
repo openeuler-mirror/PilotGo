@@ -12,7 +12,7 @@
  * LastEditTime: 2022-03-08 09:46:30
  * Description: jwt是一个基于token的轻量级认证方式
  ******************************************************************************/
-package service
+package middleware
 
 import (
 	"time"

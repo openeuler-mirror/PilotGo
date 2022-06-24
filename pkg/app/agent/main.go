@@ -52,20 +52,20 @@ func main() {
 
 	// 初始化日志
 	if err := logger.Init(&aconfig.Config().Logopts); err != nil {
-		fmt.Println("logger init failed, please check the config file")
+		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
 	// 定时任务初始化
 	if err := uos.CronInit(); err != nil {
-		fmt.Println("cron init failed")
+		logger.Error("cron init failed: %s", err)
 		os.Exit(-1)
 	}
 
 	// init agent info
 	if err := localstorage.Init(); err != nil {
-		fmt.Println("local storage init failed")
+		logger.Error("local storage init failed: %s", err)
 		os.Exit(-1)
 	}
 	logger.Info("agent uuid is:%s", localstorage.AgentUUID())
@@ -93,7 +93,7 @@ func main() {
 	// 文件监控初始化
 	RESP_MSG = make(chan interface{})
 	if err := FileMonitorInit(); err != nil {
-		fmt.Println("config file monitor init failed")
+		logger.Error("config file monitor init failed: %s", err)
 		os.Exit(-1)
 	}
 
