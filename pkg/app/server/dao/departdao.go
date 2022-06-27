@@ -17,35 +17,35 @@ package dao
 import (
 	"github.com/jinzhu/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 func IsParentDepartExist(parent string) bool {
 	var Depart model.DepartNode
-	mysqlmanager.DB.Where("depart=? ", parent).Find(&Depart)
+	global.PILOTGO_DB.Where("depart=? ", parent).Find(&Depart)
 	return Depart.ID != 0
 }
 func IsDepartNodeExist(parent string, depart string) bool {
 	var Depart model.DepartNode
-	mysqlmanager.DB.Where("depart=? and parent_depart=?", depart, parent).Find(&Depart)
-	// mysqlmanager.DB.Where("", parent).Find(&Depart)
+	global.PILOTGO_DB.Where("depart=? and parent_depart=?", depart, parent).Find(&Depart)
+	// global.PILOTGO_DB.Where("", parent).Find(&Depart)
 	return Depart.ID != 0
 }
 func IsDepartIDExist(ID int) bool {
 	var Depart model.DepartNode
-	mysqlmanager.DB.Where("id=?", ID).Find(&Depart)
+	global.PILOTGO_DB.Where("id=?", ID).Find(&Depart)
 	return Depart.ID != 0
 }
 
 func IsRootExist() bool {
 	var Depart model.DepartNode
-	mysqlmanager.DB.Where("node_locate=?", 0).Find(&Depart)
+	global.PILOTGO_DB.Where("node_locate=?", 0).Find(&Depart)
 	return Depart.ID != 0
 }
 
 func DepartStore() []model.DepartNode {
 	var Depart []model.DepartNode
-	mysqlmanager.DB.Find(&Depart)
+	global.PILOTGO_DB.Find(&Depart)
 	return Depart
 }
 
@@ -54,7 +54,7 @@ func UpdateDepart(DepartID int, DepartName string) {
 	Depart := model.DepartNode{
 		Depart: DepartName,
 	}
-	mysqlmanager.DB.Model(&DepartInfo).Where("id=?", DepartID).Update(&Depart)
+	global.PILOTGO_DB.Model(&DepartInfo).Where("id=?", DepartID).Update(&Depart)
 }
 
 func UpdateParentDepart(DepartID int, DepartName string) {
@@ -62,25 +62,25 @@ func UpdateParentDepart(DepartID int, DepartName string) {
 	Depart := model.DepartNode{
 		ParentDepart: DepartName,
 	}
-	mysqlmanager.DB.Model(&DepartInfo).Where("p_id=?", DepartID).Update(&Depart)
+	global.PILOTGO_DB.Model(&DepartInfo).Where("p_id=?", DepartID).Update(&Depart)
 }
 
 func Pid2Depart(pid int) []model.DepartNode {
 	var DepartInfo []model.DepartNode
-	mysqlmanager.DB.Where("p_id=?", pid).Find(&DepartInfo)
+	global.PILOTGO_DB.Where("p_id=?", pid).Find(&DepartInfo)
 	return DepartInfo
 }
 
 func Deletedepartdata(needdelete []int) {
 	var DepartInfo []model.DepartNode
-	mysqlmanager.DB.Where("id=?", needdelete[0]).Delete(&DepartInfo)
+	global.PILOTGO_DB.Where("id=?", needdelete[0]).Delete(&DepartInfo)
 }
 
 //向需要删除的depart的组内增加需要删除的子节点
 func Insertdepartlist(needdelete []int, str string) []int {
 	var DepartInfo []model.DepartNode
 
-	mysqlmanager.DB.Where("p_id=?", str).Find(&DepartInfo)
+	global.PILOTGO_DB.Where("p_id=?", str).Find(&DepartInfo)
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
 	}
@@ -90,7 +90,7 @@ func Insertdepartlist(needdelete []int, str string) []int {
 // 根据部门名字查询id和pid
 func GetPidAndId(depart string) (pid, id int) {
 	var dep model.DepartNode
-	mysqlmanager.DB.Where("depart=?", depart).Find(&dep)
+	global.PILOTGO_DB.Where("depart=?", depart).Find(&dep)
 	return dep.PID, dep.ID
 }
 
@@ -103,7 +103,7 @@ func AddDepart(db *gorm.DB, depart *model.DepartNode) error {
 // 根据部门id获取部门名称
 func DepartIdToGetDepartName(id int) string {
 	var departNames model.DepartNode
-	mysqlmanager.DB.Where("id =?", id).Find(&departNames)
+	global.PILOTGO_DB.Where("id =?", id).Find(&departNames)
 	return departNames.Depart
 }
 
@@ -111,7 +111,7 @@ func DepartIdToGetDepartName(id int) string {
 func DepartIdsToGetDepartNames(ids []int) (names []string) {
 	for _, id := range ids {
 		var depart model.DepartNode
-		mysqlmanager.DB.Where("id = ?", id).Find(&depart)
+		global.PILOTGO_DB.Where("id = ?", id).Find(&depart)
 		names = append(names, depart.Depart)
 	}
 	return
@@ -120,7 +120,7 @@ func DepartIdsToGetDepartNames(ids []int) (names []string) {
 // 获取下级部门id
 func SubDepartId(id int) []int {
 	var depart []model.DepartNode
-	mysqlmanager.DB.Where("p_id=?", id).Find(&depart)
+	global.PILOTGO_DB.Where("p_id=?", id).Find(&depart)
 
 	res := make([]int, 0)
 	for _, value := range depart {
@@ -132,7 +132,7 @@ func SubDepartId(id int) []int {
 // 获取所有的一级部门id
 func FirstDepartId() (departIds []int) {
 	departs := []model.DepartNode{}
-	mysqlmanager.DB.Where("p_id = ?", model.UncateloguedDepartId).Find(&departs)
+	global.PILOTGO_DB.Where("p_id = ?", global.UncateloguedDepartId).Find(&departs)
 	for _, depart := range departs {
 		departIds = append(departIds, depart.ID)
 	}
@@ -142,14 +142,14 @@ func FirstDepartId() (departIds []int) {
 // 创建公司组织
 func CreateOrganization() {
 	var Depart model.DepartNode
-	mysqlmanager.DB.Where("p_id=?", model.Departroot).Find(&Depart)
+	global.PILOTGO_DB.Where("p_id=?", global.Departroot).Find(&Depart)
 	if Depart.ID == 0 {
 		Depart = model.DepartNode{
-			PID:          model.Departroot,
+			PID:          global.Departroot,
 			ParentDepart: "",
 			Depart:       "组织名",
-			NodeLocate:   model.Departroot,
+			NodeLocate:   global.Departroot,
 		}
-		mysqlmanager.DB.Save(&Depart)
+		global.PILOTGO_DB.Save(&Depart)
 	}
 }

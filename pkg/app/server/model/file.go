@@ -18,20 +18,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-)
-
-// 配置文件类型
-const (
-	ConfigRepo = "repo配置"
-)
-
-// 配置文件源路径
-const (
-	// repo路径
-	RepoPath = "/etc/yum.repos.d"
-	// 网络配置
-	NetWorkPath = "/etc/sysconfig/network-scripts"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 type Files struct {
@@ -85,21 +72,21 @@ type FileBroadcast struct {
 
 func (f *Files) AllFiles(q *PaginationQ) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = mysqlmanager.DB.Order("id desc").Find(&list)
+	tx = global.PILOTGO_DB.Order("id desc").Find(&list)
 	return
 }
 
 func (f *SearchFile) FileSearch(q *PaginationQ, search string) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = mysqlmanager.DB.Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
+	tx = global.PILOTGO_DB.Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
 	if len(*list) == 0 {
-		tx = mysqlmanager.DB.Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
+		tx = global.PILOTGO_DB.Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
 	}
 	return
 }
 
 func (f *HistoryFiles) HistoryFiles(q *PaginationQ, fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
 	list = &[]HistoryFiles{}
-	tx = mysqlmanager.DB.Order("id desc").Where("file_id=?", fileId).Find(&list)
+	tx = global.PILOTGO_DB.Order("id desc").Where("file_id=?", fileId).Find(&list)
 	return
 }

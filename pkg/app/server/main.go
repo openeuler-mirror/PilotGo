@@ -32,6 +32,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -91,8 +92,8 @@ func main() {
 			logger.Info("signal interrupted: %s", s.String())
 			// TODO: DO EXIT
 
-			mysqlmanager.DB.Close()
-			redismanager.Redis.Close()
+			global.PILOTGO_DB.Close()
+			global.PILOTGO_REDIS.Close()
 
 			goto EXIT
 		default:
@@ -135,22 +136,22 @@ func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	}
 
 	// 创建超级管理员账户
-	mysqlmanager.DB.AutoMigrate(&model.User{})
-	mysqlmanager.DB.AutoMigrate(&model.UserRole{})
+	global.PILOTGO_DB.AutoMigrate(&model.User{})
+	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
 	dao.CreateSuperAdministratorUser()
 
 	// 创建公司组织
-	mysqlmanager.DB.AutoMigrate(&model.DepartNode{})
+	global.PILOTGO_DB.AutoMigrate(&model.DepartNode{})
 	dao.CreateOrganization()
 
-	mysqlmanager.DB.AutoMigrate(&model.CrontabList{})
-	mysqlmanager.DB.AutoMigrate(&model.MachineNode{})
-	mysqlmanager.DB.AutoMigrate(&model.RoleButton{})
-	mysqlmanager.DB.AutoMigrate(&model.Batch{})
-	mysqlmanager.DB.AutoMigrate(&model.AgentLogParent{})
-	mysqlmanager.DB.AutoMigrate(&model.AgentLog{})
-	mysqlmanager.DB.AutoMigrate(&model.Files{})
-	mysqlmanager.DB.AutoMigrate(&model.HistoryFiles{})
+	global.PILOTGO_DB.AutoMigrate(&model.CrontabList{})
+	global.PILOTGO_DB.AutoMigrate(&model.MachineNode{})
+	global.PILOTGO_DB.AutoMigrate(&model.RoleButton{})
+	global.PILOTGO_DB.AutoMigrate(&model.Batch{})
+	global.PILOTGO_DB.AutoMigrate(&model.AgentLogParent{})
+	global.PILOTGO_DB.AutoMigrate(&model.AgentLog{})
+	global.PILOTGO_DB.AutoMigrate(&model.Files{})
+	global.PILOTGO_DB.AutoMigrate(&model.HistoryFiles{})
 
 	return nil
 }
@@ -197,7 +198,7 @@ func monitorInit(conf *sconfig.Monitor) error {
 			// TODO: 重构为事件触发机制
 			a := make([]map[string]string, 0)
 			var m []model.MachineNode
-			mysqlmanager.DB.Find(&m)
+			global.PILOTGO_DB.Find(&m)
 			for _, value := range m {
 				r := map[string]string{}
 				r[value.MachineUUID] = value.IP

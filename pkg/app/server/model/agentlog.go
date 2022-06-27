@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 type AgentLogParent struct {
@@ -44,39 +44,14 @@ type AgentLogDel struct {
 	IDs []int `json:"ids"`
 }
 
-// 日志执行操作动作
-const (
-	RPMInstall     = "软件包安装"
-	RPMRemove      = "软件包卸载"
-	SysctlChange   = "修改内核参数"
-	ServiceRestart = "重启服务"
-	ServiceStop    = "关闭服务"
-	ServiceStart   = "开启服务"
-	BroadcastFile  = "文件下发"
-)
-
-// 日志存储类型
-const (
-	LogTypeRPM       = "软件包安装/卸载"
-	LogTypeService   = "运行服务"
-	LogTypeSysctl    = "配置内核参数"
-	LogTypeBroadcast = "配置文件下发"
-)
-
-// 单机操作成功状态:是否成功，机器数量，比率
-const (
-	ActionOK    = "1,1,1.00"
-	ActionFalse = "0,1,0.00"
-)
-
 func (p *AgentLogParent) LogAll(q *PaginationQ) (list *[]AgentLogParent, tx *gorm.DB) {
 	list = &[]AgentLogParent{}
-	tx = mysqlmanager.DB.Order("created_at desc").Find(&list)
+	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
 	return
 }
 
 func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tx *gorm.DB) {
 	list = &[]AgentLog{}
-	tx = mysqlmanager.DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
+	tx = global.PILOTGO_DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	return
 }

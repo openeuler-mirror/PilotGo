@@ -23,6 +23,7 @@ import (
 	"github.com/tealeg/xlsx"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 // 随机产生用户名字
@@ -56,8 +57,8 @@ func UserType(s string) int {
 	}
 
 	var user_type int
-	if min > model.OrdinaryUserRoleId {
-		user_type = model.OtherUserType
+	if min > global.OrdinaryUserRoleId {
+		user_type = global.OtherUserType
 	} else {
 		user_type = min - 1
 	}
@@ -84,7 +85,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
 
 			userRole := row.Cells[4].Value                          // 5：角色
 			roleId, user_type := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
-			password := model.DefaultUserPassword                   // 设置默认密码为123456
+			password := global.DefaultUserPassword                  // 设置默认密码为123456
 			u := model.User{
 				Username:     userName,
 				Phone:        phone,

@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -151,7 +152,7 @@ func AllFiles(c *gin.Context) {
 	}
 
 	var filetype []string
-	filetype = append(filetype, model.ConfigRepo)
+	filetype = append(filetype, global.ConfigRepo)
 
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code":  http.StatusOK,

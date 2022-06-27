@@ -28,7 +28,7 @@ type ConnClient struct {
 	Conn *websocket.Conn
 }
 
-var clients = make(map[int]*ConnClient)
+var Clients = make(map[int]*ConnClient)
 var i int = 0
 var lock sync.Mutex
 
@@ -44,13 +44,28 @@ func PushAlarmHandler(c *gin.Context) {
 	key := i
 	lock.Unlock()
 	client := &ConnClient{Conn: conn}
-	clients[key] = client
-	go func() {
-		for {
-			data := <-agentmanager.WARN_MSG
-			for _, cli := range clients {
-				cli.Conn.WriteMessage(websocket.TextMessage, []byte(data.(string)))
+	Clients[key] = client
+
+	go Read(Clients)
+	Write(Clients)
+}
+
+func Read(Clients map[int]*ConnClient) {
+	for {
+		for key, cli := range Clients {
+			_, _, err := cli.Conn.ReadMessage()
+			if err != nil {
+				delete(Clients, key)
+				break
 			}
 		}
-	}()
+	}
+}
+func Write(Clients map[int]*ConnClient) {
+	for {
+		data := <-agentmanager.WARN_MSG
+		for _, cli := range Clients {
+			cli.Conn.WriteMessage(websocket.TextMessage, []byte(data.(string)))
+		}
+	}
 }

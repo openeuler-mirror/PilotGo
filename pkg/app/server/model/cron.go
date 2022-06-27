@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 type CrontabList struct {
@@ -51,6 +51,6 @@ type DelCrons struct {
 // 根据uuid获取所有机器
 func (c *CrontabList) CronList(uuid string, q *PaginationQ) (list *[]CrontabList, tx *gorm.DB) {
 	list = &[]CrontabList{}
-	tx = mysqlmanager.DB.Order("created_at desc").Where("machine_uuid = ?", uuid).Find(&list)
+	tx = global.PILOTGO_DB.Order("created_at desc").Where("machine_uuid = ?", uuid).Find(&list)
 	return
 }

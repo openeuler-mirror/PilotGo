@@ -14,18 +14,21 @@
  ******************************************************************************/
 package service
 
-import "openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+import (
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
+)
 
 // 统计所有机器的状态
 func AgentStatusCounts(machines []model.MachineNode) (normal, Offline, free int) {
 	for _, agent := range machines {
 		state := agent.State
 		switch state {
-		case model.Free:
+		case global.Free:
 			free++
-		case model.OffLine:
+		case global.OffLine:
 			Offline++
-		case model.Normal:
+		case global.Normal:
 			normal++
 		default:
 			continue

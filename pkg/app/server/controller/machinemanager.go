@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -61,7 +62,7 @@ func FreeMachineSource(c *gin.Context) {
 		return
 	}
 
-	list, tx, res := machine.ReturnMachine(query, model.UncateloguedDepartId)
+	list, tx, res := machine.ReturnMachine(query, global.UncateloguedDepartId)
 	total, err := CrudAll(query, tx, &res)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

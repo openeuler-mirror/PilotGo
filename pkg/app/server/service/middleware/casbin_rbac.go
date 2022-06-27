@@ -15,14 +15,10 @@
 package middleware
 
 import (
-	"github.com/casbin/casbin"
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-)
-
-var (
-	E *casbin.Enforcer
 )
 
 // 拦截器
@@ -36,7 +32,7 @@ func CasbinHandler() gin.HandlerFunc {
 		// 获取用户的角色
 		sub := role
 		//判断策略中是否存在
-		if ok := E.Enforce(sub, obj, act); ok {
+		if ok := global.PILOTGO_E.Enforce(sub, obj, act); ok {
 			logger.Info("恭喜您,权限验证通过")
 			c.Next()
 		} else {
@@ -48,7 +44,7 @@ func CasbinHandler() gin.HandlerFunc {
 
 func AllPolicy() (interface{}, int) {
 	casbin := make([]map[string]interface{}, 0)
-	list := E.GetPolicy()
+	list := global.PILOTGO_E.GetPolicy()
 	for _, vlist := range list {
 		policy := make(map[string]interface{})
 		policy["role"] = vlist[0]
@@ -61,7 +57,7 @@ func AllPolicy() (interface{}, int) {
 }
 
 func PolicyRemove(rule model.CasbinRule) bool {
-	if ok := E.RemovePolicy(rule.RoleType, rule.Url, rule.Method); !ok {
+	if ok := global.PILOTGO_E.RemovePolicy(rule.RoleType, rule.Url, rule.Method); !ok {
 		return false
 	} else {
 		return true
@@ -69,7 +65,7 @@ func PolicyRemove(rule model.CasbinRule) bool {
 }
 
 func PolicyAdd(rule model.CasbinRule) bool {
-	if ok := E.AddPolicy(rule.RoleType, rule.Url, rule.Method); !ok {
+	if ok := global.PILOTGO_E.AddPolicy(rule.RoleType, rule.Url, rule.Method); !ok {
 		return false
 	} else {
 		return true

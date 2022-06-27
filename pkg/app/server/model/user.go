@@ -61,18 +61,3 @@ func ToUserDto(user User) UserDto {
 type Userdel struct {
 	Emails []string `json:"email"`
 }
-
-const (
-	// 超级管理员
-	AdminUserType = 0
-	// 部门管理员
-	DepartManagerType = 1
-	// 普通用户
-	OrdinaryUserType = 2
-	// 其他用户，如实习生
-	OtherUserType = 3
-	//普通用户角色id
-	OrdinaryUserRoleId = 3
-	// 默认用户密码
-	DefaultUserPassword = "123456"
-)

@@ -30,7 +30,7 @@ import (
 	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
@@ -135,7 +135,7 @@ func FileMonitorInit() error {
 
 	// 2、使用 watcher 的 Add 方法增加需要监听的文件或目录到监听队列中
 	go func() {
-		err = watcher.Add(model.RepoPath)
+		err = watcher.Add(global.RepoPath)
 		if err != nil {
 			fmt.Println("failed to monitor repo")
 		}
@@ -143,7 +143,7 @@ func FileMonitorInit() error {
 	}()
 
 	go func() {
-		err = watcher.Add(model.NetWorkPath)
+		err = watcher.Add(global.NetWorkPath)
 		if err != nil {
 			fmt.Println("failed to monitor network")
 		}

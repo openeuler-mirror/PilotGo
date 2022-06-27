@@ -21,6 +21,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -72,7 +73,7 @@ func ServiceStartHandler(c *gin.Context) {
 	logParent := model.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
-		Type:       model.LogTypeService,
+		Type:       global.LogTypeService,
 	}
 	logParentId := dao.ParentAgentLog(logParent)
 
@@ -83,14 +84,14 @@ func ServiceStartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(agentservice.UUID),
 			OperationObject: agentservice.Service,
-			Action:          model.ServiceStart,
+			Action:          global.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
 		dao.AgentLog(log)
 		response.Fail(c, nil, "获取uuid失败")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -101,14 +102,14 @@ func ServiceStartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(agentservice.UUID),
 			OperationObject: agentservice.Service,
-			Action:          model.ServiceStart,
+			Action:          global.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
 		dao.AgentLog(log)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -116,12 +117,12 @@ func ServiceStartHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              dao.UUID2MacIP(agentservice.UUID),
 		OperationObject: agentservice.Service,
-		Action:          model.ServiceStart,
+		Action:          global.ServiceStart,
 		StatusCode:      http.StatusOK,
 		Message:         "启动服务成功",
 	}
 	dao.AgentLog(log)
-	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+	dao.UpdateParentAgentLog(logParentId, global.ActionOK)
 
 	response.Success(c, gin.H{"service_start": service_start}, "Success")
 }
@@ -132,7 +133,7 @@ func ServiceStopHandler(c *gin.Context) {
 	logParent := model.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
-		Type:       model.LogTypeService,
+		Type:       global.LogTypeService,
 	}
 	logParentId := dao.ParentAgentLog(logParent)
 
@@ -143,14 +144,14 @@ func ServiceStopHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(agentservice.UUID),
 			OperationObject: agentservice.Service,
-			Action:          model.ServiceStop,
+			Action:          global.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
 		dao.AgentLog(log)
 		response.Fail(c, nil, "获取uuid失败")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -161,14 +162,14 @@ func ServiceStopHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(agentservice.UUID),
 			OperationObject: agentservice.Service,
-			Action:          model.ServiceStop,
+			Action:          global.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
 		dao.AgentLog(log)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -176,12 +177,12 @@ func ServiceStopHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              dao.UUID2MacIP(agentservice.UUID),
 		OperationObject: agentservice.Service,
-		Action:          model.ServiceStop,
+		Action:          global.ServiceStop,
 		StatusCode:      http.StatusOK,
 		Message:         "关闭服务成功",
 	}
 	dao.AgentLog(log)
-	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+	dao.UpdateParentAgentLog(logParentId, global.ActionOK)
 
 	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
 }
@@ -192,7 +193,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	logParent := model.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
-		Type:       model.LogTypeService,
+		Type:       global.LogTypeService,
 	}
 	logParentId := dao.ParentAgentLog(logParent)
 
@@ -203,14 +204,14 @@ func ServiceRestartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(agentservice.UUID),
 			OperationObject: agentservice.Service,
-			Action:          model.ServiceRestart,
+			Action:          global.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
 		dao.AgentLog(log)
 		response.Fail(c, nil, "获取uuid失败")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -221,14 +222,14 @@ func ServiceRestartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(agentservice.UUID),
 			OperationObject: agentservice.Service,
-			Action:          model.ServiceRestart,
+			Action:          global.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
 		dao.AgentLog(log)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -236,12 +237,12 @@ func ServiceRestartHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              dao.UUID2MacIP(agentservice.UUID),
 		OperationObject: agentservice.Service,
-		Action:          model.ServiceRestart,
+		Action:          global.ServiceRestart,
 		StatusCode:      http.StatusOK,
 		Message:         "重启服务成功",
 	}
 	dao.AgentLog(log)
-	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+	dao.UpdateParentAgentLog(logParentId, global.ActionOK)
 
 	response.Success(c, gin.H{"service_restart": service_restart}, "Success")
 }

@@ -21,6 +21,7 @@ import (
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -119,7 +120,7 @@ func AddAgents2DB(a *Agent) {
 	if dao.IsUUIDExist(a.UUID) {
 		logger.Warn("机器%s已经存在!", agentOS[0])
 		departId := dao.UUIDForDepartId(a.UUID)
-		if departId != model.UncateloguedDepartId {
+		if departId != global.UncateloguedDepartId {
 			dao.MachineStatusToNormal(a.UUID, agentOS[0])
 		} else {
 			dao.MachineStatusToFree(a.UUID, agentOS[0])
@@ -130,10 +131,10 @@ func AddAgents2DB(a *Agent) {
 	agent_list := model.MachineNode{
 		IP:          agentOS[0],
 		MachineUUID: a.UUID,
-		DepartId:    model.UncateloguedDepartId,
+		DepartId:    global.UncateloguedDepartId,
 		Systeminfo:  agentOS[1] + " " + agentOS[2],
 		CPU:         agentOS[3],
-		State:       model.Free,
+		State:       global.Free,
 	}
 	dao.AddNewMachine(agent_list)
 }
