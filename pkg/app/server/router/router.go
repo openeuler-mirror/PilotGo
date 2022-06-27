@@ -24,6 +24,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 func SetupRouter() *gin.Engine {
@@ -165,8 +166,8 @@ func SetupRouter() *gin.Engine {
 		policy.POST("/add", controller.PolicyAdd)
 	}
 	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
-	middleware.E = casbin.NewEnforcer("./rbac_models.conf", a)
-	middleware.E.LoadPolicy()
+	global.PILOTGO_E = casbin.NewEnforcer("./rbac_models.conf", a)
+	global.PILOTGO_E.LoadPolicy()
 	Level := router.Group("")
 	Level.Use(middleware.CasbinHandler())
 	{

@@ -16,7 +16,7 @@ package dao
 
 import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 // 删除agent日志
@@ -24,32 +24,32 @@ func LogDelete(PLogIds []int) {
 	var logparent model.AgentLogParent
 	var log model.AgentLog
 	for _, id := range PLogIds {
-		mysqlmanager.DB.Where("log_parent_id=?", id).Unscoped().Delete(log)
-		mysqlmanager.DB.Where("id=?", id).Unscoped().Delete(logparent)
+		global.PILOTGO_DB.Where("log_parent_id=?", id).Unscoped().Delete(log)
+		global.PILOTGO_DB.Where("id=?", id).Unscoped().Delete(logparent)
 	}
 }
 
 // 存储父日志
 func ParentAgentLog(PLog model.AgentLogParent) int {
-	mysqlmanager.DB.Save(&PLog)
+	global.PILOTGO_DB.Save(&PLog)
 	return PLog.ID
 }
 
 // 存储子日志
 func AgentLog(Log model.AgentLog) {
-	mysqlmanager.DB.Save(&Log)
+	global.PILOTGO_DB.Save(&Log)
 }
 
 // 查询子日志
 func Id2AgentLog(id int) []model.AgentLog {
 	var Log []model.AgentLog
-	mysqlmanager.DB.Where("log_parent_id = ?", id).Find(&Log)
+	global.PILOTGO_DB.Where("log_parent_id = ?", id).Find(&Log)
 	return Log
 }
 
 // 修改父日志的操作状态
 func UpdateParentAgentLog(PLogId int, status string) {
 	var ParentLog model.AgentLogParent
-	mysqlmanager.DB.Model(&ParentLog).Where("id=?", PLogId).Update("status", status)
+	global.PILOTGO_DB.Model(&ParentLog).Where("id=?", PLogId).Update("status", status)
 
 }

@@ -19,12 +19,10 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
-var (
-	DB  *gorm.DB
-	Url string
-)
+var Url string
 
 func MysqlInit(ip, username, password, dbname string, port int) (*MysqlManager, error) {
 	m := &MysqlManager{
@@ -45,7 +43,7 @@ func MysqlInit(ip, username, password, dbname string, port int) (*MysqlManager, 
 	if err != nil {
 		return nil, err
 	}
-	DB = m.db
+	global.PILOTGO_DB = m.db
 	m.db.DB().SetMaxIdleConns(10)
 	m.db.DB().SetMaxOpenConns(100)
 	//禁用复数

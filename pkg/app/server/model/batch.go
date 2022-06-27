@@ -16,7 +16,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 type Batch struct {
@@ -51,6 +51,6 @@ type BatchDel struct {
 
 func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, tx *gorm.DB) {
 	list = &[]Batch{}
-	tx = mysqlmanager.DB.Order("created_at desc").Find(&list)
+	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
 	return
 }

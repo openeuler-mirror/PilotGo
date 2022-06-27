@@ -20,12 +20,12 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/host"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
 
 func GetRepoSource() (interface{}, error) {
-	repos, err := GetFiles(model.RepoPath)
+	repos, err := GetFiles(global.RepoPath)
 	if err != nil {
 		return "", fmt.Errorf("获取repo源文件失败:%s", err)
 	}
@@ -52,7 +52,7 @@ func GetRepoSource() (interface{}, error) {
 		}
 	}
 
-	text, err := utils.FileReadString(model.RepoPath + "/" + repo)
+	text, err := utils.FileReadString(global.RepoPath + "/" + repo)
 	if err != nil {
 		return "", fmt.Errorf("读取repo源数据失败:%s", err)
 	}

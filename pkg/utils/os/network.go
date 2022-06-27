@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/net"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -209,7 +209,7 @@ func ConfigNetworkConnect() (interface{}, error) {
 }
 
 func GetNetworkConnInfo() (interface{}, error) {
-	netPath, err := GetFiles(model.NetWorkPath)
+	netPath, err := GetFiles(global.NetWorkPath)
 	if err != nil {
 		return nil, fmt.Errorf("获取网络配置源文件失败:%s", err)
 	}
@@ -221,13 +221,13 @@ func GetNetworkConnInfo() (interface{}, error) {
 		filename = n
 	}
 
-	result, _ := utils.RunCommand("cat " + model.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
+	result, _ := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
 	ip_assignment_method := strings.Split(result, "=")[1]
 
 	var network = &NetworkConfig{}
 	switch strings.Replace(ip_assignment_method, "\n", "", -1) {
 	case "static":
-		tmp, err := utils.RunCommand("cat " + model.NetWorkPath + "/" + filename)
+		tmp, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 		if err != nil {
 			return nil, fmt.Errorf("读取网络配置源数据失败:%s", err)
 		}
@@ -263,7 +263,7 @@ func GetNetworkConnInfo() (interface{}, error) {
 		network.GateWay = strings.Replace(gateway, "\n", "", -1)
 
 	default:
-		tmp, err := utils.RunCommand("cat " + model.NetWorkPath + "/" + filename)
+		tmp, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 		if err != nil {
 			return nil, fmt.Errorf("读取网络配置源数据失败:%s", err)
 		}
@@ -281,7 +281,7 @@ func GetNetworkConnInfo() (interface{}, error) {
 }
 
 func GetNICName() (interface{}, error) {
-	network, err := GetFiles(model.NetWorkPath)
+	network, err := GetFiles(global.NetWorkPath)
 	if err != nil {
 		return nil, fmt.Errorf("获取网络配置文件失败:%s", err)
 	}

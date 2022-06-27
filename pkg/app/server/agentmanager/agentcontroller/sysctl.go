@@ -21,6 +21,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -49,7 +50,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	logParent := model.AgentLogParent{
 		UserName:   username,
 		DepartName: userDeptName,
-		Type:       model.LogTypeSysctl,
+		Type:       global.LogTypeSysctl,
 	}
 	logParentId := dao.ParentAgentLog(logParent)
 
@@ -60,14 +61,14 @@ func SysctlChangeHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(uuid),
 			OperationObject: args,
-			Action:          model.SysctlChange,
+			Action:          global.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
 		dao.AgentLog(log)
 		response.Fail(c, nil, "获取uuid失败")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 
@@ -77,26 +78,26 @@ func SysctlChangeHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              dao.UUID2MacIP(uuid),
 			OperationObject: args,
-			Action:          model.SysctlChange,
+			Action:          global.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
 			Message:         err.Error(),
 		}
 		dao.AgentLog(log)
 		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
 
-		dao.UpdateParentAgentLog(logParentId, model.ActionFalse)
+		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
 		return
 	}
 	log := model.AgentLog{
 		LogParentID:     logParentId,
 		IP:              dao.UUID2MacIP(uuid),
 		OperationObject: args,
-		Action:          model.SysctlChange,
+		Action:          global.SysctlChange,
 		StatusCode:      http.StatusOK,
 		Message:         "修改成功",
 	}
 	dao.AgentLog(log)
-	dao.UpdateParentAgentLog(logParentId, model.ActionOK)
+	dao.UpdateParentAgentLog(logParentId, global.ActionOK)
 
 	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")
 }

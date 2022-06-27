@@ -23,6 +23,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -48,7 +49,7 @@ func Register(c *gin.Context) {
 		username = service.RandomString(5)
 	}
 	if len(password) == 0 {
-		password = model.DefaultUserPassword
+		password = global.DefaultUserPassword
 	}
 	if len(email) == 0 {
 		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "邮箱不能为空!")

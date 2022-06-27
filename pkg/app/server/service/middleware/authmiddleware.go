@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -44,7 +44,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		userId := claims.UserId // Get the userID in claim after the verification is passed
 		var user model.User
-		mysqlmanager.DB.First(&user, userId)
+		global.PILOTGO_DB.First(&user, userId)
 		if user.ID == 0 {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": 401,

@@ -23,7 +23,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -96,15 +96,15 @@ func AddDepart(c *gin.Context) {
 			response.Fail(c, nil, "已存在根节点,即组织名称")
 			return
 		} else {
-			departNode.NodeLocate = model.Departroot
-			if dao.AddDepart(mysqlmanager.DB, &departNode) != nil {
+			departNode.NodeLocate = global.Departroot
+			if dao.AddDepart(global.PILOTGO_DB, &departNode) != nil {
 				response.Fail(c, nil, "部门节点添加失败")
 				return
 			}
 		}
 	} else {
-		departNode.NodeLocate = model.DepartUnroot
-		if dao.AddDepart(mysqlmanager.DB, &departNode) != nil {
+		departNode.NodeLocate = global.DepartUnroot
+		if dao.AddDepart(global.PILOTGO_DB, &departNode) != nil {
 			response.Fail(c, nil, "部门节点添加失败")
 			return
 		}
@@ -122,12 +122,12 @@ func DeleteDepartData(c *gin.Context) {
 	}
 
 	for _, mac := range dao.MachineStore(DelDept.DepartID) {
-		dao.ModifyMachineDepart2(mac.ID, model.UncateloguedDepartId)
+		dao.ModifyMachineDepart2(mac.ID, global.UncateloguedDepartId)
 	}
 	for _, depart := range dao.SubDepartId(DelDept.DepartID) {
 		machine := dao.MachineStore(depart)
 		for _, m := range machine {
-			dao.ModifyMachineDepart2(m.ID, model.UncateloguedDepartId)
+			dao.ModifyMachineDepart2(m.ID, global.UncateloguedDepartId)
 		}
 	}
 

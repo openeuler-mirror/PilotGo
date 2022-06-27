@@ -16,21 +16,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-)
-
-const (
-	// 机器运行
-	Normal = 1
-	// 脱机
-	OffLine = 2
-	// 空闲
-	Free = 3
-	// 新注册机器添加到部门根节点
-	UncateloguedDepartId = 1
-	// 是否为部门根节点
-	Departroot   = 0
-	DepartUnroot = 1
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 type MachineNode struct {
@@ -57,7 +43,7 @@ type Res struct {
 func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, tx *gorm.DB, res []Res) {
 	list = &[]Res{}
 	// tx := mysqlmanager.DB.Where("depart_id=?", departid).Find(&list)
-	tx = mysqlmanager.DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
+	tx = global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
 		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
 	res = make([]Res, 0)

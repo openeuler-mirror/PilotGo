@@ -26,6 +26,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -135,7 +136,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 	switch ip_assignment {
 	case "static":
 		text := service.NetworkStatic(oldnets, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
-		_, Err, err := agent.UpdateFile(model.NetWorkPath, nic_name.(string), text)
+		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
 			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
 			return
@@ -149,7 +150,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 
 	case "dhcp":
 		text := service.NetworkDHCP(oldnets)
-		_, Err, err := agent.UpdateFile(model.NetWorkPath, nic_name.(string), text)
+		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
 			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
 			return
@@ -192,7 +193,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 	logParent := model.AgentLogParent{
 		UserName:   fb.User,
 		DepartName: fb.UserDept,
-		Type:       model.LogTypeBroadcast,
+		Type:       global.LogTypeBroadcast,
 	}
 	logParentId := dao.ParentAgentLog(logParent)
 
@@ -205,7 +206,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              dao.UUID2MacIP(uuid),
 				OperationObject: filename,
-				Action:          model.BroadcastFile,
+				Action:          global.BroadcastFile,
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
@@ -221,7 +222,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              dao.UUID2MacIP(uuid),
 				OperationObject: filename,
-				Action:          model.BroadcastFile,
+				Action:          global.BroadcastFile,
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
@@ -234,7 +235,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              dao.UUID2MacIP(uuid),
 				OperationObject: filename,
-				Action:          model.BroadcastFile,
+				Action:          global.BroadcastFile,
 				StatusCode:      http.StatusOK,
 				Message:         "配置文件下发成功",
 			}

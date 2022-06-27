@@ -20,34 +20,34 @@ import (
 	"strings"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 // 获取所有的用户角色
 func AllUserRole() []model.UserRole {
 	var role []model.UserRole
-	mysqlmanager.DB.Find(&role)
+	global.PILOTGO_DB.Find(&role)
 	return role
 }
 
 // 邮箱账户是否存在
 func IsEmailExist(email string) bool {
 	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
+	global.PILOTGO_DB.Where("email=?", email).Find(&user)
 	return user.ID != 0
 }
 
 // 查询数据库中账号密码、用户部门、部门ID、用户类型、用户角色
 func UserPassword(email string) (s1, s2, s3 string, i1, i2 int) {
 	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
+	global.PILOTGO_DB.Where("email=?", email).Find(&user)
 	return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType
 }
 
 // 查询某用户信息
 func UserInfo(email string) model.User {
 	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
+	global.PILOTGO_DB.Where("email=?", email).Find(&user)
 	return user
 }
 
@@ -64,7 +64,7 @@ func UserAll() ([]model.ReturnUser, int) {
 	// 	logger.Debug("%+v", "从缓存中读取")
 	// 	return redisUser
 	// } else {
-	mysqlmanager.DB.Order("id desc").Find(&users)
+	global.PILOTGO_DB.Order("id desc").Find(&users)
 	totals := len(users)
 	for _, user := range users {
 		var roles []string
@@ -74,7 +74,7 @@ func UserAll() ([]model.ReturnUser, int) {
 		for _, id := range roleId {
 			userRole := model.UserRole{}
 			i, _ := strconv.Atoi(id)
-			mysqlmanager.DB.Where("id = ?", i).Find(&userRole)
+			global.PILOTGO_DB.Where("id = ?", i).Find(&userRole)
 			role := userRole.Role
 			roles = append(roles, role)
 		}
@@ -101,7 +101,7 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 	var users []model.User
 	var redisUser []model.ReturnUser
 
-	mysqlmanager.DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users)
+	global.PILOTGO_DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users)
 	totals := len(users)
 	for _, user := range users {
 		var roles []string
@@ -111,7 +111,7 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 		for _, id := range roleId {
 			userRole := model.UserRole{}
 			i, _ := strconv.Atoi(id)
-			mysqlmanager.DB.Where("id = ?", i).Find(&userRole)
+			global.PILOTGO_DB.Where("id = ?", i).Find(&userRole)
 			role := userRole.Role
 			roles = append(roles, role)
 		}
@@ -134,9 +134,9 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 // 重置密码
 func ResetPassword(email string) (model.User, error) {
 	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Find(&user)
+	global.PILOTGO_DB.Where("email=?", email).Find(&user)
 	if user.ID != 0 {
-		mysqlmanager.DB.Model(&user).Where("email=?", email).Update("password", "123456")
+		global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", "123456")
 		return user, nil
 	} else {
 		return user, fmt.Errorf("无此用户")
@@ -146,7 +146,7 @@ func ResetPassword(email string) (model.User, error) {
 // 删除用户
 func DeleteUser(email string) {
 	var user model.User
-	mysqlmanager.DB.Where("email=?", email).Unscoped().Delete(user)
+	global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user)
 }
 
 // 修改用户的部门信息
@@ -157,21 +157,21 @@ func UpdateUserDepart(email, departName string, Pid, id int) {
 		DepartSecond: id,
 		DepartName:   departName,
 	}
-	mysqlmanager.DB.Model(&user).Where("email=?", email).Updates(&u)
+	global.PILOTGO_DB.Model(&user).Where("email=?", email).Updates(&u)
 }
 
 // 添加用户
 func AddUser(u model.User) {
-	mysqlmanager.DB.Save(&u)
+	global.PILOTGO_DB.Save(&u)
 }
 
 // 修改手机号
 func UpdateUserPhone(email, phone string) {
 	var user model.User
-	mysqlmanager.DB.Model(&user).Where("email=?", email).Update("phone", phone)
+	global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("phone", phone)
 }
 
 func DelUser(deptId int) {
 	var user model.User
-	mysqlmanager.DB.Where("depart_second=?", deptId).Unscoped().Delete(user)
+	global.PILOTGO_DB.Where("depart_second=?", deptId).Unscoped().Delete(user)
 }

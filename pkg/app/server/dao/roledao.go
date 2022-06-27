@@ -21,17 +21,17 @@ import (
 	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
 // 根据角色名称返回角色id和用户类型
 func GetRoleIdAndUserType(role string) (roleId string, user_type int) {
 	var Role model.UserRole
-	mysqlmanager.DB.Where("role = ?", role).Find(&Role)
+	global.PILOTGO_DB.Where("role = ?", role).Find(&Role)
 	roleID := strconv.Itoa(Role.ID)
 	var userType int
-	if Role.ID > model.OrdinaryUserRoleId {
-		userType = model.OtherUserType
+	if Role.ID > global.OrdinaryUserRoleId {
+		userType = global.OtherUserType
 	} else {
 		userType = Role.ID - 1
 	}
@@ -41,7 +41,7 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int) {
 // 根绝id获取该角色的所有信息
 func RoleIdToGetAllInfo(roleid int) model.UserRole {
 	var role model.UserRole
-	mysqlmanager.DB.Where("id=?", roleid).Find(&role)
+	global.PILOTGO_DB.Where("id=?", roleid).Find(&role)
 	return role
 }
 
@@ -55,7 +55,7 @@ func PermissionButtons(button string) []string {
 		if err != nil {
 			panic(err)
 		}
-		mysqlmanager.DB.Where("id = ?", i).Find(&SubButton)
+		global.PILOTGO_DB.Where("id = ?", i).Find(&SubButton)
 		button := SubButton.Button
 		buttons = append(buttons, button)
 	}
@@ -66,7 +66,7 @@ func PermissionButtons(button string) []string {
 func GetAllRoles() ([]model.ReturnUserRole, int) {
 	var roles []model.UserRole
 	var getRole []model.ReturnUserRole
-	mysqlmanager.DB.Order("id desc").Find(&roles)
+	global.PILOTGO_DB.Order("id desc").Find(&roles)
 	total := len(roles)
 
 	for _, role := range roles {
@@ -89,7 +89,7 @@ func GetAllRoles() ([]model.ReturnUserRole, int) {
 			for _, button := range buttonss {
 				var but model.RoleButton
 				i, _ := strconv.Atoi(button)
-				mysqlmanager.DB.Where("id=?", i).Find(&but)
+				global.PILOTGO_DB.Where("id=?", i).Find(&but)
 				buts = append(buts, but.Button)
 			}
 			r := model.ReturnUserRole{
@@ -117,14 +117,14 @@ func AddRole(r model.UserRole) error {
 		Type:        r.Type,
 		Description: r.Description,
 	}
-	mysqlmanager.DB.Save(&userRole)
+	global.PILOTGO_DB.Save(&userRole)
 	return nil
 }
 
 // 是否有用户绑定某角色
 func IsUserBindingRole(roleId int) bool {
 	var users []model.User
-	mysqlmanager.DB.Find(&users)
+	global.PILOTGO_DB.Find(&users)
 	for _, user := range users {
 		id := user.RoleID
 		if find := strings.Contains(id, strconv.Itoa(roleId)); find {
@@ -137,19 +137,19 @@ func IsUserBindingRole(roleId int) bool {
 // 删除用户角色
 func DeleteRole(roleId int) {
 	var UserRole model.UserRole
-	mysqlmanager.DB.Where("id = ?", roleId).Unscoped().Delete(UserRole)
+	global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole)
 }
 
 // 修改角色名称
 func UpdateRoleName(roleId int, name string) {
 	var UserRole model.UserRole
-	mysqlmanager.DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name)
+	global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name)
 }
 
 // 修改角色描述
 func UpdateRoleDescription(roleId int, desc string) {
 	var UserRole model.UserRole
-	mysqlmanager.DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc)
+	global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc)
 
 }
 
@@ -164,35 +164,35 @@ func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole 
 		Menus:    menus,
 		ButtonID: buttonId,
 	}
-	mysqlmanager.DB.Model(&userRole).Where("id = ?", permission.RoleID).Update(&r)
+	global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Update(&r)
 	return userRole
 }
 
 // 创建超级管理员账户
 func CreateSuperAdministratorUser() {
-	var menus string = "cluster,batch,usermanager,rolemanager,overview,firewall,log,prometheus"
-
 	var user model.User
 	var role model.UserRole
-	mysqlmanager.DB.Where("type =?", model.AdminUserType).Find(&role)
+	global.PILOTGO_DB.Where("type =?", global.AdminUserType).Find(&role)
 	if role.ID == 0 {
 		role = model.UserRole{
-			Role:  "超级管理员",
-			Type:  model.AdminUserType,
-			Menus: menus,
+			Role:        "超级用户",
+			Type:        global.AdminUserType,
+			Description: "超级管理员",
+			Menus:       global.PILOTGO_MENUS,
+			ButtonID:    global.PILOTGO_BUTTONID,
 		}
-		mysqlmanager.DB.Create(&role)
+		global.PILOTGO_DB.Create(&role)
 		user = model.User{
 			CreatedAt:    time.Time{},
-			DepartFirst:  model.Departroot,
-			DepartSecond: model.UncateloguedDepartId,
+			DepartFirst:  global.Departroot,
+			DepartSecond: global.UncateloguedDepartId,
 			DepartName:   "超级用户",
 			Username:     "admin",
-			Password:     model.DefaultUserPassword,
+			Password:     global.DefaultUserPassword,
 			Email:        "admin@123.com",
-			UserType:     model.AdminUserType,
+			UserType:     global.AdminUserType,
 			RoleID:       strconv.Itoa(role.ID),
 		}
-		mysqlmanager.DB.Create(&user)
+		global.PILOTGO_DB.Create(&user)
 	}
 }
