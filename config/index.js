@@ -1,9 +1,24 @@
+/*
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * @Author: zhaozhenfang
+ * @Date: 2022-05-25 17:52:50
+ * @LastEditTime: 2022-06-28 13:54:58
+ */
 'use strict'
 // Template version: 1.3.1
 // see http://vuejs-templates.github.io/webpack for documentation.
 
 const path = require('path')
-
+const basePath = 'http://localhost:8888'; 
+//'http://172.17.127.21:8000', // wang 
+//172.17.127.18:10086, zhang
 module.exports = {
   dev: {
     env: require('./dev.env'),
@@ -13,55 +28,17 @@ module.exports = {
     https:true,
     proxyTable: {
       '/': {
-        target: 'http://192.168.136.21:8888',
+        target: basePath,
         changeOrigin: true,  //改变源
-        secure:true
-        // pathRewrite: {
-        //   '^/api': ''   //路径重写
-        // }
-      },
-      '/hosts': {
-        target: 'http://localhost:8083',
-        changeOrigin: true,  //改变源
-        secure:true
-        // pathRewrite: {
-        //   '^/api': ''   //路径重写
-        // }
-      },
-      '/overview': {
-        target: 'https://172.17.6.163:8888',
-        changeOrigin: true,  //改变源
-        // pathRewrite: {
-        //   '^/api': ''   //路径重写
-        // }
-      },
-      '/plugin': {
-        target: 'https://172.17.6.163:8888',
-        changeOrigin: true,  //改变源
-        // pathRewrite: {
-        //   '^/api': ''   //路径重写
-        // }
-      },
-      '/cockpit': {
-        target: 'https://172.17.6.163:8081',
-        changeOrigin: true,  //改变源
-        // pathRewrite: {
-        //   '^/api': ''   //路径重写
-        // }
-      },
-      '/api': {
-        target: 'http://localhost:8083',
-        changeOrigin: true,  //改变源
+        secure:true,
         pathRewrite: {
-          '^/api': ''   //路径重写
+          '^/config/macList': '/macList'   //路径重写
         }
-      }
+      },
     },
-
     // Various Dev Server settings
-    // host: '172.17.6.167', // can be overwritten by process.env.HOST
-    host: '192.168.136.21', // can be overwritten by process.env.HOST
-    port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    host: '0.0.0.0', 
+    port: 8080,
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
