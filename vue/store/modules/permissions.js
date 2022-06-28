@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-05-09 11:34:00
+ * @LastEditTime: 2022-06-27 15:20:32
  */
 import { constantRouterMap, routes } from '@/router'
 import { getPermission } from "@/request/user"
@@ -72,6 +72,7 @@ const permission = {
                     if (res.data.code === 200) {
                         let data = res.data.data;
                         let { menu, button } = data;
+                        button.push("default_all");
                         commit("SET_MENUS", menu.split(','));
                         commit("SET_OPERATIONS", button);
                         resolve()

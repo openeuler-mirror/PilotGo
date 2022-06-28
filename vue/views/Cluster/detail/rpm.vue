@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-06-20 16:41:10
+  LastEditTime: 2022-06-24 17:43:32
  -->
 <template>
  <div class="content">
@@ -33,9 +33,9 @@
         placeholder="请输入内容"
         @select="handleSelect"
       ></el-autocomplete>
-      <el-button plain  type="primary" @click="handleSelect">搜索</el-button>
-      <el-button plain  type="primary" @click="handleInstall">下发</el-button>
-      <el-button plain type="primary" @click="handleUnInstall">卸载</el-button>
+      <auth-button name="default_all" @click="handleSelect">搜索</auth-button>
+      <auth-button name="rpm_install" @click="handleInstall">下发</auth-button>
+      <auth-button name="rpm_uninstall" @click="handleUnInstall">卸载</auth-button>
    </div>
    <div class="info">
      <div class="detail" v-if="display">

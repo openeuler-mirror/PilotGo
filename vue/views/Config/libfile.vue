@@ -46,10 +46,10 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
-            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</auth-button>
-            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
-            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleHistory(scope.row)">历史版本</auth-button>
-            <auth-button name="user_edit" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
+            <auth-button name="default_all" type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</auth-button>
+            <auth-button name="default_all" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+            <auth-button name="default_all" type="primary" plain size="mini" @click="handleHistory(scope.row)">历史版本</auth-button>
+            <auth-button name="config_install" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
           </template>
         </el-table-column>
       </template>

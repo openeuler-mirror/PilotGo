@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-15 10:10:01
-  LastEditTime: 2022-04-06 16:36:14
+  LastEditTime: 2022-06-27 14:33:43
  -->
 <template>
  <div>
@@ -32,7 +32,8 @@
  </div>
 </template>
 <script>
-import { getMenu, roleAuth } from '@/request/role'
+import { getMenu, roleAuth } from '@/request/role';
+import { menuData } from './authMenu';
 export default {
   name: "detail",
   props: {
@@ -51,105 +52,7 @@ export default {
         defaultData: [],
         menus: [],
         btns: [],
-        menuData: [{
-          id: 1,
-          label: '概览',
-          isMenu: true,
-          menuName:'overview',
-          children: []
-        },{
-          id: 2,
-          label: '机器管理',
-          isMenu: true,
-          menuName:'cluster',
-          children: [{
-            id: 8,
-            btnId: 1,
-            label: 'rpm下发',
-            menuName: 'rpm_install',
-          },{
-            id: 9,
-            btnId: 2,
-            label: 'rpm卸载',
-            menuName: 'rpm_uninstall',
-          },{
-            id: 10,
-            btnId: 4,
-            label: '删除机器',
-            menuName: 'cluster_delete',
-          }]
-        },{
-          id: 3,
-          label: '批次管理',
-          isMenu: true,
-          menuName:'batch',
-          children: [{
-            id: 11,
-            btnId: 3,
-            label: '创建批次',
-            menuName: 'create_batch',
-          },{
-            id: 12,
-            btnId: 6,
-            label: '编辑批次',
-            menuName: 'batch_edit',
-          },{
-            id: 13,
-            btnId: 5,
-            label: '删除批次',
-            menuName: 'batch_delete',
-          }]
-        },{
-          id: 4,
-          label: '用户管理',
-          isMenu: true,
-          menuName:'usermanager',
-          children: [{
-            id: 14,
-            btnId: 7,
-            label: '添加用户',
-            menuName: 'user_add',
-          },{
-            id: 15,
-            btnId: 9,
-            label: '导入用户',
-            menuName: 'user_import',
-          },{
-            id: 16,
-            btnId: 10,
-            label: '编辑用户',
-            menuName: 'user_edit',
-          },{
-            id: 17,
-            btnId: 11,
-            label: '重置密码',
-            menuName: 'user_reset',
-          },{
-            id: 18,
-            btnId: 8,
-            label: '删除用户',
-            menuName: 'user_del',
-          }]
-        },{
-          id: 5,
-          label: '角色管理',
-          isMenu: true,
-          menuName:'rolemanager',
-          children: []
-        },
-        /* {
-          id: 6,
-          label: '防火墙配置',
-          menuName:'firewall',
-          children: []
-        }, */
-        {
-          id: 7,
-          label: '日志管理',
-          isMenu: true,
-          menuName:'log',
-          children: []
-        }],
+        menuData: menuData,
         defaultProps: {
           children: 'children',
           label: 'label',
