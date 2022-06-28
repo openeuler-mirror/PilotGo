@@ -40,7 +40,7 @@
           </el-table-column>
           <el-table-column prop="operation" label="操作"  fixed="right">
             <template slot-scope="scope">
-              <auth-button name="batch_edit" size="mini" type="primary" plain @click="handleEdit(scope.row)">
+              <auth-button name="batch_update" size="mini" @click="handleEdit(scope.row)">
                 编辑
               </auth-button>
             </template>
@@ -61,15 +61,11 @@
 </template>
 
 <script>
-import kyTable from "@/components/KyTable";
-import AuthButton from "@/components/AuthButton";
 import UpdateForm from "./form/updateForm.vue"
 import { getBatches, delBatches } from "@/request/batch";
 export default {
   name: "Batch",
   components: {
-    kyTable,
-    AuthButton,
     UpdateForm,
   },
   data() {

@@ -9,10 +9,11 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-06-24 17:09:22
+  LastEditTime: 2022-06-27 14:14:28
   Description: provide agent log manager of pilotgo
  -->
 <template>
+<div style="width:calc(100%);height:calc(100%)">
   <el-container>
     <el-aside style="width: 10%">
       <div class="logo"> 
@@ -59,6 +60,7 @@
       </el-main>
     </el-container>
   </el-container>
+  </div>
 </template>
 
 <script>
@@ -181,17 +183,27 @@ export default {
     // 关闭连接
     closeSocket() {
       this.ws.onclose = () => {
-        console.log('关闭连接')
+        let _this = this;
+        _this.ws.close();
+        console.log('断开重连')
+        setTimeout(() =>{
+          _this.initSocket();
+        },15000)
       }
     },
     // 连接错误
     errorSocket() {
       this.ws.onerror = () => {
+        let _this = this;
+        _this.ws.close();
         this.$message.error('websoket连接失败,请刷新!')
       }
     },
-
+  
   },
+  beforeDestroy() { 
+    this.ws.close();
+  }
 };
 </script>
 

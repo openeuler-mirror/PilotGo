@@ -138,15 +138,6 @@ export const routes = [
           },
         ]
       },
-      /* {
-        path: '/prometheus',
-        name: 'Prometheus',
-        component: _import('Prometheus/index'),
-        meta: { title: 'prometheus', header_title: "性能监控", panel: "prometheus", icon_class: 'el-icon-s-marketing',
-        breadcrumb: [
-          { name: '性能监控' },
-        ]},
-      }, */
       {
         path: '/batch',
         name: 'Batch',

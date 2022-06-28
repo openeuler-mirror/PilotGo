@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-06-14 10:30:01
+  LastEditTime: 2022-06-27 15:09:26
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -38,14 +38,14 @@
           </template>
           <template v-slot:table_action>
             <auth-button 
-              name="rpm_install" 
+              name="dept_change" 
               :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" 
               @click="handleChange"> 变更部门 </auth-button>
           </template>
           <template v-slot:table>
             <el-table-column label="ip">
               <template slot-scope="scope" >
-                <router-link :to="'/cluster/macList/' +scope.row.uuid">
+                <router-link :to="'/cluster/macList/' +scope.row.uuid" @click="handleSelectIP(scope.row.ip)">
                   {{ scope.row.ip }}
                 </router-link>
               </template>
@@ -63,9 +63,8 @@
             </el-table-column>
             <el-table-column label="操作" fixed="right">
               <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain 
-                  @click="handleProme(scope.row.ip)">               
-                  监控
+                <el-button size="mini" type="primary" plain name="default_all" 
+                  @click="handleProme(scope.row.ip)"> 监控
                 </el-button>
               </template>
             </el-table-column>
@@ -89,9 +88,7 @@
 </template>
 
 <script>
-import kyTable from "@/components/KyTable";
 import kyTree from "@/components/KyTree";
-import AuthButton from "@/components/AuthButton";
 import AuthDrop from "@/components/AuthDrop";
 import StateDot from "@/components/StateDot";
 import UpdateForm from "./form/updateForm";
@@ -104,9 +101,7 @@ export default {
     UpdateForm,
     ChangeForm,
     RpmIssue,
-    kyTable,
     kyTree,
-    AuthButton,
     AuthDrop,
     StateDot,
   },
@@ -193,6 +188,7 @@ export default {
       this.departName = "未分配资源池";
     },
     handleSelectIP(ip) {
+      console.log(ip)
       this.$store.dispatch('setSelectIp', ip)
     },
     handleProme(ip) {
