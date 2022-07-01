@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-16 11:17:06
-  LastEditTime: 2022-06-21 09:27:53
+  LastEditTime: 2022-07-01 16:37:15
  -->
 <template>
  <div class="content flex">
@@ -133,8 +133,7 @@ export default {
     this.userName = this.$store.getters.userName;
     this.userDeptName = this.$store.getters.UserDepartName;
     this.userType = this.$store.getters.userType === 0 ? 
-      '超级管理员': this.$store.getters.userType === 1 ? 
-      '部门管理员' : this.$store.getters.userType === 2 ? '普通用户' : '暂无';
+      '超级管理员': '普通用户';
     getPanelDatas().then(res => {
       if(res.data.code === 200) {
         let data = res.data.data.data;
@@ -162,13 +161,6 @@ export default {
           this.messageNum = res.data.data.alerts.length;
         }
       })
-      /* setInterval(function() {
-        getAlerts().then(res => {
-        if(res.data.code === 200) {
-          this.Message = res.data.data;
-        }
-      })
-      },20000); */
     },
     handleClose() {
       this.display = false;

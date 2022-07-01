@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:34
-  LastEditTime: 2022-05-20 16:05:27
+  LastEditTime: 2022-07-01 15:16:07
  -->
 <template>
  <div class="content">
@@ -84,19 +84,22 @@ export default {
       userName:this.$store.getters.userName,
     }
     if(this.$route.params.detail != undefined) {
-    getserviceList({uuid:this.$route.params.detail}).then((res) => {
-      if(res.data.code === 200) {
-        let result = this.allService = res.data.data && res.data.data.service_list;
-         result.forEach(item => {
-            this.serviceData.push({'value':item.Name})
-          })
-      } else {
-        console.log(res.data.msg)
-      }
-    })
+      this.getAllService();
     }
   },
   methods: {
+    getAllService() {
+      getserviceList({uuid:this.$route.params.detail}).then((res) => {
+        if(res.data.code === 200) {
+          let result = this.allService = res.data.data && res.data.data.service_list;
+          result.forEach(item => {
+              this.serviceData.push({'value':item.Name})
+            })
+        } else {
+          console.log(res.data.msg)
+        }
+      })
+    },
     querySearch(queryString, cb) {
       var serviceData = this.serviceData;
       var results = queryString ? serviceData.filter((item) => {
@@ -105,6 +108,10 @@ export default {
       cb(results);
     },
     handleSelect(item) {
+      if(this.serviceName == '') {
+        this.$message.error("服务名不能为空");
+        return;
+      }
       let serviceName = (item && item.value) || this.serviceName;
       let serviceDetail = this.allService.filter(item => item.Name === serviceName);
       if(serviceDetail.length > 0) {
@@ -114,13 +121,22 @@ export default {
       }
     },
     handleResult(res) {
-      this.result = res.data.code === 200 ? '成功' : '失败';
+      if(res.data.code === 200) {
+        this.result = "成功";
+        this.getAllService();
+      } else {
+        this.result = "失败";
+      }
     },
     handleStart() {
+      if(this.serviceName == '') {
+        this.$message.error("服务名不能为空");
+        return;
+      }
       this.action = "开启服务";
       this.display = false;
       let params = {
-        service: this.sericeName,
+        service: this.serviceName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
@@ -129,10 +145,14 @@ export default {
       })
     },
     handleStop() {
+      if(this.serviceName == '') {
+        this.$message.error("服务名不能为空");
+        return;
+      }
       this.action = "停止服务";
       this.display = false;
       let params = {
-        service: this.sericeName,
+        service: this.serviceName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
@@ -141,10 +161,14 @@ export default {
       })
     },
     handleRestart() {
+      if(this.serviceName == '') {
+        this.$message.error("服务名不能为空");
+        return;
+      }
       this.action = "重启服务";
       this.display = false;
       let params = {
-        service: this.sericeName,
+        service: this.serviceName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }

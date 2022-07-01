@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-06-24 17:43:32
+  LastEditTime: 2022-07-01 15:41:13
  -->
 <template>
  <div class="content">
@@ -34,7 +34,7 @@
         @select="handleSelect"
       ></el-autocomplete>
       <auth-button name="default_all" @click="handleSelect">搜索</auth-button>
-      <auth-button name="rpm_install" @click="handleInstall">下发</auth-button>
+      <auth-button name="rpm_install" @click="handleInstall">安装</auth-button>
       <auth-button name="rpm_uninstall" @click="handleUnInstall">卸载</auth-button>
    </div>
    <div class="info">
@@ -92,9 +92,21 @@ export default {
     }
   },
   mounted() {
-    let obj = this.params = {uuid:this.$route.params.detail};
+    this.params = {uuid:this.$route.params.detail};
     if(this.$route.params.detail != undefined) {
-      rpmAll(obj).then(res => {
+      this.getAllRpm();
+      repoAll(this.params).then(res => {
+        if(res.data.code === 200) {
+          this.totalRepo = res.data.data && res.data.data;
+        } else {
+          console.log(res.data.msg)
+        }
+      })
+    }
+  },
+  methods: {
+    getAllRpm() {
+       rpmAll(this.params).then(res => {
         if(res.data.code === 200) {
           let result = res.data.data && res.data.data.rpm_all;
           this.totalPackages = result.length;
@@ -105,16 +117,7 @@ export default {
           console.log(res.data.msg)
         }
       })
-      repoAll(obj).then(res => {
-        if(res.data.code === 200) {
-          this.totalRepo = res.data.data && res.data.data;
-        } else {
-          console.log(res.data.msg)
-        }
-      })
-    }
-  },
-  methods: {
+    },
     querySearch(queryString, cb) {
       var rpmData = this.rpmData;
       var results = queryString ? rpmData.filter((item) => {
@@ -133,41 +136,52 @@ export default {
         }
       })
     },
-    handleRepoChange(repo) {
-      console.log(repo)
-    },
     handleResult(res) {
-      this.result = res.data.code === 200 ? '成功' : '失败'
+      if(res.data.code === 200) {
+        this.result = "成功";
+        this.getAllRpm();
+      } else {
+        this.result = "失败";
+      }
     },
     handleInstall() {
       this.display = false;
       this.action ="软件包下发";
       let params = {
         uuid: [this.$route.params.detail],
-        rpm: this.state,
+        rpm: this.packageName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      rpmIssue(params).then(res => {
-        this.handleResult(res)
-      }).catch(error => {
-        console.log("api error")
-      })
+      if(this.packageName == '') {
+        this.$message.error("软件包名不能为空")
+      } else {
+        rpmIssue(params).then(res => {
+          this.handleResult(res);
+        }).catch(error => {
+          console.log("api error")
+        })
+      }
+      
     },
     handleUnInstall() {
       this.display = false;
       this.action ="软件包卸载";
       let params = {
         uuid: [this.$route.params.detail],
-        rpm: this.state,
+        rpm: this.packageName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      rpmUnInstall(params).then(res => {
-        this.handleResult(res)
-      }).catch(error => {
-        console.log("api error")
-      })
+      if(this.packageName == '') {
+        this.$message.error("软件包名不能为空")
+      } else {
+        rpmUnInstall(params).then(res => {
+          this.handleResult(res);
+        }).catch(error => {
+          console.log("api error")
+        })
+      }
     }
 
 

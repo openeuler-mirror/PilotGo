@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-22 16:43:19
-  LastEditTime: 2022-06-16 09:38:21
+  LastEditTime: 2022-06-29 10:28:09
   Description: 'Components Table'
  -->
 <template>
@@ -279,7 +279,6 @@ export default {
       .el-button {
         font-size: 12px;
         padding: 10px;
-        color: #3e9df9;
       }
     }
   }

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-10 09:37:29
-  LastEditTime: 2022-06-20 11:03:23
+  LastEditTime: 2022-07-01 14:23:34
  -->
 <template>
   <div>
@@ -160,7 +160,7 @@ export default {
                 this.$message.success(res.data.msg);
                 this.$refs.form.resetFields();
               } else {
-                this.$message.error(res.data.error);
+                this.$message.error(res.data.msg);
               }
             })
             .catch((res) => {

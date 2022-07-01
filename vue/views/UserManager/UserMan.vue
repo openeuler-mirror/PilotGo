@@ -23,7 +23,7 @@
           @confirm="handleDelete">
           <auth-button name="user_del" slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"> 删除 </auth-button>
         </el-popconfirm>
-        <el-button @click="handleExport"> 导出 </el-button>
+        <el-button type="primary" plain @click="handleExport"> 导出 </el-button>
         <el-upload
           :show-file-list="false"
           :before-upload="beforeUpload"

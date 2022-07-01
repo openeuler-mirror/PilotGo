@@ -1,11 +1,11 @@
 <template>
-  <div id="tags-view-container" class="tags-view-container">
-    <scroll-pane ref="scrollPane" class="tags-view-wrapper">
+  <div class="tags-view-container">
+    <div class="tags-view-wrapper">
       <router-link
         v-for="tag in visitedViews"
         ref="tag"
         :key="tag.path"
-        :class="isActive(tag)?'active':''"
+        :class="isActive(tag)?'active':'disActive'"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
         class="tags-view-item"
         @click.middle.native="closeSelectedTag(tag)"
@@ -14,9 +14,8 @@
         {{ tag.title }}
         <span v-if="!tag.meta.affix" class="el-icon-close" @click.prevent.stop="closeSelectedTag(tag)" />
       </router-link>
-    </scroll-pane>
+      </div>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <!-- <li @click="refreshSelectedTag(selectedTag)">刷新</li> -->
       <li v-if="!(selectedTag.meta&&selectedTag.meta.affix)" @click="closeSelectedTag(selectedTag)">关闭</li>
       <li @click="closeOthersTags">关闭其他</li>
       <li @click="closeAllTags(selectedTag)">关闭全部</li>
@@ -25,18 +24,16 @@
 </template>
 
 <script>
-import ScrollPane from './ScrollPane'
 import path from 'path'
 
 export default {
-  components: { ScrollPane },
   data() {
     return {
       visible: false,
       top: 0,
       left: 0,
       selectedTag: {},
-      affixTags: []
+      affixTags: [],
     }
   },
   computed: {
@@ -51,6 +48,13 @@ export default {
     $route() {
       this.addTags()
       this.moveToCurrentTag()
+    },
+    visitedViews(value) {
+      if(value.length == 1) {
+        value[0].meta.affix = true;
+      } else {
+        value.forEach(tag => tag.meta.affix = false);
+      }
     },
     visible(value) {
       if (value) {
@@ -110,7 +114,7 @@ export default {
       this.$nextTick(() => {
         for (const tag of tags) {
           if (tag.to.path === this.$route.path) {
-            this.$refs.scrollPane.moveToTarget(tag)
+            // this.$refs.scrollPane.moveToTarget(tag)
             // when query is different then update
             if (tag.to.fullPath !== this.$route.fullPath) {
               this.$store.dispatch('tagsView/updateVisitedView', this.$route)
@@ -148,7 +152,8 @@ export default {
         if (this.affixTags.some(tag => tag.path === view.path)) {
           return
         }
-        this.toLastView(visitedViews, view)
+        // this.toLastView(visitedViews, view)
+        this.$router.push('/overview')
       })
     },
     toLastView(visitedViews, view) {
@@ -186,6 +191,9 @@ export default {
     closeMenu() {
       this.visible = false
     }
+  },
+  beforeDestroy() {
+    this.closeAllTags();
   }
 }
 </script>
@@ -203,6 +211,11 @@ export default {
   // border-bottom: 1px solid #d8dce5;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
   .tags-view-wrapper {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
     .tags-view-item {
       display: inline-block;
       position: relative;
@@ -232,6 +245,7 @@ export default {
           display: inline-block;
           width: 8px;
           height: 8px;
+          top: -4%;
           border-radius: 50%;
           position: relative;
           margin-right: 2px;
@@ -256,7 +270,8 @@ export default {
       padding: 7px 16px;
       cursor: pointer;
       &:hover {
-        background: #eee;
+        background: rgba(241, 139, 14, .9);
+        color: #fff;
       }
     }
   }
@@ -266,22 +281,40 @@ export default {
 <style lang="scss">
 //reset element css of el-icon-close
 .tags-view-wrapper {
-  .tags-view-item {
+  .disActive {
     .el-icon-close {
       width: 14px;
       height: 14px;
-      vertical-align: 2px;
+      line-height: 14px;
       border-radius: 50%;
-      text-align: center;
+      font-size:14px;
       transition: all .3s cubic-bezier(.645, .045, .355, 1);
       transform-origin: 100% 50%;
       &:before {
         transform: scale(.6);
         display: inline-block;
-        vertical-align: -3px;
       }
       &:hover {
-        color: #b4bccc;
+        color: #fff;
+        background-color: rgba(241, 139, 14, .9);
+      }
+    }
+  }
+  .active {
+    .el-icon-close {
+      width: 14px;
+      height: 14px;
+      line-height: 14px;
+      border-radius: 50%;
+      font-size:14px;
+      transition: all .3s cubic-bezier(.645, .045, .355, 1);
+      transform-origin: 100% 50%;
+      &:before {
+        transform: scale(.6);
+        display: inline-block;
+      }
+      &:hover {
+        color: #ccc;
         background-color: #fff;
       }
     }

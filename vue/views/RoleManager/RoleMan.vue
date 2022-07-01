@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-06-27 17:08:51
+  LastEditTime: 2022-07-01 16:44:41
  -->
 <template>
   <div style="width: 100%; height: 100%" class="panel">
@@ -38,13 +38,14 @@
         </el-table-column>
         <el-table-column label="权限">
           <template slot-scope="scope">
+            <auth-button v-if="![0].includes($store.getters.userType) && ![1].includes(scope.row.id)" name="default_all" size="mini" @click="handleOpen(scope.row)">查看</auth-button>
             <auth-button v-if="[1].includes(scope.row.id)" name="default_all" size="mini" @click="handleOpen(scope.row)">查看</auth-button>
             <auth-button v-if="![1].includes(scope.row.id)" name="role_modify" size="mini" @click="handleChange(scope.row)">变更</auth-button>
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
-            <auth-button :disabled="[1].includes(scope.row.id)" name="role_updaate" size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+            <auth-button :disabled="[1].includes(scope.row.id)" name="role_update" size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
             <el-popconfirm 
               title="确定删除此角色?"
               cancel-button-type="default"

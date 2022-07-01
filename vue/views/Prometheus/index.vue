@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-03-22 11:38:10
-  LastEditTime: 2022-06-24 11:32:29
+  LastEditTime: 2022-06-29 10:11:11
  -->
 <template>
   <div class="overview">
@@ -136,7 +136,10 @@ export default {
       ipData: [],
       label: 'data',
       dateRange: [new Date()-2*60*60*1000, new Date()-0],
-      timeParams: {},
+      timeParams: {
+        starttime: (new Date()-2*60*60*1000)/1000+'',
+        endtime: (new Date()-0)/1000+''
+      },
       prome: '',
       promes: [
         {
