@@ -9,13 +9,14 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-28 14:22:36
-  LastEditTime: 2022-06-17 17:42:52
+  LastEditTime: 2022-07-01 14:22:13
   Description: provide agent log manager of pilotgo
  -->
 <template>
   <div class="content">
     <div class="basic">
-      <el-descriptions class="margin-top" :column="3">
+      <el-descriptions class="margin-top" :column="2">
+        <el-descriptions-item label="操作对象">{{ opObject }}</el-descriptions-item>
         <el-descriptions-item label="类型">{{ type }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ status }}</el-descriptions-item>
         <el-descriptions-item label="进度比">{{ percent }}</el-descriptions-item>
@@ -60,7 +61,8 @@ export default {
       type: '',
       statusType: '',
       percent: '0/0',
-      status: ''
+      status: '',
+      opObject: '',
     }
   },
   mounted() {
@@ -69,12 +71,8 @@ export default {
     getLogDetail({id: this.log.id}).then(res => {
       this.result = res.data.data;
       this.type = res.data.data[0].action;
+      this.opObject = res.data.data[0].object;
       let errMac = this.result.filter(item => item.code == 400).length;
-      // if(this.log.status == '成功') {
-      //   this.percent = 100;
-      // } else {
-      //   this.percent = (errMac / this.result.length).toFixed(2) * 100;
-      // }
     })
   },
 }

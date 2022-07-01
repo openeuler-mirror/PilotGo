@@ -9,14 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-06-17 15:49:24
+ * @LastEditTime: 2022-07-01 16:15:57
  */
 const getters = {
     token: state => state.user.token,
     userName: state => state.user.username,
     roles: state => state.user.roles,
-    userType: state => state.user.userType,
-    UserDepartId: state => state.user.departId,
+    userType: state => parseInt(state.user.userType),
+    UserDepartId: state => parseInt(state.user.departId),
     UserDepartName: state => state.user.departName,
     activePanel: state => state.permissions.activePanel,
     selectIp: state => state.cluster.selectIp,

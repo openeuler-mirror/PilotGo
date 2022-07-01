@@ -57,6 +57,7 @@
     
     <el-dialog 
       :title="title"
+      top="10vh"
       :before-close="handleClose" 
       :visible.sync="display" 
       :width="dialogWidth"

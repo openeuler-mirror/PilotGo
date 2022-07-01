@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-04-18 15:18:50
- * @LastEditTime: 2022-06-20 11:33:02
+ * @LastEditTime: 2022-07-01 08:51:00
  */
 import request from './request'
 // 重启防火墙
@@ -55,5 +55,58 @@ export function getConfig(data) {
     url: 'api/firewall_config',
     method: 'get',
     params: data
+  })
+}
+
+// 更改防火墙默认区域
+export function changeDefaultZone(data) {
+  return request({
+    url: 'agent/firewall_default',
+    method: 'post',
+    data
+  })
+}
+
+// 获取防火墙区域配置
+export function getZoneConfig(data) {
+  return request({
+    url: 'api/firewall_zone',
+    method: 'get',
+    params: data
+  })
+}
+
+// 添加服务
+export function addService(data) {
+  return request({
+    url: 'agent/firewall_serviceAdd',
+    method: 'post',
+    data
+  })
+}
+
+// 删除服务
+export function delService(data) {
+  return request({
+    url: 'agent/firewall_serviceRemove',
+    method: 'post',
+    data
+  })
+}
+// 添加来源
+export function addSource(data) {
+  return request({
+    url: 'agent/firewall_sourceAdd',
+    method: 'post',
+    data
+  })
+}
+
+// 删除来源
+export function delSource(data) {
+  return request({
+    url: 'agent/firewall_sourceRemove',
+    method: 'post',
+    data
   })
 }

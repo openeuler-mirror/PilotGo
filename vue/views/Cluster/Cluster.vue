@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-06-27 15:09:26
+  LastEditTime: 2022-07-01 16:16:13
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -45,9 +45,9 @@
           <template v-slot:table>
             <el-table-column label="ip">
               <template slot-scope="scope" >
-                <router-link :to="'/cluster/macList/' +scope.row.uuid" @click="handleSelectIP(scope.row.ip)">
+                <span class="ipLink" @click="handleDetail(scope.row)" title="查看机器详情">
                   {{ scope.row.ip }}
-                </router-link>
+                </span>
               </template>
             </el-table-column>
             <el-table-column prop="departname" label="部门">
@@ -123,14 +123,14 @@ export default {
       display: false,
       disabled: false,
       searchData: {
-        DepartId: 1,
+        DepartId: this.$store.getters.UserDepartId,
       },
       isSource: 1,
       showSelect: true,
     };
   },
   mounted() {
-    this.showChange = true;//['0','1'].includes(this.$store.getters.userType);
+    this.showChange = [0].includes(this.$store.getters.userType);
     this.departName = this.$store.getters.tableTitle || '机器列表';
   },
   watch: {
@@ -187,8 +187,13 @@ export default {
       this.isSource = (Math.random()+1)*100;
       this.departName = "未分配资源池";
     },
+    handleDetail(row) {
+      this.handleSelectIP(row.ip);
+      this.$router.push({
+        path: `/cluster/macList/${row.uuid}`,
+      })
+    },
     handleSelectIP(ip) {
-      console.log(ip)
       this.$store.dispatch('setSelectIp', ip)
     },
     handleProme(ip) {
@@ -227,6 +232,13 @@ export default {
     width: 78%;
     height: 100%;
     float: right;
+    .ipLink {
+      color: rgb(64, 158, 255);
+      cursor: pointer;
+      &:hover {
+        color: rgb(242, 150, 38);
+      }
+    }
     .deptchange {
       cursor: pointer;
     }
