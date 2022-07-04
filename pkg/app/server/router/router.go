@@ -17,13 +17,11 @@ package router
 import (
 	"net/http"
 
-	"github.com/casbin/casbin"
-	gormadapter "github.com/casbin/gorm-adapter"
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
@@ -171,9 +169,8 @@ func SetupRouter() *gin.Engine {
 		policy.POST("/delete", controller.PolicyDelete)
 		policy.POST("/add", controller.PolicyAdd)
 	}
-	a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
-	global.PILOTGO_E = casbin.NewEnforcer("./rbac_models.conf", a)
-	global.PILOTGO_E.LoadPolicy()
+
+	global.PILOTGO_E = service.Casbin()
 	Level := router.Group("")
 	Level.Use(middleware.CasbinHandler())
 	{
@@ -193,11 +190,11 @@ func SetupRouter() *gin.Engine {
 	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
-	// router.NoRoute(func(c *gin.Context) {
-	// 	url := c.Request.RequestURI
-	// 	c.Redirect(http.StatusFound, url)
-	// 	router.StaticFile(url, "./dist/index.html")
-	// })
+	router.NoRoute(func(c *gin.Context) {
+		url := c.Request.RequestURI
+		c.Redirect(http.StatusFound, url)
+		router.StaticFile(url, "./dist/index.html")
+	})
 
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)
