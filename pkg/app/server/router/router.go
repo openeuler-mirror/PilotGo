@@ -76,6 +76,7 @@ func SetupRouter() *gin.Engine {
 		macDetails.GET("/user_all", agentcontroller.AllUserInfoHandler)
 		macDetails.GET("/os_basic", agentcontroller.OsBasic)
 		macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
+		macDetails.GET("/firewall_zone", agentcontroller.FirewalldZoneConfig)
 		macDetails.GET("/repos", agentcontroller.GetAgentRepo)
 		macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
 	}
@@ -105,6 +106,11 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.GET("/firewall_stop", agentcontroller.FirewalldStop)
 		macBasicModify.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
 		macBasicModify.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
+		macBasicModify.POST("/firewall_default", agentcontroller.FirewalldSetDefaultZone)
+		macBasicModify.POST("/firewall_serviceAdd", agentcontroller.FirewalldServiceAdd)
+		macBasicModify.POST("/firewall_serviceRemove", agentcontroller.FirewalldServiceRemove)
+		macBasicModify.POST("/firewall_sourceAdd", agentcontroller.FirewalldSourceAdd)
+		macBasicModify.POST("/firewall_sourceRemove", agentcontroller.FirewalldSourceRemove)
 		macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
 	}
 
@@ -187,11 +193,11 @@ func SetupRouter() *gin.Engine {
 	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
-	router.NoRoute(func(c *gin.Context) {
-		url := c.Request.RequestURI
-		c.Redirect(http.StatusFound, url)
-		router.StaticFile(url, "./dist/index.html")
-	})
+	// router.NoRoute(func(c *gin.Context) {
+	// 	url := c.Request.RequestURI
+	// 	c.Redirect(http.StatusFound, url)
+	// 	router.StaticFile(url, "./dist/index.html")
+	// })
 
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)

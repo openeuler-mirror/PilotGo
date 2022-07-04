@@ -42,7 +42,7 @@ func SaveFileToDatabase(c *gin.Context) {
 		return
 	}
 
-	if !dao.IsExistFile(filename) {
+	if dao.IsExistFile(filename) {
 		response.Fail(c, nil, "文件名字已存在，请重新输入")
 		return
 	}

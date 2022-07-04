@@ -15,8 +15,16 @@
 package agentcontroller
 
 import (
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -83,4 +91,107 @@ func NetNICConfigHandler(c *gin.Context) {
 		return
 	}
 	response.Success(c, gin.H{"net_nic": net_nic}, "Success")
+}
+
+func GetAgentNetworkConnect(c *gin.Context) {
+	uuid := c.Query("uuid")
+	agent := agentmanager.GetAgent(uuid)
+	if agent == nil {
+		response.Fail(c, nil, "获取uuid失败!")
+		return
+	}
+
+	net, Err, err := agent.GetNetWorkConnInfo()
+	if len(Err) != 0 || err != nil {
+		response.Fail(c, nil, Err)
+		return
+	}
+	response.JSON(c, http.StatusOK, http.StatusOK, net, "获取到网络连接信息")
+}
+
+func ConfigNetworkConnect(c *gin.Context) {
+	var network uos.NetworkConfig
+	c.Bind(&network)
+
+	ip_assignment := network.BootProto
+	if len(ip_assignment) == 0 {
+		response.Fail(c, nil, "ip分配方式不能为空")
+		return
+	}
+	ipv4_addr := network.IPAddr
+	if len(ip_assignment) == 0 {
+		response.Fail(c, nil, "ipv4地址不能为空")
+		return
+	}
+	ipv4_netmask := network.NetMask
+	if len(ip_assignment) == 0 {
+		response.Fail(c, nil, "ipv4子网掩码不能为空")
+		return
+	}
+	if ok := strings.Contains(ipv4_netmask, "."); !ok {
+		prefix, _ := strconv.Atoi(ipv4_netmask)
+		ipv4_netmask = uos.LenToSubNetMask(prefix)
+	}
+	ipv4_gateway := network.GateWay
+	if len(ip_assignment) == 0 {
+		response.Fail(c, nil, "ipv4网关不能为空")
+		return
+	}
+	ipv4_dns1 := network.DNS1
+	if len(ip_assignment) == 0 {
+		response.Fail(c, nil, "ipv4 DNS1 不能为空")
+		return
+	}
+
+	agent := agentmanager.GetAgent(network.MachineUUID)
+	if agent == nil {
+		response.Fail(c, nil, "获取uuid失败!")
+		return
+	}
+
+	nic_name, Err, err := agent.GetNICName()
+	if len(Err) != 0 || err != nil {
+		response.Fail(c, nil, Err)
+		return
+	}
+
+	oldnet, Err, err := agent.GetNetWorkConnectInfo()
+	if len(Err) != 0 || err != nil {
+		response.Fail(c, nil, Err)
+		return
+	}
+	oldnets := controller.InterfaceToSlice(oldnet)
+
+	switch ip_assignment {
+	case "static":
+		text := service.NetworkStatic(oldnets, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
+		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+		if len(Err) != 0 || err != nil {
+			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			return
+		}
+		_, Err, err = agent.RestartNetWork(nic_name.(string))
+		if len(Err) != 0 || err != nil {
+			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			return
+		}
+		response.JSON(c, http.StatusOK, http.StatusOK, nil, "网络配置更新成功")
+
+	case "dhcp":
+		text := service.NetworkDHCP(oldnets)
+		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+		if len(Err) != 0 || err != nil {
+			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			return
+		}
+		_, Err, err = agent.RestartNetWork(nic_name.(string))
+		if len(Err) != 0 || err != nil {
+			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			return
+		}
+		response.JSON(c, http.StatusOK, http.StatusOK, nil, "网络配置更新成功")
+
+	default:
+		response.Fail(c, nil, "请重新检查ip分配方式")
+	}
 }

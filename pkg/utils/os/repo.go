@@ -57,7 +57,7 @@ func GetRepoSource() (interface{}, error) {
 		return "", fmt.Errorf("读取repo源数据失败:%s", err)
 	}
 
-	reg1 := regexp.MustCompile(`name=.*`)
+	reg1 := regexp.MustCompile(`\[.*]`)
 	textType := reg1.FindAllString(text, -1)
 
 	var reg2 *regexp.Regexp
@@ -72,7 +72,7 @@ func GetRepoSource() (interface{}, error) {
 	datas := make([]map[string]string, 0)
 	for i := 0; i < len(textType); i++ {
 		data := map[string]string{
-			"name":    strings.Split(textType[i], "=")[1],
+			"name":    textType[i][1 : len(textType[i])-1],
 			"baseurl": "http" + strings.Split(BaseURL[i], "http")[1],
 		}
 		datas = append(datas, data)

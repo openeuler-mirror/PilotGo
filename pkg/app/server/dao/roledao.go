@@ -46,9 +46,13 @@ func RoleIdToGetAllInfo(roleid int) model.UserRole {
 }
 
 // 登录用户的权限按钮
-func PermissionButtons(button string) []string {
-	IDs := strings.Split(button, ",")
+func PermissionButtons(button string) interface{} {
 	var buttons []string
+	if len(button) == 0 {
+		return []interface{}{}
+	}
+	IDs := strings.Split(button, ",")
+
 	for _, id := range IDs {
 		var SubButton model.RoleButton
 		i, err := strconv.Atoi(id)
