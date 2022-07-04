@@ -33,3 +33,15 @@ func BatchActionStatus(StatusCodes []string) (status string) {
 	status = strconv.Itoa(StatusOKCounts) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
 	return
 }
+
+// 计算json返回状态
+func ActionStatus(StatusCodes []string) (ok bool) {
+	for _, code := range StatusCodes {
+		if code == strconv.Itoa(http.StatusBadRequest) {
+			return false
+		} else {
+			continue
+		}
+	}
+	return true
+}

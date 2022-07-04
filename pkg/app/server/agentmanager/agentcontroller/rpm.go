@@ -150,7 +150,11 @@ func InstallRpmHandler(c *gin.Context) {
 	}
 	status := service.BatchActionStatus(StatusCodes)
 	dao.UpdateParentAgentLog(logParentId, status)
-	response.Success(c, nil, "该rpm包安装完成!")
+	if ok := service.ActionStatus(StatusCodes); !ok {
+		response.Fail(c, nil, "软件包安装失败")
+		return
+	}
+	response.Success(c, nil, "软件包安装完成!")
 }
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
@@ -215,5 +219,9 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	status := service.BatchActionStatus(StatusCodes)
 	dao.UpdateParentAgentLog(logParentId, status)
-	response.Success(c, nil, "该rpm包卸载完成!")
+	if ok := service.ActionStatus(StatusCodes); !ok {
+		response.Fail(c, nil, "软件包卸载失败")
+		return
+	}
+	response.Success(c, nil, "软件包卸载完成!")
 }

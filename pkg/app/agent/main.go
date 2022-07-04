@@ -870,6 +870,156 @@ func regitsterHandler(c *network.SocketClient) {
 			return c.Send(resp_msg)
 		}
 	})
+	c.BindHandler(protocol.FirewalldDefaultZone, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		zone := msg.Data.(string)
+		default_zone, err := uos.FirewalldSetDefaultZone(zone)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   default_zone,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldZoneConfig, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		zone := msg.Data.(string)
+		default_zone, err := uos.FirewalldZoneConfig(zone)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   default_zone,
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldServiceAdd, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		zp := msg.Data.(string)
+		zps := strings.Split(zp, ",")
+		zone := zps[0]
+		service := zps[1]
+		err := uos.FirewalldServiceAdd(zone, service)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   struct{}{},
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldServiceRemove, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		zp := msg.Data.(string)
+		zps := strings.Split(zp, ",")
+		zone := zps[0]
+		service := zps[1]
+		err := uos.FirewalldServiceRemove(zone, service)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   struct{}{},
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldSourceAdd, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		zp := msg.Data.(string)
+		zps := strings.Split(zp, ",")
+		zone := zps[0]
+		source := zps[1]
+		err := uos.FirewalldSourceAdd(zone, source)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   struct{}{},
+			}
+			return c.Send(resp_msg)
+		}
+	})
+	c.BindHandler(protocol.FirewalldSourceRemove, func(c *network.SocketClient, msg *protocol.Message) error {
+		fmt.Println("process agent info command:", msg.String())
+
+		zp := msg.Data.(string)
+		zps := strings.Split(zp, ",")
+		zone := zps[0]
+		source := zps[1]
+		err := uos.FirewalldSourceRemove(zone, source)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   struct{}{},
+			}
+			return c.Send(resp_msg)
+		}
+	})
 	c.BindHandler(protocol.FirewalldRestart, func(c *network.SocketClient, msg *protocol.Message) error {
 		fmt.Println("process agent info command:", msg.String())
 
@@ -920,7 +1070,8 @@ func regitsterHandler(c *network.SocketClient) {
 		zps := strings.Split(zp, ",")
 		zone := zps[0]
 		port := zps[1]
-		add, err := uos.AddZonePort(zone, port)
+		proto := zps[2]
+		add, err := uos.AddZonePort(zone, port, proto)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
@@ -946,7 +1097,8 @@ func regitsterHandler(c *network.SocketClient) {
 		zps := strings.Split(zp, ",")
 		zone := zps[0]
 		port := zps[1]
-		del, err := uos.DelZonePort(zone, port)
+		proto := zps[2]
+		del, err := uos.DelZonePort(zone, port, proto)
 
 		if err != nil {
 			resp_msg := &protocol.Message{

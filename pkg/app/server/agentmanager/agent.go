@@ -754,6 +754,102 @@ func (a *Agent) FirewalldConfig() (interface{}, string, error) {
 	return resp_message.Data, resp_message.Error, nil
 }
 
+// 更改防火墙默认区域
+func (a *Agent) FirewalldSetDefaultZone(zone string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldDefaultZone,
+		Data: zone,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 查看防火墙指定区域配置
+func (a *Agent) FirewalldZoneConfig(zone string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldZoneConfig,
+		Data: zone,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 添加防火墙服务
+func (a *Agent) FirewalldServiceAdd(zone, service string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldServiceAdd,
+		Data: zone + "," + service,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 移除防火墙服务
+func (a *Agent) FirewalldServiceRemove(zone, service string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldServiceRemove,
+		Data: zone + "," + service,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 防火墙添加允许来源地址
+func (a *Agent) FirewalldSourceAdd(zone, source string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldSourceAdd,
+		Data: zone + "," + source,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
+// 防火墙移除允许来源地址
+func (a *Agent) FirewalldSourceRemove(zone, source string) (interface{}, string, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.FirewalldSourceRemove,
+		Data: zone + "," + source,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, "", err
+	}
+	return resp_message.Data, resp_message.Error, nil
+}
+
 // 重启防火墙
 func (a *Agent) FirewalldRestart() (interface{}, string, error) {
 	msg := &protocol.Message{
@@ -787,11 +883,11 @@ func (a *Agent) FirewalldStop() (interface{}, string, error) {
 }
 
 // 防火墙指定区域添加端口
-func (a *Agent) FirewalldZonePortAdd(zone, port string) (interface{}, string, error) {
+func (a *Agent) FirewalldZonePortAdd(zone, port, proto string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldZonePortAdd,
-		Data: zone + "," + port,
+		Data: zone + "," + port + "," + proto,
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
@@ -803,11 +899,11 @@ func (a *Agent) FirewalldZonePortAdd(zone, port string) (interface{}, string, er
 }
 
 // 防火墙指定区域删除端口
-func (a *Agent) FirewalldZonePortDel(zone, port string) (interface{}, string, error) {
+func (a *Agent) FirewalldZonePortDel(zone, port, proto string) (interface{}, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldZonePortDel,
-		Data: zone + "," + port,
+		Data: zone + "," + port + "," + proto,
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)

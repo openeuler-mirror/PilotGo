@@ -128,6 +128,18 @@ const (
 	RestartNetWork = 58
 	//获取网卡名字
 	GetNICName = 59
+	// 更改防火墙默认区域
+	FirewalldDefaultZone = 60
+	// 查看防火墙区域配置
+	FirewalldZoneConfig = 61
+	// 添加防火墙服务
+	FirewalldServiceAdd = 62
+	// 移除防火墙服务
+	FirewalldServiceRemove = 63
+	// 防火墙添加允许来源地址
+	FirewalldSourceAdd = 64
+	// 防火墙移除允许来源地址
+	FirewalldSourceRemove = 65
 )
 
 type Message struct {
