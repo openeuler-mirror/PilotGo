@@ -135,15 +135,6 @@ func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
 		return err
 	}
 
-	// 创建超级管理员账户
-	global.PILOTGO_DB.AutoMigrate(&model.User{})
-	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
-	dao.CreateSuperAdministratorUser()
-
-	// 创建公司组织
-	global.PILOTGO_DB.AutoMigrate(&model.DepartNode{})
-	dao.CreateOrganization()
-
 	global.PILOTGO_DB.AutoMigrate(&model.CrontabList{})
 	global.PILOTGO_DB.AutoMigrate(&model.MachineNode{})
 	global.PILOTGO_DB.AutoMigrate(&model.RoleButton{})
@@ -152,6 +143,15 @@ func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	global.PILOTGO_DB.AutoMigrate(&model.AgentLog{})
 	global.PILOTGO_DB.AutoMigrate(&model.Files{})
 	global.PILOTGO_DB.AutoMigrate(&model.HistoryFiles{})
+
+	// 创建超级管理员账户
+	global.PILOTGO_DB.AutoMigrate(&model.User{})
+	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
+	dao.CreateSuperAdministratorUser()
+
+	// 创建公司组织
+	global.PILOTGO_DB.AutoMigrate(&model.DepartNode{})
+	dao.CreateOrganization()
 
 	return nil
 }

@@ -47,18 +47,27 @@ PilotGo项目后端采用golang语言开发，使用到以下开源库：
 
 #### 安装、启动教程
 
-```
-# Required before startup
-go >=1.15;  nodejs >=14
-# install npm dependencies
-npm install
-# vue server with hot reload at localhost:8080(Modify the IP addresses of go server and web server under config/index.js)
-npm run dev
-# Rename the config.yaml.templete to config.yaml
 
-# PilotGo server with hot reload at localhost:8083
+开发环境
+```
+# Required before Pilotgo application deployment：
+go >=1.17;  nodejs >=14
+
+Front end deployment：
+# Download npm dependency packages
+npm install
+# Modify the basepath to the server address and port under config/index.js, and run it directly：
+npm run dev
+# Modify the basepath to the server address and port under config/index.js, and package the front-end resources：
+npm run build
+
+Server deployment：
+# Rename the config_server.yaml.templete to config_server.yaml, and configuration
+# Rename the config_agent.yaml.templete to config_agent.yaml, and configuration
+
+# PilotGo server with hot reload at localhost:8888
 go run pkg/app/server/main.go
-# PilotGo agent with hot reload at localhost:8083
+# PilotGo agent with hot reload at localhost:8879
 go build -o agent pkg/app/agent/main.go
 ./agent
 
