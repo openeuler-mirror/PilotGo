@@ -176,6 +176,7 @@ func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole 
 func CreateSuperAdministratorUser() {
 	var user model.User
 	var role model.UserRole
+	var roleButton model.RoleButton
 	global.PILOTGO_DB.Where("type =?", global.AdminUserType).Find(&role)
 	if role.ID == 0 {
 		role = model.UserRole{
@@ -198,5 +199,25 @@ func CreateSuperAdministratorUser() {
 			RoleID:       strconv.Itoa(role.ID),
 		}
 		global.PILOTGO_DB.Create(&user)
+	}
+	global.PILOTGO_DB.First(&roleButton)
+	if roleButton.ID == 0 {
+		global.PILOTGO_DB.Raw("INSERT INTO role_button(id, button)" +
+			"VALUES" +
+			"('1', 'rpm_install')," +
+			"('2', 'rpm_uninstall')," +
+			"('3', 'batch_update')," +
+			"('4', 'batch_delete')," +
+			"('5', 'user_add')," +
+			"('6', 'user_import')," +
+			"('7', 'user_edit')," +
+			"('8', 'user_reset')," +
+			"('9', 'user_del')," +
+			"('10', 'role_add')," +
+			"('11', 'role_update')," +
+			"('12', 'role_delete')," +
+			"('13', 'role_modify')," +
+			"('14', 'config_install')," +
+			"('15', 'dept_change')").Scan(&roleButton)
 	}
 }
