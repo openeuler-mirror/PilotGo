@@ -16,22 +16,13 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/router"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/initialization"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -50,31 +41,31 @@ func main() {
 	logger.Info("Thanks to choose PilotGo!")
 
 	// redis db初始化
-	if err := redisdbInit(&sconfig.Config().RedisDBinfo); err != nil {
+	if err := initialization.RedisdbInit(&sconfig.Config().RedisDBinfo); err != nil {
 		logger.Error("redis db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
 
 	// mysql db初始化
-	if err := mysqldbInit(&sconfig.Config().MysqlDBinfo); err != nil {
+	if err := initialization.MysqldbInit(&sconfig.Config().MysqlDBinfo); err != nil {
 		logger.Error("mysql db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
 
 	// 监控初始化
-	if err := monitorInit(&sconfig.Config().Monitor); err != nil {
+	if err := initialization.MonitorInit(&sconfig.Config().Monitor); err != nil {
 		logger.Error("monitor init failed: %s", err)
 		os.Exit(-1)
 	}
 
 	// 启动agent socket server
-	if err := socketServerInit(&sconfig.Config().SocketServer); err != nil {
+	if err := initialization.SocketServerInit(&sconfig.Config().SocketServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
 
 	//此处启动前端及REST http server
-	if err := httpServerInit(&sconfig.Config().HttpServer); err != nil {
+	if err := initialization.HttpServerInit(&sconfig.Config().HttpServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
@@ -103,115 +94,4 @@ func main() {
 
 EXIT:
 	logger.Info("exit system, bye~")
-}
-
-func sessionManagerInit(conf *sconfig.HttpServer) error {
-	var sessionManage service.SessionManage
-	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
-	return nil
-}
-
-func redisdbInit(conf *sconfig.RedisDBInfo) error {
-	err := redismanager.RedisInit(
-		conf.RedisConn,
-		conf.RedisPwd,
-		conf.DefaultDB,
-		conf.DialTimeout,
-		conf.EnableRedis)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func mysqldbInit(conf *sconfig.MysqlDBInfo) error {
-	_, err := mysqlmanager.MysqlInit(
-		conf.HostName,
-		conf.UserName,
-		conf.Password,
-		conf.DataBase,
-		conf.Port)
-	if err != nil {
-		return err
-	}
-
-	global.PILOTGO_DB.AutoMigrate(&model.CrontabList{})
-	global.PILOTGO_DB.AutoMigrate(&model.MachineNode{})
-	global.PILOTGO_DB.AutoMigrate(&model.RoleButton{})
-	global.PILOTGO_DB.AutoMigrate(&model.Batch{})
-	global.PILOTGO_DB.AutoMigrate(&model.AgentLogParent{})
-	global.PILOTGO_DB.AutoMigrate(&model.AgentLog{})
-	global.PILOTGO_DB.AutoMigrate(&model.Files{})
-	global.PILOTGO_DB.AutoMigrate(&model.HistoryFiles{})
-
-	// 创建超级管理员账户
-	global.PILOTGO_DB.AutoMigrate(&model.User{})
-	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
-	dao.CreateSuperAdministratorUser()
-
-	// 创建公司组织
-	global.PILOTGO_DB.AutoMigrate(&model.DepartNode{})
-	dao.CreateOrganization()
-
-	return nil
-}
-
-func socketServerInit(conf *sconfig.SocketServer) error {
-	server := &network.SocketServer{
-		// MessageProcesser: protocol.NewMessageProcesser(),
-		OnAccept: agentmanager.AddandRunAgent,
-		OnStop:   agentmanager.StopAgentManager,
-	}
-
-	go func() {
-		server.Run(conf.Addr)
-	}()
-	return nil
-}
-
-func httpServerInit(conf *sconfig.HttpServer) error {
-	if err := sessionManagerInit(conf); err != nil {
-		return err
-	}
-
-	go func() {
-		r := router.SetupRouter()
-		r.Run(conf.Addr)
-
-		err := http.ListenAndServe(conf.Addr, nil) // listen and serve
-		if err != nil {
-			logger.Error("failed to start http server, error:%v", err)
-		}
-	}()
-
-	return nil
-}
-
-func monitorInit(conf *sconfig.Monitor) error {
-	go func() {
-		logger.Info("start monitor")
-		err := controller.InitPromeYml()
-		if err != nil {
-			logger.Error("初始化promethues配置文件失败")
-		}
-		for {
-			// TODO: 重构为事件触发机制
-			a := make([]map[string]string, 0)
-			var m []model.MachineNode
-			global.PILOTGO_DB.Find(&m)
-			for _, value := range m {
-				r := map[string]string{}
-				r[value.MachineUUID] = value.IP
-				a = append(a, r)
-			}
-			err := controller.WriteYml(a)
-			if err != nil {
-				logger.Error("%s", err.Error())
-			}
-			time.Sleep(100 * time.Second)
-		}
-
-	}()
-
-	return nil
 }
