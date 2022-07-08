@@ -32,8 +32,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Start PilotGo agent.")
-
 	// 加载系统配置
 	err := aconfig.Init()
 	if err != nil {
@@ -46,7 +44,7 @@ func main() {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
-	logger.Info("Thanks to choose PilotGo!")
+	logger.Info("Start PilotGo agent.")
 
 	// 定时任务初始化
 	if err := uos.CronInit(); err != nil {
