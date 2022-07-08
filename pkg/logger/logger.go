@@ -22,8 +22,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var logName string = "pilotgo"
-
 type LogOpts struct {
 	Level   string `yaml:"level"`
 	Driver  string `yaml:"driver"`
@@ -42,7 +40,7 @@ func setLogDriver(logopts *LogOpts) error {
 		logrus.SetOutput(os.Stdout)
 	case "file":
 		writer, err := rotatelogs.New(
-			logopts.Path+"/"+logName,
+			logopts.Path,
 			rotatelogs.WithRotationCount(uint(logopts.MaxFile)),
 			rotatelogs.WithRotationSize(int64(logopts.MaxSize)),
 		)

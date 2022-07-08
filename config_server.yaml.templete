@@ -11,8 +11,8 @@ monitor:
   prometheus_yml_path: /etc/prometheus/prometheus.yml
 log:
   level: debug
-  driver: stdout
-  path: ./log/pilotgo
+  driver: stdout    #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。
+  path: ./log/pilotgo_server.log
   max_file: 1
   max_size: 10485760
 mysql:

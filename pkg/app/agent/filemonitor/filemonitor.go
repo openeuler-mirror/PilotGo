@@ -50,7 +50,7 @@ func FileMonitorInit() error {
 	go func() {
 		err = watcher.Add(global.RepoPath)
 		if err != nil {
-			fmt.Println("failed to monitor repo")
+			logger.Debug("failed to monitor repo")
 		}
 		logger.Info("start to monitor repo")
 	}()
@@ -58,7 +58,7 @@ func FileMonitorInit() error {
 	go func() {
 		err = watcher.Add(global.NetWorkPath)
 		if err != nil {
-			fmt.Println("failed to monitor network")
+			logger.Debug("failed to monitor network")
 		}
 		logger.Info("start to monitor network")
 	}()
@@ -107,7 +107,7 @@ func FileMonitor(client *network.SocketClient) {
 		}
 
 		if err := client.Send(msg); err != nil {
-			fmt.Println("send message failed, error:", err)
+			logger.Debug("send message failed, error:", err)
 		}
 
 	}
