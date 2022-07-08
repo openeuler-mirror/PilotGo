@@ -7,6 +7,8 @@ socket_server:
 monitor:
   prometheus_addr: localhost:9090
   alertmanager_addr: localhost:9093
+  alert_rules_path: /etc/prometheus/alert.rules
+  prometheus_yml_path: /etc/prometheus/prometheus.yml
 log:
   level: debug
   driver: stdout

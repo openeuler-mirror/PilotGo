@@ -106,16 +106,15 @@ func ListenALert(c *gin.Context) {
 // 	response.JSON(c, http.StatusOK, http.StatusOK, res, "Alerts have got!")
 // }
 
-func InitPromeYml() error {
-	FilePath := "/root/prometheus.yml"
-	os.Remove(FilePath)
-	os.Create(FilePath)
+func InitPromeYml(PrometheusYmlPath, AlertRulesPath string) error {
+	os.Remove(PrometheusYmlPath)
+	os.Create(PrometheusYmlPath)
 	var prometheusYml Prometheusyml
 	prometheusYml.Global.ScrapeInterval = "15s"
 	prometheusYml.Global.EvaluationInterval = "15s"
-	prometheusYml.RuleFiles = []string{"/etc/prometheus/alert.rules"}
+	prometheusYml.RuleFiles = []string{AlertRulesPath}
 
-	file, err := os.OpenFile(FilePath, os.O_WRONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(PrometheusYmlPath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		logger.Error("文件打开失败" + err.Error())
 		return err
@@ -134,13 +133,13 @@ func InitPromeYml() error {
 	write.WriteString("\n  - job_name: 'file_sd_test'")
 	write.WriteString("\n    file_sd_configs:")
 	write.WriteString("\n    - files:")
-	write.WriteString("\n      - '/root/file_sd/file_sd.yml'")
+	write.WriteString("\n      - '/opt/PilotGo/monitor_target/monitor.yml'")
 	write.WriteString("\n      refresh_interval: 20s")
 	write.Flush()
 	return nil
 }
 func WriteYml(a []map[string]string) error {
-	FilePath := "/root/file_sd/file_sd.yml"
+	FilePath := "/opt/PilotGo/monitor_target/monitor.yml"
 	os.Remove(FilePath)
 	os.Create(FilePath)
 	var prometheusYml Prometheusyml

@@ -30,8 +30,10 @@ type SocketServer struct {
 	Addr string `yaml:"addr"`
 }
 type Monitor struct {
-	PrometheusAddr   string `yaml:"prometheus_addr"`
-	AlertManagerAddr string `yaml:"alertmanager_addr"`
+	PrometheusAddr    string `yaml:"prometheus_addr"`
+	AlertManagerAddr  string `yaml:"alertmanager_addr"`
+	AlertRulesPath    string `yaml:"alert_rules_path"`
+	PrometheusYmlPath string `yaml:"prometheus_yml_path"`
 }
 type MysqlDBInfo struct {
 	HostName string `yaml:"host_name"`
