@@ -25,9 +25,11 @@ import (
 )
 
 func MonitorInit(conf *sconfig.Monitor) error {
+	PrometheusYmlPath := conf.PrometheusYmlPath
+	AlertRulesPath := conf.AlertRulesPath
 	go func() {
 		logger.Info("start monitor")
-		err := controller.InitPromeYml()
+		err := controller.InitPromeYml(PrometheusYmlPath, AlertRulesPath)
 		if err != nil {
 			logger.Error("初始化promethues配置文件失败")
 		}
