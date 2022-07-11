@@ -29,7 +29,7 @@ func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(middleware.LoggerDebug())
-	router.Use(gin.Recovery())
+	router.Use(middleware.Recover)
 
 	// TODO: 此处绑定 http api handler
 
