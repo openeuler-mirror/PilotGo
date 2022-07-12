@@ -23,6 +23,7 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeluer.org/PilotGo/PilotGo/resource"
 )
 
 func SetupRouter() *gin.Engine {
@@ -186,15 +187,7 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/deletebatch", controller.DeleteBatch)
 	}
 	// TODO: 此处绑定前端静态资源handler
-	router.Static("/static", "./dist/static")
-	router.StaticFile("/", "./dist/index.html")
-
-	// 关键点【解决页面刷新404的问题】
-	router.NoRoute(func(c *gin.Context) {
-		url := c.Request.RequestURI
-		c.Redirect(http.StatusFound, url)
-		router.StaticFile(url, "./dist/index.html")
-	})
+	resource.StaticRouter(router)
 
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)
