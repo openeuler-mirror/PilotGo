@@ -16,17 +16,30 @@ package resource
 
 import (
 	"embed"
+	"html/template"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
-//go:embed dist/static/css dist/static/fonts dist/static/img dist/static/js dist/static/pilotgo.ico dist/index.html
+//go:embed css fonts img js pilotgo.ico index.html
 var Static embed.FS
 
-func StaticRouter(r *gin.Engine) {
-	r.StaticFS("/static", http.FS(Static))
-	r.NoRoute(func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/static/index.html")
+func StaticRouter(router *gin.Engine) *gin.Engine {
+	router.StaticFS("/static", http.FS(Static))
+	t, err := template.ParseFS(Static, "index.html")
+	if err != nil {
+		logger.Error("parse template failed !!!")
+	}
+	router.SetHTMLTemplate(t)
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
 	})
+
+	// 关键点【解决页面刷新404的问题】
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+	return router
 }
