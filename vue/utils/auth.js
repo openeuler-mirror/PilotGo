@@ -26,6 +26,8 @@ const UserDepartId = "UserDepartId"
 
 const UserDepartName = 'UserDepartName'
 
+const ServerUrl = 'ServerUrl'
+
 
 const whileList = [
     "/login",
@@ -116,6 +118,20 @@ export function setUserDepartName(userDepartName) {
 
 export function removeUserDepartName() {
     return Cookies.remove(UserDepartName)
+}
+
+export function getServerUrl() {
+    return Cookies.get(ServerUrl)
+}
+
+export function setServerUrl(url) {
+    if (url) {
+        return Cookies.set(ServerUrl, url)
+    }
+}
+
+export function removeServerUrl() {
+    return Cookies.remove(ServerUrl)
 }
 
 export function hasPermission(menus, to) {

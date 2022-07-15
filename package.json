@@ -31,7 +31,7 @@
     "vue-demi": "^0.12.5",
     "vue-devtools": "^5.1.4",
     "vue-draggable-resizable": "^2.3.0",
-    "vue-grid-layout": "^2.3.7",
+    "vue-grid-layout": "2.3.7",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1",
     "vuejs": "^3.0.1",

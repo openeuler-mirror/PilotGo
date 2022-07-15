@@ -28,6 +28,8 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
+var ServerAddr string
+
 func GetUserRole(c *gin.Context) {
 	roles := dao.AllUserRole()
 	response.Success(c, gin.H{"role": roles}, "获取用户角色")
@@ -107,7 +109,7 @@ func Login(c *gin.Context) {
 		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId, "server": ServerAddr}, "登陆成功!")
 }
 
 // 退出

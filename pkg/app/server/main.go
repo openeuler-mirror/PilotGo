@@ -22,6 +22,7 @@ import (
 
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/initialization"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
@@ -65,7 +66,9 @@ func main() {
 	}
 
 	//此处启动前端及REST http server
-	if err := initialization.HttpServerInit(&sconfig.Config().HttpServer); err != nil {
+	serverAddr, err := initialization.HttpServerInit(&sconfig.Config().HttpServer)
+	controller.ServerAddr = serverAddr
+	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}

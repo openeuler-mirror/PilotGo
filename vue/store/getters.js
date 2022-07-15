@@ -26,6 +26,7 @@ const getters = {
     messageNum: state => state.message.messageNum,
     agentPath: state => state.config.agentPath,
     configType: state => state.config.configType,
+    serverUrl: state => state.user.serverUrl,
 }
 
 export default getters

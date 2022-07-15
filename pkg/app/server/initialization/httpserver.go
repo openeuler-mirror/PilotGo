@@ -22,9 +22,9 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
-func HttpServerInit(conf *sconfig.HttpServer) error {
+func HttpServerInit(conf *sconfig.HttpServer) (serverAddr string, err error) {
 	if err := SessionManagerInit(conf); err != nil {
-		return err
+		return "", err
 	}
 
 	go func() {
@@ -37,7 +37,7 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 		}
 	}()
 
-	return nil
+	return conf.Addr, nil
 }
 func SessionManagerInit(conf *sconfig.HttpServer) error {
 	var sessionManage service.SessionManage
