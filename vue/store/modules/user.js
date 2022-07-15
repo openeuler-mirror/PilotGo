@@ -15,7 +15,7 @@
 import { loginByEmail, logout } from '@/request/user'
 import { getToken, setToken, removeToken, getUsername, setUsername, removeUsername, 
     getRoles, setRoles, removeRoles, getUserType, setUserType, removeUserType, removeUserDepartId, setUserDepartId,
-    getUserDepartId, getUserDepartName, removeUserDepartName, setUserDepartName, } from '@/utils/auth'
+    getUserDepartId, getUserDepartName, removeUserDepartName, setUserDepartName, setServerUrl, getServerUrl, removeServerUrl } from '@/utils/auth'
 
 const user = {
     state: {
@@ -25,6 +25,7 @@ const user = {
         userType: getUserType(),
         departId: getUserDepartId(),
         departName: getUserDepartName(),
+        serverUrl: getServerUrl(),
     },
     mutations: {
         SET_TOKEN: (state, token) => {
@@ -45,6 +46,9 @@ const user = {
         SET_DEPARTNAME: (state, departName) => {
             state.departName = departName
         },
+        SET_SERVERURL: (state, url) => {
+            state.serverUrl = url
+        },
     },
     actions: {
         loginByEmail({ commit }, userInfo) {
@@ -55,19 +59,21 @@ const user = {
                     if (res.code != "200") {
                         reject(res)
                     } else {
-                        let {token, roleId, userType, departId,departName} = res.data;
+                        let {token, roleId, userType, departId,departName, server} = res.data;
                         commit('SET_TOKEN', token)
                         commit('SET_NAME', username)
                         commit('SET_ROLES', roleId)
                         commit('SET_USERTYPE', userType)
                         commit('SET_DEPARTID', departId)
                         commit('SET_DEPARTNAME', departName)
+                        commit('SET_SERVERURL', server)
                         setToken(token)
                         setRoles(roleId)
                         setUserType(userType)
                         setUsername(username)
                         setUserDepartId(departId)
                         setUserDepartName(departName)
+                        setServerUrl(server)
                         resolve()
                     }
                 }).catch(error => {
@@ -85,12 +91,14 @@ const user = {
                     commit('SET_NAME', '')
                     commit('SET_DEPARTID', '')
                     commit('SET_DEPARTNAME', '')
+                    commit('SET_SERVERURL', '')
                     removeRoles();
                     removeUserType();
                     removeUsername();
                     removeToken();
                     removeUserDepartId();
                     removeUserDepartName();
+                    removeServerUrl();
                     localStorage.clear()
                     resolve()
                 }).catch(error => {

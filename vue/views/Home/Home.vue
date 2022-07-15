@@ -117,8 +117,10 @@ export default {
       }
     },
     socketUrl() {
+      let hostPort = Config.dev.proxyTable['/'].target.split('//')[1];
+      hostPort = hostPort === 'localhost:8888' ? this.$store.getters.serverUrl : hostPort;
       return (location.protocol === "http:" ? "ws" : "wss") + "://" + 
-        Config.dev.proxyTable['/'].target.split('//')[1] + 
+        hostPort + 
         "/event";
     }
   },
