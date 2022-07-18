@@ -47,31 +47,63 @@ PilotGo项目后端采用golang语言开发，使用到以下开源库：
 
 #### 安装、启动教程
 
-
-开发环境
+源码编译部署安装
+```bash
+# Download pilotgo source code：
+    git clone https://gitee.com/openeuler/PilotGo.git
+# Quick build:
+    cd PilotGo
+    chmod +x build.sh
+    ./build.sh
+# Quick install:
+    cd /root
+    tar -xzvf pilotgo-xxx.tar.gz
+    cd pilotgo-xxx
+    chmod +x install.sh
+    ./install.sh
+# Go into /opt/PilotGo
+    cd /opt/PilotGo
+# Modify configuration file：
+    config_server.yaml
+    config_agent.yaml
+# Warn: There are two options for log-driver in config_server.yaml or config_agent.yaml.
+    stdout: Terminal console output log
+    file: Output log to specified file
+# Start-up
+    server:
+        ./server
+    agent:
+        ./agent
 ```
+
+二次开发部署
+```bash
 # Required before Pilotgo application deployment：
 go >=1.17;  nodejs >=14
 
-Front end deployment：
-# Download npm dependency packages
-npm install
-# Modify the basepath to the server address and port under config/index.js, and run it directly：
-npm run dev
-# Modify the basepath to the server address and port under config/index.js, and package the front-end resources：
-npm run build
+# Front end deployment：
+1. Set NPM source address to Taobao source
+    npm install -g cnpm --registry=https://registry.npm.taobao.org
+2. Download npm dependency packages
+    cnpm install
+3. Modify the basepath to the server address and port under config/index.js, and run it directly：
+    npm run dev
 
-Server deployment：
-# Rename the config_server.yaml.templete to config_server.yaml, and configuration
-# Rename the config_agent.yaml.templete to config_agent.yaml, and configuration
-
-# PilotGo server with hot reload at localhost:8888
-go run pkg/app/server/main.go
-# PilotGo agent with hot reload at localhost:8879
-go build -o agent pkg/app/agent/main.go
-./agent
-
+# Server deployment：
+1. Rename the config_server.yaml.templete to config_server.yaml, and configuration
+2. Rename the config_agent.yaml.templete to config_agent.yaml, and configuration
+3. PilotGo server with hot reload at localhost:8888
+    go run pkg/app/server/main.go
+4. PilotGo agent with hot reload at localhost:8879
+    go run pkg/app/agent/main.go
 ```
+登录首页
+```bash
+# web页面访问  ip:8888
+初始用户：admin@123.com
+密码：123456
+```
+![](./docs/images/login.png)
 
 #### 参与贡献
 

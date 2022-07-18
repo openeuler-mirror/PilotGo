@@ -80,6 +80,7 @@ export default {
           let result = res.data.data.os_info;
           this.basic.macPlatform = result.Platform + ' ' + result.PlatformVersion;
           this.basic.mackernel = result.KernelArch;
+          this.basic.osVersion = result.KernelVersion;
         } else {
           console.log(res.data.msg)
         }

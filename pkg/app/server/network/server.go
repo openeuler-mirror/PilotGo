@@ -41,35 +41,8 @@ func (s *SocketServer) Run(addr string) error {
 			continue
 		}
 		s.OnAccept(conn)
-
-		// go SendHandle(conn)
 	}
 }
-
-// func SendHandle(conn net.Conn) {
-// 	for {
-// 		fmt.Println("请输入指令：")
-// 		inputReader := bufio.NewReader(os.Stdin)
-// 		input, err := inputReader.ReadString('\n')
-// 		if err != nil {
-// 			continue
-// 		}
-// 		data := &protocol.Message{
-// 			Type: protocol.RunScript,
-// 			Body: []byte(input),
-// 		}
-
-// 		// data := msg.Encode()
-// 		// sendData := protocol.TlvEncode(data)
-
-// 		err = pnet.Send(conn, protocol.TlvEncode(data.Encode()))
-// 		if err != nil {
-// 			fmt.Println("send error:", err)
-// 		}
-
-// 		time.Sleep(time.Second)
-// 	}
-// }
 
 func (s *SocketServer) Stop() {
 
