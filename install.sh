@@ -35,4 +35,11 @@ cp alert.rules /etc/prometheus/alert.rules
 cp server /opt/PilotGo/
 cp agent /opt/PilotGo/
 
+# 开放防火墙端口
+firewall-cmd --zone=public --add-port=9100/tcp --permanent
+firewall-cmd --zone=public --add-port=9090/tcp --permanent
+firewall-cmd --zone=public --add-port=8888/tcp --permanent
+firewall-cmd --zone=public --add-port=8879/tcp --permanent
+firewall-cmd --reload
+
 echo -e "${GREEN_COLOR}启动前准备完成，请前往/opt/PilotGo下执行二进制文件以启动PilotGo${RES}"
