@@ -64,16 +64,16 @@ PilotGo项目后端采用golang语言开发，使用到以下开源库：
 # Go into /opt/PilotGo
     cd /opt/PilotGo
 # Modify configuration file：
-    config_server.yaml
-    config_agent.yaml
+   vim config_server.yaml
+   vim config_agent.yaml
 # Warn: There are two options for log-driver in config_server.yaml or config_agent.yaml.
     stdout: Terminal console output log
     file: Output log to specified file
 # Start-up
     server:
-        ./server
+       nohup ./server &
     agent:
-        ./agent
+       nohup ./agent &
 ```
 
 二次开发部署

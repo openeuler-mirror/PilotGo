@@ -47,6 +47,11 @@ func setLogDriver(logopts *LogOpts) error {
 		if err != nil {
 			return err
 		}
+		logrus.SetFormatter(&logrus.TextFormatter{
+			DisableColors:   true,
+			ForceQuote:      false,
+			TimestampFormat: "2006-01-02 15:04:05",
+		})
 		logrus.SetOutput(writer)
 	default:
 		logrus.SetOutput(os.Stdout)

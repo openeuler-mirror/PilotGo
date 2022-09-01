@@ -1,5 +1,5 @@
 server:
-  addr: 192.168.1.1:8888
+  addr: localhost:8879
 log:
   level: debug
   driver: stdout  #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。
