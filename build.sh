@@ -66,10 +66,10 @@ cp -r ./dist/static/img ./resource/
 cp -r ./dist/static/js ./resource/
 
 echo "正在编译server端二进制文件..."
-go build -o server ./pkg/app/server/main.go
+CGO_ENABLED=0 go build -o server ./pkg/app/server/main.go
 
 echo "正在编译agent端二进制文件..."
-go build -o agent pkg/app/agent/main.go
+CGO_ENABLED=0 go build -o agent pkg/app/agent/main.go
 
 # 创建文件包路径
 if [ ! -d "./pilotgo-1.0.0" ];then
