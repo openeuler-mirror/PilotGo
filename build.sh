@@ -1,94 +1,91 @@
 #!/bin/bash
+PILOTGO_VERSION="v0.0.1"
 
-RED_COLOR='\E[1;31m'  #红
-GREEN_COLOR='\E[1;32m' #绿
-YELLOW_COLOR='\E[1;33m' #黄
-RES='\E[0m'
-
-echo -e "${GREEN_COLOR}感谢您选择PilotGo${RES}"
-echo "正在检查前端编译环境..."
+echo "thanks for choosing PilotGo"
 
 # 判断是否安装了NodeJS
+echo "checking frontend compile tools..."
 if ! type node >/dev/null 2>&1; then
-    yum install -y nodejs
-    NodeJS=`node -v | grep -oP '\d*\.\d*.\d+'`
-    if [ ${NodeJS: 0: 2} -lt 14 ]; then
-        echo -e "${YELLOW_COLOR}警告: nodejs版本略低,请升级到 14.0 以上${RES}"
-        exit 1
-    fi
-    exit 1
+    echo "no nodejs detected, please install nodejs >= 14.0"
+    exit -1
 else
     NodeJS=`node -v | grep -oP '\d*\.\d*.\d+'`
-    if [ ${NodeJS: 0: 2} -lt 14 ]; then
-        echo -e "${YELLOW_COLOR}警告: nodejs版本略低,请升级到 14.0 以上${RES}"
-        exit 1
+    if [ ${NodeJS:0:2} -lt 14 ]; then
+        echo "error: your nodejs is too old, please upgrade to v14.0 or newer"
+        exit -1
     fi
 
     # 判断是否安装了NPM
     if ! type npm >/dev/null 2>&1; then
-        echo -e "${RED_COLOR}错误: 请先安装 6.0 以上版本的npm${RES}"
-        exit 1;
+        echo "error: your npm is too old, please upgrade to v6.0 or newer"
+        exit -1;
     fi
 fi
-
-echo -e "${GREEN_COLOR}前端运行依赖检查完成${RES}\n"
-echo "正在检查服务端编译环境..."
+echo "ok"
 
 # 判断是否安装了golang
+echo "Checking backend compile tools..."
 if ! type go >/dev/null 2>&1; then
-    yum install -y golang
-    GoLang=`go version |awk '{print $3}' | grep -oP '\d*\.\d*.\d+'`
-    if [ ${GoLang: 2: 2} -lt 17 ]; then
-        echo -e "${YELLOW_COLOR}警告: golang版本略低,请升级到 1.17.0 以上${RES}"
-        exit 1
-    fi
-    exit 1
+    echo "no golang detected, please install golang >= 1.17.0"
+    exit -1
 else
     GoLang=`go version |awk '{print $3}' | grep -oP '\d*\.\d*.\d+'`
     if [ ${GoLang: 2: 2} -lt 17 ]; then
-        echo -e "${YELLOW_COLOR}警告: golang版本略低,请升级到 1.17.0 以上${RES}"
-        exit 1
+        echo "error: your golang is too old, please upgrade to v1.17.0 or newer"
+        exit -1
     fi
 fi
-echo -e "${GREEN_COLOR}服务端运行依赖检查完成${RES}\n"
+echo "ok"
 
-echo -e "${GREEN_COLOR}正在下载前端依赖，请稍候...${RES}"
-npm install -g cnpm --registry=https://registry.npm.taobao.org
-cnpm install
-echo -e "\n${GREEN_COLOR}正在编译前端资源，请稍候...${RES}"
-npm run build
+function build_frontend() {
+    echo "dowoloading frontend, please wait..."
+    yarn install
+    echo "compiling frontend, please wait..."
+    yarn run build
+    if [ "$?" != "0" ]; then
+        echo 'error: build frontend failed, please check the error'
+        exit -1
+    fi
 
-cp ./dist/index.html ./resource/index.html
-cp ./dist/static/pilotgo.ico ./resource/pilotgo.ico
-cp -r ./dist/static/css ./resource/
-cp -r ./dist/static/fonts ./resource/
-cp -r ./dist/static/img ./resource/
-cp -r ./dist/static/js ./resource/
+    # move frontend binary files to resource dir
+    cp ./dist/index.html ./resource/index.html
+    cp -r ./dist/static/* ./resource/
+}
 
-echo "正在编译server端二进制文件..."
-CGO_ENABLED=0 go build -o server ./pkg/app/server/main.go
+function build_and_pack() {
+    # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
 
-echo "正在编译agent端二进制文件..."
-CGO_ENABLED=0 go build -o agent pkg/app/agent/main.go
+    version_path="./out/${1}/pilotgo-${PILOTGO_VERSION}/"
 
-# 创建文件包路径
-if [ ! -d "./pilotgo-1.0.0" ];then
-    mkdir ./pilotgo-1.0.0
-else
-    rm -rf ./pilotgo-1.0.0/*
-fi
+    echo "building server for ${1}..."
+    mkdir -p ${version_path}/server
+    CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/server/pilotgo-server ./pkg/app/server/main.go
+    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
+    cp alert.rules.templete ${version_path}/server/alert.rules
 
-# 复制配置文件
-cp server ./pilotgo-1.0.0/
-cp agent ./pilotgo-1.0.0/
-cp config_agent.yaml.templete ./pilotgo-1.0.0/config_agent.yaml
-cp config_server.yaml.templete ./pilotgo-1.0.0/config_server.yaml
-cp alert.rules.templete ./pilotgo-1.0.0/alert.rules
-cp install.sh ./pilotgo-1.0.0/
+    echo "building agent for ${1}..."
+    mkdir -p ${version_path}/agent
+    CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/pilotgo-agent pkg/app/agent/main.go
+    cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
 
-echo "正在压缩文件..."
-tar -czvf pilotgo-1.0.0.$(arch).tar.gz ./pilotgo-1.0.0/*
-rm -rf ./pilotgo-1.0.0
-mv pilotgo-1.0.0.$(arch).tar.gz /root/
+    echo "adding scripts..."
+    cp ./scripts/shell/install_server.sh ${version_path}/server/
+    cp ./scripts/shell/install_agent.sh ${version_path}/agent/
 
-echo -e "${GREEN_COLOR}编译打包完成${RES}"
+    echo "compressing files..."
+    tar -czf ./out/pilotgo-${PILOTGO_VERSION}-${1}.tar.gz -C ./out/${1} .
+
+    echo "cleanning tmp files..."
+    rm -rf ./out/${1}
+}
+
+function clean() {
+    rm -rf ./out
+}
+
+# build_frontend
+
+build_and_pack amd64
+build_and_pack arm64
+
+echo "done"

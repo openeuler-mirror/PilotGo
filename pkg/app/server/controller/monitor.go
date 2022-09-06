@@ -133,13 +133,13 @@ func InitPromeYml(PrometheusYmlPath, AlertRulesPath string) error {
 	write.WriteString("\n  - job_name: 'file_sd_test'")
 	write.WriteString("\n    file_sd_configs:")
 	write.WriteString("\n    - files:")
-	write.WriteString("\n      - '/opt/PilotGo/monitor_target/monitor.yml'")
+	write.WriteString("\n      - '/opt/PilotGo/monitor/target.yml'")
 	write.WriteString("\n      refresh_interval: 20s")
 	write.Flush()
 	return nil
 }
 func WriteYml(a []map[string]string) error {
-	FilePath := "/opt/PilotGo/monitor_target/monitor.yml"
+	FilePath := "/opt/PilotGo/monitor/target.yml"
 	os.Remove(FilePath)
 	os.Create(FilePath)
 	var prometheusYml Prometheusyml
