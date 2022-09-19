@@ -36,6 +36,7 @@ yarn-error.log*
 *.out
 *.log
 /log
+/out
 
 # Local config
 config_server.yaml

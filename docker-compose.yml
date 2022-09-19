@@ -1,0 +1,33 @@
+version: '3'
+services:
+  server:
+    build: .
+    ports:
+      - "8888:8888"
+      - "8889:8889"
+    networks:
+      - pilotgo
+    depends_on:
+      - redis
+      - mysql
+  redis:
+    image: redis
+    container_name: redis-server
+    networks:
+      - pilotgo
+    ports:
+      - "6379:6379"
+  mysql:
+    image: mysql
+    container_name: mysql-server
+    networks:
+      - pilotgo
+    ports:
+      - "3306:3306"
+    volumes:
+      - /var/lib/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=qwer1234!@#$$
+networks:
+  pilotgo:
+    external: true
