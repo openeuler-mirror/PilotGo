@@ -20,13 +20,13 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 // gorm分页查询方法
-func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int, error) {
+func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -34,7 +34,7 @@ func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int, err
 		p.CurrentPageNum = 1
 	}
 
-	var total int
+	var total int64
 	err := queryTx.Count(&total).Error
 	if err != nil {
 		return 0, err
@@ -67,10 +67,10 @@ func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{},
 		p.TotalPage = 1
 	}
 	num := p.Size * (p.CurrentPageNum - 1)
-	if num > uint(total) {
+	if num > total {
 		return nil, fmt.Errorf("页码超出")
 	}
-	if p.Size*p.CurrentPageNum > uint(total) {
+	if p.Size*p.CurrentPageNum > total {
 		return data[num:], nil
 	} else {
 		if p.Size*p.CurrentPageNum < num {
@@ -84,7 +84,7 @@ func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{},
 	}
 }
 
-//返回所有子部门id
+// 返回所有子部门id
 func ReturnSpecifiedDepart(id int, res *[]int) {
 	if len(dao.SubDepartId(id)) == 0 {
 		return
@@ -96,7 +96,7 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 }
 
 // 拼装json 分页数据
-func JsonPagination(c *gin.Context, list interface{}, total int, query *model.PaginationQ) {
+func JsonPagination(c *gin.Context, list interface{}, total int64, query *model.PaginationQ) {
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code":  http.StatusOK,
 		"ok":    true,

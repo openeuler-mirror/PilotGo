@@ -143,7 +143,7 @@ func UserAll(c *gin.Context) {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, total, query)
+	JsonPagination(c, data, int64(total), query)
 }
 
 // 高级搜索
@@ -166,7 +166,7 @@ func UserSearch(c *gin.Context) {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, total, query)
+	JsonPagination(c, data, int64(total), query)
 }
 
 // 重置密码
@@ -193,7 +193,7 @@ func DeleteUser(c *gin.Context) {
 	response.Response(c, http.StatusOK, http.StatusOK, nil, "用户删除成功!")
 }
 
-//修改用户信息
+// 修改用户信息
 func UpdateUser(c *gin.Context) {
 	var user model.User
 	c.Bind(&user)
@@ -222,7 +222,7 @@ func UpdateUser(c *gin.Context) {
 	}
 }
 
-//一键导入用户数据
+// 一键导入用户数据
 func ImportUser(c *gin.Context) {
 	form, _ := c.MultipartForm()
 

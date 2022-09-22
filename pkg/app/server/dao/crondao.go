@@ -48,7 +48,7 @@ func DeleteTask(id int) {
 // 更新任务
 func UpdateTask(id int, c model.CrontabList) {
 	var cron model.CrontabList
-	global.PILOTGO_DB.Model(&cron).Where("id=?", id).Update(&c)
+	global.PILOTGO_DB.Model(&cron).Where("id=?", id).Updates(&c)
 }
 
 // 任务状态更新
@@ -58,7 +58,7 @@ func CronTaskStatus(id int, status bool) {
 	UpdateCron := model.CrontabList{
 		Status: &flag,
 	}
-	global.PILOTGO_DB.Model(&cron).Where("id=?", id).Update(&UpdateCron)
+	global.PILOTGO_DB.Model(&cron).Where("id=?", id).Updates(&UpdateCron)
 }
 
 // 根据任务id获取spec和command

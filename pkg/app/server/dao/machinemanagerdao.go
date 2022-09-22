@@ -38,7 +38,7 @@ func MachineStatusToOffline(uuid string) {
 	Ma := model.MachineNode{
 		State: global.OffLine,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
 }
 
 // agent机器未分配
@@ -48,7 +48,7 @@ func MachineStatusToFree(uuid, ip string) {
 		State: global.Free,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
 }
 
 // agent机器连接正常
@@ -58,7 +58,7 @@ func MachineStatusToNormal(uuid, ip string) {
 		State: global.Normal,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
 }
 
 // 新增agent机器
@@ -94,7 +94,7 @@ func ModifyMachineDepart(MadId int, DeptId int) {
 		DepartId: DeptId,
 		State:    global.Normal,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
 }
 func ModifyMachineDepart2(MadId int, DeptId int) {
 	var Machine model.MachineNode
@@ -102,7 +102,7 @@ func ModifyMachineDepart2(MadId int, DeptId int) {
 		DepartId: DeptId,
 		State:    global.Free,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
 }
 
 // 根据机器id获取机器信息

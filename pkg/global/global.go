@@ -15,9 +15,10 @@
 package global
 
 import (
-	"github.com/casbin/casbin"
+	"github.com/casbin/casbin/v2"
 	"github.com/go-redis/redis/v8"
-	"github.com/jinzhu/gorm"
+
+	"gorm.io/gorm"
 )
 
 // 实例变量

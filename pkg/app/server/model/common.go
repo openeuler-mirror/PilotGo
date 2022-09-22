@@ -26,11 +26,11 @@ type PageResult struct {
 	PageSize int         `json:"pageSize"`
 }
 
-//分页查询结构体
+// 分页查询结构体
 type PaginationQ struct {
 	Ok             bool        `json:"ok"`
-	Size           uint        `form:"size" json:"size"`
-	CurrentPageNum uint        `form:"page" json:"page"`
+	Size           int         `form:"size" json:"size"`
+	CurrentPageNum int         `form:"page" json:"page"`
 	Data           interface{} `json:"data" comment:"muster be a pointer of slice gorm.Model"` // save pagination list
-	TotalPage      uint        `json:"total"`
+	TotalPage      int         `json:"total"`
 }

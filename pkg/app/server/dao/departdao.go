@@ -15,7 +15,7 @@
 package dao
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
@@ -54,7 +54,7 @@ func UpdateDepart(DepartID int, DepartName string) {
 	Depart := model.DepartNode{
 		Depart: DepartName,
 	}
-	global.PILOTGO_DB.Model(&DepartInfo).Where("id=?", DepartID).Update(&Depart)
+	global.PILOTGO_DB.Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart)
 }
 
 func UpdateParentDepart(DepartID int, DepartName string) {
@@ -62,7 +62,7 @@ func UpdateParentDepart(DepartID int, DepartName string) {
 	Depart := model.DepartNode{
 		ParentDepart: DepartName,
 	}
-	global.PILOTGO_DB.Model(&DepartInfo).Where("p_id=?", DepartID).Update(&Depart)
+	global.PILOTGO_DB.Model(&DepartInfo).Where("p_id=?", DepartID).Updates(&Depart)
 }
 
 func Pid2Depart(pid int) []model.DepartNode {
@@ -76,7 +76,7 @@ func Deletedepartdata(needdelete []int) {
 	global.PILOTGO_DB.Where("id=?", needdelete[0]).Delete(&DepartInfo)
 }
 
-//向需要删除的depart的组内增加需要删除的子节点
+// 向需要删除的depart的组内增加需要删除的子节点
 func Insertdepartlist(needdelete []int, str string) []int {
 	var DepartInfo []model.DepartNode
 
@@ -94,7 +94,7 @@ func GetPidAndId(depart string) (pid, id int) {
 	return dep.PID, dep.ID
 }
 
-//添加部门
+// 添加部门
 func AddDepart(db *gorm.DB, depart *model.DepartNode) error {
 	err := db.Create(depart).Error
 	return err

@@ -24,6 +24,7 @@ import (
 	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/initialization"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -52,6 +53,9 @@ func main() {
 		logger.Error("mysql db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
+
+	// 鉴权模块初始化
+	global.PILOTGO_E = service.Casbin(&sconfig.Config().MysqlDBinfo)
 
 	// 监控初始化
 	if err := initialization.MonitorInit(&sconfig.Config().Monitor); err != nil {
@@ -86,7 +90,6 @@ func main() {
 			logger.Info("signal interrupted: %s", s.String())
 			// TODO: DO EXIT
 
-			global.PILOTGO_DB.Close()
 			global.PILOTGO_REDIS.Close()
 
 			goto EXIT
