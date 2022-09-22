@@ -81,3 +81,14 @@ func MachineAllData(c *gin.Context) {
 	}
 	response.JSON(c, http.StatusOK, http.StatusOK, datas, "获取所有的机器数据")
 }
+
+// 删除机器
+func DeleteMachine(c *gin.Context) {
+	var deleteuuid model.DeleteUUID
+	c.Bind(&deleteuuid)
+	for _, machinedeluuid := range deleteuuid.Deluuid {
+		if err := dao.DeleteMachine(machinedeluuid); err != nil {
+			response.Response(c, http.StatusOK, http.StatusBadRequest, nil, machinedeluuid+"机器删除不成功!")
+		}
+	}
+}

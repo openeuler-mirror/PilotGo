@@ -42,6 +42,7 @@ func SetupRouter() *gin.Engine {
 
 	macList := router.Group("cluster/macList")
 	{
+		macList.POST("/deletemachine", controller.DeleteMachine)
 		macList.GET("/depart", controller.Dept)
 		macList.GET("/selectmachine", controller.MachineList)
 		macList.POST("/createbatch", controller.CreateBatch)
