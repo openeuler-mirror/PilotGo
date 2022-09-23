@@ -49,10 +49,10 @@ func MachineInfo(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, lens, query)
+	JsonPagination(c, data, int64(lens), query)
 }
 
-//资源池返回接口
+// 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
 	machine := model.MachineNode{}
 	query := &model.PaginationQ{}

@@ -35,7 +35,7 @@ func UpdateBatch(BatchID int, BatchName string, Descrip string) {
 		Name:        BatchName,
 		Description: Descrip,
 	}
-	global.PILOTGO_DB.Model(&Batch).Where("id=?", BatchID).Update(&BatchNew)
+	global.PILOTGO_DB.Model(&Batch).Where("id=?", BatchID).Updates(&BatchNew)
 }
 
 func GetMachineID(BatchID int) []string {
@@ -50,7 +50,7 @@ func CreateBatch(batch model.Batch) {
 	global.PILOTGO_DB.Create(&batch)
 }
 
-//根据批次id获取所属的所有uuids
+// 根据批次id获取所属的所有uuids
 func BatchIds2UUIDs(batchIds []int) (uuids []string) {
 	for _, batchId := range batchIds {
 		var batch model.Batch

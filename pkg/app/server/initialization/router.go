@@ -20,9 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/resource"
 )
 
@@ -171,7 +169,6 @@ func SetupRouter() *gin.Engine {
 		policy.POST("/add", controller.PolicyAdd)
 	}
 
-	global.PILOTGO_E = service.Casbin()
 	Level := router.Group("")
 	Level.Use(middleware.CasbinHandler())
 	{

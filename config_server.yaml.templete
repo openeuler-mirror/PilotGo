@@ -1,9 +1,9 @@
 http_server:
-  addr: localhost:8888
+  addr: 0.0.0.0:8888
   session_count: 100
   max_age: 1800
 socket_server:
-  addr: localhost:8879
+  addr: 0.0.0.0:8879
 monitor:
   prometheus_addr: localhost:9090
   alertmanager_addr: localhost:9093
@@ -16,13 +16,13 @@ log:
   max_file: 1
   max_size: 10485760
 mysql:
-  host_name: 127.0.0.1
+  host_name: mysql
   port: 3306
   user_name: ''
   password: ''
   data_base: PilotGo
 redis:
-  redis_conn: localhost:6379
+  redis_conn: redis:6379
   redis_pwd: ''
   defaultDB: 0
   dialTimeout: 5s #redis连接超时时间.默认5s

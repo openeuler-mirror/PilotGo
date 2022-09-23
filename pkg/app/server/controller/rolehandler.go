@@ -65,7 +65,7 @@ func GetPolicy(c *gin.Context) {
 		return
 	}
 
-	JsonPagination(c, data, total, query)
+	JsonPagination(c, data, int64(total), query)
 }
 
 // 获取登录用户权限
@@ -96,7 +96,7 @@ func GetRoles(c *gin.Context) {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, total, query)
+	JsonPagination(c, data, int64(total), query)
 }
 
 func AddUserRole(c *gin.Context) {

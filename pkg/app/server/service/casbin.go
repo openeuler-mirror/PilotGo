@@ -15,14 +15,16 @@
 package service
 
 import (
+	"fmt"
 	"sync"
 
-	"github.com/casbin/casbin"
-	casbinmodel "github.com/casbin/casbin/model"
-	gormadapter "github.com/casbin/gorm-adapter"
+	"github.com/casbin/casbin/v2"
+	casbinmodel "github.com/casbin/casbin/v2/model"
+	gormadapter "github.com/casbin/gorm-adapter/v3"
+	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
 
 var (
@@ -30,7 +32,7 @@ var (
 	once     sync.Once
 )
 
-func Casbin() *casbin.Enforcer {
+func Casbin(conf *sconfig.MysqlDBInfo) *casbin.Enforcer {
 
 	text := `
 	[request_definition]
@@ -49,14 +51,28 @@ func Casbin() *casbin.Enforcer {
 	m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	`
 
-	m := casbinmodel.Model{}
-	m.LoadModelFromText(text)
-
 	once.Do(func() {
-		a := gormadapter.NewAdapter("mysql", mysqlmanager.Url, true)
-		enforcer = casbin.NewEnforcer(m, a)
+		// m := casbinmodel.Model{}
+		m, err := casbinmodel.NewModelFromString(text)
+		if err != nil {
+			logger.Fatal("casbin model create failed: %s", err)
+		}
+
+		url := fmt.Sprintf("%s:%s@tcp(%s:%d)/",
+			conf.UserName,
+			conf.Password,
+			conf.HostName,
+			conf.Port)
+		a, err := gormadapter.NewAdapter("mysql", url, conf.DataBase)
+		if err != nil {
+			logger.Fatal("casbin adapter create failed: %s", err)
+		}
+		enforcer, err = casbin.NewEnforcer(m, a)
+		if err != nil {
+			logger.Fatal("casbin enforcer create failed: %s", err)
+		}
+		enforcer.LoadPolicy()
 	})
-	enforcer.LoadPolicy()
 	return enforcer
 }
 
@@ -75,17 +91,27 @@ func AllPolicy() (interface{}, int) {
 }
 
 func PolicyRemove(rule model.CasbinRule) bool {
-	if ok := global.PILOTGO_E.RemovePolicy(rule.RoleType, rule.Url, rule.Method); !ok {
-		return false
-	} else {
-		return true
+	ok, err := global.PILOTGO_E.RemovePolicy(rule.RoleType, rule.Url, rule.Method)
+	if err == nil {
+		if !ok {
+			return false
+		} else {
+			return true
+		}
 	}
+	logger.Error("remove policy error:%s", err)
+	return false
 }
 
 func PolicyAdd(rule model.CasbinRule) bool {
-	if ok := global.PILOTGO_E.AddPolicy(rule.RoleType, rule.Url, rule.Method); !ok {
-		return false
-	} else {
-		return true
+	ok, err := global.PILOTGO_E.AddPolicy(rule.RoleType, rule.Url, rule.Method)
+	if err == nil {
+		if !ok {
+			return false
+		} else {
+			return true
+		}
 	}
+	logger.Error("add policy error:%s", err)
+	return false
 }

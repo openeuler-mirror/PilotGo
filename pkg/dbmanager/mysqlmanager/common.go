@@ -15,7 +15,7 @@
 package mysqlmanager
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type MysqlManager struct {

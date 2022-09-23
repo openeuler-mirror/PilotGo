@@ -76,12 +76,12 @@ func SaveLatestFile(id int) {
 
 func UpdateFile(id int, f model.Files) {
 	var file model.Files
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Update(&f)
+	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f)
 }
 
 func UpdateLastFile(id int, f model.HistoryFiles) {
 	var file model.HistoryFiles
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Update(&f)
+	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f)
 }
 
 func RollBackFile(id int, text string) {
@@ -89,7 +89,7 @@ func RollBackFile(id int, text string) {
 	fd := model.Files{
 		File: text,
 	}
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Update(&fd)
+	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&fd)
 }
 func DeleteFile(id int) {
 	var file model.Files

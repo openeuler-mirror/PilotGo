@@ -194,7 +194,7 @@ func BatchMachineInfo(c *gin.Context) {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, len(MachinesInfo), query)
+	JsonPagination(c, data, int64(len(MachinesInfo)), query)
 }
 
 func SelectBatch(c *gin.Context) {

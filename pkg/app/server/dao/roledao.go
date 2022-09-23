@@ -66,7 +66,7 @@ func PermissionButtons(button string) interface{} {
 	return buttons
 }
 
-//获取所有的用户角色
+// 获取所有的用户角色
 func GetAllRoles() ([]model.ReturnUserRole, int) {
 	var roles []model.UserRole
 	var getRole []model.ReturnUserRole
@@ -168,7 +168,7 @@ func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole 
 		Menus:    menus,
 		ButtonID: buttonId,
 	}
-	global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Update(&r)
+	global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r)
 	return userRole
 }
 

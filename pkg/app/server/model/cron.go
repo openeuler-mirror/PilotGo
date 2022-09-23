@@ -17,7 +17,7 @@ package model
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
