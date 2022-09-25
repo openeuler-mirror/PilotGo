@@ -163,6 +163,13 @@ func SetupRouter() *gin.Engine {
 		userLog.POST("/delete", controller.DeleteLog)
 	}
 
+	plugin := router.Group("plugin")
+	{
+		plugin.GET("/list", controller.PluginList)
+		plugin.POST("/load", controller.LoadPlugin)
+		plugin.POST("/unload", controller.UnLoadPlugin)
+	}
+
 	// 此处绑定casbin过滤规则
 	policy := router.Group("casbin")
 	{
