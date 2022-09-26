@@ -15,6 +15,8 @@
 package dao
 
 import (
+	"fmt"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
@@ -152,4 +154,16 @@ func UUID2MacIP(uuid string) (ip string) {
 	var machine model.MachineNode
 	global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine)
 	return machine.IP
+}
+
+// 使用uuid删除机器
+func DeleteMachine(machinedeluuid string) (err error) {
+	var machine model.MachineNode
+	if IsUUIDExist(machinedeluuid) {
+		if err := global.PILOTGO_DB.Where("machine_uuid=?", machinedeluuid).Unscoped().Delete(machine).Error; err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("该机器不存在")
 }
