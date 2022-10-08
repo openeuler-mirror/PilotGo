@@ -55,6 +55,6 @@ func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, 
 	return
 }
 
-type DelUUID struct {
+type DeleteUUID struct {
 	Deluuid []string `json:"deluuid"`
 }
