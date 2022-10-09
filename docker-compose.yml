@@ -10,6 +10,7 @@ services:
     depends_on:
       - redis
       - mysql
+    restart: always
   redis:
     image: redis
     container_name: redis-server
