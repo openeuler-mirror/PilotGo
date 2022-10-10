@@ -28,7 +28,7 @@ services:
     volumes:
       - /var/lib/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=qwer1234!@#$$
+      - MYSQL_ROOT_PASSWORD=1234
 networks:
   pilotgo:
     external: true

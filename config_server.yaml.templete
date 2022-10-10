@@ -18,8 +18,8 @@ log:
 mysql:
   host_name: mysql
   port: 3306
-  user_name: ''
-  password: ''
+  user_name: 'root'
+  password: '1234'
   data_base: PilotGo
 redis:
   redis_conn: redis:6379
