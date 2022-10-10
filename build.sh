@@ -55,6 +55,9 @@ function build_frontend() {
 function build_and_pack() {
     # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
 
+    echo "cleanning tmp directory..."
+    rm -rf ./out/${1}
+
     version_path="./out/${1}/pilotgo-${PILOTGO_VERSION}/"
 
     echo "building server for ${1}..."
@@ -74,9 +77,6 @@ function build_and_pack() {
 
     echo "compressing files..."
     tar -czf ./out/pilotgo-${PILOTGO_VERSION}-${1}.tar.gz -C ./out/${1} .
-
-    echo "cleanning tmp files..."
-    rm -rf ./out/${1}
 }
 
 function clean() {
