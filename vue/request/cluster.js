@@ -58,12 +58,12 @@ export function deleteDepart(data) {
 
 // 点击部门刷新列表接口
 export function getClusters(data) {
-    return request({
-      url: 'macList/machineinfo',
-      method: 'get',
-      params: data
-    })
-  }
+  return request({
+    url: 'macList/machineinfo',
+    method: 'get',
+    params: data
+  })
+}
 
 // 获取资源池列表接口
 export function getSourceMac(data) {
@@ -74,7 +74,7 @@ export function getSourceMac(data) {
   })
 }
 
-  // 更换机器所属部门
+// 更换机器所属部门
 export function changeMacDept(data) {
   return request({
     url: 'macList/modifydepart',
@@ -92,7 +92,7 @@ export function insertIp(data) {
   })
 }
 // 编辑ip接口
-export function updateIp({ip, ...data}) {
+export function updateIp({ ip, ...data }) {
   return request({
     url: `/hosts/${ip}`,
     method: 'post',
@@ -102,7 +102,7 @@ export function updateIp({ip, ...data}) {
 // 删除ip接口
 export function deleteIp(data) {
   return request({
-    url: 'macList/deletemachinedata',
+    url: 'macList/machine_del',
     method: 'post',
     data
   })
