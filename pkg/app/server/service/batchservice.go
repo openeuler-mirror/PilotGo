@@ -14,15 +14,141 @@
  ******************************************************************************/
 package service
 
-// 去除重复字符串
-func RemoveRepeatedElement(s []string) []string {
-	result := make([]string, 0)
-	m := make(map[string]bool) //map的值不重要
-	for _, v := range s {
-		if _, ok := m[v]; !ok {
-			result = append(result, v)
-			m[v] = true
+import (
+	"errors"
+	"strconv"
+	"strings"
+
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+)
+
+func CreateBatch(batchinfo *model.CreateBatch) error {
+	if len(batchinfo.Name) == 0 {
+		return errors.New("请输入批次名称")
+	}
+
+	if dao.IsExistName(batchinfo.Name) {
+		return errors.New("已存在该名称批次")
+	}
+
+	if len(batchinfo.Manager) == 0 {
+		return errors.New("创建人未输入")
+	}
+
+	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartIDs) == 0 {
+		return errors.New("请先选择机器IP或部门")
+	}
+
+	// 机器id列表
+	var machinelist string
+	Departids := make([]int, 0)
+	if len(batchinfo.Machines) == 0 {
+		// 点选部门创建批次
+		var machineids []int
+		for _, ids := range batchinfo.DepartIDs {
+			Departids = append(Departids, ids)
+			ReturnSpecifiedDepart(ids, &Departids)
+		}
+
+		machines := dao.MachineList(Departids)
+		for _, mamachine := range machines {
+			machineids = append(machineids, mamachine.ID)
+		}
+		for _, id := range machineids {
+			machinelist = machinelist + "," + strconv.Itoa(id)
+			machinelist = strings.Trim(machinelist, ",")
+		}
+	} else {
+		// 点选ip创建批次
+		for _, id := range batchinfo.Machines {
+			machinelist = machinelist + "," + strconv.Itoa(id)
+			machinelist = strings.Trim(machinelist, ",")
 		}
 	}
-	return result
+
+	// 机器所属部门ids
+	var departIdlist string
+	if len(batchinfo.DepartID) == 0 {
+		for _, id := range Departids {
+			departIdlist = departIdlist + "," + strconv.Itoa(id)
+			departIdlist = strings.Trim(departIdlist, ",")
+		}
+	} else {
+		for _, id := range batchinfo.DepartID {
+			departIdlist = departIdlist + "," + strconv.Itoa(id)
+			departIdlist = strings.Trim(departIdlist, ",")
+		}
+	}
+
+	// 机器所属部门
+	var departNamelist string
+	if len(batchinfo.DepartID) == 0 {
+		list := dao.DepartIdsToGetDepartNames(Departids)
+		departNamelist = strings.Join(list, ",")
+	} else {
+		List := dao.DepartIdsToGetDepartNames(batchinfo.DepartID)
+		departNamelist = strings.Join(List, ",")
+	}
+
+	Batch := model.Batch{
+		Name:        batchinfo.Name,
+		Description: batchinfo.Description,
+		Manager:     batchinfo.Manager,
+		Depart:      departIdlist,
+		DepartName:  departNamelist,
+		Machinelist: machinelist,
+	}
+	dao.CreateBatch(Batch)
+
+	return nil
+}
+
+// TODO: *[]model.Batch 应该定义为指针数组
+func GetBatches(query *model.PaginationQ) (*[]model.Batch, int64, error) {
+
+	batch := model.Batch{}
+	list, tx := batch.ReturnBatch(query)
+
+	total, err := CrudAll(query, tx, list)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return list, total, nil
+}
+
+func DeleteBatch(ids []int) error {
+	for _, value := range ids {
+		dao.DeleteBatch(value)
+	}
+	return nil
+}
+
+func UpdateBatch(batchid int, name, description string) error {
+	if !dao.IsExistID(batchid) {
+		return errors.New("不存在该批次")
+	}
+
+	dao.UpdateBatch(batchid, name, description)
+	return nil
+}
+
+func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
+	machinelist := dao.GetMachineID(batchid)
+	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
+
+	// 获取机器的所有信息
+	machinesInfo := make([]model.MachineNode, 0)
+	for _, macId := range machineIdlist {
+		MacInfo := dao.MachineData(macId)
+		machinesInfo = append(machinesInfo, MacInfo)
+	}
+
+	return machinesInfo, nil
+}
+
+func SelectBatch() ([]model.Batch, error) {
+	return dao.GetBatch(), nil
 }
