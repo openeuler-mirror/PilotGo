@@ -27,6 +27,23 @@ import (
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
+// 获取部门下所有机器列表
+func MachineList(c *gin.Context) {
+	DepartId := c.Query("DepartId")
+	DepId, err := strconv.Atoi(DepartId)
+	if err != nil {
+		response.Fail(c, nil, "参数错误")
+		return
+	}
+
+	var departId []int
+	ReturnSpecifiedDepart(DepId, &departId)
+	departId = append(departId, DepId)
+
+	machinelist := dao.MachineList(departId)
+	response.JSON(c, http.StatusOK, http.StatusOK, machinelist, "部门下所属机器获取成功")
+}
+
 func Dept(c *gin.Context) {
 	departID := c.Query("DepartID")
 	tmp, err := strconv.Atoi(departID)

@@ -3,118 +3,29 @@ package controller
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-// 创建批次页面机器列表树
-func MachineList(c *gin.Context) {
-	DepartId := c.Query("DepartId")
-	DepId, err := strconv.Atoi(DepartId)
-	if err != nil {
-		response.Fail(c, nil, "参数错误")
-		return
-	}
-
-	var departId []int
-	ReturnSpecifiedDepart(DepId, &departId)
-	departId = append(departId, DepId)
-
-	machinelist := dao.MachineList(departId)
-	response.JSON(c, http.StatusOK, http.StatusOK, machinelist, "部门下所属机器获取成功")
-}
-
-func CreateBatch(c *gin.Context) {
+func CreateBatchHandler(c *gin.Context) {
 	var batchinfo model.CreateBatch
-	c.Bind(&batchinfo)
-
-	if len(batchinfo.Name) == 0 {
-		response.Fail(c, nil, "请输入批次名称")
-		return
-	}
-	if dao.IsExistName(batchinfo.Name) {
-		response.Fail(c, nil, "已存在该名称批次")
-		return
-	}
-	if len(batchinfo.Manager) == 0 {
-		response.Fail(c, nil, "创建人未输入")
+	if err := c.Bind(&batchinfo); err != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartIDs) == 0 {
-		response.Fail(c, nil, "请先选择机器IP或部门")
+	if err := service.CreateBatch(&batchinfo); err != nil {
+		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	// 机器id列表
-	var machinelist string
-	Departids := make([]int, 0)
-	if len(batchinfo.Machines) == 0 {
-		// 点选部门创建批次
-		var machineids []int
-		for _, ids := range batchinfo.DepartIDs {
-			Departids = append(Departids, ids)
-			ReturnSpecifiedDepart(ids, &Departids)
-		}
-
-		machines := dao.MachineList(Departids)
-		for _, mamachine := range machines {
-			machineids = append(machineids, mamachine.ID)
-		}
-		for _, id := range machineids {
-			machinelist = machinelist + "," + strconv.Itoa(id)
-			machinelist = strings.Trim(machinelist, ",")
-		}
-	} else {
-		// 点选ip创建批次
-		for _, id := range batchinfo.Machines {
-			machinelist = machinelist + "," + strconv.Itoa(id)
-			machinelist = strings.Trim(machinelist, ",")
-		}
-	}
-
-	// 机器所属部门ids
-	var departIdlist string
-	if len(batchinfo.DepartID) == 0 {
-		for _, id := range Departids {
-			departIdlist = departIdlist + "," + strconv.Itoa(id)
-			departIdlist = strings.Trim(departIdlist, ",")
-		}
-	} else {
-		for _, id := range batchinfo.DepartID {
-			departIdlist = departIdlist + "," + strconv.Itoa(id)
-			departIdlist = strings.Trim(departIdlist, ",")
-		}
-	}
-
-	// 机器所属部门
-	var departNamelist string
-	if len(batchinfo.DepartID) == 0 {
-		list := dao.DepartIdsToGetDepartNames(Departids)
-		departNamelist = strings.Join(list, ",")
-	} else {
-		List := dao.DepartIdsToGetDepartNames(batchinfo.DepartID)
-		departNamelist = strings.Join(List, ",")
-	}
-
-	Batch := model.Batch{
-		Name:        batchinfo.Name,
-		Description: batchinfo.Description,
-		Manager:     batchinfo.Manager,
-		Depart:      departIdlist,
-		DepartName:  departNamelist,
-		Machinelist: machinelist,
-	}
-	dao.CreateBatch(Batch)
 	response.Success(c, nil, "批次入库成功")
 }
 
-func BatchInfo(c *gin.Context) {
+func BatchInfoHandler(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -122,23 +33,17 @@ func BatchInfo(c *gin.Context) {
 		return
 	}
 
-	batch := model.Batch{}
-	list, tx := batch.ReturnBatch(query)
+	list, total, err := service.GetBatches(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	total, err := CrudAll(query, tx, list)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
 	// 返回数据开始拼装分页的json
 	JsonPagination(c, list, total, query)
 }
 
-func DeleteBatch(c *gin.Context) {
+func DeleteBatchHandler(c *gin.Context) {
 	var batchdel model.BatchDel
 	c.Bind(&batchdel)
 
@@ -146,25 +51,29 @@ func DeleteBatch(c *gin.Context) {
 		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "请输入删除批次ID")
 		return
 	}
-	for _, value := range batchdel.BatchID {
-		dao.DeleteBatch(value)
+
+	if err := service.DeleteBatch(batchdel.BatchID); err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
 	}
+
 	response.Success(c, nil, "批次删除成功")
 }
 
-func UpdateBatch(c *gin.Context) {
+func UpdateBatchHandler(c *gin.Context) {
 	var batchinfo model.BatchUpdate
 	c.Bind(&batchinfo)
 
-	if !dao.IsExistID(batchinfo.BatchId) {
-		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "不存在该批次")
+	err := service.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
-	dao.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
+
 	response.Success(c, nil, "批次修改成功")
 }
 
-func BatchMachineInfo(c *gin.Context) {
+func BatchMachineInfoHandler(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -179,28 +88,31 @@ func BatchMachineInfo(c *gin.Context) {
 		return
 	}
 
-	machinelist := dao.GetMachineID(batchid)
-	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
-
-	// 获取机器的所有信息
-	MachinesInfo := make([]model.MachineNode, 0)
-	for _, macId := range machineIdlist {
-		MacInfo := dao.MachineData(macId)
-		MachinesInfo = append(MachinesInfo, MacInfo)
+	machinesInfo, err := service.GetBatchMachines(batchid)
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, "get batch machines failed: "+err.Error())
+		return
 	}
+
 	// 分页
-	data, err := DataPaging(query, MachinesInfo, len(MachinesInfo))
+	data, err := DataPaging(query, machinesInfo, len(machinesInfo))
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, int64(len(MachinesInfo)), query)
+	JsonPagination(c, data, int64(len(machinesInfo)), query)
 }
 
-func SelectBatch(c *gin.Context) {
-	batch := dao.GetBatch()
+func SelectBatchHandler(c *gin.Context) {
+	batch, err := service.SelectBatch()
+	if err != nil {
+		response.Fail(c, nil, "获取批次信息错误"+err.Error())
+		return
+	}
+
 	if len(batch) == 0 {
 		response.Fail(c, nil, "未获取到批次信息")
+		return
 	}
 	response.Success(c, gin.H{"data": batch}, "批次信息获取成功")
 

@@ -1,0 +1,54 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: zhanghan
+ * Date: 2022-02-23 17:44:00
+ * LastEditTime: 2022-04-22 14:18:14
+ * Description: 公共函数
+ ******************************************************************************/
+package service
+
+import (
+	"gorm.io/gorm"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+)
+
+// gorm分页查询方法
+func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
+	if p.Size < 1 {
+		p.Size = 10
+	}
+	if p.CurrentPageNum < 1 {
+		p.CurrentPageNum = 1
+	}
+
+	var total int64
+	err := queryTx.Count(&total).Error
+	if err != nil {
+		return 0, err
+	}
+	offset := p.Size * (p.CurrentPageNum - 1)
+	err = queryTx.Limit(p.Size).Offset(offset).Find(list).Error
+	if err != nil {
+		return 0, err
+	}
+	return total, err
+}
+
+// 返回所有子部门id
+func ReturnSpecifiedDepart(id int, res *[]int) {
+	if len(dao.SubDepartId(id)) == 0 {
+		return
+	}
+	for _, value := range dao.SubDepartId(id) {
+		*res = append(*res, value)
+		ReturnSpecifiedDepart(value, res)
+	}
+}
