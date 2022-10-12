@@ -102,7 +102,7 @@ export function updateIp({ ip, ...data }) {
 // 删除ip接口
 export function deleteIp(data) {
   return request({
-    url: 'macList/machine_del',
+    url: 'macList/deletemachine',
     method: 'post',
     data
   })

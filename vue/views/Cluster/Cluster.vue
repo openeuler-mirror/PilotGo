@@ -157,15 +157,20 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(
+      }).then(()=> {
+        console.log('1111')
         deleteIp({ deluuid: uuidArray }).then(res => {
           if (res.data.code === 200) {
             this.$message.success(res.data.msg);
+            this.$refs.table.handleSearch();
           } else {
             this.$message.error(res.data.msg);
           }
         })
-      );
+      }
+      ).cache(()=> {
+        console.log('2222')
+      });
     },
     handleUpdateIp(ip) {
       this.display = true;
