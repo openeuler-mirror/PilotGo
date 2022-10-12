@@ -60,11 +60,3 @@ export function updateBatch(data) {
     data
   })
 }
-// 批次详情
-export function batchDetail(data) {
-  return request({
-    url: '/batchmanager/batchmachineinfo',
-    method: 'get',
-    data
-  })
-}

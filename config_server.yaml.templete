@@ -3,7 +3,7 @@ http_server:
   session_count: 100
   max_age: 1800
 socket_server:
-  addr: 0.0.0.0:8879
+  addr: 0.0.0.0:8889
 monitor:
   prometheus_addr: localhost:9090
   alertmanager_addr: localhost:9093

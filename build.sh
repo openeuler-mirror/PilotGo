@@ -83,7 +83,7 @@ function clean() {
     rm -rf ./out
 }
 
-# build_frontend
+build_frontend
 
 build_and_pack amd64
 build_and_pack arm64
