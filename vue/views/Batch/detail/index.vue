@@ -80,12 +80,6 @@ export default {
     }
   },
   mounted() {
-    getBatchDetail({ ID: parseInt(this.$route.params.id) }).then(res => {
-      this.machines = [];
-      if(res.data.code === 200) {
-        this.machines = res.data.data;
-      }
-    })
   },  
   methods: {
     getBatchDetail,
