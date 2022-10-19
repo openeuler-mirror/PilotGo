@@ -19,8 +19,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func RunScript(c *gin.Context) {

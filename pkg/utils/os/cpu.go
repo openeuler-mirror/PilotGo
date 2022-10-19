@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 // 通过 /proc/cpuinfo来获取CPU型号

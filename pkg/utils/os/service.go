@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type listService struct {

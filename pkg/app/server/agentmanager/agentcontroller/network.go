@@ -20,12 +20,12 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func NetTCPHandler(c *gin.Context) {

@@ -16,8 +16,8 @@ package dao
 
 import (
 	"gorm.io/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 func IsParentDepartExist(parent string) bool {

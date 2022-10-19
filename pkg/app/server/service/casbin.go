@@ -21,10 +21,10 @@ import (
 	"github.com/casbin/casbin/v2"
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
-	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 var (

@@ -20,13 +20,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/initialization"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func main() {

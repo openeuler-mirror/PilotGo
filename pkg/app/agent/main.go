@@ -22,13 +22,13 @@ import (
 	"syscall"
 	"time"
 
-	aconfig "openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/filemonitor"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/register"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
+	aconfig "openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/filemonitor"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/register"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
 func main() {

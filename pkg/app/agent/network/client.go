@@ -17,10 +17,10 @@ package network
 import (
 	"net"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	pnet "openeluer.org/PilotGo/PilotGo/pkg/utils/message/net"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 )
 
 type AgentMessageHandler func(*SocketClient, *protocol.Message) error

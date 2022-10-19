@@ -6,7 +6,7 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 const (

@@ -20,8 +20,8 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 const LocalStorageFile = "./.pilotgo-agent.data"
