@@ -15,10 +15,12 @@
 package mysqlmanager
 
 import (
+	"database/sql"
 	"fmt"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
 
@@ -32,21 +34,31 @@ func MysqlInit(ip, username, password, dbname string, port int) (*MysqlManager, 
 		passWord: password,
 		dbName:   dbname,
 	}
-	Url = fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+	Url = fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8mb4&parseTime=true",
 		m.userName,
 		m.passWord,
 		m.ip,
 		m.port,
 		m.dbName)
 	var err error
-	m.db, err = gorm.Open("mysql", Url)
+	// gorm db does not need to close
+	m.db, err = gorm.Open(mysql.Open(Url), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
 	global.PILOTGO_DB = m.db
-	m.db.DB().SetMaxIdleConns(10)
-	m.db.DB().SetMaxOpenConns(100)
-	//禁用复数
-	m.db.SingularTable(true)
+
+	var db *sql.DB
+	if db, err = m.db.DB(); err != nil {
+		return nil, err
+	}
+
+	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(100)
+
 	return m, nil
 }

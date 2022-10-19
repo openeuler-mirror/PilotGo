@@ -38,7 +38,7 @@ fi
 echo "ok"
 
 function build_frontend() {
-    echo "dowoloading frontend, please wait..."
+    echo "dowoloading frontend libraries, please wait..."
     yarn install
     echo "compiling frontend, please wait..."
     yarn run build

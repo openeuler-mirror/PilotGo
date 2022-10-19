@@ -49,10 +49,10 @@ func MachineInfo(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, lens, query)
+	JsonPagination(c, data, int64(lens), query)
 }
 
-//资源池返回接口
+// 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
 	machine := model.MachineNode{}
 	query := &model.PaginationQ{}
@@ -80,4 +80,15 @@ func MachineAllData(c *gin.Context) {
 		datas = append(datas, map[string]string{"uuid": data.UUID, "ip_dept": data.IP + "-" + data.Departname, "ip": data.IP})
 	}
 	response.JSON(c, http.StatusOK, http.StatusOK, datas, "获取所有的机器数据")
+}
+
+// 删除机器
+func DeleteMachine(c *gin.Context) {
+	var deleteuuid model.DeleteUUID
+	c.Bind(&deleteuuid)
+	for _, machinedeluuid := range deleteuuid.Deluuid {
+		if err := dao.DeleteMachine(machinedeluuid); err != nil {
+			response.Response(c, http.StatusOK, http.StatusBadRequest, nil, machinedeluuid+"机器删除不成功!")
+		}
+	}
 }

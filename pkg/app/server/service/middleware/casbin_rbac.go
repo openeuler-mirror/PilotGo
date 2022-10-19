@@ -16,7 +16,6 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 	"openeluer.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -32,13 +31,18 @@ func CasbinHandler() gin.HandlerFunc {
 		// 获取用户的角色
 		sub := role
 		//判断策略中是否存在
-		if ok := global.PILOTGO_E.Enforce(sub, obj, act); ok {
-			logger.Info("恭喜您,权限验证通过")
-			c.Next()
-		} else {
-			logger.Fatal("很遗憾,权限验证没有通过")
-			c.Abort()
+		ok, err := global.PILOTGO_E.Enforce(sub, obj, act)
+		if err == nil {
+			if ok {
+				logger.Info("恭喜您,权限验证通过")
+				c.Next()
+			} else {
+				logger.Error("很遗憾,权限验证没有通过")
+				c.Abort()
+			}
 		}
+		logger.Error("auth check error:%s", err)
+		c.Abort()
 	}
 }
 
@@ -54,20 +58,4 @@ func AllPolicy() (interface{}, int) {
 	}
 	total := len(casbin)
 	return casbin, total
-}
-
-func PolicyRemove(rule model.CasbinRule) bool {
-	if ok := global.PILOTGO_E.RemovePolicy(rule.RoleType, rule.Url, rule.Method); !ok {
-		return false
-	} else {
-		return true
-	}
-}
-
-func PolicyAdd(rule model.CasbinRule) bool {
-	if ok := global.PILOTGO_E.AddPolicy(rule.RoleType, rule.Url, rule.Method); !ok {
-		return false
-	} else {
-		return true
-	}
 }

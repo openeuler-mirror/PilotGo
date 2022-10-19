@@ -15,6 +15,8 @@
 package dao
 
 import (
+	"fmt"
+
 	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeluer.org/PilotGo/PilotGo/pkg/global"
 )
@@ -38,7 +40,7 @@ func MachineStatusToOffline(uuid string) {
 	Ma := model.MachineNode{
 		State: global.OffLine,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
 }
 
 // agent机器未分配
@@ -48,7 +50,7 @@ func MachineStatusToFree(uuid, ip string) {
 		State: global.Free,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
 }
 
 // agent机器连接正常
@@ -58,7 +60,7 @@ func MachineStatusToNormal(uuid, ip string) {
 		State: global.Normal,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
 }
 
 // 新增agent机器
@@ -94,7 +96,7 @@ func ModifyMachineDepart(MadId int, DeptId int) {
 		DepartId: DeptId,
 		State:    global.Normal,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
 }
 func ModifyMachineDepart2(MadId int, DeptId int) {
 	var Machine model.MachineNode
@@ -102,7 +104,7 @@ func ModifyMachineDepart2(MadId int, DeptId int) {
 		DepartId: DeptId,
 		State:    global.Free,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Update(&Ma)
+	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
 }
 
 // 根据机器id获取机器信息
@@ -152,4 +154,16 @@ func UUID2MacIP(uuid string) (ip string) {
 	var machine model.MachineNode
 	global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine)
 	return machine.IP
+}
+
+// 使用uuid删除机器
+func DeleteMachine(machinedeluuid string) (err error) {
+	var machine model.MachineNode
+	if IsUUIDExist(machinedeluuid) {
+		if err := global.PILOTGO_DB.Where("machine_uuid=?", machinedeluuid).Unscoped().Delete(machine).Error; err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("该机器不存在")
 }

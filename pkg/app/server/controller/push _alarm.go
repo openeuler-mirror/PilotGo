@@ -16,7 +16,9 @@
 package controller
 
 import (
+	"log"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -54,6 +56,7 @@ func PushAlarmHandler(c *gin.Context) {
 
 func Read(Clients map[int]*ConnClient) {
 	for {
+		lock.Lock()
 		for key, cli := range Clients {
 			_, _, err := cli.Conn.ReadMessage()
 			if err != nil {
@@ -62,14 +65,22 @@ func Read(Clients map[int]*ConnClient) {
 				return
 			}
 		}
+		lock.Unlock()
 	}
 }
+
 func Write(Clients map[int]*ConnClient) {
 	for {
 		data := <-agentmanager.WARN_MSG
 		lock.Lock()
-		for _, cli := range Clients {
-			cli.Conn.WriteMessage(websocket.TextMessage, []byte(data.(string)))
+		for key, cli := range Clients {
+			err := cli.Conn.WriteMessage(websocket.TextMessage, []byte(data.(string)))
+			if err != nil {
+				log.Println(err)
+				Keys = append(Keys, key)
+				cli.Conn.Close()
+				return
+			}
 		}
 		lock.Unlock()
 	}
@@ -82,6 +93,7 @@ func Delete(Clients map[int]*ConnClient, keys []int) {
 			for _, key := range keys {
 				delete(Clients, key)
 			}
+			time.Sleep(time.Millisecond * 1)
 			lock.Unlock()
 		}
 	}
