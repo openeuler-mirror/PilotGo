@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 用户操作请求打印到终端

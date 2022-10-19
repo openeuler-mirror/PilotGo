@@ -16,8 +16,8 @@ package agentcontroller
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 type ZonePort struct {

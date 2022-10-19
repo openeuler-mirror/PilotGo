@@ -20,8 +20,8 @@ import (
 	"regexp"
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 //形如	openssl-1:1.1.1f-4.oe1.x86_64

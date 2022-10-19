@@ -20,8 +20,8 @@ import (
 	"strings"
 	"time"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 // 根据角色名称返回角色id和用户类型

@@ -17,8 +17,8 @@ package dao
 import (
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 func IsExistId(id int) bool {

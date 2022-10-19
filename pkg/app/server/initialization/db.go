@@ -15,12 +15,12 @@
 package initialization
 
 import (
-	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 func RedisdbInit(conf *sconfig.RedisDBInfo) error {

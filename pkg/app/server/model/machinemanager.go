@@ -16,7 +16,7 @@ package model
 
 import (
 	"gorm.io/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 type MachineNode struct {

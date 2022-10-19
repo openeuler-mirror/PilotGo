@@ -20,7 +20,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 //go:embed css fonts img js pilotgo.ico index.html

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/host"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type SystemInfo struct {
