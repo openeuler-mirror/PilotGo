@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 func Config() (interface{}, error) {

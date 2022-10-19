@@ -20,7 +20,7 @@ import (
 	"time"
 
 	cron "github.com/robfig/cron/v3"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 var Cron *Crontab

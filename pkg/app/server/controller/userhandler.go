@@ -19,13 +19,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 var ServerAddr string

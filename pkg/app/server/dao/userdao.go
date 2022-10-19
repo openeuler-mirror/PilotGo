@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 // 获取所有的用户角色

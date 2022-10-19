@@ -18,10 +18,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
-	"openeluer.org/PilotGo/PilotGo/resource"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeuler.org/PilotGo/PilotGo/resource"
 )
 
 func SetupRouter() *gin.Engine {

@@ -17,8 +17,8 @@ package service
 import (
 	"fmt"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 // 返回全部的部门指针数组

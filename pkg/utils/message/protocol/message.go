@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"sync"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 const (

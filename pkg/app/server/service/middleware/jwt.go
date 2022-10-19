@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 var jwtKey = []byte("a_secret_crect")

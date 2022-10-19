@@ -23,8 +23,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func Query(c *gin.Context) {

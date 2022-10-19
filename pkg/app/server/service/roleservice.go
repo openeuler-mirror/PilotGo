@@ -14,7 +14,7 @@
  ******************************************************************************/
 package service
 
-import "openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+import "openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 
 // 获取用户最高权限的角色id
 func RoleId(R model.RoleID) int {

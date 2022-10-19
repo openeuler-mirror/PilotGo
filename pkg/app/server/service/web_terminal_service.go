@@ -19,7 +19,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 func DecodedMsgToSSHClient(msg string) (model.SSHClient, error) {

@@ -17,7 +17,7 @@ package os
 import (
 	"io/ioutil"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 func GetFiles(filePath string) (fs []string, err error) {

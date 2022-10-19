@@ -19,9 +19,9 @@ import (
 	"strconv"
 	"strings"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 func CreateBatch(batchinfo *model.CreateBatch) error {

@@ -1,4 +1,4 @@
-module openeluer.org/PilotGo/PilotGo
+module openeuler.org/PilotGo/PilotGo
 
 go 1.17
 

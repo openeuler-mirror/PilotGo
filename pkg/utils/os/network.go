@@ -23,9 +23,9 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/net"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type NetConnect struct {

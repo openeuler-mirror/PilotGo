@@ -20,12 +20,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/agent/network"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
-	uos "openeluer.org/PilotGo/PilotGo/pkg/utils/os"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
 var agent_version = "v0.0.1"

@@ -17,7 +17,7 @@ package service
 import (
 	"fmt"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 )
 
 // 开启任务
