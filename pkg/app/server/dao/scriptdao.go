@@ -3,8 +3,8 @@ package dao
 import (
 	"fmt"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 //添加脚本文件
