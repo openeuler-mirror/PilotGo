@@ -265,4 +265,4 @@ CREATE TABLE `user_role` (
 -- ----------------------------
 -- Records of user_role
 -- ----------------------------
-INSERT INTO `user_role` VALUES ('1', '超级用户', '0', '超级管理员', 'overview,cluster,batch,usermanager,rolemanager,config,log', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15');
+INSERT INTO `user_role` VALUES ('1', '超级用户', '0', '超级管理员', 'overview,cluster,batch,usermanager,rolemanager,config,log,plug-in,plugin-web', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15');

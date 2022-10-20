@@ -224,6 +224,24 @@ export const routes = [
           { name: '日志管理' },
         ],}
       },
+      {
+        path: '/plug-in',
+        name: 'Plug-in',
+        component:  _import('Plug-in/Plug-in'),
+        meta: { title: 'plug-in', header_title: "插件管理", panel: "plug-in", icon_class: 'el-icon-s-custom' ,submenu: false ,
+        breadcrumb: [
+          { name: '插件管理' },
+        ],}
+      },
+      {
+        path: '/plugin-web',
+        name: 'Plugin-web',
+        component:  _import('Plugin-web/Plugin-web'),
+        meta: { title: 'Plugin-web', header_title: "插件展示", panel: "plugin-web", icon_class: 'el-icon-s-custom' ,submenu: false ,hidden:true,
+        breadcrumb: [
+          { name: '插件展示' },
+        ],}
+      }
     ]
   },
 ]
