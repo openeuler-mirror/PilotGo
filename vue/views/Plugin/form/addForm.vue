@@ -1,32 +1,13 @@
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="主机地址:" prop="host">
+      <el-form-item label="主机地址:" prop="url">
           <el-input
             class="ipInput"
             controls-position="right"
-            v-model="form.host"
+            v-model="form.url"
             autocomplete="off"
           ></el-input>
-        </el-form-item>
-        <el-form-item label="端口:" prop="port">
-          <el-input
-            class="ipInput"
-            controls-position="right"
-            v-model="form.port"
-            autocomplete="off"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="协议类型:" prop="protocol">
-          <el-select v-model="form.protocol" placeholder="请选择">
-            <el-option
-              v-for="item in protocols"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            >
-            </el-option>
-          </el-select>
         </el-form-item>
     </el-form>
 
@@ -43,30 +24,17 @@ import { checkIP } from "@/rules/check";
 export default {
   data() {
     return {
-      protocols: [
-        { label: "http", value: "http" },
-        { label: "https", value: "https" },
-      ],
       form: {
-        host: "",
-        port: "",
-        protocol: "",
+        url: "",
       },
       rules: {
-        host: [
+        url: [
           { 
             required: true, 
-            message: '主机ip不能为空', 
+            message: 'url不能为空', 
             trigger: "blur" 
           },
-          {
-            validator: checkIP,
-            message: "请输入正确的邮箱格式",
-            trigger: "change" 
-          }],
-        port: [{ required: true, message: '端口不能为空', trigger:'blur' }],
-        plugin: [{ required: true, message: '插件名称不能为空', trigger:'blur' }],
-        protocol: [{ required: true, message: '协议不能为空', trigger:'blur' }],
+        ]
       },
     };
   },
