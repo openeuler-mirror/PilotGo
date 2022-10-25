@@ -224,6 +224,15 @@ export const routes = [
           { name: '日志管理' },
         ],}
       },
+      {
+        path: '/plugin',
+        name: 'Plugin',
+        component:  _import('Plugin/Plugin'),
+        meta: { title: 'plugin', header_title: "插件管理", panel: "plugin", icon_class: 'el-icon-s-order' ,
+        breadcrumb: [
+          { name: '插件管理' },
+        ],}
+      },
     ]
   },
 ]

@@ -42,6 +42,8 @@ Vue.component('auth-button', AuthButton)
 Vue.component('ky-table', kyTable)
 
 Vue.config.productionTip = false
+// TODO: remove on production build
+Vue.config.devtools = true
 
 
 new Vue({

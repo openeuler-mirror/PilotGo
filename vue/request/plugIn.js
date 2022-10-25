@@ -11,7 +11,7 @@ export function getPlugins() {
 export function insertPlugin(data) {
   return request({
     url: '/plugin',
-    method: 'post',
+    method: 'put',
     data
   })
 }
