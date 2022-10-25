@@ -77,6 +77,12 @@ func main() {
 		os.Exit(-1)
 	}
 
+	// 初始化插件组件
+	if err = service.PluginServiceInit(); err != nil {
+		logger.Error("plugin service init failed, error:%v", err)
+		os.Exit(-1)
+	}
+
 	logger.Info("start to serve.")
 
 	// 信号监听

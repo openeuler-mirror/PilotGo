@@ -192,6 +192,15 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/updatebatch", controller.UpdateBatchHandler)
 		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
+
+	plugin := router.Group("plugin")
+	{
+		plugin.GET("", controller.GetPluginsHanlder)
+		plugin.PUT("", controller.AddPluginHanlder)
+		plugin.POST("", controller.TogglePluginHanlder)
+		plugin.DELETE("", controller.UnloadPluginHanlder)
+	}
+
 	// TODO: 此处绑定前端静态资源handler
 	resource.StaticRouter(router)
 
