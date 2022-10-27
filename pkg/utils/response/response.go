@@ -41,3 +41,11 @@ func JSON(c *gin.Context, httpStatus int, code int, data interface{}, msg string
 		"data": data,
 		"msg":  msg})
 }
+
+// TODO: 后续重构，替换原有的响应封装
+func NewSuccess(c *gin.Context, data interface{}, msg string) {
+	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK,
+		"data": data,
+	})
+}
