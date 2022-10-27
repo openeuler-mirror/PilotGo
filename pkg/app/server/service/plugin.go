@@ -1,11 +1,15 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"net/http"
 	"sync"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	//splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
 )
 
 type Plugin struct {
@@ -149,7 +153,6 @@ func GetManager() *PluginManager {
 	return globalManager
 }
 
-/*
 // 请求plugin的接口服务，获取接口信息
 func CheckPlugin(url string) (*Plugin, error) {
 	info, err := requestPluginInfo(url)
@@ -192,7 +195,7 @@ func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
 	// TODO: check info valid
 	return info, nil
 }
-*/
+
 // 获取plugin清单
 func GetPlugins() []*Plugin {
 	return globalManager.GetAll()

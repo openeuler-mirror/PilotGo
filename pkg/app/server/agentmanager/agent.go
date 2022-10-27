@@ -485,9 +485,11 @@ func (a *Agent) DiskInfo() (interface{}, error) {
 	return resp_message.Data, nil
 }
 
-/*挂载磁盘
+/*
+挂载磁盘
 1.创建挂载磁盘的目录
-2.挂载磁盘*/
+2.挂载磁盘
+*/
 func (a *Agent) DiskCreatPath(mountpath string) (interface{}, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
