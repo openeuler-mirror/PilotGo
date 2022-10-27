@@ -164,7 +164,6 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 	if msg.UUID == "" {
 		msg.UUID = uuid.New().String()
 	}
-
 	if wait {
 		waitChan := make(chan *protocol.Message)
 		a.MessageProcesser.WaitMap.Store(msg.UUID, waitChan)
@@ -1060,4 +1059,21 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (inter
 		return nil, "", err
 	}
 	return resp_message.Data, resp_message.Error, nil
+}
+
+// 远程获取agent端的时间信息
+func (a *Agent) GetTimeInfo() (interface{}, error) {
+	logger.Info("进入获取时间函数")
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AgentTime,
+		Data: struct{}{},
+	}
+	logger.Info("进入管道函数")
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to get time on agent")
+		return nil, err
+	}
+	return resp_message.Data, nil
 }
