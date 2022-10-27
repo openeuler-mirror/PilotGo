@@ -36,3 +36,10 @@ func DeleteScript(scriptversion string) error {
 	}
 	return fmt.Errorf("脚本不存在")
 }
+
+//根据版本号查询脚本文件内容
+func ShowScript(scriptversion string) string {
+	var script model.Script
+	global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script)
+	return script.Content
+}
