@@ -9,10 +9,10 @@ import (
 
 // 查询插件清单
 func GetPluginsHanlder(c *gin.Context) {
-	logger.Info("query plugin")
 	plugins := service.GetPlugins()
 
-	response.NewSuccess(c, plugins, "插件查询")
+	logger.Info("find %d plugins", len(plugins))
+	response.NewSuccess(c, plugins, "插件查询成功")
 }
 
 // 添加插件
@@ -21,12 +21,11 @@ func AddPluginHanlder(c *gin.Context) {
 		Url string `json:"url"`
 	}{}
 
-	if err := c.Bind(&param); err != nil {
+	if err := c.BindJSON(&param); err != nil {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
 
-	logger.Info("add plugin from: %s", param.Url)
 	if err := service.AddPlugin(param.Url); err != nil {
 		response.Fail(c, nil, "add plugin failed:"+err.Error())
 		return
@@ -37,16 +36,33 @@ func AddPluginHanlder(c *gin.Context) {
 
 // 停用/启动插件
 func TogglePluginHanlder(c *gin.Context) {
-	logger.Info("disable plugin")
-	// TODO:
+	param := struct {
+		UUID   string `json:"uuid"`
+		Enable int    `json:"enable"`
+	}{}
 
+	if err := c.BindJSON(&param); err != nil {
+		response.Fail(c, nil, "参数错误")
+		return
+	}
+
+	logger.Info("toggle plugin:%s to enable %d", param.UUID, param.Enable)
+	// TODO:
+	service.TogglePlugin(param.UUID, param.Enable)
 	response.Success(c, nil, "插件信息更新成功")
 }
 
 // 卸载插件
 func UnloadPluginHanlder(c *gin.Context) {
-	logger.Info("disable plugin")
-	// TODO:
+	param := struct {
+		Id int `json:"id"`
+	}{}
+	if err := c.BindJSON(&param); err != nil {
+		response.Fail(c, nil, "参数错误")
+		return
+	}
+	logger.Info("unload plugin:%d", param.Id)
+	service.DeletePlugin(param.Id)
 
 	response.Success(c, nil, "插件信息更新成功")
 }
