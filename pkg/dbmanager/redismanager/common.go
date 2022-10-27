@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 func Set(key string, value interface{}) {

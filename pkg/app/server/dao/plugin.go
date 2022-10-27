@@ -1,0 +1,53 @@
+/******************************************************************************
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * Author: guozhengxin
+ * Date: 2022-05-26 10:25:52
+ * LastEditTime: 2022-06-02 10:16:10
+ * Description: plugin info record
+ ******************************************************************************/
+package dao
+
+import (
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+)
+
+type PluginModel struct {
+	ID          int    `gorm:"type:int"`
+	Name        string `gorm:"type:varchar(100)"`
+	Version     string `gorm:"type:varchar(50)"`
+	Description string `gorm:"type:text"`
+	Author      string `gorm:"type:varchar(50)"`
+	Email       string `gorm:"type:varchar(100)"`
+	Url         string `gorm:"type:varchar(200)"`
+	Status      int    `gorm:"type:int"`
+}
+
+func (m *PluginModel) TableName() string {
+	return "plugin"
+}
+
+func RecordPlugin(plugin *PluginModel) error {
+	err := global.PILOTGO_DB.Create(&plugin).Error
+	return err
+}
+
+func QueryPlugins() ([]*PluginModel, error) {
+	var plugins []*PluginModel
+	if err := global.PILOTGO_DB.Find(&plugins).Error; err != nil {
+		return nil, err
+	}
+	return plugins, nil
+}
+
+// 更新插件状态
+func UpdatePluginStatus(plugin *PluginModel) error {
+	err := global.PILOTGO_DB.Model(&plugin).Update("status", plugin.Status).Error
+	return err
+}

@@ -20,10 +20,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
-	pnet "openeluer.org/PilotGo/PilotGo/pkg/utils/message/net"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 )
 
 type AgentMessageHandler func(*Agent, *protocol.Message) error

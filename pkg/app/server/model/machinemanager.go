@@ -16,7 +16,7 @@ package model
 
 import (
 	"gorm.io/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 type MachineNode struct {
@@ -55,6 +55,6 @@ func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, 
 	return
 }
 
-type DelUUID struct {
+type DeleteUUID struct {
 	Deluuid []string `json:"deluuid"`
 }

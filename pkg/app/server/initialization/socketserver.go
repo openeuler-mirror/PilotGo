@@ -15,9 +15,9 @@
 package initialization
 
 import (
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 )
 
 func SocketServerInit(conf *sconfig.SocketServer) error {

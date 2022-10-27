@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 type Files struct {

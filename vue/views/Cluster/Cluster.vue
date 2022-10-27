@@ -15,7 +15,8 @@
 <template>
   <div class="cluster">
     <transition name="fade-transform" mode="out-in">
-      <router-view v-if="$route.name=='MacDetail' || $route.name=='createBatch' || $route.name=='Prometheus'"></router-view>
+      <router-view v-if="$route.name=='MacDetail' || $route.name=='createBatch' || $route.name=='Prometheus'">
+      </router-view>
     </transition>
     <div style="width:100%;height:100%" v-if="$route.name=='macList'">
       <div class="dept panel">
@@ -23,28 +24,20 @@
         <span class="sourceBtn" @click="getSourcePool">未分配资源池</span>
       </div>
       <div class="info panel">
-        <ky-table
-          class="cluster-table"
-          ref="table"
-          :isSource="isSource"
-          :showSelect="showSelect"
-          :getData="getClusters"
-          :getSourceData="getSourceMac"
-          :searchData="searchData"
-          :treeNodes="checkedNode"
-        >
+        <ky-table class="cluster-table" ref="table" :isSource="isSource" :showSelect="showSelect" :getData="getClusters"
+          :getSourceData="getSourceMac" :searchData="searchData" :treeNodes="checkedNode">
           <template v-slot:table_search>
             <div>{{ departName }}</div>
           </template>
           <template v-slot:table_action>
-            <auth-button 
-              name="dept_change" 
-              :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" 
+            <auth-button name="dept_change" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"
               @click="handleChange"> 变更部门 </auth-button>
+            <auth-button name="dept_change" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"
+              @click="handleDelete"> 删除 </auth-button>
           </template>
           <template v-slot:table>
             <el-table-column label="ip">
-              <template slot-scope="scope" >
+              <template slot-scope="scope">
                 <span class="ipLink" @click="handleDetail(scope.row)" title="查看机器详情">
                   {{ scope.row.ip }}
                 </span>
@@ -52,19 +45,18 @@
             </el-table-column>
             <el-table-column prop="departname" label="部门">
             </el-table-column>
-            <el-table-column prop="cpu" label="cpu"> 
+            <el-table-column prop="cpu" label="cpu">
             </el-table-column>
             <el-table-column label="状态">
               <template slot-scope="scope">
                 <state-dot :state="scope.row.state"></state-dot>
               </template>
             </el-table-column>
-            <el-table-column prop="systeminfo" label="系统信息"> 
+            <el-table-column prop="systeminfo" label="系统信息">
             </el-table-column>
             <el-table-column label="操作" fixed="right">
               <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain name="default_all" 
-                  @click="handleProme(scope.row.ip)"> 监控
+                <el-button size="mini" type="primary" plain name="default_all" @click="handleProme(scope.row.ip)"> 监控
                 </el-button>
               </template>
             </el-table-column>
@@ -72,17 +64,11 @@
         </ky-table>
       </div>
 
-      <el-dialog 
-        :title="title"
-        top="10vh"
-        :before-close="handleClose" 
-        :visible.sync="display" 
-        :width="dialogWidth"
-        :fullscreen="isFull"
-      >
-      <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>   
-      <change-form v-if="type === 'change'" :machines='batchMAcs' @click="handleClose"></change-form>      
-    </el-dialog>
+      <el-dialog :title="title" top="10vh" :before-close="handleClose" :visible.sync="display" :width="dialogWidth"
+        :fullscreen="isFull">
+        <update-form v-if="type === 'update'" :ip='ip' @click="handleClose"></update-form>
+        <change-form v-if="type === 'change'" :machines='batchMAcs' @click="handleClose"></change-form>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -105,7 +91,7 @@ export default {
     AuthDrop,
     StateDot,
   },
-  data() {  
+  data() {
     return {
       title: '',
       type: '',
@@ -134,13 +120,13 @@ export default {
     this.departName = this.$store.getters.tableTitle || '机器列表';
   },
   watch: {
-    machines: function(newValue,oldValue) {
+    machines: function (newValue, oldValue) {
       this.batchMAcs = newValue.concat(oldValue)
     },
     '$route': {
       handler() {
-        if(this.$route.name == 'MacDetail') {
-           this.departName = "机器列表";
+        if (this.$route.name == 'MacDetail') {
+          this.departName = "机器列表";
         }
       }
     }
@@ -158,19 +144,43 @@ export default {
     handleChange() {
       this.display = true;
       this.title = "变更部门";
-      this.type = "change"; 
+      this.type = "change";
       this.dialogWidth = "760px";
       this.machines = this.$refs.table.selectRow.rows;
+    },
+    handleDelete() {
+      let uuidArray = [];
+      this.$refs.table.selectRow.rows.forEach(item => {
+        uuidArray.push(item.uuid);
+      })
+      this.$confirm('是否确认删除该机器?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(()=> {
+        console.log('1111')
+        deleteIp({ deluuid: uuidArray }).then(res => {
+          if (res.data.code === 200) {
+            this.$message.success(res.data.msg);
+            this.$refs.table.handleSearch();
+          } else {
+            this.$message.error(res.data.msg);
+          }
+        })
+      }
+      ).cache(()=> {
+        console.log('2222')
+      });
     },
     handleUpdateIp(ip) {
       this.display = true;
       this.title = "编辑IP";
-      this.type = "update"; 
+      this.type = "update";
       this.dialogWidth = "760px";
       this.ip = ip;
     },
     handleSelectDept(data) {
-      if(data) {
+      if (data) {
         this.departName = data.label + '机器列表';
         this.searchData.DepartId = data.id;
         this.departInfo = data;
@@ -179,12 +189,12 @@ export default {
     },
     handleNodeCheck(data) {
       this.checkedNode = [];
-      if(data) {
+      if (data) {
         this.checkedNode = data.checkedKeys;
       }
     },
     getSourcePool() {
-      this.isSource = (Math.random()+1)*100;
+      this.isSource = (Math.random() + 1) * 100;
       this.departName = "未分配资源池";
     },
     handleDetail(row) {
@@ -212,10 +222,12 @@ export default {
   width: 100%;
   height: 100%;
   display: flex;
+
   .dept {
     height: 100%;
     width: 20%;
     display: inline-block;
+
     .sourceBtn {
       display: block;
       background: rgb(255, 191, 0);
@@ -228,56 +240,67 @@ export default {
       cursor: pointer;
     }
   }
+
   .info {
     width: 78%;
     height: 100%;
     float: right;
+
     .ipLink {
       color: rgb(64, 158, 255);
       cursor: pointer;
+
       &:hover {
         color: rgb(242, 150, 38);
       }
     }
+
     .deptchange {
       cursor: pointer;
     }
+
     .deptchange:hover {
       color: rgb(108, 173, 228)
     }
   }
-  .term  {
+
+  .term {
+    width: 100%;
+    height: 100%;
+
+    .term_head {
+      position: relative;
       width: 100%;
-      height: 100%;
-      .term_head {
-        position: relative;
-        width: 100%;
-        font-size: 16px;
-        border: 1px solid rgb(109, 123, 172);
-        border-radius: 10px 10px 0 0;
-        background: rgb(109, 123, 172);
-        color: #fff;
-        display: flex;
-        justify-content: space-between;
-      }
-      .termTitle {
-        display: inline-block;
-        width: 30%;
-        padding: 0.3% 0 0 1%;
-      }
-      .closeChart {
-        display: inline-block;
-        width: 4px;
-        height: 4px;
-        position: absolute;
-        top: 2%;
-        right: 2%;
-        z-index: 1;
-        cursor: pointer;
-      }
+      font-size: 16px;
+      border: 1px solid rgb(109, 123, 172);
+      border-radius: 10px 10px 0 0;
+      background: rgb(109, 123, 172);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
     }
+
+    .termTitle {
+      display: inline-block;
+      width: 30%;
+      padding: 0.3% 0 0 1%;
+    }
+
+    .closeChart {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      position: absolute;
+      top: 2%;
+      right: 2%;
+      z-index: 1;
+      cursor: pointer;
+    }
+  }
+
   .deleteHostText {
     margin-left: 10px;
+
     .del-host {
       color: red;
       font-weight: 600;

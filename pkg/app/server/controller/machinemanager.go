@@ -18,10 +18,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	"openeluer.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func MachineInfo(c *gin.Context) {
@@ -86,9 +86,15 @@ func MachineAllData(c *gin.Context) {
 func DeleteMachine(c *gin.Context) {
 	var deleteuuid model.DeleteUUID
 	c.Bind(&deleteuuid)
+	machinelist := make(map[string]string)
 	for _, machinedeluuid := range deleteuuid.Deluuid {
 		if err := dao.DeleteMachine(machinedeluuid); err != nil {
-			response.Response(c, http.StatusOK, http.StatusBadRequest, nil, machinedeluuid+"机器删除不成功!")
+			machinelist[machinedeluuid] = err.Error()
 		}
+	}
+	if len(machinelist) != 0 {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"machinelist": machinelist}, "机器删除失败")
+	} else {
+		response.Response(c, http.StatusOK, http.StatusOK, nil, "机器删除成功!")
 	}
 }

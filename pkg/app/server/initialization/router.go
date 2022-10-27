@@ -18,10 +18,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
-	"openeluer.org/PilotGo/PilotGo/resource"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeuler.org/PilotGo/PilotGo/resource"
 )
 
 func SetupRouter() *gin.Engine {
@@ -40,10 +40,11 @@ func SetupRouter() *gin.Engine {
 
 	macList := router.Group("cluster/macList")
 	{
+		macList.POST("/script_save", controller.AddScript)
 		macList.POST("/deletemachine", controller.DeleteMachine)
 		macList.GET("/depart", controller.Dept)
 		macList.GET("/selectmachine", controller.MachineList)
-		macList.POST("/createbatch", controller.CreateBatch)
+		macList.POST("/createbatch", controller.CreateBatchHandler)
 		macList.GET("/machineinfo", controller.MachineInfo)
 		macList.POST("/modifydepart", controller.ModifyMachineDepart)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
@@ -122,8 +123,8 @@ func SetupRouter() *gin.Engine {
 
 	batchmanager := router.Group("batchmanager")
 	{
-		batchmanager.GET("/batchinfo", controller.BatchInfo)
-		batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfo)
+		batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
+		batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfoHandler)
 	}
 
 	user := router.Group("user")
@@ -188,9 +189,18 @@ func SetupRouter() *gin.Engine {
 		macList.POST("/deletedepartdata", controller.DeleteDepartData)
 		macList.POST("/adddepart", controller.AddDepart)
 		macList.POST("/updatedepart", controller.UpdateDepart)
-		batchmanager.POST("/updatebatch", controller.UpdateBatch)
-		batchmanager.POST("/deletebatch", controller.DeleteBatch)
+		batchmanager.POST("/updatebatch", controller.UpdateBatchHandler)
+		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
+
+	plugin := router.Group("plugin")
+	{
+		plugin.GET("", controller.GetPluginsHanlder)
+		plugin.PUT("", controller.AddPluginHanlder)
+		plugin.POST("", controller.TogglePluginHanlder)
+		plugin.DELETE("", controller.UnloadPluginHanlder)
+	}
+
 	// TODO: 此处绑定前端静态资源handler
 	resource.StaticRouter(router)
 
@@ -199,7 +209,8 @@ func SetupRouter() *gin.Engine {
 	router.GET("/macList/machinealldata", controller.MachineAllData)
 	router.GET("/macList/departinfo", controller.DepartInfo)
 	router.GET("/macList/depart", controller.Dept)
-	router.GET("/batchmanager/selectbatch", controller.SelectBatch)
+	// TODO: 不知道用途
+	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 

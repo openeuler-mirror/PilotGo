@@ -27,7 +27,7 @@ export function unLoadPlugin(data) {
 export function insertPlugin(data) {
   return request({
     url: '/plugin',
-    method: 'post',
+    method: 'put',
     data
   })
 }

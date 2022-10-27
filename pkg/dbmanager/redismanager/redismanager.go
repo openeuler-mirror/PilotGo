@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 var (

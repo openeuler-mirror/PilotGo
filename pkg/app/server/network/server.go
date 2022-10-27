@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"net"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 type SocketServer struct {

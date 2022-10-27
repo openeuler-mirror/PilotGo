@@ -10,6 +10,7 @@ services:
     depends_on:
       - redis
       - mysql
+    restart: always
   redis:
     image: redis
     container_name: redis-server
@@ -27,7 +28,7 @@ services:
     volumes:
       - /var/lib/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=qwer1234!@#$$
+      - MYSQL_ROOT_PASSWORD=1234
 networks:
   pilotgo:
     external: true

@@ -17,11 +17,11 @@ package service
 import (
 	"fmt"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
-//返回全部的部门指针数组
+// 返回全部的部门指针数组
 func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.DepartTreeNode, deptRoot model.DepartTreeNode) {
 	departnode := make([]model.DepartTreeNode, 0)
 	ptrchild = make([]*model.DepartTreeNode, 0)
@@ -51,7 +51,7 @@ func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.DepartTreeNode
 	return ptrchild, deptRoot
 }
 
-//生成部门树
+// 生成部门树
 func MakeTree(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) {
 	childs := findchild(node, ptrchild)
 	for _, value := range childs {
@@ -62,7 +62,7 @@ func MakeTree(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) {
 	}
 }
 
-//返回节点的子节点
+// 返回节点的子节点
 func findchild(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) (ret []*model.DepartTreeNode) {
 	for _, value := range ptrchild {
 		if node.Id == value.Pid {
@@ -72,7 +72,7 @@ func findchild(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) (re
 	return
 }
 
-//判断是否存在子节点
+// 判断是否存在子节点
 func IsChildExist(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) bool {
 	for _, child := range ptrchild {
 		if node.Id == child.Pid {

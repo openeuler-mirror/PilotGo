@@ -20,13 +20,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	sconfig "openeluer.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/controller"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/initialization"
-	"openeluer.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeluer.org/PilotGo/PilotGo/pkg/global"
-	"openeluer.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func main() {
@@ -74,6 +74,12 @@ func main() {
 	controller.ServerAddr = serverAddr
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
+		os.Exit(-1)
+	}
+
+	// 初始化插件组件
+	if err = service.PluginServiceInit(); err != nil {
+		logger.Error("plugin service init failed, error:%v", err)
 		os.Exit(-1)
 	}
 
