@@ -3,39 +3,43 @@ PILOTGO_VERSION="v0.0.1"
 
 echo "thanks for choosing PilotGo"
 
-# 判断是否安装了NodeJS
-echo "checking frontend compile tools..."
-if ! type node >/dev/null 2>&1; then
-    echo "no nodejs detected, please install nodejs >= 14.0"
-    exit -1
-else
-    NodeJS=`node -v | grep -oP '\d*\.\d*.\d+'`
-    if [ ${NodeJS:0:2} -lt 14 ]; then
-        echo "error: your nodejs is too old, please upgrade to v14.0 or newer"
+function check_nodejs(){
+    # 判断是否安装了NodeJS
+    echo "checking frontend compile tools..."
+    if ! type node >/dev/null 2>&1; then
+        echo "no nodejs detected, please install nodejs >= 14.0"
         exit -1
-    fi
+    else
+        NodeJS=`node -v | grep -oP '\d*\.\d*.\d+'`
+        if [ ${NodeJS:0:2} -lt 14 ]; then
+            echo "error: your nodejs is too old, please upgrade to v14.0 or newer"
+            exit -1
+        fi
 
-    # 判断是否安装了NPM
-    if ! type npm >/dev/null 2>&1; then
-        echo "error: your npm is too old, please upgrade to v6.0 or newer"
-        exit -1;
+        # 判断是否安装了NPM
+        if ! type npm >/dev/null 2>&1; then
+            echo "error: your npm is too old, please upgrade to v6.0 or newer"
+            exit -1;
+        fi
     fi
-fi
-echo "ok"
+    echo "ok"
+}
 
-# 判断是否安装了golang
-echo "Checking backend compile tools..."
-if ! type go >/dev/null 2>&1; then
-    echo "no golang detected, please install golang >= 1.17.0"
-    exit -1
-else
-    GoLang=`go version |awk '{print $3}' | grep -oP '\d*\.\d*.\d+'`
-    if [ ${GoLang: 2: 2} -lt 17 ]; then
-        echo "error: your golang is too old, please upgrade to v1.17.0 or newer"
+function check_golang(){
+    # 判断是否安装了golang
+    echo "Checking backend compile tools..."
+    if ! type go >/dev/null 2>&1; then
+        echo "no golang detected, please install golang >= 1.17.0"
         exit -1
+    else
+        GoLang=`go version |awk '{print $3}' | grep -oP '\d*\.\d*.\d+'`
+        if [ ${GoLang: 2: 2} -lt 17 ]; then
+            echo "error: your golang is too old, please upgrade to v1.17.0 or newer"
+            exit -1
+        fi
     fi
-fi
-echo "ok"
+    echo "ok"
+}
 
 function build_frontend() {
     echo "dowoloading frontend libraries, please wait..."
@@ -83,9 +87,32 @@ function clean() {
     rm -rf ./out
 }
 
-build_frontend
-
-build_and_pack amd64
-build_and_pack arm64
+case $1 in
+"backend")
+    check_golang
+    build_and_pack $2
+    ;;
+"front")
+    check_nodejs
+    build_frontend
+    ;;
+"pack")
+    check_golang
+    check_nodejs
+    echo "pack tar package"
+    ;;
+"image")
+    check_golang
+    check_nodejs
+    echo "pack docker image"
+    echo "=================== stage 1: build bin ==================="
+    build_and_pack $2
+    echo "=================== stage 2: build image ==================="
+    sudo docker build --tag pilotgo_server:latest --build-arg ARCH=$2 .
+    ;;
+"clean")
+    clean
+    ;;
+esac
 
 echo "done"

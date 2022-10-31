@@ -31,6 +31,7 @@ func SetupRouter() *gin.Engine {
 	router.Use(middleware.Recover)
 
 	// TODO: 此处绑定 http api handler
+	api := router.Group("/api/v1")
 
 	overview := router.Group("/overview")
 	{
@@ -163,13 +164,6 @@ func SetupRouter() *gin.Engine {
 		userLog.POST("/delete", controller.DeleteLog)
 	}
 
-	plugin := router.Group("plugin")
-	{
-		plugin.GET("/list", controller.PluginList)
-		plugin.POST("/load", controller.LoadPlugin)
-		plugin.POST("/unload", controller.UnLoadPlugin)
-	}
-
 	// 此处绑定casbin过滤规则
 	policy := router.Group("casbin")
 	{
@@ -193,12 +187,12 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
 
-	plugin := router.Group("plugin")
+	plugin := api.Group("plugins")
 	{
 		plugin.GET("", controller.GetPluginsHanlder)
 		plugin.PUT("", controller.AddPluginHanlder)
-		plugin.POST("", controller.TogglePluginHanlder)
-		plugin.DELETE("", controller.UnloadPluginHanlder)
+		plugin.POST("/:uuid", controller.TogglePluginHanlder)
+		plugin.DELETE("/:uuid", controller.UnloadPluginHanlder)
 	}
 
 	// TODO: 此处绑定前端静态资源handler

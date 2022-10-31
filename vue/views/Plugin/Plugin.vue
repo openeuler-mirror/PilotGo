@@ -11,13 +11,13 @@
         </el-popconfirm>
       </template>
       <template v-slot:table>
-        <el-table-column prop="plugin" label="名称" width="150">
+        <el-table-column prop="name" label="名称" width="150">
         </el-table-column>
         <el-table-column prop="version" label="版本" width="150">
         </el-table-column>
         <el-table-column prop="description" label="概述" show-overflow-tooltip>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="150">
+        <el-table-column prop="enabled" label="状态" width="150">
         </el-table-column>
       </template>
     </ky-table>
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { getPlugins, deletePlugins } from "@/request/plugIn";
+import { getPlugins, deletePlugins } from "@/request/plugin";
 import kyTable from "@/components/KyTable";
 import AddForm from "./form/addForm.vue"
 export default {

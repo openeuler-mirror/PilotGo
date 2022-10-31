@@ -20,13 +20,14 @@ import (
 
 type PluginModel struct {
 	ID          int    `gorm:"type:int"`
+	UUID        string `gorm:"type:varchar(50)"`
 	Name        string `gorm:"type:varchar(100)"`
 	Version     string `gorm:"type:varchar(50)"`
 	Description string `gorm:"type:text"`
 	Author      string `gorm:"type:varchar(50)"`
 	Email       string `gorm:"type:varchar(100)"`
 	Url         string `gorm:"type:varchar(200)"`
-	Status      int    `gorm:"type:int"`
+	Enabled     int    `gorm:"type:int"`
 }
 
 func (m *PluginModel) TableName() string {
@@ -46,8 +47,8 @@ func QueryPlugins() ([]*PluginModel, error) {
 	return plugins, nil
 }
 
-// 更新插件状态
-func UpdatePluginStatus(plugin *PluginModel) error {
-	err := global.PILOTGO_DB.Model(&plugin).Update("status", plugin.Status).Error
+// 更新插件使能状态
+func UpdatePluginEnabled(plugin *PluginModel) error {
+	err := global.PILOTGO_DB.Model(&plugin).Update("Enabled", plugin.Enabled).Error
 	return err
 }

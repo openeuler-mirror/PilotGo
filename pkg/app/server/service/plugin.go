@@ -13,11 +13,12 @@ import (
 )
 
 type Plugin struct {
-	Name        string
-	Version     string
-	Description string
-	Url         string
-	Status      int
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+	Enabled     int    `json:"enabled"`
+	Status      string `json:"status"`
 }
 
 // 初始化插件服务
@@ -49,7 +50,8 @@ func restorePluginInfo() error {
 			Version:     p.Version,
 			Description: p.Version,
 			Url:         p.Url,
-			Status:      p.Status,
+			Enabled:     p.Enabled,
+			Status:      splugin.StatusOffline,
 		}
 
 		globalManager.Add(np)
@@ -105,19 +107,16 @@ func (pm *PluginManager) GetAll() []*Plugin {
 	pm.lock.RLock()
 	defer pm.lock.RUnlock()
 
-	pluginLen := len(pm.loadedPlugin)
-	if pluginLen == 0 {
-		return nil
-	}
-
-	plugins := make([]*Plugin, pluginLen)
-	i := 0
+	plugins := []*Plugin{}
 	for _, value := range pm.loadedPlugin {
-		plugins[i].Name = value.Name
-		plugins[i].Version = value.Version
-		plugins[i].Description = value.Description
-		plugins[i].Url = value.Url
-		i++
+		p := &Plugin{
+			Name:        value.Name,
+			Version:     value.Version,
+			Description: value.Description,
+			Url:         value.Url,
+		}
+
+		plugins = append(plugins, p)
 	}
 
 	return plugins
@@ -132,19 +131,45 @@ func (pm *PluginManager) Check(name string) bool {
 	return ok
 }
 
+// 更新插件使能状态
+func (pm *PluginManager) UpdatePlugin(uuid string, enable int) error {
+	pm.lock.RLock()
+	defer pm.lock.RUnlock()
+
+	// TODO: 更新插件状态
+	return nil
+}
+
+// 检查插件是否使能
+func (pm *PluginManager) IsPluginEnabled(uuid string) bool {
+	pm.lock.RLock()
+	defer pm.lock.RUnlock()
+
+	// TODO: 查询插件状态
+	return false
+}
+
 func GetManager() *PluginManager {
 	return globalManager
 }
 
 // 请求plugin的接口服务，获取接口信息
-func CheckPlugin(url string) (*splugin.PluginInfo, error) {
+func CheckPlugin(url string) (*Plugin, error) {
 	info, err := requestPluginInfo(url)
 	if err != nil {
 		logger.Debug("")
 		return nil, err
 	}
 
-	return info, nil
+	plugin := &Plugin{
+		Name:        info.Name,
+		Version:     info.Version,
+		Description: info.Description,
+		Url:         info.Url,
+		Status:      splugin.StatusLoaded,
+	}
+
+	return plugin, nil
 }
 
 // 发起http请求获取到插件的基本信息
@@ -167,6 +192,7 @@ func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
 	if err != nil {
 		logger.Debug("unmarshal request plugin info error:%s", err.Error())
 	}
+	// TODO: check info valid
 	return info, nil
 }
 
@@ -176,5 +202,33 @@ func GetPlugins() []*Plugin {
 }
 
 func AddPlugin(url string) error {
+	logger.Debug("add login from %s", url)
+
+	plugin, err := CheckPlugin(url + "/plugin_manage/info")
+	if err != nil {
+		return err
+	}
+
+	if err := globalManager.Add(plugin); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeletePlugin(id int) error {
+	logger.Debug("delete login: %d", id)
+
+	if err := globalManager.Remove("id"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func TogglePlugin(uuid string, enable int) error {
+	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
+
+	if err := globalManager.UpdatePlugin(uuid, enable); err != nil {
+		return err
+	}
 	return nil
 }

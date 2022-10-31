@@ -44,8 +44,14 @@ func JSON(c *gin.Context, httpStatus int, code int, data interface{}, msg string
 
 // TODO: 后续重构，替换原有的响应封装
 func NewSuccess(c *gin.Context, data interface{}, msg string) {
+	var d interface{} = struct{}{}
+	if data != nil {
+		d = data
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
-		"data": data,
+		"data": d,
+		"msg":  msg,
 	})
 }
