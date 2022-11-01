@@ -1165,4 +1165,17 @@ func RegitsterHandler(c *network.SocketClient) {
 			return c.Send(resp_msg)
 		}
 	})
+	c.BindHandler(protocol.AgentTime, func(c *network.SocketClient, msg *protocol.Message) error {
+		logger.Debug("process agent info command:%s", msg.String())
+
+		timeinfo := uos.GetTime()
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   timeinfo,
+		}
+		return c.Send(resp_msg)
+	})
 }
