@@ -56,7 +56,7 @@ function build_frontend() {
     cp -r ./dist/static/* ./resource/
 }
 
-function build_and_pack() {
+function build_backend() {
     # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
 
     echo "cleanning tmp directory..."
@@ -67,21 +67,32 @@ function build_and_pack() {
     echo "building server for ${1}..."
     mkdir -p ${version_path}/server
     CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/server/pilotgo-server ./pkg/app/server/main.go
-    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
-    cp alert.rules.templete ${version_path}/server/alert.rules
 
     echo "building agent for ${1}..."
     mkdir -p ${version_path}/agent
     CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/pilotgo-agent pkg/app/agent/main.go
-    cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
+}
+
+function pack_tar() {
+    # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
+
+    version_path="./out/${1}/pilotgo-${PILOTGO_VERSION}/"
 
     echo "adding scripts..."
+    mkdir -p ${version_path}/server
+    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
+    cp alert.rules.templete ${version_path}/server/alert.rules
+
+    mkdir -p ${version_path}/agent
+    cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
+    
     cp ./scripts/shell/install_server.sh ${version_path}/server/
     cp ./scripts/shell/install_agent.sh ${version_path}/agent/
 
     echo "compressing files..."
     tar -czf ./out/pilotgo-${PILOTGO_VERSION}-${1}.tar.gz -C ./out/${1} .
 }
+
 
 function clean() {
     rm -rf ./out
@@ -90,7 +101,7 @@ function clean() {
 case $1 in
 "backend")
     check_golang
-    build_and_pack $2
+    build_backend $2
     ;;
 "front")
     check_nodejs
@@ -99,16 +110,20 @@ case $1 in
 "pack")
     check_golang
     check_nodejs
-    echo "pack tar package"
+    echo "pack tar package for ${2}"
+    echo "=================== stage 1: build bin ==================="
+    build_backend $2
+    echo "=================== stage 2: pack tar package ==================="
+    pack_tar $2
     ;;
 "image")
     check_golang
     check_nodejs
-    echo "pack docker image"
+    echo "pack docker image for ${2}"
     echo "=================== stage 1: build bin ==================="
-    build_and_pack $2
+    build_backend $2
     echo "=================== stage 2: build image ==================="
-    sudo docker build --tag pilotgo_server:latest --build-arg ARCH=$2 .
+    sudo docker build --force-rm --tag pilotgo_server:latest --build-arg ARCH=$2 .
     ;;
 "clean")
     clean
