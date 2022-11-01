@@ -1,6 +1,10 @@
 package agentcontroller
 
 import (
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +25,12 @@ func CompareTimeHandler(c *gin.Context) {
 		return
 	}
 	currentTime := time.Now().Unix()
-	if currentTime-result.(int64) < 150 {
+	resulttime, err := strconv.ParseInt(strings.Replace(fmt.Sprint(result), "\n", "", -1), 10, 64)
+	if err != nil {
+		response.Fail(c, gin.H{"error": err.Error()}, "数据有误")
+		return
+	}
+	if math.Abs(float64(currentTime-resulttime)) < 100 {
 		response.Success(c, nil, "Success")
 		return
 	}
