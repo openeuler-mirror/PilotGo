@@ -40,7 +40,7 @@ func BatchInfoHandler(c *gin.Context) {
 	}
 
 	// 返回数据开始拼装分页的json
-	JsonPagination(c, list, total, query)
+	service.JsonPagination(c, list, total, query)
 }
 
 func DeleteBatchHandler(c *gin.Context) {
@@ -95,12 +95,12 @@ func BatchMachineInfoHandler(c *gin.Context) {
 	}
 
 	// 分页
-	data, err := DataPaging(query, machinesInfo, len(machinesInfo))
+	data, err := service.DataPaging(query, machinesInfo, len(machinesInfo))
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, int64(len(machinesInfo)), query)
+	service.JsonPagination(c, data, int64(len(machinesInfo)), query)
 }
 
 func SelectBatchHandler(c *gin.Context) {

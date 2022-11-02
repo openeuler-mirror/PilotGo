@@ -35,8 +35,8 @@ func SetupRouter() *gin.Engine {
 
 	overview := router.Group("/overview")
 	{
-		overview.GET("/info", controller.ClusterInfo)
-		overview.GET("/depart_info", controller.DepartClusterInfo)
+		overview.GET("/info", controller.ClusterInfoHandler)
+		overview.GET("/depart_info", controller.DepartClusterInfoHandler)
 	}
 
 	macList := router.Group("cluster/macList")

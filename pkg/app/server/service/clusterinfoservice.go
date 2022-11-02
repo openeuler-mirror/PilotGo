@@ -15,6 +15,9 @@
 package service
 
 import (
+	"errors"
+
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
@@ -35,4 +38,55 @@ func AgentStatusCounts(machines []model.MachineNode) (normal, Offline, free int)
 		}
 	}
 	return
+}
+
+//查找所有机器
+func SelectAllMachine() ([]model.MachineNode, error) {
+	machines := dao.AllMachine()
+	if len(machines) == 0 {
+		return nil, errors.New("未获取到机器")
+	}
+	return machines, nil
+}
+
+//获取集群概览
+func ClusterInfo() (model.ClusterInfo, error) {
+	data := model.ClusterInfo{}
+	machines, err := SelectAllMachine()
+	if err != nil {
+		return data, err
+	}
+	normal, Offline, free := AgentStatusCounts(machines)
+
+	data.AgentTotal = len(machines)
+	data.AgentStatus.Normal = normal
+	data.AgentStatus.OffLine = Offline
+	data.AgentStatus.Free = free
+	return data, nil
+}
+
+//获取各部门集群状态
+func DepartClusterInfo() []model.DepartMachineInfo {
+	var departs []model.DepartMachineInfo
+
+	FirstDepartIds := dao.FirstDepartId()
+	for _, depart_Id := range FirstDepartIds {
+		Departids := make([]int, 0)
+		Departids = append(Departids, depart_Id)
+		ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
+
+		lists := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
+
+		departName := dao.DepartIdToGetDepartName(depart_Id)
+		normal, Offline, free := AgentStatusCounts(lists)
+
+		departInfo := model.DepartMachineInfo{}
+		departInfo.DepartName = departName
+		departInfo.AgentStatus.Normal = normal
+		departInfo.AgentStatus.OffLine = Offline
+		departInfo.AgentStatus.Free = free
+
+		departs = append(departs, departInfo)
+	}
+	return departs
 }

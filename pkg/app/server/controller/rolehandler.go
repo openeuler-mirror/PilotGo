@@ -59,13 +59,13 @@ func GetPolicy(c *gin.Context) {
 
 	policy, total := service.AllPolicy()
 
-	data, err := DataPaging(query, policy, total)
+	data, err := service.DataPaging(query, policy, total)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	JsonPagination(c, data, int64(total), query)
+	service.JsonPagination(c, data, int64(total), query)
 }
 
 // 获取登录用户权限
@@ -91,12 +91,12 @@ func GetRoles(c *gin.Context) {
 
 	roles, total := dao.GetAllRoles()
 
-	data, err := DataPaging(query, roles, total)
+	data, err := service.DataPaging(query, roles, total)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, int64(total), query)
+	service.JsonPagination(c, data, int64(total), query)
 }
 
 func AddUserRole(c *gin.Context) {

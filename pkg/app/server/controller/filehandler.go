@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -145,7 +146,7 @@ func AllFiles(c *gin.Context) {
 	files := model.Files{}
 	list, tx := files.AllFiles(query)
 
-	total, err := CrudAll(query, tx, list)
+	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -178,12 +179,12 @@ func FileSearch(c *gin.Context) {
 
 	list, tx := file.FileSearch(query, search)
 
-	total, err := CrudAll(query, tx, list)
+	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, list, total, query)
+	service.JsonPagination(c, list, total, query)
 }
 
 func HistoryFiles(c *gin.Context) {
@@ -204,12 +205,12 @@ func HistoryFiles(c *gin.Context) {
 	files := model.HistoryFiles{}
 	list, tx := files.HistoryFiles(query, FileId)
 
-	total, err := CrudAll(query, tx, list)
+	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, list, total, query)
+	service.JsonPagination(c, list, total, query)
 }
 
 func LastFileRollBack(c *gin.Context) {

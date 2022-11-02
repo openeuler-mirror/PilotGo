@@ -40,13 +40,13 @@ func LogAllHandler(c *gin.Context) {
 		return
 	}
 
-	total, err := CrudAll(query, tx, list)
+	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	// 返回数据开始拼装分页的json
-	JsonPagination(c, list, total, query)
+	service.JsonPagination(c, list, total, query)
 }
 
 // 查询所有子日志
@@ -63,6 +63,7 @@ func AgentLogsHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, "获取子日志失败: "+err.Error())
 		return
 	}
+
 	response.JSON(c, http.StatusOK, http.StatusOK, agentlog, "子日志查询成功!")
 }
 
