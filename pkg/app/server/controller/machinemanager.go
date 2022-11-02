@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -39,17 +40,17 @@ func MachineInfo(c *gin.Context) {
 	}
 
 	var TheDeptAndSubDeptIds []int
-	ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
+	service.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
 	machinelist := dao.MachineList(TheDeptAndSubDeptIds)
 
 	lens := len(machinelist)
-	data, err := DataPaging(query, machinelist, lens)
+	data, err := service.DataPaging(query, machinelist, lens)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, int64(lens), query)
+	service.JsonPagination(c, data, int64(lens), query)
 }
 
 // 资源池返回接口
@@ -63,14 +64,14 @@ func FreeMachineSource(c *gin.Context) {
 	}
 
 	list, tx, res := machine.ReturnMachine(query, global.UncateloguedDepartId)
-	total, err := CrudAll(query, tx, &res)
+	total, err := service.CrudAll(query, tx, &res)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
 	// 返回数据开始拼装分页的json
-	JsonPagination(c, list, total, query)
+	service.JsonPagination(c, list, total, query)
 }
 
 func MachineAllData(c *gin.Context) {

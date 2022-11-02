@@ -16,50 +16,20 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-func ClusterInfo(c *gin.Context) {
-	machines := dao.AllMachine()
-	if len(machines) == 0 {
-		response.Fail(c, nil, "未获取到机器")
+func ClusterInfoHandler(c *gin.Context) {
+	data, err := service.ClusterInfo()
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
 	}
-
-	normal, Offline, free := service.AgentStatusCounts(machines)
-
-	data := model.ClusterInfo{}
-	data.AgentTotal = len(machines)
-	data.AgentStatus.Normal = normal
-	data.AgentStatus.OffLine = Offline
-	data.AgentStatus.Free = free
-
 	response.Success(c, gin.H{"data": data}, "集群概览获取成功")
 }
 
-func DepartClusterInfo(c *gin.Context) {
-	var departs []model.DepartMachineInfo
-
-	FirstDepartIds := dao.FirstDepartId()
-	for _, depart_Id := range FirstDepartIds {
-		Departids := make([]int, 0)
-		Departids = append(Departids, depart_Id)
-		ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
-
-		lists := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
-
-		departName := dao.DepartIdToGetDepartName(depart_Id)
-		normal, Offline, free := service.AgentStatusCounts(lists)
-
-		departInfo := model.DepartMachineInfo{}
-		departInfo.DepartName = departName
-		departInfo.AgentStatus.Normal = normal
-		departInfo.AgentStatus.OffLine = Offline
-		departInfo.AgentStatus.Free = free
-
-		departs = append(departs, departInfo)
-	}
+func DepartClusterInfoHandler(c *gin.Context) {
+	departs := service.DepartClusterInfo()
 	response.Success(c, gin.H{"data": departs}, "获取各部门集群状态成功")
 }
