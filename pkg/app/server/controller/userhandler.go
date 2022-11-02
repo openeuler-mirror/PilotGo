@@ -138,12 +138,12 @@ func UserAll(c *gin.Context) {
 
 	users, total := dao.UserAll()
 
-	data, err := DataPaging(query, users, total)
+	data, err := service.DataPaging(query, users, total)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, int64(total), query)
+	service.JsonPagination(c, data, int64(total), query)
 }
 
 // 高级搜索
@@ -161,12 +161,12 @@ func UserSearch(c *gin.Context) {
 
 	users, total := dao.UserSearch(email)
 
-	data, err := DataPaging(query, users, total)
+	data, err := service.DataPaging(query, users, total)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
 	}
-	JsonPagination(c, data, int64(total), query)
+	service.JsonPagination(c, data, int64(total), query)
 }
 
 // 重置密码
