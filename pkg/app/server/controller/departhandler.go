@@ -37,7 +37,7 @@ func MachineList(c *gin.Context) {
 	}
 
 	var departId []int
-	ReturnSpecifiedDepart(DepId, &departId)
+	service.ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)
 
 	machinelist := dao.MachineList(departId)

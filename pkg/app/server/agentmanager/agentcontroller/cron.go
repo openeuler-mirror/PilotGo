@@ -20,7 +20,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
@@ -194,11 +193,11 @@ func CronTaskList(c *gin.Context) {
 		return
 	}
 
-	total, err := controller.CrudAll(query, tx, list)
+	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	// 返回数据开始拼装分页的json
-	controller.JsonPagination(c, list, total, query)
+	service.JsonPagination(c, list, total, query)
 }

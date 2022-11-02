@@ -140,6 +140,8 @@ const (
 	FirewalldSourceAdd = 64
 	// 防火墙移除允许来源地址
 	FirewalldSourceRemove = 65
+	//获取agent端时间信息
+	AgentTime = 66
 )
 
 type Message struct {

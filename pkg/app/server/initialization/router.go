@@ -35,8 +35,8 @@ func SetupRouter() *gin.Engine {
 
 	overview := router.Group("/overview")
 	{
-		overview.GET("/info", controller.ClusterInfo)
-		overview.GET("/depart_info", controller.DepartClusterInfo)
+		overview.GET("/info", controller.ClusterInfoHandler)
+		overview.GET("/depart_info", controller.DepartClusterInfoHandler)
 	}
 
 	macList := router.Group("cluster/macList")
@@ -159,9 +159,9 @@ func SetupRouter() *gin.Engine {
 
 	userLog := router.Group("log")
 	{
-		userLog.GET("/log_all", controller.LogAll)
-		userLog.GET("/logs", controller.AgentLogs)
-		userLog.POST("/delete", controller.DeleteLog)
+		userLog.GET("/log_all", controller.LogAllHandler)
+		userLog.GET("/logs", controller.AgentLogsHandler)
+		userLog.POST("/delete", controller.DeleteLogHandler)
 	}
 
 	// 此处绑定casbin过滤规则

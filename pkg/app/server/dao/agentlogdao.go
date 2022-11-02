@@ -20,13 +20,13 @@ import (
 )
 
 // 删除agent日志
-func LogDelete(PLogIds []int) {
+func DeleteLog(PLogIds int) {
 	var logparent model.AgentLogParent
 	var log model.AgentLog
-	for _, id := range PLogIds {
-		global.PILOTGO_DB.Where("log_parent_id=?", id).Unscoped().Delete(log)
-		global.PILOTGO_DB.Where("id=?", id).Unscoped().Delete(logparent)
-	}
+
+	global.PILOTGO_DB.Where("log_parent_id=?", PLogIds).Unscoped().Delete(log)
+	global.PILOTGO_DB.Where("id=?", PLogIds).Unscoped().Delete(logparent)
+
 }
 
 // 存储父日志

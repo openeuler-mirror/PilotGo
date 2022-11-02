@@ -21,7 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
@@ -160,7 +159,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 		response.Fail(c, nil, Err)
 		return
 	}
-	oldnets := controller.InterfaceToSlice(oldnet)
+	oldnets := service.InterfaceToSlice(oldnet)
 
 	switch ip_assignment {
 	case "static":

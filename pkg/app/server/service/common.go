@@ -15,6 +15,11 @@
 package service
 
 import (
+	"fmt"
+	"net/http"
+	"reflect"
+
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
@@ -51,4 +56,64 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 		*res = append(*res, value)
 		ReturnSpecifiedDepart(value, res)
 	}
+}
+
+// 结构体分页查询方法
+func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{}, error) {
+	data := make([]interface{}, 0)
+	if reflect.TypeOf(list).Kind() == reflect.Slice {
+		s := reflect.ValueOf(list)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			data = append(data, ele.Interface())
+		}
+	}
+	if p.Size < 1 {
+		p.Size = 10
+	}
+	if p.CurrentPageNum < 1 {
+		p.CurrentPageNum = 1
+	}
+	if total == 0 {
+		p.TotalPage = 1
+	}
+	num := p.Size * (p.CurrentPageNum - 1)
+	if num > total {
+		return nil, fmt.Errorf("页码超出")
+	}
+	if p.Size*p.CurrentPageNum > total {
+		return data[num:], nil
+	} else {
+		if p.Size*p.CurrentPageNum < num {
+			return nil, fmt.Errorf("读取错误")
+		}
+		if p.Size*p.CurrentPageNum == 0 {
+			return data, nil
+		} else {
+			return data[num : p.CurrentPageNum*p.Size], nil
+		}
+	}
+}
+
+// 拼装json 分页数据
+func JsonPagination(c *gin.Context, list interface{}, total int64, query *model.PaginationQ) {
+	c.AbortWithStatusJSON(http.StatusOK, gin.H{
+		"code":  http.StatusOK,
+		"ok":    true,
+		"data":  list,
+		"total": total,
+		"page":  query.CurrentPageNum,
+		"size":  query.Size})
+}
+
+// interface to []interface
+func InterfaceToSlice(list interface{}) (datas []interface{}) {
+	if reflect.TypeOf(list).Kind() == reflect.Slice {
+		s := reflect.ValueOf(list)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			datas = append(datas, ele.Interface())
+		}
+	}
+	return
 }
