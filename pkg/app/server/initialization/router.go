@@ -118,7 +118,7 @@ func SetupRouter() *gin.Engine {
 		monitor.GET("/queryrange", controller.QueryRange)
 		monitor.GET("/query", controller.Query)
 		monitor.GET("/alert", controller.ListenALert)
-		monitor.POST("/alertmanager", controller.AlertMessageConfig)
+		monitor.POST("/alertmanager", controller.AlertMessageConfigHandler)
 	}
 
 	batchmanager := router.Group("batchmanager")
