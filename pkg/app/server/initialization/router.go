@@ -43,11 +43,11 @@ func SetupRouter() *gin.Engine {
 	{
 		macList.POST("/script_save", controller.AddScript)
 		macList.POST("/deletemachine", controller.DeleteMachine)
-		macList.GET("/depart", controller.Dept)
-		macList.GET("/selectmachine", controller.MachineList)
+		macList.GET("/depart", controller.DeptHandlerHandler)
+		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.POST("/createbatch", controller.CreateBatchHandler)
 		macList.GET("/machineinfo", controller.MachineInfo)
-		macList.POST("/modifydepart", controller.ModifyMachineDepart)
+		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
 
@@ -180,9 +180,9 @@ func SetupRouter() *gin.Engine {
 		user.POST("/delete", controller.DeleteUser)
 		user.POST("/update", controller.UpdateUser)
 		user.POST("/import", controller.ImportUser)
-		macList.POST("/deletedepartdata", controller.DeleteDepartData)
-		macList.POST("/adddepart", controller.AddDepart)
-		macList.POST("/updatedepart", controller.UpdateDepart)
+		macList.POST("/deletedepartdata", controller.DeleteDepartDataHandler)
+		macList.POST("/adddepart", controller.AddDepartHandler)
+		macList.POST("/updatedepart", controller.UpdateDepartHandler)
 		batchmanager.POST("/updatebatch", controller.UpdateBatchHandler)
 		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
@@ -201,8 +201,8 @@ func SetupRouter() *gin.Engine {
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)
 	router.GET("/macList/machinealldata", controller.MachineAllData)
-	router.GET("/macList/departinfo", controller.DepartInfo)
-	router.GET("/macList/depart", controller.Dept)
+	router.GET("/macList/departinfo", controller.DepartInfoHandler)
+	router.GET("/macList/depart", controller.DeptHandlerHandler)
 	// TODO: 不知道用途
 	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)
