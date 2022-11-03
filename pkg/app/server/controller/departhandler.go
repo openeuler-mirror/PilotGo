@@ -32,7 +32,6 @@ func MachineListHandler(c *gin.Context) {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
-
 	machinelist, err := service.MachineList(DepId)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
@@ -41,7 +40,7 @@ func MachineListHandler(c *gin.Context) {
 	response.JSON(c, http.StatusOK, http.StatusOK, machinelist, "部门下所属机器获取成功")
 }
 
-func DepartHandler(c *gin.Context) {
+func DeptHandlerHandler(c *gin.Context) {
 	departID := c.Query("DepartID")
 	tmp, err := strconv.Atoi(departID)
 	if err != nil {
