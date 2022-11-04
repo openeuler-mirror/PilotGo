@@ -40,7 +40,7 @@ func MachineInfoHandler(c *gin.Context) {
 
 	data, lens, err := service.MachineInfo(depart, query)
 	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(lens), query)
@@ -50,9 +50,8 @@ func MachineInfoHandler(c *gin.Context) {
 func FreeMachineSource(c *gin.Context) {
 	machine := model.MachineNode{}
 	query := &model.PaginationQ{}
-	err := c.ShouldBindQuery(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
+	if c.ShouldBindQuery(query) != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
@@ -79,7 +78,7 @@ func MachineAllDataHandler(c *gin.Context) {
 // 删除机器
 func DeleteMachineHandler(c *gin.Context) {
 	var deleteuuid model.DeleteUUID
-	if c.Bind(&deleteuuid) != nil {
+	if c.Bind(deleteuuid) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
