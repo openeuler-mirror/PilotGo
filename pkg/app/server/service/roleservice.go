@@ -14,7 +14,12 @@
  ******************************************************************************/
 package service
 
-import "openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+import (
+	"errors"
+
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+)
 
 // 获取用户最高权限的角色id
 func RoleId(R model.RoleID) int {
@@ -27,4 +32,63 @@ func RoleId(R model.RoleID) int {
 		}
 	}
 	return min
+}
+
+func GetLoginUserPermission(Roleid model.RoleID) (model.UserRole, interface{}, error) {
+	roleId := RoleId(Roleid) //用户的最高权限
+	userRole := dao.RoleIdToGetAllInfo(roleId)
+	buttons := dao.PermissionButtons(userRole.ButtonID)
+	return userRole, buttons, nil
+}
+
+func GetRoles(query *model.PaginationQ) (int, interface{}, error) {
+	roles, total := dao.GetAllRoles()
+	data, err := DataPaging(query, roles, total)
+	if err != nil {
+		return total, data, err
+	}
+	return total, data, nil
+}
+
+func AddUserRole(userRole *model.UserRole) error {
+	err := dao.AddRole(*userRole)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteUserRole(ID int) error {
+	if ok := dao.IsUserBindingRole(ID); !ok {
+		dao.DeleteRole(ID)
+		return nil
+	} else {
+		return errors.New("有用户绑定此角色，不可删除")
+	}
+}
+
+func UpdateUserRole(UserRole *model.UserRole) error {
+	id := UserRole.ID
+	role := UserRole.Role
+	description := UserRole.Description
+	userRole := dao.RoleIdToGetAllInfo(id)
+	if userRole.Role != role && userRole.Description != description {
+		dao.UpdateRoleName(id, role)
+		dao.UpdateRoleDescription(id, description)
+		return nil
+	}
+	if userRole.Role == role && userRole.Description != description {
+		dao.UpdateRoleDescription(id, description)
+		return nil
+	}
+	if userRole.Role != role && userRole.Description == description {
+		dao.UpdateRoleName(id, role)
+		return nil
+	}
+	return errors.New("没有修改信息")
+}
+
+func RolePermissionChange(roleChange model.RolePermissionChange) (*model.UserRole, error) {
+	userRole := dao.UpdateRolePermission(roleChange)
+	return &userRole, nil
 }
