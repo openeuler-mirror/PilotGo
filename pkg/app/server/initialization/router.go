@@ -41,11 +41,11 @@ func SetupRouter() *gin.Engine {
 	macList := router.Group("cluster/macList")
 	{
 		macList.POST("/script_save", controller.AddScript)
-		macList.POST("/deletemachine", controller.DeleteMachine)
+		macList.POST("/deletemachine", controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DeptHandlerHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.POST("/createbatch", controller.CreateBatchHandler)
-		macList.GET("/machineinfo", controller.MachineInfo)
+		macList.GET("/machineinfo", controller.MachineInfoHandler)
 		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
@@ -199,7 +199,7 @@ func SetupRouter() *gin.Engine {
 
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)
-	router.GET("/macList/machinealldata", controller.MachineAllData)
+	router.GET("/macList/machinealldata", controller.MachineAllDataHandler)
 	router.GET("/macList/departinfo", controller.DepartInfoHandler)
 	router.GET("/macList/depart", controller.DeptHandlerHandler)
 	// TODO: 不知道用途
