@@ -146,13 +146,13 @@ func SetupRouter() *gin.Engine {
 	configmanager := router.Group("config")
 	{
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
-		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabase)
+		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabaseHandler)
 		configmanager.GET("/file_all", controller.AllFiles)
-		configmanager.POST("/file_search", controller.FileSearch)
-		configmanager.POST("/file_update", controller.UpdateFile)
-		configmanager.POST("/file_delete", controller.DeleteFile)
-		configmanager.GET("/lastfile_all", controller.HistoryFiles)
-		configmanager.POST("/lastfile_rollback", controller.LastFileRollBack)
+		configmanager.POST("/file_search", controller.FileSearchHandler)
+		configmanager.POST("/file_update", controller.UpdateFileHandler)
+		configmanager.POST("/file_delete", controller.DeleteFileHandler)
+		configmanager.GET("/lastfile_all", controller.HistoryFilesHandler)
+		configmanager.POST("/lastfile_rollback", controller.LastFileRollBackHandler)
 		configmanager.POST("/file_broadcast", agentcontroller.FileBroadcastToAgents)
 	}
 
