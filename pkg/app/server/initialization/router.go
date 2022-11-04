@@ -39,7 +39,7 @@ func SetupRouter() *gin.Engine {
 
 	macList := api.Group("cluster/macList")
 	{
-		macList.POST("/script_save", controller.AddScript)
+		macList.POST("/script_save", controller.AddScriptHandler)
 		macList.POST("/deletemachine", controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DeptHandlerHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
@@ -135,7 +135,7 @@ func SetupRouter() *gin.Engine {
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 		user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
-		user.GET("/role", controller.GetUserRoleHandler)
+		user.GET("/role", controller.GetUserRole)
 		user.POST("/addRole", controller.AddUserRoleHandler)
 		user.POST("/delRole", controller.DeleteUserRoleHandler)
 		user.POST("/updateRole", controller.UpdateUserRoleHandler)
