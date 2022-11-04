@@ -40,7 +40,7 @@ func SetupRouter() *gin.Engine {
 
 	macList := router.Group("cluster/macList")
 	{
-		macList.POST("/script_save", controller.AddScript)
+		macList.POST("/script_save", controller.AddScriptHandler)
 		macList.POST("/deletemachine", controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DeptHandlerHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
@@ -134,13 +134,13 @@ func SetupRouter() *gin.Engine {
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearch)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
-		user.POST("/permission", controller.GetLoginUserPermission)
-		user.GET("/roles", controller.GetRoles)
+		user.POST("/permission", controller.GetLoginUserPermissionHandler)
+		user.GET("/roles", controller.GetRolesHandler)
 		user.GET("/role", controller.GetUserRole)
-		user.POST("/addRole", controller.AddUserRole)
-		user.POST("/delRole", controller.DeleteUserRole)
-		user.POST("/updateRole", controller.UpdateUserRole)
-		user.POST("/roleChange", controller.RolePermissionChange)
+		user.POST("/addRole", controller.AddUserRoleHandler)
+		user.POST("/delRole", controller.DeleteUserRoleHandler)
+		user.POST("/updateRole", controller.UpdateUserRoleHandler)
+		user.POST("/roleChange", controller.RolePermissionChangeHandler)
 	}
 
 	configmanager := router.Group("config")
