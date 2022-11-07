@@ -23,14 +23,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-type ConnClient struct {
-	Conn *websocket.Conn
-}
-
-var Clients = make(map[int]*ConnClient)
+var Clients = make(map[int]*model.ConnClient)
 var i int = 0
 var lock sync.Mutex
 var Keys []int
@@ -45,7 +42,7 @@ func PushAlarmHandler(c *gin.Context) {
 	lock.Lock()
 	i++
 	key := i
-	client := &ConnClient{Conn: conn}
+	client := &model.ConnClient{Conn: conn}
 	Clients[key] = client
 	lock.Unlock()
 
@@ -53,8 +50,7 @@ func PushAlarmHandler(c *gin.Context) {
 	go Read(Clients)
 	Write(Clients)
 }
-
-func Read(Clients map[int]*ConnClient) {
+func Read(Clients map[int]*model.ConnClient) {
 	for {
 		lock.Lock()
 		for key, cli := range Clients {
@@ -69,7 +65,7 @@ func Read(Clients map[int]*ConnClient) {
 	}
 }
 
-func Write(Clients map[int]*ConnClient) {
+func Write(Clients map[int]*model.ConnClient) {
 	for {
 		data := <-agentmanager.WARN_MSG
 		lock.Lock()
@@ -86,7 +82,7 @@ func Write(Clients map[int]*ConnClient) {
 	}
 }
 
-func Delete(Clients map[int]*ConnClient, keys []int) {
+func Delete(Clients map[int]*model.ConnClient, keys []int) {
 	for {
 		if len(keys) != 0 {
 			lock.Lock()

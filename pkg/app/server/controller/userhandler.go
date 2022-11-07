@@ -19,92 +19,39 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 var ServerAddr string
 
-func GetUserRole(c *gin.Context) {
-	roles := dao.AllUserRole()
+func GetUserRoleHandler(c *gin.Context) {
+	roles := service.GetUserRole()
 	response.Success(c, gin.H{"role": roles}, "获取用户角色")
 }
 
-func Register(c *gin.Context) {
+func RegisterHandler(c *gin.Context) {
 	var user model.User
-	c.Bind(&user)
-	username := user.Username
-	password := user.Password
-	email := user.Email
-	phone := user.Phone
-	depart := user.DepartName
-	departId := user.DepartSecond
-	departPid := user.DepartFirst
-	roleId := user.RoleID
-
-	if len(username) == 0 { //Data verification
-		username = service.RandomString(5)
-	}
-	if len(password) == 0 {
-		password = global.DefaultUserPassword
-	}
-	if len(email) == 0 {
-		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "邮箱不能为空!")
+	if c.Bind(&user) != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
-	if dao.IsEmailExist(email) {
-		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "邮箱已存在!")
+	err := service.Register(user)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
 		return
 	}
-
-	user_type := service.UserType(roleId)
-
-	user = model.User{ //Create user
-		Username:     username,
-		Password:     password,
-		Phone:        phone,
-		Email:        email,
-		DepartName:   depart,
-		DepartFirst:  departPid,
-		DepartSecond: departId,
-		UserType:     user_type,
-		RoleID:       roleId,
-	}
-	dao.AddUser(user)
-
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
-func Login(c *gin.Context) {
+func LoginHandler(c *gin.Context) {
 	var user model.User //Data verification
-	c.Bind(&user)
-	email := user.Email
-	password := user.Password
-
-	if !dao.IsEmailExist(email) {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "用户不存在!")
+	if c.Bind(&user) != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
-
-	DecryptedPassword, err := utils.JsAesDecrypt(password, email)
-	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "密码解密失败")
-		return
-	}
-
-	DBpassword, departName, roleId, departId, userType := dao.UserPassword(email)
-	if DBpassword != DecryptedPassword {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "密码错误!")
-		return
-	}
-
-	// Issue token
-	token, err := middleware.ReleaseToken(user)
+	token, departName, departId, userType, roleId, err := service.Login(user)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
 		return
@@ -136,8 +83,7 @@ func UserAll(c *gin.Context) {
 		return
 	}
 
-	users, total := dao.UserAll()
-
+	users, total := service.UserAll()
 	data, err := service.DataPaging(query, users, total)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
@@ -147,11 +93,13 @@ func UserAll(c *gin.Context) {
 }
 
 // 高级搜索
-func UserSearch(c *gin.Context) {
+func UserSearchHandler(c *gin.Context) {
 	var user model.User
-	c.Bind(&user)
+	if c.Bind(&user) != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	var email = user.Email
-
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -159,9 +107,7 @@ func UserSearch(c *gin.Context) {
 		return
 	}
 
-	users, total := dao.UserSearch(email)
-
-	data, err := service.DataPaging(query, users, total)
+	data, total, err := service.UserSearch(email, query)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
@@ -170,11 +116,13 @@ func UserSearch(c *gin.Context) {
 }
 
 // 重置密码
-func ResetPassword(c *gin.Context) {
+func ResetPasswordHandler(c *gin.Context) {
 	var user model.User
-	c.Bind(&user)
-	var email = user.Email
-	u, err := dao.ResetPassword(email)
+	if c.Bind(&user) != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	u, err := service.ResetPassword(user.Email)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
 	} else {
@@ -183,49 +131,39 @@ func ResetPassword(c *gin.Context) {
 }
 
 // 删除用户
-func DeleteUser(c *gin.Context) {
+func DeleteUserHandler(c *gin.Context) {
 	var userdel model.Userdel
-	c.Bind(&userdel)
-
-	for _, userEmail := range userdel.Emails {
-		dao.DeleteUser(userEmail)
+	if c.Bind(&userdel) != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	err := service.DeleteUser(userdel.Emails)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		return
 	}
 	response.Response(c, http.StatusOK, http.StatusOK, nil, "用户删除成功!")
 }
 
 // 修改用户信息
-func UpdateUser(c *gin.Context) {
+func UpdateUserHandler(c *gin.Context) {
 	var user model.User
-	c.Bind(&user)
-	email := user.Email
-	phone := user.Phone
-	Pid := user.DepartFirst
-	id := user.DepartSecond
-	departName := user.DepartName
-
-	u := dao.UserInfo(email)
-
-	if u.DepartName != departName && u.Phone != phone {
-		dao.UpdateUserDepart(email, departName, Pid, id)
-		dao.UpdateUserPhone(email, phone)
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": user}, "用户信息修改成功")
+	if c.Bind(&user) != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
-	if u.DepartName == departName && u.Phone != phone {
-		dao.UpdateUserPhone(email, phone)
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": user}, "用户信息修改成功")
+	u, err := service.UpdateUser(user)
+	if err != nil {
+		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
 		return
 	}
-	if u.DepartName != departName && u.Phone == phone {
-		dao.UpdateUserDepart(email, departName, Pid, id)
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": user}, "用户信息修改成功")
-	}
+	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": u}, "用户信息修改成功")
+
 }
 
 // 一键导入用户数据
 func ImportUser(c *gin.Context) {
 	form, _ := c.MultipartForm()
-
 	files := form.File["upload"]
 	if files == nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "请先选择要上传的文件")
@@ -235,12 +173,10 @@ func ImportUser(c *gin.Context) {
 	for _, file := range files {
 		name := file.Filename
 		c.SaveUploadedFile(file, name)
-
 		xlFile, error := xlsx.OpenFile(name)
 		if error != nil {
 			return
 		}
-
 		UserExit = service.ReadFile(xlFile, UserExit)
 	}
 
