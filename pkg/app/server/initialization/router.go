@@ -41,7 +41,7 @@ func SetupRouter() *gin.Engine {
 	{
 		macList.POST("/script_save", controller.AddScriptHandler)
 		macList.POST("/deletemachine", controller.DeleteMachineHandler)
-		macList.GET("/depart", controller.DeptHandlerHandler)
+		macList.GET("/depart", controller.DeptHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.POST("/createbatch", controller.CreateBatchHandler)
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
@@ -135,7 +135,7 @@ func SetupRouter() *gin.Engine {
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
 		user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
-		user.GET("/role", controller.GetUserRole)
+		user.GET("/role", controller.GetUserRoleHandler)
 		user.POST("/addRole", controller.AddUserRoleHandler)
 		user.POST("/delRole", controller.DeleteUserRoleHandler)
 		user.POST("/updateRole", controller.UpdateUserRoleHandler)
@@ -200,7 +200,7 @@ func SetupRouter() *gin.Engine {
 	router.GET("/ws", controller.ShellWs)
 	router.GET("/macList/machinealldata", controller.MachineAllDataHandler)
 	router.GET("/macList/departinfo", controller.DepartInfoHandler)
-	router.GET("/macList/depart", controller.DeptHandlerHandler)
+	router.GET("/macList/depart", controller.DeptHandler)
 	// TODO: 不知道用途
 	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)

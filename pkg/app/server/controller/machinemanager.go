@@ -79,7 +79,7 @@ func MachineAllDataHandler(c *gin.Context) {
 // 删除机器
 func DeleteMachineHandler(c *gin.Context) {
 	var deleteuuid model.DeleteUUID
-	if c.Bind(deleteuuid) != nil {
+	if c.Bind(&deleteuuid) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}

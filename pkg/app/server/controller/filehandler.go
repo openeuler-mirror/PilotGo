@@ -41,7 +41,6 @@ func SaveFileToDatabaseHandler(c *gin.Context) {
 
 func DeleteFileHandler(c *gin.Context) {
 	var files model.DeleteFiles
-	c.Bind(&files)
 	if err := c.Bind(&files); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -57,7 +56,6 @@ func DeleteFileHandler(c *gin.Context) {
 
 func UpdateFileHandler(c *gin.Context) {
 	var file model.Files
-	c.Bind(&file)
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -102,7 +100,6 @@ func AllFiles(c *gin.Context) {
 
 func FileSearchHandler(c *gin.Context) {
 	var file model.SearchFile
-	c.Bind(&file)
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
