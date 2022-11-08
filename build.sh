@@ -3,39 +3,43 @@ PILOTGO_VERSION="v0.0.1"
 
 echo "thanks for choosing PilotGo"
 
-# 判断是否安装了NodeJS
-echo "checking frontend compile tools..."
-if ! type node >/dev/null 2>&1; then
-    echo "no nodejs detected, please install nodejs >= 14.0"
-    exit -1
-else
-    NodeJS=`node -v | grep -oP '\d*\.\d*.\d+'`
-    if [ ${NodeJS:0:2} -lt 14 ]; then
-        echo "error: your nodejs is too old, please upgrade to v14.0 or newer"
+function check_nodejs(){
+    # 判断是否安装了NodeJS
+    echo "checking frontend compile tools..."
+    if ! type node >/dev/null 2>&1; then
+        echo "no nodejs detected, please install nodejs >= 14.0"
         exit -1
-    fi
+    else
+        NodeJS=`node -v | grep -oP '\d*\.\d*.\d+'`
+        if [ ${NodeJS:0:2} -lt 14 ]; then
+            echo "error: your nodejs is too old, please upgrade to v14.0 or newer"
+            exit -1
+        fi
 
-    # 判断是否安装了NPM
-    if ! type npm >/dev/null 2>&1; then
-        echo "error: your npm is too old, please upgrade to v6.0 or newer"
-        exit -1;
+        # 判断是否安装了NPM
+        if ! type npm >/dev/null 2>&1; then
+            echo "error: your npm is too old, please upgrade to v6.0 or newer"
+            exit -1;
+        fi
     fi
-fi
-echo "ok"
+    echo "ok"
+}
 
-# 判断是否安装了golang
-echo "Checking backend compile tools..."
-if ! type go >/dev/null 2>&1; then
-    echo "no golang detected, please install golang >= 1.17.0"
-    exit -1
-else
-    GoLang=`go version |awk '{print $3}' | grep -oP '\d*\.\d*.\d+'`
-    if [ ${GoLang: 2: 2} -lt 17 ]; then
-        echo "error: your golang is too old, please upgrade to v1.17.0 or newer"
+function check_golang(){
+    # 判断是否安装了golang
+    echo "Checking backend compile tools..."
+    if ! type go >/dev/null 2>&1; then
+        echo "no golang detected, please install golang >= 1.17.0"
         exit -1
+    else
+        GoLang=`go version |awk '{print $3}' | grep -oP '\d*\.\d*.\d+'`
+        if [ ${GoLang: 2: 2} -lt 17 ]; then
+            echo "error: your golang is too old, please upgrade to v1.17.0 or newer"
+            exit -1
+        fi
     fi
-fi
-echo "ok"
+    echo "ok"
+}
 
 function build_frontend() {
     echo "dowoloading frontend libraries, please wait..."
@@ -52,7 +56,7 @@ function build_frontend() {
     cp -r ./dist/static/* ./resource/
 }
 
-function build_and_pack() {
+function build_backend() {
     # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
 
     echo "cleanning tmp directory..."
@@ -63,15 +67,25 @@ function build_and_pack() {
     echo "building server for ${1}..."
     mkdir -p ${version_path}/server
     CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/server/pilotgo-server ./pkg/app/server/main.go
-    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
-    cp alert.rules.templete ${version_path}/server/alert.rules
 
     echo "building agent for ${1}..."
     mkdir -p ${version_path}/agent
     CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/pilotgo-agent pkg/app/agent/main.go
-    cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
+}
 
-    echo "adding scripts..."
+function pack_tar() {
+    # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
+
+    version_path="./out/${1}/pilotgo-${PILOTGO_VERSION}/"
+
+    echo "adding scripts and config files..."
+    mkdir -p ${version_path}/server
+    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
+    cp alert.rules.templete ${version_path}/server/alert.rules
+
+    mkdir -p ${version_path}/agent
+    cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
+    
     cp ./scripts/shell/install_server.sh ${version_path}/server/
     cp ./scripts/shell/install_agent.sh ${version_path}/agent/
 
@@ -79,13 +93,61 @@ function build_and_pack() {
     tar -czf ./out/pilotgo-${PILOTGO_VERSION}-${1}.tar.gz -C ./out/${1} .
 }
 
+function build_docker_image() {
+    echo "adding config files..."
+    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
+    cp alert.rules.templete ${version_path}/server/alert.rules
+
+    sudo docker build --force-rm --tag pilotgo_server:latest --build-arg ARCH=$1 .
+}
+
+
 function clean() {
     rm -rf ./out
 }
 
-build_frontend
-
-build_and_pack amd64
-build_and_pack arm64
+case $1 in
+"backend")
+    if [[ $# -lt 2 ]] ; then
+        echo "must provide arch parameter(arm64 or amd64)"
+        exit -1
+    fi
+    check_golang
+    build_backend $2
+    ;;
+"front")
+    check_nodejs
+    build_frontend
+    ;;
+"pack")
+    if [[ $# -lt 2 ]] ; then
+        echo "must provide arch parameter(arm64 or amd64)"
+        exit -1
+    fi
+    check_golang
+    check_nodejs
+    echo "pack tar package for ${2}"
+    echo "=================== stage 1: build bin ==================="
+    build_backend $2
+    echo "=================== stage 2: pack tar package ==================="
+    pack_tar $2
+    ;;
+"image")
+    if [[ $# -lt 2 ]] ; then
+        echo "must provide arch parameter(arm64 or amd64)"
+        exit -1
+    fi
+    check_golang
+    check_nodejs
+    echo "pack docker image for ${2}"
+    echo "=================== stage 1: build bin ==================="
+    build_backend $2
+    echo "=================== stage 2: build image ==================="
+    build_docker_image $2
+    ;;
+"clean")
+    clean
+    ;;
+esac
 
 echo "done"

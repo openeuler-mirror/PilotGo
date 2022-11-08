@@ -31,6 +31,7 @@ func SetupRouter() *gin.Engine {
 	router.Use(middleware.Recover)
 
 	// TODO: 此处绑定 http api handler
+	api := router.Group("/api/v1")
 
 	overview := router.Group("/overview")
 	{
@@ -186,12 +187,12 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
 
-	plugin := router.Group("plugin")
+	plugin := api.Group("plugins")
 	{
 		plugin.GET("", controller.GetPluginsHanlder)
 		plugin.PUT("", controller.AddPluginHanlder)
-		plugin.POST("", controller.TogglePluginHanlder)
-		plugin.DELETE("", controller.UnloadPluginHanlder)
+		plugin.POST("/:uuid", controller.TogglePluginHanlder)
+		plugin.DELETE("/:uuid", controller.UnloadPluginHanlder)
 	}
 
 	// TODO: 此处绑定前端静态资源handler

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { insertPlugin } from "@/request/plugIn";
+import { insertPlugin } from "@/request/plugin";
 import { checkIP } from "@/rules/check";
 export default {
   data() {

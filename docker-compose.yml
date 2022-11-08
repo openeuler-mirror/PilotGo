@@ -1,7 +1,8 @@
 version: '3'
 services:
   server:
-    build: .
+    # build: .
+    image: pilotgo_server:latest
     ports:
       - "8888:8888"
       - "8889:8889"
