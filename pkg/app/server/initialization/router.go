@@ -42,7 +42,7 @@ func SetupRouter() *gin.Engine {
 	{
 		macList.POST("/script_save", controller.AddScriptHandler)
 		macList.POST("/deletemachine", controller.DeleteMachineHandler)
-		macList.GET("/depart", controller.DeptHandler)
+		macList.GET("/depart", controller.DepartHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.POST("/createbatch", controller.CreateBatchHandler)
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
@@ -201,7 +201,7 @@ func SetupRouter() *gin.Engine {
 	router.GET("/ws", controller.ShellWs)
 	router.GET("/macList/machinealldata", controller.MachineAllDataHandler)
 	router.GET("/macList/departinfo", controller.DepartInfoHandler)
-	router.GET("/macList/depart", controller.DeptHandler)
+	router.GET("/macList/depart", controller.DepartHandler)
 	// TODO: 不知道用途
 	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)

@@ -92,9 +92,24 @@ func MachineStore(departid int) []model.MachineNode {
 
 func ModifyMachineDepart(MadId int, DeptId int) {
 	var Machine model.MachineNode
-	Ma := model.MachineNode{
-		DepartId: DeptId,
-		State:    global.Normal,
+	global.PILOTGO_DB.Where("id=?", MadId).Find(&Machine)
+	var Ma model.MachineNode
+	if Machine.State == global.Free {
+		Ma = model.MachineNode{
+			DepartId: DeptId,
+			State:    global.Normal,
+		}
+	} else {
+		if DeptId == global.UncateloguedDepartId {
+			Ma = model.MachineNode{
+				DepartId: DeptId,
+				State:    global.Free,
+			}
+		} else {
+			Ma = model.MachineNode{
+				DepartId: DeptId,
+			}
+		}
 	}
 	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
 }
