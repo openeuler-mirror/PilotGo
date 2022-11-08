@@ -78,7 +78,7 @@ function pack_tar() {
 
     version_path="./out/${1}/pilotgo-${PILOTGO_VERSION}/"
 
-    echo "adding scripts..."
+    echo "adding scripts and config files..."
     mkdir -p ${version_path}/server
     cp config_server.yaml.templete ${version_path}/server/config_server.yaml
     cp alert.rules.templete ${version_path}/server/alert.rules
@@ -93,6 +93,14 @@ function pack_tar() {
     tar -czf ./out/pilotgo-${PILOTGO_VERSION}-${1}.tar.gz -C ./out/${1} .
 }
 
+function build_docker_image() {
+    echo "adding config files..."
+    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
+    cp alert.rules.templete ${version_path}/server/alert.rules
+
+    sudo docker build --force-rm --tag pilotgo_server:latest --build-arg ARCH=$1 .
+}
+
 
 function clean() {
     rm -rf ./out
@@ -100,6 +108,10 @@ function clean() {
 
 case $1 in
 "backend")
+    if [[ $# -lt 2 ]] ; then
+        echo "must provide arch parameter(arm64 or amd64)"
+        exit -1
+    fi
     check_golang
     build_backend $2
     ;;
@@ -108,6 +120,10 @@ case $1 in
     build_frontend
     ;;
 "pack")
+    if [[ $# -lt 2 ]] ; then
+        echo "must provide arch parameter(arm64 or amd64)"
+        exit -1
+    fi
     check_golang
     check_nodejs
     echo "pack tar package for ${2}"
@@ -117,13 +133,17 @@ case $1 in
     pack_tar $2
     ;;
 "image")
+    if [[ $# -lt 2 ]] ; then
+        echo "must provide arch parameter(arm64 or amd64)"
+        exit -1
+    fi
     check_golang
     check_nodejs
     echo "pack docker image for ${2}"
     echo "=================== stage 1: build bin ==================="
     build_backend $2
     echo "=================== stage 2: build image ==================="
-    sudo docker build --force-rm --tag pilotgo_server:latest --build-arg ARCH=$2 .
+    build_docker_image $2
     ;;
 "clean")
     clean

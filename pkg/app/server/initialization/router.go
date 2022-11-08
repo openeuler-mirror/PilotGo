@@ -41,13 +41,13 @@ func SetupRouter() *gin.Engine {
 
 	macList := router.Group("cluster/macList")
 	{
-		macList.POST("/script_save", controller.AddScript)
-		macList.POST("/deletemachine", controller.DeleteMachine)
-		macList.GET("/depart", controller.Dept)
-		macList.GET("/selectmachine", controller.MachineList)
+		macList.POST("/script_save", controller.AddScriptHandler)
+		macList.POST("/deletemachine", controller.DeleteMachineHandler)
+		macList.GET("/depart", controller.DepartHandler)
+		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.POST("/createbatch", controller.CreateBatchHandler)
-		macList.GET("/machineinfo", controller.MachineInfo)
-		macList.POST("/modifydepart", controller.ModifyMachineDepart)
+		macList.GET("/machineinfo", controller.MachineInfoHandler)
+		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
 
@@ -119,7 +119,7 @@ func SetupRouter() *gin.Engine {
 		monitor.GET("/queryrange", controller.QueryRange)
 		monitor.GET("/query", controller.Query)
 		monitor.GET("/alert", controller.ListenALert)
-		monitor.POST("/alertmanager", controller.AlertMessageConfig)
+		monitor.POST("/alertmanager", controller.AlertMessageConfigHandler)
 	}
 
 	batchmanager := router.Group("batchmanager")
@@ -130,30 +130,30 @@ func SetupRouter() *gin.Engine {
 
 	user := router.Group("user")
 	{
-		user.POST("/login", controller.Login)
+		user.POST("/login", controller.LoginHandler)
 		user.GET("/logout", controller.Logout)
 		user.GET("/searchAll", controller.UserAll)
-		user.POST("/userSearch", controller.UserSearch)
+		user.POST("/userSearch", controller.UserSearchHandler)
 		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
-		user.POST("/permission", controller.GetLoginUserPermission)
-		user.GET("/roles", controller.GetRoles)
-		user.GET("/role", controller.GetUserRole)
-		user.POST("/addRole", controller.AddUserRole)
-		user.POST("/delRole", controller.DeleteUserRole)
-		user.POST("/updateRole", controller.UpdateUserRole)
-		user.POST("/roleChange", controller.RolePermissionChange)
+		user.POST("/permission", controller.GetLoginUserPermissionHandler)
+		user.GET("/roles", controller.GetRolesHandler)
+		user.GET("/role", controller.GetUserRoleHandler)
+		user.POST("/addRole", controller.AddUserRoleHandler)
+		user.POST("/delRole", controller.DeleteUserRoleHandler)
+		user.POST("/updateRole", controller.UpdateUserRoleHandler)
+		user.POST("/roleChange", controller.RolePermissionChangeHandler)
 	}
 
 	configmanager := router.Group("config")
 	{
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
-		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabase)
+		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabaseHandler)
 		configmanager.GET("/file_all", controller.AllFiles)
-		configmanager.POST("/file_search", controller.FileSearch)
-		configmanager.POST("/file_update", controller.UpdateFile)
-		configmanager.POST("/file_delete", controller.DeleteFile)
-		configmanager.GET("/lastfile_all", controller.HistoryFiles)
-		configmanager.POST("/lastfile_rollback", controller.LastFileRollBack)
+		configmanager.POST("/file_search", controller.FileSearchHandler)
+		configmanager.POST("/file_update", controller.UpdateFileHandler)
+		configmanager.POST("/file_delete", controller.DeleteFileHandler)
+		configmanager.GET("/lastfile_all", controller.HistoryFilesHandler)
+		configmanager.POST("/lastfile_rollback", controller.LastFileRollBackHandler)
 		configmanager.POST("/file_broadcast", agentcontroller.FileBroadcastToAgents)
 	}
 
@@ -175,14 +175,14 @@ func SetupRouter() *gin.Engine {
 	Level := router.Group("")
 	Level.Use(middleware.CasbinHandler())
 	{
-		user.POST("/register", controller.Register)
-		user.POST("/reset", controller.ResetPassword)
-		user.POST("/delete", controller.DeleteUser)
-		user.POST("/update", controller.UpdateUser)
+		user.POST("/register", controller.RegisterHandler)
+		user.POST("/reset", controller.ResetPasswordHandler)
+		user.POST("/delete", controller.DeleteUserHandler)
+		user.POST("/update", controller.UpdateUserHandler)
 		user.POST("/import", controller.ImportUser)
-		macList.POST("/deletedepartdata", controller.DeleteDepartData)
-		macList.POST("/adddepart", controller.AddDepart)
-		macList.POST("/updatedepart", controller.UpdateDepart)
+		macList.POST("/deletedepartdata", controller.DeleteDepartDataHandler)
+		macList.POST("/adddepart", controller.AddDepartHandler)
+		macList.POST("/updatedepart", controller.UpdateDepartHandler)
 		batchmanager.POST("/updatebatch", controller.UpdateBatchHandler)
 		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
@@ -200,9 +200,9 @@ func SetupRouter() *gin.Engine {
 
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)
-	router.GET("/macList/machinealldata", controller.MachineAllData)
-	router.GET("/macList/departinfo", controller.DepartInfo)
-	router.GET("/macList/depart", controller.Dept)
+	router.GET("/macList/machinealldata", controller.MachineAllDataHandler)
+	router.GET("/macList/departinfo", controller.DepartInfoHandler)
+	router.GET("/macList/depart", controller.DepartHandler)
 	// TODO: 不知道用途
 	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)

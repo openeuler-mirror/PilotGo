@@ -18,14 +18,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-func MachineInfo(c *gin.Context) {
+func MachineInfoHandler(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -34,18 +33,12 @@ func MachineInfo(c *gin.Context) {
 	}
 
 	depart := &model.Depart{}
-	if c.ShouldBind(depart) != nil {
+	if c.ShouldBind(&depart) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	var TheDeptAndSubDeptIds []int
-	service.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
-	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
-	machinelist := dao.MachineList(TheDeptAndSubDeptIds)
-
-	lens := len(machinelist)
-	data, err := service.DataPaging(query, machinelist, lens)
+	data, lens, err := service.MachineInfo(depart, query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -74,25 +67,24 @@ func FreeMachineSource(c *gin.Context) {
 	service.JsonPagination(c, list, total, query)
 }
 
-func MachineAllData(c *gin.Context) {
-	AllData := dao.MachineAllData()
-	datas := make([]map[string]string, 0)
-	for _, data := range AllData {
-		datas = append(datas, map[string]string{"uuid": data.UUID, "ip_dept": data.IP + "-" + data.Departname, "ip": data.IP})
+func MachineAllDataHandler(c *gin.Context) {
+	datas, err := service.MachineAllData()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
 	}
 	response.JSON(c, http.StatusOK, http.StatusOK, datas, "获取所有的机器数据")
 }
 
 // 删除机器
-func DeleteMachine(c *gin.Context) {
+func DeleteMachineHandler(c *gin.Context) {
 	var deleteuuid model.DeleteUUID
-	c.Bind(&deleteuuid)
-	machinelist := make(map[string]string)
-	for _, machinedeluuid := range deleteuuid.Deluuid {
-		if err := dao.DeleteMachine(machinedeluuid); err != nil {
-			machinelist[machinedeluuid] = err.Error()
-		}
+	if c.Bind(&deleteuuid) != nil {
+		response.Fail(c, nil, "parameter error")
+		return
 	}
+	machinelist := service.DeleteMachine(deleteuuid.Deluuid)
+
 	if len(machinelist) != 0 {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"machinelist": machinelist}, "机器删除失败")
 	} else {

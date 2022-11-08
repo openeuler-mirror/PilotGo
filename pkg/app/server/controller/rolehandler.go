@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -27,8 +26,10 @@ import (
 // 删除过滤策略
 func PolicyDelete(c *gin.Context) {
 	var Rule model.CasbinRule
-	c.Bind(&Rule)
-
+	if err := c.Bind(&Rule); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	if ok := service.PolicyRemove(Rule); !ok {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy不存在")
 	} else {
@@ -39,8 +40,10 @@ func PolicyDelete(c *gin.Context) {
 // 增加过滤策略
 func PolicyAdd(c *gin.Context) {
 	var Rule model.CasbinRule
-	c.Bind(&Rule)
-
+	if err := c.Bind(&Rule); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	if ok := service.PolicyAdd(Rule); !ok {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy已存在")
 	} else {
@@ -69,19 +72,21 @@ func GetPolicy(c *gin.Context) {
 }
 
 // 获取登录用户权限
-func GetLoginUserPermission(c *gin.Context) {
+func GetLoginUserPermissionHandler(c *gin.Context) {
 	var RoleId model.RoleID
-	c.Bind(&RoleId)
-
-	roleId := service.RoleId(RoleId) //用户的最高权限
-
-	userRole := dao.RoleIdToGetAllInfo(roleId)
-	buttons := dao.PermissionButtons(userRole.ButtonID)
-
+	if err := c.Bind(&RoleId); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	userRole, buttons, err := service.GetLoginUserPermission(RoleId)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
 	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"userType": userRole.Type, "menu": userRole.Menus, "button": buttons}, "用户权限列表")
 }
 
-func GetRoles(c *gin.Context) {
+func GetRolesHandler(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -89,9 +94,7 @@ func GetRoles(c *gin.Context) {
 		return
 	}
 
-	roles, total := dao.GetAllRoles()
-
-	data, err := service.DataPaging(query, roles, total)
+	total, data, err := service.GetRoles(query)
 	if err != nil {
 		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
 		return
@@ -99,59 +102,54 @@ func GetRoles(c *gin.Context) {
 	service.JsonPagination(c, data, int64(total), query)
 }
 
-func AddUserRole(c *gin.Context) {
+func AddUserRoleHandler(c *gin.Context) {
 	var userRole model.UserRole
-	c.Bind(&userRole)
-
-	err := dao.AddRole(userRole)
+	if err := c.Bind(&userRole); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	err := service.AddUserRole(&userRole)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
 	}
 	response.Success(c, nil, "新增角色成功")
 }
 
-func DeleteUserRole(c *gin.Context) {
+func DeleteUserRoleHandler(c *gin.Context) {
 	var UserRole model.UserRole
-	c.Bind(&UserRole)
-
-	if ok := dao.IsUserBindingRole(UserRole.ID); !ok {
-		dao.DeleteRole(UserRole.ID)
-		response.Success(c, nil, "角色删除成功")
-	} else {
+	if err := c.Bind(&UserRole); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	err := service.DeleteUserRole(UserRole.ID)
+	if err != nil {
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 	}
+	response.Success(c, nil, "角色删除成功")
 }
 
-func UpdateUserRole(c *gin.Context) {
+func UpdateUserRoleHandler(c *gin.Context) {
 	var UserRole model.UserRole
-	c.Bind(&UserRole)
-	id := UserRole.ID
-	role := UserRole.Role
-	description := UserRole.Description
-
-	userRole := dao.RoleIdToGetAllInfo(id)
-	if userRole.Role != role && userRole.Description != description {
-		dao.UpdateRoleName(id, role)
-		dao.UpdateRoleDescription(id, description)
-		response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
+	if err := c.Bind(&UserRole); err != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
-	if userRole.Role == role && userRole.Description != description {
-		dao.UpdateRoleDescription(id, description)
-		response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
-		return
+	err := service.UpdateUserRole(&UserRole)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
 	}
-	if userRole.Role != role && userRole.Description == description {
-		dao.UpdateRoleName(id, role)
-		response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
-		return
-	}
+	response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
 }
 
-func RolePermissionChange(c *gin.Context) {
+func RolePermissionChangeHandler(c *gin.Context) {
 	var roleChange model.RolePermissionChange
-	c.Bind(&roleChange)
-
-	userRole := dao.UpdateRolePermission(roleChange)
+	if err := c.Bind(&roleChange); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	userRole, err := service.RolePermissionChange(roleChange)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+	}
 	response.Success(c, gin.H{"data": userRole}, "角色权限变更成功")
 }

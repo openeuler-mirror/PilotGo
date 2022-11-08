@@ -70,7 +70,10 @@ func AgentLogsHandler(c *gin.Context) {
 // 删除机器日志
 func DeleteLogHandler(c *gin.Context) {
 	var logid model.AgentLogDel
-	c.Bind(&logid)
+	if err := c.Bind(&logid); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	if len(logid.IDs) == 0 {
 		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "请输入删除机器日志ID")
 		return
