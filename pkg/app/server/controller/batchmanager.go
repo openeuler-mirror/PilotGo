@@ -45,8 +45,10 @@ func BatchInfoHandler(c *gin.Context) {
 
 func DeleteBatchHandler(c *gin.Context) {
 	var batchdel model.BatchDel
-	c.Bind(&batchdel)
-
+	if err := c.Bind(&batchdel); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	if len(batchdel.BatchID) == 0 {
 		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "请输入删除批次ID")
 		return
@@ -62,8 +64,10 @@ func DeleteBatchHandler(c *gin.Context) {
 
 func UpdateBatchHandler(c *gin.Context) {
 	var batchinfo model.BatchUpdate
-	c.Bind(&batchinfo)
-
+	if err := c.Bind(&batchinfo); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	err := service.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
@@ -115,5 +119,4 @@ func SelectBatchHandler(c *gin.Context) {
 		return
 	}
 	response.Success(c, gin.H{"data": batch}, "批次信息获取成功")
-
 }
