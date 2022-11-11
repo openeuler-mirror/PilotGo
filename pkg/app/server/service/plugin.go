@@ -1,15 +1,12 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"net/http"
 	"sync"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
+	//splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
 )
 
 type Plugin struct {
@@ -51,7 +48,7 @@ func restorePluginInfo() error {
 			Description: p.Version,
 			Url:         p.Url,
 			Enabled:     p.Enabled,
-			Status:      splugin.StatusOffline,
+			//Status:      splugin.StatusOffline,
 		}
 
 		globalManager.Add(np)
@@ -153,6 +150,7 @@ func GetManager() *PluginManager {
 	return globalManager
 }
 
+/*
 // 请求plugin的接口服务，获取接口信息
 func CheckPlugin(url string) (*Plugin, error) {
 	info, err := requestPluginInfo(url)
@@ -195,12 +193,13 @@ func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
 	// TODO: check info valid
 	return info, nil
 }
-
+*/
 // 获取plugin清单
 func GetPlugins() []*Plugin {
 	return globalManager.GetAll()
 }
 
+/*
 func AddPlugin(url string) error {
 	logger.Debug("add login from %s", url)
 
@@ -213,7 +212,7 @@ func AddPlugin(url string) error {
 		return err
 	}
 	return nil
-}
+}*/
 
 func DeletePlugin(id int) error {
 	logger.Debug("delete login: %d", id)
