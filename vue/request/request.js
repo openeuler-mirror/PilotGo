@@ -20,7 +20,7 @@ import { getToken } from '@/utils/auth'
 
 // 1.创建axios实例
 const request = axios.create({
-  baseURL: '',
+  baseURL: '/api/v1',
   timeOut: 5000
 })
 
