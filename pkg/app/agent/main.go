@@ -80,7 +80,6 @@ func main() {
 	}(&aconfig.Config().Server)
 
 	// 文件监控初始化
-	filemonitor.RESP_MSG = make(chan interface{})
 	if err := filemonitor.FileMonitorInit(); err != nil {
 		logger.Error("config file monitor init failed: %s", err)
 		os.Exit(-1)
