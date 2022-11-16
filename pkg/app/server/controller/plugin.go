@@ -16,22 +16,22 @@ func GetPluginsHanlder(c *gin.Context) {
 }
 
 // 添加插件
-func AddPluginHanlder(c *gin.Context) {
-	param := struct {
-		Url string `json:"url"`
-	}{}
+func AddPluginHanlder(c *gin.Context) { /*
+		param := struct {
+			Url string `json:"url"`
+		}{}
 
-	if err := c.BindJSON(&param); err != nil {
-		response.Fail(c, nil, "参数错误")
-		return
-	}
+		if err := c.BindJSON(&param); err != nil {
+			response.Fail(c, nil, "参数错误")
+			return
+		}
 
-	if err := service.AddPlugin(param.Url); err != nil {
-		response.Fail(c, nil, "add plugin failed:"+err.Error())
-		return
-	}
+		if err := service.AddPlugin(param.Url); err != nil {
+			response.Fail(c, nil, "add plugin failed:"+err.Error())
+			return
+		}
 
-	response.Success(c, nil, "插件添加成功")
+		response.Success(c, nil, "插件添加成功")*/
 }
 
 // 停用/启动插件

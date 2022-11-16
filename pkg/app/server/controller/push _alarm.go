@@ -89,8 +89,8 @@ func Delete(Clients map[int]*model.ConnClient, keys []int) {
 			for _, key := range keys {
 				delete(Clients, key)
 			}
-			time.Sleep(time.Millisecond * 1)
 			lock.Unlock()
 		}
+		time.Sleep(time.Millisecond * 1)
 	}
 }
