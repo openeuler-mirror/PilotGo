@@ -117,7 +117,7 @@ export default {
       }
     },
     socketUrl() {
-      let hostPort = Config.dev.proxyTable['/'].target.split('//')[1];
+      let hostPort = Config.dev.proxyTable['/api/v1'].target.split('//')[1];
       hostPort = hostPort === 'localhost:8888' ? this.$store.getters.serverUrl : hostPort;
       return (location.protocol === "http:" ? "ws" : "wss") + "://" + 
         hostPort + 
@@ -126,7 +126,7 @@ export default {
   },
   methods: {
     handleSelect(key) {
-      this.$store.commit("SET_ACtiVEPANEL", key);
+      this.$store.commit("SET_ACTIVE_PANEL", key);
     },
     handleLogOut() {
       this.$confirm('此操作将注销登录, 是否继续?', '提示', {
@@ -334,7 +334,7 @@ export default {
     }
     .el-main {
       height: 92%;
-      padding: 3.6% 0 0;
+      padding: 3% 0 0;
       .bodyContent {
         width: 100%;
         height: 100%;

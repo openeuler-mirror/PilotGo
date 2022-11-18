@@ -28,19 +28,34 @@ function filterAsyncRouter(routers, menus) {
 
 const permission = {
   state: {
+    // 最终路由列表
     routers: [],
+    // 动态路由列表
+    dynamicRoutes: [],
+    // router组件routes
     routes: routes,
     notfound: [],
+    // 基本页面菜单面板
+    baseMenus: [],
+    // 最终页面菜单列表
     menus: [],
+    //
     operations: [],
+    // 当前激活面板
     activePanel: ''
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
-      state.routers = [...routers, ...constantRouterMap];
+      state.routers = [...routers, ...constantRouterMap, ...state.dynamicRoutes];
+    },
+    SET_DYNAMIC_ROUTERS: (state, routers) => {
+      state.dynamicRoutes = routers;
     },
     SET_MENUS: (state, menus) => {
       state.menus = menus
+    },
+    SET_BASE_MENUS: (state, menus) => {
+      state.baseMenus = menus
     },
     SET_OPERATIONS: (state, operations) => {
       state.operations = operations;
@@ -48,7 +63,7 @@ const permission = {
     SET_LOGROUTERS: (state, routers) => {
       state.logRouters = routers;
     },
-    SET_ACtiVEPANEL: (state, panel) => {
+    SET_ACTIVE_PANEL: (state, panel) => {
       state.activePanel = panel;
     },
     SET_NOTFOUND: (state, routers) => {
@@ -56,16 +71,23 @@ const permission = {
     }
   },
   actions: {
-    GenerateRoutes({ commit, state }, panel) {
+    GenerateRoutes({ commit, state }) {
       return new Promise(resolve => {
-        const menus = state.menus;
-        menus.push(panel);
+        let menus = [...state.baseMenus];
+        state.dynamicRoutes.forEach(() => {
+          menus.push("plugin3");
+        })
         commit("SET_MENUS", menus)
+
+        router.updateRoutes(state.dynamicRoutes);
         let routers = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), menus)
         commit('SET_ROUTERS', routers)
 
         resolve()
       })
+    },
+    SetDynamicRouters({ commit }, routers) {
+      commit("SET_DYNAMIC_ROUTERS", routers)
     },
     getPermission({ commit }, roles) {
       let roleId = roles.split(',').map(Number)
@@ -75,7 +97,7 @@ const permission = {
             let data = res.data.data;
             let { menu, button } = data;
             button.push("default_all");
-            commit("SET_MENUS", menu.split(','));
+            commit("SET_BASE_MENUS", menu.split(','));
             commit("SET_OPERATIONS", button);
             resolve()
           } else {
@@ -87,14 +109,16 @@ const permission = {
     SetMenus({ commit }, menus) {
       commit("SET_MENUS", menus)
     },
+    SetBaseMenus({ commit }, menus) {
+      commit("SET_BASE_MENUS", menus)
+    },
     SetActivePanel({ commit }, panel) {
-      commit("SET_ACtiVEPANEL", panel)
+      commit("SET_ACTIVE_PANEL", panel)
     },
     addRoute({ commit, state }, route) {
-      routes[1].children.push(route);
-      let routers = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), state.menus)
-      commit('SET_ROUTERS', routers)
-      console.log(routers)
+      let r = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), state.menus)
+      r[1].children.push(...state.dynamicRoutes);
+      commit('SET_ROUTERS', r)
     }
   },
   getters: {
@@ -105,6 +129,9 @@ const permission = {
     getMenus: state => {
       return state.menus
     },
+    getBaseMenus: state => {
+      return state.baseMenus
+    },
     getOperations: state => {
       return state.operations
     },
@@ -112,6 +139,9 @@ const permission = {
       return state.routers[1].children.filter(item => {
         return item.meta != undefined;
       }).map(item => item)
+    },
+    getDynamicRoutes: state => {
+      return state.dynamicRoutes
     }
   }
 }
