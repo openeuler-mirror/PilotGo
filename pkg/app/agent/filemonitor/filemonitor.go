@@ -47,21 +47,17 @@ func FileMonitorInit() error {
 	defer watcher.Close()
 
 	// 2、使用 watcher 的 Add 方法增加需要监听的文件或目录到监听队列中
-	go func() {
-		err = watcher.Add(global.RepoPath)
-		if err != nil {
-			logger.Debug("failed to monitor repo")
-		}
-		logger.Info("start to monitor repo")
-	}()
+	err = watcher.Add(global.RepoPath)
+	if err != nil {
+		logger.Debug("failed to monitor repo")
+	}
+	logger.Info("start to monitor repo")
 
-	go func() {
-		err = watcher.Add(global.NetWorkPath)
-		if err != nil {
-			logger.Debug("failed to monitor network")
-		}
-		logger.Info("start to monitor network")
-	}()
+	err = watcher.Add(global.NetWorkPath)
+	if err != nil {
+		logger.Debug("failed to monitor network")
+	}
+	logger.Info("start to monitor network")
 
 	//3、创建新的 goroutine，等待管道中的事件或错误
 	done := make(chan bool)

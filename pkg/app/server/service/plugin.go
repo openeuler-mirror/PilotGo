@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	//splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
 )
 
@@ -47,7 +48,7 @@ func restorePluginInfo() error {
 			Description: p.Version,
 			Url:         p.Url,
 			Enabled:     p.Enabled,
-			Status:      splugin.StatusOffline,
+			//Status:      splugin.StatusOffline,
 		}
 
 		globalManager.Add(np)
@@ -198,6 +199,7 @@ func GetPlugins() []*Plugin {
 	return globalManager.GetAll()
 }
 
+/*
 func AddPlugin(url string) error {
 	logger.Debug("add login from %s", url)
 
@@ -210,7 +212,7 @@ func AddPlugin(url string) error {
 		return err
 	}
 	return nil
-}
+}*/
 
 func DeletePlugin(id int) error {
 	logger.Debug("delete login: %d", id)

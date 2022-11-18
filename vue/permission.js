@@ -20,52 +20,65 @@ NProgress.configure({ showSpinner: false })// NProgress Configuration
 const whiteList = ['/login']
 
 router.beforeEach((to, from, next) => {
-    if (to.meta && to.meta.header_title) {
-        document.title = to.meta.header_title
-    }
-    NProgress.start();
-    if (getRoles()) {
-        if (to.path === '/login') {
-            next({ path: '/' })
-            NProgress.done()
-        } else {
-            if (!store.getters.getMenus || store.getters.getMenus.length === 0) {
-                store.dispatch('getPermission', store.getters.roles).then(res => {
-                    store.dispatch('GenerateRoutes').then(() => {
-                        next({ ...to, replace: true })
-                    })
-                })
-            } else {
-                if (to.path === "/") {
-                    let paths = store.getters.getPaths;
-                    let keys = Object.keys(paths);
-                    let to = keys.length > 0 ? paths[keys[0]] : "/401"
-                    next({ path: to.path, replace: true })
-                } else {
-                    // if(to.name) {
-                        if (hasPermission(store.getters.getMenus, to)) {
-                            store.dispatch('SetActivePanel', to.meta.panel)
-                            next()
-                        } else {
-                            next({ path: '/404', replace: true })
-                        }
-                   /*  } else {
-                        let toPath = to.path.split('/');
-                        next({path: '/'+toPath[toPath.length-1]})
-                    } */
-                }
-            }
-        }
+  console.log(from, to)
+  if (to.meta && to.meta.header_title) {
+    document.title = to.meta.header_title
+  }
+  NProgress.start();
+  if (getRoles()) {
+    if (to.path === '/login') {
+      next({ path: '/' })
+      NProgress.done()
     } else {
-        if (whiteList.indexOf(to.path) !== -1) {
-            next()
+      if (!store.getters.getMenus || store.getters.getMenus.length === 0) {
+        store.dispatch('getPermission', store.getters.roles).then(res => {
+          store.dispatch('GenerateRoutes').then(() => {
+            next({ ...to, replace: true })
+          })
+        })
+      } else {
+        if (to.path === "/") {
+          let paths = store.getters.getPaths;
+          let keys = Object.keys(paths);
+          let to = keys.length > 0 ? paths[keys[0]] : "/401"
+          next({ path: to.path, replace: true })
         } else {
-            next('/login')
-            NProgress.done()
+          if (to.name) {
+            if (hasPermission(store.getters.getMenus, to)) {
+              store.dispatch('SetActivePanel', to.meta.panel)
+              next()
+            } else {
+              next({ path: '/404', replace: true })
+            }
+          } else {
+            console.log('无name')
+            router.selfaddRoutes();
+            /* router.addRoute('Home', {
+              path: '/plugin3',
+              name: 'Plugin3',
+              component: () => import('@/views/Plugin/plugin3.vue'),
+              meta: {
+                title: 'plugin', header_title: "插件管理3", panel: "log", icon_class: 'el-icon-s-order',
+                breadcrumb: [
+                  { name: '插件管理3' },
+                ],
+              }
+            }) */
+            next({ path: '/plugin3', replace: true })
+          }
         }
+      }
     }
+  } else {
+    if (whiteList.indexOf(to.path) !== -1) {
+      next()
+    } else {
+      next('/login')
+      NProgress.done()
+    }
+  }
 })
 
 router.afterEach(route => {
-    NProgress.done();
+  NProgress.done();
 })
