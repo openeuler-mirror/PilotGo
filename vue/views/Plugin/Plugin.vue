@@ -33,6 +33,7 @@
 import { getPlugins, deletePlugins } from "@/request/plugin";
 import kyTable from "@/components/KyTable";
 import AddForm from "./form/addForm.vue"
+import _import from '../../router/_import';
 export default {
   name: "Plugin",
   components: {
@@ -41,7 +42,6 @@ export default {
   },
   data() {
     return {
-      // cockpitIp: "",
       display: false,
       title: "",
       type: "",
@@ -61,6 +61,29 @@ export default {
     },
     refresh() {
       this.$refs.table.handleSearch();
+
+      getPlugins().then((res) => {
+        if (res.data.code === 200) {
+          let p = []
+          res.data.data.forEach((item) => {
+            p.push({
+              path: '/plugin3',
+              name: 'Plugin3',
+              component: _import('IFrame/IFrame'),
+              meta: {
+                title: 'plugin', header_title: "grafana", panel: "plugin3", icon_class: 'el-icon-s-order',
+                breadcrumb: [
+                  { name: 'grafana' },
+                ],
+              }
+            })
+          });
+          this.$store.dispatch("SetDynamicRouters", p);
+          this.$store.dispatch('GenerateRoutes');
+        } else {
+          this.$message.error("查询插件列表错误：", res.data.msg);
+        }
+      })
     },
     handleCreate() {
       this.display = true;
@@ -68,15 +91,15 @@ export default {
       this.type = "create";
     },
     handleDeleteItems() {
-      let names = [];
       this.$refs.table.selectRow.rows.forEach(item => {
-        names.push(item.plugin);
-      });
-      deletePlugins({ plugin: names }).then((res) => {
-        if (res.data.status === "success") {
-          this.refresh();
-          this.$message.success("删除成功");
-        }
+        deletePlugins({ UUID: item.uuid }).then((res) => {
+          if (res.data.code === 200) {
+            this.refresh();
+            this.$message.success("删除成功");
+          } else {
+            this.$message.error("删除插件错误：" + res.data.msg)
+          }
+        });
       });
     },
   },

@@ -158,7 +158,6 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(()=> {
-        console.log('1111')
         deleteIp({ deluuid: uuidArray }).then(res => {
           if (res.data.code === 200) {
             this.$message.success(res.data.msg);
@@ -169,7 +168,7 @@ export default {
         })
       }
       ).cache(()=> {
-        console.log('2222')
+        console.log('delete ip failed')
       });
     },
     handleUpdateIp(ip) {

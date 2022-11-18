@@ -155,31 +155,18 @@ export default {
   },
   methods: {
     handleCreate() {
-      this.$store.dispatch('GenerateRoutes', 'plugin3');
+      this.$store.dispatch('GenerateRoutes');
       this.$store.dispatch('addRoute', {
         path: '/plugin3',
         name: 'Plugin3',
-        component: _import('Plugin/plugin3'),
+        component: _import('IFrame/IFrame'),
         meta: {
-          title: 'plugin', header_title: "插件管理3", panel: "plugin3", icon_class: 'el-icon-s-order',
+          title: 'plugin', header_title: "grafana", panel: "plugin3", icon_class: 'el-icon-s-order',
           breadcrumb: [
-            { name: '插件管理3' },
+            { name: 'grafana' },
           ],
         }
       },);
-      // this.$router.push("/plugin3")
-      // this.$router.addRoute('home', {
-      //   path: '/plugin3',
-      //   name: 'Plugin3',
-      //   component: () => import('@/views/Plugin/Plugin.vue'),
-      //   meta: {
-      //     title: 'plugin', header_title: "插件管理3", panel: "log", icon_class: 'el-icon-s-order',
-      //     breadcrumb: [
-      //       { name: '插件管理3' },
-      //     ],
-      //   }
-      // })
-      // this.$store.dispatch('GenerateRoutes', 'plugin3');
     },
     resize() {
       let cWidth = document.getElementsByClassName('dept')[0].clientWidth;

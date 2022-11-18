@@ -255,32 +255,27 @@ export const routes = [
           ],
         }
       },
-      /* {
-        path: '/plugin3',
-        name: 'Plugin3',
-        component: _import('Plugin/plugin3'),
-        meta: {
-          title: 'plugin', header_title: "插件管理3", panel: "plugin3", icon_class: 'el-icon-s-order',
-          breadcrumb: [
-            { name: '插件管理3' },
-          ],
-        }
-      } */
     ]
   },
 ]
 
+export const HOME_CHILDREN_LENGTH = routes[1].children.length
+
 const router = new Router({
-  mode: 'hash',
+  mode: 'history',
   routes: [...routes, ...constantRouterMap],
 })
 
-router.selfaddRoutes = function (param) {
+router.updateRoutes = function (dynamicRoutes) {
+  let r = [...routes]
+  // 清理之前添加的dynamicRoutes数据
+  r[1].children = r[1].children.slice(0, HOME_CHILDREN_LENGTH);
+  r[1].children.push(...dynamicRoutes);
+
   router.matcher = new Router({
-    mode: 'hash',
-    routes: [...routes, ...constantRouterMap]
+    mode: 'history',
+    routes: [...r, ...constantRouterMap]
   }).matcher
-  // router.addRoute(param)
 }
 
 export default router;

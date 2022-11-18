@@ -27,7 +27,7 @@ module.exports = {
     assetsPublicPath: '/',
     https:true,
     proxyTable: {
-      '/': {
+      '/api/v1': {
         target: basePath,
         changeOrigin: true,  //改变源
         secure:true,

@@ -20,7 +20,6 @@ NProgress.configure({ showSpinner: false })// NProgress Configuration
 const whiteList = ['/login']
 
 router.beforeEach((to, from, next) => {
-  console.log(from, to)
   if (to.meta && to.meta.header_title) {
     document.title = to.meta.header_title
   }
@@ -52,18 +51,6 @@ router.beforeEach((to, from, next) => {
             }
           } else {
             console.log('无name')
-            router.selfaddRoutes();
-            /* router.addRoute('Home', {
-              path: '/plugin3',
-              name: 'Plugin3',
-              component: () => import('@/views/Plugin/plugin3.vue'),
-              meta: {
-                title: 'plugin', header_title: "插件管理3", panel: "log", icon_class: 'el-icon-s-order',
-                breadcrumb: [
-                  { name: '插件管理3' },
-                ],
-              }
-            }) */
             next({ path: '/plugin3', replace: true })
           }
         }
