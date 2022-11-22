@@ -120,13 +120,11 @@ export default {
     openSocket() {
       this.ws.onopen = () => {
         this.initTerm();
-        console.log('打开连接')
       }
     },
     // 关闭连接
     closeSocket() {
       this.ws.onclose = () => {
-        console.log('关闭连接')
       }
     },
     // 连接错误
