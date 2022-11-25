@@ -1179,7 +1179,6 @@ func RegitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
-
 	c.BindHandler(protocol.AgentConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		p, ok := msg.Data.(map[string]interface{})
