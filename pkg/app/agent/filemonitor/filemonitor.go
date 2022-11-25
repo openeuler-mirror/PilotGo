@@ -62,6 +62,7 @@ func FileMonitorInit() error {
 	//3、创建新的 goroutine，等待管道中的事件或错误
 	done := make(chan bool)
 	go func() {
+		defer close(done)
 		for {
 			select {
 			case e, ok := <-watcher.Events:
