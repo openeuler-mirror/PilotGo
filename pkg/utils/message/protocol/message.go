@@ -142,6 +142,8 @@ const (
 	FirewalldSourceRemove = 65
 	//获取agent端时间信息
 	AgentTime = 66
+	//监控配置文件
+	AgentConfig = 67
 )
 
 type Message struct {
