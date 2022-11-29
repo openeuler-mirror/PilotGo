@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
@@ -1074,4 +1075,19 @@ func (a *Agent) GetTimeInfo() (interface{}, error) {
 		return nil, err
 	}
 	return resp_message.Data, nil
+}
+
+//监控配置文件配置文件
+func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AgentConfig,
+		Data: ConMess,
+	}
+	_, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to config on agent")
+		return err
+	}
+	return nil
 }
