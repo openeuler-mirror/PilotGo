@@ -16,9 +16,8 @@ func ConfigfileHandler(c *gin.Context) {
 	}
 	//传入需要监控的文件的信息
 	var ConMess global.ConfigMessage
-	ConMess.ConfigName = "config_server"
-	ConMess.ConfigType = "yaml"
-	ConMess.ConfigPath = "."
+	ConMess.Machine_uuid = uuid
+	ConMess.ConfigName = "/home/wbj/PilotGo/config_serve.yaml.templete"
 	err := agent.ConfigfileInfo(ConMess)
 	if err != nil {
 		response.Fail(c, nil, "配置文件监控失败!")

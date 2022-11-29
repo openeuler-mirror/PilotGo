@@ -1179,17 +1179,39 @@ func RegitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
+
 	c.BindHandler(protocol.AgentConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-
-		err := global.FileGetViper(msg.Data.(global.ConfigMessage))
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   err,
+		p, ok := msg.Data.(map[string]interface{})
+		if ok {
+			var ConMess global.ConfigMessage
+			ConMess.ConfigName = p["ConfigName"].(string)
+			err := global.Configfsnotify(ConMess, c)
+			if err != nil {
+				resp_msg := &protocol.Message{
+					UUID:   msg.UUID,
+					Type:   msg.Type,
+					Status: 0,
+					Error:  err.Error(),
+				}
+				return c.Send(resp_msg)
+			} else {
+				resp_msg := &protocol.Message{
+					UUID:   msg.UUID,
+					Type:   msg.Type,
+					Status: 0,
+					Data:   "正常监听文件",
+				}
+				return c.Send(resp_msg)
+			}
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  "监控文件有误",
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
@@ -124,6 +125,13 @@ func (a *Agent) Init() error {
 	a.bindHandler(protocol.AgentInfo, func(a *Agent, msg *protocol.Message) error {
 		logger.Info("process heartbeat from processor, remote addr:%s, data:%s",
 			a.conn.RemoteAddr().String(), msg.String())
+		return nil
+	})
+
+	a.bindHandler(protocol.ConfigFileMonitor, func(a *Agent, msg *protocol.Message) error {
+		logger.Info("remote addr:%s,process config file monitor from processor:%s",
+			a.conn.RemoteAddr().String(), msg.String())
+		ConfigMessageInfo(msg.Data)
 		return nil
 	})
 
@@ -1077,7 +1085,7 @@ func (a *Agent) GetTimeInfo() (interface{}, error) {
 	return resp_message.Data, nil
 }
 
-//监控配置文件配置文件
+//监控配置文件
 func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -1090,4 +1098,21 @@ func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 		return err
 	}
 	return nil
+}
+
+//监控文件信息回传
+func ConfigMessageInfo(Data interface{}) {
+	p, ok := Data.(map[string]interface{})
+	if ok {
+		cf := model.ConfigFile{
+			MachineUUID: p["Machine_uuid"].(string),
+			Content:     p["ConfigContent"].(string),
+			Path:        p["ConfigName"].(string),
+			UpdatedAt:   time.Time{},
+		}
+		err := dao.AddConfigFile(cf)
+		if err != nil {
+			logger.Error("配置文件添加失败")
+		}
+	}
 }
