@@ -24,7 +24,6 @@ import (
 
 	aconfig "openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/filemonitor"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/register"
@@ -79,15 +78,6 @@ func main() {
 			time.Sleep(delayTime)
 		}
 	}(&aconfig.Config().Server)
-
-	var ConMess global.ConfigMessage
-	ConMess.ConfigName = "config_server"
-	ConMess.ConfigType = "yaml"
-	ConMess.ConfigPath = "."
-	err = global.FileGetViper(ConMess)
-	if err != nil {
-		logger.Error("config message failed: %s", err)
-	}
 
 	// 文件监控初始化
 	if err := filemonitor.FileMonitorInit(); err != nil {

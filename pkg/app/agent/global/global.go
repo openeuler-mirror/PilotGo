@@ -1,75 +1,66 @@
 package global
 
 import (
-	"log"
-
 	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
+	"github.com/google/uuid"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 )
 
 type ConfigMessage struct {
-	ConfigName string
-	ConfigType string
-	ConfigPath string
-}
-
-func FileGetViper(ConMess ConfigMessage) error {
-	viper.SetConfigName(ConMess.ConfigName)
-	viper.SetConfigType(ConMess.ConfigType)
-	viper.AddConfigPath(ConMess.ConfigPath)
-	err := viper.ReadInConfig()
-	if err != nil {
-		logger.Info("read config failed: %v", err)
-		return err
-	}
-	/*
-		//输出配置文件的一些参数
-		fmt.Println("mysql ip: ", viper.Get("mysql.host_name"))
-		fmt.Println("mysql port: ", viper.Get("mysql.port"))
-		fmt.Println("mysql user: ", viper.Get("mysql.user_name"))
-		fmt.Println("redis ip: ", viper.Get("redis.redis_conn"))
-	*/
-	err = Configfsnotify(ConMess)
-	if err != nil {
-		logger.Info("listening config failed: %v", err)
-		return err
-	}
-	return nil
+	ConfigName    string
+	ConfigContent string
+	ConfigChange  string
+	Machine_uuid  string
 }
 
 //配置文件的监听器
-func Configfsnotify(ConMess ConfigMessage) error {
+func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 	//创建一个监听器
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Fatal("NewWatcher failed: ", err)
+		logger.Error("NewWatcher failed: ", err)
 		return err
 	}
 	defer watcher.Close()
 	done := make(chan bool)
-	var event fsnotify.Event
-	var ok bool
+	err = watcher.Add(ConMess.ConfigName)
+	if err != nil {
+		logger.Error("Add failed:", err)
+	}
 	go func() {
 		defer close(done)
 		for {
 			select {
-			case event, ok = <-watcher.Events:
-				logger.Fatal("%s %s\n", event.Name, event.Op)
+			case event, ok := <-watcher.Events:
 				if !ok {
-					goto here
+					return
 				}
-			case err, ok = <-watcher.Errors:
-				logger.Fatal("error:", err)
+				logger.Debug("在文件 %s 上进行 : %s", event.Name, event.Op)
+				if event.Op&fsnotify.Rename == fsnotify.Rename || event.Op&fsnotify.Write == fsnotify.Write {
+					ConMess.ConfigChange = event.Op.String()
+					ConMess.ConfigContent, err = utils.FileReadString(ConMess.ConfigName)
+					if err != nil {
+						logger.Debug("error:", err)
+					}
+					msg := &protocol.Message{
+						UUID:   uuid.New().String(),
+						Type:   protocol.ConfigFileMonitor,
+						Status: 0,
+						Data:   ConMess,
+					}
+					if err := client.Send(msg); err != nil {
+						logger.Debug("send message failed, error:", err)
+					}
+				}
+			case err, ok := <-watcher.Errors:
+				logger.Debug("error:", err)
 				if !ok {
-					goto here
+					return
 				}
 			}
-		}
-	here:
-		err = watcher.Add(ConMess.ConfigPath + ConMess.ConfigName + "." + ConMess.ConfigType)
-		if err != nil {
-			log.Fatal("Add failed:", err)
 		}
 	}()
 	<-done

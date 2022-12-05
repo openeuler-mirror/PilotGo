@@ -144,6 +144,8 @@ const (
 	AgentTime = 66
 	//监控配置文件
 	AgentConfig = 67
+	//配置文件修改
+	ConfigFileMonitor = 68
 )
 
 type Message struct {
