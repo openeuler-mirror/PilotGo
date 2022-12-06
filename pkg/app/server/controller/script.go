@@ -13,6 +13,7 @@ func AddScriptHandler(c *gin.Context) {
 	err := service.AddScript(&script)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err.Error()}, "脚本文件添加失败")
+		return
 	}
 	response.Success(c, nil, "脚本文件添加成功")
 }

@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -1177,5 +1178,39 @@ func RegitsterHandler(c *network.SocketClient) {
 			Data:   timeinfo,
 		}
 		return c.Send(resp_msg)
+	})
+	c.BindHandler(protocol.AgentConfig, func(c *network.SocketClient, msg *protocol.Message) error {
+		logger.Debug("process agent info command:%s", msg.String())
+		p, ok := msg.Data.(map[string]interface{})
+		if ok {
+			var ConMess global.ConfigMessage
+			ConMess.ConfigName = p["ConfigName"].(string)
+			err := global.Configfsnotify(ConMess, c)
+			if err != nil {
+				resp_msg := &protocol.Message{
+					UUID:   msg.UUID,
+					Type:   msg.Type,
+					Status: 0,
+					Error:  err.Error(),
+				}
+				return c.Send(resp_msg)
+			} else {
+				resp_msg := &protocol.Message{
+					UUID:   msg.UUID,
+					Type:   msg.Type,
+					Status: 0,
+					Data:   "正常监听文件",
+				}
+				return c.Send(resp_msg)
+			}
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Error:  "监控文件有误",
+			}
+			return c.Send(resp_msg)
+		}
 	})
 }
