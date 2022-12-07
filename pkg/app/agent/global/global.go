@@ -1,6 +1,8 @@
 package global
 
 import (
+	"os"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
@@ -39,7 +41,7 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 					return
 				}
 				logger.Debug("在文件 %s 上进行 : %s", event.Name, event.Op)
-				if event.Op&fsnotify.Rename == fsnotify.Rename || event.Op&fsnotify.Write == fsnotify.Write {
+				if event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Rename == fsnotify.Rename || event.Op&fsnotify.Write == fsnotify.Write {
 					ConMess.ConfigChange = event.Op.String()
 					ConMess.ConfigContent, err = utils.FileReadString(ConMess.ConfigName)
 					if err != nil {
@@ -53,6 +55,12 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 					}
 					if err := client.Send(msg); err != nil {
 						logger.Debug("send message failed, error:", err)
+					}
+				}
+				if event.Op&fsnotify.Remove == fsnotify.Remove {
+					_, err := os.Stat(ConMess.ConfigName)
+					if err == nil {
+						err = watcher.Add(ConMess.ConfigName)
 					}
 				}
 			case err, ok := <-watcher.Errors:

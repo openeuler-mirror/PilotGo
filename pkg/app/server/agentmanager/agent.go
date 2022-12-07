@@ -1114,7 +1114,7 @@ func ConfigMessageInfo(Data interface{}) {
 		}
 		err := dao.AddConfigFile(cf)
 		if err != nil {
-			logger.Error("配置文件添加失败")
+			logger.Error("配置文件添加失败" + err.Error())
 		}
 	}
 }
