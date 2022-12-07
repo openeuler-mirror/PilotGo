@@ -1184,6 +1184,7 @@ func RegitsterHandler(c *network.SocketClient) {
 		p, ok := msg.Data.(map[string]interface{})
 		if ok {
 			var ConMess global.ConfigMessage
+			ConMess.Machine_uuid = p["Machine_uuid"].(string)
 			ConMess.ConfigName = p["ConfigName"].(string)
 			err := global.Configfsnotify(ConMess, c)
 			if err != nil {

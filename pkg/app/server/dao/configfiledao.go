@@ -13,5 +13,4 @@ func AddConfigFile(cf model.ConfigFile) error {
 		return nil
 	}
 	return fmt.Errorf("机器不存在")
-
 }
