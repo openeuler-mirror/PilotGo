@@ -9,11 +9,11 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-04-20 16:48:55
- * LastEditTime: 2022-04-20 17:48:55
- * Description: web socket连接逻辑代码
+ * LastEditTime: 2022-12-8 14:48:55
+ * Description: 解析ssh 客户端连接信息
  ******************************************************************************/
 
-package service
+package webSocket
 
 import (
 	"encoding/base64"

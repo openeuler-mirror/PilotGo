@@ -87,10 +87,10 @@ func (a *Agent) startListen() {
 		buff := make([]byte, 1024)
 		n, err := a.conn.Read(buff)
 		if err != nil {
-			logger.Error("read error:%s", err)
 			dao.MachineStatusToOffline(a.UUID)
 			DeleteAgent(a.UUID)
 			str := "agent机器" + dao.UUID2MacIP(a.UUID) + "已断开连接"
+			logger.Error("%s", str)
 			WARN_MSG <- str
 			return
 		}
