@@ -56,6 +56,9 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 		for _, mamachine := range machines {
 			machineids = append(machineids, mamachine.ID)
 		}
+		if len(machineids) == 0 {
+			return errors.New("该部门下没有机器，请重新确认")
+		}
 		for _, id := range machineids {
 			machinelist = machinelist + "," + strconv.Itoa(id)
 			machinelist = strings.Trim(machinelist, ",")

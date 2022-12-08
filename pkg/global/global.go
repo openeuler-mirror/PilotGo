@@ -30,7 +30,7 @@ var (
 
 // 权限菜单、按钮
 const (
-	PILOTGO_MENUS    = "overview,cluster,batch,usermanager,rolemanager,config,log"
+	PILOTGO_MENUS    = "overview,cluster,batch,usermanager,rolemanager,config,log,plugin"
 	PILOTGO_BUTTONID = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
 )
 
