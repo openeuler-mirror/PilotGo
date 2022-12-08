@@ -15,12 +15,13 @@
 <template>
   <div class="cluster">
     <transition name="fade-transform" mode="out-in">
-      <router-view v-if="$route.name=='MacDetail' || $route.name=='createBatch' || $route.name=='Prometheus'">
+      <router-view v-if="$route.name == 'MacDetail' || $route.name == 'createBatch' || $route.name == 'Prometheus'">
       </router-view>
     </transition>
-    <div style="width:100%;height:100%" v-if="$route.name=='macList'">
+    <div style="width:100%;height:100%" v-if="$route.name == 'macList'">
       <div class="dept panel">
-        <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"></ky-tree>
+        <ky-tree :getData="getChildNode" :showEdit="showChange" ref="tree" @nodeClick="handleSelectDept"
+          @refresh="handleRefresh"></ky-tree>
         <span class="sourceBtn" @click="getSourcePool">未分配资源池</span>
       </div>
       <div class="info panel">
@@ -141,6 +142,10 @@ export default {
       this.type = "";
       this.$refs.table.handleSearch();
     },
+    handleRefresh() {
+      // 节点树更新
+      this.$refs.table.handleSearch();
+    },
     handleChange() {
       this.display = true;
       this.title = "变更部门";
@@ -157,7 +162,7 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(()=> {
+      }).then(() => {
         deleteIp({ deluuid: uuidArray }).then(res => {
           if (res.data.code === 200) {
             this.$message.success(res.data.msg);
@@ -167,7 +172,7 @@ export default {
           }
         })
       }
-      ).cache(()=> {
+      ).cache(() => {
         console.log('delete ip failed')
       });
     },

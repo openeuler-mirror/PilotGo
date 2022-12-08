@@ -13,7 +13,7 @@
  -->
 <template>
   <div id="dept" style="width:100%;height:100%">
-    
+
   </div>
 </template>
 <script>
@@ -21,7 +21,7 @@ import { getDeptDatas } from '@/request/overview'
 export default {
   name: 'DepartChart',
   props: {
-    
+
   },
   data() {
     return {
@@ -43,7 +43,7 @@ export default {
         },
         legend: {
           show: true,
-          data: ["在线","离线","未分配"]
+          data: ["在线", "离线", "未分配"]
         },
         xAxis: {
           type: 'category',
@@ -53,8 +53,8 @@ export default {
           type: 'value'
         },
         grid: {
-          left:50,
-          right:40,
+          left: 50,
+          right: 40,
           bottom: 20
         },
         series: [
@@ -104,30 +104,34 @@ export default {
   mounted() {
     this.deptChart = this.$echarts.init(document.getElementById('dept'));
     getDeptDatas().then(res => {
-      if(res.data.code === 200) {
-        let data = res.data.data.data;
-        data.forEach(item => {
-          this.xAxis.push(item.depart);
-          this.normal.push(item.AgentStatus.normal);
-          this.offline.push(item.AgentStatus.offline);
-          this.free.push(item.AgentStatus.free);
-        })
+      if (res.data.code === 200) {
+        let data = res.data.data.data || res.data.data.data;
+        if (data) {
+          data.forEach(item => {
+            this.xAxis.push(item.depart);
+            this.normal.push(item.AgentStatus.normal);
+            this.offline.push(item.AgentStatus.offline);
+            this.free.push(item.AgentStatus.free);
+          })
+        } else {
+
+        }
       }
     })
   },
   methods: {
     resize(params) {
       this.deptChart.resize(params)
-      this.deptChart.setOption(this.option,true)
+      this.deptChart.setOption(this.option, true)
     },
     clear() {
       this.deptChart.clear();
     }
-  
+
   },
   watch: {
-    option: function() {
-      this.deptChart.setOption(this.option,true)
+    option: function () {
+      this.deptChart.setOption(this.option, true)
     }
   }
 }

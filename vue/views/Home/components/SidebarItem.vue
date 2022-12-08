@@ -14,7 +14,7 @@
  -->
 <template>
   <div>
-    <template v-for="item in routes">
+    <template v-for="item in routesData">
       <router-link :to="item.path" :key="item.meta.header_title" v-if="!item.meta.hidden && !item.meta.submenu">
         <el-menu-item :index="item.meta.panel">
           <em :class="item.meta.icon_class"></em>
@@ -23,7 +23,6 @@
           </template>
         </el-menu-item>
       </router-link>
-
       <el-submenu popper-append-to-body :index="item.meta.panel" :key="item.meta.header_title"
         v-if="!item.meta.hidden && item.meta.submenu">
         <template #title><em :class="item.meta.icon_class"></em>
@@ -47,6 +46,22 @@ export default {
       type: Array,
     },
   },
+  data() {
+    return {
+      routesData: [],
+    }
+  },
+  mounted() {
+    this.routesData = this.$store.getters.getPaths;
+  },
+  watch: {
+    "$store.getters.getPaths": {
+      handler: function (newVal, oldVal) {
+        this.routesData = JSON.parse(JSON.stringify(newVal));
+      }
+    }
+  }
+
 };
 </script>
 
