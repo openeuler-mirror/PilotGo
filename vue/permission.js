@@ -31,8 +31,10 @@ router.beforeEach((to, from, next) => {
     } else {
       if (!store.getters.getMenus || store.getters.getMenus.length === 0) {
         store.dispatch('getPermission', store.getters.roles).then(res => {
-          store.dispatch('GenerateRoutes').then(() => {
-            next({ ...to, replace: true })
+          store.dispatch("SetDynamicRouters", []).then(() => {
+            store.dispatch('GenerateRoutes').then(() => {
+              next({ ...to, replace: true })
+            })
           })
         })
       } else {
@@ -42,17 +44,13 @@ router.beforeEach((to, from, next) => {
           let to = keys.length > 0 ? paths[keys[0]] : "/401"
           next({ path: to.path, replace: true })
         } else {
-          if (to.name) {
-            if (hasPermission(store.getters.getMenus, to)) {
-              store.dispatch('SetActivePanel', to.meta.panel)
-              next()
-            } else {
-              next({ path: '/404', replace: true })
-            }
+          if (hasPermission(store.getters.getMenus, to)) {
+            store.dispatch('SetActivePanel', to.meta.panel)
+            next()
           } else {
-            console.log('无name')
-            next({ path: '/plugin3', replace: true })
+            next({ path: '/404', replace: true })
           }
+
         }
       }
     }

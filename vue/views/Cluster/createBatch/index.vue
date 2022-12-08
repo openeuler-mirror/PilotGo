@@ -15,49 +15,24 @@
   <div class="content">
     <div class="dept panel">
       <div class="title">部门列表</div>
-      <ky-tree 
-        ref="tree" 
-        :getData="getChildNode" 
-        :showSelect="showSelect" 
-        :showEdit="showChange" 
-        @checkClick="handleCheck"
-        @nodeClick="handleSelectDept">
+      <ky-tree ref="tree" :getData="getChildNode" :showSelect="showSelect" :showEdit="showChange"
+        @checkClick="handleCheck" @nodeClick="handleSelectDept">
       </ky-tree>
     </div>
     <div class="info panel">
-       <el-form
-        :model="form"
-        :rules="rules"
-        ref="form"
-        label-width="100px"
-      >
+      <el-form :model="form" :rules="rules" ref="form" label-width="100px">
         <el-form-item label="批次名称:" prop="batchName">
-          <el-input
-            class="ipInput"
-            type="text"
-            size="medium"
-            v-model="form.batchName"
-            autocomplete="off"
-          ></el-input>
+          <el-input class="ipInput" type="text" size="medium" v-model="form.batchName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="描述:" prop="description">
-          <el-input
-            class="ipInput"
-            type="text"
-            size="medium"
-            v-model="form.description"
-            autocomplete="off"
-          ></el-input>
+          <el-input class="ipInput" type="text" size="medium" v-model="form.description" autocomplete="off"></el-input>
         </el-form-item>
-       </el-form>
-      <el-transfer 
-        :data="initMac"
-        filterable
-        filter-placeholder="请输入关键字"
-        :titles="['备选项', '已选项']"
-        v-model="targetMac">
-        <el-button class="transfer-footer" slot="left-footer" type="primary" plain size="small" @click="handleReset">重置</el-button>
-        <el-button class="transfer-footer" slot="right-footer" type="primary" plain size="small" @click="handleConfirm">创建</el-button>
+      </el-form>
+      <el-transfer :data="initMac" filterable filter-placeholder="请输入关键字" :titles="['备选项', '已选项']" v-model="targetMac">
+        <el-button class="transfer-footer" slot="left-footer" type="primary" plain size="small"
+          @click="handleReset">重置</el-button>
+        <el-button class="transfer-footer" slot="right-footer" type="primary" plain size="small"
+          @click="handleConfirm">创建</el-button>
       </el-transfer>
     </div>
   </div>
@@ -66,7 +41,7 @@
 <script>
 import kyTree from "@/components/KyTree";
 import AuthButton from "@/components/AuthButton";
-import {  createBatch  } from "@/request/batch";
+import { createBatch } from "@/request/batch";
 import { getMacIps, getChildNode } from "@/request/cluster";
 export default {
   name: "CreateBatch",
@@ -74,7 +49,7 @@ export default {
     kyTree,
     AuthButton,
   },
-  data() {  
+  data() {
     return {
       showChange: false,
       showSelect: true,
@@ -85,10 +60,10 @@ export default {
         description: ""
       },
       rules: {
-        batchName: [{ 
-          required: true, 
-          message: "请填写批次名称", 
-          trigger: "blur" 
+        batchName: [{
+          required: true,
+          message: "请填写批次名称",
+          trigger: "blur"
         }]
       },
       initMac: [], // 备选项
@@ -117,18 +92,18 @@ export default {
       this.$refs.tree.setCheckedKeys([])
     },
     handleSelectDept(data) {
-      if(this.choosedDept.indexOf(data.id) === -1) {
+      if (this.choosedDept.indexOf(data.id) === -1) {
         this.choosedDept.push(data.id);
       } else {
         return;
       }
-      if(this.flag == 0 || this.isNodeCheck) {
+      if (this.flag == 0 || this.isNodeCheck) {
         this.initMac = [];
         this.flag++;
       }
       this.isNodeCheck = false;
-      getMacIps({DepartId: data.id}).then(res => {
-        if(res.data.code === 200) {
+      getMacIps({ DepartId: data.id }).then(res => {
+        if (res.data.code === 200) {
           res.data.data.forEach(item => {
             this.initMac.push({
               key: item.uuid,
@@ -140,27 +115,27 @@ export default {
           })
         }
       })
-      
+
     },
     handleFilter(params) {
       // 处理节点选择状态
-      if(params.checked) {
+      if (params.checked) {
         this.initMac.push({
           key: params.data.id,
           label: params.data.label,
           disabled: false
         });
       } else {
-        let delIndex = this.initMac.map((item,index) => {
-          if(item.key == params.data.id) {
+        let delIndex = this.initMac.map((item, index) => {
+          if (item.key == params.data.id) {
             return index;
           }
         }).filter(item => item >= 0)[0];
-        this.initMac.splice(delIndex,1);
+        this.initMac.splice(delIndex, 1);
       }
     },
     handleCheck(params) {
-      if(this.flag === 0 || !this.isNodeCheck) {
+      if (this.flag === 0 || !this.isNodeCheck) {
         this.initMac = [];
         this.flag++;
       }
@@ -179,34 +154,34 @@ export default {
         deptids.push(item.deptId);
       })
       return {
-        Name: this.form.batchName, 
-        Description: this.form.description, 
-        Manager: this.$store.getters.userName, 
+        Name: this.form.batchName,
+        Description: this.form.description,
+        Manager: this.$store.getters.userName,
         DepartID: [...new Set(deptids)],
         Machines: [...new Set(macIds)]
       }
     },
     createByNode() {
       return {
-        Name: this.form.batchName, 
-        Description: this.form.description, 
-        Manager: this.$store.getters.userName, 
+        Name: this.form.batchName,
+        Description: this.form.description,
+        Manager: this.$store.getters.userName,
         deptids: this.targetMac,
       }
     },
     handleConfirm() {
       let params = this.isNodeCheck ? this.createByNode() : this.createByList();
-      console.log(params)
       this.$refs.form.validate((valid) => {
         if (valid) {
           createBatch(params)
             .then((res) => {
               if (res.data.code === 200) {
-                this.$emit("click");
                 this.$refs.form.resetFields();
+                this.initMac = []
+                this.targetMac = []
                 this.$message.success(res.data.msg);
               } else {
-                this.$message.error(res.data.error);
+                this.$message.error(res.msg);
               }
             })
             .catch((res) => {
@@ -226,10 +201,12 @@ export default {
   width: 100%;
   display: flex;
   justify-content: space-around;
+
   .dept {
     height: 100%;
     width: 20%;
     display: inline-block;
+
     .title {
       width: 100%;
       height: 8%;
@@ -242,11 +219,13 @@ export default {
       align-items: center;
     }
   }
+
   .info {
     .el-form {
       width: 56%;
       height: 18%;
     }
+
     width: 78%;
     height: 100%;
     float: right;

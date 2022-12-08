@@ -1,22 +1,15 @@
 <template>
   <div class="tags-view-container">
     <div class="tags-view-wrapper">
-      <router-link
-        v-for="tag in visitedViews"
-        ref="tag"
-        :key="tag.path"
-        :class="isActive(tag)?'active':'disActive'"
-        :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
-        class="tags-view-item"
-        @click.middle.native="closeSelectedTag(tag)"
-        @contextmenu.prevent.native="openMenu(tag,$event)"
-      >
+      <router-link v-for="tag in visitedViews" ref="tag" :key="tag.path" :class="isActive(tag) ? 'active' : 'disActive'"
+        :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }" class="tags-view-item"
+        @click.middle.native="closeSelectedTag(tag)" @contextmenu.prevent.native="openMenu(tag, $event)">
         {{ tag.title }}
         <span v-if="!tag.meta.affix" class="el-icon-close" @click.prevent.stop="closeSelectedTag(tag)" />
       </router-link>
-      </div>
-    <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <li v-if="!(selectedTag.meta&&selectedTag.meta.affix)" @click="closeSelectedTag(selectedTag)">关闭</li>
+    </div>
+    <ul v-show="visible" :style="{ left: left + 'px', top: top + 'px' }" class="contextmenu">
+      <li v-if="!(selectedTag.meta && selectedTag.meta.affix)" @click="closeSelectedTag(selectedTag)">关闭</li>
       <li @click="closeOthersTags">关闭其他</li>
       <li @click="closeAllTags(selectedTag)">关闭全部</li>
     </ul>
@@ -50,7 +43,7 @@ export default {
       this.moveToCurrentTag()
     },
     visitedViews(value) {
-      if(value.length == 1) {
+      if (value.length == 1) {
         value[0].meta.affix = true;
       } else {
         value.forEach(tag => tag.meta.affix = false);
@@ -210,12 +203,14 @@ export default {
   align-items: center;
   // border-bottom: 1px solid #d8dce5;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
+
   .tags-view-wrapper {
     height: 100%;
     display: flex;
     align-items: center;
     overflow-x: auto;
     white-space: nowrap;
+
     .tags-view-item {
       display: inline-block;
       position: relative;
@@ -228,17 +223,21 @@ export default {
       padding: 0 8px;
       font-size: 12px;
       margin-left: 5px;
+
       &:first-of-type {
         margin-left: 15px;
       }
+
       &:last-of-type {
         margin-right: 15px;
       }
+
       &.active {
         //  rgba(241, 139, 14, .9);
         background-color: rgba(241, 139, 14, .9);
         color: #fff;
         border-color: rgba(241, 139, 14, .9);
+
         &::before {
           content: '';
           background: #fff;
@@ -253,6 +252,7 @@ export default {
       }
     }
   }
+
   .contextmenu {
     margin: 0;
     background: #fff;
@@ -265,10 +265,12 @@ export default {
     font-weight: 400;
     color: #333;
     box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
+
     li {
       margin: 0;
       padding: 7px 16px;
       cursor: pointer;
+
       &:hover {
         background: rgba(241, 139, 14, .9);
         color: #fff;
@@ -287,32 +289,37 @@ export default {
       height: 14px;
       line-height: 14px;
       border-radius: 50%;
-      font-size:14px;
+      font-size: 14px;
       transition: all .3s cubic-bezier(.645, .045, .355, 1);
       transform-origin: 100% 50%;
+
       &:before {
         transform: scale(.6);
         display: inline-block;
       }
+
       &:hover {
         color: #fff;
         background-color: rgba(241, 139, 14, .9);
       }
     }
   }
+
   .active {
     .el-icon-close {
       width: 14px;
       height: 14px;
       line-height: 14px;
       border-radius: 50%;
-      font-size:14px;
+      font-size: 14px;
       transition: all .3s cubic-bezier(.645, .045, .355, 1);
       transform-origin: 100% 50%;
+
       &:before {
         transform: scale(.6);
         display: inline-block;
       }
+
       &:hover {
         color: #ccc;
         background-color: #fff;

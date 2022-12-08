@@ -11,11 +11,15 @@
  * @Date: 2022-01-19 17:30:12
  * @LastEditTime: 2022-06-27 15:20:32
  */
+import Vue from 'vue';
 import { constantRouterMap, routes } from '@/router'
 import router from '@/router';
 import { getPermission } from "@/request/user"
 import { hasPermission } from "@/utils/auth";
+import { getPlugins } from "@/request/plugin";
+import _import from '../../router/_import';
 
+// 过滤有展示权限的路由
 function filterAsyncRouter(routers, menus) {
   routers.forEach((route) => {
     if (!hasPermission(menus, route)) {
@@ -42,7 +46,9 @@ const permission = {
     //
     operations: [],
     // 当前激活面板
-    activePanel: ''
+    activePanel: '',
+    // iframe的组件数组
+    iframeComponents: [],
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
@@ -50,6 +56,9 @@ const permission = {
     },
     SET_DYNAMIC_ROUTERS: (state, routers) => {
       state.dynamicRoutes = routers;
+    },
+    ADD_DYNAMIC_ROUTERS: (state, newRoute) => {
+      state.dynamicRoutes = [...state.dynamicRoutes, ...newRoute];
     },
     SET_MENUS: (state, menus) => {
       state.menus = menus
@@ -74,20 +83,59 @@ const permission = {
     GenerateRoutes({ commit, state }) {
       return new Promise(resolve => {
         let menus = [...state.baseMenus];
-        state.dynamicRoutes.forEach(() => {
-          menus.push("plugin3");
+        state.dynamicRoutes.forEach((item, index) => {
+          menus.push('plugin' + index);
         })
         commit("SET_MENUS", menus)
 
         router.updateRoutes(state.dynamicRoutes);
         let routers = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), menus)
         commit('SET_ROUTERS', routers)
-
         resolve()
       })
     },
-    SetDynamicRouters({ commit }, routers) {
-      commit("SET_DYNAMIC_ROUTERS", routers)
+    SetDynamicRouters({ commit, state }, routers) {
+      if (routers.length == 0) {
+        // 初始化动态路由表
+        return new Promise(resolve => {
+          // 获取动态插件路由
+          let p = [];
+          getPlugins().then((res) => {
+            if (res.data.code === 200) {
+              res.data.data.forEach((item, index) => {
+                p.push({
+                  path: '/plugin' + index,
+                  name: 'Plugin' + index,
+                  iframeComponent: '',
+                  meta: {
+                    title: 'plugin', header_title: item.name, panel: "plugin" + index, icon_class: 'el-icon-s-order', url: item.url,
+                    breadcrumb: [
+                      { name: item.name },
+                    ],
+                  }
+                })
+                let iframeObj = {
+                  path: '/plugin' + index,
+                  name: 'Plugin' + index,
+                  component: _import('IFrame/IFrame')// 组件文件的引用
+                }
+                state.iframeComponents.push(iframeObj);
+                Vue.component('Plugin' + index, _import('IFrame/IFrame'));
+              });
+              commit("SET_DYNAMIC_ROUTERS", p)
+              resolve()
+            } else {
+              this.$message.error("查询插件列表错误：", res.data.msg);
+            }
+          })
+
+        })
+      } else {
+        return new Promise(resolve => {
+          commit("ADD_DYNAMIC_ROUTERS", routers)
+          resolve()
+        })
+      }
     },
     getPermission({ commit }, roles) {
       let roleId = roles.split(',').map(Number)
@@ -115,11 +163,6 @@ const permission = {
     SetActivePanel({ commit }, panel) {
       commit("SET_ACTIVE_PANEL", panel)
     },
-    addRoute({ commit, state }, route) {
-      let r = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), state.menus)
-      r[1].children.push(...state.dynamicRoutes);
-      commit('SET_ROUTERS', r)
-    }
   },
   getters: {
     addRoutes: state => {

@@ -12,21 +12,22 @@
  * @LastEditTime: 2022-07-01 16:15:57
  */
 const getters = {
-    token: state => state.user.token,
-    userName: state => state.user.username,
-    roles: state => state.user.roles,
-    userType: state => parseInt(state.user.userType),
-    UserDepartId: state => parseInt(state.user.departId),
-    UserDepartName: state => state.user.departName,
-    activePanel: state => state.permissions.activePanel,
-    selectIp: state => state.cluster.selectIp,
-    tableTitle: state => state.cluster.tableTitle,
-    visitedViews: state => state.tagsView.visitedViews,
-    cachedViews: state => state.tagsView.cachedViews,
-    messageNum: state => state.message.messageNum,
-    agentPath: state => state.config.agentPath,
-    configType: state => state.config.configType,
-    serverUrl: state => state.user.serverUrl,
+  token: state => state.user.token,
+  userName: state => state.user.username,
+  roles: state => state.user.roles,
+  userType: state => parseInt(state.user.userType),
+  UserDepartId: state => parseInt(state.user.departId),
+  UserDepartName: state => state.user.departName,
+  activePanel: state => state.permissions.activePanel,
+  iframeComponents: state => state.permissions.iframeComponents,
+  selectIp: state => state.cluster.selectIp,
+  tableTitle: state => state.cluster.tableTitle,
+  visitedViews: state => state.tagsView.visitedViews,
+  cachedViews: state => state.tagsView.cachedViews,
+  messageNum: state => state.message.messageNum,
+  agentPath: state => state.config.agentPath,
+  configType: state => state.config.configType,
+  serverUrl: state => state.user.serverUrl,
 }
 
 export default getters
