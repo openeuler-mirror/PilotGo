@@ -15,6 +15,8 @@
 package initialization
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
@@ -31,13 +33,13 @@ func SetupRouter() *gin.Engine {
 	// TODO: 此处绑定 http api handler
 	api := router.Group("/api/v1")
 
-	overview := api.Group("/overview")
+	overview := api.Group("/overview") // 机器概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)
 		overview.GET("/depart_info", controller.DepartClusterInfoHandler)
 	}
 
-	macList := api.Group("cluster/macList")
+	macList := api.Group("/macList") // 机器管理
 	{
 		macList.POST("/script_save", controller.AddScriptHandler)
 		macList.POST("/deletemachine", controller.DeleteMachineHandler)
@@ -49,7 +51,7 @@ func SetupRouter() *gin.Engine {
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 	}
 
-	macDetails := api.Group("cluster/macList/api")
+	macDetails := api.Group("/api") // 机器详情
 	{
 		macDetails.GET("/agent_info", agentcontroller.AgentInfoHandler)
 		macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
@@ -79,7 +81,7 @@ func SetupRouter() *gin.Engine {
 		macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
 	}
 
-	macBasicModify := api.Group("cluster/macList/agent")
+	macBasicModify := api.Group("/agent") // 机器配置
 	{
 		macBasicModify.GET("/sysctl_change", agentcontroller.SysctlChangeHandler)
 		macBasicModify.POST("/service_stop", agentcontroller.ServiceStopHandler)
@@ -112,7 +114,7 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
 	}
 
-	monitor := api.Group("prometheus")
+	monitor := api.Group("prometheus") // 监控
 	{
 		monitor.GET("/queryrange", controller.QueryRange)
 		monitor.GET("/query", controller.Query)
@@ -120,13 +122,13 @@ func SetupRouter() *gin.Engine {
 		monitor.POST("/alertmanager", controller.AlertMessageConfigHandler)
 	}
 
-	batchmanager := api.Group("batchmanager")
+	batchmanager := api.Group("batchmanager") // 批次
 	{
 		batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
 		batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfoHandler)
 	}
 
-	user := api.Group("user")
+	user := api.Group("user") // 用户管理
 	{
 		user.POST("/login", controller.LoginHandler)
 		user.GET("/logout", controller.Logout)
@@ -142,7 +144,7 @@ func SetupRouter() *gin.Engine {
 		user.POST("/roleChange", controller.RolePermissionChangeHandler)
 	}
 
-	configmanager := api.Group("config")
+	configmanager := api.Group("config") // 配置管理
 	{
 		configmanager.GET("/read_file", agentcontroller.ReadFile)
 		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabaseHandler)
@@ -155,7 +157,7 @@ func SetupRouter() *gin.Engine {
 		configmanager.POST("/file_broadcast", agentcontroller.FileBroadcastToAgents)
 	}
 
-	userLog := api.Group("log")
+	userLog := api.Group("log") // 日志管理
 	{
 		userLog.GET("/log_all", controller.LogAllHandler)
 		userLog.GET("/logs", controller.AgentLogsHandler)
@@ -185,7 +187,7 @@ func SetupRouter() *gin.Engine {
 		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
 	}
 
-	plugin := api.Group("plugins")
+	plugin := api.Group("plugins") // 插件
 	{
 		plugin.GET("", controller.GetPluginsHanlder)
 		plugin.PUT("", controller.AddPluginHanlder)
@@ -204,6 +206,18 @@ func SetupRouter() *gin.Engine {
 	// TODO: 不知道用途
 	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)
+
+	other := api.Group("")
+	{
+		// 监控机器列表
+		other.GET("/macList/machinealldata", controller.MachineAllDataHandler)
+		// 未用到
+		other.GET("/macList/departinfo", controller.DepartInfoHandler)
+		// 配置批次下发
+		other.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
+		// 健康监测
+		other.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
+	}
 
 	return router
 }

@@ -31,5 +31,9 @@ func ClusterInfoHandler(c *gin.Context) {
 
 func DepartClusterInfoHandler(c *gin.Context) {
 	departs := service.DepartClusterInfo()
-	response.Success(c, gin.H{"data": departs}, "获取各部门集群状态成功")
+	if len(departs) == 0 {
+		response.Success(c, gin.H{"data": []interface{}{}}, "获取各部门集群状态成功")
+	} else {
+		response.Success(c, gin.H{"data": departs}, "获取各部门集群状态成功")
+	}
 }
