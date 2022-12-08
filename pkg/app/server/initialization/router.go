@@ -21,6 +21,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 	"openeuler.org/PilotGo/PilotGo/resource"
 )
 
@@ -218,6 +219,6 @@ func SetupRouter() *gin.Engine {
 		// 健康监测
 		other.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 	}
-
+	go webSocket.CliManager.Start()
 	return router
 }

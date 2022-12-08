@@ -16,83 +16,27 @@
 package controller
 
 import (
-	"log"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-var Clients = make(map[int]*model.ConnClient)
-var i int = 0
-var lock sync.Mutex
-var Keys []int
-
 func PushAlarmHandler(c *gin.Context) {
-	conn, err := Upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := webSocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
+	logger.Debug("webSocket 建立连接: %s", conn.RemoteAddr().String())
 
-	lock.Lock()
-	i++
-	key := i
-	client := &model.ConnClient{Conn: conn}
-	Clients[key] = client
-	lock.Unlock()
+	currentTime := uint64(time.Now().Unix())
+	client := webSocket.NewClient(conn.RemoteAddr().String(), conn, currentTime)
 
-	go Delete(Clients, Keys)
-	go Read(Clients)
-	Write(Clients)
-}
-func Read(Clients map[int]*model.ConnClient) {
-	for {
-		lock.Lock()
-		for key, cli := range Clients {
-			_, _, err := cli.Conn.ReadMessage()
-			if err != nil {
-				Keys = append(Keys, key)
-				cli.Conn.Close()
-				lock.Unlock()
-				return
-			}
-		}
-		lock.Unlock()
-	}
-}
+	go client.Read()
+	go client.Write()
 
-func Write(Clients map[int]*model.ConnClient) {
-	for {
-		data := <-agentmanager.WARN_MSG
-		lock.Lock()
-		for key, cli := range Clients {
-			err := cli.Conn.WriteMessage(websocket.TextMessage, []byte(data.(string)))
-			if err != nil {
-				log.Println(err)
-				Keys = append(Keys, key)
-				cli.Conn.Close()
-				lock.Unlock()
-				return
-			}
-		}
-		lock.Unlock()
-	}
-}
-
-func Delete(Clients map[int]*model.ConnClient, keys []int) {
-	for {
-		if len(keys) != 0 {
-			lock.Lock()
-			for _, key := range keys {
-				delete(Clients, key)
-			}
-			lock.Unlock()
-		}
-		time.Sleep(time.Millisecond * 1)
-	}
+	// 用户连接事件
+	webSocket.CliManager.Register <- client
 }
