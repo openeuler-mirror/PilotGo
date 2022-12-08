@@ -1,6 +1,9 @@
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
+      <el-form-item label="插件名称:" prop="url">
+        <el-input class="ipInput" controls-position="right" v-model="form.name" autocomplete="off"></el-input>
+      </el-form-item>
       <el-form-item label="主机地址:" prop="url">
         <el-input class="ipInput" controls-position="right" v-model="form.url" autocomplete="off"></el-input>
       </el-form-item>
@@ -14,15 +17,23 @@
 </template>
 
 <script>
-import { insertPlugin } from "@/request/plugin";
+import { getPlugins, insertPlugin } from "@/request/plugin";
 import _import from '../../../router/_import';
 export default {
   data() {
     return {
       form: {
-        url: "",
+        name: 'grafana',
+        url: "http://10.1.167.93:9999",
       },
       rules: {
+        url: [
+          {
+            required: true,
+            message: '插件名称不能为空',
+            trigger: "blur"
+          },
+        ],
         url: [
           {
             required: true,
@@ -39,6 +50,12 @@ export default {
       this.$emit("click");
     },
     handleAdd() {
+      let pluginIndex = 100;
+      getPlugins().then(res => {
+        if (res.data.code === 200) {
+          pluginIndex = res.data.data.length;
+        }
+      })
       this.$refs.form.validate((valid) => {
         if (valid) {
           insertPlugin(this.form)
@@ -46,20 +63,21 @@ export default {
               if (res.data.code === 200) {
                 // 更新dynamicRoutes数据
                 this.$store.dispatch('SetDynamicRouters', [
-                {
-                  path: '/plugin3',
-                  name: 'Plugin3',
-                  component: _import('IFrame/IFrame'),
-                  meta: {
-                    title: 'plugin', header_title: "grafana", panel: "plugin3", icon_class: 'el-icon-s-order',
-                    breadcrumb: [
-                      { name: 'grafana' },
-                    ],
+                  {
+                    path: '/plugin' + pluginIndex,
+                    name: 'Plugin' + pluginIndex,
+                    component: _import('IFrame/IFrame'),
+                    meta: {
+                      title: 'plugin', header_title: this.form.name, panel: 'plugin' + pluginIndex, icon_class: 'el-icon-s-order', url: this.form.url,
+                      breadcrumb: [
+                        { name: this.form.name },
+                      ],
+                    }
                   }
-                }
-                ]);
-                // 更新左侧导航栏
-                this.$store.dispatch('GenerateRoutes');
+                ]).then(() => {
+                  // 更新左侧导航栏
+                  this.$store.dispatch('GenerateRoutes');
+                });
 
                 this.$emit("click", "success");
                 this.$message.success(res.data.msg);

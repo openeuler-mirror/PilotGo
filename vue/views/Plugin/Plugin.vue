@@ -1,6 +1,6 @@
 <template>
-  <div class="plugin">
-    <ky-table class="cluster-table" ref="table" :getData="getPlugins">
+  <div class="plugin" style="width:100%;height:100%;">
+    <ky-table ref="table" :getData="getPlugins">
       <template v-slot:table_search>
         <div>插件列表</div>
       </template>
@@ -31,13 +31,11 @@
 
 <script>
 import { getPlugins, deletePlugins } from "@/request/plugin";
-import kyTable from "@/components/KyTable";
 import AddForm from "./form/addForm.vue"
 import _import from '../../router/_import';
 export default {
   name: "Plugin",
   components: {
-    kyTable,
     AddForm,
   },
   data() {
@@ -61,29 +59,6 @@ export default {
     },
     refresh() {
       this.$refs.table.handleSearch();
-
-      getPlugins().then((res) => {
-        if (res.data.code === 200) {
-          let p = []
-          res.data.data.forEach((item) => {
-            p.push({
-              path: '/plugin3',
-              name: 'Plugin3',
-              component: _import('IFrame/IFrame'),
-              meta: {
-                title: 'plugin', header_title: "grafana", panel: "plugin3", icon_class: 'el-icon-s-order',
-                breadcrumb: [
-                  { name: 'grafana' },
-                ],
-              }
-            })
-          });
-          this.$store.dispatch("SetDynamicRouters", p);
-          this.$store.dispatch('GenerateRoutes');
-        } else {
-          this.$message.error("查询插件列表错误：", res.data.msg);
-        }
-      })
     },
     handleCreate() {
       this.display = true;
@@ -95,6 +70,9 @@ export default {
         deletePlugins({ UUID: item.uuid }).then((res) => {
           if (res.data.code === 200) {
             this.refresh();
+            this.$store.dispatch('SetDynamicRouters', []).then(() => {
+              this.$store.dispatch('GenerateRoutes');
+            })
             this.$message.success("删除成功");
           } else {
             this.$message.error("删除插件错误：" + res.data.msg)
@@ -109,6 +87,5 @@ export default {
 <style scoped lang="scss">
 .plugin {
   width: 100%;
-  margin-top: 10px;
 }
 </style>

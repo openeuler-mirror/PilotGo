@@ -13,53 +13,51 @@
   Description: provide agent log manager of pilotgo
  -->
 <template>
-<div style="width:calc(100%);height:calc(100%)">
-  <el-container>
-    <el-aside style="width: 10%">
-      <div class="logo"> 
-        <img src="../../assets/logo.png" alt=""> 
-        <span>PilotGo</span>
-      </div>
-      <el-menu id="el-menu"
-        :collapse="isCollapse"
-        :unique-opened="true"
-        @select="handleSelect"
-        class="el-menu-vertical-demo"
-        background-color="#fff"
-        :default-active="activePanel">
-        <sidebar-item :routes="routesData"></sidebar-item>
-      </el-menu>
-    </el-aside>
+  <div style="width:calc(100%);height:calc(100%)">
     <el-container>
-      <el-header style="height: 6%">
-        <bread-crumb class="breadCrumb"></bread-crumb>
-        <div class="header-function">
-          <el-dropdown class="header-function__username">
-            <div :title="username">
-              <em class="el-icon-s-custom"></em>
-              <span>{{username.length > 16 ? username.split('@')[0] : username}}</span>
+      <el-aside style="width: 10%">
+        <div class="logo">
+          <img src="../../assets/logo.png" alt="">
+          <span>PilotGo</span>
+        </div>
+        <el-menu id="el-menu" :collapse="isCollapse" :unique-opened="true" @select="handleSelect"
+          class="el-menu-vertical-demo" background-color="#fff" :default-active="activePanel">
+          <sidebar-item :routes="routesData"></sidebar-item>
+        </el-menu>
+      </el-aside>
+      <el-container>
+        <el-header style="height: 6%">
+          <bread-crumb class="breadCrumb"></bread-crumb>
+          <div class="header-function">
+            <el-dropdown class="header-function__username">
+              <div :title="username">
+                <em class="el-icon-s-custom"></em>
+                <span>{{ username.length > 16 ? username.split('@')[0] : username }}</span>
+              </div>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item @click.native="updatePwd">修改密码</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <div class="logOut" title="退出" @click="handleLogOut">
+              <em class="el-icon-s-unfold"></em>
             </div>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item @click.native="updatePwd">修改密码</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-          <div class="logOut" title="退出" @click="handleLogOut">
-            <em class="el-icon-s-unfold"></em>
           </div>
-        </div>
-        <tags-view />
-      </el-header>
-      <el-main>
-        <div class="bodyContent">
-          <transition name="fade-transform" mode="out-in">
-            <keep-alive :include="cachedViews">
-              <router-view :key="key" />
-            </keep-alive>
-          </transition>
-        </div>
-      </el-main>
+          <tags-view />
+        </el-header>
+        <el-main>
+          <div class="bodyContent">
+            <transition name="fade-transform" mode="out-in">
+              <keep-alive :include="cachedViews">
+                <router-view :key="key" />
+              </keep-alive>
+            </transition>
+            <!--iframe页-->
+            <component v-for="item in iframeComponents" :key="item.name" :is="item.name"
+              v-show="$route.path === item.path"></component>
+          </div>
+        </el-main>
+      </el-container>
     </el-container>
-  </el-container>
   </div>
 </template>
 
@@ -82,9 +80,10 @@ export default {
       isCollapse: false,
       // cachedViews: ['Batch','Overview','Prometheus']
     };
-  }, 
+  },
   mounted() {
     this.initSocket();
+    console.log(this.iframeComponents)
   },
   computed: {
     cachedViews() {
@@ -94,10 +93,13 @@ export default {
       return this.$route.path
     },
     routesData() {
-        return this.$store.getters.getPaths
+      return this.$store.getters.getPaths
     },
     activePanel() {
-        return this.$store.getters.activePanel
+      return this.$store.getters.activePanel
+    },
+    iframeComponents() {
+      return this.$store.getters.iframeComponents;
     },
     menuKey() {
       return this.$store.state.menuIndex;
@@ -107,20 +109,20 @@ export default {
         ? this.$store.state.selectedClusterIp
         : null;
     },
-    username(){
+    username() {
       return this.$store.getters.userName;
     },
     breadCrumb() {
       this.crumbs = [];
-      if(this.$route.params.id) {
+      if (this.$route.params.id) {
         this.$route.meta.breadCrumb[1].name = this.$route.params.id
       }
     },
     socketUrl() {
       let hostPort = Config.dev.proxyTable['/api/v1'].target.split('//')[1];
       hostPort = hostPort === 'localhost:8888' ? this.$store.getters.serverUrl : hostPort;
-      return (location.protocol === "http:" ? "ws" : "wss") + "://" + 
-        hostPort + 
+      return (location.protocol === "http:" ? "ws" : "wss") + "://" +
+        hostPort +
         "/event";
     }
   },
@@ -137,8 +139,8 @@ export default {
         this.$store.dispatch("logOut").then((res) => {
           this.$router.push("/login");
         });
-      }).catch(()=>{
-        
+      }).catch(() => {
+
       })
     },
     updatePwd() {
@@ -170,7 +172,7 @@ export default {
     // 打开连接
     openSocket() {
       this.ws.onopen = () => {
-        console.log('打开连接')
+        console.log('打开ws连接')
       }
     },
     // 接收消息
@@ -190,9 +192,9 @@ export default {
         let _this = this;
         _this.ws.close();
         console.log('断开重连')
-        setTimeout(() =>{
+        setTimeout(() => {
           _this.initSocket();
-        },15000)
+        }, 15000)
       }
     },
     // 连接错误
@@ -203,9 +205,9 @@ export default {
         this.$message.error('websoket连接失败,请刷新!')
       }
     },
-  
+
   },
-  beforeDestroy() { 
+  beforeDestroy() {
     this.ws.close();
   }
 };
@@ -216,10 +218,11 @@ export default {
   height: calc(100%);
   width: calc(100%);
   overflow: hidden;
-  
+
   .el-aside {
     height: 100%;
     overflow: hidden;
+
     .logo {
       width: 100%;
       height: 10%;
@@ -232,18 +235,22 @@ export default {
       position: relative;
       z-index: 1999;
       background: rgb(11, 35, 117);
+
       img {
         width: 50%;
       }
+
       span {
         display: inline-block;
         margin-left: -30%;
       }
     }
+
     .el-menu {
       width: 100%;
       height: 90%;
     }
+
     .aside-footer {
       position: absolute;
       bottom: 0;
@@ -259,11 +266,13 @@ export default {
       }
     }
   }
+
   .el-container {
     width: 88%;
     height: 100%;
     overflow: hidden;
     background: #fff;
+
     .el-header {
       position: relative;
       width: 100%;
@@ -271,6 +280,7 @@ export default {
       align-items: center;
       justify-content: space-between;
       border-bottom: solid 1px #e6e6e6;
+
       .header-logoName {
         height: 100%;
         font-size: 28px;
@@ -279,10 +289,12 @@ export default {
         display: flex;
         justify-content: space-evenly;
         align-items: center;
+
         img {
-        height: 120%;
+          height: 120%;
+        }
       }
-      }
+
       .header-function {
         width: 20%;
         height: 100%;
@@ -300,48 +312,59 @@ export default {
           border-radius: 30px;
           background-color: #fff;
           transition: width 500ms ease-in-out;
+
           span {
             display: none;
           }
         }
+
         .header-function__username:hover {
           border: 1px solid rgb(241, 139, 14);
           width: 70%;
+
           span {
             animation: text 1s 1;
             font-size: 16px;
             display: inline-block;
           }
+
           @keyframes text {
             0% {
               color: transparent;
             }
+
             100% {
               color: rgb(241, 139, 14);
             }
           }
         }
+
         .logOut {
           cursor: pointer;
           font-size: 24px;
           margin: 0 0 0 6px;
           color: rgb(241, 139, 14);
         }
+
         .logOut:hover {
           color: rgb(202, 205, 210);
         }
       }
     }
+
     .el-main {
       height: 92%;
-      padding: 3% 0 0;
+      padding: 3.6% 0 0;
+
       .bodyContent {
         width: 100%;
         height: 100%;
       }
+
       .breadCrumb {
         width: 100%;
         height: 8%;
+
         .el-breadcrumb {
           width: 100%;
           height: 100%;
@@ -350,6 +373,6 @@ export default {
         }
       }
     }
-}
+  }
 }
 </style>

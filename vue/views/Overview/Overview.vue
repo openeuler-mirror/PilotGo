@@ -22,7 +22,6 @@
           <span>欢迎您：{{ userName }}</span>
           <span>所属部门：{{ userDeptName }}</span>
           <span>您的身份：{{ userType }}</span>
-          <el-button @click="handleCreate">+</el-button>
         </div>
         <div class="mac">
           <el-carousel ref="carousel" trigger="click" :interval="8000" :height="carHeight" indicator-position="none">
@@ -154,20 +153,6 @@ export default {
     this.carHeight = this.$refs.curr.clientHeight + 'px';
   },
   methods: {
-    handleCreate() {
-      this.$store.dispatch('GenerateRoutes');
-      this.$store.dispatch('addRoute', {
-        path: '/plugin3',
-        name: 'Plugin3',
-        component: _import('IFrame/IFrame'),
-        meta: {
-          title: 'plugin', header_title: "grafana", panel: "plugin3", icon_class: 'el-icon-s-order',
-          breadcrumb: [
-            { name: 'grafana' },
-          ],
-        }
-      },);
-    },
     resize() {
       let cWidth = document.getElementsByClassName('dept')[0].clientWidth;
       let cHeight = document.getElementsByClassName('dept')[0].clientHeight;
