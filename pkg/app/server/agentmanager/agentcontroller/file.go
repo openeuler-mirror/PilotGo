@@ -58,7 +58,7 @@ func GetAgentRepo(c *gin.Context) {
 		response.Fail(c, nil, Err)
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, repos, "获取到repo源")
+	response.Success(c, repos, "获取到repo源")
 }
 
 func FileBroadcastToAgents(c *gin.Context) {

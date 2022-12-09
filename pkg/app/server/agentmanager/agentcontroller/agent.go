@@ -49,5 +49,5 @@ func AgentListHandler(c *gin.Context) {
 func OsBasic(c *gin.Context) {
 	uuid := c.Query("uuid")
 	ip, state, dept := dao.MachineBasic(uuid)
-	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"IP": ip, "state": state, "depart": dept}, "Success")
+	response.Success(c, gin.H{"IP": ip, "state": state, "depart": dept}, "Success")
 }

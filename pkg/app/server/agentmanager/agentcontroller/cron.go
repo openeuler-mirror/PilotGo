@@ -16,7 +16,6 @@ package agentcontroller
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -39,19 +38,19 @@ func CreatCron(c *gin.Context) {
 	status := newCron.Status
 
 	if len(TaskName) == 0 {
-		response.JSON(c, http.StatusOK, http.StatusBadRequest, nil, "任务名字不能为空")
+		response.Fail(c, nil, "任务名字不能为空")
 		return
 	}
 	if dao.IsTaskNameExist(TaskName) {
-		response.JSON(c, http.StatusOK, http.StatusBadRequest, nil, "任务名称已存在!")
+		response.Fail(c, nil, "任务名称已存在!")
 		return
 	}
 	if len(spec) == 0 {
-		response.JSON(c, http.StatusOK, http.StatusBadRequest, nil, "cron表达式不能为空")
+		response.Fail(c, nil, "cron表达式不能为空")
 		return
 	}
 	if len(command) == 0 {
-		response.JSON(c, http.StatusOK, http.StatusBadRequest, nil, "执行命令不能为空")
+		response.Fail(c, nil, "执行命令不能为空")
 		return
 	}
 	newcron := model.CrontabList{
@@ -77,7 +76,7 @@ func CreatCron(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, http.StatusOK, http.StatusOK, gin.H{"data": newCron, "cron": cron_start}, "任务已生效")
+	response.Success(c, gin.H{"data": newCron, "cron": cron_start}, "任务已生效")
 }
 
 func DeleteCronTask(c *gin.Context) {
@@ -98,7 +97,7 @@ func DeleteCronTask(c *gin.Context) {
 		response.Fail(c, nil, msg)
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, nil, "任务删除成功!")
+	response.Success(c, nil, "任务删除成功!")
 }
 
 func UpdateCron(c *gin.Context) {
@@ -139,7 +138,7 @@ func UpdateCron(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, http.StatusOK, http.StatusOK, gin.H{"cron": cron_start}, "任务更新成功,已开始执行")
+	response.Success(c, gin.H{"cron": cron_start}, "任务更新成功,已开始执行")
 }
 
 func CronTaskStatus(c *gin.Context) {
@@ -162,7 +161,7 @@ func CronTaskStatus(c *gin.Context) {
 			response.Fail(c, nil, "任务暂停失败")
 			return
 		}
-		response.JSON(c, http.StatusOK, http.StatusOK, gin.H{"cron": cron_stop}, "任务已暂停")
+		response.Success(c, gin.H{"cron": cron_stop}, "任务已暂停")
 		return
 	}
 
@@ -173,7 +172,7 @@ func CronTaskStatus(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, http.StatusOK, http.StatusOK, gin.H{"cron": cron_start}, "任务已开启")
+	response.Success(c, gin.H{"cron": cron_start}, "任务已开启")
 }
 
 func CronTaskList(c *gin.Context) {
@@ -182,7 +181,7 @@ func CronTaskList(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.JSON(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
