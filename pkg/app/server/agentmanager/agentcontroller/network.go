@@ -15,7 +15,6 @@
 package agentcontroller
 
 import (
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -105,7 +104,7 @@ func GetAgentNetworkConnect(c *gin.Context) {
 		response.Fail(c, nil, Err)
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, net, "获取到网络连接信息")
+	response.Success(c, net, "获取到网络连接信息")
 }
 
 func ConfigNetworkConnect(c *gin.Context) {
@@ -166,29 +165,29 @@ func ConfigNetworkConnect(c *gin.Context) {
 		text := service.NetworkStatic(oldnets, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
 		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
-			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			response.Fail(c, nil, Err)
 			return
 		}
 		_, Err, err = agent.RestartNetWork(nic_name.(string))
 		if len(Err) != 0 || err != nil {
-			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			response.Fail(c, nil, Err)
 			return
 		}
-		response.JSON(c, http.StatusOK, http.StatusOK, nil, "网络配置更新成功")
+		response.Success(c, nil, "网络配置更新成功")
 
 	case "dhcp":
 		text := service.NetworkDHCP(oldnets)
 		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
-			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			response.Fail(c, nil, Err)
 			return
 		}
 		_, Err, err = agent.RestartNetWork(nic_name.(string))
 		if len(Err) != 0 || err != nil {
-			response.JSON(c, http.StatusOK, http.StatusOK, nil, Err)
+			response.Fail(c, nil, Err)
 			return
 		}
-		response.JSON(c, http.StatusOK, http.StatusOK, nil, "网络配置更新成功")
+		response.Success(c, nil, "网络配置更新成功")
 
 	default:
 		response.Fail(c, nil, "请重新检查ip分配方式")

@@ -18,40 +18,31 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
-func Response(c *gin.Context, httpStatus int, code int, data gin.H, msg string) {
+func result(c *gin.Context, httpStatus int, code int, data interface{}, msg string) {
 	c.JSON(httpStatus, gin.H{
 		"code": code,
 		"data": data,
 		"msg":  msg})
 }
 
-func Success(c *gin.Context, data gin.H, msg string) {
-	Response(c, http.StatusOK, http.StatusOK, data, msg)
+func Success(c *gin.Context, data interface{}, msg string) {
+	result(c, http.StatusOK, http.StatusOK, data, msg)
 }
 
-func Fail(c *gin.Context, data gin.H, msg string) {
-	Response(c, http.StatusOK, http.StatusBadRequest, data, msg)
+func Fail(c *gin.Context, data interface{}, msg string) {
+	result(c, http.StatusOK, http.StatusBadRequest, data, msg)
 }
 
-func JSON(c *gin.Context, httpStatus int, code int, data interface{}, msg string) {
-	c.JSON(httpStatus, gin.H{
-		"code": code,
-		"data": data,
-		"msg":  msg})
-}
-
-// TODO: 后续重构，替换原有的响应封装
-func NewSuccess(c *gin.Context, data interface{}, msg string) {
-	var d interface{} = struct{}{}
-	if data != nil {
-		d = data
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": d,
-		"msg":  msg,
-	})
+// 拼装json 分页数据
+func DataPagination(c *gin.Context, list interface{}, total int, query *model.PaginationQ) {
+	c.AbortWithStatusJSON(http.StatusOK, gin.H{
+		"code":  http.StatusOK,
+		"ok":    true,
+		"data":  list,
+		"total": total,
+		"page":  query.CurrentPageNum,
+		"size":  query.Size})
 }

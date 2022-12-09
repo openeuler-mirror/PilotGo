@@ -39,7 +39,7 @@ func RegisterHandler(c *gin.Context) {
 	}
 	err := service.Register(user)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	response.Success(c, nil, "添加用户成功!") //Return result
@@ -53,7 +53,7 @@ func LoginHandler(c *gin.Context) {
 	}
 	token, departName, departId, userType, roleId, err := service.Login(user)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId, "server": ServerAddr}, "登陆成功!")
@@ -79,14 +79,14 @@ func UserAll(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
 	users, total := service.UserAll()
 	data, err := service.DataPaging(query, users, total)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(total), query)
@@ -103,13 +103,13 @@ func UserSearchHandler(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
 	data, total, err := service.UserSearch(email, query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(total), query)
@@ -124,9 +124,9 @@ func ResetPasswordHandler(c *gin.Context) {
 	}
 	u, err := service.ResetPassword(user.Email)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 	} else {
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": u}, "密码重置成功!")
+		response.Success(c, gin.H{"data": u}, "密码重置成功!")
 	}
 }
 
@@ -139,10 +139,10 @@ func DeleteUserHandler(c *gin.Context) {
 	}
 	err := service.DeleteUser(userdel.Emails)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Response(c, http.StatusOK, http.StatusOK, nil, "用户删除成功!")
+	response.Success(c, nil, "用户删除成功!")
 }
 
 // 修改用户信息
@@ -154,10 +154,10 @@ func UpdateUserHandler(c *gin.Context) {
 	}
 	u, err := service.UpdateUser(user)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": u}, "用户信息修改成功")
+	response.Success(c, gin.H{"data": u}, "用户信息修改成功")
 
 }
 
@@ -166,7 +166,7 @@ func ImportUser(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["upload"]
 	if files == nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "请先选择要上传的文件")
+		response.Fail(c, nil, "请先选择要上传的文件")
 		return
 	}
 	UserExit := make([]string, 0)
@@ -181,8 +181,8 @@ func ImportUser(c *gin.Context) {
 	}
 
 	if len(UserExit) == 0 {
-		response.Response(c, http.StatusOK, http.StatusOK, nil, "导入用户信息成功")
+		response.Success(c, nil, "导入用户信息成功")
 	} else {
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"UserExit": UserExit}, "以上用户已经存在")
+		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

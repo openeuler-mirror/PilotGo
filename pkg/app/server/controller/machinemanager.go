@@ -15,8 +15,6 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
@@ -73,7 +71,7 @@ func MachineAllDataHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, datas, "获取所有的机器数据")
+	response.Success(c, datas, "获取所有的机器数据")
 }
 
 // 删除机器
@@ -86,8 +84,8 @@ func DeleteMachineHandler(c *gin.Context) {
 	machinelist := service.DeleteMachine(deleteuuid.Deluuid)
 
 	if len(machinelist) != 0 {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"machinelist": machinelist}, "机器删除失败")
+		response.Fail(c, gin.H{"machinelist": machinelist}, "机器删除失败")
 	} else {
-		response.Response(c, http.StatusOK, http.StatusOK, nil, "机器删除成功!")
+		response.Success(c, nil, "机器删除成功!")
 	}
 }

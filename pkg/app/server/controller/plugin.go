@@ -12,7 +12,7 @@ func GetPluginsHanlder(c *gin.Context) {
 	plugins := service.GetPlugins()
 
 	logger.Info("find %d plugins", len(plugins))
-	response.NewSuccess(c, plugins, "插件查询成功")
+	response.Success(c, plugins, "插件查询成功")
 }
 
 // 添加插件
