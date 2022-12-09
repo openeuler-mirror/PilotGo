@@ -31,7 +31,7 @@ func PolicyDelete(c *gin.Context) {
 		return
 	}
 	if ok := service.PolicyRemove(Rule); !ok {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy不存在")
+		response.Fail(c, nil, "Pilocy不存在")
 	} else {
 		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy删除成功")
 	}
@@ -45,7 +45,7 @@ func PolicyAdd(c *gin.Context) {
 		return
 	}
 	if ok := service.PolicyAdd(Rule); !ok {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "Pilocy已存在")
+		response.Fail(c, nil, "Pilocy已存在")
 	} else {
 		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy添加成功")
 	}
@@ -56,7 +56,7 @@ func GetPolicy(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
@@ -64,7 +64,7 @@ func GetPolicy(c *gin.Context) {
 
 	data, err := service.DataPaging(query, policy, total)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
@@ -83,20 +83,20 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"userType": userRole.Type, "menu": userRole.Menus, "button": buttons}, "用户权限列表")
+	response.Success(c, gin.H{"userType": userRole.Type, "menu": userRole.Menus, "button": buttons}, "用户权限列表")
 }
 
 func GetRolesHandler(c *gin.Context) {
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
 	total, data, err := service.GetRoles(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(total), query)
