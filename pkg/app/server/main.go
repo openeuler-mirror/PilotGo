@@ -20,7 +20,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
@@ -87,7 +86,6 @@ func main() {
 	logger.Info("start to serve.")
 
 	// 前端推送告警
-	agentmanager.WARN_MSG = make(chan interface{}, 1)
 	go webSocket.SendWarnMsgToWeb()
 
 	// 信号监听
