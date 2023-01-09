@@ -24,10 +24,13 @@ import (
 )
 
 // 获取所有的用户角色
-func AllUserRole() []model.UserRole {
+func AllUserRole() ([]model.UserRole, error) {
 	var role []model.UserRole
-	global.PILOTGO_DB.Find(&role)
-	return role
+	err := global.PILOTGO_DB.Find(&role).Error
+	if err != nil {
+		return role, err
+	}
+	return role, nil
 }
 
 // 邮箱账户是否存在

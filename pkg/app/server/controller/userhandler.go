@@ -27,7 +27,11 @@ import (
 var ServerAddr string
 
 func GetUserRoleHandler(c *gin.Context) {
-	roles := service.GetUserRole()
+	roles, err := service.GetUserRole()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
 	response.Success(c, gin.H{"role": roles}, "获取用户角色")
 }
 
