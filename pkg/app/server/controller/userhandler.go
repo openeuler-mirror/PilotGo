@@ -174,6 +174,7 @@ func ImportUser(c *gin.Context) {
 		return
 	}
 	UserExit := make([]string, 0)
+	var err error
 	for _, file := range files {
 		name := file.Filename
 		c.SaveUploadedFile(file, name)
@@ -181,7 +182,10 @@ func ImportUser(c *gin.Context) {
 		if error != nil {
 			return
 		}
-		UserExit = service.ReadFile(xlFile, UserExit)
+		UserExit, err = service.ReadFile(xlFile, UserExit)
+		if err != nil {
+			return
+		}
 	}
 
 	if len(UserExit) == 0 {
