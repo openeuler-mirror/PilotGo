@@ -87,7 +87,11 @@ func UserAll(c *gin.Context) {
 		return
 	}
 
-	users, total := service.UserAll()
+	users, total, err := service.UserAll()
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
 	data, err := service.DataPaging(query, users, total)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

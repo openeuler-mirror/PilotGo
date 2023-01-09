@@ -43,22 +43,29 @@ func IsEmailExist(email string) (bool, error) {
 	return user.ID != 0, nil
 }
 
+/*
 // 查询数据库中账号密码、用户部门、部门ID、用户类型、用户角色
-func UserPassword(email string) (s1, s2, s3 string, i1, i2 int) {
+func UserPassword(email string) (s1, s2, s3 string, i1, i2 int, err error) {
 	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType
-}
+	err = global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, err
+	}
+	return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, nil
+}*/
 
 // 查询某用户信息
-func UserInfo(email string) model.User {
+func UserInfo(email string) (model.User, error) {
 	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	return user
+	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }
 
 // 查询所有的用户
-func UserAll() ([]model.ReturnUser, int) {
+func UserAll() ([]model.ReturnUser, int, error) {
 	var users []model.User
 	var redisUser []model.ReturnUser
 
@@ -70,7 +77,10 @@ func UserAll() ([]model.ReturnUser, int) {
 	// 	logger.Debug("%+v", "从缓存中读取")
 	// 	return redisUser
 	// } else {
-	global.PILOTGO_DB.Order("id desc").Find(&users)
+	err := global.PILOTGO_DB.Order("id desc").Find(&users).Error
+	if err != nil {
+		return redisUser, 0, err
+	}
 	totals := len(users)
 	for _, user := range users {
 		var roles []string
@@ -80,7 +90,10 @@ func UserAll() ([]model.ReturnUser, int) {
 		for _, id := range roleId {
 			userRole := model.UserRole{}
 			i, _ := strconv.Atoi(id)
-			global.PILOTGO_DB.Where("id = ?", i).Find(&userRole)
+			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
+			if err != nil {
+				return redisUser, totals, err
+			}
 			role := userRole.Role
 			roles = append(roles, role)
 		}
@@ -98,7 +111,7 @@ func UserAll() ([]model.ReturnUser, int) {
 		redisUser = append(redisUser, u)
 	}
 	// redismanager.Set("users", &redisUser)
-	return redisUser, totals
+	return redisUser, totals, nil
 	// }
 }
 

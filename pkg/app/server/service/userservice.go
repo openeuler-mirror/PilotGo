@@ -124,7 +124,10 @@ func UpdateUser(user model.User) (model.User, error) {
 	Pid := user.DepartFirst
 	id := user.DepartSecond
 	departName := user.DepartName
-	u := dao.UserInfo(email)
+	u, err := dao.UserInfo(email)
+	if err != nil {
+		return u, err
+	}
 
 	if u.DepartName != departName && u.Phone != phone {
 		dao.UpdateUserDepart(email, departName, Pid, id)
@@ -158,9 +161,12 @@ func UserSearch(email string, query *model.PaginationQ) (interface{}, int, error
 	return data, total, nil
 }
 
-func UserAll() ([]model.ReturnUser, int) {
-	users, total := dao.UserAll()
-	return users, total
+func UserAll() ([]model.ReturnUser, int, error) {
+	users, total, err := dao.UserAll()
+	if err != nil {
+		return users, total, err
+	}
+	return users, total, nil
 }
 
 func Login(user model.User) (string, string, int, int, string, error) {
@@ -178,9 +184,13 @@ func Login(user model.User) (string, string, int, int, string, error) {
 	if err != nil {
 		return "", "", 0, 0, "", errors.New("密码解密失败")
 	}
+	u, err := dao.UserInfo(email)
+	//DBpassword, departName, roleId, departId, userType, err := dao.UserPassword(email)
+	if err != nil {
+		return "", "", 0, 0, "", errors.New("查询邮箱密码错误")
+	}
 
-	DBpassword, departName, roleId, departId, userType := dao.UserPassword(email)
-	if DBpassword != DecryptedPassword {
+	if u.Password != DecryptedPassword {
 		return "", "", 0, 0, "", errors.New("密码错误!")
 	}
 
@@ -189,7 +199,7 @@ func Login(user model.User) (string, string, int, int, string, error) {
 	if err != nil {
 		return "", "", 0, 0, "", err
 	}
-	return token, departName, departId, userType, roleId, nil
+	return token, u.DepartName, u.DepartSecond, u.UserType, u.RoleID, nil
 }
 
 func Register(user model.User) error {
