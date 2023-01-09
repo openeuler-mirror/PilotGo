@@ -81,7 +81,6 @@ function pack_tar() {
     echo "adding scripts and config files..."
     mkdir -p ${version_path}/server
     cp config_server.yaml.templete ${version_path}/server/config_server.yaml
-    cp alert.rules.templete ${version_path}/server/alert.rules
 
     mkdir -p ${version_path}/agent
     cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
@@ -96,7 +95,6 @@ function pack_tar() {
 function build_docker_image() {
     echo "adding config files..."
     cp config_server.yaml.templete ${version_path}/server/config_server.yaml
-    cp alert.rules.templete ${version_path}/server/alert.rules
 
     sudo docker build --force-rm --tag pilotgo_server:latest --build-arg ARCH=$1 .
 }

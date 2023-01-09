@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-04-12 14:10:23
+ * LastEditTime: 2023-01-09 17:57:55
  * Description: Interface routing forwarding
  ******************************************************************************/
 package initialization
@@ -113,14 +113,6 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.POST("/firewall_sourceAdd", agentcontroller.FirewalldSourceAdd)
 		macBasicModify.POST("/firewall_sourceRemove", agentcontroller.FirewalldSourceRemove)
 		macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
-	}
-
-	monitor := api.Group("prometheus") // 监控
-	{
-		monitor.GET("/queryrange", controller.QueryRange)
-		monitor.GET("/query", controller.Query)
-		monitor.GET("/alert", controller.ListenALert)
-		monitor.POST("/alertmanager", controller.AlertMessageConfigHandler)
 	}
 
 	batchmanager := api.Group("batchmanager") // 批次
