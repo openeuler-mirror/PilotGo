@@ -69,7 +69,7 @@ func UserType(s string) int {
 }
 
 // 读取xlsx文件
-func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
+func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 	for _, sheet := range xlFile.Sheets {
 		for rowIndex, row := range sheet.Rows {
 			//跳过第一行表头信息
@@ -79,7 +79,11 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
 			userName := row.Cells[0].Value //1:用户名
 			phone := row.Cells[1].Value    //2：手机号
 			email := row.Cells[2].Value    //3：邮箱
-			if dao.IsEmailExist(email) {
+			EmailBool, err := dao.IsEmailExist(email)
+			if err != nil {
+				return nil, err
+			}
+			if EmailBool {
 				UserExit = append(UserExit, email)
 				continue
 			}
@@ -103,7 +107,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
 			dao.AddUser(u)
 		}
 	}
-	return UserExit
+	return UserExit, nil
 }
 
 func DeleteUser(Emails []string) error {
@@ -162,8 +166,11 @@ func UserAll() ([]model.ReturnUser, int) {
 func Login(user model.User) (string, string, int, int, string, error) {
 	email := user.Email
 	password := user.Password
-
-	if !dao.IsEmailExist(email) {
+	EmailBool, err := dao.IsEmailExist(email)
+	if err != nil {
+		return "", "", 0, 0, "", err
+	}
+	if !EmailBool {
 		return "", "", 0, 0, "", errors.New("用户不存在!")
 	}
 
@@ -204,7 +211,11 @@ func Register(user model.User) error {
 	if len(email) == 0 {
 		return errors.New("邮箱不能为空!")
 	}
-	if dao.IsEmailExist(email) {
+	EmailBool, err := dao.IsEmailExist(email)
+	if err != nil {
+		return err
+	}
+	if EmailBool {
 		return errors.New("邮箱已存在!")
 	}
 

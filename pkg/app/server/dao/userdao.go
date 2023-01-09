@@ -34,10 +34,13 @@ func AllUserRole() ([]model.UserRole, error) {
 }
 
 // 邮箱账户是否存在
-func IsEmailExist(email string) bool {
+func IsEmailExist(email string) (bool, error) {
 	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	return user.ID != 0
+	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user.ID != 0, err
+	}
+	return user.ID != 0, nil
 }
 
 // 查询数据库中账号密码、用户部门、部门ID、用户类型、用户角色
