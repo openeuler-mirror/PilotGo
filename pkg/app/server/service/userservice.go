@@ -224,7 +224,10 @@ func Register(user model.User) error {
 	return nil
 }
 
-func GetUserRole() []model.UserRole {
-	roles := dao.AllUserRole()
-	return roles
+func GetUserRole() ([]model.UserRole, error) {
+	roles, err := dao.AllUserRole()
+	if err != nil {
+		return roles, err
+	}
+	return roles, nil
 }
