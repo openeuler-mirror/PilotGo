@@ -15,7 +15,6 @@
 package dao
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -116,11 +115,14 @@ func UserAll() ([]model.ReturnUser, int, error) {
 }
 
 // 根据用户邮箱模糊查询
-func UserSearch(email string) ([]model.ReturnUser, int) {
+func UserSearch(email string) ([]model.ReturnUser, int, error) {
 	var users []model.User
 	var redisUser []model.ReturnUser
 
-	global.PILOTGO_DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users)
+	err := global.PILOTGO_DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users).Error
+	if err != nil {
+		return redisUser, 0, err
+	}
 	totals := len(users)
 	for _, user := range users {
 		var roles []string
@@ -130,7 +132,10 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 		for _, id := range roleId {
 			userRole := model.UserRole{}
 			i, _ := strconv.Atoi(id)
-			global.PILOTGO_DB.Where("id = ?", i).Find(&userRole)
+			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
+			if err != nil {
+				return redisUser, totals, err
+			}
 			role := userRole.Role
 			roles = append(roles, role)
 		}
@@ -147,25 +152,32 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 		}
 		redisUser = append(redisUser, u)
 	}
-	return redisUser, totals
+	return redisUser, totals, nil
 }
 
 // 重置密码
 func ResetPassword(email string) (model.User, error) {
 	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	if user.ID != 0 {
-		global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", "123456")
-		return user, nil
+	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user, err
 	} else {
-		return user, fmt.Errorf("无此用户")
+		err := global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", "123456").Error
+		if err != nil {
+			return user, err
+		}
+		return user, nil
 	}
 }
 
 // 删除用户
-func DeleteUser(email string) {
+func DeleteUser(email string) error {
 	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user)
+	err := global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // 修改用户的部门信息
