@@ -112,7 +112,9 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 
 func DeleteUser(Emails []string) error {
 	for _, userEmail := range Emails {
-		dao.DeleteUser(userEmail)
+		if err := dao.DeleteUser(userEmail); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -153,7 +155,7 @@ func ResetPassword(email string) (model.User, error) {
 }
 
 func UserSearch(email string, query *model.PaginationQ) (interface{}, int, error) {
-	users, total := dao.UserSearch(email)
+	users, total, err := dao.UserSearch(email)
 	data, err := DataPaging(query, users, total)
 	if err != nil {
 		return nil, 0, err
