@@ -31,4 +31,4 @@ $ :set ff=unix
 $ :wq    #问题解决
 ```
 
-脚本执行过程中会检查golang、nodejs是否满足编译和执行的版本要求；将前端和后端server、agent打包成二进制；将二进制文件以及启动所需的必要文件`config_agent.yml`、`config_server.yml`、`alert.rules`等文件进行打包，生成tar.gz压缩包文件。
+脚本执行过程中会检查golang、nodejs是否满足编译和执行的版本要求；将前端和后端server、agent打包成二进制；将二进制文件以及启动所需的必要文件`config_agent.yml`、`config_server.yml`等文件进行打包，生成tar.gz压缩包文件。

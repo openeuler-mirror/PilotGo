@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-18 15:16:10
+ * LastEditTime: 2023-01-09 15:00:34
  * Description: server main
  ******************************************************************************/
 package main
@@ -56,12 +56,6 @@ func main() {
 
 	// 鉴权模块初始化
 	global.PILOTGO_E = service.Casbin(&sconfig.Config().MysqlDBinfo)
-
-	// 监控初始化
-	if err := initialization.MonitorInit(&sconfig.Config().Monitor); err != nil {
-		logger.Error("monitor init failed: %s", err)
-		os.Exit(-1)
-	}
 
 	// 启动agent socket server
 	if err := initialization.SocketServerInit(&sconfig.Config().SocketServer); err != nil {

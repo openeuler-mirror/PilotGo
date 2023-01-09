@@ -4,11 +4,6 @@ http_server:
   max_age: 1800
 socket_server:
   addr: 0.0.0.0:8889
-monitor:
-  prometheus_addr: localhost:9090
-  alertmanager_addr: localhost:9093
-  alert_rules_path: /etc/prometheus/alert.rules
-  prometheus_yml_path: /etc/prometheus/prometheus.yml
 log:
   level: debug
   driver: stdout    #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。
