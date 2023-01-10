@@ -41,7 +41,7 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error)
 	return roleID, userType, nil
 }
 
-// 根绝id获取该角色的所有信息
+// 根据id获取该角色的所有信息
 func RoleIdToGetAllInfo(roleid int) (model.UserRole, error) {
 	var role model.UserRole
 	err := global.PILOTGO_DB.Where("id=?", roleid).Find(&role).Error
@@ -52,10 +52,10 @@ func RoleIdToGetAllInfo(roleid int) (model.UserRole, error) {
 }
 
 // 登录用户的权限按钮
-func PermissionButtons(button string) interface{} {
+func PermissionButtons(button string) (interface{}, error) {
 	var buttons []string
 	if len(button) == 0 {
-		return []interface{}{}
+		return []interface{}{}, nil
 	}
 	IDs := strings.Split(button, ",")
 
@@ -65,11 +65,14 @@ func PermissionButtons(button string) interface{} {
 		if err != nil {
 			panic(err)
 		}
-		global.PILOTGO_DB.Where("id = ?", i).Find(&SubButton)
+		err = global.PILOTGO_DB.Where("id = ?", i).Find(&SubButton).Error
+		if err != nil {
+			return buttons, err
+		}
 		button := SubButton.Button
 		buttons = append(buttons, button)
 	}
-	return buttons
+	return buttons, nil
 }
 
 // 获取所有的用户角色

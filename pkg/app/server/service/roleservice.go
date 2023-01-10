@@ -40,7 +40,10 @@ func GetLoginUserPermission(Roleid model.RoleID) (model.UserRole, interface{}, e
 	if err != nil {
 		return userRole, nil, err
 	}
-	buttons := dao.PermissionButtons(userRole.ButtonID)
+	buttons, err := dao.PermissionButtons(userRole.ButtonID)
+	if err != nil {
+		return userRole, buttons, err
+	}
 	return userRole, buttons, nil
 }
 
