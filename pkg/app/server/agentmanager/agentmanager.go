@@ -116,8 +116,12 @@ func AddAgents2DB(a *Agent) {
 		return
 	}
 	agentOS := strings.Split(agent_OS.(string), ";")
-
-	if dao.IsUUIDExist(a.UUID) {
+	UUIDExistbool, err := dao.IsUUIDExist(a.UUID)
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	if UUIDExistbool {
 		logger.Warn("机器%s已经存在!", agentOS[0])
 		departId := dao.UUIDForDepartId(a.UUID)
 		if departId != global.UncateloguedDepartId {

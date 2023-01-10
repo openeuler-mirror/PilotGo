@@ -8,7 +8,11 @@ import (
 )
 
 func AddConfigFile(cf model.ConfigFile) error {
-	if IsUUIDExist(cf.MachineUUID) {
+	UUIDExistbool, err := IsUUIDExist(cf.MachineUUID)
+	if err != nil {
+		return err
+	}
+	if UUIDExistbool {
 		global.PILOTGO_DB.Save(&cf)
 		return nil
 	}
