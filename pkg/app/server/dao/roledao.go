@@ -42,10 +42,13 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error)
 }
 
 // 根绝id获取该角色的所有信息
-func RoleIdToGetAllInfo(roleid int) model.UserRole {
+func RoleIdToGetAllInfo(roleid int) (model.UserRole, error) {
 	var role model.UserRole
-	global.PILOTGO_DB.Where("id=?", roleid).Find(&role)
-	return role
+	err := global.PILOTGO_DB.Where("id=?", roleid).Find(&role).Error
+	if err != nil {
+		return role, err
+	}
+	return role, nil
 }
 
 // 登录用户的权限按钮
