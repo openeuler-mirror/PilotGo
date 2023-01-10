@@ -8,10 +8,13 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func IsExistName(name string) bool {
+func IsExistName(name string) (bool, error) {
 	var batch model.Batch
-	global.PILOTGO_DB.Where("name=?", name).Find(&batch)
-	return batch.ID != 0
+	err := global.PILOTGO_DB.Where("name=?", name).Find(&batch).Error
+	if err != nil {
+		return batch.ID != 0, err
+	}
+	return batch.ID != 0, nil
 }
 func IsExistID(id int) bool {
 	var batch model.Batch
