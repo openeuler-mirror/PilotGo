@@ -29,8 +29,8 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 		return errors.New("请输入批次名称")
 	}
 
-	if dao.IsExistName(batchinfo.Name) {
-		return errors.New("已存在该名称批次")
+	if _, err := dao.IsExistName(batchinfo.Name); err != nil {
+		return err
 	}
 
 	if len(batchinfo.Manager) == 0 {
