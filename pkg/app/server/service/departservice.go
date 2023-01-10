@@ -170,7 +170,11 @@ func AddDepart(newDepart *model.AddDepart) error {
 	if dao.IsDepartNodeExist(parentDepart, depart) {
 		return errors.New("该部门节点已存在")
 	}
-	if len(parentDepart) != 0 && !dao.IsParentDepartExist(parentDepart) {
+	ParentDepartExistBool, err := dao.IsParentDepartExist(parentDepart)
+	if err != nil {
+		return err
+	}
+	if len(parentDepart) != 0 && !ParentDepartExistBool {
 		return errors.New("该部门上级部门不存在")
 	}
 	if len(depart) == 0 {
