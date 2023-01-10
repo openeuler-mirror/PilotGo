@@ -21,10 +21,13 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-func IsUUIDExist(uuid string) bool {
+func IsUUIDExist(uuid string) (bool, error) {
 	var Machine model.MachineNode
-	global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine)
-	return Machine.DepartId != 0
+	err := global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine).Error
+	if err != nil {
+		return Machine.DepartId != 0, err
+	}
+	return Machine.DepartId != 0, nil
 }
 
 // 根据uuid获取部门id
@@ -174,7 +177,11 @@ func UUID2MacIP(uuid string) (ip string) {
 // 使用uuid删除机器
 func DeleteMachine(machinedeluuid string) (err error) {
 	var machine model.MachineNode
-	if IsUUIDExist(machinedeluuid) {
+	UUIDExistbool, err := IsUUIDExist(machinedeluuid)
+	if err != nil {
+		return err
+	}
+	if UUIDExistbool {
 		if err := global.PILOTGO_DB.Where("machine_uuid=?", machinedeluuid).Unscoped().Delete(machine).Error; err != nil {
 			return err
 		}
