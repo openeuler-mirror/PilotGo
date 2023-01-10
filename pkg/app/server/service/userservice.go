@@ -90,9 +90,12 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 			departName := row.Cells[3].Value       //4：部门
 			pid, id := dao.GetPidAndId(departName) // 部门对应的PId和Id
 
-			userRole := row.Cells[4].Value                          // 5：角色
-			roleId, user_type := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
-			password := global.DefaultUserPassword                  // 设置默认密码为123456
+			userRole := row.Cells[4].Value                               // 5：角色
+			roleId, user_type, err := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
+			if err != nil {
+				return UserExit, err
+			}
+			password := global.DefaultUserPassword // 设置默认密码为123456
 			u := model.User{
 				Username:     userName,
 				Phone:        phone,
@@ -104,7 +107,10 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				UserType:     user_type,
 				RoleID:       roleId,
 			}
-			dao.AddUser(u)
+			err = dao.AddUser(u)
+			if err != nil {
+				return UserExit, err
+			}
 		}
 	}
 	return UserExit, nil
@@ -132,7 +138,10 @@ func UpdateUser(user model.User) (model.User, error) {
 	}
 
 	if u.DepartName != departName && u.Phone != phone {
-		dao.UpdateUserDepart(email, departName, Pid, id)
+		err := dao.UpdateUserDepart(email, departName, Pid, id)
+		if err != nil {
+			return u, err
+		}
 		dao.UpdateUserPhone(email, phone)
 		return u, nil
 	}
@@ -141,7 +150,10 @@ func UpdateUser(user model.User) (model.User, error) {
 		return u, nil
 	}
 	if u.DepartName != departName && u.Phone == phone {
-		dao.UpdateUserDepart(email, departName, Pid, id)
+		err := dao.UpdateUserDepart(email, departName, Pid, id)
+		if err != nil {
+			return u, err
+		}
 	}
 	return u, nil
 }
@@ -243,7 +255,10 @@ func Register(user model.User) error {
 		UserType:     user_type,
 		RoleID:       roleId,
 	}
-	dao.AddUser(user)
+	err = dao.AddUser(user)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
