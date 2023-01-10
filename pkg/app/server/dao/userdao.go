@@ -181,28 +181,28 @@ func DeleteUser(email string) error {
 }
 
 // 修改用户的部门信息
-func UpdateUserDepart(email, departName string, Pid, id int) {
+func UpdateUserDepart(email, departName string, Pid, id int) error {
 	var user model.User
 	u := model.User{
 		DepartFirst:  Pid,
 		DepartSecond: id,
 		DepartName:   departName,
 	}
-	global.PILOTGO_DB.Model(&user).Where("email=?", email).Updates(&u)
+	return global.PILOTGO_DB.Model(&user).Where("email=?", email).Updates(&u).Error
 }
 
 // 添加用户
-func AddUser(u model.User) {
-	global.PILOTGO_DB.Save(&u)
+func AddUser(u model.User) error {
+	return global.PILOTGO_DB.Save(&u).Error
 }
 
 // 修改手机号
-func UpdateUserPhone(email, phone string) {
+func UpdateUserPhone(email, phone string) error {
 	var user model.User
-	global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("phone", phone)
+	return global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("phone", phone).Error
 }
 
-func DelUser(deptId int) {
+func DelUser(deptId int) error {
 	var user model.User
-	global.PILOTGO_DB.Where("depart_second=?", deptId).Unscoped().Delete(user)
+	return global.PILOTGO_DB.Where("depart_second=?", deptId).Unscoped().Delete(user).Error
 }
