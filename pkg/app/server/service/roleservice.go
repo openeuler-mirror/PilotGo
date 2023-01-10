@@ -36,7 +36,10 @@ func RoleId(R model.RoleID) int {
 
 func GetLoginUserPermission(Roleid model.RoleID) (model.UserRole, interface{}, error) {
 	roleId := RoleId(Roleid) //用户的最高权限
-	userRole := dao.RoleIdToGetAllInfo(roleId)
+	userRole, err := dao.RoleIdToGetAllInfo(roleId)
+	if err != nil {
+		return userRole, nil, err
+	}
 	buttons := dao.PermissionButtons(userRole.ButtonID)
 	return userRole, buttons, nil
 }
@@ -71,7 +74,10 @@ func UpdateUserRole(UserRole *model.UserRole) error {
 	id := UserRole.ID
 	role := UserRole.Role
 	description := UserRole.Description
-	userRole := dao.RoleIdToGetAllInfo(id)
+	userRole, err := dao.RoleIdToGetAllInfo(id)
+	if err != nil {
+		return err
+	}
 	if userRole.Role != role && userRole.Description != description {
 		dao.UpdateRoleName(id, role)
 		dao.UpdateRoleDescription(id, description)
