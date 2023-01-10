@@ -22,16 +22,23 @@ func AddScript(s model.Script) error {
 }
 
 // 根据脚本版本号查询文件是否存在
-func IsVersionExist(scriptversion string) bool {
+func IsVersionExist(scriptversion string) (bool, error) {
 	var script model.Script
-	global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script)
-	return script.Deleted == 0
+	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
+	if err != nil {
+		return script.Deleted == 0, err
+	}
+	return script.Deleted == 0, nil
 }
 
 // 根据版本号删除文件（将标志位变为1）
 func DeleteScript(scriptversion string) error {
 	var script model.Script
-	if IsVersionExist(scriptversion) {
+	VersionExistBool, err := IsVersionExist(scriptversion)
+	if err != nil {
+		return err
+	}
+	if VersionExistBool {
 		if err := global.PILOTGO_DB.Model(&script).Where("version=?", scriptversion).Update("deleted", 1).Error; err != nil {
 			return err
 		}
