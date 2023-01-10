@@ -7,25 +7,28 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-//添加脚本文件
+// 添加脚本文件
 func AddScript(s model.Script) error {
 	fmt.Println("jjinru daoceng")
 	version := s.Version
 	if len(version) == 0 {
 		return fmt.Errorf("版本号不能为空")
 	}
-	global.PILOTGO_DB.Save(&s)
+	err := global.PILOTGO_DB.Save(&s).Error
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-//根据脚本版本号查询文件是否存在
+// 根据脚本版本号查询文件是否存在
 func IsVersionExist(scriptversion string) bool {
 	var script model.Script
 	global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script)
 	return script.Deleted == 0
 }
 
-//根据版本号删除文件（将标志位变为1）
+// 根据版本号删除文件（将标志位变为1）
 func DeleteScript(scriptversion string) error {
 	var script model.Script
 	if IsVersionExist(scriptversion) {
@@ -37,7 +40,7 @@ func DeleteScript(scriptversion string) error {
 	return fmt.Errorf("脚本不存在")
 }
 
-//根据版本号查询脚本文件内容
+// 根据版本号查询脚本文件内容
 func ShowScript(scriptversion string) string {
 	var script model.Script
 	global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script)

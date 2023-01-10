@@ -214,7 +214,10 @@ func DeleteDepartData(DelDept *model.DeleteDepart) error {
 
 	DepartInfo := dao.Pid2Depart(DelDept.DepartID)
 	DeleteDepartNode(DepartInfo, DelDept.DepartID)
-	dao.DelUser(DelDept.DepartID)
+	err := dao.DelUser(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
