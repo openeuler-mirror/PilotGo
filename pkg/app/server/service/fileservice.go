@@ -173,8 +173,8 @@ func UpdateFile(file *model.Files) error {
 	description := file.Description
 	batchId := file.ControlledBatch
 	text := file.File
-	if !dao.IsExistId(file.ID) {
-		return errors.New("id有误,请重新确认该文件是否存在")
+	if _, err := dao.IsExistId(file.ID); err != nil {
+		return err
 	}
 	if ok, lastfileId, fileName := dao.IsExistFileLatest(id); ok {
 		fname := strings.Split(fileName, "-")

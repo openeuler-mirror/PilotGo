@@ -20,10 +20,13 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-func IsParentDepartExist(parent string) bool {
+func IsParentDepartExist(parent string) (bool, error) {
 	var Depart model.DepartNode
-	global.PILOTGO_DB.Where("depart=? ", parent).Find(&Depart)
-	return Depart.ID != 0
+	err := global.PILOTGO_DB.Where("depart=? ", parent).Find(&Depart).Error
+	if err != nil {
+		return Depart.ID != 0, err
+	}
+	return Depart.ID != 0, nil
 }
 func IsDepartNodeExist(parent string, depart string) bool {
 	var Depart model.DepartNode

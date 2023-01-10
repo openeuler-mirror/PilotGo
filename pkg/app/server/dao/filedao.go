@@ -21,10 +21,13 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-func IsExistId(id int) bool {
+func IsExistId(id int) (bool, error) {
 	var file model.Files
-	global.PILOTGO_DB.Where("id=?", id).Find(&file)
-	return file.ID != 0
+	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
+	if err != nil {
+		return file.ID != 0, err
+	}
+	return file.ID != 0, nil
 }
 
 func IsExistFile(filename string) bool {
