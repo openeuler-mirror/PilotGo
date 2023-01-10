@@ -28,11 +28,13 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 	if len(batchinfo.Name) == 0 {
 		return errors.New("请输入批次名称")
 	}
-
-	if _, err := dao.IsExistName(batchinfo.Name); err != nil {
+	ExistNameBool, err := dao.IsExistName(batchinfo.Name)
+	if err != nil {
 		return err
 	}
-
+	if ExistNameBool {
+		return errors.New("已存在该名称批次")
+	}
 	if len(batchinfo.Manager) == 0 {
 		return errors.New("创建人未输入")
 	}

@@ -142,11 +142,17 @@ func UpdateUser(user model.User) (model.User, error) {
 		if err != nil {
 			return u, err
 		}
-		dao.UpdateUserPhone(email, phone)
+		err = dao.UpdateUserPhone(email, phone)
+		if err != nil {
+			return u, err
+		}
 		return u, nil
 	}
 	if u.DepartName == departName && u.Phone != phone {
-		dao.UpdateUserPhone(email, phone)
+		err = dao.UpdateUserPhone(email, phone)
+		if err != nil {
+			return u, err
+		}
 		return u, nil
 	}
 	if u.DepartName != departName && u.Phone == phone {
