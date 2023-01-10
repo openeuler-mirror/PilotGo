@@ -48,7 +48,10 @@ func GetLoginUserPermission(Roleid model.RoleID) (model.UserRole, interface{}, e
 }
 
 func GetRoles(query *model.PaginationQ) (int, interface{}, error) {
-	roles, total := dao.GetAllRoles()
+	roles, total, err := dao.GetAllRoles()
+	if err != nil {
+		return total, nil, err
+	}
 	data, err := DataPaging(query, roles, total)
 	if err != nil {
 		return total, data, err
