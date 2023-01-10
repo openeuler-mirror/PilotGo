@@ -76,10 +76,13 @@ func PermissionButtons(button string) (interface{}, error) {
 }
 
 // 获取所有的用户角色
-func GetAllRoles() ([]model.ReturnUserRole, int) {
+func GetAllRoles() ([]model.ReturnUserRole, int, error) {
 	var roles []model.UserRole
 	var getRole []model.ReturnUserRole
-	global.PILOTGO_DB.Order("id desc").Find(&roles)
+	err := global.PILOTGO_DB.Order("id desc").Find(&roles).Error
+	if err != nil {
+		return getRole, 0, err
+	}
 	total := len(roles)
 
 	for _, role := range roles {
@@ -102,7 +105,10 @@ func GetAllRoles() ([]model.ReturnUserRole, int) {
 			for _, button := range buttonss {
 				var but model.RoleButton
 				i, _ := strconv.Atoi(button)
-				global.PILOTGO_DB.Where("id=?", i).Find(&but)
+				err := global.PILOTGO_DB.Where("id=?", i).Find(&but).Error
+				if err != nil {
+					return getRole, total, err
+				}
 				buts = append(buts, but.Button)
 			}
 			r := model.ReturnUserRole{
@@ -116,7 +122,7 @@ func GetAllRoles() ([]model.ReturnUserRole, int) {
 			getRole = append(getRole, r)
 		}
 	}
-	return getRole, total
+	return getRole, total, nil
 }
 
 // 新增角色
