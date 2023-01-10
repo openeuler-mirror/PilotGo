@@ -25,9 +25,12 @@ import (
 )
 
 // 根据角色名称返回角色id和用户类型
-func GetRoleIdAndUserType(role string) (roleId string, user_type int) {
+func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error) {
 	var Role model.UserRole
-	global.PILOTGO_DB.Where("role = ?", role).Find(&Role)
+	err = global.PILOTGO_DB.Where("role = ?", role).Find(&Role).Error
+	if err != nil {
+		return "", 0, err
+	}
 	roleID := strconv.Itoa(Role.ID)
 	var userType int
 	if Role.ID > global.OrdinaryUserRoleId {
@@ -35,7 +38,7 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int) {
 	} else {
 		userType = Role.ID - 1
 	}
-	return roleID, userType
+	return roleID, userType, nil
 }
 
 // 根绝id获取该角色的所有信息
