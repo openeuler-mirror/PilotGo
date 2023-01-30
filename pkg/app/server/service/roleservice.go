@@ -68,8 +68,15 @@ func AddUserRole(userRole *model.UserRole) error {
 }
 
 func DeleteUserRole(ID int) error {
-	if ok := dao.IsUserBindingRole(ID); !ok {
-		dao.DeleteRole(ID)
+	ok, err := dao.IsUserBindingRole(ID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		err := dao.DeleteRole(ID)
+		if err != nil {
+			return err
+		}
 		return nil
 	} else {
 		return errors.New("有用户绑定此角色，不可删除")
@@ -85,22 +92,37 @@ func UpdateUserRole(UserRole *model.UserRole) error {
 		return err
 	}
 	if userRole.Role != role && userRole.Description != description {
-		dao.UpdateRoleName(id, role)
-		dao.UpdateRoleDescription(id, description)
+		err = dao.UpdateRoleName(id, role)
+		if err != nil {
+			return err
+		}
+		err = dao.UpdateRoleDescription(id, description)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	if userRole.Role == role && userRole.Description != description {
-		dao.UpdateRoleDescription(id, description)
+		err = dao.UpdateRoleDescription(id, description)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	if userRole.Role != role && userRole.Description == description {
-		dao.UpdateRoleName(id, role)
+		err = dao.UpdateRoleName(id, role)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	return errors.New("没有修改信息")
 }
 
 func RolePermissionChange(roleChange model.RolePermissionChange) (*model.UserRole, error) {
-	userRole := dao.UpdateRolePermission(roleChange)
+	userRole, err := dao.UpdateRolePermission(roleChange)
+	if err != nil {
+		return &userRole, err
+	}
 	return &userRole, nil
 }
