@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-07-01 16:12:16
+ LastEditTime: 2023-01-30 16:12:44
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -119,10 +119,8 @@ export default {
       }
     },
     socketUrl() {
-      let hostPort = Config.dev.proxyTable['/api/v1'].target.split('//')[1];
-      hostPort = hostPort === 'localhost:8888' ? this.$store.getters.serverUrl : hostPort;
       return (location.protocol === "http:" ? "ws" : "wss") + "://" +
-        hostPort +
+        location.host +
         "/event";
     }
   },
