@@ -136,44 +136,57 @@ func AddRole(r model.UserRole) error {
 		Type:        r.Type,
 		Description: r.Description,
 	}
-	global.PILOTGO_DB.Save(&userRole)
-	return nil
+	return global.PILOTGO_DB.Save(&userRole).Error
 }
 
 // 是否有用户绑定某角色
-func IsUserBindingRole(roleId int) bool {
+func IsUserBindingRole(roleId int) (bool, error) {
 	var users []model.User
-	global.PILOTGO_DB.Find(&users)
+	err := global.PILOTGO_DB.Find(&users).Error
+	if err != nil {
+		return false, err
+	}
 	for _, user := range users {
 		id := user.RoleID
 		if find := strings.Contains(id, strconv.Itoa(roleId)); find {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 // 删除用户角色
-func DeleteRole(roleId int) {
+func DeleteRole(roleId int) error {
 	var UserRole model.UserRole
-	global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole)
+	err := global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // 修改角色名称
-func UpdateRoleName(roleId int, name string) {
+func UpdateRoleName(roleId int, name string) error {
 	var UserRole model.UserRole
-	global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name)
+	err := global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // 修改角色描述
-func UpdateRoleDescription(roleId int, desc string) {
+func UpdateRoleDescription(roleId int, desc string) error {
 	var UserRole model.UserRole
-	global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc)
-
+	err := global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // 变更用户角色权限
-func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole {
+func UpdateRolePermission(permission model.RolePermissionChange) (model.UserRole, error) {
 	var userRole model.UserRole
 	// 数组切片转为string
 	menus := strings.Replace(strings.Trim(fmt.Sprint(permission.Menus), "[]"), " ", ",", -1)
@@ -183,8 +196,11 @@ func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole 
 		Menus:    menus,
 		ButtonID: buttonId,
 	}
-	global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r)
-	return userRole
+	err := global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r).Error
+	if err != nil {
+		return userRole, err
+	}
+	return userRole, nil
 }
 
 // 创建超级管理员账户
