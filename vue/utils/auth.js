@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-06-27 14:29:10
+ * @LastEditTime: 2023-01-30 17:26:15
  * @Description: provide agent log manager of pilotgo
  */
 import Cookies from 'js-cookie'
@@ -25,8 +25,6 @@ const UserType = 'UserType'
 const UserDepartId = "UserDepartId"
 
 const UserDepartName = 'UserDepartName'
-
-const ServerUrl = 'ServerUrl'
 
 
 const whileList = [
@@ -118,20 +116,6 @@ export function setUserDepartName(userDepartName) {
 
 export function removeUserDepartName() {
     return Cookies.remove(UserDepartName)
-}
-
-export function getServerUrl() {
-    return Cookies.get(ServerUrl)
-}
-
-export function setServerUrl(url) {
-    if (url) {
-        return Cookies.set(ServerUrl, url)
-    }
-}
-
-export function removeServerUrl() {
-    return Cookies.remove(ServerUrl)
 }
 
 export function hasPermission(menus, to) {
