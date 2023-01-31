@@ -90,7 +90,6 @@ func (a *Agent) startListen() {
 			err := dao.MachineStatusToOffline(a.UUID)
 			if err != nil {
 				logger.Error(err.Error())
-				return
 			}
 			DeleteAgent(a.UUID)
 			str := "agent机器" + dao.UUID2MacIP(a.UUID) + "已断开连接"

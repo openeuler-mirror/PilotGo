@@ -123,7 +123,10 @@ func MachineList(DepId int) ([]model.Res, error) {
 	var departId []int
 	ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)
-	machinelist1 := dao.MachineList(departId)
+	machinelist1, err := dao.MachineList(departId)
+	if err != nil {
+		return machinelist1, err
+	}
 	return machinelist1, nil
 }
 
@@ -201,20 +204,32 @@ func DeleteDepartData(DelDept *model.DeleteDepart) error {
 	if !dao.IsDepartIDExist(DelDept.DepartID) {
 		return errors.New("不存在该机器")
 	}
-
-	for _, mac := range dao.MachineStore(DelDept.DepartID) {
-		dao.ModifyMachineDepart2(mac.ID, global.UncateloguedDepartId)
+	macli, err := dao.MachineStore(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
+	for _, mac := range macli {
+		err := dao.ModifyMachineDepart2(mac.ID, global.UncateloguedDepartId)
+		if err != nil {
+			return err
+		}
 	}
 	for _, depart := range dao.SubDepartId(DelDept.DepartID) {
-		machine := dao.MachineStore(depart)
+		machine, err := dao.MachineStore(depart)
+		if err != nil {
+			return err
+		}
 		for _, m := range machine {
-			dao.ModifyMachineDepart2(m.ID, global.UncateloguedDepartId)
+			err := dao.ModifyMachineDepart2(m.ID, global.UncateloguedDepartId)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	DepartInfo := dao.Pid2Depart(DelDept.DepartID)
 	DeleteDepartNode(DepartInfo, DelDept.DepartID)
-	err := dao.DelUser(DelDept.DepartID)
+	err = dao.DelUser(DelDept.DepartID)
 	if err != nil {
 		return err
 	}
@@ -234,7 +249,10 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 		ResIds[index], _ = strconv.Atoi(val)
 	}
 	for _, id := range ResIds {
-		dao.ModifyMachineDepart(id, DepartID)
+		err := dao.ModifyMachineDepart(id, DepartID)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

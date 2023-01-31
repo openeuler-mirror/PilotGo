@@ -10,8 +10,10 @@ func MachineInfo(depart *model.Depart, query *model.PaginationQ) (interface{}, i
 	var TheDeptAndSubDeptIds []int
 	ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
-	machinelist := dao.MachineList(TheDeptAndSubDeptIds)
-
+	machinelist, err := dao.MachineList(TheDeptAndSubDeptIds)
+	if err != nil {
+		return nil, 0, err
+	}
 	lens := len(machinelist)
 	data, err := DataPaging(query, machinelist, lens)
 	if err != nil {
