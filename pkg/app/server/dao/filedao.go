@@ -118,25 +118,36 @@ func SaveFile(file model.Files) error {
 	return global.PILOTGO_DB.Save(&file).Error
 }
 
-func FileText(id int) (text string) {
+func FileText(id int) (text string, err error) {
 	file := model.Files{}
-	global.PILOTGO_DB.Where("id = ?", id).Find(&file)
-	return file.File
+	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	if err != nil {
+		return file.File, err
+	}
+	return file.File, nil
 }
-func LastFileText(id int) (text string) {
+
+func LastFileText(id int) (text string, err error) {
 	file := model.HistoryFiles{}
-	global.PILOTGO_DB.Where("id = ?", id).Find(&file)
-	return file.File
+	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	if err != nil {
+		return file.File, err
+	}
+	return file.File, nil
 }
-func FindLastVersionFile(uuid, filename string) []model.HistoryFiles {
+
+func FindLastVersionFile(uuid, filename string) ([]model.HistoryFiles, error) {
 	var files []model.HistoryFiles
 	var lastfiles []model.HistoryFiles
 
-	global.PILOTGO_DB.Where("uuid = ? ", uuid).Find(&files)
+	err := global.PILOTGO_DB.Where("uuid = ? ", uuid).Find(&files).Error
+	if err != nil {
+		return lastfiles, err
+	}
 	for _, file := range files {
 		if ok := strings.Contains(file.FileName, filename); ok {
 			lastfiles = append(lastfiles, file)
 		}
 	}
-	return lastfiles
+	return lastfiles, nil
 }
