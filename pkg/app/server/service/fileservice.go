@@ -22,6 +22,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 获取时间的日期函数 => 20200426-17:36:04
@@ -155,14 +156,19 @@ func SaveFileToDatabase(file *model.Files) error {
 		TakeEffect:      file.TakeEffect,
 		File:            text,
 	}
-	dao.SaveFile(fd)
-	return nil
+	return dao.SaveFile(fd)
 }
 
 func DeleteFile(fileIds []int) error {
 	for _, fileId := range fileIds {
-		dao.DeleteFile(fileId)
-		dao.DeleteHistoryFile(fileId)
+		err := dao.DeleteFile(fileId)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		err = dao.DeleteHistoryFile(fileId)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	}
 	return nil
 }
@@ -193,7 +199,10 @@ func UpdateFile(file *model.Files) error {
 		f := model.HistoryFiles{
 			FileName: fname[0],
 		}
-		dao.UpdateLastFile(lastfileId, f)
+		err = dao.UpdateLastFile(lastfileId, f)
+		if err != nil {
+			return err
+		}
 	}
 	f := model.Files{
 		Type:            file.Type,
@@ -206,8 +215,7 @@ func UpdateFile(file *model.Files) error {
 		TakeEffect:      file.TakeEffect,
 		File:            text,
 	}
-	dao.UpdateFile(id, f)
-	return nil
+	return dao.UpdateFile(id, f)
 }
 
 func LastFileRollBack(file *model.RollBackFiles) error {
@@ -231,6 +239,5 @@ func LastFileRollBack(file *model.RollBackFiles) error {
 		UserDept:   userDept,
 		File:       lastfileText,
 	}
-	dao.UpdateFile(fileId, fd)
-	return nil
+	return dao.UpdateFile(fileId, fd)
 }
