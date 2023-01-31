@@ -87,35 +87,35 @@ func SaveLatestFile(id int) error {
 	return global.PILOTGO_DB.Save(&lastversion).Error
 }
 
-func UpdateFile(id int, f model.Files) {
+func UpdateFile(id int, f model.Files) error {
 	var file model.Files
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f)
+	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
-func UpdateLastFile(id int, f model.HistoryFiles) {
+func UpdateLastFile(id int, f model.HistoryFiles) error {
 	var file model.HistoryFiles
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f)
+	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
-func RollBackFile(id int, text string) {
+func RollBackFile(id int, text string) error {
 	var file model.Files
 	fd := model.Files{
 		File: text,
 	}
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&fd)
+	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&fd).Error
 }
-func DeleteFile(id int) {
+func DeleteFile(id int) error {
 	var file model.Files
-	global.PILOTGO_DB.Where("id = ?", id).Unscoped().Delete(file)
+	return global.PILOTGO_DB.Where("id = ?", id).Unscoped().Delete(file).Error
 }
 
-func DeleteHistoryFile(filePId int) {
+func DeleteHistoryFile(filePId int) error {
 	var file model.HistoryFiles
-	global.PILOTGO_DB.Where("file_id = ?", filePId).Unscoped().Delete(file)
+	return global.PILOTGO_DB.Where("file_id = ?", filePId).Unscoped().Delete(file).Error
 }
 
-func SaveFile(file model.Files) {
-	global.PILOTGO_DB.Save(&file)
+func SaveFile(file model.Files) error {
+	return global.PILOTGO_DB.Save(&file).Error
 }
 
 func FileText(id int) (text string) {
