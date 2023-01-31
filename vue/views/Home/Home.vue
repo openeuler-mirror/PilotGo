@@ -65,7 +65,6 @@
 import SidebarItem from "./components/SidebarItem";
 import BreadCrumb from "./components/BreadCrumb";
 import TagsView from "./components/TagsView";
-import Config from '../../../config/index.js'; //Config.dev.proxyTable['/'].target.split('//')[1]
 export default {
   name: "Home",
   components: {
