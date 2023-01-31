@@ -123,11 +123,23 @@ func AddAgents2DB(a *Agent) {
 	}
 	if UUIDExistbool {
 		logger.Warn("机器%s已经存在!", agentOS[0])
-		departId := dao.UUIDForDepartId(a.UUID)
+		departId, err := dao.UUIDForDepartId(a.UUID)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
 		if departId != global.UncateloguedDepartId {
-			dao.MachineStatusToNormal(a.UUID, agentOS[0])
+			err := dao.MachineStatusToNormal(a.UUID, agentOS[0])
+			if err != nil {
+				logger.Error(err.Error())
+				return
+			}
 		} else {
-			dao.MachineStatusToFree(a.UUID, agentOS[0])
+			err := dao.MachineStatusToFree(a.UUID, agentOS[0])
+			if err != nil {
+				logger.Error(err.Error())
+				return
+			}
 		}
 		return
 	}
@@ -140,5 +152,9 @@ func AddAgents2DB(a *Agent) {
 		CPU:         agentOS[3],
 		State:       global.Free,
 	}
-	dao.AddNewMachine(agent_list)
+	err = dao.AddNewMachine(agent_list)
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
 }
