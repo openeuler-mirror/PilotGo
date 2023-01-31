@@ -223,15 +223,17 @@ func LastFileRollBack(file *model.RollBackFiles) error {
 	fileId := file.FileID
 	user := file.UserUpdate
 	userDept := file.UserDept
-	lastfileText := dao.LastFileText(lastfileId)
-
+	lastfileText, err := dao.LastFileText(lastfileId)
+	if err != nil {
+		return err
+	}
 	if ok, _, _, err := dao.IsExistFileLatest(fileId); !ok {
 		if err != nil {
-			return nil
+			return err
 		}
 		err := dao.SaveLatestFile(fileId)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 	fd := model.Files{
