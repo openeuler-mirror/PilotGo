@@ -30,21 +30,27 @@ func IsExistId(id int) (bool, error) {
 	return file.ID != 0, nil
 }
 
-func IsExistFile(filename string) bool {
+func IsExistFile(filename string) (bool, error) {
 	var file model.Files
-	global.PILOTGO_DB.Where("file_name = ?", filename).Find(&file)
-	return file.ID != 0
+	err := global.PILOTGO_DB.Where("file_name = ?", filename).Find(&file).Error
+	if err != nil {
+		return file.ID != 0, err
+	}
+	return file.ID != 0, nil
 }
 
-func IsExistFileLatest(fileId int) (bool, int, string) {
+func IsExistFileLatest(fileId int) (bool, int, string, error) {
 	var files []model.HistoryFiles
-	global.PILOTGO_DB.Order("id desc").Where("file_id = ?", fileId).Find(&files)
+	err := global.PILOTGO_DB.Order("id desc").Where("file_id = ?", fileId).Find(&files).Error
+	if err != nil {
+		return false, 0, "", err
+	}
 	for _, file := range files {
 		if ok := strings.Contains(file.FileName, "latest"); ok {
-			return true, file.ID, file.FileName
+			return true, file.ID, file.FileName, nil
 		}
 	}
-	return false, 0, ""
+	return false, 0, "", nil
 }
 
 func SaveHistoryFile(id int) {
