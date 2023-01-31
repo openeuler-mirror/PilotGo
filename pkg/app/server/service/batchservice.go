@@ -54,7 +54,10 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 			ReturnSpecifiedDepart(ids, &Departids)
 		}
 
-		machines := dao.MachineList(Departids)
+		machines, err := dao.MachineList(Departids)
+		if err != nil {
+			return err
+		}
 		for _, mamachine := range machines {
 			machineids = append(machineids, mamachine.ID)
 		}
