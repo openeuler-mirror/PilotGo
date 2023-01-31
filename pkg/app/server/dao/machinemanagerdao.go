@@ -72,12 +72,15 @@ func AddNewMachine(Machine model.MachineNode) error {
 }
 
 // 获取该部门下的所有机器
-func MachineList(departId []int) (machinelist []model.Res) {
+func MachineList(departId []int) (machinelist []model.Res, err error) {
 	for _, value := range departId {
 		list := &[]model.Res{}
-		global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
+		err = global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
 			"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
+			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list).Error
+		if err != nil {
+			return
+		}
 		for _, value1 := range *list {
 			if value1.Departid == value {
 				machinelist = append(machinelist, value1)
@@ -87,15 +90,21 @@ func MachineList(departId []int) (machinelist []model.Res) {
 	return
 }
 
-func MachineStore(departid int) []model.MachineNode {
+func MachineStore(departid int) ([]model.MachineNode, error) {
 	var Machineinfo []model.MachineNode
-	global.PILOTGO_DB.Where("depart_id=?", departid).Find(&Machineinfo)
-	return Machineinfo
+	err := global.PILOTGO_DB.Where("depart_id=?", departid).Find(&Machineinfo).Error
+	if err != nil {
+		return Machineinfo, err
+	}
+	return Machineinfo, nil
 }
 
-func ModifyMachineDepart(MadId int, DeptId int) {
+func ModifyMachineDepart(MadId int, DeptId int) error {
 	var Machine model.MachineNode
-	global.PILOTGO_DB.Where("id=?", MadId).Find(&Machine)
+	err := global.PILOTGO_DB.Where("id=?", MadId).Find(&Machine).Error
+	if err != nil {
+		return err
+	}
 	var Ma model.MachineNode
 	if Machine.State == global.Free {
 		Ma = model.MachineNode{
@@ -114,15 +123,15 @@ func ModifyMachineDepart(MadId int, DeptId int) {
 			}
 		}
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
 }
-func ModifyMachineDepart2(MadId int, DeptId int) {
+func ModifyMachineDepart2(MadId int, DeptId int) error {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
 		DepartId: DeptId,
 		State:    global.Free,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
 }
 
 // 根据机器id获取机器信息
