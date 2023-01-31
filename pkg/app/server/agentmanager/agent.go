@@ -87,7 +87,11 @@ func (a *Agent) startListen() {
 		buff := make([]byte, 1024)
 		n, err := a.conn.Read(buff)
 		if err != nil {
-			dao.MachineStatusToOffline(a.UUID)
+			err := dao.MachineStatusToOffline(a.UUID)
+			if err != nil {
+				logger.Error(err.Error())
+				return
+			}
 			DeleteAgent(a.UUID)
 			str := "agent机器" + dao.UUID2MacIP(a.UUID) + "已断开连接"
 			logger.Error("%s", str)
@@ -1087,7 +1091,7 @@ func (a *Agent) GetTimeInfo() (interface{}, error) {
 	return resp_message.Data, nil
 }
 
-//监控配置文件
+// 监控配置文件
 func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -1102,7 +1106,7 @@ func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 	return nil
 }
 
-//监控文件信息回传
+// 监控文件信息回传
 func ConfigMessageInfo(Data interface{}) {
 	p, ok := Data.(map[string]interface{})
 	if ok {

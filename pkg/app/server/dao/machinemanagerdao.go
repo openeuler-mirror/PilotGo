@@ -31,44 +31,44 @@ func IsUUIDExist(uuid string) (bool, error) {
 }
 
 // 根据uuid获取部门id
-func UUIDForDepartId(uuid string) int {
+func UUIDForDepartId(uuid string) (int, error) {
 	var Machine model.MachineNode
-	global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine)
-	return Machine.DepartId
+	err := global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine).Error
+	return Machine.DepartId, err
 }
 
 // agent机器断开
-func MachineStatusToOffline(uuid string) {
+func MachineStatusToOffline(uuid string) error {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
 		State: global.OffLine,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
 }
 
 // agent机器未分配
-func MachineStatusToFree(uuid, ip string) {
+func MachineStatusToFree(uuid, ip string) error {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
 		State: global.Free,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
 }
 
 // agent机器连接正常
-func MachineStatusToNormal(uuid, ip string) {
+func MachineStatusToNormal(uuid, ip string) error {
 	var Machine model.MachineNode
 	Ma := model.MachineNode{
 		State: global.Normal,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
 }
 
 // 新增agent机器
-func AddNewMachine(Machine model.MachineNode) {
-	global.PILOTGO_DB.Save(&Machine)
+func AddNewMachine(Machine model.MachineNode) error {
+	return global.PILOTGO_DB.Save(&Machine).Error
 }
 
 // 获取该部门下的所有机器
