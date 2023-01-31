@@ -168,8 +168,10 @@ func DeleteFile(fileIds []int) error {
 }
 func UpdateFile(file *model.Files) error {
 	id := file.ID
-	dao.SaveHistoryFile(id)
-
+	err := dao.SaveHistoryFile(id)
+	if err != nil {
+		return err
+	}
 	user := file.UserUpdate
 	userDept := file.UserDept
 	filename := file.FileName
@@ -219,7 +221,10 @@ func LastFileRollBack(file *model.RollBackFiles) error {
 		if err != nil {
 			return nil
 		}
-		dao.SaveLatestFile(fileId)
+		err := dao.SaveLatestFile(fileId)
+		if err != nil {
+			return nil
+		}
 	}
 	fd := model.Files{
 		UserUpdate: user,
