@@ -119,8 +119,11 @@ func SaveFileToDatabase(file *model.Files) error {
 	if len(filepath) == 0 {
 		return errors.New("请输入下发文件路径")
 	}
-
-	if dao.IsExistFile(filename) {
+	temp, err := dao.IsExistFile(filename)
+	if err != nil {
+		return err
+	}
+	if temp {
 		return errors.New("文件名字已存在，请重新输入")
 	}
 
@@ -180,7 +183,10 @@ func UpdateFile(file *model.Files) error {
 	if !ExistIdBool {
 		return errors.New("id有误,请重新确认该文件是否存在")
 	}
-	if ok, lastfileId, fileName := dao.IsExistFileLatest(id); ok {
+	if ok, lastfileId, fileName, err := dao.IsExistFileLatest(id); ok {
+		if err != nil {
+			return err
+		}
 		fname := strings.Split(fileName, "-")
 		f := model.HistoryFiles{
 			FileName: fname[0],
@@ -209,7 +215,10 @@ func LastFileRollBack(file *model.RollBackFiles) error {
 	userDept := file.UserDept
 	lastfileText := dao.LastFileText(lastfileId)
 
-	if ok, _, _ := dao.IsExistFileLatest(fileId); !ok {
+	if ok, _, _, err := dao.IsExistFileLatest(fileId); !ok {
+		if err != nil {
+			return nil
+		}
 		dao.SaveLatestFile(fileId)
 	}
 	fd := model.Files{
