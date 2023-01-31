@@ -53,10 +53,12 @@ func IsExistFileLatest(fileId int) (bool, int, string, error) {
 	return false, 0, "", nil
 }
 
-func SaveHistoryFile(id int) {
+func SaveHistoryFile(id int) error {
 	var file model.Files
-	global.PILOTGO_DB.Where("id=?", id).Find(&file)
-
+	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
+	if err != nil {
+		return err
+	}
 	lastversion := model.HistoryFiles{
 		FileID:      id,
 		UserUpdate:  file.UserUpdate,
@@ -65,13 +67,15 @@ func SaveHistoryFile(id int) {
 		Description: file.Description,
 		File:        file.File,
 	}
-	global.PILOTGO_DB.Save(&lastversion)
+	return global.PILOTGO_DB.Save(&lastversion).Error
 }
 
-func SaveLatestFile(id int) {
+func SaveLatestFile(id int) error {
 	var file model.Files
-	global.PILOTGO_DB.Where("id = ?", id).Find(&file)
-
+	err := global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	if err != nil {
+		return err
+	}
 	lastversion := model.HistoryFiles{
 		FileID:      id,
 		UserUpdate:  file.UserUpdate,
@@ -80,7 +84,7 @@ func SaveLatestFile(id int) {
 		Description: file.Description,
 		File:        file.File,
 	}
-	global.PILOTGO_DB.Save(&lastversion)
+	return global.PILOTGO_DB.Save(&lastversion).Error
 }
 
 func UpdateFile(id int, f model.Files) {
