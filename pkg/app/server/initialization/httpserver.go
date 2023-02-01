@@ -25,9 +25,9 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-func HttpServerInit(conf *sconfig.HttpServer) (serverAddr string, err error) {
+func HttpServerInit(conf *sconfig.HttpServer) error {
 	if err := SessionManagerInit(conf); err != nil {
-		return "", err
+		return err
 	}
 
 	go func() {
@@ -45,13 +45,13 @@ func HttpServerInit(conf *sconfig.HttpServer) (serverAddr string, err error) {
 		pos := strings.Index(conf.Addr, ":")
 		dizhi := conf.Addr[:pos] + ":6060"
 		logger.Debug("start pprof service on: %s", dizhi)
-		err = http.ListenAndServe(dizhi, nil)
+		err := http.ListenAndServe(dizhi, nil)
 		if err != nil {
 			logger.Error("failed to start pprof, error:%v", err)
 		}
 	}()
 
-	return conf.Addr, nil
+	return nil
 }
 func SessionManagerInit(conf *sconfig.HttpServer) error {
 	var sessionManage service.SessionManage
