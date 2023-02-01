@@ -21,7 +21,6 @@ import (
 	"syscall"
 
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
@@ -64,8 +63,7 @@ func main() {
 	}
 
 	//此处启动前端及REST http server
-	serverAddr, err := initialization.HttpServerInit(&sconfig.Config().HttpServer)
-	controller.ServerAddr = serverAddr
+	err = initialization.HttpServerInit(&sconfig.Config().HttpServer)
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
