@@ -97,8 +97,10 @@ func InstallRpmHandler(c *gin.Context) {
 		DepartName: rpm.UserDeptName,
 		Type:       global.LogTypeRPM,
 	}
-	logParentId := dao.ParentAgentLog(logParent)
-
+	logParentId, err := dao.ParentAgentLog(logParent)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	StatusCodes := make([]string, 0)
 
 	for _, uuid := range rpm.UUIDs {
@@ -117,7 +119,9 @@ func InstallRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -134,8 +138,9 @@ func InstallRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
-			dao.AgentLog(log)
-
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
@@ -148,13 +153,17 @@ func InstallRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusOK,
 				Message:         "安装成功",
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 	status := service.BatchActionStatus(StatusCodes)
-	dao.UpdateParentAgentLog(logParentId, status)
+	if dao.UpdateParentAgentLog(logParentId, status) != nil {
+		logger.Error(err.Error())
+	}
 	if ok := service.ActionStatus(StatusCodes); !ok {
 		response.Fail(c, nil, "软件包安装失败")
 		return
@@ -170,8 +179,10 @@ func RemoveRpmHandler(c *gin.Context) {
 		DepartName: rpm.UserDeptName,
 		Type:       global.LogTypeRPM,
 	}
-	logParentId := dao.ParentAgentLog(logParent)
-
+	logParentId, err := dao.ParentAgentLog(logParent)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	StatusCodes := make([]string, 0)
 	for _, uuid := range rpm.UUIDs {
 
@@ -189,7 +200,9 @@ func RemoveRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -206,7 +219,9 @@ func RemoveRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -220,14 +235,18 @@ func RemoveRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusOK,
 				Message:         "卸载成功",
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 
 	status := service.BatchActionStatus(StatusCodes)
-	dao.UpdateParentAgentLog(logParentId, status)
+	if dao.UpdateParentAgentLog(logParentId, status) != nil {
+		logger.Error(err.Error())
+	}
 	if ok := service.ActionStatus(StatusCodes); !ok {
 		response.Fail(c, nil, "软件包卸载失败")
 		return

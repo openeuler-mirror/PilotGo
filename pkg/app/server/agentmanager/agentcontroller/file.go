@@ -90,8 +90,10 @@ func FileBroadcastToAgents(c *gin.Context) {
 		DepartName: fb.UserDept,
 		Type:       global.LogTypeBroadcast,
 	}
-	logParentId := dao.ParentAgentLog(logParent)
-
+	logParentId, err := dao.ParentAgentLog(logParent)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	StatusCodes := make([]string, 0)
 
 	for _, uuid := range UUIDs {
@@ -109,7 +111,9 @@ func FileBroadcastToAgents(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -126,7 +130,9 @@ func FileBroadcastToAgents(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -139,13 +145,17 @@ func FileBroadcastToAgents(c *gin.Context) {
 				StatusCode:      http.StatusOK,
 				Message:         "配置文件下发成功",
 			}
-			dao.AgentLog(log)
+			if dao.AgentLog(log) != nil {
+				logger.Error(err.Error())
+			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 	status := service.BatchActionStatus(StatusCodes)
-	dao.UpdateParentAgentLog(logParentId, status)
+	if dao.UpdateParentAgentLog(logParentId, status) != nil {
+		logger.Error(err.Error())
+	}
 	if ok := service.ActionStatus(StatusCodes); !ok {
 		response.Fail(c, nil, "配置文件下发失败")
 		return

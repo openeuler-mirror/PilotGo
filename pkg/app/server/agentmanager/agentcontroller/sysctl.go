@@ -53,8 +53,10 @@ func SysctlChangeHandler(c *gin.Context) {
 		DepartName: userDeptName,
 		Type:       global.LogTypeSysctl,
 	}
-	logParentId := dao.ParentAgentLog(logParent)
-
+	logParentId, err := dao.ParentAgentLog(logParent)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	agent := agentmanager.GetAgent(uuid)
 	UUID_iP, err := dao.UUID2MacIP(uuid)
 	if err != nil {
@@ -70,10 +72,14 @@ func SysctlChangeHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
-		dao.AgentLog(log)
+		if dao.AgentLog(log) != nil {
+			logger.Error(err.Error())
+		}
 		response.Fail(c, nil, "获取uuid失败")
 
-		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
+		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+			logger.Error(err.Error())
+		}
 		return
 	}
 
@@ -87,10 +93,13 @@ func SysctlChangeHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         err.Error(),
 		}
-		dao.AgentLog(log)
+		if dao.AgentLog(log) != nil {
+			logger.Error(err.Error())
+		}
 		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
-
-		dao.UpdateParentAgentLog(logParentId, global.ActionFalse)
+		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+			logger.Error(err.Error())
+		}
 		return
 	}
 	log := model.AgentLog{
@@ -101,9 +110,12 @@ func SysctlChangeHandler(c *gin.Context) {
 		StatusCode:      http.StatusOK,
 		Message:         "修改成功",
 	}
-	dao.AgentLog(log)
-	dao.UpdateParentAgentLog(logParentId, global.ActionOK)
-
+	if dao.AgentLog(log) != nil {
+		logger.Error(err.Error())
+	}
+	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
+		logger.Error(err.Error())
+	}
 	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")
 }
 func SysctlViewHandler(c *gin.Context) {

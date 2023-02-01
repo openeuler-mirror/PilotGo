@@ -21,6 +21,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 计算批量机器操作的状态：成功数，总数目，比率
@@ -49,15 +50,18 @@ func ActionStatus(StatusCodes []string) (ok bool) {
 	return true
 }
 
-//查询所有子日志
+// 查询所有子日志
 func AgentLogs(ids int) ([]model.AgentLog, error) {
-	return dao.Id2AgentLog(ids), nil
+	return dao.Id2AgentLog(ids)
 }
 
-//删除机器日志
+// 删除机器日志
 func DeleteLog(ids []int) error {
 	for _, value := range ids {
-		dao.DeleteLog(value)
+		err := dao.DeleteLog(value)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	}
 	return nil
 }

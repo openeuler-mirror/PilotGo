@@ -51,7 +51,6 @@ func OsBasic(c *gin.Context) {
 	ip, state, dept, err := dao.MachineBasic(uuid)
 	if err != nil {
 		response.Fail(c, gin.H{"IP": ip, "state": state, "depart": dept}, err.Error())
-
 	}
 	response.Success(c, gin.H{"IP": ip, "state": state, "depart": dept}, "Success")
 }
