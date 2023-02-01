@@ -23,6 +23,7 @@ import (
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // gorm分页查询方法
@@ -49,10 +50,14 @@ func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int64, e
 
 // 返回所有子部门id
 func ReturnSpecifiedDepart(id int, res *[]int) {
-	if len(dao.SubDepartId(id)) == 0 {
+	temp, err := dao.SubDepartId(id)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	if len(temp) == 0 {
 		return
 	}
-	for _, value := range dao.SubDepartId(id) {
+	for _, value := range temp {
 		*res = append(*res, value)
 		ReturnSpecifiedDepart(value, res)
 	}
