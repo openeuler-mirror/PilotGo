@@ -20,50 +20,50 @@ import (
 )
 
 // 任务名称是否存在
-func IsTaskNameExist(name string) bool {
+func IsTaskNameExist(name string) (bool, error) {
 	var cron model.CrontabList
-	global.PILOTGO_DB.Where("task_name=?", name).Find(&cron)
-	return cron.ID != 0
+	err := global.PILOTGO_DB.Where("task_name=?", name).Find(&cron).Error
+	return cron.ID != 0, err
 }
 
 // 判断任务状态
-func IsTaskStatus(id int, status bool) bool {
+func IsTaskStatus(id int, status bool) (bool, error) {
 	var cron model.CrontabList
-	global.PILOTGO_DB.Where("id = ?", id).Find(&cron)
-	return cron.Status == &status
+	err := global.PILOTGO_DB.Where("id = ?", id).Find(&cron).Error
+	return cron.Status == &status, err
 }
 
 // 新建定时任务
-func NewCron(c model.CrontabList) (id int) {
-	global.PILOTGO_DB.Save(&c)
-	return c.ID
+func NewCron(c model.CrontabList) (int, error) {
+	err := global.PILOTGO_DB.Save(&c).Error
+	return c.ID, err
 }
 
 // 删除任务
-func DeleteTask(id int) {
+func DeleteTask(id int) error {
 	var cron model.CrontabList
-	global.PILOTGO_DB.Where("id=?", id).Unscoped().Delete(cron)
+	return global.PILOTGO_DB.Where("id=?", id).Unscoped().Delete(cron).Error
 }
 
 // 更新任务
-func UpdateTask(id int, c model.CrontabList) {
+func UpdateTask(id int, c model.CrontabList) error {
 	var cron model.CrontabList
-	global.PILOTGO_DB.Model(&cron).Where("id=?", id).Updates(&c)
+	return global.PILOTGO_DB.Model(&cron).Where("id=?", id).Updates(&c).Error
 }
 
 // 任务状态更新
-func CronTaskStatus(id int, status bool) {
+func CronTaskStatus(id int, status bool) error {
 	var cron model.CrontabList
 	flag := !status
 	UpdateCron := model.CrontabList{
 		Status: &flag,
 	}
-	global.PILOTGO_DB.Model(&cron).Where("id=?", id).Updates(&UpdateCron)
+	return global.PILOTGO_DB.Model(&cron).Where("id=?", id).Updates(&UpdateCron).Error
 }
 
 // 根据任务id获取spec和command
-func Id2CronInfo(id int) (spec, command string) {
+func Id2CronInfo(id int) (spec, command string, err error) {
 	var cron model.CrontabList
-	global.PILOTGO_DB.Where("id =?", id).Find(&cron)
-	return cron.CronSpec, cron.Command
+	err = global.PILOTGO_DB.Where("id =?", id).Find(&cron).Error
+	return cron.CronSpec, cron.Command, err
 }
