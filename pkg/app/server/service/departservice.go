@@ -23,6 +23,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 返回全部的部门指针数组
@@ -111,7 +112,10 @@ func DeleteDepartNode(DepartInfo []model.DepartNode, departid int) {
 		if len(needdelete) == 0 {
 			break
 		}
-		dao.Deletedepartdata(needdelete)
+		err := dao.Deletedepartdata(needdelete)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		str := fmt.Sprintf("%d", needdelete[0])
 		needdelete = needdelete[1:]
 		dao.Insertdepartlist(needdelete, str)
@@ -131,7 +135,10 @@ func MachineList(DepId int) ([]model.Res, error) {
 }
 
 func Dept(tmp int) (*model.DepartTreeNode, error) {
-	depart := dao.DepartStore()
+	depart, err := dao.DepartStore()
+	if err != nil {
+		return nil, err
+	}
 	ptrchild, departRoot := Returnptrchild(depart)
 	MakeTree(&departRoot, ptrchild)
 	node := &departRoot
@@ -147,7 +154,10 @@ func Dept(tmp int) (*model.DepartTreeNode, error) {
 }
 
 func DepartInfo() (*model.DepartTreeNode, error) {
-	depart := dao.DepartStore()
+	depart, err := dao.DepartStore()
+	if err != nil {
+		return nil, err
+	}
 	if len(depart) == 0 {
 		return nil, errors.New("当前无部门节点")
 	}
@@ -160,8 +170,11 @@ func AddDepart(newDepart *model.AddDepart) error {
 	pid := newDepart.ParentID
 	parentDepart := newDepart.ParentDepart
 	depart := newDepart.DepartName
-
-	if !dao.IsDepartIDExist(pid) {
+	temp, err := dao.IsDepartIDExist(pid)
+	if err != nil {
+		return err
+	}
+	if !temp {
 		return errors.New("部门PID有误,数据库中不存在该部门PID")
 	}
 
@@ -170,7 +183,11 @@ func AddDepart(newDepart *model.AddDepart) error {
 		ParentDepart: parentDepart,
 		Depart:       depart,
 	}
-	if dao.IsDepartNodeExist(parentDepart, depart) {
+	temp, err = dao.IsDepartNodeExist(parentDepart, depart)
+	if err != nil {
+		return err
+	}
+	if temp {
 		return errors.New("该部门节点已存在")
 	}
 	ParentDepartExistBool, err := dao.IsParentDepartExist(parentDepart)
@@ -183,7 +200,11 @@ func AddDepart(newDepart *model.AddDepart) error {
 	if len(depart) == 0 {
 		return errors.New("部门节点不能为空")
 	} else if len(parentDepart) == 0 {
-		if dao.IsRootExist() {
+		temp, err := dao.IsRootExist()
+		if err != nil {
+			return err
+		}
+		if temp {
 			return errors.New("已存在根节点,即组织名称")
 		} else {
 			departNode.NodeLocate = global.Departroot
@@ -201,7 +222,11 @@ func AddDepart(newDepart *model.AddDepart) error {
 }
 
 func DeleteDepartData(DelDept *model.DeleteDepart) error {
-	if !dao.IsDepartIDExist(DelDept.DepartID) {
+	temp, err := dao.IsDepartIDExist(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
+	if !temp {
 		return errors.New("不存在该机器")
 	}
 	macli, err := dao.MachineStore(DelDept.DepartID)
@@ -214,7 +239,11 @@ func DeleteDepartData(DelDept *model.DeleteDepart) error {
 			return err
 		}
 	}
-	for _, depart := range dao.SubDepartId(DelDept.DepartID) {
+	departs, err := dao.SubDepartId(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
+	for _, depart := range departs {
 		machine, err := dao.MachineStore(depart)
 		if err != nil {
 			return err
@@ -227,7 +256,10 @@ func DeleteDepartData(DelDept *model.DeleteDepart) error {
 		}
 	}
 
-	DepartInfo := dao.Pid2Depart(DelDept.DepartID)
+	DepartInfo, err := dao.Pid2Depart(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
 	DeleteDepartNode(DepartInfo, DelDept.DepartID)
 	err = dao.DelUser(DelDept.DepartID)
 	if err != nil {
@@ -237,9 +269,12 @@ func DeleteDepartData(DelDept *model.DeleteDepart) error {
 }
 
 func UpdateDepart(DepartID int, DepartName string) error {
-	dao.UpdateDepart(DepartID, DepartName)
-	dao.UpdateParentDepart(DepartID, DepartName)
-	return nil
+	err := dao.UpdateDepart(DepartID, DepartName)
+	if err != nil {
+		return err
+	}
+	err = dao.UpdateParentDepart(DepartID, DepartName)
+	return err
 }
 
 func ModifyMachineDepart(MachineID string, DepartID int) error {

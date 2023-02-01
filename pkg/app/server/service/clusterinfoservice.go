@@ -73,7 +73,10 @@ func ClusterInfo() (model.ClusterInfo, error) {
 func DepartClusterInfo() []model.DepartMachineInfo {
 	var departs []model.DepartMachineInfo
 
-	FirstDepartIds := dao.FirstDepartId()
+	FirstDepartIds, err := dao.FirstDepartId()
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	for _, depart_Id := range FirstDepartIds {
 		Departids := make([]int, 0)
 		Departids = append(Departids, depart_Id)
@@ -83,7 +86,10 @@ func DepartClusterInfo() []model.DepartMachineInfo {
 		if err != nil {
 			logger.Error(err.Error())
 		}
-		departName := dao.DepartIdToGetDepartName(depart_Id)
+		departName, err := dao.DepartIdToGetDepartName(depart_Id)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		normal, Offline, free := AgentStatusCounts(lists)
 
 		departInfo := model.DepartMachineInfo{}

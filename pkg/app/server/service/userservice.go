@@ -87,9 +87,12 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				UserExit = append(UserExit, email)
 				continue
 			}
-			departName := row.Cells[3].Value       //4：部门
-			pid, id := dao.GetPidAndId(departName) // 部门对应的PId和Id
+			departName := row.Cells[3].Value            //4：部门
+			pid, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
+			if err != nil {
 
+				return UserExit, err
+			}
 			userRole := row.Cells[4].Value                               // 5：角色
 			roleId, user_type, err := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
 			if err != nil {
