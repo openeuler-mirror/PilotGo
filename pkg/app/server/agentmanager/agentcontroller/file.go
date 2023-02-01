@@ -25,6 +25,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -95,10 +96,14 @@ func FileBroadcastToAgents(c *gin.Context) {
 
 	for _, uuid := range UUIDs {
 		agent := agentmanager.GetAgent(uuid)
+		UUID_iP, err := dao.UUID2MacIP(uuid)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		if agent == nil {
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: filename,
 				Action:          global.BroadcastFile,
 				StatusCode:      http.StatusBadRequest,
@@ -112,9 +117,10 @@ func FileBroadcastToAgents(c *gin.Context) {
 
 		_, Err, err := agent.UpdateFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
+
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: filename,
 				Action:          global.BroadcastFile,
 				StatusCode:      http.StatusBadRequest,
@@ -127,7 +133,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 		} else {
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: filename,
 				Action:          global.BroadcastFile,
 				StatusCode:      http.StatusOK,

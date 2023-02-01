@@ -150,7 +150,10 @@ func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
 	// 获取机器的所有信息
 	machinesInfo := make([]model.MachineNode, 0)
 	for _, macId := range machineIdlist {
-		MacInfo := dao.MachineData(macId)
+		MacInfo, err := dao.MachineData(macId)
+		if err != nil {
+			return machinesInfo, err
+		}
 		machinesInfo = append(machinesInfo, MacInfo)
 	}
 

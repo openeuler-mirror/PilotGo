@@ -24,6 +24,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -102,11 +103,15 @@ func InstallRpmHandler(c *gin.Context) {
 
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
+		UUID_iP, err := dao.UUID2MacIP(uuid)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		if agent == nil {
 
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
 				Action:          global.RPMInstall,
 				StatusCode:      http.StatusBadRequest,
@@ -123,7 +128,7 @@ func InstallRpmHandler(c *gin.Context) {
 
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
 				Action:          global.RPMInstall,
 				StatusCode:      http.StatusBadRequest,
@@ -137,7 +142,7 @@ func InstallRpmHandler(c *gin.Context) {
 
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
 				Action:          global.RPMInstall,
 				StatusCode:      http.StatusOK,
@@ -171,10 +176,14 @@ func RemoveRpmHandler(c *gin.Context) {
 	for _, uuid := range rpm.UUIDs {
 
 		agent := agentmanager.GetAgent(uuid)
+		UUID_iP, err := dao.UUID2MacIP(uuid)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		if agent == nil {
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
 				Action:          global.RPMRemove,
 				StatusCode:      http.StatusBadRequest,
@@ -191,7 +200,7 @@ func RemoveRpmHandler(c *gin.Context) {
 
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
 				Action:          global.RPMRemove,
 				StatusCode:      http.StatusBadRequest,
@@ -205,7 +214,7 @@ func RemoveRpmHandler(c *gin.Context) {
 
 			log := model.AgentLog{
 				LogParentID:     logParentId,
-				IP:              dao.UUID2MacIP(uuid),
+				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
 				Action:          global.RPMRemove,
 				StatusCode:      http.StatusOK,
