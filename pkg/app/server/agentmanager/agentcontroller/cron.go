@@ -22,6 +22,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -41,7 +42,12 @@ func CreatCron(c *gin.Context) {
 		response.Fail(c, nil, "任务名字不能为空")
 		return
 	}
-	if dao.IsTaskNameExist(TaskName) {
+	temp, err := dao.IsTaskNameExist(TaskName)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if temp {
 		response.Fail(c, nil, "任务名称已存在!")
 		return
 	}
@@ -61,15 +67,22 @@ func CreatCron(c *gin.Context) {
 		Command:     command,
 		Status:      &status,
 	}
-	id := dao.NewCron(newcron)
-
+	id, err := dao.NewCron(newcron)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
 	if !status {
 		response.Fail(c, nil, "定时任务已保存")
 		return
 	}
 
 	// 远程命令执行
-	cronSpec, Command := dao.Id2CronInfo(id)
+	cronSpec, Command, err := dao.Id2CronInfo(id)
+	if err != nil {
+		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
+		return
+	}
 	cron_start, err := service.CronStart(uuid, id, cronSpec, Command)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
@@ -90,7 +103,9 @@ func DeleteCronTask(c *gin.Context) {
 			cronIds = strconv.Itoa(cronId) + ","
 			continue
 		}
-		dao.DeleteTask(cronId)
+		if err := dao.DeleteTask(cronId); err != nil {
+			logger.Error(err.Error())
+		}
 	}
 	if len(cronIds) != 0 {
 		msg := fmt.Sprintf("以下任务编号未删除成功：%s", cronIds[:len(cronIds)-1])
@@ -118,7 +133,9 @@ func UpdateCron(c *gin.Context) {
 		Status:      &status,
 	}
 	// 数据库内容修改
-	dao.UpdateTask(id, UpdateCron)
+	if err := dao.UpdateTask(id, UpdateCron); err != nil {
+		response.Fail(c, nil, err.Error())
+	}
 	if !status {
 		response.Fail(c, nil, "定时任务已保存,未执行")
 		return
@@ -147,13 +164,19 @@ func CronTaskStatus(c *gin.Context) {
 	id := Cron.ID
 	uuid := Cron.MachineUUID
 	status := Cron.Status
-
-	if dao.IsTaskStatus(id, status) {
+	temp, err := dao.IsTaskStatus(id, status)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if temp {
 		response.Fail(c, nil, "请重新确认任务状态")
 		return
 	}
 
-	dao.CronTaskStatus(id, status)
+	if err := dao.CronTaskStatus(id, status); err != nil {
+		response.Fail(c, nil, err.Error())
+	}
 
 	if status {
 		cron_stop, err := service.StopAndDel(uuid, id)
@@ -165,7 +188,11 @@ func CronTaskStatus(c *gin.Context) {
 		return
 	}
 
-	cronSpec, Command := dao.Id2CronInfo(id)
+	cronSpec, Command, err := dao.Id2CronInfo(id)
+	if err != nil {
+		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
+		return
+	}
 	cron_start, err := service.CronStart(uuid, id, cronSpec, Command)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
