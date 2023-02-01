@@ -22,6 +22,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -78,11 +79,15 @@ func ServiceStartHandler(c *gin.Context) {
 	logParentId := dao.ParentAgentLog(logParent)
 
 	agent := agentmanager.GetAgent(agentservice.UUID)
+	UUID_iP, err := dao.UUID2MacIP(agentservice.UUID)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	if agent == nil {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(agentservice.UUID),
+			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
 			Action:          global.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
@@ -100,7 +105,7 @@ func ServiceStartHandler(c *gin.Context) {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(agentservice.UUID),
+			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
 			Action:          global.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
@@ -115,7 +120,7 @@ func ServiceStartHandler(c *gin.Context) {
 
 	log := model.AgentLog{
 		LogParentID:     logParentId,
-		IP:              dao.UUID2MacIP(agentservice.UUID),
+		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
 		Action:          global.ServiceStart,
 		StatusCode:      http.StatusOK,
@@ -138,11 +143,15 @@ func ServiceStopHandler(c *gin.Context) {
 	logParentId := dao.ParentAgentLog(logParent)
 
 	agent := agentmanager.GetAgent(agentservice.UUID)
+	UUID_iP, err := dao.UUID2MacIP(agentservice.UUID)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	if agent == nil {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(agentservice.UUID),
+			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
 			Action:          global.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
@@ -160,7 +169,7 @@ func ServiceStopHandler(c *gin.Context) {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(agentservice.UUID),
+			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
 			Action:          global.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
@@ -175,7 +184,7 @@ func ServiceStopHandler(c *gin.Context) {
 
 	log := model.AgentLog{
 		LogParentID:     logParentId,
-		IP:              dao.UUID2MacIP(agentservice.UUID),
+		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
 		Action:          global.ServiceStop,
 		StatusCode:      http.StatusOK,
@@ -198,11 +207,15 @@ func ServiceRestartHandler(c *gin.Context) {
 	logParentId := dao.ParentAgentLog(logParent)
 
 	agent := agentmanager.GetAgent(agentservice.UUID)
+	UUID_iP, err := dao.UUID2MacIP(agentservice.UUID)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	if agent == nil {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(agentservice.UUID),
+			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
 			Action:          global.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
@@ -220,7 +233,7 @@ func ServiceRestartHandler(c *gin.Context) {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(agentservice.UUID),
+			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
 			Action:          global.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
@@ -235,7 +248,7 @@ func ServiceRestartHandler(c *gin.Context) {
 
 	log := model.AgentLog{
 		LogParentID:     logParentId,
-		IP:              dao.UUID2MacIP(agentservice.UUID),
+		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
 		Action:          global.ServiceRestart,
 		StatusCode:      http.StatusOK,

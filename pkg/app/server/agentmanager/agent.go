@@ -92,7 +92,11 @@ func (a *Agent) startListen() {
 				logger.Error(err.Error())
 			}
 			DeleteAgent(a.UUID)
-			str := "agent机器" + dao.UUID2MacIP(a.UUID) + "已断开连接"
+			UUID_ip, err := dao.UUID2MacIP(a.UUID)
+			if err != nil {
+				logger.Error(err.Error())
+			}
+			str := "agent机器" + UUID_ip + "已断开连接"
 			logger.Error("%s", str)
 			WARN_MSG <- str
 			return
