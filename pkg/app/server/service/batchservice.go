@@ -21,6 +21,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
@@ -108,9 +109,9 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 		DepartName:  departNamelist,
 		Machinelist: machinelist,
 	}
-	dao.CreateBatch(Batch)
+	err = dao.CreateBatch(Batch)
 
-	return nil
+	return err
 }
 
 // TODO: *[]model.Batch 应该定义为指针数组
@@ -129,22 +130,32 @@ func GetBatches(query *model.PaginationQ) (*[]model.Batch, int64, error) {
 
 func DeleteBatch(ids []int) error {
 	for _, value := range ids {
-		dao.DeleteBatch(value)
+		err := dao.DeleteBatch(value)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 	}
 	return nil
 }
 
 func UpdateBatch(batchid int, name, description string) error {
-	if !dao.IsExistID(batchid) {
+	temp, err := dao.IsExistID(batchid)
+	if err != nil {
+		return err
+	}
+	if !temp {
 		return errors.New("不存在该批次")
 	}
 
-	dao.UpdateBatch(batchid, name, description)
-	return nil
+	err = dao.UpdateBatch(batchid, name, description)
+	return err
 }
 
 func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
-	machinelist := dao.GetMachineID(batchid)
+	machinelist, err := dao.GetMachineID(batchid)
+	if err != nil {
+		return nil, err
+	}
 	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
 
 	// 获取机器的所有信息
@@ -161,5 +172,5 @@ func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
 }
 
 func SelectBatch() ([]model.Batch, error) {
-	return dao.GetBatch(), nil
+	return dao.GetBatch()
 }
