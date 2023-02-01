@@ -24,8 +24,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-var ServerAddr string
-
 func GetUserRoleHandler(c *gin.Context) {
 	roles, err := service.GetUserRole()
 	if err != nil {
@@ -60,7 +58,7 @@ func LoginHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId, "server": ServerAddr}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
 }
 
 // 退出
