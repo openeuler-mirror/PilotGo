@@ -13,8 +13,7 @@ func AddConfigFile(cf model.ConfigFile) error {
 		return err
 	}
 	if UUIDExistbool {
-		global.PILOTGO_DB.Save(&cf)
-		return nil
+		return global.PILOTGO_DB.Save(&cf).Error
 	}
 	return fmt.Errorf("机器不存在")
 }

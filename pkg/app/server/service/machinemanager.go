@@ -23,7 +23,10 @@ func MachineInfo(depart *model.Depart, query *model.PaginationQ) (interface{}, i
 }
 
 func MachineAllData() ([]map[string]string, error) {
-	AllData := dao.MachineAllData()
+	AllData, err := dao.MachineAllData()
+	if err != nil {
+		return nil, err
+	}
 	datas := make([]map[string]string, 0)
 	for _, data := range AllData {
 		datas = append(datas, map[string]string{"uuid": data.UUID, "ip_dept": data.IP + "-" + data.Departname, "ip": data.IP})
