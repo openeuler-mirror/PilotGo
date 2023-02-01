@@ -22,6 +22,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -55,11 +56,15 @@ func SysctlChangeHandler(c *gin.Context) {
 	logParentId := dao.ParentAgentLog(logParent)
 
 	agent := agentmanager.GetAgent(uuid)
+	UUID_iP, err := dao.UUID2MacIP(uuid)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	if agent == nil {
 
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(uuid),
+			IP:              UUID_iP,
 			OperationObject: args,
 			Action:          global.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
@@ -76,7 +81,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	if err != nil {
 		log := model.AgentLog{
 			LogParentID:     logParentId,
-			IP:              dao.UUID2MacIP(uuid),
+			IP:              UUID_iP,
 			OperationObject: args,
 			Action:          global.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
@@ -90,7 +95,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	}
 	log := model.AgentLog{
 		LogParentID:     logParentId,
-		IP:              dao.UUID2MacIP(uuid),
+		IP:              UUID_iP,
 		OperationObject: args,
 		Action:          global.SysctlChange,
 		StatusCode:      http.StatusOK,

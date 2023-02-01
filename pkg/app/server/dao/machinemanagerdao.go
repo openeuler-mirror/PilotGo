@@ -135,52 +135,57 @@ func ModifyMachineDepart2(MadId int, DeptId int) error {
 }
 
 // 根据机器id获取机器信息
-func MachineData(MacId int) model.MachineNode {
+func MachineData(MacId int) (model.MachineNode, error) {
 	var m model.MachineNode
-	global.PILOTGO_DB.Where("id=?", MacId).Find(&m)
-	return m
+	err := global.PILOTGO_DB.Where("id=?", MacId).Find(&m).Error
+	return m, err
 }
 
 // 获取所有机器
-func AllMachine() []model.MachineNode {
+func AllMachine() ([]model.MachineNode, error) {
 	var m []model.MachineNode
-	global.PILOTGO_DB.Find(&m)
-
-	return m
+	err := global.PILOTGO_DB.Find(&m).Error
+	return m, err
 }
 
-func MachineAllData() []model.Res {
+func MachineAllData() ([]model.Res, error) {
 	var mch []model.Res
-	global.PILOTGO_DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
+	err := global.PILOTGO_DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch)
-	return mch
+		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch).Error
+	return mch, err
 }
 
 // 获取某一级部门下的所有机器
-func SomeDepartMachine(Departids []int) (lists []model.MachineNode) {
+func SomeDepartMachine(Departids []int) (lists []model.MachineNode, err error) {
 	for _, id := range Departids {
 		list := []model.MachineNode{}
-		global.PILOTGO_DB.Where("depart_id = ?", id).Find(&list)
+		err = global.PILOTGO_DB.Where("depart_id = ?", id).Find(&list).Error
+		if err != nil {
+			return
+		}
 		lists = append(lists, list...)
 	}
 	return
 }
 
 // 根据uuid获取机器的ip、状态和部门
-func MachineBasic(uuid string) (ip string, state int, dept string) {
+func MachineBasic(uuid string) (ip string, state int, dept string, err error) {
 	var machine model.MachineNode
 	var depart model.DepartNode
-	global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine)
-	global.PILOTGO_DB.Where("id = ?", machine.DepartId).Find(&depart)
-	return machine.IP, machine.State, depart.Depart
+	err = global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine).Error
+	if err != nil {
+		return machine.IP, machine.State, "", err
+	}
+	err = global.PILOTGO_DB.Where("id = ?", machine.DepartId).Find(&depart).Error
+	return machine.IP, machine.State, depart.Depart, err
 }
 
 // 根据uuid获取机器的ip
-func UUID2MacIP(uuid string) (ip string) {
+func UUID2MacIP(uuid string) (ip string, err error) {
 	var machine model.MachineNode
-	global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine)
-	return machine.IP
+	err = global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine).Error
+	return machine.IP, err
 }
 
 // 使用uuid删除机器
