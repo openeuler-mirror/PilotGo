@@ -82,12 +82,10 @@ func RegitsterHandler(c *network.SocketClient) {
 
 	c.BindHandler(protocol.AgentInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		IP, err := utils.RunCommand("hostname -I")
+		IP, err := uos.GetHostIp()
 		if err != nil {
 			logger.Debug("获取IP失败!")
 		}
-		str := strings.Split(IP, " ")
-		IP = str[0]
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
