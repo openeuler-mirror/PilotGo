@@ -74,7 +74,7 @@ type NetworkConfig struct {
 	DNS2        string `json:"DNS2"`
 }
 
-//获取当前TCP网络连接信息
+// 获取当前TCP网络连接信息
 func GetTCP() ([]NetConnect, error) {
 	info, err := net.Connections("tcp")
 	if err != nil {
@@ -94,7 +94,7 @@ func GetTCP() ([]NetConnect, error) {
 	return tcpConf, nil
 }
 
-//获取当前UDP网络连接信息
+// 获取当前UDP网络连接信息
 func GetUDP() ([]NetConnect, error) {
 	info, err := net.Connections("udp")
 	if err != nil {
@@ -114,7 +114,7 @@ func GetUDP() ([]NetConnect, error) {
 	return tcpConf, nil
 }
 
-//获取网络读写字节／包的个数
+// 获取网络读写字节／包的个数
 func GetIOCounter() ([]IOCnt, error) {
 	info, err := net.IOCounters(true)
 	if err != nil {
@@ -346,4 +346,14 @@ func LenToSubNetMask(subnet int) string {
 	resultMask := fmt.Sprintf("%v.%v.%v.%v", a, b, c, d)
 	return resultMask
 
+}
+
+func GetHostIp() (string, error) {
+	IP, err := utils.RunCommand("hostname -I")
+	if err != nil {
+		return "", err
+	}
+	str := strings.Split(IP, " ")
+	IP = str[0]
+	return IP, nil
 }
