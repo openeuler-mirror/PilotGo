@@ -24,20 +24,18 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
 var RESP_MSG = make(chan interface{})
 
 func FileMonitorInit() error {
 	//获取IP
-	IP, err := utils.RunCommand("hostname -I")
+	IP, err := uos.GetHostIp()
 	if err != nil {
 		return fmt.Errorf("can not to get IP")
 	}
-	str := strings.Split(IP, " ")
-	IP = str[0]
 
 	// 1、NewWatcher 初始化一个 watcher
 	watcher, err := fsnotify.NewWatcher()
