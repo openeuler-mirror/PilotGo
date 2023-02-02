@@ -52,7 +52,7 @@ func Send_heartbeat(client *network.SocketClient) {
 		}
 	}
 
-	out, err := utils.RunCommand("date")
+	out, err := uos.GetTime()
 	if err == nil {
 		logger.Debug(string(out))
 	}
@@ -1167,7 +1167,10 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AgentTime, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		timeinfo := uos.GetTime()
+		timeinfo, err := uos.GetTime()
+		if err != nil {
+			logger.Debug(err.Error())
+		}
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
