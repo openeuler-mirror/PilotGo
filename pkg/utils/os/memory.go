@@ -1,12 +1,13 @@
 package os
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"math"
-	"os/exec"
+	"strings"
+
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 type MemoryConfig struct {
@@ -104,30 +105,16 @@ func bytesToInt(bys []byte) int64 {
 }
 
 func GetMemoryConfig() *MemoryConfig {
-	cmd := exec.Command("/bin/sh", "-c", "cat /proc/meminfo")
-	stdout, err := cmd.StdoutPipe()
+	output, err := utils.RunCommand("cat /proc/meminfo")
 	if err != nil {
 		fmt.Printf("Error:can not obtain stdout pipe for command:%s\n", err)
 	}
-	if err := cmd.Start(); err != nil {
-		fmt.Println("Error:The command is err,", err)
-	}
-	//使用带缓冲的读取器
-	outputBuf := bufio.NewReader(stdout)
+	outputlines := strings.Split(output, "\n")
 	m := &MemoryConfig{}
-	for {
+	for _, line := range outputlines {
 		//一次获取一行,_ 获取当前行是否被读完
-		output, _, err := outputBuf.ReadLine()
-		if err != nil {
-			// 判断是否到文件的结尾了否则出错
-			if err.Error() != "EOF" {
-				fmt.Printf("Error :%s\n", err)
-			}
-			break
-		}
-		a, b := reserveRead(output)
+		a, b := reserveRead([]byte(line))
 		moduleMatch(string(a), bytesToInt(b), m)
-
 	}
 	return m
 }
