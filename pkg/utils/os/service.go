@@ -3,7 +3,6 @@ package os
 import (
 	"bufio"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -23,7 +22,7 @@ const (
 	ServiceRestart = 2
 )
 
-//获取服务列表
+// 获取服务列表
 func GetServiceList() ([]listService, error) {
 	list := make([]listService, 0)
 	result1, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
@@ -64,23 +63,8 @@ func GetServiceStatus(service string) (string, error) {
 	build.WriteString("systemctl is-active ")
 	build.WriteString(service)
 	command := build.String()
-	cmd := exec.Command("/bin/sh", "-c", command)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		logger.Error("Error:can not obtain stdout pipe for command", err)
-		return string("Error:can not obtain stdout pipe for command"), err
-	}
-	if err := cmd.Start(); err != nil {
-		logger.Error("Error:The command is err,", err)
-		return string("Error:The command is err"), err
-	}
-	outputBuf := bufio.NewReader(stdout)
-	output, _, err := outputBuf.ReadLine()
-	if err != nil {
-		logger.Error("Error:The command is err", err)
-		return string("Error:The command is err"), err
-	}
-	return string(output), nil
+	output, err := utils.RunCommand(command)
+	return output, err
 }
 func verifyStatus(output string, operate int) bool {
 	var judge bool
