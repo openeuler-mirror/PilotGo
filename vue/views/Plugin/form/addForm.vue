@@ -23,8 +23,8 @@ export default {
   data() {
     return {
       form: {
-        name: 'grafana',
-        url: "http://10.1.167.93:9999",
+        name: "",
+        url: "",
       },
       rules: {
         url: [
@@ -62,19 +62,7 @@ export default {
             .then((res) => {
               if (res.data.code === 200) {
                 // 更新dynamicRoutes数据
-                this.$store.dispatch('SetDynamicRouters', [
-                  {
-                    path: '/plugin' + pluginIndex,
-                    name: 'Plugin' + pluginIndex,
-                    component: _import('IFrame/IFrame'),
-                    meta: {
-                      title: 'plugin', header_title: this.form.name, panel: 'plugin' + pluginIndex, icon_class: 'el-icon-s-order', url: this.form.url,
-                      breadcrumb: [
-                        { name: this.form.name },
-                      ],
-                    }
-                  }
-                ]).then(() => {
+                this.$store.dispatch('SetDynamicRouters', []).then(() => {
                   // 更新左侧导航栏
                   this.$store.dispatch('GenerateRoutes');
                 });

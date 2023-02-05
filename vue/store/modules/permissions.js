@@ -95,7 +95,7 @@ const permission = {
       })
     },
     SetDynamicRouters({ commit, state }, routers) {
-      if (routers.length == 0) {
+      // if (routers.length == 0) {
         // 初始化动态路由表
         return new Promise(resolve => {
           // 获取动态插件路由
@@ -130,12 +130,12 @@ const permission = {
           })
 
         })
-      } else {
-        return new Promise(resolve => {
-          commit("ADD_DYNAMIC_ROUTERS", routers)
-          resolve()
-        })
-      }
+      // } else {
+      //   return new Promise(resolve => {
+      //     commit("ADD_DYNAMIC_ROUTERS", routers)
+      //     resolve()
+      //   })
+      // }
     },
     getPermission({ commit }, roles) {
       let roleId = roles.split(',').map(Number)
