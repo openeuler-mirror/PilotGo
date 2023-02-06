@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2023-02-06 14:49:43
+ * @LastEditTime: 2023-02-06 15:42:40
  */
 import Vue from 'vue';
 import { constantRouterMap, routes } from '@/router'
@@ -100,6 +100,7 @@ const permission = {
         return new Promise(resolve => {
           // 获取动态插件路由
           let p = [];
+          state.iframeComponent = []
           getPlugins().then((res) => {
             if (res.data.code === 200) {
               res.data.data.forEach((item, index) => {
