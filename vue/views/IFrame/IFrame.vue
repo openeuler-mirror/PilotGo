@@ -6,24 +6,10 @@
 
 <script>
 export default {
-  name: "plugin3",
-  data() {
-    return {
-      url: '',
-    }
+  name: "plugin",
+  props:{
+    url:String,
   },
-  mounted() {
-    this.url = this.$route.meta.url || '';
-  },
-  watch: {
-    '$route': {
-      handler() {
-        if (this.url === '') {
-          this.url = this.$route.meta.url;
-        }
-      }
-    }
-  }
 }
 </script>
 
