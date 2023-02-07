@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-05-16 16:49:18
+ * @LastEditTime: 2023-02-07 09:47:06
  * @Description: provide agent log manager of pilotgo
  */
 import axios from 'axios'
@@ -26,9 +26,6 @@ const request = axios.create({
 
 // 2.1添加请求拦截器
 request.interceptors.request.use(config => {
-  if (store.getters.token) {
-    config.headers['authToken'] = getToken()
-  }
   return config
 }, error => {
   return Promise.reject(error);
