@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"bufio"
@@ -35,7 +35,7 @@ func handleErr(err error) {
 	}
 }
 
-func GetCurrentUserInfo() CurrentUser {
+func (b *BaseOS) GetCurrentUserInfo() CurrentUser {
 	u, err := user.Current()
 	handleErr(err)
 	userinfo := CurrentUser{
@@ -48,7 +48,7 @@ func GetCurrentUserInfo() CurrentUser {
 	return userinfo
 }
 
-func GetAllUserInfo() []AllUserInfo {
+func (b *BaseOS) GetAllUserInfo() []AllUserInfo {
 	tmp, err := utils.RunCommand("cat /etc/passwd")
 	if err != nil {
 		logger.Error("获取失败!%s", err.Error())
@@ -79,7 +79,7 @@ func GetAllUserInfo() []AllUserInfo {
 }
 
 // 创建新的用户，并新建家目录
-func AddLinuxUser(username, password string) error {
+func (b *BaseOS) AddLinuxUser(username, password string) error {
 	output, err := utils.RunCommand("useradd -m " + username)
 	if err != nil {
 		logger.Error(err.Error())
@@ -98,7 +98,7 @@ func AddLinuxUser(username, password string) error {
 }
 
 // 删除用户
-func DelUser(username string) (string, error) {
+func (b *BaseOS) DelUser(username string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("userdel -r %s", username))
 	if err != nil {
 		logger.Error("删除用户失败!%s", err.Error())
@@ -109,7 +109,7 @@ func DelUser(username string) (string, error) {
 }
 
 // chmod [-R] 权限值 文件名
-func ChangePermission(permission, file string) (string, error) {
+func (b *BaseOS) ChangePermission(permission, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chmod %s %s", permission, file))
 	if err != nil {
 		logger.Error("改变文件权限失败!%s", err.Error())
@@ -120,7 +120,7 @@ func ChangePermission(permission, file string) (string, error) {
 }
 
 // chown [-R] 所有者 文件或目录
-func ChangeFileOwner(user, file string) (string, error) {
+func (b *BaseOS) ChangeFileOwner(user, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chown -R %s %s", user, file))
 	if err != nil {
 		logger.Error("改变文件所有者失败!%s", err.Error())

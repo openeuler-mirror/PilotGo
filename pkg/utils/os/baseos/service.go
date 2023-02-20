@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"bufio"
@@ -23,7 +23,7 @@ const (
 )
 
 // 获取服务列表
-func GetServiceList() ([]listService, error) {
+func (b *BaseOS) GetServiceList() ([]listService, error) {
 	list := make([]listService, 0)
 	result1, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
 	if err != nil {
@@ -58,7 +58,7 @@ func GetServiceList() ([]listService, error) {
 
 //operate 0,1,2分别代表开启，关闭，重启
 
-func GetServiceStatus(service string) (string, error) {
+func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 	var build strings.Builder
 	build.WriteString("systemctl is-active ")
 	build.WriteString(service)
@@ -89,7 +89,7 @@ func verifyStatus(output string, operate int) bool {
 	}
 	return judge
 }
-func StartService(service string) error {
+func (b *BaseOS) StartService(service string) error {
 	var build strings.Builder
 	build.WriteString("systemctl start ")
 	build.WriteString(service)
@@ -99,7 +99,7 @@ func StartService(service string) error {
 		logger.Error("开启服务命令运行失败: ", err)
 		return fmt.Errorf(" %s 服务启动失败%s", service, err)
 	}
-	output, err := GetServiceStatus(service)
+	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("获取服务状态失败")
 		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
@@ -110,7 +110,7 @@ func StartService(service string) error {
 	}
 	return nil
 }
-func StopService(service string) error {
+func (b *BaseOS) StopService(service string) error {
 	var build strings.Builder
 	build.WriteString("systemctl stop ")
 	build.WriteString(service)
@@ -120,7 +120,7 @@ func StopService(service string) error {
 		logger.Error("关闭服务命令运行失败: ", err)
 		return fmt.Errorf(" %s 服务关闭失败%s", service, err)
 	}
-	output, err := GetServiceStatus(service)
+	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("获取服务状态失败")
 		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
@@ -131,7 +131,7 @@ func StopService(service string) error {
 	}
 	return nil
 }
-func RestartService(service string) error {
+func (b *BaseOS) RestartService(service string) error {
 	var build strings.Builder
 	build.WriteString("systemctl restart ")
 	build.WriteString(service)
@@ -141,7 +141,7 @@ func RestartService(service string) error {
 		logger.Error("重启服务命令运行失败: ", err)
 		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
 	}
-	output, err := GetServiceStatus(service)
+	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("获取服务状态失败")
 		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)

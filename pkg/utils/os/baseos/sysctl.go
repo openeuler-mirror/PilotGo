@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func GetSysctlConfig() ([]map[string]string, error) {
+func (b *BaseOS) GetSysctlConfig() ([]map[string]string, error) {
 	tmp, err := utils.RunCommand("sysctl -a")
 	if err != nil {
 		logger.Error("获取内核配置文件失败!%s", err.Error())
@@ -35,7 +35,7 @@ func GetSysctlConfig() ([]map[string]string, error) {
 }
 
 // sysctl -w net.ipv4.ip_forward=1  临时修改系统参数
-func TempModifyPar(arg string) string {
+func (b *BaseOS) TempModifyPar(arg string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sudo sysctl -w %s", arg))
 	tmp = strings.Replace(tmp, "\n", "", -1)
 
@@ -46,7 +46,7 @@ func TempModifyPar(arg string) string {
 }
 
 // sysctl -n net.ipv4.ip_forward  查看某个内核参数的值
-func GetVarNameValue(arg string) string {
+func (b *BaseOS) GetVarNameValue(arg string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sysctl -n %s", arg))
 	tmp = strings.Replace(tmp, "\n", "", -1)
 	if err != nil {

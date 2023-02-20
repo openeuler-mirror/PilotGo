@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ func (cpu *CPUInfo) String() string {
 }
 
 // 获取CPU型号
-func GetCPUName() string {
+func (b *BaseOS) GetCPUName() string {
 	cpuname, _ := utils.RunCommand("lscpu | grep '型号名称'| sort| uniq")
 	if cpuname == "" {
 		cpuname, _ = utils.RunCommand("lscpu | grep 'Model name'| sort| uniq")
@@ -52,7 +52,7 @@ func GetCPUName() string {
 }
 
 // 获取物理CPU个数
-func GetPhysicalCPU() int {
+func (b *BaseOS) GetPhysicalCPU() int {
 	num, _ := utils.RunCommand("cat /proc/cpuinfo| grep 'processor'| sort| uniq| wc -l")
 	num = strings.Replace(num, "\n", "", -1)
 	cpunum, err := strconv.Atoi(num)
@@ -62,10 +62,10 @@ func GetPhysicalCPU() int {
 	return cpunum
 }
 
-func GetCPUInfo() *CPUInfo {
+func (b *BaseOS) GetCPUInfo() *CPUInfo {
 	cpuinfo := &CPUInfo{
-		ModelName: GetCPUName(),
-		CpuNum:    GetPhysicalCPU(),
+		ModelName: b.GetCPUName(),
+		CpuNum:    b.GetPhysicalCPU(),
 	}
 	return cpuinfo
 }
