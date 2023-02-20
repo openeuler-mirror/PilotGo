@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-17 02:43:29
- * LastEditTime: 2022-04-13 01:51:51
+ * LastEditTime: 2023-02-21 16:01:22
  * Description: provide agent network manager functions.
  ******************************************************************************/
 package agentcontroller
@@ -22,7 +22,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
-	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -108,7 +108,7 @@ func GetAgentNetworkConnect(c *gin.Context) {
 }
 
 func ConfigNetworkConnect(c *gin.Context) {
-	var network uos.NetworkConfig
+	var network common.NetworkConfig
 	c.Bind(&network)
 
 	ip_assignment := network.BootProto
@@ -128,7 +128,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 	}
 	if ok := strings.Contains(ipv4_netmask, "."); !ok {
 		prefix, _ := strconv.Atoi(ipv4_netmask)
-		ipv4_netmask = uos.LenToSubNetMask(prefix)
+		ipv4_netmask = common.LenToSubNetMask(prefix)
 	}
 	ipv4_gateway := network.GateWay
 	if len(ip_assignment) == 0 {

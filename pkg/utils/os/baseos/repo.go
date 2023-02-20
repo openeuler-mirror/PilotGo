@@ -12,7 +12,7 @@
  * LastEditTime: 2022-06-20 16:51:51
  * Description: get agent repo info.
  ******************************************************************************/
-package os
+package baseos
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 )
 
 func GetRepoSource() (interface{}, error) {
-	repos, err := GetFiles(global.RepoPath)
+	repos, err := utils.GetFiles(global.RepoPath)
 	if err != nil {
 		return "", fmt.Errorf("获取repo源文件失败:%s", err)
 	}

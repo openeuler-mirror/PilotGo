@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ type SystemInfo struct {
 	Uptime          string //系统最新启动时间
 }
 
-func GetHostInfo() *SystemInfo {
+func (b *BaseOS) GetHostInfo() *SystemInfo {
 	//获取IP
 	IP, err := utils.RunCommand("hostname -I")
 	if err != nil {

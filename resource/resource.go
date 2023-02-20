@@ -15,39 +15,35 @@
 package resource
 
 import (
-	"embed"
-	"html/template"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-//go:embed css fonts img js pilotgo.ico index.html
-var Static embed.FS
+// //go:embed css fonts img js pilotgo.ico index.html
+// var Static embed.FS
 
 func StaticRouter(router *gin.Engine) *gin.Engine {
-	router.StaticFS("/static", http.FS(Static))
-	t, err := template.ParseFS(Static, "index.html")
-	if err != nil {
-		logger.Error("parse template failed !!!")
-	}
-	router.SetHTMLTemplate(t)
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
-	})
+	// router.StaticFS("/static", http.FS(Static))
+	// t, err := template.ParseFS(Static, "index.html")
+	// if err != nil {
+	// 	logger.Error("parse template failed !!!")
+	// }
+	// router.SetHTMLTemplate(t)
+	// router.GET("/", func(c *gin.Context) {
+	// 	c.HTML(http.StatusOK, "index.html", nil)
+	// })
 
 	// TODO: for test
-	// router.Static("/static", "./dist/static")
-	// router.StaticFile("/", "./dist/index.html")
+	router.Static("/static", "./dist/static")
+	router.StaticFile("/", "./dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
 	router.NoRoute(func(c *gin.Context) {
 		logger.Info("process noroute: %s", c.Request.URL.RawPath)
-		c.HTML(http.StatusOK, "index.html", nil)
+		// c.HTML(http.StatusOK, "index.html", nil)
 
 		// TODO: for test
-		// c.File("./dist/index.html")
+		c.File("./dist/index.html")
 	})
 	return router
 }

@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"fmt"
@@ -7,8 +7,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func Config() (interface{}, error) {
-	nic_interface, err := GetNICName()
+func (b *BaseOS) Config() (interface{}, error) {
+	nic_interface, err := b.GetNICName()
 	if err != nil {
 		return nil, fmt.Errorf("未获取到网卡名称")
 	}
@@ -73,7 +73,7 @@ func Config() (interface{}, error) {
 	return firewalldConfig, nil
 }
 
-func FirewalldSetDefaultZone(zone string) (interface{}, error) {
+func (b *BaseOS) FirewalldSetDefaultZone(zone string) (interface{}, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --set-default-zone=%v", zone))
 	if err != nil {
 		return nil, fmt.Errorf("防火墙默认区域更改失败")
@@ -81,7 +81,7 @@ func FirewalldSetDefaultZone(zone string) (interface{}, error) {
 	return tmp, nil
 }
 
-func FirewalldZoneConfig(zone string) (interface{}, error) {
+func (b *BaseOS) FirewalldZoneConfig(zone string) (interface{}, error) {
 	conf, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --list-all", zone))
 	if err != nil {
 		return nil, fmt.Errorf("防火墙未运行")
@@ -117,7 +117,7 @@ func FirewalldZoneConfig(zone string) (interface{}, error) {
 	return firewall, nil
 }
 
-func FirewalldSourceAdd(zone, source string) error {
+func (b *BaseOS) FirewalldSourceAdd(zone, source string) error {
 	_, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --add-source=%v", zone, source))
 	if err != nil {
 		return fmt.Errorf("INVALID_ADDR:%s", source)
@@ -125,7 +125,7 @@ func FirewalldSourceAdd(zone, source string) error {
 	return nil
 }
 
-func FirewalldSourceRemove(zone, source string) error {
+func (b *BaseOS) FirewalldSourceRemove(zone, source string) error {
 	_, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --remove-source=%v", zone, source))
 	if err != nil {
 		return fmt.Errorf("UNKNOWN_SOURCE: '%s' is not in any zone", source)
@@ -133,7 +133,7 @@ func FirewalldSourceRemove(zone, source string) error {
 	return nil
 }
 
-func FirewalldServiceAdd(zone, service string) error {
+func (b *BaseOS) FirewalldServiceAdd(zone, service string) error {
 	_, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --add-service=%v", zone, service))
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func FirewalldServiceAdd(zone, service string) error {
 	return nil
 }
 
-func FirewalldServiceRemove(zone, service string) error {
+func (b *BaseOS) FirewalldServiceRemove(zone, service string) error {
 	_, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --remove-service=%v", zone, service))
 	if err != nil {
 		return err
@@ -149,17 +149,17 @@ func FirewalldServiceRemove(zone, service string) error {
 	return nil
 }
 
-func Restart() bool {
+func (b *BaseOS) Restart() bool {
 	tmp, _ := utils.RunCommand("service firewalld restart")
 	return len(tmp) == 0
 }
 
-func Stop() bool {
+func (b *BaseOS) Stop() bool {
 	tmp, _ := utils.RunCommand("service firewalld stop")
 	return len(tmp) == 0
 }
 
-func DelZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
+func (b *BaseOS) DelZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
 	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-port=%v/%v", zone, port, protocol))
 	if err != nil {
 		return tmp, fmt.Errorf("防火墙未运行")
@@ -172,7 +172,7 @@ func DelZonePort(zone, port, protocol string) (string, error) { //zone = block d
 	return tmpp, nil
 }
 
-func AddZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
+func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
 	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-port=%v/%v", zone, port, protocol))
 	if err != nil {
 		return tmp, fmt.Errorf("防火墙未运行")
