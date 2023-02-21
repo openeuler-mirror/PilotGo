@@ -52,7 +52,6 @@
 
 <script>
 import { checkEmail } from "@/rules/check";
-import { encrypt } from "@/utils/crypto";
 export default {
   name: "Login",
   data() {
@@ -92,7 +91,7 @@ export default {
             this.loading = true;
             let data = {
                 username: this.loginForm.email,
-                password: encrypt(this.loginForm.password, this.loginForm.email)
+                password: this.loginForm.password
             }
             this.$store.dispatch("loginByEmail", data).then((res) => {
                 this.loading = false;
