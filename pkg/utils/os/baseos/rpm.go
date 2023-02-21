@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-17 02:43:29
- * LastEditTime: 2022-03-02 18:35:12
+ * LastEditTime: 2023-02-21 18:24:37
  * Description: provide agent rpm manager functions.
  ******************************************************************************/
 package baseos
@@ -22,32 +22,8 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-// 形如	openssl-1:1.1.1f-4.oe1.x86_64
-//
-//	OS
-//	openssl=1:1.1.1f-4.oe1
-type RpmSrc struct {
-	Name     string
-	Repo     string
-	Provides string
-}
-
-type RpmInfo struct {
-	Name         string
-	Version      string
-	Release      string
-	Architecture string
-	InstallDate  string
-	Size         string
-	License      string
-	Signature    string
-	Packager     string
-	Vendor       string
-	URL          string
-	Summary      string
-}
 
 // 获取全部安装的rpm包列表
 func (b *BaseOS) GetAllRpm() []string {
@@ -71,15 +47,15 @@ func (b *BaseOS) GetAllRpm() []string {
 }
 
 // 获取源软件包名以及源
-func (b *BaseOS) GetRpmSource(rpm string) ([]RpmSrc, error) {
-	Getlist := make([]RpmSrc, 0)
+func (b *BaseOS) GetRpmSource(rpm string) ([]common.RpmSrc, error) {
+	Getlist := make([]common.RpmSrc, 0)
 	listRpmSource := make([]string, 0)
 	listRpmName := make([]string, 0)
 	listRpmProvides := make([]string, 0)
 	result, err := utils.RunCommand("yum provides " + rpm)
 	if err != nil && len(result) != 0 {
 		logger.Error("获取源软件包名以及源失败", err)
-		return []RpmSrc{}, fmt.Errorf("获取源软件包名以及源失败")
+		return []common.RpmSrc{}, fmt.Errorf("获取源软件包名以及源失败")
 	}
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
@@ -131,7 +107,7 @@ func (b *BaseOS) GetRpmSource(rpm string) ([]RpmSrc, error) {
 		listRpmProvides = append(listRpmProvides, str)
 	}
 	for key, value := range listRpmSource {
-		tmp := RpmSrc{}
+		tmp := common.RpmSrc{}
 		tmp.Name = listRpmName[key]
 		tmp.Provides = listRpmProvides[key]
 		tmp.Repo = value
@@ -179,33 +155,33 @@ func readInfo(reader *strings.Reader, reg string) (string, error) {
 	return string(""), fmt.Errorf("匹配结构体属性失败")
 }
 
-func (b *BaseOS) GetRpmInfo(rpm string) (RpmInfo, error, error) {
-	rpminfo := RpmInfo{}
+func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error, error) {
+	rpminfo := common.RpmInfo{}
 	result, err := utils.RunCommand("rpm -qi " + rpm)
 	//未安装该软件包情况
 	if err != nil && len(result) != 0 {
 		logger.Error(" %s的rpm包未安装", rpm)
-		return RpmInfo{}, fmt.Errorf("%s的rpm包未安装", rpm), err
+		return common.RpmInfo{}, fmt.Errorf("%s的rpm包未安装", rpm), err
 	}
 	reader := strings.NewReader(result)
 	str, err := readInfo(reader, `^Name.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包名属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包名属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包名属性失败"), err
 	}
 	rpminfo.Name = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Version.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Version属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Version属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包Version属性失败"), err
 	}
 	rpminfo.Version = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Release.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Release属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Release属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包Release属性失败"), err
 	}
 	rpminfo.Release = str
 	// reader = strings.NewReader(result)
@@ -219,56 +195,56 @@ func (b *BaseOS) GetRpmInfo(rpm string) (RpmInfo, error, error) {
 	str, err = readInfo(reader, `^Install Date.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包InstallDate属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包InstallDate属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包InstallDate属性失败"), err
 	}
 	rpminfo.InstallDate = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Size.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Size属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Size属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包Size属性失败"), err
 	}
 	rpminfo.Size = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^License.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包License属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包License属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包License属性失败"), err
 	}
 	rpminfo.License = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Signature.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Signature属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Signature属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包Signature属性失败"), err
 	}
 	rpminfo.Signature = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Packager.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Packager属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Packager属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包Packager属性失败"), err
 	}
 	rpminfo.Packager = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Vendor.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Vendor属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包Vendor属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包Vendor属性失败"), err
 	}
 	rpminfo.Vendor = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^URL.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包URL属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
 	}
 	rpminfo.URL = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Summary.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("读取rpm包Summary属性失败")
-		return RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
+		return common.RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
 	}
 	rpminfo.Summary = str
 	return rpminfo, nil, nil

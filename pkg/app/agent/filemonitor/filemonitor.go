@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
+ * LastEditTime: 2023-02-21 19:02:55
  * Description: file monitor init
  ******************************************************************************/
 package filemonitor
@@ -32,7 +32,7 @@ var RESP_MSG = make(chan interface{})
 
 func FileMonitorInit() error {
 	//获取IP
-	IP, err := uos.GetHostIp()
+	IP, err := uos.OS().GetHostIp()
 	if err != nil {
 		return fmt.Errorf("can not to get IP")
 	}

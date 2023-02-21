@@ -1,34 +1,13 @@
 package baseos
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-// 通过 /proc/cpuinfo来获取CPU型号
-type CPUInfo struct {
-	ModelName string
-	CpuNum    int
-}
-
-func (cpu *CPUInfo) String() string {
-	b, err := json.Marshal(*cpu)
-	if err != nil {
-		return fmt.Sprintf("%+v", *cpu)
-	}
-	var out bytes.Buffer
-	err = json.Indent(&out, b, "", "    ")
-	if err != nil {
-		return fmt.Sprintf("%+v", *cpu)
-	}
-	return out.String()
-}
 
 // 获取CPU型号
 func (b *BaseOS) GetCPUName() string {
@@ -62,8 +41,8 @@ func (b *BaseOS) GetPhysicalCPU() int {
 	return cpunum
 }
 
-func (b *BaseOS) GetCPUInfo() *CPUInfo {
-	cpuinfo := &CPUInfo{
+func (b *BaseOS) GetCPUInfo() *common.CPUInfo {
+	cpuinfo := &common.CPUInfo{
 		ModelName: b.GetCPUName(),
 		CpuNum:    b.GetPhysicalCPU(),
 	}

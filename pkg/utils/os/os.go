@@ -16,11 +16,7 @@ func detectOS() string {
 	return OpenEuler
 }
 
-type OSOperator interface {
-	common.NetworkOperator
-}
-
-func OS() OSOperator {
+func OS() common.OSOperator {
 	switch detectOS() {
 	case OpenEuler:
 		return &openeuler.OpenEuler{}
