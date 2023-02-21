@@ -8,26 +8,8 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-// 获取当前用户信息
-type CurrentUser struct {
-	Username  string
-	Userid    string
-	GroupName string
-	Groupid   string
-	HomeDir   string
-}
-
-// 获取所有用户的信息
-type AllUserInfo struct {
-	Username    string
-	UserId      string
-	GroupId     string
-	Description string
-	HomeDir     string
-	ShellType   string
-}
 
 func handleErr(err error) {
 	if err != nil {
@@ -35,10 +17,10 @@ func handleErr(err error) {
 	}
 }
 
-func (b *BaseOS) GetCurrentUserInfo() CurrentUser {
+func (b *BaseOS) GetCurrentUserInfo() common.CurrentUser {
 	u, err := user.Current()
 	handleErr(err)
-	userinfo := CurrentUser{
+	userinfo := common.CurrentUser{
 		Username:  u.Username,
 		Userid:    u.Gid,
 		GroupName: u.Name,
@@ -48,14 +30,14 @@ func (b *BaseOS) GetCurrentUserInfo() CurrentUser {
 	return userinfo
 }
 
-func (b *BaseOS) GetAllUserInfo() []AllUserInfo {
+func (b *BaseOS) GetAllUserInfo() []common.AllUserInfo {
 	tmp, err := utils.RunCommand("cat /etc/passwd")
 	if err != nil {
 		logger.Error("获取失败!%s", err.Error())
 	}
 	reader := strings.NewReader(tmp)
 	scanner := bufio.NewScanner(reader)
-	var allUsers []AllUserInfo
+	var allUsers []common.AllUserInfo
 	for {
 
 		if !scanner.Scan() {
@@ -64,7 +46,7 @@ func (b *BaseOS) GetAllUserInfo() []AllUserInfo {
 		line := scanner.Text()
 		line = strings.TrimSpace(line)
 		strSlice := strings.Split(line, ":")
-		users := AllUserInfo{
+		users := common.AllUserInfo{
 			Username:    strSlice[0],
 			UserId:      strSlice[2],
 			GroupId:     strSlice[3],

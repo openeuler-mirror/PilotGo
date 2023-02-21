@@ -1,36 +1,13 @@
 package baseos
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-type MemoryConfig struct {
-	MemTotal     int64
-	MemFree      int64
-	MemAvailable int64
-	Buffers      int64
-	Cached       int64
-	SwapCached   int64
-}
-
-func (conf *MemoryConfig) String() string {
-	b, err := json.Marshal(*conf)
-	if err != nil {
-		return fmt.Sprintf("%+v", *conf)
-	}
-	var out bytes.Buffer
-	err = json.Indent(&out, b, "", "    ")
-	if err != nil {
-		return fmt.Sprintf("%+v", *conf)
-	}
-	return out.String()
-}
 
 func reverse(res []byte) []byte {
 	key := 0
@@ -76,7 +53,7 @@ func reserveRead(analyStr []byte) ([]byte, []byte) {
 	}
 	return tmp1, reverse(tmp2)
 }
-func moduleMatch(name string, value int64, memconf *MemoryConfig) {
+func moduleMatch(name string, value int64, memconf *common.MemoryConfig) {
 	if name == "MemTotal" {
 		memconf.MemTotal = value
 	} else if name == "MemFree" {
@@ -104,13 +81,13 @@ func bytesToInt(bys []byte) int64 {
 
 }
 
-func (b *BaseOS) GetMemoryConfig() *MemoryConfig {
+func (b *BaseOS) GetMemoryConfig() *common.MemoryConfig {
 	output, err := utils.RunCommand("cat /proc/meminfo")
 	if err != nil {
 		fmt.Printf("Error:can not obtain stdout pipe for command:%s\n", err)
 	}
 	outputlines := strings.Split(output, "\n")
-	m := &MemoryConfig{}
+	m := &common.MemoryConfig{}
 	for _, line := range outputlines {
 		//一次获取一行,_ 获取当前行是否被读完
 		a, b := reserveRead([]byte(line))

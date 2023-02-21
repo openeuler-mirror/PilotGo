@@ -7,14 +7,8 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-type listService struct {
-	Name   string
-	LOAD   string
-	Active string
-	SUB    string
-}
 
 const (
 	ServiceStart   = 0
@@ -23,17 +17,17 @@ const (
 )
 
 // 获取服务列表
-func (b *BaseOS) GetServiceList() ([]listService, error) {
-	list := make([]listService, 0)
+func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
+	list := make([]common.ListService, 0)
 	result1, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
 	if err != nil {
 		logger.Error("获取服务列表命令运行失败: ", err)
-		return []listService{}, err
+		return []common.ListService{}, err
 	}
 	result2, err := utils.RunCommand("systemctl list-units --all|grep 'not-found' | awk 'NR>2{print $2\" \" $3\" \" $4\" \" $5}'")
 	if err != nil {
 		logger.Error("获取服务列表命令运行失败: ", err)
-		return []listService{}, err
+		return []common.ListService{}, err
 	}
 	result := result1 + result2
 	reader := strings.NewReader(result)
@@ -46,7 +40,7 @@ func (b *BaseOS) GetServiceList() ([]listService, error) {
 		line := scanner.Text()
 		line = strings.TrimSpace(line)
 		str := strings.Fields(line)
-		tmp := listService{}
+		tmp := common.ListService{}
 		tmp.Name = str[0]
 		tmp.LOAD = str[1]
 		tmp.Active = str[2]
