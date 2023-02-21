@@ -12,7 +12,7 @@
  * LastEditTime: 2022-03-02 18:35:12
  * Description: provide agent rpm manager functions.
  ******************************************************************************/
-package os
+package baseos
 
 import (
 	"bufio"
@@ -24,7 +24,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-//形如	openssl-1:1.1.1f-4.oe1.x86_64
+// 形如	openssl-1:1.1.1f-4.oe1.x86_64
+//
 //	OS
 //	openssl=1:1.1.1f-4.oe1
 type RpmSrc struct {
@@ -48,8 +49,8 @@ type RpmInfo struct {
 	Summary      string
 }
 
-//获取全部安装的rpm包列表
-func GetAllRpm() []string {
+// 获取全部安装的rpm包列表
+func (b *BaseOS) GetAllRpm() []string {
 	listRpm := make([]string, 0)
 	result, err := utils.RunCommand("rpm -qa")
 	if err != nil && len(result) != 0 {
@@ -69,8 +70,8 @@ func GetAllRpm() []string {
 	return listRpm
 }
 
-//获取源软件包名以及源
-func GetRpmSource(rpm string) ([]RpmSrc, error) {
+// 获取源软件包名以及源
+func (b *BaseOS) GetRpmSource(rpm string) ([]RpmSrc, error) {
 	Getlist := make([]RpmSrc, 0)
 	listRpmSource := make([]string, 0)
 	listRpmName := make([]string, 0)
@@ -139,7 +140,7 @@ func GetRpmSource(rpm string) ([]RpmSrc, error) {
 	return Getlist, nil
 }
 
-//按行使用正则语言查找结构体的属性信息
+// 按行使用正则语言查找结构体的属性信息
 func readInfo(reader *strings.Reader, reg string) (string, error) {
 	scanner := bufio.NewScanner(reader)
 	var result string
@@ -178,7 +179,7 @@ func readInfo(reader *strings.Reader, reg string) (string, error) {
 	return string(""), fmt.Errorf("匹配结构体属性失败")
 }
 
-func GetRpmInfo(rpm string) (RpmInfo, error, error) {
+func (b *BaseOS) GetRpmInfo(rpm string) (RpmInfo, error, error) {
 	rpminfo := RpmInfo{}
 	result, err := utils.RunCommand("rpm -qi " + rpm)
 	//未安装该软件包情况
@@ -273,7 +274,7 @@ func GetRpmInfo(rpm string) (RpmInfo, error, error) {
 	return rpminfo, nil, nil
 }
 
-//判断rpm软件包是否安装/卸载成功
+// 判断rpm软件包是否安装/卸载成功
 func verifyRpmInstalled(reader *strings.Reader, reg string) bool {
 	scanner := bufio.NewScanner(reader)
 	for {
@@ -291,8 +292,8 @@ func verifyRpmInstalled(reader *strings.Reader, reg string) bool {
 	return false
 }
 
-//安装rpm软件包
-func InstallRpm(rpm string) error {
+// 安装rpm软件包
+func (b *BaseOS) InstallRpm(rpm string) error {
 	result, err := utils.RunCommand("yum -y install " + rpm)
 	if err != nil {
 		logger.Error("rpm包安装命令运行失败: ", err)
@@ -311,8 +312,8 @@ func InstallRpm(rpm string) error {
 
 }
 
-//卸载rpm软件包
-func RemoveRpm(rpm string) error {
+// 卸载rpm软件包
+func (b *BaseOS) RemoveRpm(rpm string) error {
 	result, err := utils.RunCommand("yum -y remove " + rpm)
 	if err != nil {
 		logger.Error("rpm包卸载命令运行失败: ", err)

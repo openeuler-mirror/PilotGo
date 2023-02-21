@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"bytes"
@@ -104,7 +104,7 @@ func bytesToInt(bys []byte) int64 {
 
 }
 
-func GetMemoryConfig() *MemoryConfig {
+func (b *BaseOS) GetMemoryConfig() *MemoryConfig {
 	output, err := utils.RunCommand("cat /proc/meminfo")
 	if err != nil {
 		fmt.Printf("Error:can not obtain stdout pipe for command:%s\n", err)

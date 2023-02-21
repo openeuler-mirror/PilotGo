@@ -1,4 +1,4 @@
-package os
+package baseos
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ const (
 )
 
 // 获取磁盘的使用情况
-func GetDiskUsageInfo() []DiskUsageINfo {
+func (b *BaseOS) GetDiskUsageInfo() []DiskUsageINfo {
 	diskusage := make([]DiskUsageINfo, 0)
 	parts, err := disk.Partitions(false)
 	if err != nil {
@@ -75,7 +75,7 @@ func GetDiskUsageInfo() []DiskUsageINfo {
 }
 
 // 获取磁盘的IO信息
-func GetDiskInfo() []DiskIOInfo {
+func (b *BaseOS) GetDiskInfo() []DiskIOInfo {
 
 	diskinfo := make([]DiskIOInfo, 0)
 	ioStat, _ := disk.IOCounters()
@@ -101,10 +101,12 @@ func GetDiskInfo() []DiskIOInfo {
 	return diskinfo
 }
 
-/*挂载磁盘
+/*
+挂载磁盘
 1.创建挂载磁盘的目录
-2.挂载磁盘*/
-func CreateDiskPath(mountpath string) string {
+2.挂载磁盘
+*/
+func (b *BaseOS) CreateDiskPath(mountpath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("mkdir %s", mountpath))
 	if err != nil {
 		logger.Error("创建挂载目录失败!%s", err.Error())
@@ -113,7 +115,8 @@ func CreateDiskPath(mountpath string) string {
 	logger.Info("创建挂载目录成功!%s", tmp)
 	return tmp
 }
-func DiskMount(sourceDisk, destPath string) string {
+
+func (b *BaseOS) DiskMount(sourceDisk, destPath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, destPath))
 	if err != nil {
 		logger.Error("挂载磁盘失败!%s", err.Error())
@@ -124,7 +127,7 @@ func DiskMount(sourceDisk, destPath string) string {
 }
 
 // 卸载磁盘
-func DiskUMount(diskPath string) string {
+func (b *BaseOS) DiskUMount(diskPath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("umount %s", diskPath))
 	if err != nil {
 		logger.Error("卸载磁盘失败!%s", err.Error())
@@ -135,7 +138,7 @@ func DiskUMount(diskPath string) string {
 }
 
 // 磁盘格式化
-func DiskFormat(fileType, diskPath string) string {
+func (b *BaseOS) DiskFormat(fileType, diskPath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("mkfs.%s %s", fileType, diskPath))
 	if err != nil {
 		logger.Error("格式化磁盘失败!%s", err.Error())
