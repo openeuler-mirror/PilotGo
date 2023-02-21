@@ -8,34 +8,16 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-type DiskIOInfo struct {
-	PartitionName string
-	Label         string
-	ReadCount     uint64
-	WriteCount    uint64
-	ReadBytes     uint64
-	WriteBytes    uint64
-	IOTime        uint64
-}
-
-type DiskUsageINfo struct {
-	Device      string `json:"device"`
-	Path        string `json:"path"`
-	Fstype      string `json:"fstype"`
-	Total       string `json:"total"`
-	Used        string `json:"used"`
-	UsedPercent string `json:"usedPercent"`
-}
 
 const (
 	CapacitySize = 1
 )
 
 // 获取磁盘的使用情况
-func (b *BaseOS) GetDiskUsageInfo() []DiskUsageINfo {
-	diskusage := make([]DiskUsageINfo, 0)
+func (b *BaseOS) GetDiskUsageInfo() []common.DiskUsageINfo {
+	diskusage := make([]common.DiskUsageINfo, 0)
 	parts, err := disk.Partitions(false)
 	if err != nil {
 		logger.Error("get Partitions failed, err:%v\n", err.Error())
@@ -61,7 +43,7 @@ func (b *BaseOS) GetDiskUsageInfo() []DiskUsageINfo {
 			used = strconv.FormatUint(diskInfo.Used/(1024*1024), 10) + "M"
 		}
 		usedPercent := int(math.Floor(diskInfo.UsedPercent))
-		tmp := DiskUsageINfo{
+		tmp := common.DiskUsageINfo{
 			Device:      device,
 			Path:        path,
 			Fstype:      fstype,
@@ -75,9 +57,9 @@ func (b *BaseOS) GetDiskUsageInfo() []DiskUsageINfo {
 }
 
 // 获取磁盘的IO信息
-func (b *BaseOS) GetDiskInfo() []DiskIOInfo {
+func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
 
-	diskinfo := make([]DiskIOInfo, 0)
+	diskinfo := make([]common.DiskIOInfo, 0)
 	ioStat, _ := disk.IOCounters()
 	for k, v := range ioStat {
 		label := v.Label
@@ -87,7 +69,7 @@ func (b *BaseOS) GetDiskInfo() []DiskIOInfo {
 		writeBytes := v.WriteBytes
 		ioTime := v.IoTime
 
-		tmp := DiskIOInfo{
+		tmp := common.DiskIOInfo{
 			PartitionName: k,
 			Label:         label,
 			ReadCount:     readCount,

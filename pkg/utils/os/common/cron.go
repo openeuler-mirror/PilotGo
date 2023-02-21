@@ -9,10 +9,10 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-05-23 10:25:52
- * LastEditTime: 2022-05-23 15:16:10
+ * LastEditTime: 2023-02-21 18:33:00
  * Description: os scheduled task
  ******************************************************************************/
-package baseos
+package common
 
 import (
 	"fmt"

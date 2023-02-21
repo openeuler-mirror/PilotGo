@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2022-04-18 16:02:48
+ * LastEditTime: 2023-02-21 19:03:23
  * Description: agent main
  ******************************************************************************/
 package main
@@ -28,7 +28,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/register"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
 func main() {
@@ -47,7 +47,7 @@ func main() {
 	logger.Info("Start PilotGo agent.")
 
 	// 定时任务初始化
-	if err := uos.CronInit(); err != nil {
+	if err := common.CronInit(); err != nil {
 		logger.Error("cron init failed: %s", err)
 		os.Exit(-1)
 	}
