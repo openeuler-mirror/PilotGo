@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-01-09 17:57:55
+ * LastEditTime: 2023-02-22 17:19:32
  * Description: Interface routing forwarding
  ******************************************************************************/
 package initialization
@@ -20,9 +20,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
-	"openeuler.org/PilotGo/PilotGo/resource"
 )
 
 func SetupRouter() *gin.Engine {
