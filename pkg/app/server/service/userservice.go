@@ -194,27 +194,23 @@ func UserAll() ([]model.ReturnUser, int, error) {
 
 func Login(user model.User) (string, string, int, int, string, error) {
 	email := user.Email
-	password := user.Password
+	pwd := user.Password
 	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
 		return "", "", 0, 0, "", err
 	}
 	if !EmailBool {
-		return "", "", 0, 0, "", errors.New("用户不存在!")
+		return "", "", 0, 0, "", errors.New("用户不存在")
 	}
 
-	DecryptedPassword, err := utils.JsAesDecrypt(password, email)
-	if err != nil {
-		return "", "", 0, 0, "", errors.New("密码解密失败")
-	}
 	u, err := dao.UserInfo(email)
-	//DBpassword, departName, roleId, departId, userType, err := dao.UserPassword(email)
 	if err != nil {
 		return "", "", 0, 0, "", errors.New("查询邮箱密码错误")
 	}
 
-	if u.Password != DecryptedPassword {
-		return "", "", 0, 0, "", errors.New("密码错误!")
+	err = utils.ComparePassword(u.Password, pwd)
+	if err != nil {
+		return "", "", 0, 0, "", errors.New("密码错误")
 	}
 
 	// Issue token
@@ -239,23 +235,28 @@ func Register(user model.User) error {
 		username = RandomString(5)
 	}
 	if len(password) == 0 {
-		password = global.DefaultUserPassword
+		return errors.New("密码不能为空")
 	}
 	if len(email) == 0 {
-		return errors.New("邮箱不能为空!")
+		return errors.New("邮箱不能为空")
 	}
 	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
 		return err
 	}
 	if EmailBool {
-		return errors.New("邮箱已存在!")
+		return errors.New("邮箱已存在")
+	}
+
+	bs, err := utils.CryptoPassword(password)
+	if err != nil {
+		return errors.New("数据加密错误")
 	}
 
 	user_type := UserType(roleId)
 	user = model.User{ //Create user
 		Username:     username,
-		Password:     password,
+		Password:     string(bs),
 		Phone:        phone,
 		Email:        email,
 		DepartName:   depart,
