@@ -20,6 +20,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 // 获取所有的用户角色
@@ -162,7 +163,11 @@ func ResetPassword(email string) (model.User, error) {
 	if err != nil {
 		return user, err
 	} else {
-		err := global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", "123456").Error
+		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
+		if err != nil {
+			return user, err
+		}
+		err = global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", string(bs)).Error
 		if err != nil {
 			return user, err
 		}
