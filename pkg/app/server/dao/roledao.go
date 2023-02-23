@@ -22,6 +22,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 // 根据角色名称返回角色id和用户类型
@@ -203,11 +204,9 @@ func UpdateRolePermission(permission model.RolePermissionChange) (model.UserRole
 	return userRole, nil
 }
 
-// 创建超级管理员账户
-func CreateSuperAdministratorUser() {
-	var user model.User
+// 创建管理员账户
+func CreateAdministratorUser() error {
 	var role model.UserRole
-	var roleButton model.RoleButton
 	global.PILOTGO_DB.Where("type =?", global.AdminUserType).Find(&role)
 	if role.ID == 0 {
 		role = model.UserRole{
@@ -218,19 +217,26 @@ func CreateSuperAdministratorUser() {
 			ButtonID:    global.PILOTGO_BUTTONID,
 		}
 		global.PILOTGO_DB.Create(&role)
-		user = model.User{
+		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
+		if err != nil {
+			return err
+		}
+
+		user := model.User{
 			CreatedAt:    time.Time{},
 			DepartFirst:  global.Departroot,
 			DepartSecond: global.UncateloguedDepartId,
 			DepartName:   "超级用户",
 			Username:     "admin",
-			Password:     global.DefaultUserPassword,
+			Password:     string(bs),
 			Email:        "admin@123.com",
 			UserType:     global.AdminUserType,
 			RoleID:       strconv.Itoa(role.ID),
 		}
 		global.PILOTGO_DB.Create(&user)
 	}
+
+	var roleButton model.RoleButton
 	global.PILOTGO_DB.First(&roleButton)
 	if roleButton.ID == 0 {
 		global.PILOTGO_DB.Raw("INSERT INTO role_button(id, button)" +
@@ -251,4 +257,5 @@ func CreateSuperAdministratorUser() {
 			"('14', 'config_install')," +
 			"('15', 'dept_change')").Scan(&roleButton)
 	}
+	return nil
 }
