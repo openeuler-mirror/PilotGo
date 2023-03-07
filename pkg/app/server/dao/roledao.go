@@ -142,7 +142,7 @@ func AddRole(r model.UserRole) error {
 
 // 是否有用户绑定某角色
 func IsUserBindingRole(roleId int) (bool, error) {
-	var users []model.User
+	var users []User
 	err := global.PILOTGO_DB.Find(&users).Error
 	if err != nil {
 		return false, err
@@ -222,7 +222,7 @@ func CreateAdministratorUser() error {
 			return err
 		}
 
-		user := model.User{
+		user := User{
 			CreatedAt:    time.Time{},
 			DepartFirst:  global.Departroot,
 			DepartSecond: global.UncateloguedDepartId,

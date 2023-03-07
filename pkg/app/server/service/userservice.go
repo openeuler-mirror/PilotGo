@@ -99,7 +99,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				return UserExit, err
 			}
 			password := global.DefaultUserPassword // 设置默认密码为123456
-			u := model.User{
+			u := dao.User{
 				Username:     userName,
 				Phone:        phone,
 				Password:     password,
@@ -129,7 +129,7 @@ func DeleteUser(Emails []string) error {
 }
 
 // 修改用户信息
-func UpdateUser(user model.User) (model.User, error) {
+func UpdateUser(user dao.User) (dao.User, error) {
 	email := user.Email
 	phone := user.Phone
 	Pid := user.DepartFirst
@@ -167,7 +167,7 @@ func UpdateUser(user model.User) (model.User, error) {
 	return u, nil
 }
 
-func ResetPassword(email string) (model.User, error) {
+func ResetPassword(email string) (dao.User, error) {
 	u, err := dao.ResetPassword(email)
 	if err != nil {
 		return u, err
@@ -184,7 +184,7 @@ func UserSearch(email string, query *model.PaginationQ) (interface{}, int, error
 	return data, total, nil
 }
 
-func UserAll() ([]model.ReturnUser, int, error) {
+func UserAll() ([]dao.ReturnUser, int, error) {
 	users, total, err := dao.UserAll()
 	if err != nil {
 		return users, total, err
@@ -192,7 +192,7 @@ func UserAll() ([]model.ReturnUser, int, error) {
 	return users, total, nil
 }
 
-func Login(user model.User) (string, string, int, int, string, error) {
+func Login(user dao.User) (string, string, int, int, string, error) {
 	email := user.Email
 	pwd := user.Password
 	EmailBool, err := dao.IsEmailExist(email)
@@ -221,7 +221,7 @@ func Login(user model.User) (string, string, int, int, string, error) {
 	return token, u.DepartName, u.DepartSecond, u.UserType, u.RoleID, nil
 }
 
-func Register(user model.User) error {
+func Register(user dao.User) error {
 	username := user.Username
 	password := user.Password
 	email := user.Email
@@ -254,7 +254,7 @@ func Register(user model.User) error {
 	}
 
 	user_type := UserType(roleId)
-	user = model.User{ //Create user
+	user = dao.User{ //Create user
 		Username:     username,
 		Password:     string(bs),
 		Phone:        phone,
