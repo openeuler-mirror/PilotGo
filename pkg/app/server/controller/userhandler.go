@@ -19,6 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -34,7 +35,7 @@ func GetUserRoleHandler(c *gin.Context) {
 }
 
 func RegisterHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -48,7 +49,7 @@ func RegisterHandler(c *gin.Context) {
 }
 
 func LoginHandler(c *gin.Context) {
-	var user model.User //Data verification
+	var user dao.User //Data verification
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -72,7 +73,7 @@ func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
-		"data": gin.H{"user": model.ToUserDto(user.(model.User))},
+		"data": gin.H{"user": dao.ToUserDto(user.(dao.User))},
 	})
 }
 
@@ -100,7 +101,7 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -123,7 +124,7 @@ func UserSearchHandler(c *gin.Context) {
 
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -138,7 +139,7 @@ func ResetPasswordHandler(c *gin.Context) {
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	var userdel model.Userdel
+	var userdel dao.Userdel
 	if c.Bind(&userdel) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -153,7 +154,7 @@ func DeleteUserHandler(c *gin.Context) {
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
