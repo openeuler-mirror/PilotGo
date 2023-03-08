@@ -34,8 +34,8 @@ func StaticRouter(router *gin.Engine) *gin.Engine {
 	// })
 
 	// TODO: for test
-	router.Static("/static", "./dist/static")
-	router.StaticFile("/", "./dist/index.html")
+	router.Static("/static", "./frontend/dist/static")
+	router.StaticFile("/", "./frontend/dist/index.html")
 
 	// 关键点【解决页面刷新404的问题】
 	router.NoRoute(func(c *gin.Context) {
@@ -43,7 +43,7 @@ func StaticRouter(router *gin.Engine) *gin.Engine {
 		// c.HTML(http.StatusOK, "index.html", nil)
 
 		// TODO: for test
-		c.File("./dist/index.html")
+		c.File("./frontend/dist/index.html")
 	})
 	return router
 }

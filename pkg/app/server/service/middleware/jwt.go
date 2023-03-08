@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 )
 
 var jwtKey = []byte("a_secret_crect")
@@ -29,7 +29,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func ReleaseToken(user model.User) (string, error) {
+func ReleaseToken(user dao.User) (string, error) {
 	expirationTime := time.Now().Add(6 * 60 * time.Minute) //到期时间
 	claims := &Claims{
 		UserId: user.ID,
