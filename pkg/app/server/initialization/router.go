@@ -18,8 +18,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
