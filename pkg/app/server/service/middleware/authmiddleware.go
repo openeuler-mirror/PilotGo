@@ -18,7 +18,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
@@ -43,7 +43,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		userId := claims.UserId // Get the userID in claim after the verification is passed
-		var user model.User
+		var user dao.User
 		global.PILOTGO_DB.First(&user, userId)
 		if user.ID == 0 {
 			c.JSON(http.StatusUnauthorized, gin.H{

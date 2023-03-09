@@ -60,7 +60,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	global.PILOTGO_DB.AutoMigrate(&dao.PluginModel{})
 
 	// 创建超级管理员账户
-	global.PILOTGO_DB.AutoMigrate(&model.User{})
+	global.PILOTGO_DB.AutoMigrate(&dao.User{})
 	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
 	err = dao.CreateAdministratorUser()
 	if err != nil {
