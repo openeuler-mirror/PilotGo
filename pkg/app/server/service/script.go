@@ -7,11 +7,10 @@ import (
 	"time"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 // 存储脚本文件
-func AddScript(script *model.Script) error {
+func AddScript(script *dao.Script) error {
 	if len(script.Name) == 0 {
 		return errors.New("请输入脚本文件名字")
 	}
@@ -24,7 +23,7 @@ func AddScript(script *model.Script) error {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	vcode := fmt.Sprintf("%06v", rnd.Int31n(1000000))
 	version := time.Now().Format("2006-01-02 15:04:05") + "-" + vcode
-	sc := model.Script{
+	sc := dao.Script{
 		Name:        script.Name,
 		Content:     script.Content,
 		Description: script.Description,
