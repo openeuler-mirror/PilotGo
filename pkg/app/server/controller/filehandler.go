@@ -19,6 +19,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
@@ -26,7 +27,7 @@ import (
 )
 
 func SaveFileToDatabaseHandler(c *gin.Context) {
-	var file model.Files
+	var file dao.Files
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -40,7 +41,7 @@ func SaveFileToDatabaseHandler(c *gin.Context) {
 }
 
 func DeleteFileHandler(c *gin.Context) {
-	var files model.DeleteFiles
+	var files dao.DeleteFiles
 	if err := c.Bind(&files); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -55,7 +56,7 @@ func DeleteFileHandler(c *gin.Context) {
 }
 
 func UpdateFileHandler(c *gin.Context) {
-	var file model.Files
+	var file dao.Files
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -76,7 +77,7 @@ func AllFiles(c *gin.Context) {
 		return
 	}
 
-	files := model.Files{}
+	files := dao.Files{}
 	list, tx := files.AllFiles(query)
 
 	total, err := service.CrudAll(query, tx, list)
@@ -99,7 +100,7 @@ func AllFiles(c *gin.Context) {
 }
 
 func FileSearchHandler(c *gin.Context) {
-	var file model.SearchFile
+	var file dao.SearchFile
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -138,7 +139,7 @@ func HistoryFilesHandler(c *gin.Context) {
 		return
 	}
 
-	files := model.HistoryFiles{}
+	files := dao.HistoryFiles{}
 	list, tx := files.HistoryFiles(query, FileId)
 
 	total, err := service.CrudAll(query, tx, list)
@@ -150,7 +151,7 @@ func HistoryFilesHandler(c *gin.Context) {
 }
 
 func LastFileRollBackHandler(c *gin.Context) {
-	var file model.RollBackFiles
+	var file dao.RollBackFiles
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
