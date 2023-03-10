@@ -2,13 +2,23 @@ package dao
 
 import (
 	"fmt"
+	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
+type Script struct {
+	ID          uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	Name        string `json:"name"`
+	Content     string `json:"content"`
+	Description string `json:"description"`
+	UpdatedAt   time.Time
+	Version     string `gorm:"unique" json:"version"`
+	Deleted     int    `json:"deleted"` //deleted为1的时候表示删除，一般表示为0
+}
+
 // 添加脚本文件
-func AddScript(s model.Script) error {
+func AddScript(s Script) error {
 	fmt.Println("jjinru daoceng")
 	version := s.Version
 	if len(version) == 0 {
@@ -23,7 +33,7 @@ func AddScript(s model.Script) error {
 
 // 根据脚本版本号查询文件是否存在
 func IsVersionExist(scriptversion string) (bool, error) {
-	var script model.Script
+	var script Script
 	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
 	if err != nil {
 		return script.Deleted == 0, err
@@ -33,7 +43,7 @@ func IsVersionExist(scriptversion string) (bool, error) {
 
 // 根据版本号删除文件（将标志位变为1）
 func DeleteScript(scriptversion string) error {
-	var script model.Script
+	var script Script
 	VersionExistBool, err := IsVersionExist(scriptversion)
 	if err != nil {
 		return err
@@ -49,7 +59,7 @@ func DeleteScript(scriptversion string) error {
 
 // 根据版本号查询脚本文件内容
 func ShowScript(scriptversion string) (string, error) {
-	var script model.Script
+	var script Script
 	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
 	if err != nil {
 		return script.Content, err
