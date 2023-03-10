@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/pluginapi"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
@@ -188,7 +189,14 @@ func SetupRouter() *gin.Engine {
 		plugin.DELETE("/:uuid", controller.UnloadPluginHanlder)
 	}
 
-	// TODO: 此处绑定前端静态资源handler
+	// 对插件提供的api接口
+	pluginAPI := api.Group("/pluginapi")
+	pluginAPI.Use(pluginapi.AuthCheck)
+	{
+		pluginAPI.POST("/runScript", pluginapi.RunScriptHandler)
+	}
+
+	// 此处绑定前端静态资源handler
 	resource.StaticRouter(router)
 
 	// 全局通用接口
