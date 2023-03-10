@@ -22,7 +22,6 @@ import (
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
@@ -1113,7 +1112,7 @@ func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 func ConfigMessageInfo(Data interface{}) {
 	p, ok := Data.(map[string]interface{})
 	if ok {
-		cf := model.ConfigFile{
+		cf := dao.ConfigFile{
 			MachineUUID: p["Machine_uuid"].(string),
 			Content:     p["ConfigContent"].(string),
 			Path:        p["ConfigName"].(string),
