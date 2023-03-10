@@ -28,7 +28,7 @@ import (
 
 func CreatCron(c *gin.Context) {
 	// 存入数据库
-	var newCron model.CrontabUpdate
+	var newCron dao.CrontabUpdate
 	c.Bind(&newCron)
 
 	uuid := newCron.MachineUUID
@@ -59,7 +59,7 @@ func CreatCron(c *gin.Context) {
 		response.Fail(c, nil, "执行命令不能为空")
 		return
 	}
-	newcron := model.CrontabList{
+	newcron := dao.CrontabList{
 		MachineUUID: uuid,
 		TaskName:    TaskName,
 		Description: description,
@@ -93,7 +93,7 @@ func CreatCron(c *gin.Context) {
 }
 
 func DeleteCronTask(c *gin.Context) {
-	var crons model.DelCrons
+	var crons dao.DelCrons
 	var cronIds string
 	c.Bind(&crons)
 	uuid := crons.MachineUUID
@@ -116,7 +116,7 @@ func DeleteCronTask(c *gin.Context) {
 }
 
 func UpdateCron(c *gin.Context) {
-	var Cron model.CrontabUpdate
+	var Cron dao.CrontabUpdate
 	c.Bind(&Cron)
 	id := Cron.ID
 	TaskName := Cron.TaskName
@@ -125,7 +125,7 @@ func UpdateCron(c *gin.Context) {
 	command := Cron.Command
 	uuid := Cron.MachineUUID
 	status := Cron.Status
-	UpdateCron := model.CrontabList{
+	UpdateCron := dao.CrontabList{
 		TaskName:    TaskName,
 		Description: description,
 		CronSpec:    spec[:len(spec)-2],
@@ -159,7 +159,7 @@ func UpdateCron(c *gin.Context) {
 }
 
 func CronTaskStatus(c *gin.Context) {
-	var Cron model.CrontabUpdate
+	var Cron dao.CrontabUpdate
 	c.Bind(&Cron)
 	id := Cron.ID
 	uuid := Cron.MachineUUID
@@ -212,7 +212,7 @@ func CronTaskList(c *gin.Context) {
 		return
 	}
 
-	cronlist := model.CrontabList{}
+	cronlist := &dao.CrontabList{}
 	list, tx := cronlist.CronList(uuid, query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
