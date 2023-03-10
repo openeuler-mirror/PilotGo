@@ -42,6 +42,7 @@ function check_golang(){
 }
 
 function build_frontend() {
+    pushd frontend
     echo "dowoloading frontend libraries, please wait..."
     yarn install
     echo "compiling frontend, please wait..."
@@ -51,9 +52,10 @@ function build_frontend() {
         exit -1
     fi
 
-    # move frontend binary files to resource dir
-    cp ./dist/index.html ./resource/index.html
-    cp -r ./dist/static/* ./resource/
+    # # move frontend binary files to resource dir
+    # cp ./dist/index.html ./resource/index.html
+    # cp -r ./dist/static/* ./resource/
+    popd
 }
 
 function build_backend() {
