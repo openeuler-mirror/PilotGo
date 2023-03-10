@@ -22,7 +22,7 @@ import (
 )
 
 // 获取用户最高权限的角色id
-func RoleId(R model.RoleID) int {
+func RoleId(R dao.RoleID) int {
 	min := R.RoleId[0]
 	if len(R.RoleId) > 1 {
 		for _, v := range R.RoleId {
@@ -34,7 +34,7 @@ func RoleId(R model.RoleID) int {
 	return min
 }
 
-func GetLoginUserPermission(Roleid model.RoleID) (model.UserRole, interface{}, error) {
+func GetLoginUserPermission(Roleid dao.RoleID) (dao.UserRole, interface{}, error) {
 	roleId := RoleId(Roleid) //用户的最高权限
 	userRole, err := dao.RoleIdToGetAllInfo(roleId)
 	if err != nil {
@@ -59,7 +59,7 @@ func GetRoles(query *model.PaginationQ) (int, interface{}, error) {
 	return total, data, nil
 }
 
-func AddUserRole(userRole *model.UserRole) error {
+func AddUserRole(userRole *dao.UserRole) error {
 	err := dao.AddRole(*userRole)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func DeleteUserRole(ID int) error {
 	}
 }
 
-func UpdateUserRole(UserRole *model.UserRole) error {
+func UpdateUserRole(UserRole *dao.UserRole) error {
 	id := UserRole.ID
 	role := UserRole.Role
 	description := UserRole.Description
@@ -119,7 +119,7 @@ func UpdateUserRole(UserRole *model.UserRole) error {
 	return errors.New("没有修改信息")
 }
 
-func RolePermissionChange(roleChange model.RolePermissionChange) (*model.UserRole, error) {
+func RolePermissionChange(roleChange dao.RolePermissionChange) (*dao.UserRole, error) {
 	userRole, err := dao.UpdateRolePermission(roleChange)
 	if err != nil {
 		return &userRole, err

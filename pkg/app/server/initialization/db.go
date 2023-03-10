@@ -49,7 +49,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 
 	global.PILOTGO_DB.AutoMigrate(&model.CrontabList{})
 	global.PILOTGO_DB.AutoMigrate(&model.MachineNode{})
-	global.PILOTGO_DB.AutoMigrate(&model.RoleButton{})
+	global.PILOTGO_DB.AutoMigrate(&dao.RoleButton{})
 	global.PILOTGO_DB.AutoMigrate(&model.Batch{})
 	global.PILOTGO_DB.AutoMigrate(&model.AgentLogParent{})
 	global.PILOTGO_DB.AutoMigrate(&model.AgentLog{})
@@ -61,7 +61,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 
 	// 创建超级管理员账户
 	global.PILOTGO_DB.AutoMigrate(&dao.User{})
-	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
+	global.PILOTGO_DB.AutoMigrate(&dao.UserRole{})
 	err = dao.CreateAdministratorUser()
 	if err != nil {
 		return err

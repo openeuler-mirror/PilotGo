@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -73,7 +74,7 @@ func GetPolicy(c *gin.Context) {
 
 // 获取登录用户权限
 func GetLoginUserPermissionHandler(c *gin.Context) {
-	var RoleId model.RoleID
+	var RoleId dao.RoleID
 	if err := c.Bind(&RoleId); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -103,7 +104,7 @@ func GetRolesHandler(c *gin.Context) {
 }
 
 func AddUserRoleHandler(c *gin.Context) {
-	var userRole model.UserRole
+	var userRole dao.UserRole
 	if err := c.Bind(&userRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -116,7 +117,7 @@ func AddUserRoleHandler(c *gin.Context) {
 }
 
 func DeleteUserRoleHandler(c *gin.Context) {
-	var UserRole model.UserRole
+	var UserRole dao.UserRole
 	if err := c.Bind(&UserRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -129,7 +130,7 @@ func DeleteUserRoleHandler(c *gin.Context) {
 }
 
 func UpdateUserRoleHandler(c *gin.Context) {
-	var UserRole model.UserRole
+	var UserRole dao.UserRole
 	if err := c.Bind(&UserRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -142,7 +143,7 @@ func UpdateUserRoleHandler(c *gin.Context) {
 }
 
 func RolePermissionChangeHandler(c *gin.Context) {
-	var roleChange model.RolePermissionChange
+	var roleChange dao.RolePermissionChange
 	if err := c.Bind(&roleChange); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
