@@ -2,12 +2,20 @@ package dao
 
 import (
 	"fmt"
+	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-func AddConfigFile(cf model.ConfigFile) error {
+type ConfigFile struct {
+	ID          uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	MachineUUID string `json:"uuid"`
+	Path        string `json:"path"`
+	Content     string `json:"content"`
+	UpdatedAt   time.Time
+}
+
+func AddConfigFile(cf ConfigFile) error {
 	UUIDExistbool, err := IsUUIDExist(cf.MachineUUID)
 	if err != nil {
 		return err

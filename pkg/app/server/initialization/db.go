@@ -56,7 +56,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	global.PILOTGO_DB.AutoMigrate(&dao.Files{})
 	global.PILOTGO_DB.AutoMigrate(&dao.HistoryFiles{})
 	global.PILOTGO_DB.AutoMigrate(&dao.Script{})
-	global.PILOTGO_DB.AutoMigrate(&model.ConfigFile{})
+	global.PILOTGO_DB.AutoMigrate(&dao.ConfigFile{})
 	global.PILOTGO_DB.AutoMigrate(&dao.PluginModel{})
 
 	// 创建超级管理员账户
