@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -110,7 +109,7 @@ func NetworkStatic(net []interface{}, ip string, netmask string, gateway string,
 	return
 }
 
-func SaveFileToDatabase(file *model.Files) error {
+func SaveFileToDatabase(file *dao.Files) error {
 	filename := file.FileName
 	if len(filename) == 0 {
 		return errors.New("请输入配置文件名字")
@@ -145,7 +144,7 @@ func SaveFileToDatabase(file *model.Files) error {
 		return errors.New("请重新检查文件内容")
 	}
 
-	fd := model.Files{
+	fd := dao.Files{
 		UserUpdate:      file.UserUpdate,
 		UserDept:        file.UserDept,
 		FileName:        filename,
@@ -172,7 +171,7 @@ func DeleteFile(fileIds []int) error {
 	}
 	return nil
 }
-func UpdateFile(file *model.Files) error {
+func UpdateFile(file *dao.Files) error {
 	id := file.ID
 	err := dao.SaveHistoryFile(id)
 	if err != nil {
@@ -196,7 +195,7 @@ func UpdateFile(file *model.Files) error {
 			return err
 		}
 		fname := strings.Split(fileName, "-")
-		f := model.HistoryFiles{
+		f := dao.HistoryFiles{
 			FileName: fname[0],
 		}
 		err = dao.UpdateLastFile(lastfileId, f)
@@ -204,7 +203,7 @@ func UpdateFile(file *model.Files) error {
 			return err
 		}
 	}
-	f := model.Files{
+	f := dao.Files{
 		Type:            file.Type,
 		FileName:        filename,
 		FilePath:        file.FilePath,
@@ -218,7 +217,7 @@ func UpdateFile(file *model.Files) error {
 	return dao.UpdateFile(id, f)
 }
 
-func LastFileRollBack(file *model.RollBackFiles) error {
+func LastFileRollBack(file *dao.RollBackFiles) error {
 	lastfileId := file.HistoryFileID
 	fileId := file.FileID
 	user := file.UserUpdate
@@ -236,7 +235,7 @@ func LastFileRollBack(file *model.RollBackFiles) error {
 			return err
 		}
 	}
-	fd := model.Files{
+	fd := dao.Files{
 		UserUpdate: user,
 		UserDept:   userDept,
 		File:       lastfileText,
