@@ -19,7 +19,6 @@ import (
 	"strings"
 	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -69,8 +68,8 @@ type Userdel struct {
 }
 
 // 获取所有的用户角色
-func AllUserRole() ([]model.UserRole, error) {
-	var role []model.UserRole
+func AllUserRole() ([]UserRole, error) {
+	var role []UserRole
 	err := global.PILOTGO_DB.Find(&role).Error
 	if err != nil {
 		return role, err
@@ -133,7 +132,7 @@ func UserAll() ([]ReturnUser, int, error) {
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := model.UserRole{}
+			userRole := UserRole{}
 			i, _ := strconv.Atoi(id)
 			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
@@ -176,7 +175,7 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := model.UserRole{}
+			userRole := UserRole{}
 			i, _ := strconv.Atoi(id)
 			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
