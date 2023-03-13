@@ -12,7 +12,7 @@
  * LastEditTime: 2022-03-14 14:49:44
  * Description: casbin权限控制
  ******************************************************************************/
-package model
+package dao
 
 type CasbinRule struct {
 	PType    string `json:"ptype"`
