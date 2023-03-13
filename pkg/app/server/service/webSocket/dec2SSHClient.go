@@ -19,11 +19,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 )
 
-func DecodedMsgToSSHClient(msg string) (model.SSHClient, error) {
-	client := model.SSHClient{}
+func DecodedMsgToSSHClient(msg string) (dao.SSHClient, error) {
+	client := dao.SSHClient{}
 	decoded, err := base64.StdEncoding.DecodeString(msg)
 	if err != nil {
 		return client, err
