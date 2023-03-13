@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -48,7 +47,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	username := c.Query("userName")
 	userDeptName := c.Query("userDept")
 
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   username,
 		DepartName: userDeptName,
 		Type:       global.LogTypeSysctl,
@@ -64,7 +63,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	}
 	if agent == nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: args,
@@ -72,7 +71,7 @@ func SysctlChangeHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, nil, "获取uuid失败")
@@ -85,7 +84,7 @@ func SysctlChangeHandler(c *gin.Context) {
 
 	sysctl_change, err := agent.ChangeSysctl(args)
 	if err != nil {
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: args,
@@ -93,7 +92,7 @@ func SysctlChangeHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         err.Error(),
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
@@ -102,7 +101,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		}
 		return
 	}
-	log := model.AgentLog{
+	log := dao.AgentLog{
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: args,
@@ -110,7 +109,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		StatusCode:      http.StatusOK,
 		Message:         "修改成功",
 	}
-	if dao.AgentLog(log) != nil {
+	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
 	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {

@@ -18,6 +18,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -32,7 +33,7 @@ func LogAllHandler(c *gin.Context) {
 		return
 	}
 
-	logParent := model.AgentLogParent{}
+	logParent := dao.AgentLogParent{}
 	list, tx := logParent.LogAll(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -68,7 +69,7 @@ func AgentLogsHandler(c *gin.Context) {
 
 // 删除机器日志
 func DeleteLogHandler(c *gin.Context) {
-	var logid model.AgentLogDel
+	var logid dao.AgentLogDel
 	if err := c.Bind(&logid); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
