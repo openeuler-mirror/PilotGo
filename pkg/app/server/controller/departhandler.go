@@ -18,7 +18,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -67,7 +67,7 @@ func DepartInfoHandler(c *gin.Context) {
 }
 
 func AddDepartHandler(c *gin.Context) {
-	newDepart := model.AddDepart{}
+	newDepart := dao.AddDepart{}
 	if err := c.Bind(&newDepart); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -81,7 +81,7 @@ func AddDepartHandler(c *gin.Context) {
 }
 
 func DeleteDepartDataHandler(c *gin.Context) {
-	var DelDept model.DeleteDepart
+	var DelDept dao.DeleteDepart
 	if err := c.Bind(&DelDept); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -95,7 +95,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 }
 
 func UpdateDepartHandler(c *gin.Context) {
-	var new model.NewDepart
+	var new dao.NewDepart
 	if err := c.Bind(&new); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -109,7 +109,7 @@ func UpdateDepartHandler(c *gin.Context) {
 }
 
 func ModifyMachineDepartHandler(c *gin.Context) {
-	var M model.MachineModifyDepart
+	var M dao.MachineModifyDepart
 	if err := c.Bind(&M); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

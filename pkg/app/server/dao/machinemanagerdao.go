@@ -172,7 +172,7 @@ func SomeDepartMachine(Departids []int) (lists []model.MachineNode, err error) {
 // 根据uuid获取机器的ip、状态和部门
 func MachineBasic(uuid string) (ip string, state int, dept string, err error) {
 	var machine model.MachineNode
-	var depart model.DepartNode
+	var depart DepartNode
 	err = global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine).Error
 	if err != nil {
 		return machine.IP, machine.State, "", err
