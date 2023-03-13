@@ -26,7 +26,7 @@ import (
 
 // 删除过滤策略
 func PolicyDelete(c *gin.Context) {
-	var Rule model.CasbinRule
+	var Rule dao.CasbinRule
 	if err := c.Bind(&Rule); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -40,7 +40,7 @@ func PolicyDelete(c *gin.Context) {
 
 // 增加过滤策略
 func PolicyAdd(c *gin.Context) {
-	var Rule model.CasbinRule
+	var Rule dao.CasbinRule
 	if err := c.Bind(&Rule); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
