@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-29 09:25:41
  * Description: 集群概览数据结构体
  ******************************************************************************/
-package model
+package dao
 
 type ClusterInfo struct {
 	AgentTotal  int `json:"total"`
