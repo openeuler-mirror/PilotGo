@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -71,7 +70,7 @@ func ServiceStartHandler(c *gin.Context) {
 	var agentservice AgentService
 	c.Bind(&agentservice)
 
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
 		Type:       global.LogTypeService,
@@ -87,7 +86,7 @@ func ServiceStartHandler(c *gin.Context) {
 	}
 	if agent == nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
@@ -95,7 +94,7 @@ func ServiceStartHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, nil, "获取uuid失败")
@@ -108,7 +107,7 @@ func ServiceStartHandler(c *gin.Context) {
 	service_start, Err, err := agent.ServiceStart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
@@ -116,7 +115,7 @@ func ServiceStartHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
@@ -127,7 +126,7 @@ func ServiceStartHandler(c *gin.Context) {
 		return
 	}
 
-	log := model.AgentLog{
+	log := dao.AgentLog{
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
@@ -135,7 +134,7 @@ func ServiceStartHandler(c *gin.Context) {
 		StatusCode:      http.StatusOK,
 		Message:         "启动服务成功",
 	}
-	if dao.AgentLog(log) != nil {
+	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
 	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
@@ -148,7 +147,7 @@ func ServiceStopHandler(c *gin.Context) {
 	var agentservice AgentService
 	c.Bind(&agentservice)
 
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
 		Type:       global.LogTypeService,
@@ -164,7 +163,7 @@ func ServiceStopHandler(c *gin.Context) {
 	}
 	if agent == nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
@@ -172,7 +171,7 @@ func ServiceStopHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, nil, "获取uuid失败")
@@ -186,7 +185,7 @@ func ServiceStopHandler(c *gin.Context) {
 	service_stop, Err, err := agent.ServiceStop(agentservice.Service)
 	if len(Err) != 0 || err != nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
@@ -194,7 +193,7 @@ func ServiceStopHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
@@ -205,7 +204,7 @@ func ServiceStopHandler(c *gin.Context) {
 		return
 	}
 
-	log := model.AgentLog{
+	log := dao.AgentLog{
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
@@ -213,7 +212,7 @@ func ServiceStopHandler(c *gin.Context) {
 		StatusCode:      http.StatusOK,
 		Message:         "关闭服务成功",
 	}
-	if dao.AgentLog(log) != nil {
+	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
 	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
@@ -226,7 +225,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	var agentservice AgentService
 	c.Bind(&agentservice)
 
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
 		Type:       global.LogTypeService,
@@ -242,7 +241,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	}
 	if agent == nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
@@ -250,7 +249,7 @@ func ServiceRestartHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, nil, "获取uuid失败")
@@ -264,7 +263,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	service_restart, Err, err := agent.ServiceRestart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
 
-		log := model.AgentLog{
+		log := dao.AgentLog{
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
@@ -272,7 +271,7 @@ func ServiceRestartHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
-		if dao.AgentLog(log) != nil {
+		if dao.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
@@ -283,7 +282,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		return
 	}
 
-	log := model.AgentLog{
+	log := dao.AgentLog{
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
@@ -291,7 +290,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		StatusCode:      http.StatusOK,
 		Message:         "重启服务成功",
 	}
-	if dao.AgentLog(log) != nil {
+	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
 	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {

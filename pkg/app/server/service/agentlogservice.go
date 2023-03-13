@@ -20,7 +20,6 @@ import (
 	"strconv"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -51,7 +50,7 @@ func ActionStatus(StatusCodes []string) (ok bool) {
 }
 
 // 查询所有子日志
-func AgentLogs(ids int) ([]model.AgentLog, error) {
+func AgentLogs(ids int) ([]dao.AgentLog, error) {
 	return dao.Id2AgentLog(ids)
 }
 
