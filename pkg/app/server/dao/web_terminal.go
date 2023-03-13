@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-20 17:48:55
  * Description: web socket连接结构体
  ******************************************************************************/
-package model
+package dao
 
 import (
 	"bufio"

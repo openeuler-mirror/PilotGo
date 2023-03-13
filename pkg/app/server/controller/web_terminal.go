@@ -19,7 +19,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 )
 
@@ -29,7 +29,7 @@ func ShellWs(c *gin.Context) {
 	rows := c.DefaultQuery("rows", "35")
 	col, _ := strconv.Atoi(cols)
 	row, _ := strconv.Atoi(rows)
-	terminal := model.Terminal{
+	terminal := dao.Terminal{
 		Columns: uint32(col),
 		Rows:    uint32(row),
 	}
@@ -40,7 +40,7 @@ func ShellWs(c *gin.Context) {
 		return
 	}
 	if sshClient.IpAddress == "" || sshClient.Password == "" {
-		c.Error(&model.ApiError{Message: "IP地址或密码不能为空", Code: 400})
+		c.Error(&dao.ApiError{Message: "IP地址或密码不能为空", Code: 400})
 		return
 	}
 	// 升级协议并获得socket连接
