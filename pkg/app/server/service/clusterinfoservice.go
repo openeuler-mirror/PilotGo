@@ -54,8 +54,8 @@ func SelectAllMachine() ([]model.MachineNode, error) {
 }
 
 // 获取集群概览
-func ClusterInfo() (model.ClusterInfo, error) {
-	data := model.ClusterInfo{}
+func ClusterInfo() (dao.ClusterInfo, error) {
+	data := dao.ClusterInfo{}
 	machines, err := SelectAllMachine()
 	if err != nil {
 		return data, err
@@ -70,8 +70,8 @@ func ClusterInfo() (model.ClusterInfo, error) {
 }
 
 // 获取各部门集群状态
-func DepartClusterInfo() []model.DepartMachineInfo {
-	var departs []model.DepartMachineInfo
+func DepartClusterInfo() []dao.DepartMachineInfo {
+	var departs []dao.DepartMachineInfo
 
 	FirstDepartIds, err := dao.FirstDepartId()
 	if err != nil {
@@ -92,7 +92,7 @@ func DepartClusterInfo() []model.DepartMachineInfo {
 		}
 		normal, Offline, free := AgentStatusCounts(lists)
 
-		departInfo := model.DepartMachineInfo{}
+		departInfo := dao.DepartMachineInfo{}
 		departInfo.DepartName = departName
 		departInfo.AgentStatus.Normal = normal
 		departInfo.AgentStatus.OffLine = Offline
