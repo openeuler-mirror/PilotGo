@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -123,7 +122,7 @@ func DeleteDepartNode(DepartInfo []dao.DepartNode, departid int) {
 }
 
 // 获取部门下所有机器列表
-func MachineList(DepId int) ([]model.Res, error) {
+func MachineList(DepId int) ([]dao.Res, error) {
 	var departId []int
 	ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)

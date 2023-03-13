@@ -48,7 +48,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	}
 
 	global.PILOTGO_DB.AutoMigrate(&dao.CrontabList{})
-	global.PILOTGO_DB.AutoMigrate(&model.MachineNode{})
+	global.PILOTGO_DB.AutoMigrate(&dao.MachineNode{})
 	global.PILOTGO_DB.AutoMigrate(&dao.RoleButton{})
 	global.PILOTGO_DB.AutoMigrate(&model.Batch{})
 	global.PILOTGO_DB.AutoMigrate(&dao.AgentLogParent{})
