@@ -22,7 +22,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -85,7 +84,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 		response.Fail(c, nil, "文件内容为空，请重新检查文件内容")
 		return
 	}
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   fb.User,
 		DepartName: fb.UserDept,
 		Type:       global.LogTypeBroadcast,
@@ -103,7 +102,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 			logger.Error(err.Error())
 		}
 		if agent == nil {
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: filename,
@@ -111,7 +110,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
@@ -122,7 +121,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 		_, Err, err := agent.UpdateFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
 
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: filename,
@@ -130,14 +129,14 @@ func FileBroadcastToAgents(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: filename,
@@ -145,7 +144,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 				StatusCode:      http.StatusOK,
 				Message:         "配置文件下发成功",
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 

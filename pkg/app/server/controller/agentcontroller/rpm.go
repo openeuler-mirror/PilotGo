@@ -21,7 +21,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -92,7 +91,7 @@ func InstallRpmHandler(c *gin.Context) {
 	var rpm RPMS
 	c.Bind(&rpm)
 
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   rpm.UserName,
 		DepartName: rpm.UserDeptName,
 		Type:       global.LogTypeRPM,
@@ -111,7 +110,7 @@ func InstallRpmHandler(c *gin.Context) {
 		}
 		if agent == nil {
 
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
@@ -119,7 +118,7 @@ func InstallRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
@@ -130,7 +129,7 @@ func InstallRpmHandler(c *gin.Context) {
 		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
 
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
@@ -138,14 +137,14 @@ func InstallRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
 
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
@@ -153,7 +152,7 @@ func InstallRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusOK,
 				Message:         "安装成功",
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
@@ -174,7 +173,7 @@ func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
 	c.Bind(&rpm)
 
-	logParent := model.AgentLogParent{
+	logParent := dao.AgentLogParent{
 		UserName:   rpm.UserName,
 		DepartName: rpm.UserDeptName,
 		Type:       global.LogTypeRPM,
@@ -192,7 +191,7 @@ func RemoveRpmHandler(c *gin.Context) {
 			logger.Error(err.Error())
 		}
 		if agent == nil {
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
@@ -200,7 +199,7 @@ func RemoveRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
@@ -211,7 +210,7 @@ func RemoveRpmHandler(c *gin.Context) {
 		_, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
 
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
@@ -219,7 +218,7 @@ func RemoveRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
@@ -227,7 +226,7 @@ func RemoveRpmHandler(c *gin.Context) {
 			continue
 		} else {
 
-			log := model.AgentLog{
+			log := dao.AgentLog{
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
@@ -235,7 +234,7 @@ func RemoveRpmHandler(c *gin.Context) {
 				StatusCode:      http.StatusOK,
 				Message:         "卸载成功",
 			}
-			if dao.AgentLog(log) != nil {
+			if dao.AgentLogMessage(log) != nil {
 				logger.Error(err.Error())
 			}
 
