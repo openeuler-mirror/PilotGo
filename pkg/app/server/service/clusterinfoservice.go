@@ -18,13 +18,12 @@ import (
 	"errors"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 统计所有机器的状态
-func AgentStatusCounts(machines []model.MachineNode) (normal, Offline, free int) {
+func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
 	for _, agent := range machines {
 		state := agent.State
 		switch state {
@@ -42,7 +41,7 @@ func AgentStatusCounts(machines []model.MachineNode) (normal, Offline, free int)
 }
 
 // 查找所有机器
-func SelectAllMachine() ([]model.MachineNode, error) {
+func SelectAllMachine() ([]dao.MachineNode, error) {
 	machines, err := dao.AllMachine()
 	if err != nil {
 		return machines, err

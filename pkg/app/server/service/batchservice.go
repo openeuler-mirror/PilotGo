@@ -151,7 +151,7 @@ func UpdateBatch(batchid int, name, description string) error {
 	return err
 }
 
-func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
+func GetBatchMachines(batchid int) ([]dao.MachineNode, error) {
 	machinelist, err := dao.GetMachineID(batchid)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
 	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
 
 	// 获取机器的所有信息
-	machinesInfo := make([]model.MachineNode, 0)
+	machinesInfo := make([]dao.MachineNode, 0)
 	for _, macId := range machineIdlist {
 		MacInfo, err := dao.MachineData(macId)
 		if err != nil {

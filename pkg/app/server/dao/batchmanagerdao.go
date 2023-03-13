@@ -63,7 +63,7 @@ func BatchIds2UUIDs(batchIds []int) (uuids []string) {
 		macIds := utils.String2Int(str)
 
 		for _, macId := range macIds {
-			var machine model.MachineNode
+			var machine MachineNode
 			err = global.PILOTGO_DB.Where("id=?", macId).Find(&machine).Error
 			if err != nil {
 				logger.Error(err.Error())
