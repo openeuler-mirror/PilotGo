@@ -68,7 +68,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	}
 
 	// 创建公司组织
-	global.PILOTGO_DB.AutoMigrate(&model.DepartNode{})
+	global.PILOTGO_DB.AutoMigrate(&dao.DepartNode{})
 
 	return dao.CreateOrganization()
 }

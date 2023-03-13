@@ -16,6 +16,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
@@ -30,7 +31,7 @@ func MachineInfoHandler(c *gin.Context) {
 		return
 	}
 
-	depart := &model.Depart{}
+	depart := &dao.Depart{}
 	if c.ShouldBind(&depart) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
