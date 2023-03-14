@@ -25,7 +25,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func CreateBatch(batchinfo *model.CreateBatch) error {
+func CreateBatch(batchinfo *dao.CreateBatch) error {
 	if len(batchinfo.Name) == 0 {
 		return errors.New("请输入批次名称")
 	}
@@ -101,7 +101,7 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 		departNamelist = strings.Join(List, ",")
 	}
 
-	Batch := model.Batch{
+	Batch := dao.Batch{
 		Name:        batchinfo.Name,
 		Description: batchinfo.Description,
 		Manager:     batchinfo.Manager,
@@ -109,15 +109,15 @@ func CreateBatch(batchinfo *model.CreateBatch) error {
 		DepartName:  departNamelist,
 		Machinelist: machinelist,
 	}
-	err = dao.CreateBatch(Batch)
+	err = dao.CreateBatchMessage(Batch)
 
 	return err
 }
 
 // TODO: *[]model.Batch 应该定义为指针数组
-func GetBatches(query *model.PaginationQ) (*[]model.Batch, int64, error) {
+func GetBatches(query *model.PaginationQ) (*[]dao.Batch, int64, error) {
 
-	batch := model.Batch{}
+	batch := dao.Batch{}
 	list, tx := batch.ReturnBatch(query)
 
 	total, err := CrudAll(query, tx, list)
@@ -171,6 +171,6 @@ func GetBatchMachines(batchid int) ([]model.MachineNode, error) {
 	return machinesInfo, nil
 }
 
-func SelectBatch() ([]model.Batch, error) {
+func SelectBatch() ([]dao.Batch, error) {
 	return dao.GetBatch()
 }

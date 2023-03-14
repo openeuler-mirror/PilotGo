@@ -4,13 +4,14 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func CreateBatchHandler(c *gin.Context) {
-	var batchinfo model.CreateBatch
+	var batchinfo dao.CreateBatch
 	if err := c.Bind(&batchinfo); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -43,7 +44,7 @@ func BatchInfoHandler(c *gin.Context) {
 }
 
 func DeleteBatchHandler(c *gin.Context) {
-	var batchdel model.BatchDel
+	var batchdel dao.BatchDel
 	if err := c.Bind(&batchdel); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -62,7 +63,7 @@ func DeleteBatchHandler(c *gin.Context) {
 }
 
 func UpdateBatchHandler(c *gin.Context) {
-	var batchinfo model.BatchUpdate
+	var batchinfo dao.BatchUpdate
 	if err := c.Bind(&batchinfo); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
