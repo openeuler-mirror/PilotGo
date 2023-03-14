@@ -20,7 +20,6 @@ import (
 	"sync"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -144,7 +143,7 @@ func AddAgents2DB(a *Agent) {
 		return
 	}
 
-	agent_list := model.MachineNode{
+	agent_list := dao.MachineNode{
 		IP:          agentOS[0],
 		MachineUUID: a.UUID,
 		DepartId:    global.UncateloguedDepartId,

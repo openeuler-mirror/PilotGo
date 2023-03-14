@@ -47,7 +47,7 @@ func MachineInfoHandler(c *gin.Context) {
 
 // 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
-	machine := model.MachineNode{}
+	machine := dao.MachineNode{}
 	query := &model.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
@@ -77,7 +77,7 @@ func MachineAllDataHandler(c *gin.Context) {
 
 // 删除机器
 func DeleteMachineHandler(c *gin.Context) {
-	var deleteuuid model.DeleteUUID
+	var deleteuuid dao.DeleteUUID
 	if c.Bind(&deleteuuid) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
