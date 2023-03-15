@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -79,7 +78,7 @@ func Info(c *gin.Context) {
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -107,7 +106,7 @@ func UserSearchHandler(c *gin.Context) {
 		return
 	}
 	var email = user.Email
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

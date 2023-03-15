@@ -19,14 +19,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // 查询所有父日志
 func LogAllHandler(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

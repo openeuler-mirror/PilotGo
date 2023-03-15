@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
@@ -72,13 +71,13 @@ type FileBroadcast struct {
 	Text     string `json:"file"`
 }
 
-func (f *Files) AllFiles(q *model.PaginationQ) (list *[]Files, tx *gorm.DB) {
+func (f *Files) AllFiles(q *PaginationQ) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
 	tx = global.PILOTGO_DB.Order("id desc").Find(&list)
 	return
 }
 
-func (f *SearchFile) FileSearch(q *model.PaginationQ, search string) (list *[]Files, tx *gorm.DB) {
+func (f *SearchFile) FileSearch(q *PaginationQ, search string) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
 	tx = global.PILOTGO_DB.Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
 	if len(*list) == 0 {
@@ -87,7 +86,7 @@ func (f *SearchFile) FileSearch(q *model.PaginationQ, search string) (list *[]Fi
 	return
 }
 
-func (f *HistoryFiles) HistoryFiles(q *model.PaginationQ, fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
+func (f *HistoryFiles) HistoryFiles(q *PaginationQ, fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
 	list = &[]HistoryFiles{}
 	tx = global.PILOTGO_DB.Order("id desc").Where("file_id=?", fileId).Find(&list)
 	return

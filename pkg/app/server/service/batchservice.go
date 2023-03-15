@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -115,7 +114,7 @@ func CreateBatch(batchinfo *dao.CreateBatch) error {
 }
 
 // TODO: *[]model.Batch 应该定义为指针数组
-func GetBatches(query *model.PaginationQ) (*[]dao.Batch, int64, error) {
+func GetBatches(query *dao.PaginationQ) (*[]dao.Batch, int64, error) {
 
 	batch := dao.Batch{}
 	list, tx := batch.ReturnBatch(query)

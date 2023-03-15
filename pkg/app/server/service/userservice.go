@@ -23,7 +23,6 @@ import (
 
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -175,7 +174,7 @@ func ResetPassword(email string) (dao.User, error) {
 	return u, nil
 }
 
-func UserSearch(email string, query *model.PaginationQ) (interface{}, int, error) {
+func UserSearch(email string, query *dao.PaginationQ) (interface{}, int, error) {
 	users, total, err := dao.UserSearch(email)
 	data, err := DataPaging(query, users, total)
 	if err != nil {
