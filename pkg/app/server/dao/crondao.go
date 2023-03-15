@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
@@ -50,7 +49,7 @@ type DelCrons struct {
 }
 
 // 根据uuid获取所有机器
-func (c *CrontabList) CronList(uuid string, q *model.PaginationQ) (list *[]CrontabList, tx *gorm.DB) {
+func (c *CrontabList) CronList(uuid string, q *PaginationQ) (list *[]CrontabList, tx *gorm.DB) {
 	list = &[]CrontabList{}
 	tx = global.PILOTGO_DB.Order("created_at desc").Where("machine_uuid = ?", uuid).Find(&list)
 	return list, tx

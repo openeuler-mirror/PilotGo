@@ -2,10 +2,9 @@ package service
 
 import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
-func MachineInfo(depart *dao.Depart, query *model.PaginationQ) (interface{}, int, error) {
+func MachineInfo(depart *dao.Depart, query *dao.PaginationQ) (interface{}, int, error) {
 
 	var TheDeptAndSubDeptIds []int
 	ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
