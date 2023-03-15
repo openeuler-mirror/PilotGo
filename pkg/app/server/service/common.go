@@ -22,12 +22,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // gorm分页查询方法
-func CrudAll(p *model.PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
+func CrudAll(p *dao.PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -64,7 +63,7 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 }
 
 // 结构体分页查询方法
-func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{}, error) {
+func DataPaging(p *dao.PaginationQ, list interface{}, total int) (interface{}, error) {
 	data := make([]interface{}, 0)
 	if reflect.TypeOf(list).Kind() == reflect.Slice {
 		s := reflect.ValueOf(list)
@@ -101,7 +100,7 @@ func DataPaging(p *model.PaginationQ, list interface{}, total int) (interface{},
 }
 
 // 拼装json 分页数据
-func JsonPagination(c *gin.Context, list interface{}, total int64, query *model.PaginationQ) {
+func JsonPagination(c *gin.Context, list interface{}, total int64, query *dao.PaginationQ) {
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code":  http.StatusOK,
 		"ok":    true,

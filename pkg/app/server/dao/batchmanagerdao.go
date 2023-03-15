@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"gorm.io/gorm"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -40,7 +39,7 @@ type BatchDel struct {
 	BatchID []int `json:"BatchID"`
 }
 
-func (b *Batch) ReturnBatch(q *model.PaginationQ) (list *[]Batch, tx *gorm.DB) {
+func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, tx *gorm.DB) {
 	list = &[]Batch{}
 	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
 	return

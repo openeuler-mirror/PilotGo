@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-22 14:55:44
  * Description: 公共函数结构体
  ******************************************************************************/
-package model
+package dao
 
 type PageInfo struct {
 	Page     int `json:"page" form:"page"`

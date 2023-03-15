@@ -18,7 +18,6 @@ import (
 	"errors"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 // 获取用户最高权限的角色id
@@ -47,7 +46,7 @@ func GetLoginUserPermission(Roleid dao.RoleID) (dao.UserRole, interface{}, error
 	return userRole, buttons, nil
 }
 
-func GetRoles(query *model.PaginationQ) (int, interface{}, error) {
+func GetRoles(query *dao.PaginationQ) (int, interface{}, error) {
 	roles, total, err := dao.GetAllRoles()
 	if err != nil {
 		return total, nil, err
