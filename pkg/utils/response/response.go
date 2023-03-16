@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-04-20 13:05:57
+ * LastEditTime: 2023-03-16 15:08:01
  * Description: 封装response的返回参数
  ******************************************************************************/
 package response
@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 )
 
 func result(c *gin.Context, httpStatus int, code int, data interface{}, msg string) {
@@ -34,15 +33,4 @@ func Success(c *gin.Context, data interface{}, msg string) {
 
 func Fail(c *gin.Context, data interface{}, msg string) {
 	result(c, http.StatusOK, http.StatusBadRequest, data, msg)
-}
-
-// 拼装json 分页数据
-func DataPagination(c *gin.Context, list interface{}, total int, query *model.PaginationQ) {
-	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"code":  http.StatusOK,
-		"ok":    true,
-		"data":  list,
-		"total": total,
-		"page":  query.CurrentPageNum,
-		"size":  query.Size})
 }
