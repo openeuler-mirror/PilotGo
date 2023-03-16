@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-05-18 09:08:08
- * LastEditTime: 2022-05-18 16:25:41
+ * LastEditTime: 2023-03-16 16:31:01
  * Description: 批次管理业务逻辑
  ******************************************************************************/
 package service
@@ -24,7 +24,17 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func CreateBatch(batchinfo *dao.CreateBatch) error {
+type CreateBatchParam struct {
+	Name        string   `json:"Name"`
+	Description string   `json:"Description"`
+	Manager     string   `json:"Manager"`
+	DepartName  []string `json:"DepartName"`
+	DepartID    []int    `json:"DepartID"`
+	Machines    []int    `json:"Machines"`
+	DepartIDs   []int    `json:"deptids"`
+}
+
+func CreateBatch(batchinfo *CreateBatchParam) error {
 	if len(batchinfo.Name) == 0 {
 		return errors.New("请输入批次名称")
 	}

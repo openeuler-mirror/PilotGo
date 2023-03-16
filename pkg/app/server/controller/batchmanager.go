@@ -10,7 +10,7 @@ import (
 )
 
 func CreateBatchHandler(c *gin.Context) {
-	var batchinfo dao.CreateBatch
+	var batchinfo service.CreateBatchParam
 	if err := c.Bind(&batchinfo); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -43,7 +43,9 @@ func BatchInfoHandler(c *gin.Context) {
 }
 
 func DeleteBatchHandler(c *gin.Context) {
-	var batchdel dao.BatchDel
+	batchdel := struct {
+		BatchID []int `json:"BatchID"`
+	}{}
 	if err := c.Bind(&batchdel); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -62,7 +64,11 @@ func DeleteBatchHandler(c *gin.Context) {
 }
 
 func UpdateBatchHandler(c *gin.Context) {
-	var batchinfo dao.BatchUpdate
+	batchinfo := struct {
+		BatchId     int    `json:"BatchID"`
+		BatchName   string `json:"BatchName"`
+		Description string `json:"Description"`
+	}{}
 	if err := c.Bind(&batchinfo); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
