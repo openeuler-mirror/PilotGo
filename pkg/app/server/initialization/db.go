@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
+ * LastEditTime: 2023-03-16 13:52:49
  * Description: db and redis init
  ******************************************************************************/
 package initialization
@@ -17,7 +17,6 @@ package initialization
 import (
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
