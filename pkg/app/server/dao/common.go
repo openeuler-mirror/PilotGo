@@ -14,18 +14,6 @@
  ******************************************************************************/
 package dao
 
-type PageInfo struct {
-	Page     int `json:"page" form:"page"`
-	PageSize int `json:"pageSize" form:"pageSize"`
-}
-
-type PageResult struct {
-	List     interface{} `json:"list"`
-	Total    int         `json:"total"`
-	Page     int         `json:"page"`
-	PageSize int         `json:"pageSize"`
-}
-
 // 分页查询结构体
 type PaginationQ struct {
 	Ok             bool        `json:"ok"`
