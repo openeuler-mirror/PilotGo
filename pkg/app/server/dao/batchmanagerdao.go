@@ -19,26 +19,6 @@ type Batch struct {
 	DepartName  string `gorm:"type:varchar(100)"`
 }
 
-type CreateBatch struct {
-	Name        string   `json:"Name"`
-	Description string   `json:"Description"`
-	Manager     string   `json:"Manager"`
-	DepartName  []string `json:"DepartName"`
-	DepartID    []int    `json:"DepartID"`
-	Machines    []int    `json:"Machines"`
-	DepartIDs   []int    `json:"deptids"`
-}
-
-type BatchUpdate struct {
-	BatchId     int    `json:"BatchID"`
-	BatchName   string `json:"BatchName"`
-	Description string `json:"Description"`
-}
-
-type BatchDel struct {
-	BatchID []int `json:"BatchID"`
-}
-
 func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, tx *gorm.DB) {
 	list = &[]Batch{}
 	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
