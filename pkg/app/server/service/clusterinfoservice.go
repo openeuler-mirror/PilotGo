@@ -22,6 +22,22 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type ClusterInfoParam struct {
+	AgentTotal  int `json:"total"`
+	AgentStatus AgentStatus
+}
+
+type DepartMachineInfo struct {
+	DepartName  string `json:"depart"`
+	AgentStatus AgentStatus
+}
+
+type AgentStatus struct {
+	Normal  int `json:"normal"`
+	OffLine int `json:"offline"`
+	Free    int `json:"free"`
+}
+
 // 统计所有机器的状态
 func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
 	for _, agent := range machines {
@@ -53,8 +69,8 @@ func SelectAllMachine() ([]dao.MachineNode, error) {
 }
 
 // 获取集群概览
-func ClusterInfo() (dao.ClusterInfo, error) {
-	data := dao.ClusterInfo{}
+func ClusterInfo() (ClusterInfoParam, error) {
+	data := ClusterInfoParam{}
 	machines, err := SelectAllMachine()
 	if err != nil {
 		return data, err
@@ -69,8 +85,8 @@ func ClusterInfo() (dao.ClusterInfo, error) {
 }
 
 // 获取各部门集群状态
-func DepartClusterInfo() []dao.DepartMachineInfo {
-	var departs []dao.DepartMachineInfo
+func DepartClusterInfo() []DepartMachineInfo {
+	var departs []DepartMachineInfo
 
 	FirstDepartIds, err := dao.FirstDepartId()
 	if err != nil {
@@ -91,7 +107,7 @@ func DepartClusterInfo() []dao.DepartMachineInfo {
 		}
 		normal, Offline, free := AgentStatusCounts(lists)
 
-		departInfo := dao.DepartMachineInfo{}
+		departInfo := DepartMachineInfo{}
 		departInfo.DepartName = departName
 		departInfo.AgentStatus.Normal = normal
 		departInfo.AgentStatus.OffLine = Offline
