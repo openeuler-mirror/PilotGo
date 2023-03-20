@@ -77,7 +77,7 @@ func AllFiles(c *gin.Context) {
 	}
 
 	files := dao.Files{}
-	list, tx := files.AllFiles(query)
+	list, tx := files.AllFiles()
 
 	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
@@ -113,7 +113,7 @@ func FileSearchHandler(c *gin.Context) {
 		return
 	}
 
-	list, tx := file.FileSearch(query, search)
+	list, tx := file.FileSearch(search)
 
 	total, err := service.CrudAll(query, tx, list)
 	if err != nil {
@@ -139,7 +139,7 @@ func HistoryFilesHandler(c *gin.Context) {
 	}
 
 	files := dao.HistoryFiles{}
-	list, tx := files.HistoryFiles(query, FileId)
+	list, tx := files.HistoryFiles(FileId)
 
 	total, err := service.CrudAll(query, tx, list)
 	if err != nil {

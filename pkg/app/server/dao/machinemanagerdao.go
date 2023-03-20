@@ -42,7 +42,7 @@ type Res struct {
 	Systeminfo string `json:"systeminfo"`
 }
 
-func (m *MachineNode) ReturnMachine(q *PaginationQ, departid int) (list *[]Res, tx *gorm.DB, res []Res) {
+func (m *MachineNode) ReturnMachine(departid int) (list *[]Res, tx *gorm.DB, res []Res) {
 	list = &[]Res{}
 	// tx := mysqlmanager.DB.Where("depart_id=?", departid).Find(&list)
 	tx = global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +

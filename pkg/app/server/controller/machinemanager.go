@@ -54,7 +54,7 @@ func FreeMachineSource(c *gin.Context) {
 		return
 	}
 
-	list, tx, res := machine.ReturnMachine(query, global.UncateloguedDepartId)
+	list, tx, res := machine.ReturnMachine(global.UncateloguedDepartId)
 	total, err := service.CrudAll(query, tx, &res)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
