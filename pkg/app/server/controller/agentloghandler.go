@@ -33,7 +33,7 @@ func LogAllHandler(c *gin.Context) {
 	}
 
 	logParent := dao.AgentLogParent{}
-	list, tx := logParent.LogAll(query)
+	list, tx := logParent.LogAll()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
