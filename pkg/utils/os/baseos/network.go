@@ -17,11 +17,12 @@ package baseos
 import (
 	"bufio"
 	"fmt"
+	"net"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/shirou/gopsutil/net"
+	gnet "github.com/shirou/gopsutil/net"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -30,7 +31,7 @@ import (
 
 // 获取当前TCP网络连接信息
 func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
-	info, err := net.Connections("tcp")
+	info, err := gnet.Connections("tcp")
 	if err != nil {
 		logger.Error("tcp信息获取失败: ", err)
 		return []common.NetConnect{}, fmt.Errorf("tcp信息获取失败")
@@ -50,7 +51,7 @@ func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
 
 // 获取当前UDP网络连接信息
 func (b *BaseOS) GetUDP() ([]common.NetConnect, error) {
-	info, err := net.Connections("udp")
+	info, err := gnet.Connections("udp")
 	if err != nil {
 		logger.Error("udp信息获取失败: ", err)
 		return []common.NetConnect{}, fmt.Errorf("udp信息获取失败")
@@ -70,7 +71,7 @@ func (b *BaseOS) GetUDP() ([]common.NetConnect, error) {
 
 // 获取网络读写字节／包的个数
 func (b *BaseOS) GetIOCounter() ([]common.IOCnt, error) {
-	info, err := net.IOCounters(true)
+	info, err := gnet.IOCounters(true)
 	if err != nil {
 		logger.Error("网络读写字节／包的个数获取失败: ", err)
 		return []common.IOCnt{}, fmt.Errorf("网络读写字节／包的个数获取失败")
@@ -284,11 +285,10 @@ func ModuleMatch(key string, value string, network *common.NetworkConfig) {
 }
 
 func (b *BaseOS) GetHostIp() (string, error) {
-	IP, err := utils.RunCommand("hostname -I")
+	conn, err := net.Dial("udp", "openeuler.org:80")
 	if err != nil {
 		return "", err
 	}
-	str := strings.Split(IP, " ")
-	IP = str[0]
-	return IP, nil
+	defer conn.Close()
+	return strings.Split(conn.LocalAddr().String(), ":")[0], nil
 }
