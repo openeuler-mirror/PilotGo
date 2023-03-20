@@ -19,7 +19,7 @@ type Batch struct {
 	DepartName  string `gorm:"type:varchar(100)"`
 }
 
-func (b *Batch) ReturnBatch(q *PaginationQ) (list *[]Batch, tx *gorm.DB) {
+func (b *Batch) ReturnBatch() (list *[]Batch, tx *gorm.DB) {
 	list = &[]Batch{}
 	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
 	return

@@ -212,7 +212,7 @@ func CronTaskList(c *gin.Context) {
 	}
 
 	cronlist := &dao.CrontabList{}
-	list, tx := cronlist.CronList(uuid, query)
+	list, tx := cronlist.CronList(uuid)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return

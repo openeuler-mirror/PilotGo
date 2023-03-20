@@ -43,13 +43,13 @@ type AgentLogDel struct {
 	IDs []int `json:"ids"`
 }
 
-func (p *AgentLogParent) LogAll(q *PaginationQ) (list *[]AgentLogParent, tx *gorm.DB) {
+func (p *AgentLogParent) LogAll() (list *[]AgentLogParent, tx *gorm.DB) {
 	list = &[]AgentLogParent{}
 	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
 	return
 }
 
-func (p *AgentLog) AgentLog(q *PaginationQ, parentId int) (list *[]AgentLog, tx *gorm.DB) {
+func (p *AgentLog) AgentLog(parentId int) (list *[]AgentLog, tx *gorm.DB) {
 	list = &[]AgentLog{}
 	tx = global.PILOTGO_DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	return

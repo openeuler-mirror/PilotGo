@@ -127,7 +127,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 func GetBatches(query *dao.PaginationQ) (*[]dao.Batch, int64, error) {
 
 	batch := dao.Batch{}
-	list, tx := batch.ReturnBatch(query)
+	list, tx := batch.ReturnBatch()
 
 	total, err := CrudAll(query, tx, list)
 	if err != nil {
