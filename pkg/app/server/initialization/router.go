@@ -194,6 +194,8 @@ func SetupRouter() *gin.Engine {
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
 		pluginAPI.POST("/runScript", pluginapi.RunScriptHandler)
+		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
+		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
 	}
 
 	// 此处绑定前端静态资源handler
