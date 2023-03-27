@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="插件名称:" prop="url">
+      <el-form-item label="插件名称:" prop="name">
         <el-input class="ipInput" controls-position="right" v-model="form.name" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="主机地址:" prop="url">
@@ -27,7 +27,7 @@ export default {
         url: "",
       },
       rules: {
-        url: [
+        name: [
           {
             required: true,
             message: '插件名称不能为空',
@@ -87,6 +87,4 @@ export default {
   },
 };
 </script>
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>
