@@ -1,15 +1,17 @@
 <template>
   <div class="iframe-div">
-    <iframe :src="url" class="iframe"></iframe>
+    <!-- <iframe :src="url" class="iframe"></iframe> -->
+    <micro-app :name=name :url=url baseroute='/plugin'></micro-app>
   </div>
 </template>
 
 <script>
 export default {
   name: "plugin",
-  props:{
-    url:String,
-  },
+  props: {
+    url: String,
+    name: String
+  }
 }
 </script>
 

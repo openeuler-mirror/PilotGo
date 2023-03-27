@@ -12,6 +12,11 @@
   resolved "https://registry.npmjs.org/@interactjs/types/-/types-1.10.14.tgz"
   integrity sha512-ds6wAI9aDzojzr7UBvifUJIgogCL1ZL0nfBrXDv5GVMaW7gBglqejaeiQ1a0cRiHII/8p8s5AwPhhODTDM8RCQ==
 
+"@micro-zoe/micro-app@^0.8.10":
+  version "0.8.10"
+  resolved "https://registry.npmmirror.com/@micro-zoe/micro-app/-/micro-app-0.8.10.tgz#33fc5e821289521d8339cb35aa47a20786e01aea"
+  integrity sha512-Zb1G5UrOAEHhiAlanzHJiBlRFHMd4+C/Q5jkwTM991R7blb1F6uGY47pmcunzHns48Kj6k9v2+CLsozGyhQmyw==
+
 "@types/q@^1.5.1":
   version "1.5.5"
   resolved "https://registry.npmjs.org/@types/q/-/q-1.5.5.tgz"
