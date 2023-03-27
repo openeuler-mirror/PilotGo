@@ -52,7 +52,7 @@
               </keep-alive>
             </transition>
             <!--iframe页-->
-            <component v-for="item in iframeComponents" :key="item.name" :is="item.name" :url="item.url"
+            <component v-for="item in iframeComponents" :key="item.name" :is="item.name" :url="item.url" :name="item.name"
               v-show="$route.path === item.path"></component>
           </div>
         </el-main>

@@ -31,10 +31,15 @@ import VueDraggableResizable from 'vue-draggable-resizable'//引入可拖拽组�
 import 'vue-draggable-resizable/dist/VueDraggableResizable.css'
 // import './mock/index.js' //引入mockjs,上线后注掉
 
-Vue.prototype.$http = axios  
+import microApp from '@micro-zoe/micro-app' //注入微服务
+
+microApp.start()
+
+
+Vue.prototype.$http = axios
 Vue.prototype.$echarts = echarts
 
-Vue.use(ElementUI);  
+Vue.use(ElementUI);
 Vue.use(echarts);
 Vue.use(CodeDiff);
 Vue.component('vue-draggable-resizable', VueDraggableResizable)
