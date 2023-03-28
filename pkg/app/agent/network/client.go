@@ -74,7 +74,7 @@ func (c *SocketClient) connect(addr string) error {
 			data := msg.Encode()
 			sendData := protocol.TlvEncode(data)
 
-			err := pnet.Send(c.conn, sendData)
+			err := pnet.SendBytes(c.conn, sendData)
 			if err != nil {
 				logger.Error("send byte data error:%s", err.Error())
 				c.exitWithError(err)

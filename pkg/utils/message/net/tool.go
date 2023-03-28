@@ -18,7 +18,7 @@ import (
 	"net"
 )
 
-func Send(conn net.Conn, data []byte) error {
+func SendBytes(conn net.Conn, data []byte) error {
 	data_length := len(data)
 	send_count := 0
 	for {
