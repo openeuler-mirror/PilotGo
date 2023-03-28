@@ -52,7 +52,7 @@ func NewAgent(conn net.Conn) (*Agent, error) {
 		for {
 			msg := <-agent.messageChan
 			logger.Debug("send message:%s", msg.String())
-			pnet.Send(agent.conn, protocol.TlvEncode(msg.Encode()))
+			pnet.SendBytes(agent.conn, protocol.TlvEncode(msg.Encode()))
 		}
 	}(agent)
 
