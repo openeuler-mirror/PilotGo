@@ -2,6 +2,7 @@ package baseos
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/shirou/gopsutil/host"
@@ -11,12 +12,12 @@ import (
 
 func (b *BaseOS) GetHostInfo() *common.SystemInfo {
 	//获取IP
-	IP, err := utils.RunCommand("hostname -I")
+	conn, err := net.Dial("udp", "openeuler.org:80")
 	if err != nil {
-		fmt.Println("获取IP失败!")
+		fmt.Println("failed to get IP")
 	}
-	str := strings.Split(IP, " ")
-	IP = str[0]
+	defer conn.Close()
+	IP := strings.Split(conn.LocalAddr().String(), ":")[0]
 	SysInfo, _ := host.Info()
 	Uptime := fmt.Sprintf("date -d '%v second ago'", SysInfo.Uptime)
 	uptime, _ := utils.RunCommand(Uptime)

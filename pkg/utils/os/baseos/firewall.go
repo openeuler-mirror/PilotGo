@@ -10,7 +10,7 @@ import (
 func (b *BaseOS) Config() (interface{}, error) {
 	nic_interface, err := b.GetNICName()
 	if err != nil {
-		return nil, fmt.Errorf("未获取到网卡名称")
+		return nil, fmt.Errorf("failed to get network card name")
 	}
 
 	firewall_state, err := utils.RunCommand("firewall-cmd --state")
@@ -76,7 +76,7 @@ func (b *BaseOS) Config() (interface{}, error) {
 func (b *BaseOS) FirewalldSetDefaultZone(zone string) (interface{}, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --set-default-zone=%v", zone))
 	if err != nil {
-		return nil, fmt.Errorf("防火墙默认区域更改失败")
+		return nil, fmt.Errorf("failed to change default zone of firewall")
 	}
 	return tmp, nil
 }
@@ -84,7 +84,7 @@ func (b *BaseOS) FirewalldSetDefaultZone(zone string) (interface{}, error) {
 func (b *BaseOS) FirewalldZoneConfig(zone string) (interface{}, error) {
 	conf, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --list-all", zone))
 	if err != nil {
-		return nil, fmt.Errorf("防火墙未运行")
+		return nil, fmt.Errorf("firewall not running")
 	}
 
 	var firewall = &FirewalldCMDList{}
@@ -162,12 +162,12 @@ func (b *BaseOS) Stop() bool {
 func (b *BaseOS) DelZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
 	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-port=%v/%v", zone, port, protocol))
 	if err != nil {
-		return tmp, fmt.Errorf("防火墙未运行")
+		return tmp, fmt.Errorf("firewall not running")
 	}
 	tmpp, err := utils.RunCommand("firewall-cmd --reload")
 	tmpp = strings.Replace(tmpp, "\n", "", -1)
 	if err != nil {
-		return "", fmt.Errorf("重新加载防火墙失败")
+		return "", fmt.Errorf("failed to reload firewall")
 	}
 	return tmpp, nil
 }
@@ -175,12 +175,12 @@ func (b *BaseOS) DelZonePort(zone, port, protocol string) (string, error) { //zo
 func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
 	tmp, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-port=%v/%v", zone, port, protocol))
 	if err != nil {
-		return tmp, fmt.Errorf("防火墙未运行")
+		return tmp, fmt.Errorf("firewall not running")
 	}
 	tmpp, err := utils.RunCommand("firewall-cmd --reload")
 	tmpp = strings.Replace(tmpp, "\n", "", -1)
 	if err != nil {
-		return "", fmt.Errorf("重新加载防火墙失败")
+		return "", fmt.Errorf("failed to reload firewall")
 	}
 	return tmpp, nil
 }

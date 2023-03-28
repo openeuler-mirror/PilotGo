@@ -11,7 +11,7 @@ import (
 func (b *BaseOS) GetSysctlConfig() ([]map[string]string, error) {
 	tmp, err := utils.RunCommand("sysctl -a")
 	if err != nil {
-		logger.Error("获取内核配置文件失败!%s", err.Error())
+		logger.Error("Failed to retrieve the kernel configuration file: %s", err.Error())
 		return nil, err
 	}
 	// TODO: 修正数据结构
@@ -40,7 +40,7 @@ func (b *BaseOS) TempModifyPar(arg string) string {
 	tmp = strings.Replace(tmp, "\n", "", -1)
 
 	if err != nil {
-		logger.Error("修改内核运行时参数失败!%s", err.Error())
+		logger.Error("failed to modify the kernel runtime parameters: %s", err.Error())
 	}
 	return tmp
 }
@@ -50,7 +50,7 @@ func (b *BaseOS) GetVarNameValue(arg string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sysctl -n %s", arg))
 	tmp = strings.Replace(tmp, "\n", "", -1)
 	if err != nil {
-		logger.Error("获取该参数的值失败!%s", err.Error())
+		logger.Error("failed to get the value of the parameter: %s", err.Error())
 	}
 	return tmp
 }
