@@ -21,7 +21,7 @@ import (
 
 func RunCommand(s string) (string, error) {
 
-	cmd := exec.Command("/bin/bash", "-c", s)
+	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; " + s)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
