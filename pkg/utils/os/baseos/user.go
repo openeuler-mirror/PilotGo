@@ -33,7 +33,7 @@ func (b *BaseOS) GetCurrentUserInfo() common.CurrentUser {
 func (b *BaseOS) GetAllUserInfo() []common.AllUserInfo {
 	tmp, err := utils.RunCommand("cat /etc/passwd")
 	if err != nil {
-		logger.Error("获取失败!%s", err.Error())
+		logger.Error("failed to get passwd: %s", err.Error())
 	}
 	reader := strings.NewReader(tmp)
 	scanner := bufio.NewScanner(reader)
@@ -66,7 +66,7 @@ func (b *BaseOS) AddLinuxUser(username, password string) error {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	logger.Info("创建用户成功!%s", output)
+	logger.Info("successfully created user: %s", output)
 
 	//下面两个是管道的两端
 	//linux可以使用  echo "password" | passwd --stdin username
@@ -75,7 +75,7 @@ func (b *BaseOS) AddLinuxUser(username, password string) error {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	logger.Info("更改用户密码成功!%s", output_ps)
+	logger.Info("successfully changed user passwd: %s", output_ps)
 	return nil
 }
 
@@ -83,10 +83,10 @@ func (b *BaseOS) AddLinuxUser(username, password string) error {
 func (b *BaseOS) DelUser(username string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("userdel -r %s", username))
 	if err != nil {
-		logger.Error("删除用户失败!%s", err.Error())
-		return "", fmt.Errorf("删除用户失败%s", err)
+		logger.Error("failed to delete user: %s", err.Error())
+		return "", fmt.Errorf("failed to delete user: %s", err)
 	}
-	logger.Info("删除用户成功!%s", tmp)
+	logger.Info("successfully deleted user: %s", tmp)
 	return tmp, nil
 }
 
@@ -94,10 +94,10 @@ func (b *BaseOS) DelUser(username string) (string, error) {
 func (b *BaseOS) ChangePermission(permission, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chmod %s %s", permission, file))
 	if err != nil {
-		logger.Error("改变文件权限失败!%s", err.Error())
+		logger.Error("failed to change file permissions: %s", err.Error())
 		return "", err
 	}
-	logger.Info("改变文件权限成功!%s", tmp)
+	logger.Info("successfully changed file permissions: %s", tmp)
 	return tmp, nil
 }
 
@@ -105,9 +105,9 @@ func (b *BaseOS) ChangePermission(permission, file string) (string, error) {
 func (b *BaseOS) ChangeFileOwner(user, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chown -R %s %s", user, file))
 	if err != nil {
-		logger.Error("改变文件所有者失败!%s", err.Error())
+		logger.Error("failed to change file owner!%s", err.Error())
 		return "", err
 	}
-	logger.Info("改变文件所有者成功!%s", tmp)
+	logger.Info("successfully changed file owner: %s", tmp)
 	return tmp, nil
 }

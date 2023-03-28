@@ -30,7 +30,7 @@ func (b *BaseOS) GetAllRpm() []string {
 	listRpm := make([]string, 0)
 	result, err := utils.RunCommand("rpm -qa")
 	if err != nil && len(result) != 0 {
-		logger.Error("获取已安装rpm包列表失败", err)
+		logger.Error("failed to get list of installed RPM packages: ", err)
 	}
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
@@ -54,8 +54,8 @@ func (b *BaseOS) GetRpmSource(rpm string) ([]common.RpmSrc, error) {
 	listRpmProvides := make([]string, 0)
 	result, err := utils.RunCommand("yum provides " + rpm)
 	if err != nil && len(result) != 0 {
-		logger.Error("获取源软件包名以及源失败", err)
-		return []common.RpmSrc{}, fmt.Errorf("获取源软件包名以及源失败")
+		logger.Error("failed to get source software package name and source: ", err)
+		return []common.RpmSrc{}, fmt.Errorf("failed to get source software package name and source")
 	}
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
@@ -152,7 +152,7 @@ func readInfo(reader *strings.Reader, reg string) (string, error) {
 			return result, nil
 		}
 	}
-	return string(""), fmt.Errorf("匹配结构体属性失败")
+	return string(""), fmt.Errorf("failed to match struct properties")
 }
 
 func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error, error) {
@@ -160,28 +160,28 @@ func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error, error) {
 	result, err := utils.RunCommand("rpm -qi " + rpm)
 	//未安装该软件包情况
 	if err != nil && len(result) != 0 {
-		logger.Error(" %s的rpm包未安装", rpm)
-		return common.RpmInfo{}, fmt.Errorf("%s的rpm包未安装", rpm), err
+		logger.Error(" %s's RPM package not installed", rpm)
+		return common.RpmInfo{}, fmt.Errorf("%s's RPM package not installed", rpm), err
 	}
 	reader := strings.NewReader(result)
 	str, err := readInfo(reader, `^Name.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包名属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包名属性失败"), err
+		logger.Error("failed to read RPM package name properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package name properties"), err
 	}
 	rpminfo.Name = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Version.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Version属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包Version属性失败"), err
+		logger.Error("failed to read RPM package Version properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Version properties"), err
 	}
 	rpminfo.Version = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Release.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Release属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包Release属性失败"), err
+		logger.Error("failed to read RPM package Release properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Release properties"), err
 	}
 	rpminfo.Release = str
 	// reader = strings.NewReader(result)
@@ -194,57 +194,57 @@ func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error, error) {
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Install Date.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包InstallDate属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包InstallDate属性失败"), err
+		logger.Error("failed to read RPM package InstallDate properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package InstallDate properties"), err
 	}
 	rpminfo.InstallDate = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Size.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Size属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包Size属性失败"), err
+		logger.Error("failed to read RPM package Size properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Size properties"), err
 	}
 	rpminfo.Size = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^License.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包License属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包License属性失败"), err
+		logger.Error("failed to read RPM package License properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package License properties"), err
 	}
 	rpminfo.License = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Signature.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Signature属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包Signature属性失败"), err
+		logger.Error("failed to read RPM package Signature properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Signature properties"), err
 	}
 	rpminfo.Signature = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Packager.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Packager属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包Packager属性失败"), err
+		logger.Error("failed to read RPM package Packager properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Packager properties"), err
 	}
 	rpminfo.Packager = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Vendor.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Vendor属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包Vendor属性失败"), err
+		logger.Error("failed to read RPM package Vendor properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Vendor properties"), err
 	}
 	rpminfo.Vendor = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^URL.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包URL属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
+		logger.Error("failed to read RPM package URL properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package URL properties"), err
 	}
 	rpminfo.URL = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Summary.*`)
 	if err != nil && len(str) != 0 {
-		logger.Error("读取rpm包Summary属性失败")
-		return common.RpmInfo{}, fmt.Errorf("读取rpm包URL属性失败"), err
+		logger.Error("failed to read RPM package Summary properties")
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Summary properties"), err
 	}
 	rpminfo.Summary = str
 	return rpminfo, nil, nil
@@ -272,17 +272,17 @@ func verifyRpmInstalled(reader *strings.Reader, reg string) bool {
 func (b *BaseOS) InstallRpm(rpm string) error {
 	result, err := utils.RunCommand("yum -y install " + rpm)
 	if err != nil {
-		logger.Error("rpm包安装命令运行失败: ", err)
-		return fmt.Errorf("rpm包安装命令执行失败")
+		logger.Error("failed to run RPM package installation command: ", err)
+		return fmt.Errorf("failed to run RPM package installation command")
 	}
 	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
-		logger.Error("rpm包安装命令由于rpm包已安装而运行失败")
-		return fmt.Errorf("该rpm包已安装")
+		logger.Error("failed to run RPM package installation command due to package already being installed")
+		return fmt.Errorf("this RPM package is already installed")
 	} else if verifyRpmInstalled(strings.NewReader(result), `^Error: Unable to find a match:.*`) {
-		logger.Error("rpm包安装命令由于源内匹配不到该rpm包而运行失败")
-		return fmt.Errorf("源内匹配不到该rpm包")
+		logger.Error("failed to run RPM package installation command due to the package not being found in the source")
+		return fmt.Errorf("the package cannot be found in the source")
 	} else {
-		logger.Info("%s安装成功", rpm)
+		logger.Info("successfully installed %s", rpm)
 		return nil
 	}
 
@@ -292,14 +292,14 @@ func (b *BaseOS) InstallRpm(rpm string) error {
 func (b *BaseOS) RemoveRpm(rpm string) error {
 	result, err := utils.RunCommand("yum -y remove " + rpm)
 	if err != nil {
-		logger.Error("rpm包卸载命令运行失败: ", err)
-		return fmt.Errorf("rpm包卸载命令执行失败")
+		logger.Error("failed to run RPM package uninstallation command: ", err)
+		return fmt.Errorf("failed to execute RPM package uninstallation command")
 	}
 	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
-		logger.Error("rpm包卸载命令由于rpm包不存在而运行失败")
-		return fmt.Errorf("该rpm包不存在")
+		logger.Error("failed to run RPM package uninstallation command due to the package not being found")
+		return fmt.Errorf("this RPM package does not exist")
 	} else {
-		logger.Info("%s卸载成功", rpm)
+		logger.Info("successfully uninstalled %s", rpm)
 		return nil
 	}
 }

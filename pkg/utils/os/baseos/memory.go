@@ -84,7 +84,7 @@ func bytesToInt(bys []byte) int64 {
 func (b *BaseOS) GetMemoryConfig() *common.MemoryConfig {
 	output, err := utils.RunCommand("cat /proc/meminfo")
 	if err != nil {
-		fmt.Printf("Error:can not obtain stdout pipe for command:%s\n", err)
+		fmt.Printf("Error:can not obtain stdout pipe for command: %s\n", err)
 	}
 	outputlines := strings.Split(output, "\n")
 	m := &common.MemoryConfig{}

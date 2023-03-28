@@ -38,12 +38,12 @@ type RpmInfo struct {
 func GetRepoSource() (interface{}, error) {
 	repos, err := utils.GetFiles(global.RepoPath)
 	if err != nil {
-		return "", fmt.Errorf("获取repo源文件失败:%s", err)
+		return "", fmt.Errorf("failed to get repo source file: %s", err)
 	}
 
 	SysInfo, err := host.Info()
 	if err != nil {
-		return "", fmt.Errorf("获取系统的原生repo失败:%s", err)
+		return "", fmt.Errorf("failed to get system's native repo: %s", err)
 	}
 	SysPlatform := SysInfo.Platform
 
@@ -65,7 +65,7 @@ func GetRepoSource() (interface{}, error) {
 
 	text, err := utils.FileReadString(global.RepoPath + "/" + repo)
 	if err != nil {
-		return "", fmt.Errorf("读取repo源数据失败:%s", err)
+		return "", fmt.Errorf("failed to read repo source data: %s", err)
 	}
 
 	reg1 := regexp.MustCompile(`\[.*]`)

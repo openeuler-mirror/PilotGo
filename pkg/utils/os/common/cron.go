@@ -121,7 +121,7 @@ func CronStart(id int, spec string, command string) error {
 		utils.RunCommand(command)
 	}
 	if err := Cron.AddByFunc(id, spec, taskFunc); err != nil {
-		return fmt.Errorf("error to add crontab task:%s", err)
+		return fmt.Errorf("error to add crontab task: %s", err)
 	}
 	Cron.Start()
 	time.Sleep(time.Duration(time.Millisecond * 300))

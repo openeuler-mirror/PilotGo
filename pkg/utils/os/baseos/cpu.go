@@ -11,16 +11,13 @@ import (
 
 // 获取CPU型号
 func (b *BaseOS) GetCPUName() string {
-	cpuname, _ := utils.RunCommand("lscpu | grep '型号名称'| sort| uniq")
+	cpuname, _ := utils.RunCommand("lscpu | grep 'BIOS Model name' | sort | uniq")
 	if cpuname == "" {
-		cpuname, _ = utils.RunCommand("lscpu | grep 'Model name'| sort| uniq")
-		if cpuname == "" {
-			logger.Error("获取cpu型号失败!")
-		}
+		logger.Error("failed to get cpu model name!")
 	}
 
 	cpuname = strings.Replace(cpuname, "\n", "", -1)
-	str := strings.Split(cpuname, "：")
+	str := strings.Split(cpuname, ":")
 	if len(str) == 1 {
 		str = strings.Split(cpuname, ":")
 		cpuname = strings.TrimLeft(str[1], " ")
@@ -36,7 +33,7 @@ func (b *BaseOS) GetPhysicalCPU() int {
 	num = strings.Replace(num, "\n", "", -1)
 	cpunum, err := strconv.Atoi(num)
 	if err != nil {
-		logger.Error("获取cpu个数失败!")
+		logger.Error("failed to get cpu num")
 	}
 	return cpunum
 }
