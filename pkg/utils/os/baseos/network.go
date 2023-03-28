@@ -33,8 +33,8 @@ import (
 func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
 	info, err := gnet.Connections("tcp")
 	if err != nil {
-		logger.Error("tcp信息获取失败: ", err)
-		return []common.NetConnect{}, fmt.Errorf("tcp信息获取失败")
+		logger.Error("failed to get tcp message: ", err)
+		return []common.NetConnect{}, fmt.Errorf("failed to get tcp message")
 	}
 	tcpConf := make([]common.NetConnect, 0)
 	for _, value := range info {
@@ -53,8 +53,8 @@ func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
 func (b *BaseOS) GetUDP() ([]common.NetConnect, error) {
 	info, err := gnet.Connections("udp")
 	if err != nil {
-		logger.Error("udp信息获取失败: ", err)
-		return []common.NetConnect{}, fmt.Errorf("udp信息获取失败")
+		logger.Error("failed to get udp message: ", err)
+		return []common.NetConnect{}, fmt.Errorf("failed to get udp message")
 	}
 	tcpConf := make([]common.NetConnect, 0)
 	for _, value := range info {
@@ -73,8 +73,8 @@ func (b *BaseOS) GetUDP() ([]common.NetConnect, error) {
 func (b *BaseOS) GetIOCounter() ([]common.IOCnt, error) {
 	info, err := gnet.IOCounters(true)
 	if err != nil {
-		logger.Error("网络读写字节／包的个数获取失败: ", err)
-		return []common.IOCnt{}, fmt.Errorf("网络读写字节／包的个数获取失败")
+		logger.Error("failed to get number of bytes/packets for network read/write: ", err)
+		return []common.IOCnt{}, fmt.Errorf("failed to get number of bytes/packets for network read/write")
 	}
 	IOConf := make([]common.IOCnt, 0)
 	for _, value := range info {
@@ -93,8 +93,8 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 	NICConfig := make([]common.NetInterfaceCard, 0)
 	result, err := utils.RunCommand("cat /proc/net/arp")
 	if err != nil {
-		logger.Error("网卡信息获取失败: ", err)
-		return []common.NetInterfaceCard{}, fmt.Errorf("网卡信息获取失败")
+		logger.Error("faile to get network card message: ", err)
+		return []common.NetInterfaceCard{}, fmt.Errorf("faile to get network card message")
 	}
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
@@ -130,7 +130,7 @@ func (b *BaseOS) ConfigNetworkConnect() (interface{}, error) {
 	filePath := "/home"
 	network, err := utils.GetFiles(filePath)
 	if err != nil {
-		return "", fmt.Errorf("获取网络配置文件失败:%s", err)
+		return "", fmt.Errorf("failed to get network configuration file: %s", err)
 	}
 	var filename string
 	for _, n := range network {
@@ -142,7 +142,7 @@ func (b *BaseOS) ConfigNetworkConnect() (interface{}, error) {
 
 	text, err := utils.RunCommand("cat " + filePath + "/" + filename)
 	if err != nil {
-		return "", fmt.Errorf("读取网络配置数据失败:%s", err)
+		return "", fmt.Errorf("failed to read network configuration data: %s", err)
 	}
 
 	var oldnet []map[string]string
@@ -166,7 +166,7 @@ func (b *BaseOS) ConfigNetworkConnect() (interface{}, error) {
 func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
 	netPath, err := utils.GetFiles(global.NetWorkPath)
 	if err != nil {
-		return nil, fmt.Errorf("获取网络配置源文件失败:%s", err)
+		return nil, fmt.Errorf("failed to get network configuration source file: %s", err)
 	}
 	var filename string
 	for _, n := range netPath {
@@ -184,7 +184,7 @@ func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
 	case "static":
 		tmp, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 		if err != nil {
-			return nil, fmt.Errorf("读取网络配置源数据失败:%s", err)
+			return nil, fmt.Errorf("failed to read network configuration source file: %s", err)
 		}
 		lines := strings.Split(tmp, "\n")
 		for _, line := range lines {
@@ -198,19 +198,19 @@ func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
 	case "dhcp":
 		IP, err := utils.RunCommand("hostname -I")
 		if err != nil {
-			return nil, fmt.Errorf("获取IP失败:%s", err)
+			return nil, fmt.Errorf("failed to get IP: %s", err)
 		}
 		str := strings.Split(IP, " ")
 		ip := str[0]
 
 		gateway, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
 		if err != nil {
-			return nil, fmt.Errorf("获取网关失败:%s", err)
+			return nil, fmt.Errorf("failed to get gateway: %s", err)
 		}
 
 		DNS, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
 		if err != nil {
-			return nil, fmt.Errorf("获取DNS失败:%s", err)
+			return nil, fmt.Errorf("failed to get dns: %s", err)
 		}
 		network.DNS1 = strings.Replace(DNS, "\n", "", -1)
 		network.BootProto = "dhcp"
@@ -220,7 +220,7 @@ func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
 	default:
 		tmp, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 		if err != nil {
-			return nil, fmt.Errorf("读取网络配置源数据失败:%s", err)
+			return nil, fmt.Errorf("failed to read network configuration source data: %s", err)
 		}
 		lines := strings.Split(tmp, "\n")
 		for _, line := range lines {
@@ -238,7 +238,7 @@ func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
 func (b *BaseOS) GetNICName() (interface{}, error) {
 	network, err := utils.GetFiles(global.NetWorkPath)
 	if err != nil {
-		return nil, fmt.Errorf("获取网络配置文件失败:%s", err)
+		return nil, fmt.Errorf("failed to get network configuration file: %s", err)
 	}
 	var filename string
 	for _, n := range network {
@@ -254,13 +254,13 @@ func (b *BaseOS) GetNICName() (interface{}, error) {
 func (b *BaseOS) RestartNetwork(nic string) error {
 	_, err := utils.RunCommand("nmcli c reload")
 	if err != nil {
-		return fmt.Errorf("网络配置文件重载失败:%s", err)
+		return fmt.Errorf("failed to reload network configuration file: %s", err)
 	}
 
 	str := "nmcli c up " + strings.Split(nic, "-")[1]
 	_, err = utils.RunCommand(str)
 	if err != nil {
-		return fmt.Errorf("网络配置文件未生效:%s", err)
+		return fmt.Errorf("network configuration file not effective: %s", err)
 	}
 	return nil
 }

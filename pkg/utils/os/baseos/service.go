@@ -21,12 +21,12 @@ func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 	list := make([]common.ListService, 0)
 	result1, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
 	if err != nil {
-		logger.Error("获取服务列表命令运行失败: ", err)
+		logger.Error("failed to execute the command to get the list of services: ", err)
 		return []common.ListService{}, err
 	}
 	result2, err := utils.RunCommand("systemctl list-units --all|grep 'not-found' | awk 'NR>2{print $2\" \" $3\" \" $4\" \" $5}'")
 	if err != nil {
-		logger.Error("获取服务列表命令运行失败: ", err)
+		logger.Error("the command to get the list of services has failed to run: ", err)
 		return []common.ListService{}, err
 	}
 	result := result1 + result2
@@ -90,17 +90,17 @@ func (b *BaseOS) StartService(service string) error {
 	command := build.String()
 	result, err := utils.RunCommand(command)
 	if err != nil || len(result) != 0 {
-		logger.Error("开启服务命令运行失败: ", err)
-		return fmt.Errorf(" %s 服务启动失败%s", service, err)
+		logger.Error("failed to execute the command to start the service: ", err)
+		return fmt.Errorf(" failed to start the %s service: %s", service, err)
 	}
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
-		logger.Error("获取服务状态失败")
-		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
+		logger.Error("failed to retrieve the status of the service")
+		return fmt.Errorf("failed to restart the %s service: %s", service, err)
 	}
 	if !verifyStatus(output, ServiceStart) {
-		logger.Error("开启服务命令运行结果无效!")
-		return fmt.Errorf(" %s 服务启动失败%s", service, err)
+		logger.Error("the command to start the service has produced an invalid result!")
+		return fmt.Errorf("failed to start the %s service: %s", service, err)
 	}
 	return nil
 }
@@ -111,17 +111,17 @@ func (b *BaseOS) StopService(service string) error {
 	command := build.String()
 	result, err := utils.RunCommand(command)
 	if err != nil || len(result) != 0 {
-		logger.Error("关闭服务命令运行失败: ", err)
-		return fmt.Errorf(" %s 服务关闭失败%s", service, err)
+		logger.Error("failed to execute the command to stop the service: ", err)
+		return fmt.Errorf("failed to stop the %s service: %s", service, err)
 	}
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
-		logger.Error("获取服务状态失败")
-		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
+		logger.Error("failed to get the status of the service")
+		return fmt.Errorf("failed to restart the %s service: %s", service, err)
 	}
 	if !verifyStatus(output, ServiceStop) {
-		logger.Error("关闭服务命令运行结果无效!")
-		return fmt.Errorf(" %s 服务关闭失败%s", service, err)
+		logger.Error("the command to stop the service has produced an invalid result!")
+		return fmt.Errorf("failed to stop the %s service: %s", service, err)
 	}
 	return nil
 }
@@ -132,17 +132,17 @@ func (b *BaseOS) RestartService(service string) error {
 	command := build.String()
 	result, err := utils.RunCommand(command)
 	if err != nil || len(result) != 0 {
-		logger.Error("重启服务命令运行失败: ", err)
-		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
+		logger.Error("failed to execute the command to restart the service: ", err)
+		return fmt.Errorf("failed to restart the %s service: %s", service, err)
 	}
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
-		logger.Error("获取服务状态失败")
-		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
+		logger.Error("failed to get the status of the service")
+		return fmt.Errorf("failed to restart the %s service: %s", service, err)
 	}
 	if !verifyStatus(output, ServiceRestart) {
-		logger.Error("重启服务命令运行结果无效!")
-		return fmt.Errorf(" %s 服务重新启动失败%s", service, err)
+		logger.Error("failed to execute the command to restart the service!")
+		return fmt.Errorf("failed to restart the %s service: %s", service, err)
 	}
 	return nil
 }

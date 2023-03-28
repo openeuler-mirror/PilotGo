@@ -91,20 +91,20 @@ func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
 func (b *BaseOS) CreateDiskPath(mountpath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("mkdir %s", mountpath))
 	if err != nil {
-		logger.Error("创建挂载目录失败!%s", err.Error())
+		logger.Error("failed to create a mounted directory: %s", err.Error())
 		return err.Error()
 	}
-	logger.Info("创建挂载目录成功!%s", tmp)
+	logger.Info("successfully created a mounted directory: %s", tmp)
 	return tmp
 }
 
 func (b *BaseOS) DiskMount(sourceDisk, destPath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, destPath))
 	if err != nil {
-		logger.Error("挂载磁盘失败!%s", err.Error())
+		logger.Error("failed to mount disk: %s", err.Error())
 		return err.Error()
 	}
-	logger.Info("挂载磁盘成功!%s", tmp)
+	logger.Info("successfully mounted disk: %s", tmp)
 	return tmp
 }
 
@@ -112,10 +112,10 @@ func (b *BaseOS) DiskMount(sourceDisk, destPath string) string {
 func (b *BaseOS) DiskUMount(diskPath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("umount %s", diskPath))
 	if err != nil {
-		logger.Error("卸载磁盘失败!%s", err.Error())
+		logger.Error("failed to unmount the disk: %s", err.Error())
 		return err.Error()
 	}
-	logger.Info("卸载磁盘成功!%s", tmp)
+	logger.Info("successfully unmounted the disk: %s", tmp)
 	return tmp
 }
 
@@ -123,9 +123,9 @@ func (b *BaseOS) DiskUMount(diskPath string) string {
 func (b *BaseOS) DiskFormat(fileType, diskPath string) string {
 	tmp, err := utils.RunCommand(fmt.Sprintf("mkfs.%s %s", fileType, diskPath))
 	if err != nil {
-		logger.Error("格式化磁盘失败!%s", err.Error())
+		logger.Error("failed to format the disk: %s", err.Error())
 		return err.Error()
 	}
-	logger.Info("格式化磁盘成功!%s", tmp)
+	logger.Info("successfully formatted the disk: %s", tmp)
 	return tmp
 }
