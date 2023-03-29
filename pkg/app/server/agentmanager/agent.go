@@ -505,20 +505,7 @@ func (a *Agent) DiskInfo() (interface{}, error) {
 1.创建挂载磁盘的目录
 2.挂载磁盘
 */
-func (a *Agent) DiskCreatPath(mountpath string) (interface{}, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.CreateDiskPath,
-		Data: mountpath,
-	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-	return resp_message.Data, nil
-}
 func (a *Agent) DiskMount(sourceDisk, destPath string) (interface{}, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),

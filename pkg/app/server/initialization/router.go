@@ -91,7 +91,6 @@ func SetupRouter() *gin.Engine {
 		macBasicModify.POST("/service_restart", agentcontroller.ServiceRestartHandler)
 		macBasicModify.POST("/rpm_install", agentcontroller.InstallRpmHandler)
 		macBasicModify.POST("/rpm_remove", agentcontroller.RemoveRpmHandler)
-		macBasicModify.GET("/disk_path", agentcontroller.DiskCreatPathHandler)
 		macBasicModify.GET("/disk_mount", agentcontroller.DiskMountHandler)
 		macBasicModify.GET("/disk_umount", agentcontroller.DiskUMountHandler)
 		macBasicModify.GET("/disk_format", agentcontroller.DiskFormatHandler)

@@ -68,8 +68,6 @@ const (
 	RemoveRpm = 28
 	//获取磁盘的使用情况
 	DiskUsage = 29
-	//创建挂载磁盘的目录
-	CreateDiskPath = 30
 	//挂载磁盘
 	DiskMount = 31
 	//卸载磁盘

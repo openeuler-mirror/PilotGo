@@ -3,6 +3,7 @@ package baseos
 import (
 	"fmt"
 	"math"
+	"os"
 	"strconv"
 
 	"github.com/shirou/gopsutil/disk"
@@ -88,18 +89,17 @@ func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
 1.创建挂载磁盘的目录
 2.挂载磁盘
 */
-func (b *BaseOS) CreateDiskPath(mountpath string) string {
-	tmp, err := utils.RunCommand(fmt.Sprintf("mkdir %s", mountpath))
+
+func (b *BaseOS) DiskMount(sourceDisk, mountPath string) string {
+	// 创建挂载目录
+	err := os.MkdirAll(mountPath, 0755)
 	if err != nil {
 		logger.Error("failed to create a mounted directory: %s", err.Error())
 		return err.Error()
 	}
-	logger.Info("successfully created a mounted directory: %s", tmp)
-	return tmp
-}
+	logger.Info("successfully created a mounted directory: %s", mountPath)
 
-func (b *BaseOS) DiskMount(sourceDisk, destPath string) string {
-	tmp, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, destPath))
+	tmp, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, mountPath))
 	if err != nil {
 		logger.Error("failed to mount disk: %s", err.Error())
 		return err.Error()
@@ -121,7 +121,8 @@ func (b *BaseOS) DiskUMount(diskPath string) string {
 
 // 磁盘格式化
 func (b *BaseOS) DiskFormat(fileType, diskPath string) string {
-	tmp, err := utils.RunCommand(fmt.Sprintf("mkfs.%s %s", fileType, diskPath))
+	// TODO
+	tmp, err := utils.RunCommand(fmt.Sprintf("mkfs.%s -F %s", fileType, diskPath))
 	if err != nil {
 		logger.Error("failed to format the disk: %s", err.Error())
 		return err.Error()

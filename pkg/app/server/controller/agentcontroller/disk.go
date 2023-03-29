@@ -53,23 +53,6 @@ func DiskInfoHandler(c *gin.Context) {
 	}
 	response.Success(c, gin.H{"disk_info": disk_info}, "Success")
 }
-func DiskCreatPathHandler(c *gin.Context) {
-	uuid := c.Query("uuid")
-	mountpath := c.Query("mountpath")
-
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
-		return
-	}
-
-	disk_path, err := agent.DiskCreatPath(mountpath)
-	if disk_path != nil || err != nil {
-		response.Fail(c, gin.H{"error": disk_path}, "创建挂载目录失败!")
-		return
-	}
-	response.Success(c, gin.H{"disk_path": disk_path}, "Success")
-}
 func DiskMountHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 	sourceDisk := c.Query("source")
