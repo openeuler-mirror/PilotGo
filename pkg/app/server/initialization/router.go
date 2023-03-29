@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-02-22 17:19:32
+ * LastEditTime: 2023-03-29 17:22:15
  * Description: Interface routing forwarding
  ******************************************************************************/
 package initialization
@@ -196,6 +196,9 @@ func SetupRouter() *gin.Engine {
 		pluginAPI.POST("/runScript", pluginapi.RunScriptHandler)
 		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
 		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
+
+		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
+		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
 	}
 
 	// 此处绑定前端静态资源handler
