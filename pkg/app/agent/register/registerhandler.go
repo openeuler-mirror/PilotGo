@@ -394,19 +394,6 @@ func RegitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
-	c.BindHandler(protocol.CreateDiskPath, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		mountpath := msg.Data.(string)
-		creatdiskpath := uos.OS().CreateDiskPath(mountpath)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   creatdiskpath,
-		}
-		return c.Send(resp_msg)
-	})
 	c.BindHandler(protocol.DiskMount, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		disk := msg.Data.(string)

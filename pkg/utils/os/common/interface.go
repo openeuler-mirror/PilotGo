@@ -47,7 +47,6 @@ type ServiceOperator interface {
 type DiskOperator interface {
 	GetDiskUsageInfo() []DiskUsageINfo
 	GetDiskInfo() []DiskIOInfo
-	CreateDiskPath(string) string
 	DiskMount(string, string) string
 	DiskUMount(string) string
 	DiskFormat(string, string) string
