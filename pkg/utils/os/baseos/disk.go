@@ -92,7 +92,7 @@ func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
 
 func (b *BaseOS) DiskMount(sourceDisk, mountPath string) string {
 	// 创建挂载目录
-	err := os.MkdirAll(mountPath, 0755)
+	err := os.MkdirAll(mountPath, 0644)
 	if err != nil {
 		logger.Error("failed to create a mounted directory: %s", err.Error())
 		return err.Error()
