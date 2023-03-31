@@ -150,12 +150,12 @@ func (b *BaseOS) FirewalldServiceRemove(zone, service string) error {
 }
 
 func (b *BaseOS) Restart() bool {
-	tmp, _ := utils.RunCommand("service firewalld restart")
+	tmp, _ := utils.RunCommand("systemctl restart firewalld.service")
 	return len(tmp) == 0
 }
 
 func (b *BaseOS) Stop() bool {
-	tmp, _ := utils.RunCommand("service firewalld stop")
+	tmp, _ := utils.RunCommand("systemctl stop firewalld.service")
 	return len(tmp) == 0
 }
 
@@ -183,6 +183,19 @@ func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zo
 		return "", fmt.Errorf("failed to reload firewall")
 	}
 	return tmpp, nil
+}
+
+// TODO firewall完善zone interface的添加和删除接口，完善firewall接口重复add会报错的逻辑
+func (b *BaseOS) AddZoneInterface(zone, NIC string) (string, error) {
+	tmp, _ := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-interface=%v", zone, NIC))
+
+	return strings.Replace(tmp, "\n", "", -1), nil
+}
+
+func (b *BaseOS) DelZoneInterface(zone, NIC string) (string, error) {
+	tmp, _ := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-interface=%v", zone, NIC))
+
+	return strings.Replace(tmp, "\n", "", -1), nil
 }
 
 type FirewalldCMDList struct {
