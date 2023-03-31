@@ -81,6 +81,7 @@ func bytesToInt(bys []byte) int64 {
 
 }
 
+// TODO 完善94-96逻辑，getmemoryconfig接口存在空行bug
 func (b *BaseOS) GetMemoryConfig() *common.MemoryConfig {
 	output, err := utils.RunCommand("cat /proc/meminfo")
 	if err != nil {
@@ -90,6 +91,9 @@ func (b *BaseOS) GetMemoryConfig() *common.MemoryConfig {
 	m := &common.MemoryConfig{}
 	for _, line := range outputlines {
 		//一次获取一行,_ 获取当前行是否被读完
+		if len(line) <= 1 {
+			continue
+		}
 		a, b := reserveRead([]byte(line))
 		moduleMatch(string(a), bytesToInt(b), m)
 	}
