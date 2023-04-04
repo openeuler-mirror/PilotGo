@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetcpuinfo(t *testing.T) {
+func TestGetMemoryConfig(t *testing.T) {
 	var osobj BaseOS
-	assert.NotNil(t, osobj.GetCPUInfo())
+	assert.NotNil(t, osobj.GetMemoryConfig())
 }
