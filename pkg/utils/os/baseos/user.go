@@ -105,7 +105,7 @@ func (b *BaseOS) ChangePermission(permission, file string) (string, error) {
 func (b *BaseOS) ChangeFileOwner(user, file string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("chown -R %s %s", user, file))
 	if err != nil {
-		logger.Error("failed to change file owner!%s", err.Error())
+		logger.Error("failed to change file owner: %s", err.Error())
 		return "", err
 	}
 	logger.Info("successfully changed file owner: %s", tmp)

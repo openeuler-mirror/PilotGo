@@ -30,7 +30,7 @@ func (b *BaseOS) GetAllRpm() []string {
 	listRpm := make([]string, 0)
 	result, err := utils.RunCommand("rpm -qa")
 	if err != nil && len(result) != 0 {
-		logger.Error("failed to get list of installed RPM packages: ", err)
+		logger.Error("failed to get list of installed RPM packages: %s", err)
 	}
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
@@ -54,7 +54,7 @@ func (b *BaseOS) GetRpmSource(rpm string) ([]common.RpmSrc, error) {
 	listRpmProvides := make([]string, 0)
 	result, err := utils.RunCommand("yum provides " + rpm)
 	if err != nil && len(result) != 0 {
-		logger.Error("failed to get source software package name and source: ", err)
+		logger.Error("failed to get source software package name and source: %s", err)
 		return []common.RpmSrc{}, fmt.Errorf("failed to get source software package name and source")
 	}
 	reader := strings.NewReader(result)
@@ -272,7 +272,7 @@ func verifyRpmInstalled(reader *strings.Reader, reg string) bool {
 func (b *BaseOS) InstallRpm(rpm string) error {
 	result, err := utils.RunCommand("yum -y install " + rpm)
 	if err != nil {
-		logger.Error("failed to run RPM package installation command: ", err)
+		logger.Error("failed to run RPM package installation command: %s", err)
 		return fmt.Errorf("failed to run RPM package installation command")
 	}
 	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
@@ -292,7 +292,7 @@ func (b *BaseOS) InstallRpm(rpm string) error {
 func (b *BaseOS) RemoveRpm(rpm string) error {
 	result, err := utils.RunCommand("yum -y remove " + rpm)
 	if err != nil {
-		logger.Error("failed to run RPM package uninstallation command: ", err)
+		logger.Error("failed to run RPM package uninstallation command: %s", err)
 		return fmt.Errorf("failed to execute RPM package uninstallation command")
 	}
 	if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {

@@ -33,7 +33,7 @@ import (
 func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
 	info, err := gnet.Connections("tcp")
 	if err != nil {
-		logger.Error("failed to get tcp message: ", err)
+		logger.Error("failed to get tcp message: %s", err)
 		return []common.NetConnect{}, fmt.Errorf("failed to get tcp message")
 	}
 	tcpConf := make([]common.NetConnect, 0)
@@ -53,7 +53,7 @@ func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
 func (b *BaseOS) GetUDP() ([]common.NetConnect, error) {
 	info, err := gnet.Connections("udp")
 	if err != nil {
-		logger.Error("failed to get udp message: ", err)
+		logger.Error("failed to get udp message: %s", err)
 		return []common.NetConnect{}, fmt.Errorf("failed to get udp message")
 	}
 	tcpConf := make([]common.NetConnect, 0)
@@ -73,7 +73,7 @@ func (b *BaseOS) GetUDP() ([]common.NetConnect, error) {
 func (b *BaseOS) GetIOCounter() ([]common.IOCnt, error) {
 	info, err := gnet.IOCounters(true)
 	if err != nil {
-		logger.Error("failed to get number of bytes/packets for network read/write: ", err)
+		logger.Error("failed to get number of bytes/packets for network read/write: %s", err)
 		return []common.IOCnt{}, fmt.Errorf("failed to get number of bytes/packets for network read/write")
 	}
 	IOConf := make([]common.IOCnt, 0)
@@ -93,7 +93,7 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 	NICConfig := make([]common.NetInterfaceCard, 0)
 	result, err := utils.RunCommand("cat /proc/net/arp")
 	if err != nil {
-		logger.Error("faile to get network card message: ", err)
+		logger.Error("faile to get network card message: %s", err)
 		return []common.NetInterfaceCard{}, fmt.Errorf("faile to get network card message")
 	}
 	reader := strings.NewReader(result)
