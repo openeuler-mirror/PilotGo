@@ -21,12 +21,12 @@ func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 	list := make([]common.ListService, 0)
 	result1, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
 	if err != nil {
-		logger.Error("failed to execute the command to get the list of services: ", err)
+		logger.Error("failed to execute the command to get the list of services: %s", err)
 		return []common.ListService{}, err
 	}
 	result2, err := utils.RunCommand("systemctl list-units --all|grep 'not-found' | awk 'NR>2{print $2\" \" $3\" \" $4\" \" $5}'")
 	if err != nil {
-		logger.Error("the command to get the list of services has failed to run: ", err)
+		logger.Error("the command to get the list of services has failed to run: %s", err)
 		return []common.ListService{}, err
 	}
 	result := result1 + result2
@@ -90,7 +90,7 @@ func (b *BaseOS) StartService(service string) error {
 	command := build.String()
 	result, err := utils.RunCommand(command)
 	if err != nil || len(result) != 0 {
-		logger.Error("failed to execute the command to start the service: ", err)
+		logger.Error("failed to execute the command to start the service: %s", err)
 		return fmt.Errorf(" failed to start the %s service: %s", service, err)
 	}
 	output, err := b.GetServiceStatus(service)
@@ -111,7 +111,7 @@ func (b *BaseOS) StopService(service string) error {
 	command := build.String()
 	result, err := utils.RunCommand(command)
 	if err != nil || len(result) != 0 {
-		logger.Error("failed to execute the command to stop the service: ", err)
+		logger.Error("failed to execute the command to stop the service: %s", err)
 		return fmt.Errorf("failed to stop the %s service: %s", service, err)
 	}
 	output, err := b.GetServiceStatus(service)
@@ -132,7 +132,7 @@ func (b *BaseOS) RestartService(service string) error {
 	command := build.String()
 	result, err := utils.RunCommand(command)
 	if err != nil || len(result) != 0 {
-		logger.Error("failed to execute the command to restart the service: ", err)
+		logger.Error("failed to execute the command to restart the service: %s", err)
 		return fmt.Errorf("failed to restart the %s service: %s", service, err)
 	}
 	output, err := b.GetServiceStatus(service)
