@@ -126,11 +126,10 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 }
 
 // 配置网络连接
-func (b *BaseOS) ConfigNetworkConnect() (interface{}, error) {
-	filePath := "/home"
-	network, err := utils.GetFiles(filePath)
+func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
+	network, err := utils.GetFiles(global.NetWorkPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to get network configuration file: %s", err)
+		return nil, fmt.Errorf("failed to get network configuration file: %s", err)
 	}
 	var filename string
 	for _, n := range network {
@@ -140,9 +139,9 @@ func (b *BaseOS) ConfigNetworkConnect() (interface{}, error) {
 		filename = n
 	}
 
-	text, err := utils.RunCommand("cat " + filePath + "/" + filename)
+	text, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 	if err != nil {
-		return "", fmt.Errorf("failed to read network configuration data: %s", err)
+		return nil, fmt.Errorf("failed to read network configuration data: %s", err)
 	}
 
 	var oldnet []map[string]string
@@ -291,4 +290,74 @@ func (b *BaseOS) GetHostIp() (string, error) {
 	}
 	defer conn.Close()
 	return strings.Split(conn.LocalAddr().String(), ":")[0], nil
+}
+
+// dhcp方式配置网络
+func NetworkDHCP(net []map[string]string) (text string) {
+	for _, n := range net {
+		for key, value := range n {
+			if key == "BOOTPROTO" {
+				text += key + "=" + "dhcp" + "\n"
+			} else if key == "IPADDR" {
+				break
+			} else if key == "NETMASK" {
+				break
+			} else if key == "GATEWAY" {
+				break
+			} else if key == "DNS1" {
+				break
+			} else if key == "DNS2" {
+				break
+			} else {
+				text += key + "=" + value + "\n"
+			}
+		}
+	}
+	return
+}
+
+// static方式配置网络
+func NetworkStatic(net []map[string]string, ip string, netmask string, gateway string, dns1 string, dns2 string) (text string) {
+	for _, n := range net {
+		for key, value := range n {
+			if key == "BOOTPROTO" {
+				text += key + "=" + "static" + "\n"
+			} else if key == "IPADDR" {
+				text += key + "=" + ip + "\n"
+			} else if key == "NETMASK" {
+				text += key + "=" + netmask + "\n"
+			} else if key == "GATEWAY" {
+				text += key + "=" + gateway + "\n"
+			} else if key == "DNS1" {
+				text += key + "=" + dns1 + "\n"
+			} else if key == "DNS2" && len(dns2) != 0 {
+				text += key + "=" + dns2 + "\n"
+			} else {
+				text += key + "=" + value + "\n"
+			}
+		}
+	}
+	if ok := strings.Contains(text, "IPADDR"); !ok {
+		t := "IPADDR" + "=" + ip + "\n"
+		text += t
+	}
+	if ok := strings.Contains(text, "NETMASK"); !ok {
+		t := "NETMASK" + "=" + netmask + "\n"
+		text += t
+	}
+	if ok := strings.Contains(text, "GATEWAY"); !ok {
+		t := "GATEWAY" + "=" + gateway + "\n"
+		text += t
+	}
+	if ok := strings.Contains(text, "DNS1"); !ok {
+		t := "DNS1" + "=" + dns1 + "\n"
+		text += t
+	}
+	if ok := strings.Contains(text, "DNS2"); !ok {
+		if len(dns2) != 0 {
+			t := "DNS2" + "=" + dns2 + "\n"
+			text += t
+		}
+	}
+	return
 }

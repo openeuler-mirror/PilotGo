@@ -20,8 +20,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/baseos"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -158,11 +158,12 @@ func ConfigNetworkConnect(c *gin.Context) {
 		response.Fail(c, nil, Err)
 		return
 	}
-	oldnets := service.InterfaceToSlice(oldnet)
+
+	oldnets := oldnet.([]map[string]string)
 
 	switch ip_assignment {
 	case "static":
-		text := service.NetworkStatic(oldnets, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
+		text := baseos.NetworkStatic(oldnets, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
 		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
@@ -176,7 +177,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 		response.Success(c, nil, "网络配置更新成功")
 
 	case "dhcp":
-		text := service.NetworkDHCP(oldnets)
+		text := baseos.NetworkDHCP(oldnets)
 		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
