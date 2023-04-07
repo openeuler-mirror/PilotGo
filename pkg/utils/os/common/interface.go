@@ -80,7 +80,7 @@ type NetworkOperator interface {
 	GetUDP() ([]NetConnect, error)
 	GetIOCounter() ([]IOCnt, error)
 	GetNICConfig() ([]NetInterfaceCard, error)
-	ConfigNetworkConnect() (interface{}, error)
+	ConfigNetworkConnect() ([]map[string]string, error)
 	GetNetworkConnInfo() (interface{}, error)
 	GetNICName() (interface{}, error)
 	RestartNetwork(string) error
