@@ -302,14 +302,14 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RpmInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		rpmname := msg.Data.(string)
-		rpminfo, Err, err := uos.OS().GetRpmInfo(rpmname)
-		if Err != nil && err != nil {
+		rpminfo, err := uos.OS().GetRpmInfo(rpmname)
+		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: 0,
 				Data:   rpminfo,
-				Error:  Err.Error(),
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		} else {

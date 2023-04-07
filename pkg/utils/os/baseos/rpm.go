@@ -155,33 +155,33 @@ func readInfo(reader *strings.Reader, reg string) (string, error) {
 	return string(""), fmt.Errorf("failed to match struct properties")
 }
 
-func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error, error) {
+func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error) {
 	rpminfo := common.RpmInfo{}
 	result, err := utils.RunCommand("rpm -qi " + rpm)
 	//未安装该软件包情况
 	if err != nil && len(result) != 0 {
 		logger.Error(" %s's RPM package not installed", rpm)
-		return common.RpmInfo{}, fmt.Errorf("%s's RPM package not installed", rpm), err
+		return common.RpmInfo{}, fmt.Errorf("%s's RPM package not installed: %s", rpm, err)
 	}
 	reader := strings.NewReader(result)
 	str, err := readInfo(reader, `^Name.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package name properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package name properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package name properties: %s", err)
 	}
 	rpminfo.Name = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Version.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Version properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Version properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Version properties: %s", err)
 	}
 	rpminfo.Version = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Release.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Release properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Release properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Release properties: %s", err)
 	}
 	rpminfo.Release = str
 	// reader = strings.NewReader(result)
@@ -195,59 +195,59 @@ func (b *BaseOS) GetRpmInfo(rpm string) (common.RpmInfo, error, error) {
 	str, err = readInfo(reader, `^Install Date.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package InstallDate properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package InstallDate properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package InstallDate properties: %s", err)
 	}
 	rpminfo.InstallDate = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Size.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Size properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Size properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Size properties: %s", err)
 	}
 	rpminfo.Size = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^License.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package License properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package License properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package License properties: %s", err)
 	}
 	rpminfo.License = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Signature.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Signature properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Signature properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Signature properties: %s", err)
 	}
 	rpminfo.Signature = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Packager.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Packager properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Packager properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Packager properties: %s", err)
 	}
 	rpminfo.Packager = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Vendor.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Vendor properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Vendor properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Vendor properties: %s", err)
 	}
 	rpminfo.Vendor = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^URL.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package URL properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package URL properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package URL properties: %s", err)
 	}
 	rpminfo.URL = str
 	reader = strings.NewReader(result)
 	str, err = readInfo(reader, `^Summary.*`)
 	if err != nil && len(str) != 0 {
 		logger.Error("failed to read RPM package Summary properties")
-		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Summary properties"), err
+		return common.RpmInfo{}, fmt.Errorf("failed to read RPM package Summary properties:%s", err)
 	}
 	rpminfo.Summary = str
-	return rpminfo, nil, nil
+	return rpminfo, nil
 }
 
 // 判断rpm软件包是否安装/卸载成功

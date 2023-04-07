@@ -91,5 +91,5 @@ type PackageOperator interface {
 	RemoveRpm(string) error
 	GetAllRpm() []string
 	GetRpmSource(string) ([]RpmSrc, error)
-	GetRpmInfo(string) (RpmInfo, error, error)
+	GetRpmInfo(string) (RpmInfo, error)
 }
