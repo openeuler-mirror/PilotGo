@@ -158,12 +158,24 @@ func ConfigNetworkConnect(c *gin.Context) {
 		response.Fail(c, nil, Err)
 		return
 	}
-
-	oldnets := oldnet.([]map[string]string)
+	oldnets1 := oldnet.([]interface{})
+	var oldnets2 []map[string]interface{}
+	for _, m := range oldnets1 {
+		m1 := m.(map[string]interface{})
+		oldnets2 = append(oldnets2, m1)
+	}
+	var oldnets3 []map[string]string
+	for _, m := range oldnets2 {
+		for k, v := range m {
+			m2 := make(map[string]string)
+			m2[k] = v.(string)
+			oldnets3 = append(oldnets3, m2)
+		}
+	}
 
 	switch ip_assignment {
 	case "static":
-		text := baseos.NetworkStatic(oldnets, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
+		text := baseos.NetworkStatic(oldnets3, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
 		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
@@ -177,7 +189,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 		response.Success(c, nil, "网络配置更新成功")
 
 	case "dhcp":
-		text := baseos.NetworkDHCP(oldnets)
+		text := baseos.NetworkDHCP(oldnets3)
 		_, Err, err := agent.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
