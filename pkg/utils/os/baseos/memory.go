@@ -27,10 +27,11 @@ func moduleMatch(name string, value int64, memconf *common.MemoryConfig) {
 }
 
 // TODO 完善94-96逻辑，getmemoryconfig接口存在空行bug
-func (b *BaseOS) GetMemoryConfig() *common.MemoryConfig {
+func (b *BaseOS) GetMemoryConfig() (*common.MemoryConfig, error) {
 	output, err := utils.RunCommand("cat /proc/meminfo")
 	if err != nil {
 		fmt.Printf("failed to get memory config: %s\n", err)
+		return nil, fmt.Errorf("failed to get memory config: %s", err)
 	}
 	outputlines := strings.Split(output, "\n")
 	m := &common.MemoryConfig{}
@@ -45,5 +46,5 @@ func (b *BaseOS) GetMemoryConfig() *common.MemoryConfig {
 		vint64, _ := strconv.ParseInt(v, 10, 64)
 		moduleMatch(k, vint64, m)
 	}
-	return m
+	return m, nil
 }
