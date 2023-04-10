@@ -129,7 +129,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.MemoryInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		memoryinfo := uos.OS().GetMemoryConfig()
+		memoryinfo, _ := uos.OS().GetMemoryConfig()
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,

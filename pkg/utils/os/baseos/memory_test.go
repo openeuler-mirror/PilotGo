@@ -8,5 +8,7 @@ import (
 
 func TestGetMemoryConfig(t *testing.T) {
 	var osobj BaseOS
-	assert.NotNil(t, osobj.GetMemoryConfig())
+	tmp, err := osobj.GetMemoryConfig()
+	assert.Nil(t, err)
+	assert.NotNil(t, tmp)
 }
