@@ -23,7 +23,7 @@ type CpuOperator interface {
 }
 
 type MemoryOperator interface {
-	GetMemoryConfig() *MemoryConfig
+	GetMemoryConfig() (*MemoryConfig, error)
 }
 
 type SysctlOperator interface {
