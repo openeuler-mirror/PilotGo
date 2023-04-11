@@ -64,8 +64,7 @@ func DeleteLog(PLogIds int) error {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	err = global.PILOTGO_DB.Where("id=?", PLogIds).Unscoped().Delete(logparent).Error
-	return err
+	return global.PILOTGO_DB.Where("id=?", PLogIds).Unscoped().Delete(logparent).Error
 }
 
 // 存储父日志

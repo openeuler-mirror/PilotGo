@@ -95,19 +95,13 @@ func (f *HistoryFiles) HistoryFiles(fileId int) (list *[]HistoryFiles, tx *gorm.
 func IsExistId(id int) (bool, error) {
 	var file Files
 	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
-	if err != nil {
-		return file.ID != 0, err
-	}
-	return file.ID != 0, nil
+	return file.ID != 0, err
 }
 
 func IsExistFile(filename string) (bool, error) {
 	var file Files
 	err := global.PILOTGO_DB.Where("file_name = ?", filename).Find(&file).Error
-	if err != nil {
-		return file.ID != 0, err
-	}
-	return file.ID != 0, nil
+	return file.ID != 0, err
 }
 
 func IsExistFileLatest(fileId int) (bool, int, string, error) {
@@ -192,19 +186,13 @@ func SaveFile(file Files) error {
 func FileText(id int) (text string, err error) {
 	file := Files{}
 	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
-	if err != nil {
-		return file.File, err
-	}
-	return file.File, nil
+	return file.File, err
 }
 
 func LastFileText(id int) (text string, err error) {
 	file := HistoryFiles{}
 	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
-	if err != nil {
-		return file.File, err
-	}
-	return file.File, nil
+	return file.File, err
 }
 
 func FindLastVersionFile(uuid, filename string) ([]HistoryFiles, error) {
