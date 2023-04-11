@@ -58,7 +58,12 @@ func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 	build.WriteString(service)
 	command := build.String()
 	output, err := utils.RunCommand(command)
-	return output, err
+	switch output {
+	case "active\n", "inactive\n":
+		return output, nil
+	default:
+		return output, err
+	}
 }
 func verifyStatus(output string, operate int) bool {
 	var judge bool
@@ -96,7 +101,7 @@ func (b *BaseOS) StartService(service string) error {
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("failed to retrieve the status of the service")
-		return fmt.Errorf("failed to restart the %s service: %s", service, err)
+		return fmt.Errorf("failed to start the %s service: %s", service, err)
 	}
 	if !verifyStatus(output, ServiceStart) {
 		logger.Error("the command to start the service has produced an invalid result!")
@@ -117,7 +122,7 @@ func (b *BaseOS) StopService(service string) error {
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("failed to get the status of the service")
-		return fmt.Errorf("failed to restart the %s service: %s", service, err)
+		return fmt.Errorf("failed to stop the %s service: %s", service, err)
 	}
 	if !verifyStatus(output, ServiceStop) {
 		logger.Error("the command to stop the service has produced an invalid result!")
