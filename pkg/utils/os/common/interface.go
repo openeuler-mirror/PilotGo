@@ -27,7 +27,7 @@ type MemoryOperator interface {
 }
 
 type SysctlOperator interface {
-	GetSysctlConfig() ([]map[string]string, error)
+	GetSysctlConfig() (map[string]string, error)
 	TempModifyPar(string) string
 	GetVarNameValue(string) string
 }
