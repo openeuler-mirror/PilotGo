@@ -8,14 +8,14 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func (b *BaseOS) GetSysctlConfig() ([]map[string]string, error) {
+func (b *BaseOS) GetSysctlConfig() (map[string]string, error) {
 	tmp, err := utils.RunCommand("sysctl -a")
 	if err != nil {
 		logger.Error("Failed to retrieve the kernel configuration file: %s", err.Error())
 		return nil, err
 	}
-	// TODO: 修正数据结构
-	var sysConfig []map[string]string
+
+	sysConfig := make(map[string]string)
 	lines := strings.Split(tmp, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -26,10 +26,7 @@ func (b *BaseOS) GetSysctlConfig() ([]map[string]string, error) {
 		strSlice := strings.Split(line, " =")
 		key := strSlice[0]
 		value := strings.TrimLeft(line[len(key)+2:], " ")
-		sysPars := map[string]string{
-			key: value,
-		}
-		sysConfig = append(sysConfig, sysPars)
+		sysConfig[key] = value
 	}
 	return sysConfig, nil
 }
