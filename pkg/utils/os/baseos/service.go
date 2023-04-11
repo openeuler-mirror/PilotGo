@@ -57,9 +57,10 @@ func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 	build.WriteString("systemctl is-active ")
 	build.WriteString(service)
 	command := build.String()
-	output, err := utils.RunCommand(command)
+	tmp, err := utils.RunCommand(command)
+	output := strings.Trim(tmp, "\n")
 	switch output {
-	case "active\n", "inactive\n":
+	case "active", "inactive":
 		return output, nil
 	default:
 		return output, err
@@ -67,7 +68,7 @@ func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 }
 func verifyStatus(output string, operate int) bool {
 	var judge bool
-	if strings.Contains(string(output), "inactive") {
+	if output == "inactive" {
 		switch operate {
 		case 0:
 			judge = false

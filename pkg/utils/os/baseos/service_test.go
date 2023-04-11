@@ -1,7 +1,6 @@
 package baseos
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +18,7 @@ func TestGetServiceStatus(t *testing.T) {
 	service := "named.service"
 	tmp, err := osobj.GetServiceStatus(service)
 	switch tmp {
-	case "active\n", "inactive\n":
+	case "active", "inactive":
 		break
 	default:
 		assert.Nil(t, err)
@@ -32,28 +31,28 @@ func TestConfigService(t *testing.T) {
 	service := "named.service"
 	tmp, err := osobj.GetServiceStatus(service)
 	switch tmp {
-	case "active\n", "inactive\n":
+	case "active", "inactive":
 		break
 	default:
 		assert.Nil(t, err)
 	}
-	if strings.Replace(tmp, "\n", "", -1) == "inactive" {
+	if tmp == "inactive" {
 		t.Run("test StartService", func(t *testing.T) {
 			assert.Nil(t, osobj.StartService(service))
 			status, err := osobj.GetServiceStatus(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active\n", status)
+			assert.Equal(t, "active", status)
 		})
 
 		t.Run("test StopService", func(t *testing.T) {
 			assert.Nil(t, osobj.StopService(service))
 			status, err := osobj.GetServiceStatus(service)
 			switch status {
-			case "active\n", "inactive\n":
-				assert.Equal(t, "inactive\n", status)
+			case "active", "inactive":
+				assert.Equal(t, "inactive", status)
 			default:
 				assert.Nil(t, err)
-				assert.Equal(t, "inactive\n", status)
+				assert.Equal(t, "inactive", status)
 			}
 		})
 
@@ -61,25 +60,25 @@ func TestConfigService(t *testing.T) {
 			assert.Nil(t, osobj.RestartService(service))
 			status, err := osobj.GetServiceStatus(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active\n", status)
+			assert.Equal(t, "active", status)
 		})
 	} else {
 		t.Run("test RestartService", func(t *testing.T) {
 			assert.Nil(t, osobj.RestartService(service))
 			status, err := osobj.GetServiceStatus(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active\n", status)
+			assert.Equal(t, "active", status)
 		})
 
 		t.Run("test StopService", func(t *testing.T) {
 			assert.Nil(t, osobj.StopService(service))
 			status, err := osobj.GetServiceStatus(service)
 			switch status {
-			case "active\n", "inactive\n":
-				assert.Equal(t, "inactive\n", status)
+			case "active", "inactive":
+				assert.Equal(t, "inactive", status)
 			default:
 				assert.Nil(t, err)
-				assert.Equal(t, "inactive\n", status)
+				assert.Equal(t, "inactive", status)
 			}
 		})
 
@@ -87,7 +86,7 @@ func TestConfigService(t *testing.T) {
 			assert.Nil(t, osobj.StartService(service))
 			status, err := osobj.GetServiceStatus(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active\n", status)
+			assert.Equal(t, "active", status)
 		})
 	}
 
