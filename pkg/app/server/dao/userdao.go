@@ -71,20 +71,14 @@ type Userdel struct {
 func AllUserRole() ([]UserRole, error) {
 	var role []UserRole
 	err := global.PILOTGO_DB.Find(&role).Error
-	if err != nil {
-		return role, err
-	}
-	return role, nil
+	return role, err
 }
 
 // 邮箱账户是否存在
 func IsEmailExist(email string) (bool, error) {
 	var user User
 	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
-	if err != nil {
-		return user.ID != 0, err
-	}
-	return user.ID != 0, nil
+	return user.ID != 0, err
 }
 
 /*
@@ -102,10 +96,7 @@ func UserPassword(email string) (s1, s2, s3 string, i1, i2 int, err error) {
 func UserInfo(email string) (User, error) {
 	var user User
 	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
-	if err != nil {
-		return user, err
-	}
-	return user, nil
+	return user, err
 }
 
 // 查询所有的用户
@@ -212,21 +203,14 @@ func ResetPassword(email string) (User, error) {
 			return user, err
 		}
 		err = global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", string(bs)).Error
-		if err != nil {
-			return user, err
-		}
-		return user, nil
+		return user, err
 	}
 }
 
 // 删除用户
 func DeleteUser(email string) error {
 	var user User
-	err := global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user).Error
 }
 
 // 修改用户的部门信息

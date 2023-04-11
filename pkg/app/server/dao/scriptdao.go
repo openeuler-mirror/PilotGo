@@ -24,21 +24,14 @@ func AddScript(s Script) error {
 	if len(version) == 0 {
 		return fmt.Errorf("版本号不能为空")
 	}
-	err := global.PILOTGO_DB.Save(&s).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.PILOTGO_DB.Save(&s).Error
 }
 
 // 根据脚本版本号查询文件是否存在
 func IsVersionExist(scriptversion string) (bool, error) {
 	var script Script
 	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
-	if err != nil {
-		return script.Deleted == 0, err
-	}
-	return script.Deleted == 0, nil
+	return script.Deleted == 0, err
 }
 
 // 根据版本号删除文件（将标志位变为1）
@@ -61,8 +54,5 @@ func DeleteScript(scriptversion string) error {
 func ShowScript(scriptversion string) (string, error) {
 	var script Script
 	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
-	if err != nil {
-		return script.Content, err
-	}
-	return script.Content, nil
+	return script.Content, err
 }

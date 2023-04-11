@@ -64,10 +64,7 @@ type DeleteUUID struct {
 func IsUUIDExist(uuid string) (bool, error) {
 	var Machine MachineNode
 	err := global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine).Error
-	if err != nil {
-		return Machine.DepartId != 0, err
-	}
-	return Machine.DepartId != 0, nil
+	return Machine.DepartId != 0, err
 }
 
 // 根据uuid获取部门id
@@ -133,10 +130,7 @@ func MachineList(departId []int) (machinelist []Res, err error) {
 func MachineStore(departid int) ([]MachineNode, error) {
 	var Machineinfo []MachineNode
 	err := global.PILOTGO_DB.Where("depart_id=?", departid).Find(&Machineinfo).Error
-	if err != nil {
-		return Machineinfo, err
-	}
-	return Machineinfo, nil
+	return Machineinfo, err
 }
 
 func ModifyMachineDepart(MadId int, DeptId int) error {

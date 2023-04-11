@@ -78,10 +78,7 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error)
 func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
 	var role UserRole
 	err := global.PILOTGO_DB.Where("id=?", roleid).Find(&role).Error
-	if err != nil {
-		return role, err
-	}
-	return role, nil
+	return role, err
 }
 
 // 登录用户的权限按钮
@@ -191,31 +188,19 @@ func IsUserBindingRole(roleId int) (bool, error) {
 // 删除用户角色
 func DeleteRole(roleId int) error {
 	var UserRole UserRole
-	err := global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
 }
 
 // 修改角色名称
 func UpdateRoleName(roleId int, name string) error {
 	var UserRole UserRole
-	err := global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
 }
 
 // 修改角色描述
 func UpdateRoleDescription(roleId int, desc string) error {
 	var UserRole UserRole
-	err := global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
 }
 
 // 变更用户角色权限
@@ -230,10 +215,7 @@ func UpdateRolePermission(permission RolePermissionChange) (UserRole, error) {
 		ButtonID: buttonId,
 	}
 	err := global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r).Error
-	if err != nil {
-		return userRole, err
-	}
-	return userRole, nil
+	return userRole, err
 }
 
 // 创建管理员账户
