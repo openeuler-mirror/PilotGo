@@ -156,7 +156,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.SysctlChange, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		args := msg.Data.(string)
-		sysctlchange := uos.OS().TempModifyPar(args)
+		sysctlchange, _ := uos.OS().TempModifyPar(args)
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -169,7 +169,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.SysctlView, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		args := msg.Data.(string)
-		sysctlview := uos.OS().GetVarNameValue(args)
+		sysctlview, _ := uos.OS().GetVarNameValue(args)
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,

@@ -28,8 +28,8 @@ type MemoryOperator interface {
 
 type SysctlOperator interface {
 	GetSysctlConfig() (map[string]string, error)
-	TempModifyPar(string) string
-	GetVarNameValue(string) string
+	TempModifyPar(string) (string, error)
+	GetVarNameValue(string) (string, error)
 }
 
 type DateTimeOperator interface {
