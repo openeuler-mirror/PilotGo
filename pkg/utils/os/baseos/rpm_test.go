@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
 func TestGetAllRpm(t *testing.T) {
@@ -32,8 +33,8 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 	var osobj BaseOS
 	rpm := "bind"
 
-	_, err := osobj.GetRpmInfo(rpm)
-	if err == nil {
+	exitc, stdo, stde, err := utils.RunCommandnew("rpm -qi " + rpm)
+	if exitc == 0 && len(stdo) > 0 && stde == "" && err == nil {
 		t.Run("test remove rpm", func(t *testing.T) {
 			assert.Nil(t, osobj.RemoveRpm(rpm))
 			_, err := osobj.GetRpmInfo(rpm)
@@ -46,7 +47,7 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, rpm, tmp.Name)
 		})
-	} else {
+	} else if exitc == 1 && strings.Replace(stdo, "\n", "", -1) == "package bind is not installed" && stde == "" && err == nil {
 		t.Run("test install rpm", func(t *testing.T) {
 			assert.Nil(t, osobj.InstallRpm(rpm))
 			tmp, err := osobj.GetRpmInfo(rpm)
@@ -59,5 +60,7 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 			_, err := osobj.GetRpmInfo(rpm)
 			assert.NotNil(t, err)
 		})
+	} else if exitc == 127 && stdo == "" && strings.Contains(stde, "command not found") == true && err == nil {
+		t.Errorf("[TestInstallAndRemoveRpm]rpm command not found: %v\n", err)
 	}
 }
