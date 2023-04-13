@@ -32,22 +32,24 @@ func (b *BaseOS) GetSysctlConfig() (map[string]string, error) {
 }
 
 // sysctl -w net.ipv4.ip_forward=1  临时修改系统参数
-func (b *BaseOS) TempModifyPar(arg string) string {
+func (b *BaseOS) TempModifyPar(arg string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sudo sysctl -w %s", arg))
 	tmp = strings.Replace(tmp, "\n", "", -1)
 
 	if err != nil {
 		logger.Error("failed to modify the kernel runtime parameters: %s", err.Error())
+		return tmp, fmt.Errorf("failed to modify the kernel runtime parameters: %s", err.Error())
 	}
-	return tmp
+	return tmp, nil
 }
 
 // sysctl -n net.ipv4.ip_forward  查看某个内核参数的值
-func (b *BaseOS) GetVarNameValue(arg string) string {
+func (b *BaseOS) GetVarNameValue(arg string) (string, error) {
 	tmp, err := utils.RunCommand(fmt.Sprintf("sysctl -n %s", arg))
 	tmp = strings.Replace(tmp, "\n", "", -1)
 	if err != nil {
 		logger.Error("failed to get the value of the parameter: %s", err.Error())
+		return tmp, fmt.Errorf("failed to get the value of the parameter: %s", err.Error())
 	}
-	return tmp
+	return tmp, nil
 }
