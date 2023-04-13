@@ -60,7 +60,7 @@ func (b *BaseOS) GetAllUserInfo() []common.AllUserInfo {
 	return allUsers
 }
 
-// 创建新的用户，并新建家目录
+// 创建新的用户，并修改新用户密码
 func (b *BaseOS) AddLinuxUser(username, password string) error {
 	output, err := utils.RunCommand("useradd -m " + username)
 	if err != nil {
