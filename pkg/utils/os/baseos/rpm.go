@@ -52,7 +52,7 @@ func (b *BaseOS) GetRpmSource(rpm string) ([]common.RpmSrc, error) {
 	listRpmSource := make([]string, 0)
 	listRpmName := make([]string, 0)
 	listRpmProvides := make([]string, 0)
-	result, err := utils.RunCommand("yum provides " + rpm)
+	result, err := utils.RunCommand("yum --nogpgcheck provides " + rpm)
 	if err != nil && len(result) != 0 {
 		logger.Error("failed to get source software package name and source: %s", err)
 		return []common.RpmSrc{}, fmt.Errorf("failed to get source software package name and source")
@@ -270,7 +270,7 @@ func verifyRpmInstalled(reader *strings.Reader, reg string) bool {
 
 // 安装rpm软件包
 func (b *BaseOS) InstallRpm(rpm string) error {
-	result, err := utils.RunCommand("yum -y install " + rpm)
+	result, err := utils.RunCommand("yum -y --nogpgcheck install " + rpm)
 	if err != nil {
 		logger.Error("failed to run RPM package installation command: %s", err)
 		return fmt.Errorf("failed to run RPM package installation command")
@@ -290,7 +290,7 @@ func (b *BaseOS) InstallRpm(rpm string) error {
 
 // 卸载rpm软件包
 func (b *BaseOS) RemoveRpm(rpm string) error {
-	result, err := utils.RunCommand("yum -y remove " + rpm)
+	result, err := utils.RunCommand("yum -y --nogpgcheck remove " + rpm)
 	if err != nil {
 		logger.Error("failed to run RPM package uninstallation command: %s", err)
 		return fmt.Errorf("failed to execute RPM package uninstallation command")
