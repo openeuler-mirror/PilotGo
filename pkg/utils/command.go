@@ -16,16 +16,62 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
+	"io/ioutil"
 	"os/exec"
 )
 
 func RunCommand(s string) (string, error) {
 	// TODO
-	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; " + s)
+	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; "+s)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	err := cmd.Run()
 
 	return out.String(), err
+}
+
+func RunCommandnew(s string) (int, string, string, error) {
+	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; "+s)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return 0, "", "", err
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return 0, "", "", err
+	}
+
+	exitCode := 0
+	err = cmd.Start()
+	if err != nil {
+		return 0, "", "", err
+	}
+
+	b1, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		return 0, "", "", err
+	}
+	s1 := string(b1)
+
+	b2, err := ioutil.ReadAll(stderr)
+	if err != nil {
+		return 0, "", "", err
+	}
+	s2 := string(b2)
+
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Println(err)
+		e, ok := err.(*exec.ExitError)
+		if !ok {
+			return 0, "", "", err
+		}
+		exitCode = e.ExitCode()
+	}
+
+	return exitCode, s1, s2, nil
 }
