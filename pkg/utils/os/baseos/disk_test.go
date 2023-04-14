@@ -20,17 +20,23 @@ func TestGetDiskUsageInfo(t *testing.T) {
 func TestDiskConfig(t *testing.T) {
 	var osobj BaseOS
 	diskpath := "/dev/nvme0n1"
-	mountpath := "/root/PilotGo-plugins/PilotGo/pkg/utils/os/testapi/mountdir"
+	mountpath := "/root/mountdir"
 
 	t.Run("test DiskMount", func(t *testing.T) {
-		assert.NotNil(t, osobj.DiskMount(diskpath, mountpath))
+		tmp, err := osobj.DiskMount(diskpath, mountpath)
+		assert.Nil(t, err)
+		assert.Equal(t, "", tmp)
 	})
 
 	t.Run("test DiskUMount", func(t *testing.T) {
-		assert.NotNil(t, osobj.DiskUMount(diskpath))
+		tmp, err := osobj.DiskUMount(diskpath)
+		assert.Nil(t, err)
+		assert.Equal(t, "", tmp)
 	})
 
 	t.Run("test DiskFormat", func(t *testing.T) {
-		assert.NotNil(t, osobj.DiskFormat("ext4", diskpath))
+		tmp, err := osobj.DiskFormat("ext4", diskpath)
+		assert.Nil(t, err)
+		assert.NotNil(t, tmp)
 	})
 }

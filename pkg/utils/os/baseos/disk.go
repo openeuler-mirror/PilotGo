@@ -90,43 +90,45 @@ func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
 2.挂载磁盘
 */
 
-func (b *BaseOS) DiskMount(sourceDisk, mountPath string) string {
+func (b *BaseOS) DiskMount(sourceDisk, mountPath string) (string, error) {
 	// 创建挂载目录
 	err := os.MkdirAll(mountPath, 0644)
 	if err != nil {
 		logger.Error("failed to create a mounted directory: %s", err.Error())
-		return err.Error()
+		return err.Error(), fmt.Errorf("failed to create a mounted directory: %s", err.Error())
 	}
 	logger.Info("successfully created a mounted directory: %s", mountPath)
 
-	tmp, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, mountPath))
-	if err != nil {
+	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("mount %s %s", sourceDisk, mountPath))
+	if exitc == 0 && stdo == "" && stde == "" && err == nil {
+		logger.Info("successfully mounted disk: %s", stdo)
+		return stdo, nil
+	} else {
 		logger.Error("failed to mount disk: %s", err.Error())
-		return err.Error()
+		return err.Error(), fmt.Errorf("failed to mount disk: %s", err.Error())
 	}
-	logger.Info("successfully mounted disk: %s", tmp)
-	return tmp
 }
 
 // 卸载磁盘
-func (b *BaseOS) DiskUMount(diskPath string) string {
-	tmp, err := utils.RunCommand(fmt.Sprintf("umount %s", diskPath))
-	if err != nil {
+func (b *BaseOS) DiskUMount(diskPath string) (string, error) {
+	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("umount %s", diskPath))
+	if exitc == 0 && stdo == "" && stde == "" && err == nil {
+		logger.Info("successfully unmounted the disk: %s", stdo)
+		return stdo, nil
+	} else {
 		logger.Error("failed to unmount the disk: %s", err.Error())
-		return err.Error()
+		return err.Error(), fmt.Errorf("failed to unmount the disk: %s", err.Error())
 	}
-	logger.Info("successfully unmounted the disk: %s", tmp)
-	return tmp
 }
 
 // 磁盘格式化
-func (b *BaseOS) DiskFormat(fileType, diskPath string) string {
-	// TODO
-	tmp, err := utils.RunCommand(fmt.Sprintf("mkfs.%s -F %s", fileType, diskPath))
-	if err != nil {
+func (b *BaseOS) DiskFormat(fileType, diskPath string) (string, error) {
+	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("mkfs.%s -F %s", fileType, diskPath))
+	if exitc == 0 && stdo != "" && stde != "" && err == nil {
+		logger.Info("successfully formatted the disk: %s", stdo)
+		return stdo, nil
+	} else {
 		logger.Error("failed to format the disk: %s", err.Error())
-		return err.Error()
+		return "", fmt.Errorf("failed to format the disk: %s", stde)
 	}
-	logger.Info("successfully formatted the disk: %s", tmp)
-	return tmp
 }
