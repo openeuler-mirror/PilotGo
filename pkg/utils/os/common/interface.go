@@ -19,7 +19,7 @@ type SystemOperator interface {
 }
 
 type CpuOperator interface {
-	GetCPUInfo() *CPUInfo
+	GetCPUInfo() (*CPUInfo, error)
 }
 
 type MemoryOperator interface {
