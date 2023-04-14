@@ -8,5 +8,7 @@ import (
 
 func TestGetcpuinfo(t *testing.T) {
 	var osobj BaseOS
-	assert.NotNil(t, osobj.GetCPUInfo())
+	tmp, err := osobj.GetCPUInfo()
+	assert.Nil(t, err)
+	assert.NotNil(t, tmp)
 }
