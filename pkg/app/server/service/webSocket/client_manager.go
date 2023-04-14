@@ -111,7 +111,7 @@ func ClearTimeoutWebSocketConnections() {
 	clients := CliManager.GetClients()
 	for client := range clients {
 		if client.IsHeartbeatTimeout() {
-			logger.Debug("心跳时间超时 关闭连接: %s, %s", client.Addr, client.HeartbeatTime)
+			logger.Debug("心跳时间超时 关闭连接: %s, %d", client.Addr, client.HeartbeatTime)
 
 			client.Socket.Close()
 		}
