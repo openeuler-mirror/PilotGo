@@ -62,5 +62,7 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 		})
 	} else if exitc == 127 && stdo == "" && strings.Contains(stde, "command not found") == true && err == nil {
 		t.Errorf("[TestInstallAndRemoveRpm]rpm command not found: %v\n", err)
+	} else {
+		t.Errorf("[TestInstallAndRemoveRpm]other error: %v, %v, %v, %v\n", exitc, stdo, stde, err)
 	}
 }
