@@ -80,7 +80,7 @@ func FileMonitorInit() error {
 				if !ok {
 					return
 				}
-				logger.Error("error:", err)
+				logger.Error("error: %s", err)
 			}
 		}
 	}()
@@ -102,7 +102,7 @@ func FileMonitor(client *network.SocketClient) {
 		}
 
 		if err := client.Send(msg); err != nil {
-			logger.Debug("send message failed, error:", err)
+			logger.Debug("send message failed, error: %s", err)
 		}
 
 	}

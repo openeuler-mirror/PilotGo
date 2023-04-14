@@ -18,19 +18,19 @@ type ConfigMessage struct {
 	Machine_uuid  string
 }
 
-//配置文件的监听器
+// 配置文件的监听器
 func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 	//创建一个监听器
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Error("NewWatcher failed: ", err)
+		logger.Error("NewWatcher failed: %s", err)
 		return err
 	}
 	defer watcher.Close()
 	done := make(chan bool)
 	err = watcher.Add(ConMess.ConfigName)
 	if err != nil {
-		logger.Error("Add failed:", err)
+		logger.Error("Add failed:%s", err)
 	}
 	go func() {
 		defer close(done)
@@ -45,7 +45,7 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 					ConMess.ConfigChange = event.Op.String()
 					ConMess.ConfigContent, err = utils.FileReadString(ConMess.ConfigName)
 					if err != nil {
-						logger.Debug("error:", err)
+						logger.Debug("error: %s", err)
 					}
 					msg := &protocol.Message{
 						UUID:   uuid.New().String(),
@@ -54,7 +54,7 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 						Data:   ConMess,
 					}
 					if err := client.Send(msg); err != nil {
-						logger.Debug("send message failed, error:", err)
+						logger.Debug("send message failed, error: %s", err)
 					}
 				}
 				if event.Op&fsnotify.Remove == fsnotify.Remove {
@@ -64,7 +64,7 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 					}
 				}
 			case err, ok := <-watcher.Errors:
-				logger.Debug("error:", err)
+				logger.Debug("error: %s", err)
 				if !ok {
 					return
 				}
