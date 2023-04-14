@@ -116,8 +116,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.CPUInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		cpuinfo, _ := uos.OS().GetCPUInfo()
-
+		cpuinfo, err := uos.OS().GetCPUInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -683,7 +691,16 @@ func RegitsterHandler(c *network.SocketClient) {
 		logger.Debug("process agent info command:%s", msg.String())
 
 		os := uos.OS().GetHostInfo()
-		cpu, _ := uos.OS().GetCPUInfo()
+		cpu, err := uos.OS().GetCPUInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
