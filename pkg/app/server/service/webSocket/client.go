@@ -65,7 +65,7 @@ func (c *Client) Write() {
 		message, ok := <-c.Send
 		if !ok {
 			// 发送数据错误 关闭连接
-			logger.Debug("Client发送数据 关闭连接: %s, OK: %s", c.Addr, ok)
+			logger.Debug("Client发送数据 关闭连接: %s, OK: %t", c.Addr, ok)
 			return
 		}
 		c.Socket.WriteMessage(websocket.TextMessage, message)
