@@ -214,7 +214,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -236,7 +236,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -259,7 +259,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -307,7 +307,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   rpminfo,
 				Error:  err.Error(),
 			}
@@ -332,7 +332,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -355,7 +355,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -400,28 +400,46 @@ func RegitsterHandler(c *network.SocketClient) {
 		disks := strings.Split(disk, ",")
 		source := disks[0]
 		dest := disks[1]
-		mountpath := uos.OS().DiskMount(source, dest)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   mountpath,
+		info, err := uos.OS().DiskMount(source, dest)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   info,
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.DiskUMount, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		disk := msg.Data.(string)
-		diskPath := uos.OS().DiskUMount(disk)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   diskPath,
+		info, err := uos.OS().DiskUMount(disk)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   info,
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.DiskFormat, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -429,15 +447,24 @@ func RegitsterHandler(c *network.SocketClient) {
 		disks := strings.Split(disk, ",")
 		fileType := disks[0]
 		diskPath := disks[1]
-		formatpath := uos.OS().DiskFormat(fileType, diskPath)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   formatpath,
+		info, err := uos.OS().DiskFormat(fileType, diskPath)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		} else {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: 0,
+				Data:   info,
+			}
+			return c.Send(resp_msg)
 		}
-		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.NetTCP, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -446,8 +473,8 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
-				Data:   err,
+				Status: -1,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		} else {
@@ -468,7 +495,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -490,7 +517,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -512,7 +539,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -563,7 +590,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -586,7 +613,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -612,7 +639,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -638,7 +665,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -673,7 +700,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -696,7 +723,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -719,7 +746,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -745,7 +772,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -771,7 +798,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -797,7 +824,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -823,7 +850,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -845,7 +872,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  "重启防火墙失败",
 			}
 			return c.Send(resp_msg)
@@ -867,7 +894,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  "关闭防火墙失败",
 			}
 			return c.Send(resp_msg)
@@ -894,7 +921,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -921,7 +948,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -949,7 +976,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -975,7 +1002,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -998,7 +1025,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1020,7 +1047,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1043,7 +1070,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1066,7 +1093,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1088,7 +1115,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1111,7 +1138,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1138,7 +1165,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1180,7 +1207,7 @@ func RegitsterHandler(c *network.SocketClient) {
 				resp_msg := &protocol.Message{
 					UUID:   msg.UUID,
 					Type:   msg.Type,
-					Status: 0,
+					Status: -1,
 					Error:  err.Error(),
 				}
 				return c.Send(resp_msg)
@@ -1197,7 +1224,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  "监控文件有误",
 			}
 			return c.Send(resp_msg)

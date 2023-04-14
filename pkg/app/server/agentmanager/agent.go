@@ -506,7 +506,7 @@ func (a *Agent) DiskInfo() (interface{}, error) {
 2.挂载磁盘
 */
 
-func (a *Agent) DiskMount(sourceDisk, destPath string) (interface{}, error) {
+func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DiskMount,
@@ -516,11 +516,11 @@ func (a *Agent) DiskMount(sourceDisk, destPath string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return err.Error(), err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
-func (a *Agent) DiskUMount(diskPath string) (interface{}, error) {
+func (a *Agent) DiskUMount(diskPath string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DiskUMount,
@@ -530,11 +530,11 @@ func (a *Agent) DiskUMount(diskPath string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return err.Error(), err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
-func (a *Agent) DiskFormat(fileType, diskPath string) (interface{}, error) {
+func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DiskFormat,
@@ -544,9 +544,9 @@ func (a *Agent) DiskFormat(fileType, diskPath string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 获取当前TCP网络连接信息

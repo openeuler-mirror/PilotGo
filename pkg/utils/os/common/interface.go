@@ -47,9 +47,9 @@ type ServiceOperator interface {
 type DiskOperator interface {
 	GetDiskUsageInfo() []DiskUsageINfo
 	GetDiskInfo() []DiskIOInfo
-	DiskMount(string, string) string
-	DiskUMount(string) string
-	DiskFormat(string, string) string
+	DiskMount(string, string) (string, error)
+	DiskUMount(string) (string, error)
+	DiskFormat(string, string) (string, error)
 }
 type UserOperator interface {
 	GetCurrentUserInfo() CurrentUser

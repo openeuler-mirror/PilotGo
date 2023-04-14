@@ -65,7 +65,7 @@ func DiskMountHandler(c *gin.Context) {
 	}
 
 	disk_mount, err := agent.DiskMount(sourceDisk, destPath)
-	if disk_mount != nil || err != nil {
+	if disk_mount != "" || err != nil {
 		response.Fail(c, gin.H{"error": disk_mount}, "挂载磁盘失败!")
 		return
 	}
@@ -82,7 +82,7 @@ func DiskUMountHandler(c *gin.Context) {
 	}
 
 	disk_umount, err := agent.DiskUMount(diskPath)
-	if disk_umount != nil || err != nil {
+	if disk_umount != "" || err != nil {
 		response.Fail(c, gin.H{"error": disk_umount}, "卸载磁盘失败!")
 		return
 	}
@@ -100,7 +100,7 @@ func DiskFormatHandler(c *gin.Context) {
 	}
 
 	disk_format, err := agent.DiskFormat(fileType, diskPath)
-	if disk_format != nil || err != nil {
+	if disk_format == "" || err != nil {
 		response.Fail(c, gin.H{"error": disk_format}, "格式化磁盘失败!")
 		return
 	}
