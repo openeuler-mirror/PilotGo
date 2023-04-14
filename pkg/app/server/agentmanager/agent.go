@@ -25,6 +25,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
 type AgentMessageHandler func(*Agent, *protocol.Message) error
@@ -229,7 +230,7 @@ func (a *Agent) GetOSInfo() (interface{}, error) {
 }
 
 // 远程获取agent端的CPU信息
-func (a *Agent) GetCPUInfo() (interface{}, error) {
+func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.CPUInfo,
@@ -241,7 +242,7 @@ func (a *Agent) GetCPUInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(*common.CPUInfo), nil
 }
 
 // 远程获取agent端的内存信息
