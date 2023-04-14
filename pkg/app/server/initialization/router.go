@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-04-04 11:17:58
+ * LastEditTime: 2023-04-14 10:07:34
  * Description: Interface routing forwarding
  ******************************************************************************/
 package initialization
@@ -189,18 +189,7 @@ func SetupRouter() *gin.Engine {
 	}
 
 	// 对插件提供的api接口
-	pluginAPI := api.Group("/pluginapi")
-	pluginAPI.Use(pluginapi.AuthCheck)
-	{
-		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)
-		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
-		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
-
-		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
-		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
-
-		pluginAPI.GET("/machine_list", pluginapi.MachineList)
-	}
+	registerPluginApi(api)
 
 	// 此处绑定前端静态资源handler
 	resource.StaticRouter(router)
@@ -227,4 +216,23 @@ func SetupRouter() *gin.Engine {
 	}
 	go webSocket.CliManager.Start()
 	return router
+}
+
+func registerPluginApi(router *gin.RouterGroup) {
+	pluginAPI := router.Group("/pluginapi")
+	pluginAPI.Use(pluginapi.AuthCheck)
+	{
+		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)
+		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
+		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
+
+		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
+		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
+
+		pluginAPI.GET("/machine_list", pluginapi.MachineList)
+	}
+	// plugin
+	{
+		pluginAPI.GET("/plugins", pluginapi.PluginList)
+	}
 }
