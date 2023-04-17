@@ -109,6 +109,7 @@ func AddAgents2DB(a *Agent) {
 		logger.Error("获取uuid失败!")
 		return
 	}
+	// TODO: 沒有对message对象status、Error字段进行判断，决定后续步骤是否执行
 	agent_OS, err := agent_uuid.GetAgentOSInfo()
 	if err != nil {
 		logger.Error("初始化系统信息失败!")
