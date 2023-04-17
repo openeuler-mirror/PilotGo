@@ -58,6 +58,7 @@ func Read(Clients map[int]*model.ConnClient) {
 			if err != nil {
 				Keys = append(Keys, key)
 				cli.Conn.Close()
+				lock.Unlock()
 				return
 			}
 		}
@@ -75,6 +76,7 @@ func Write(Clients map[int]*model.ConnClient) {
 				log.Println(err)
 				Keys = append(Keys, key)
 				cli.Conn.Close()
+				lock.Unlock()
 				return
 			}
 		}
