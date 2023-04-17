@@ -12,7 +12,7 @@ import (
 
 // 获取CPU型号
 func (b *BaseOS) GetCPUName() (string, error) {
-	exitc, cpuname, stde, err := utils.RunCommandnew("lscpu | grep 'BIOS Model name' | sort | uniq")
+	exitc, cpuname, stde, err := utils.RunCommandnew("lscpu | grep 'Model name' | sort | uniq")
 	if exitc == 0 && len(cpuname) > 0 && stde == "" && err == nil {
 		cpuname = strings.Replace(cpuname, "\n", "", -1)
 		str := strings.Split(cpuname, ":")
