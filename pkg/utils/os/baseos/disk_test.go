@@ -1,6 +1,7 @@
 package baseos
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,6 +33,8 @@ func TestDiskConfig(t *testing.T) {
 		tmp, err := osobj.DiskUMount(diskpath)
 		assert.Nil(t, err)
 		assert.Equal(t, "", tmp)
+		Err := os.RemoveAll(mountpath)
+		assert.Nil(t, Err)
 	})
 
 	t.Run("test DiskFormat", func(t *testing.T) {
