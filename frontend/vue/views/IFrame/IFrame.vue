@@ -1,7 +1,7 @@
 <template>
   <div class="iframe-div">
     <!-- <iframe :src="url" class="iframe"></iframe> -->
-    <micro-app :name=name :url=url baseroute='/plugin'></micro-app>
+    <micro-app :name=name :url=url :baseroute=path class="micro_content"></micro-app>
   </div>
 </template>
 
@@ -10,16 +10,21 @@ export default {
   name: "plugin",
   props: {
     url: String,
-    name: String
+    name: String,
+    path: String
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .iframe-div {
   box-sizing: border-box;
   height: 100%;
   width: 100%;
+
+  .micro_content {
+    height: 100%;
+  }
 }
 
 .iframe {

@@ -96,42 +96,46 @@ const permission = {
     },
     SetDynamicRouters({ commit, state }, routers) {
       // if (routers.length == 0) {
-        // 初始化动态路由表
-        return new Promise(resolve => {
-          // 获取动态插件路由
-          let p = [];
-          state.iframeComponent = []
-          getPlugins().then((res) => {
-            if (res.data.code === 200) {
-              res.data.data.forEach((item, index) => {
-                p.push({
-                  path: '/plugin' + index,
-                  name: 'Plugin' + index,
-                  iframeComponent: '',
-                  meta: {
-                    title: 'plugin', header_title: item.name, panel: "plugin" + index, icon_class: 'el-icon-s-order', url: item.url,
-                    breadcrumb: [
-                      { name: item.name },
-                    ],
-                  }
-                })
-                let iframeObj = {
-                  path: '/plugin' + index,
-                  name: 'Plugin' + index,
-                  component: _import('IFrame/IFrame'), // 组件文件的引用
-                  url: item.url,
-                }
-                state.iframeComponents.push(iframeObj);
-                Vue.component('Plugin' + index, _import('IFrame/IFrame'));
-              });
-              commit("SET_DYNAMIC_ROUTERS", p)
-              resolve()
-            } else {
-              this.$message.error("查询插件列表错误：", res.data.msg);
-            }
-          })
+      // 初始化动态路由表
+      return new Promise(resolve => {
+        // 获取动态插件路由
+        let p = [];
+        state.iframeComponent = []
+        getPlugins().then((res) => {
+          if (res.data.code === 200) {
+            [{
+              name: 'gala-ops',
+              url: 'http://10.41.121.5:8081',
 
+            }].forEach((item, index) => {
+              p.push({
+                path: '/plugin' + index,
+                name: 'Plugin' + index,
+                iframeComponent: '',
+                meta: {
+                  title: 'plugin', header_title: item.name, panel: "plugin" + index, icon_class: 'el-icon-s-order', url: item.url,
+                  breadcrumb: [
+                    { name: item.name },
+                  ],
+                }
+              })
+              let iframeObj = {
+                path: '/plugin' + index,
+                name: 'Plugin' + index,
+                component: _import('IFrame/IFrame'), // 组件文件的引用
+                url: item.url,
+              }
+              state.iframeComponents.push(iframeObj);
+              Vue.component('Plugin' + index, _import('IFrame/IFrame'));
+            });
+            commit("SET_DYNAMIC_ROUTERS", p)
+            resolve()
+          } else {
+            this.$message.error("查询插件列表错误：", res.data.msg);
+          }
         })
+
+      })
       // } else {
       //   return new Promise(resolve => {
       //     commit("ADD_DYNAMIC_ROUTERS", routers)
