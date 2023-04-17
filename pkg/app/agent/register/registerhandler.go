@@ -692,12 +692,14 @@ func RegitsterHandler(c *network.SocketClient) {
 
 		os := uos.OS().GetHostInfo()
 		cpu, err := uos.OS().GetCPUInfo()
+
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: -1,
 				Error:  err.Error(),
+				Data:   os.IP + ";" + os.Platform + ";" + os.PlatformVersion + ";" + "",
 			}
 			return c.Send(resp_msg)
 		}
