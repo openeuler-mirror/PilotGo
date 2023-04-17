@@ -12,7 +12,7 @@ import (
 
 // 获取CPU型号
 func (b *BaseOS) GetCPUName() (string, error) {
-	exitc, cpuname, stde, err := utils.RunCommandnew("lscpu | grep 'BIOS Model name' | sort | uniq")
+	exitc, cpuname, stde, err := utils.RunCommandnew("lscpu | grep 'Model name' | sort | uniq")
 	if exitc == 0 && len(cpuname) > 0 && stde == "" && err == nil {
 		cpuname = strings.Replace(cpuname, "\n", "", -1)
 		str := strings.Split(cpuname, ":")
@@ -25,7 +25,7 @@ func (b *BaseOS) GetCPUName() (string, error) {
 		return cpuname, nil
 	} else {
 		logger.Error("failed to get cpu model name!")
-		return "", fmt.Errorf("failed to get cpu model name: %s", err.Error())
+		return "", fmt.Errorf("failed to get cpu model name")
 	}
 }
 
@@ -41,18 +41,18 @@ func (b *BaseOS) GetPhysicalCPU() (int, error) {
 		return cpunum, nil
 	} else {
 		logger.Error("failed to get cpu num")
-		return -1, fmt.Errorf("failed to get cpu num: %s", err.Error())
+		return -1, fmt.Errorf("failed to get cpu num")
 	}
 }
 
 func (b *BaseOS) GetCPUInfo() (*common.CPUInfo, error) {
 	cpuname, err := b.GetCPUName()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cpu model name: %s", err.Error())
+		return nil, fmt.Errorf("failed to get cpu model name")
 	}
 	cpunum, err := b.GetPhysicalCPU()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cpu num: %s", err.Error())
+		return nil, fmt.Errorf("failed to get cpu num")
 	}
 	cpuinfo := &common.CPUInfo{
 		ModelName: cpuname,

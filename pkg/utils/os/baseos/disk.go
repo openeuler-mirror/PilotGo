@@ -100,12 +100,16 @@ func (b *BaseOS) DiskMount(sourceDisk, mountPath string) (string, error) {
 	logger.Info("successfully created a mounted directory: %s", mountPath)
 
 	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("mount %s %s", sourceDisk, mountPath))
+	fmt.Printf("[diskmount]%v, %v, %v, %v\n", exitc, stdo, stde, err)
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 		logger.Info("successfully mounted disk: %s", stdo)
 		return stdo, nil
-	} else {
+	} else if err != nil {
 		logger.Error("failed to mount disk: %s", err.Error())
-		return err.Error(), fmt.Errorf("failed to mount disk: %s", err.Error())
+		return "failed to mount disk", fmt.Errorf("failed to mount disk: %s", err.Error())
+	} else {
+		logger.Error("failed to mount disk")
+		return "failed to mount disk", fmt.Errorf("failed to mount disk")
 	}
 }
 
@@ -115,9 +119,12 @@ func (b *BaseOS) DiskUMount(diskPath string) (string, error) {
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 		logger.Info("successfully unmounted the disk: %s", stdo)
 		return stdo, nil
-	} else {
+	} else if err != nil {
 		logger.Error("failed to unmount the disk: %s", err.Error())
-		return err.Error(), fmt.Errorf("failed to unmount the disk: %s", err.Error())
+		return "failed to unmount the disk", fmt.Errorf("failed to unmount the disk: %s", err.Error())
+	} else {
+		logger.Error("failed to unmount the disk")
+		return "failed to unmount the disk", fmt.Errorf("failed to unmount the disk")
 	}
 }
 
@@ -128,7 +135,7 @@ func (b *BaseOS) DiskFormat(fileType, diskPath string) (string, error) {
 		logger.Info("successfully formatted the disk: %s", stdo)
 		return stdo, nil
 	} else {
-		logger.Error("failed to format the disk: %s", err.Error())
+		logger.Error("failed to format the disk: %s", stde)
 		return "", fmt.Errorf("failed to format the disk: %s", stde)
 	}
 }
