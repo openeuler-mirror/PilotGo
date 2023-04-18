@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:07:46
-  LastEditTime: 2022-06-22 16:12:18
+ LastEditTime: 2023-04-18 09:46:14
  -->
 <template>
   <div class="content">
@@ -51,12 +51,12 @@ export default {
       display: false,
       type: '',
       net: {
-        BOOTPROTO: '手动',
-        IPADDR: '172.17.127.29',
-        NETMASK: '24',
-        GATEWAY: '172.17.127.252',
-        DNS1: '123.150.150.150',
-        DNS2: '255.5.5.5',
+        // BOOTPROTO: '手动',
+        // IPADDR: '172.17.127.29',
+        // NETMASK: '24',
+        // GATEWAY: '172.17.127.252',
+        // DNS1: '123.150.150.150',
+        // DNS2: '255.5.5.5',
       },
       netData: [],
       tableData: []

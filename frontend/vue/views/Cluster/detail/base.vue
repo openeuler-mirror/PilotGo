@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
-  LastEditTime: 2022-04-13 14:29:01
+ LastEditTime: 2023-04-18 09:31:34
  -->
 <template>
  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -39,27 +39,27 @@ export default {
     return {
       params: {},
       diskData: [
-      {
-        "device": "/dev/dm-0",
-        "fileSystem": "/dev/dm-0(挂载点：/)",
-        "fstype": "xfs",
-        "path": "/",
-        "total": "64G",
-        "used": "45G",
-        "usedPercent": "71%"
-      }
+      // {
+      //   "device": "/dev/dm-0",
+      //   "fileSystem": "/dev/dm-0(挂载点：/)",
+      //   "fstype": "xfs",
+      //   "path": "/",
+      //   "total": "64G",
+      //   "used": "45G",
+      //   "usedPercent": "71%"
+      // }
     ],
       basic: {
-        IP: '127.0.0.1',
-        dept: '麒麟',
-        manager: 'root',
-        status: '在线',
-        IP: '192.168.160.128',
-        macPlatform: 'Kylin',
-        mackernel: 'x86_64',
-        macCPU: '4 Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz',
-        macMEM: '2957640',
-        osVersion: '4.19.90-24.4.v2101.ky10.x86_64'
+        // IP: '127.0.0.1',
+        // dept: '麒麟',
+        // manager: 'root',
+        // status: '在线',
+        // IP: '192.168.160.128',
+        // macPlatform: 'Kylin',
+        // mackernel: 'x86_64',
+        // macCPU: '4 Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz',
+        // macMEM: '2957640',
+        // osVersion: '4.19.90-24.4.v2101.ky10.x86_64'
       },
     }
   },
