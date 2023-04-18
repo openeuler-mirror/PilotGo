@@ -61,7 +61,7 @@ func TestConfigUser(t *testing.T) {
 
 		output, err := utils.RunCommand("ls -l " + fileabs)
 		assert.Nil(t, err)
-		assert.Equal(t, "-r--r--r--", strings.Split(output, ".")[0])
+		assert.Equal(t, "-r--r--r--", strings.Replace(strings.Split(output, " ")[0], ".", "", -1))
 	})
 
 	t.Run("test ChangeFileOwner", func(t *testing.T) {

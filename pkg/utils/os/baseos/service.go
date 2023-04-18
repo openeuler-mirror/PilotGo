@@ -51,7 +51,7 @@ func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 }
 
 //operate 0,1,2分别代表开启，关闭，重启
-
+// TODO: 软件包在未安装情况下，'systemctl is-active'返回的结果和软件包已安装且服务未运行时的结果一致
 func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 	var build strings.Builder
 	build.WriteString("systemctl is-active ")
