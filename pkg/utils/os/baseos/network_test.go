@@ -55,9 +55,9 @@ func TestNetwork(t *testing.T) {
 	t.Run("test ConfigNetwork", func(t *testing.T) {
 		// http请求地址中的网卡配置参数
 		ip_assignment := "static"
-		ipv4_addr := "1.1.1.1"
+		ipv4_addr := "192.168.75.200"
 		ipv4_netmask := "255.255.255.0"
-		ipv4_gateway := "1.1.1.254"
+		ipv4_gateway := "192.168.75.2"
 		ipv4_dns1 := "114.114.114.114"
 		ipv4_dns2 := "8.8.8.8"
 		// getnicname接口获取的网卡配置参数
