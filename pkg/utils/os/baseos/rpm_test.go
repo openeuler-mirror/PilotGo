@@ -61,8 +61,8 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 			assert.NotNil(t, err)
 		})
 	} else if exitc == 127 && stdo == "" && strings.Contains(stde, "command not found") == true && err == nil {
-		t.Errorf("[TestInstallAndRemoveRpm]rpm command not found: %v\n", err)
+		t.Errorf("[TestInstallAndRemoveRpm]rpm command not found: %s\n", stde)
 	} else {
-		t.Errorf("[TestInstallAndRemoveRpm]other error: %v, %v, %v, %v\n", exitc, stdo, stde, err)
+		t.Errorf("[TestInstallAndRemoveRpm]other error: %d, %s, %s, %v\n", exitc, stdo, stde, err)
 	}
 }
