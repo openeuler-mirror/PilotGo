@@ -27,7 +27,8 @@ func TestFirewall(t *testing.T) {
 		assert.Nil(t, err)
 		new_config := tmp.(map[string]interface{})
 		new_zone := new_config["defaultZone"].(string)
-		assert.Equal(t, defaultzone, new_zone)
+		assert.Equal(t, defaultzone, new_zone) 
+		osobj.FirewalldSetDefaultZone("public")
 	})
 
 	t.Run("test Stop", func(t *testing.T) {
@@ -49,16 +50,16 @@ func TestFirewall(t *testing.T) {
 	})
 
 	t.Run("test FirewalldSourceAdd", func(t *testing.T) {
-		osobj.FirewalldSourceAdd(dropzone, "192.168.75.131")
+		osobj.FirewalldSourceAdd(dropzone, "192.168.75.200")
 		tmp, err := osobj.FirewalldZoneConfig(dropzone)
 		assert.Nil(t, err)
 		new_zoneconfig := tmp.(*FirewalldCMDList)
 		new_sources := new_zoneconfig.Sources
-		assert.Equal(t, []string{"192.168.75.131"}, new_sources)
+		assert.Equal(t, []string{"192.168.75.200"}, new_sources)
 	})
 
 	t.Run("test FirewalldSourceRemove", func(t *testing.T) {
-		osobj.FirewalldSourceRemove(dropzone, "192.168.75.131")
+		osobj.FirewalldSourceRemove(dropzone, "192.168.75.200")
 		tmp, err := osobj.FirewalldZoneConfig(dropzone)
 		assert.Nil(t, err)
 		new_zoneconfig := tmp.(*FirewalldCMDList)
