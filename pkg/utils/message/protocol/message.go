@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/mitchellh/mapstructure"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -152,6 +153,10 @@ type Message struct {
 	Status int    `json:"status"`
 	Data   interface{}
 	Error  string
+}
+
+func (m *Message) BindData(s interface{}) error {
+	return mapstructure.Decode(m.Data, s)
 }
 
 type MessageContext interface{}

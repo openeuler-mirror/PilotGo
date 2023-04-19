@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-02-21 18:35:58
+ * LastEditTime: 2023-04-19 16:21:52
  * Description: socket client register
  ******************************************************************************/
 package register
@@ -87,15 +87,22 @@ func RegitsterHandler(c *network.SocketClient) {
 		if err != nil {
 			logger.Debug("获取IP失败!")
 		}
+
+		result := struct {
+			AgentVersion string `json:"agent_version"`
+			IP           string `json:"IP"`
+			AgentUUID    string `json:"agent_uuid"`
+		}{
+			AgentVersion: agent_version,
+			IP:           IP,
+			AgentUUID:    localstorage.AgentUUID(),
+		}
+
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data: map[string]string{
-				"agent_version": agent_version,
-				"IP":            IP,
-				"agent_uuid":    localstorage.AgentUUID(),
-			},
+			Data:   result,
 		}
 		return c.Send(resp_msg)
 	})
