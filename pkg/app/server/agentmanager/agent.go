@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2022-04-08 13:07:53
+ * LastEditTime: 2023-04-19 16:19:56
  * Description: socket server's agentmanager
  ******************************************************************************/
 package agentmanager
@@ -146,10 +146,9 @@ func (a *Agent) Init() error {
 	if err != nil {
 		logger.Error("fail to get agent info, address:%s", a.conn.RemoteAddr().String())
 	}
-	d := data.(map[string]interface{})
-	logger.Debug("response agent info is %v", d)
-	a.UUID = d["agent_uuid"].(string)
-	a.Version = d["agent_version"].(string)
+
+	a.UUID = data.AgentUUID
+	a.Version = data.AgentVersion
 
 	return nil
 }
@@ -173,6 +172,7 @@ func (a *Agent) RunScript(cmd string) (interface{}, error) {
 	}
 	return resp_message.Data, nil
 }
+
 // TODO: err未发挥作用
 func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Duration) (*protocol.Message, error) {
 	logger.Debug("send message:%s", msg.String())
@@ -197,12 +197,17 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 	return nil, nil
 }
 
+type AgentInfo struct {
+	AgentVersion string `mapstructure:"agent_version"`
+	IP           string `mapstructure:"IP"`
+	AgentUUID    string `mapstructure:"agent_uuid"`
+}
+
 // 远程获取agent端的系统信息
-func (a *Agent) AgentInfo() (interface{}, error) {
+func (a *Agent) AgentInfo() (*AgentInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AgentInfo,
-		Data: struct{}{},
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
@@ -210,7 +215,15 @@ func (a *Agent) AgentInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &AgentInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+
+	return info, nil
 }
 
 // 远程获取agent端的系统信息
