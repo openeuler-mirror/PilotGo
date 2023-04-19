@@ -204,7 +204,8 @@ export default {
                 this.$message.success(res.data.msg);
                 this.$refs.form.resetFields();
               } else {
-                this.$message.error(res.data.error);
+                // this.$message.error(res.data.error);
+                this.$message.error(res.data.msg);
               }
             })
             .catch((res) => {
