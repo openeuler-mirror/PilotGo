@@ -169,7 +169,17 @@ export default {
     },
     handleExport() {
       const xlsxParam = { raw: true }; 
-      const t2b = XLSX.utils.table_to_book(document.querySelector('#exportTab'), xlsxParam);
+      const exportTabElement = document.querySelector('#exportTab');
+      const fixed = exportTabElement.querySelector(".el-table__fixed") || exportTabElement.querySelector(".el-table__fixed-right");
+      let t2b = null;
+      if (fixed) {
+        const parentNode = fixed.parentNode;
+        parentNode.removeChild(fixed);
+        t2b = XLSX.utils.table_to_book(exportTabElement, xlsxParam);
+        parentNode.appendChild(fixed);
+      } else {
+        t2b = XLSX.utils.table_to_book(exportTabElement, xlsxParam);
+      }
       const userExcel = XLSX.write(t2b, { bookType: 'xlsx', bookSST: true, type: 'array' });
       try {
         FileSaver.saveAs(
