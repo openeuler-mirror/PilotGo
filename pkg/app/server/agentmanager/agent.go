@@ -227,7 +227,7 @@ func (a *Agent) AgentInfo() (*AgentInfo, error) {
 }
 
 // 远程获取agent端的系统信息
-func (a *Agent) GetOSInfo() (interface{}, error) {
+func (a *Agent) GetOSInfo() (*common.SystemInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.OsInfo,
@@ -239,7 +239,14 @@ func (a *Agent) GetOSInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.SystemInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 远程获取agent端的CPU信息
