@@ -26,25 +26,26 @@ func moduleMatch(name string, value int64, memconf *common.MemoryConfig) {
 	}
 }
 
-// TODO 完善94-96逻辑，getmemoryconfig接口存在空行bug
 func (b *BaseOS) GetMemoryConfig() (*common.MemoryConfig, error) {
-	output, err := utils.RunCommand("cat /proc/meminfo")
-	if err != nil {
-		fmt.Printf("failed to get memory config: %s\n", err)
-		return nil, fmt.Errorf("failed to get memory config: %s", err)
-	}
-	outputlines := strings.Split(output, "\n")
-	m := &common.MemoryConfig{}
-	reg := regexp.MustCompile(`[a-zA-Z\s]+`)
-	for _, line := range outputlines {
-		//一次获取一行,_ 获取当前行是否被读完
-		if line == "" {
-			continue
+	exitc, output, stde, err := utils.RunCommandnew("cat /proc/meminfo")
+	if exitc == 0 && output != "" && stde == "" && err == nil {
+		outputlines := strings.Split(output, "\n")
+		m := &common.MemoryConfig{}
+		reg := regexp.MustCompile(`[a-zA-Z\s]+`)
+		for _, line := range outputlines {
+			//一次获取一行,_ 获取当前行是否被读完
+			if line == "" {
+				continue
+			}
+			k := strings.Split(line, ":")[0]
+			v := reg.ReplaceAllString(strings.Split(line, ":")[1], "")
+			vint64, _ := strconv.ParseInt(v, 10, 64)
+			moduleMatch(k, vint64, m)
 		}
-		k := strings.Split(line, ":")[0]
-		v := reg.ReplaceAllString(strings.Split(line, ":")[1], "")
-		vint64, _ := strconv.ParseInt(v, 10, 64)
-		moduleMatch(k, vint64, m)
+		return m, nil
+	} else if stde != "" {
+		return nil, fmt.Errorf(stde)
+	} else {
+		return nil , fmt.Errorf("failed to get memory config")
 	}
-	return m, nil
 }
