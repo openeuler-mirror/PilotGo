@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
 func TestNetwork(t *testing.T) {
@@ -53,6 +52,14 @@ func TestNetwork(t *testing.T) {
 	})
 
 	t.Run("test ConfigNetwork", func(t *testing.T) {
+		init_config, err := osobj.GetNetworkConnInfo()
+		assert.Nil(t, err)
+		init_ip_assignment := init_config.BootProto
+		init_ipv4_addr := init_config.IPAddr
+		init_ipv4_netmask := init_config.NetMask
+		init_ipv4_gateway := init_config.GateWay
+		init_ipv4_dns1 := init_config.DNS1
+		init_ipv4_dns2 := init_config.DNS2
 		// http请求地址中的网卡配置参数
 		ip_assignment := "static"
 		ipv4_addr := "192.168.75.200"
@@ -74,24 +81,37 @@ func TestNetwork(t *testing.T) {
 			assert.Nil(t, err)
 			err = osobj.RestartNetwork(nic_name.(string))
 			assert.Nil(t, err)
-
 		case "dhcp":
 			text := NetworkDHCP(oldnet)
 			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
 			assert.Nil(t, err)
 			err = osobj.RestartNetwork(nic_name.(string))
 			assert.Nil(t, err)
-
 		}
 
 		tmp, err := osobj.GetNetworkConnInfo()
 		assert.Nil(t, err)
-		assert.Equal(t, ip_assignment, tmp.(*common.NetworkConfig).BootProto)
-		assert.Equal(t, ipv4_addr, tmp.(*common.NetworkConfig).IPAddr)
-		assert.Equal(t, ipv4_netmask, tmp.(*common.NetworkConfig).NetMask)
-		assert.Equal(t, ipv4_gateway, tmp.(*common.NetworkConfig).GateWay)
-		assert.Equal(t, ipv4_dns1, tmp.(*common.NetworkConfig).DNS1)
-		assert.Equal(t, ipv4_dns2, tmp.(*common.NetworkConfig).DNS2)
+		assert.Equal(t, ip_assignment, tmp.BootProto)
+		assert.Equal(t, ipv4_addr, tmp.IPAddr)
+		assert.Equal(t, ipv4_netmask, tmp.NetMask)
+		assert.Equal(t, ipv4_gateway, tmp.GateWay)
+		assert.Equal(t, ipv4_dns1, tmp.DNS1)
+		assert.Equal(t, ipv4_dns2, tmp.DNS2)
 
+		// 测试完成将更改参数改回初始值
+		switch init_ip_assignment {
+		case "static":
+			text := NetworkStatic(oldnet, init_ipv4_addr, init_ipv4_netmask, init_ipv4_gateway, init_ipv4_dns1, init_ipv4_dns2)
+			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+			assert.Nil(t, err)
+			err = osobj.RestartNetwork(nic_name.(string))
+			assert.Nil(t, err)
+		case "dhcp":
+			text := NetworkDHCP(oldnet)
+			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+			assert.Nil(t, err)
+			err = osobj.RestartNetwork(nic_name.(string))
+			assert.Nil(t, err)
+		}
 	})
 }
