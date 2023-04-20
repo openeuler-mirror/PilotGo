@@ -81,7 +81,7 @@ type NetworkOperator interface {
 	GetIOCounter() ([]IOCnt, error)
 	GetNICConfig() ([]NetInterfaceCard, error)
 	ConfigNetworkConnect() ([]map[string]string, error)
-	GetNetworkConnInfo() (interface{}, error)
+	GetNetworkConnInfo() (*NetworkConfig, error)
 	GetNICName() (interface{}, error)
 	RestartNetwork(string) error
 }
