@@ -91,38 +91,42 @@ func (b *BaseOS) GetIOCounter() ([]common.IOCnt, error) {
 
 func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 	NICConfig := make([]common.NetInterfaceCard, 0)
-	result, err := utils.RunCommand("cat /proc/net/arp")
-	if err != nil {
-		logger.Error("faile to get network card message: %s", err)
-		return []common.NetInterfaceCard{}, fmt.Errorf("faile to get network card message")
-	}
-	reader := strings.NewReader(result)
-	scanner := bufio.NewScanner(reader)
+	exitc, result, stde, err := utils.RunCommandnew("cat /proc/net/arp")
+	if exitc == 0 && result != "" && stde == "" && err == nil {
+		reader := strings.NewReader(result)
+		scanner := bufio.NewScanner(reader)
 
-	for {
+		for {
 
-		if !scanner.Scan() {
-			break
+			if !scanner.Scan() {
+				break
+			}
+			line := scanner.Text()
+			line = strings.TrimSpace(line)
+
+			reg1 := regexp.MustCompile(`[A-Fa-f0-9]{2}(:[A-Fa-f0-9]{2}){5}`)
+			reg2 := regexp.MustCompile(`([0-9]{1,3}.){3}[0-9]{1,3}`)
+			reg3 := regexp.MustCompile(`[a-zA-Z0-9]+$`)
+			x := reg1.FindAllString(line, -1)
+			y := reg2.FindAllString(line, -1)
+			z := reg3.FindAllString(line, -1)
+			if x == nil || y == nil || z == nil {
+				continue
+			}
+			tmp := common.NetInterfaceCard{}
+			tmp.IPAddr = y[0]
+			tmp.MacAddr = x[0]
+			tmp.Name = z[0]
+			NICConfig = append(NICConfig, tmp)
 		}
-		line := scanner.Text()
-		line = strings.TrimSpace(line)
-
-		reg1 := regexp.MustCompile(`[A-Fa-f0-9]{2}(:[A-Fa-f0-9]{2}){5}`)
-		reg2 := regexp.MustCompile(`([0-9]{1,3}.){3}[0-9]{1,3}`)
-		reg3 := regexp.MustCompile(`[a-zA-Z0-9]+$`)
-		x := reg1.FindAllString(line, -1)
-		y := reg2.FindAllString(line, -1)
-		z := reg3.FindAllString(line, -1)
-		if x == nil || y == nil || z == nil {
-			continue
-		}
-		tmp := common.NetInterfaceCard{}
-		tmp.IPAddr = y[0]
-		tmp.MacAddr = x[0]
-		tmp.Name = z[0]
-		NICConfig = append(NICConfig, tmp)
+		return NICConfig, nil
+	} else if stde != "" {
+		logger.Error("faile to get network card message: %s", stde)
+		return nil, fmt.Errorf("faile to get network card message: %s", stde)
+	} else {
+		logger.Error("faile to get network card message")
+		return nil, fmt.Errorf("faile to get network card message")
 	}
-	return NICConfig, nil
 }
 
 // 配置网络连接
@@ -139,30 +143,32 @@ func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
 		filename = n
 	}
 
-	text, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read network configuration data: %s", err)
+	exitc, text, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
+	if exitc == 0 && text != "" && stde == "" && err == nil {
+		var oldnet []map[string]string
+		lines := strings.Split(text, "\n")
+		for _, line := range lines {
+			strSlice := strings.Split(line, "=")
+			if len(strSlice) == 1 {
+				continue
+			}
+			if strings.Contains(strSlice[0], "#") {
+				continue
+			}
+			net := map[string]string{
+				strSlice[0]: strSlice[1],
+			}
+			oldnet = append(oldnet, net)
+		}
+		return oldnet, nil
+	} else if stde != "" {
+		return nil, fmt.Errorf("failed to read network configuration data: %s", stde)
+	} else {
+		return nil, fmt.Errorf("failed to read network configuration data")
 	}
-
-	var oldnet []map[string]string
-	lines := strings.Split(text, "\n")
-	for _, line := range lines {
-		strSlice := strings.Split(line, "=")
-		if len(strSlice) == 1 {
-			continue
-		}
-		if strings.Contains(strSlice[0], "#") {
-			continue
-		}
-		net := map[string]string{
-			strSlice[0]: strSlice[1],
-		}
-		oldnet = append(oldnet, net)
-	}
-	return oldnet, nil
 }
 
-func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
+func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 	netPath, err := utils.GetFiles(global.NetWorkPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network configuration source file: %s", err)
@@ -175,63 +181,82 @@ func (b *BaseOS) GetNetworkConnInfo() (interface{}, error) {
 		filename = n
 	}
 
-	result, _ := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
-	ip_assignment_method := strings.Split(result, "=")[1]
+	exitc, result, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
+	if exitc == 0 && result != "" && stde == "" && err == nil {
+		ip_assignment_method := strings.Split(result, "=")[1]
 
-	var network = &common.NetworkConfig{}
-	switch strings.Replace(ip_assignment_method, "\n", "", -1) {
-	case "static":
-		tmp, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read network configuration source file: %s", err)
-		}
-		lines := strings.Split(tmp, "\n")
-		for _, line := range lines {
-			line = strings.TrimSpace(line)
-			strSlice := strings.Split(line, "=")
-			if len(strSlice) == 1 {
-				continue
+		var network = &common.NetworkConfig{}
+		switch strings.Replace(ip_assignment_method, "\n", "", -1) {
+		case "static":
+			exitc, tmp, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
+			if exitc == 0 && tmp != "" && stde == "" && err == nil {
+				lines := strings.Split(tmp, "\n")
+				for _, line := range lines {
+					line = strings.TrimSpace(line)
+					strSlice := strings.Split(line, "=")
+					if len(strSlice) == 1 {
+						continue
+					}
+					ModuleMatch(strSlice[0], strSlice[1], network)
+				}
+			} else if stde != "" {
+				return nil, fmt.Errorf("failed to read network configuration source file: %s", stde)
+			} else {
+				return nil, fmt.Errorf("failed to read network configuration source file")
 			}
-			ModuleMatch(strSlice[0], strSlice[1], network)
-		}
-	case "dhcp":
-		IP, err := utils.RunCommand("hostname -I")
-		if err != nil {
-			return nil, fmt.Errorf("failed to get IP: %s", err)
-		}
-		str := strings.Split(IP, " ")
-		ip := str[0]
-
-		gateway, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
-		if err != nil {
-			return nil, fmt.Errorf("failed to get gateway: %s", err)
-		}
-
-		DNS, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
-		if err != nil {
-			return nil, fmt.Errorf("failed to get dns: %s", err)
-		}
-		network.DNS1 = strings.Replace(DNS, "\n", "", -1)
-		network.BootProto = "dhcp"
-		network.IPAddr = ip
-		network.GateWay = strings.Replace(gateway, "\n", "", -1)
-
-	default:
-		tmp, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read network configuration source data: %s", err)
-		}
-		lines := strings.Split(tmp, "\n")
-		for _, line := range lines {
-			line = strings.TrimSpace(line)
-			strSlice := strings.Split(line, "=")
-			if len(strSlice) == 1 {
-				continue
+		case "dhcp":
+			conn, err := net.Dial("udp", "openeuler.org:80")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get IP: %s", err)
 			}
-			ModuleMatch(strSlice[0], strSlice[1], network)
+			defer conn.Close()
+			ip := strings.Split(conn.LocalAddr().String(), ":")[0]
+
+			exitc, gateway, stde, err := utils.RunCommandnew("route -n |awk '{print $2}' | sed -n '3p'")
+			if exitc == 0 && gateway != "" && stde == "" && err == nil {
+			} else if stde != "" {
+				return nil, fmt.Errorf("failed to get gateway: %s", stde)
+			} else {
+				return nil, fmt.Errorf("failed to get gateway")
+			}
+
+			exitc, DNS, stde, err := utils.RunCommandnew("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
+			if exitc == 0 && DNS != "" && stde == "" && err == nil {
+			} else if stde != "" {
+				return nil, fmt.Errorf("failed to get dns: %s", stde)
+			} else {
+				return nil, fmt.Errorf("failed to get dns")
+			}
+
+			network.DNS1 = strings.Replace(DNS, "\n", "", -1)
+			network.BootProto = "dhcp"
+			network.IPAddr = ip
+			network.GateWay = strings.Replace(gateway, "\n", "", -1)
+
+		default:
+			exitc, tmp, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
+			if exitc == 0 && tmp != "" && stde == "" && err == nil {
+				lines := strings.Split(tmp, "\n")
+				for _, line := range lines {
+					line = strings.TrimSpace(line)
+					strSlice := strings.Split(line, "=")
+					if len(strSlice) == 1 {
+						continue
+					}
+					ModuleMatch(strSlice[0], strSlice[1], network)
+				}
+			} else if stde != "" {
+				return nil, fmt.Errorf("failed to read network configuration source data: %s", stde)
+			} else {
+				return nil, fmt.Errorf("failed to read network configuration source data")
+			}
 		}
+		return network, nil
+	} else if stde != "" {
+		return nil, fmt.Errorf("failed to get BOOTPROTO: %s", stde)
+	} else {
+		return nil, fmt.Errorf("failed to get BOOTPROTO")
 	}
-	return network, nil
 }
 
 func (b *BaseOS) GetNICName() (interface{}, error) {
@@ -251,16 +276,22 @@ func (b *BaseOS) GetNICName() (interface{}, error) {
 }
 
 func (b *BaseOS) RestartNetwork(nic string) error {
-	_, err := utils.RunCommand("nmcli c reload")
-	if err != nil {
-		return fmt.Errorf("failed to reload network configuration file: %s", err)
+	exitc, stdo, stde, err := utils.RunCommandnew("nmcli c reload")
+	if exitc == 0 && stdo == "" && stde == "" && err == nil {
+	} else if stde != "" {
+		return fmt.Errorf("failed to reload network configuration file: %s", stde)
+	} else {
+		return fmt.Errorf("failed to reload network configuration file")
 	}
 
-	str := "nmcli c up " + strings.Split(nic, "-")[1]
-	_, err = utils.RunCommand(str)
-	if err != nil {
-		return fmt.Errorf("network configuration file not effective: %s", err)
+	exitc2, stdo2, stde2, err2 := utils.RunCommandnew("nmcli c up " + strings.Split(nic, "-")[1])
+	if exitc2 == 0 && stdo2 != "" && stde2 == "" && err2 == nil {
+	} else if stde2 != "" {
+		return fmt.Errorf("network configuration file not effective: %s", stde2)
+	} else {
+		return fmt.Errorf("network configuration file not effective")
 	}
+
 	return nil
 }
 
