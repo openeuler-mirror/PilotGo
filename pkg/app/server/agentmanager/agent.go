@@ -255,7 +255,13 @@ func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data.(*common.CPUInfo), nil
+	info := &common.CPUInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 远程获取agent端的内存信息
