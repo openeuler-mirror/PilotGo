@@ -17,12 +17,12 @@ const (
 )
 
 // 获取磁盘的使用情况
-func (b *BaseOS) GetDiskUsageInfo() []common.DiskUsageINfo {
+func (b *BaseOS) GetDiskUsageInfo() ([]common.DiskUsageINfo, error) {
 	diskusage := make([]common.DiskUsageINfo, 0)
 	parts, err := disk.Partitions(false)
 	if err != nil {
-		logger.Error("get Partitions failed, err:%v\n", err.Error())
-		return nil
+		logger.Error("get Partitions failed, err: %s", err.Error())
+		return nil, err
 	}
 	for _, part := range parts {
 		diskInfo, _ := disk.Usage(part.Mountpoint)
@@ -54,14 +54,18 @@ func (b *BaseOS) GetDiskUsageInfo() []common.DiskUsageINfo {
 		}
 		diskusage = append(diskusage, tmp)
 	}
-	return diskusage
+	return diskusage, nil
 }
 
 // 获取磁盘的IO信息
-func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
+func (b *BaseOS) GetDiskInfo() ([]common.DiskIOInfo, error) {
 
 	diskinfo := make([]common.DiskIOInfo, 0)
-	ioStat, _ := disk.IOCounters()
+	ioStat, err := disk.IOCounters()
+	if err != nil {
+		logger.Error("get disk IO failed, err: %s", err.Error())
+		return nil, err
+	}
 	for k, v := range ioStat {
 		label := v.Label
 		readCount := v.ReadCount
@@ -81,7 +85,7 @@ func (b *BaseOS) GetDiskInfo() []common.DiskIOInfo {
 		}
 		diskinfo = append(diskinfo, tmp)
 	}
-	return diskinfo
+	return diskinfo, nil
 }
 
 /*

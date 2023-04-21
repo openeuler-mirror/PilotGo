@@ -387,8 +387,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.DiskUsage, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		diskusage := uos.OS().GetDiskUsageInfo()
-
+		diskusage, err := uos.OS().GetDiskUsageInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -399,8 +407,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	})
 	c.BindHandler(protocol.DiskInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		diskinfo := uos.OS().GetDiskInfo()
-
+		diskinfo, err := uos.OS().GetDiskInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -424,15 +440,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   info,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   info,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.DiskUMount, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -446,15 +462,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   info,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   info,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.DiskFormat, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -471,15 +487,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   info,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   info,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetTCP, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
