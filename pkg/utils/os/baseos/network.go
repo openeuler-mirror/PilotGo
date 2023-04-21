@@ -95,9 +95,7 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 	if exitc == 0 && result != "" && stde == "" && err == nil {
 		reader := strings.NewReader(result)
 		scanner := bufio.NewScanner(reader)
-
 		for {
-
 			if !scanner.Scan() {
 				break
 			}
