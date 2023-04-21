@@ -144,8 +144,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.MemoryInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		memoryinfo, _ := uos.OS().GetMemoryConfig()
-
+		memoryinfo, err := uos.OS().GetMemoryConfig()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -508,15 +516,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   nettcp,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   nettcp,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetUDP, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -527,18 +535,18 @@ func RegitsterHandler(c *network.SocketClient) {
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: -1,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   netudp,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   netudp,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetIOCounter, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -549,18 +557,18 @@ func RegitsterHandler(c *network.SocketClient) {
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: -1,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   netio,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   netio,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetNICConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -571,18 +579,18 @@ func RegitsterHandler(c *network.SocketClient) {
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: -1,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   netnic,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   netnic,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.CurrentUser, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -746,15 +754,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   config,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   config,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldDefaultZone, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -769,15 +777,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   default_zone,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   default_zone,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldZoneConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -792,15 +800,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   default_zone,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   default_zone,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldServiceAdd, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -818,15 +826,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   struct{}{},
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldServiceRemove, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -844,15 +852,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   struct{}{},
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldSourceAdd, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -870,15 +878,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   struct{}{},
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldSourceRemove, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -896,15 +904,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   struct{}{},
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldRestart, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -918,15 +926,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  "重启防火墙失败",
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   Restart,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   Restart,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldStop, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -940,15 +948,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  "关闭防火墙失败",
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   Stop,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   Stop,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldZonePortAdd, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -967,15 +975,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   add,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   add,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldZonePortDel, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -994,15 +1002,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   del,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   del,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.CronStart, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
