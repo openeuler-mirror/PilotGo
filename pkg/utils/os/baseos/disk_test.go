@@ -10,12 +10,16 @@ import (
 // test disk
 func TestGetDiskInfo(t *testing.T) {
 	var osobj BaseOS
-	assert.NotNil(t, osobj.GetDiskInfo())
+	tmp, err := osobj.GetDiskInfo()
+	assert.Nil(t, err)
+	assert.NotNil(t, tmp)
 }
 
 func TestGetDiskUsageInfo(t *testing.T) {
 	var osobj BaseOS
-	assert.NotNil(t, osobj.GetDiskUsageInfo())
+	tmp, err := osobj.GetDiskUsageInfo()
+	assert.Nil(t, err)
+	assert.NotNil(t, tmp)
 }
 
 func TestDiskConfig(t *testing.T) {
