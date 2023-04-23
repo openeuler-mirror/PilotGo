@@ -652,7 +652,7 @@ func (a *Agent) NetUDP() (interface{}, error) {
 }
 
 // 获取网络读写字节／包的个数
-func (a *Agent) NetIOCounter() (interface{}, error) {
+func (a *Agent) NetIOCounter() (*common.IOCnt, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.NetIOCounter,
@@ -664,7 +664,14 @@ func (a *Agent) NetIOCounter() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.IOCnt{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 获取网卡配置
