@@ -696,7 +696,7 @@ func (a *Agent) NetIOCounter() (*common.IOCnt, error) {
 }
 
 // 获取网卡配置
-func (a *Agent) NetNICConfig() (interface{}, error) {
+func (a *Agent) NetNICConfig() (*common.NetInterfaceCard, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.NetNICConfig,
@@ -708,7 +708,14 @@ func (a *Agent) NetNICConfig() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.NetInterfaceCard{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 获取当前用户信息
