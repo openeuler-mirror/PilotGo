@@ -255,6 +255,7 @@ func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
+
 	info := &common.CPUInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -329,7 +330,7 @@ func (a *Agent) SysctlView(args string) (interface{}, error) {
 }
 
 // 查看服务列表
-func (a *Agent) ServiceList() (interface{}, error) {
+func (a *Agent) ServiceList() (*common.ListService, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceList,
@@ -341,7 +342,14 @@ func (a *Agent) ServiceList() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.ListService{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 查看某个服务的状态
