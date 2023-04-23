@@ -700,7 +700,7 @@ func (a *Agent) CurrentUser() (interface{}, error) {
 }
 
 // 获取所有用户的信息
-func (a *Agent) AllUser() (interface{}, error) {
+func (a *Agent) AllUser() (*common.AllUserInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AllUser,
@@ -712,7 +712,14 @@ func (a *Agent) AllUser() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.AllUserInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 创建新的用户，并新建家目录
