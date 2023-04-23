@@ -620,7 +620,7 @@ func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
 }
 
 // 获取当前TCP网络连接信息
-func (a *Agent) NetTCP() (interface{}, error) {
+func (a *Agent) NetTCP() (*common.NetConnect, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.NetTCP,
@@ -632,7 +632,14 @@ func (a *Agent) NetTCP() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.NetConnect{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 获取当前UDP网络连接信息
