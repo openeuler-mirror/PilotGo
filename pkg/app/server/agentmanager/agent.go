@@ -489,7 +489,7 @@ func (a *Agent) RemoveRpm(rpm string) (interface{}, string, error) {
 }
 
 // 获取磁盘的使用情况
-func (a *Agent) DiskUsage() (interface{}, error) {
+func (a *Agent) DiskUsage() (*common.DiskUsageINfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DiskUsage,
@@ -501,7 +501,14 @@ func (a *Agent) DiskUsage() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.DiskUsageINfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 获取磁盘的IO信息
