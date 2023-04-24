@@ -89,7 +89,7 @@ type NetworkOperator interface {
 type PackageOperator interface {
 	InstallRpm(string) error
 	RemoveRpm(string) error
-	GetAllRpm() []string
+	GetAllRpm() ([]string, error)
 	GetRpmSource(string) ([]RpmSrc, error)
 	GetRpmInfo(string) (*RpmInfo, error)
 }
