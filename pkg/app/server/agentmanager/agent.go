@@ -265,7 +265,7 @@ func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 }
 
 // 远程获取agent端的内存信息
-func (a *Agent) GetMemoryInfo() (interface{}, error) {
+func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.MemoryInfo,
@@ -277,7 +277,14 @@ func (a *Agent) GetMemoryInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.MemoryConfig{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 远程获取agent端的内核信息
