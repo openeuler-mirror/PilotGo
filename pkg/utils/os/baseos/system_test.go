@@ -8,7 +8,8 @@ import (
 
 func TestGetHostInfo(t *testing.T) {
 	var osobj BaseOS
-	tmp := osobj.GetHostInfo()
+	tmp, err := osobj.GetHostInfo()
+	assert.Nil(t, err)
 	assert.NotNil(t, tmp.IP)
 	assert.NotNil(t, tmp.HostId)
 	assert.NotNil(t, tmp.KernelArch)

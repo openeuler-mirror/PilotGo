@@ -118,8 +118,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.OsInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		sysinfo := uos.OS().GetHostInfo()
-
+		sysinfo, err := uos.OS().GetHostInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -747,6 +755,11 @@ func RegitsterHandler(c *network.SocketClient) {
 
 		os := uos.OS().GetHostInfo()
 		cpu, err := uos.OS().GetCPUInfo()
+		systemAndCPUInfo := common.SystemAndCPUInfo{
+			IP:              os.IP,
+			Platform:        os.Platform,
+			PlatformVersion: os.PlatformVersion,
+		}
 
 		if err != nil {
 			resp_msg := &protocol.Message{
@@ -754,15 +767,16 @@ func RegitsterHandler(c *network.SocketClient) {
 				Type:   msg.Type,
 				Status: -1,
 				Error:  err.Error(),
-				Data:   os.IP + ";" + os.Platform + ";" + os.PlatformVersion + ";" + "",
+				Data:   systemAndCPUInfo,
 			}
 			return c.Send(resp_msg)
 		}
+		systemAndCPUInfo.ModelName = cpu.ModelName
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   os.IP + ";" + os.Platform + ";" + os.PlatformVersion + ";" + cpu.ModelName,
+			Data:   systemAndCPUInfo,
 		}
 		return c.Send(resp_msg)
 	})
