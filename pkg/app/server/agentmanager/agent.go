@@ -534,7 +534,7 @@ func (a *Agent) DiskUsage() (interface{}, error) {
 }
 
 // 获取磁盘的IO信息
-func (a *Agent) DiskInfo() (interface{}, error) {
+func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DiskInfo,
@@ -546,7 +546,14 @@ func (a *Agent) DiskInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.DiskIOInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 /*
