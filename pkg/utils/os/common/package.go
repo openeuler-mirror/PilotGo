@@ -35,6 +35,7 @@ type RpmInfo struct {
 	Summary      string
 }
 
+// TODO: yum源文件在agent端打开的情况下调用该接口匹配内容出错
 func GetRepoSource() (interface{}, error) {
 	repos, err := utils.GetFiles(global.RepoPath)
 	if err != nil {
@@ -76,7 +77,7 @@ func GetRepoSource() (interface{}, error) {
 	reg2 = regexp.MustCompile(`mirrorlist=http.*`)
 	BaseURL = reg2.FindAllString(text, -1)
 	if len(BaseURL) == 0 {
-		reg2 = regexp.MustCompile(`baseurl=.*`)
+		reg2 = regexp.MustCompile(`baseurl.*`)
 		BaseURL = reg2.FindAllString(text, -1)
 	}
 
