@@ -719,7 +719,7 @@ func (a *Agent) NetNICConfig() (*common.NetInterfaceCard, error) {
 }
 
 // 获取当前用户信息
-func (a *Agent) CurrentUser() (interface{}, error) {
+func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.CurrentUser,
@@ -731,7 +731,14 @@ func (a *Agent) CurrentUser() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.CurrentUser{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 获取所有用户的信息
