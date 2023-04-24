@@ -5,49 +5,38 @@ import (
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
-func (b *BaseOS) Config() (interface{}, error) {
+func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	nic_interface, err := b.GetNICName()
+	firewalldConfig := common.FireWalldConfig{}
+	firewalldConfig.Set()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get network card name")
+		return firewalldConfig, fmt.Errorf("failed to get network card name")
 	}
 
 	exitc, firewall_state, stde, err := utils.RunCommandnew("firewall-cmd --state")
 	if exitc != 0 && firewall_state == "" && strings.Replace(stde, "\n", "", -1) == "not running" && err == nil {
-		firewalldConfig := map[string]interface{}{
-			"status":      "not running",
-			"nic":         strings.Split(nic_interface.(string), "-")[1],
-			"defaultZone": nil,
-			"zones":       nil,
-			"services":    nil,
-		}
+		firewalldConfig.Status = "not running"
+		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
 		return firewalldConfig, nil
 	}
 
 	exitc, zone_default, stde, err := utils.RunCommandnew("firewall-cmd --get-default-zone")
 	if exitc == 0 && zone_default != "" && stde == "" && err == nil {
 	} else {
-		firewalldConfig := map[string]interface{}{
-			"status":      strings.Replace(firewall_state, "\n", "", -1),
-			"nic":         strings.Split(nic_interface.(string), "-")[1],
-			"defaultZone": nil,
-			"zones":       nil,
-			"services":    nil,
-		}
+		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
+		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
 		return firewalldConfig, nil
 	}
 
 	exitc, zones, stde, err := utils.RunCommandnew("firewall-cmd --get-zones")
 	if exitc == 0 && zones != "" && stde == "" && err == nil {
 	} else {
-		firewalldConfig := map[string]interface{}{
-			"status":      strings.Replace(firewall_state, "\n", "", -1),
-			"nic":         strings.Split(nic_interface.(string), "-")[1],
-			"defaultZone": strings.Replace(zone_default, "\n", "", -1),
-			"zones":       nil,
-			"services":    nil,
-		}
+		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
+		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+		firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 		return firewalldConfig, nil
 	}
 	Zones := strings.Split(strings.Replace(zones, "\n", "", -1), " ")
@@ -55,24 +44,19 @@ func (b *BaseOS) Config() (interface{}, error) {
 	exitc, services, stde, err := utils.RunCommandnew("firewall-cmd --get-services")
 	if exitc == 0 && services != "" && stde == "" && err == nil {
 	} else {
-		firewalldConfig := map[string]interface{}{
-			"status":      strings.Replace(firewall_state, "\n", "", -1),
-			"nic":         strings.Split(nic_interface.(string), "-")[1],
-			"defaultZone": strings.Replace(zone_default, "\n", "", -1),
-			"zones":       Zones,
-			"services":    nil,
-		}
+		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
+		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+		firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
+		firewalldConfig.Zones = Zones
 		return firewalldConfig, nil
 	}
 	Services := strings.Split(strings.Replace(services, "\n", "", -1), " ")
+	firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
+	firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+	firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
+	firewalldConfig.Zones = Zones
+	firewalldConfig.Services = Services
 
-	firewalldConfig := map[string]interface{}{
-		"status":      strings.Replace(firewall_state, "\n", "", -1),
-		"nic":         strings.Split(nic_interface.(string), "-")[1],
-		"defaultZone": strings.Replace(zone_default, "\n", "", -1),
-		"zones":       Zones,
-		"services":    Services,
-	}
 	return firewalldConfig, nil
 }
 
