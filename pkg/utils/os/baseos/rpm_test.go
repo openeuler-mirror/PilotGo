@@ -10,7 +10,9 @@ import (
 
 func TestGetAllRpm(t *testing.T) {
 	var osobj BaseOS
-	assert.NotNil(t, osobj.GetAllRpm())
+	tmp, err := osobj.GetAllRpm()
+	assert.Nil(t, err)
+	assert.NotNil(t, tmp)
 }
 
 func TestGetRpmSource(t *testing.T) {
@@ -61,7 +63,7 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 			assert.NotNil(t, err)
 		})
 	} else if exitc == 127 && stdo == "" && strings.Contains(stde, "command not found") == true && err == nil {
-		t.Errorf("[TestInstallAndRemoveRpm]rpm command not found: %s\n", stde)
+		t.Errorf("[TestInstallAndRemoveRpm]rpm command not found: %d, %s, %s, %v\n", exitc, stdo, stde, err)
 	} else {
 		t.Errorf("[TestInstallAndRemoveRpm]other error: %d, %s, %s, %v\n", exitc, stdo, stde, err)
 	}
