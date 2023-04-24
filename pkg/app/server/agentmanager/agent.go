@@ -296,7 +296,7 @@ func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
 }
 
 // 远程获取agent端的内核信息
-func (a *Agent) GetSysctlInfo() (interface{}, error) {
+func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.SysctlInfo,
@@ -308,7 +308,14 @@ func (a *Agent) GetSysctlInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &map[string]string{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 临时修改agent端系统参数
