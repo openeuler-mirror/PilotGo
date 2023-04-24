@@ -868,7 +868,7 @@ func (a *Agent) HeartBeat() (interface{}, error) {
 }
 
 // 获取防火墙配置
-func (a *Agent) FirewalldConfig() (interface{}, string, error) {
+func (a *Agent) FirewalldConfig() (*common.FireWalldConfig, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldConfig,
@@ -880,7 +880,14 @@ func (a *Agent) FirewalldConfig() (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+
+	info := &common.FireWalldConfig{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, resp_message.Error, err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 更改防火墙默认区域
