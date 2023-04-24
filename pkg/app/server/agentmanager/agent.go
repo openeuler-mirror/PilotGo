@@ -1165,15 +1165,16 @@ func (a *Agent) ReadFile(filepath string) (interface{}, string, error) {
 }
 
 // 更新配置文件
-func (a *Agent) UpdateFile(filepath string, filename string, text string) (interface{}, string, error) {
+func (a *Agent) UpdateFile(filepath string, filename string, text string) (*common.UpdateFile, string, error) {
+	updatefile := common.UpdateFile{
+		FilePath: filepath,
+		FileName: filename,
+		FileText: text,
+	}
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.EditFile,
-		Data: map[string]string{
-			"path": filepath,
-			"name": filename,
-			"text": text,
-		},
+		Data: updatefile,
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
@@ -1181,7 +1182,14 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (inter
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+
+	info := &common.UpdateFile{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, resp_message.Error, err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 远程获取agent端的时间信息
