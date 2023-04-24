@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
+	splugin "gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
 )
 
 const (
