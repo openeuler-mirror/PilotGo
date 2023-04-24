@@ -53,7 +53,7 @@ type DiskOperator interface {
 }
 type UserOperator interface {
 	GetCurrentUserInfo() CurrentUser
-	GetAllUserInfo() []AllUserInfo
+	GetAllUserInfo() ([]AllUserInfo, error)
 	AddLinuxUser(string, string) error
 	DelUser(string) (string, error)
 	ChangePermission(string, string) (string, error)

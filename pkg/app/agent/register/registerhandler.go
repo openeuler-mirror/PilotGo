@@ -640,8 +640,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AllUser, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		user_all := uos.OS().GetAllUserInfo()
-
+		user_all, err := uos.OS().GetAllUserInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -753,25 +761,48 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AgentOSInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		os := uos.OS().GetHostInfo()
-		cpu, err := uos.OS().GetCPUInfo()
-		systemAndCPUInfo := common.SystemAndCPUInfo{
-			IP:              os.IP,
-			Platform:        os.Platform,
-			PlatformVersion: os.PlatformVersion,
-		}
+		os, erros := uos.OS().GetHostInfo()
+		cpu, errcpu := uos.OS().GetCPUInfo()
+		systemAndCPUInfo := common.SystemAndCPUInfo{}
 
-		if err != nil {
+		if erros != nil && errcpu != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: -1,
-				Error:  err.Error(),
+				Error:  erros.Error(),
+				Data:   systemAndCPUInfo,
+			}
+			return c.Send(resp_msg)
+		} else if erros != nil && errcpu == nil {
+			systemAndCPUInfo.ModelName = cpu.ModelName
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  erros.Error(),
+				Data:   systemAndCPUInfo,
+			}
+			return c.Send(resp_msg)
+		} else if erros == nil && errcpu != nil {
+			systemAndCPUInfo.IP = os.IP
+			systemAndCPUInfo.Platform = os.Platform
+			systemAndCPUInfo.PlatformVersion = os.PlatformVersion
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  errcpu.Error(),
 				Data:   systemAndCPUInfo,
 			}
 			return c.Send(resp_msg)
 		}
-		systemAndCPUInfo.ModelName = cpu.ModelName
+		systemAndCPUInfo = common.SystemAndCPUInfo{
+			IP:              os.IP,
+			Platform:        os.Platform,
+			PlatformVersion: os.PlatformVersion,
+			ModelName:       cpu.ModelName,
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
