@@ -97,21 +97,18 @@ func GetFiles(filePath string) (fs []string, err error) {
 	return fs, nil
 }
 
-func UpdateFile(path, filename, data interface{}) (lastversion interface{}, err error) {
+func UpdateFile(path, filename, data interface{}) (lastversion string, err error) {
 	fullname := path.(string) + "/" + filename.(string)
 	if !IsFileExist(fullname) {
 		err := FileSaveString(fullname, data.(string))
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 	lastversion, err = FileReadString(fullname)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	err = FileSaveString(fullname, data.(string))
-	if err != nil {
-		return lastversion, err
-	}
-	return lastversion, nil
+	return lastversion, err
 }
