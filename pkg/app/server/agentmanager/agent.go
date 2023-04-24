@@ -470,7 +470,7 @@ func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 }
 
 // 获取软件包信息
-func (a *Agent) RpmInfo(rpm string) (interface{}, string, error) {
+func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RpmInfo,
@@ -482,7 +482,14 @@ func (a *Agent) RpmInfo(rpm string) (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+
+	info := &common.RpmInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, "", err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 获取源软件包名以及源
