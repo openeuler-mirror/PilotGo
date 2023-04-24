@@ -19,16 +19,20 @@ const (
 // 获取服务列表
 func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 	list := make([]common.ListService, 0)
-	result1, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
-	if err != nil {
-		logger.Error("failed to execute the command to get the list of services: %s", err)
-		return []common.ListService{}, err
+	exitc, result1, stde, err := utils.RunCommandnew("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
+	if exitc == 0 && result1 != "" && stde == "" && err == nil {
+	} else {
+		logger.Error("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result1, stde, err)
+		return nil, fmt.Errorf("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result1, stde, err)
 	}
-	result2, err := utils.RunCommand("systemctl list-units --all|grep 'not-found' | awk 'NR>2{print $2\" \" $3\" \" $4\" \" $5}'")
-	if err != nil {
-		logger.Error("the command to get the list of services has failed to run: %s", err)
-		return []common.ListService{}, err
+
+	exitc, result2, stde, err := utils.RunCommandnew("systemctl list-units --all|grep 'not-found' | awk 'NR>2{print $2\" \" $3\" \" $4\" \" $5}'")
+	if exitc == 0 && result2 != "" && stde == "" && err == nil {
+	} else {
+		logger.Error("the command to get the list of services has failed to run: %d, %s, %s, %v", exitc, result1, stde, err)
+		return nil, fmt.Errorf("the command to get the list of services has failed to run: %d, %s, %s, %v", exitc, result1, stde, err)
 	}
+
 	result := result1 + result2
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
@@ -50,22 +54,23 @@ func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 	return list, nil
 }
 
-//operate 0,1,2分别代表开启，关闭，重启
+// operate 0,1,2分别代表开启，关闭，重启
 // TODO: 软件包在未安装情况下，'systemctl is-active'返回的结果和软件包已安装且服务未运行时的结果一致
 func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 	var build strings.Builder
 	build.WriteString("systemctl is-active ")
 	build.WriteString(service)
 	command := build.String()
-	tmp, err := utils.RunCommand(command)
+	exitc, tmp, stde, err := utils.RunCommandnew(command)
 	output := strings.Trim(tmp, "\n")
 	switch output {
 	case "active", "inactive":
 		return output, nil
 	default:
-		return output, err
+		return "", fmt.Errorf("failed to get service status: %d, %s, %s, %v", exitc, tmp, stde, err)
 	}
 }
+
 func verifyStatus(output string, operate int) bool {
 	var judge bool
 	if output == "inactive" {
@@ -94,11 +99,14 @@ func (b *BaseOS) StartService(service string) error {
 	build.WriteString("systemctl start ")
 	build.WriteString(service)
 	command := build.String()
-	result, err := utils.RunCommand(command)
-	if err != nil || len(result) != 0 {
-		logger.Error("failed to execute the command to start the service: %s", err)
-		return fmt.Errorf(" failed to start the %s service: %s", service, err)
+
+	exitc, result, stde, err := utils.RunCommandnew(command)
+	if exitc == 0 && result == "" && stde == "" && err == nil {
+	} else {
+		logger.Error("failed to execute the command to start the service: %d, %s, %s, %v", exitc, result, stde, err)
+		return fmt.Errorf("failed to execute the command to start the service: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("failed to retrieve the status of the service")
@@ -115,11 +123,13 @@ func (b *BaseOS) StopService(service string) error {
 	build.WriteString("systemctl stop ")
 	build.WriteString(service)
 	command := build.String()
-	result, err := utils.RunCommand(command)
-	if err != nil || len(result) != 0 {
-		logger.Error("failed to execute the command to stop the service: %s", err)
-		return fmt.Errorf("failed to stop the %s service: %s", service, err)
+	exitc, result, stde, err := utils.RunCommandnew(command)
+	if exitc == 0 && result == "" && stde == "" && err == nil {
+	} else {
+		logger.Error("failed to execute the command to stop the service: %d, %s, %s, %v", exitc, result, stde, err)
+		return fmt.Errorf("failed to execute the command to stop the service: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("failed to get the status of the service")
@@ -136,11 +146,13 @@ func (b *BaseOS) RestartService(service string) error {
 	build.WriteString("systemctl restart ")
 	build.WriteString(service)
 	command := build.String()
-	result, err := utils.RunCommand(command)
-	if err != nil || len(result) != 0 {
-		logger.Error("failed to execute the command to restart the service: %s", err)
-		return fmt.Errorf("failed to restart the %s service: %s", service, err)
+	exitc, result, stde, err := utils.RunCommandnew(command)
+	if exitc == 0 && result == "" && stde == "" && err == nil {
+	} else {
+		logger.Error("failed to execute the command to restart the service: %d, %s, %s, %v", exitc, result, stde, err)
+		return fmt.Errorf("failed to execute the command to restart the service: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+
 	output, err := b.GetServiceStatus(service)
 	if err != nil {
 		logger.Error("failed to get the status of the service")
