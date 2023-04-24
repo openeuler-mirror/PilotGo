@@ -15,7 +15,7 @@ type OSOperator interface {
 }
 
 type SystemOperator interface {
-	GetHostInfo() *SystemInfo
+	GetHostInfo() (*SystemInfo, error)
 }
 
 type CpuOperator interface {
