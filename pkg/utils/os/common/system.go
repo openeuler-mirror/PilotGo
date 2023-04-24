@@ -9,3 +9,10 @@ type SystemInfo struct {
 	HostId          string //系统id
 	Uptime          string //系统最新启动时间
 }
+
+type SystemAndCPUInfo struct {
+	IP              string
+	Platform        string //系统平台
+	PlatformVersion string //系统版本
+	ModelName       string
+}
