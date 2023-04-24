@@ -307,8 +307,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AllRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		allrpm := uos.OS().GetAllRpm()
-
+		allrpm, err := uos.OS().GetAllRpm()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -320,8 +328,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RpmSource, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		rpmname := msg.Data.(string)
-		rpmsource, _ := uos.OS().GetRpmSource(rpmname)
-
+		rpmsource, err := uos.OS().GetRpmSource(rpmname)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -1087,15 +1103,15 @@ func RegitsterHandler(c *network.SocketClient) {
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   repo,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   repo,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.GetNetWorkConnectInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
