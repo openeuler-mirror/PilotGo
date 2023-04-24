@@ -829,7 +829,7 @@ func (a *Agent) ChangeFileOwner(user, file string) (interface{}, error) {
 }
 
 // 远程获取agent端的内核信息
-func (a *Agent) GetAgentOSInfo() (interface{}, error) {
+func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AgentOSInfo,
@@ -841,7 +841,14 @@ func (a *Agent) GetAgentOSInfo() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
-	return resp_message.Data, nil
+
+	info := &common.SystemAndCPUInfo{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, err
+	}
+	return info, nil
 }
 
 // 心跳

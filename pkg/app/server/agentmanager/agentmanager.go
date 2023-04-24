@@ -16,7 +16,6 @@ package agentmanager
 
 import (
 	"net"
-	"strings"
 	"sync"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
@@ -110,32 +109,31 @@ func AddAgents2DB(a *Agent) {
 		return
 	}
 	// TODO: 沒有对message对象status、Error字段进行判断，决定后续步骤是否执行
-	agent_OS, err := agent_uuid.GetAgentOSInfo()
+	agent_os, err := agent_uuid.GetAgentOSInfo()
 	if err != nil {
 		logger.Error("初始化系统信息失败!")
 		return
 	}
-	agentOS := strings.Split(agent_OS.(string), ";")
 	UUIDExistbool, err := dao.IsUUIDExist(a.UUID)
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
 	if UUIDExistbool {
-		logger.Warn("机器%s已经存在!", agentOS[0])
+		logger.Warn("机器%s已经存在!", agent_os.IP)
 		departId, err := dao.UUIDForDepartId(a.UUID)
 		if err != nil {
 			logger.Error(err.Error())
 			return
 		}
 		if departId != global.UncateloguedDepartId {
-			err := dao.MachineStatusToNormal(a.UUID, agentOS[0])
+			err := dao.MachineStatusToNormal(a.UUID, agent_os.IP)
 			if err != nil {
 				logger.Error(err.Error())
 				return
 			}
 		} else {
-			err := dao.MachineStatusToFree(a.UUID, agentOS[0])
+			err := dao.MachineStatusToFree(a.UUID, agent_os.IP)
 			if err != nil {
 				logger.Error(err.Error())
 				return
@@ -145,11 +143,11 @@ func AddAgents2DB(a *Agent) {
 	}
 
 	agent_list := dao.MachineNode{
-		IP:          agentOS[0],
+		IP:          agent_os.IP,
 		MachineUUID: a.UUID,
 		DepartId:    global.UncateloguedDepartId,
-		Systeminfo:  agentOS[1] + " " + agentOS[2],
-		CPU:         agentOS[3],
+		Systeminfo:  agent_os.Platform + " " + agent_os.PlatformVersion,
+		CPU:         agent_os.ModelName,
 		State:       global.Free,
 	}
 	err = dao.AddNewMachine(agent_list)
