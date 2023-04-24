@@ -1227,13 +1227,20 @@ func RegitsterHandler(c *network.SocketClient) {
 	})
 	c.BindHandler(protocol.EditFile, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
+		result := &common.UpdateFile{}
+		err := msg.BindData(result)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 
-		file := msg.Data.(map[string]interface{})
-		filepath := file["path"]
-		filename := file["name"]
-		text := file["text"]
-
-		LastVersion, err := utils.UpdateFile(filepath, filename, text)
+		LastVersion, err := utils.UpdateFile(result.FilePath, result.FileName, result.FileText)
+		result.FileVersion = LastVersion
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
@@ -1247,7 +1254,7 @@ func RegitsterHandler(c *network.SocketClient) {
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: 0,
-				Data:   LastVersion,
+				Data:   result,
 			}
 			return c.Send(resp_msg)
 		}
