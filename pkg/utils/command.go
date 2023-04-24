@@ -15,22 +15,10 @@
 package utils
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
 )
-
-func RunCommand(s string) (string, error) {
-	// TODO
-	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; "+s)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	err := cmd.Run()
-
-	return out.String(), err
-}
 
 func RunCommandnew(s string) (int, string, string, error) {
 	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; "+s)

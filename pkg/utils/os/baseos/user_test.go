@@ -22,7 +22,8 @@ func TestGetCurrentUserInfo(t *testing.T) {
 
 func TestGetAllUserInfo(t *testing.T) {
 	var osobj BaseOS
-	tmp := osobj.GetAllUserInfo()
+	tmp, err := osobj.GetAllUserInfo()
+	assert.Nil(t, err)
 	for _, v := range tmp {
 		assert.NotNil(t, v.Description)
 		assert.NotNil(t, v.GroupId)
@@ -42,7 +43,7 @@ func TestConfigUser(t *testing.T) {
 		panic(err)
 	}
 	username := base64.URLEncoding.EncodeToString(randomBytes)
-	password := "123456"
+	password := "china666*"
 	permission := "444"
 	file := "testfile"
 	fileabs := "/home/" + username + "/" + file
@@ -53,32 +54,43 @@ func TestConfigUser(t *testing.T) {
 	})
 
 	t.Run("test ChangePermission", func(t *testing.T) {
-		_, err := utils.RunCommand("touch /home/" + username + "/" + file)
+		exitc, stdo, stde, err := utils.RunCommandnew("touch /home/" + username + "/" + file)
+		assert.Equal(t, 0, exitc)
+		assert.Equal(t, "", strings.Replace(stdo, "\n", "", -1))
+		assert.Equal(t, "", strings.Replace(stde, "\n", "", -1))
 		assert.Nil(t, err)
 
 		_, err = osobj.ChangePermission(permission, fileabs)
 		assert.Nil(t, err)
 
-		output, err := utils.RunCommand("ls -l " + fileabs)
-		assert.Nil(t, err)
-		assert.Equal(t, "-r--r--r--", strings.Replace(strings.Split(output, " ")[0], ".", "", -1))
+		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("ls -l " + fileabs)
+		assert.Equal(t, 0, exitc2)
+		assert.NotNil(t, stdo2)
+		assert.Equal(t, "", strings.Replace(stde2, "\n", "", -1))
+		assert.Nil(t, err2)
+		assert.Equal(t, "-r--r--r--", strings.Replace(strings.Split(stdo2, " ")[0], ".", "", -1))
 	})
 
 	t.Run("test ChangeFileOwner", func(t *testing.T) {
 		_, err := osobj.ChangeFileOwner(username, fileabs)
 		assert.Nil(t, err)
 
-		output, err := utils.RunCommand("ls -l " + fileabs)
-		assert.Nil(t, err)
-		assert.Equal(t, username, strings.Split(output, " ")[2])
+		exitc, stdo, stde, err2 := utils.RunCommandnew("ls -l " + fileabs)
+		assert.Equal(t, 0, exitc)
+		assert.NotNil(t, stdo)
+		assert.Equal(t, "", strings.Replace(stde, "\n", "", -1))
+		assert.Nil(t, err2)
+		assert.Equal(t, username, strings.Split(stdo, " ")[2])
 	})
 
 	t.Run("test DelUser", func(t *testing.T) {
 		_, err := osobj.DelUser(username)
 		assert.Nil(t, err)
 
-		output, _ := utils.RunCommand("cat /etc/passwd | cut -d : -f 1 | grep \"" + username + "\"")
-		assert.Nil(t, err)
-		assert.Equal(t, "", strings.Replace(output, "\n", "", -1))
+		exitc, stdo, stde, err2 := utils.RunCommandnew("cat /etc/passwd | cut -d : -f 1 | grep \"" + username + "\"")
+		assert.Equal(t, 1, exitc)
+		assert.Equal(t, "", strings.Replace(stde, "\n", "", -1))
+		assert.Nil(t, err2)
+		assert.Equal(t, "", strings.Replace(stdo, "\n", "", -1))
 	})
 }
