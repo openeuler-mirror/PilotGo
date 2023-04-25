@@ -67,7 +67,7 @@ type FirewallOperator interface {
 	FirewalldServiceRemove(string, string) error
 	FirewalldSourceAdd(string, string) error
 	FirewalldSourceRemove(string, string) error
-	Config() ([]FireWalldConfig, error)
+	Config() (FireWalldConfig, error)
 	Restart() bool
 	Stop() bool
 	AddZonePort(string, string, string) (string, error)
