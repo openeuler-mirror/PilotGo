@@ -25,9 +25,9 @@ func TestFirewall(t *testing.T) {
 		osobj.FirewalldSetDefaultZone(defaultzone)
 		tmp, err := osobj.Config()
 		assert.Nil(t, err)
-		new_config := tmp.(map[string]interface{})
-		new_zone := new_config["defaultZone"].(string)
-		assert.Equal(t, defaultzone, new_zone) 
+		//new_config := tmp.(map[string]interface{})
+		new_zone := tmp.DefaultZone
+		assert.Equal(t, defaultzone, new_zone)
 		osobj.FirewalldSetDefaultZone("public")
 	})
 
@@ -35,8 +35,8 @@ func TestFirewall(t *testing.T) {
 		osobj.Stop()
 		tmp, err := osobj.Config()
 		assert.Nil(t, err)
-		new_config := tmp.(map[string]interface{})
-		new_status := new_config["status"].(string)
+		//new_config := tmp.(map[string]interface{})
+		new_status := tmp.Status
 		assert.Equal(t, "not running", new_status)
 	})
 
@@ -44,8 +44,8 @@ func TestFirewall(t *testing.T) {
 		osobj.Restart()
 		tmp, err := osobj.Config()
 		assert.Nil(t, err)
-		new_config := tmp.(map[string]interface{})
-		new_status := new_config["status"].(string)
+		//new_config := tmp.(map[string]interface{})
+		new_status := tmp.Status
 		assert.Equal(t, "running", new_status)
 	})
 
