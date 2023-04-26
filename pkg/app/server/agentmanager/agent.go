@@ -319,7 +319,7 @@ func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
 }
 
 // 临时修改agent端系统参数
-func (a *Agent) ChangeSysctl(args string) (interface{}, error) {
+func (a *Agent) ChangeSysctl(args string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.SysctlChange,
@@ -329,13 +329,13 @@ func (a *Agent) ChangeSysctl(args string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 查看某个内核参数的值
-func (a *Agent) SysctlView(args string) (interface{}, error) {
+func (a *Agent) SysctlView(args string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.SysctlView,
@@ -345,9 +345,9 @@ func (a *Agent) SysctlView(args string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 查看服务列表
@@ -374,7 +374,7 @@ func (a *Agent) ServiceList() (*common.ListService, error) {
 }
 
 // 查看某个服务的状态
-func (a *Agent) ServiceStatus(service string) (interface{}, error) {
+func (a *Agent) ServiceStatus(service string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceStatus,
@@ -384,13 +384,13 @@ func (a *Agent) ServiceStatus(service string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 重启服务
-func (a *Agent) ServiceRestart(service string) (interface{}, string, error) {
+func (a *Agent) ServiceRestart(service string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceRestart,
@@ -400,13 +400,13 @@ func (a *Agent) ServiceRestart(service string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 关闭服务
-func (a *Agent) ServiceStop(service string) (interface{}, string, error) {
+func (a *Agent) ServiceStop(service string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceStop,
@@ -416,13 +416,13 @@ func (a *Agent) ServiceStop(service string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 启动服务
-func (a *Agent) ServiceStart(service string) (interface{}, string, error) {
+func (a *Agent) ServiceStart(service string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceStart,
@@ -432,9 +432,9 @@ func (a *Agent) ServiceStart(service string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 获取全部安装的rpm包列表
@@ -500,7 +500,7 @@ func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 }
 
 // 获取源软件包名以及源
-func (a *Agent) InstallRpm(rpm string) (interface{}, string, error) {
+func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.InstallRpm,
@@ -510,13 +510,13 @@ func (a *Agent) InstallRpm(rpm string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 获取源软件包名以及源
-func (a *Agent) RemoveRpm(rpm string) (interface{}, string, error) {
+func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RemoveRpm,
@@ -526,9 +526,9 @@ func (a *Agent) RemoveRpm(rpm string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 获取磁盘的使用情况
@@ -765,7 +765,7 @@ func (a *Agent) AllUser() (*common.AllUserInfo, error) {
 }
 
 // 创建新的用户，并新建家目录
-func (a *Agent) AddLinuxUser(username, password string) (interface{}, error) {
+func (a *Agent) AddLinuxUser(username, password string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AddLinuxUser,
@@ -775,13 +775,13 @@ func (a *Agent) AddLinuxUser(username, password string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 删除用户
-func (a *Agent) DelUser(username string) (interface{}, string, error) {
+func (a *Agent) DelUser(username string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DelUser,
@@ -791,13 +791,13 @@ func (a *Agent) DelUser(username string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // chmod [-R] 权限值 文件名
-func (a *Agent) ChangePermission(permission, file string) (interface{}, error) {
+func (a *Agent) ChangePermission(permission, file string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ChangePermission,
@@ -807,13 +807,13 @@ func (a *Agent) ChangePermission(permission, file string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // chown [-R] 所有者 文件或目录
-func (a *Agent) ChangeFileOwner(user, file string) (interface{}, error) {
+func (a *Agent) ChangeFileOwner(user, file string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ChangeFileOwner,
@@ -823,9 +823,9 @@ func (a *Agent) ChangeFileOwner(user, file string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 远程获取agent端的内核信息
@@ -852,7 +852,7 @@ func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
 }
 
 // 心跳
-func (a *Agent) HeartBeat() (interface{}, error) {
+func (a *Agent) HeartBeat() (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.Heartbeat,
@@ -862,9 +862,9 @@ func (a *Agent) HeartBeat() (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 获取防火墙配置
@@ -987,7 +987,7 @@ func (a *Agent) FirewalldSourceRemove(zone, source string) (interface{}, string,
 }
 
 // 重启防火墙
-func (a *Agent) FirewalldRestart() (interface{}, string, error) {
+func (a *Agent) FirewalldRestart() (bool, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldRestart,
@@ -997,13 +997,13 @@ func (a *Agent) FirewalldRestart() (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return false, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(bool), resp_message.Error, nil
 }
 
 // 关闭防火墙
-func (a *Agent) FirewalldStop() (interface{}, string, error) {
+func (a *Agent) FirewalldStop() (bool, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldStop,
@@ -1013,13 +1013,13 @@ func (a *Agent) FirewalldStop() (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return false, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(bool), resp_message.Error, nil
 }
 
 // 防火墙指定区域添加端口
-func (a *Agent) FirewalldZonePortAdd(zone, port, proto string) (interface{}, string, error) {
+func (a *Agent) FirewalldZonePortAdd(zone, port, proto string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldZonePortAdd,
@@ -1029,13 +1029,13 @@ func (a *Agent) FirewalldZonePortAdd(zone, port, proto string) (interface{}, str
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 防火墙指定区域删除端口
-func (a *Agent) FirewalldZonePortDel(zone, port, proto string) (interface{}, string, error) {
+func (a *Agent) FirewalldZonePortDel(zone, port, proto string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldZonePortDel,
@@ -1045,13 +1045,13 @@ func (a *Agent) FirewalldZonePortDel(zone, port, proto string) (interface{}, str
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 开启定时任务
-func (a *Agent) CronStart(id int, spec string, command string) (interface{}, string, error) {
+func (a *Agent) CronStart(id int, spec string, command string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.CronStart,
@@ -1061,13 +1061,13 @@ func (a *Agent) CronStart(id int, spec string, command string) (interface{}, str
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 暂停定时任务
-func (a *Agent) CronStopAndDel(id int) (interface{}, error) {
+func (a *Agent) CronStopAndDel(id int) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.CronStopAndDel,
@@ -1077,9 +1077,9 @@ func (a *Agent) CronStopAndDel(id int) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 远程获取agent端的repo文件
@@ -1171,7 +1171,7 @@ func (a *Agent) RestartNetWork(NIC string) (interface{}, string, error) {
 }
 
 // 查看配置文件内容
-func (a *Agent) ReadFile(filepath string) (interface{}, string, error) {
+func (a *Agent) ReadFile(filepath string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ReadFile,
@@ -1181,9 +1181,9 @@ func (a *Agent) ReadFile(filepath string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 更新配置文件
