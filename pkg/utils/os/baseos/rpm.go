@@ -42,10 +42,10 @@ func (b *BaseOS) GetAllRpm() ([]string, error) {
 			listRpm = append(listRpm, line)
 		}
 		return listRpm, nil
-	} else {
-		logger.Error("failed to get list of installed RPM packages: %d, %s, %s, %v", exitc, result, stde, err)
-		return nil, fmt.Errorf("failed to get list of installed RPM packages: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+	logger.Error("failed to get list of installed RPM packages: %d, %s, %s, %v", exitc, result, stde, err)
+	return nil, fmt.Errorf("failed to get list of installed RPM packages: %d, %s, %s, %v", exitc, result, stde, err)
+
 }
 
 // 获取源软件包名以及源
@@ -113,10 +113,10 @@ func (b *BaseOS) GetRpmSource(rpm string) ([]common.RpmSrc, error) {
 			Getlist = append(Getlist, tmp)
 		}
 		return Getlist, nil
-	} else {
-		logger.Error("failed to get source software package name and source: %d, %s, %s, %v", exitc, result, stde, err)
-		return nil, fmt.Errorf("failed to get source software package name and source: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+	logger.Error("failed to get source software package name and source: %d, %s, %s, %v", exitc, result, stde, err)
+	return nil, fmt.Errorf("failed to get source software package name and source: %d, %s, %s, %v", exitc, result, stde, err)
+
 }
 
 // 按行使用正则语言查找结构体的属性信息
@@ -294,10 +294,10 @@ func (b *BaseOS) InstallRpm(rpm string) error {
 			logger.Info("successfully installed %s", rpm)
 			return nil
 		}
-	} else {
-		logger.Error("failed to run RPM package installation command: %d, %s, %s, %v", exitc, result, stde, err)
-		return fmt.Errorf("failed to run RPM package installation command: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+	logger.Error("failed to run RPM package installation command: %d, %s, %s, %v", exitc, result, stde, err)
+	return fmt.Errorf("failed to run RPM package installation command: %d, %s, %s, %v", exitc, result, stde, err)
+
 }
 
 // 卸载rpm软件包
@@ -311,8 +311,8 @@ func (b *BaseOS) RemoveRpm(rpm string) error {
 			logger.Info("successfully uninstalled %s", rpm)
 			return nil
 		}
-	} else {
-		logger.Error("failed to run RPM package uninstallation command: %d, %s, %s, %v", exitc, result, stde, err)
-		return fmt.Errorf("failed to execute RPM package uninstallation command: %d, %s, %s, %v", exitc, result, stde, err)
 	}
+	logger.Error("failed to run RPM package uninstallation command: %d, %s, %s, %v", exitc, result, stde, err)
+	return fmt.Errorf("failed to execute RPM package uninstallation command: %d, %s, %s, %v", exitc, result, stde, err)
+
 }

@@ -43,9 +43,7 @@ func (b *BaseOS) GetMemoryConfig() (*common.MemoryConfig, error) {
 			moduleMatch(k, vint64, m)
 		}
 		return m, nil
-	} else if stde != "" {
-		return nil, fmt.Errorf(stde)
-	} else {
-		return nil , fmt.Errorf("failed to get memory config")
 	}
+	return nil, fmt.Errorf("failed to get memory config: %d, %s, %s, %v", exitc, output, stde, err)
+
 }
