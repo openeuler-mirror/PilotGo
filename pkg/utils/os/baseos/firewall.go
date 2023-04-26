@@ -68,10 +68,10 @@ func (b *BaseOS) FirewalldSetDefaultZone(zone string) (string, error) {
 	return "", fmt.Errorf("failed to change default zone of firewall: %d, %s, %s, %v", exitc, stdo, stde, err)
 }
 
-func (b *BaseOS) FirewalldZoneConfig(zone string) (interface{}, error) {
+func (b *BaseOS) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, error) {
 	exitc, conf, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --zone=%v --list-all", zone))
 	if exitc == 0 && conf != "" && stde == "" && err == nil {
-		var firewall = &FirewalldCMDList{}
+		var firewall = &common.FirewalldCMDList{}
 		lines := strings.Split(conf, "\n")
 		for _, line := range lines {
 			if ok := strings.Contains(line, "sources"); ok {
@@ -204,10 +204,4 @@ func (b *BaseOS) DelZoneInterface(zone, NIC string) (string, error) {
 	_, tmp, _, _ := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-interface=%v", zone, NIC))
 
 	return strings.Replace(tmp, "\n", "", -1), nil
-}
-
-type FirewalldCMDList struct {
-	Service []string    `json:"services"` // 列出允许通过这个防火墙的服务
-	Ports   interface{} `json:"ports"`    //列出允许通过这个防火墙的目标端口。（即 需要对外开放的端口）
-	Sources []string    `json:"sources"`  // 允许通过的IP或mac
 }

@@ -62,7 +62,7 @@ type UserOperator interface {
 
 type FirewallOperator interface {
 	FirewalldSetDefaultZone(string) (string, error)
-	FirewalldZoneConfig(string) (interface{}, error)
+	FirewalldZoneConfig(string) (*FirewalldCMDList, error)
 	FirewalldServiceAdd(string, string) error
 	FirewalldServiceRemove(string, string) error
 	FirewalldSourceAdd(string, string) error

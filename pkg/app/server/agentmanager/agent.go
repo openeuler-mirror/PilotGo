@@ -907,7 +907,7 @@ func (a *Agent) FirewalldSetDefaultZone(zone string) (string, string, error) {
 }
 
 // 查看防火墙指定区域配置
-func (a *Agent) FirewalldZoneConfig(zone string) (interface{}, string, error) {
+func (a *Agent) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldZoneConfig,
@@ -919,7 +919,14 @@ func (a *Agent) FirewalldZoneConfig(zone string) (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+
+	info := &common.FirewalldCMDList{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, resp_message.Error, err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 添加防火墙服务
