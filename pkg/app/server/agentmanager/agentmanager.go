@@ -111,7 +111,7 @@ func AddAgents2DB(a *Agent) {
 	// TODO: 沒有对message对象status、Error字段进行判断，决定后续步骤是否执行
 	agent_os, err := agent_uuid.GetAgentOSInfo()
 	if err != nil {
-		logger.Error("初始化系统信息失败!")
+		logger.Error("初始化系统信息失败: %s", err.Error())
 		return
 	}
 	UUIDExistbool, err := dao.IsUUIDExist(a.UUID)

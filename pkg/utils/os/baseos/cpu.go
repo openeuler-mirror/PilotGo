@@ -46,11 +46,11 @@ func (b *BaseOS) GetPhysicalCPU() (int, error) {
 func (b *BaseOS) GetCPUInfo() (*common.CPUInfo, error) {
 	cpuname, err := b.GetCPUName()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cpu model name")
+		return nil, fmt.Errorf(err.Error())
 	}
 	cpunum, err := b.GetPhysicalCPU()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cpu num")
+		return nil, fmt.Errorf(err.Error())
 	}
 	cpuinfo := &common.CPUInfo{
 		ModelName: cpuname,
