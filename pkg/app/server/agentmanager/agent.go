@@ -15,6 +15,7 @@
 package agentmanager
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"time"
@@ -216,6 +217,11 @@ func (a *Agent) AgentInfo() (*AgentInfo, error) {
 		return nil, err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &AgentInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -238,6 +244,11 @@ func (a *Agent) GetOSInfo() (*common.SystemInfo, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.SystemInfo{}
@@ -263,6 +274,11 @@ func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 		return nil, err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &common.CPUInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -284,6 +300,11 @@ func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent: %s", err.Error())
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.MemoryConfig{}
@@ -309,6 +330,11 @@ func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
 		return nil, err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &map[string]string{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -331,6 +357,12 @@ func (a *Agent) ChangeSysctl(args string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -347,11 +379,17 @@ func (a *Agent) SysctlView(args string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
 // 查看服务列表
-func (a *Agent) ServiceList() (*common.ListService, error) {
+func (a *Agent) ServiceList() ([]*common.ListService, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.ServiceList,
@@ -364,13 +402,18 @@ func (a *Agent) ServiceList() (*common.ListService, error) {
 		return nil, err
 	}
 
-	info := &common.ListService{}
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
+	info := &[]*common.ListService{}
 	err = resp_message.BindData(info)
 	if err != nil {
 		logger.Error("bind ServiceList data error:", err)
 		return nil, err
 	}
-	return info, nil
+	return *info, nil
 }
 
 // 查看某个服务的状态
@@ -386,6 +429,12 @@ func (a *Agent) ServiceStatus(service string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -402,6 +451,12 @@ func (a *Agent) ServiceRestart(service string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -418,6 +473,12 @@ func (a *Agent) ServiceStop(service string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -434,6 +495,12 @@ func (a *Agent) ServiceStart(service string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -450,6 +517,12 @@ func (a *Agent) AllRpm() (interface{}, error) {
 		logger.Error("failed to run script on agent")
 		return nil, err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, nil
 }
 
@@ -465,6 +538,11 @@ func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.RpmSrc{}
@@ -490,6 +568,11 @@ func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 		return nil, "", err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &common.RpmInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -512,6 +595,12 @@ func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -528,6 +617,12 @@ func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -543,6 +638,11 @@ func (a *Agent) DiskUsage() ([]*common.DiskUsageINfo, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &[]*common.DiskUsageINfo{}
@@ -566,6 +666,11 @@ func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.DiskIOInfo{}
@@ -595,6 +700,12 @@ func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return err.Error(), err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 func (a *Agent) DiskUMount(diskPath string) (string, error) {
@@ -609,6 +720,12 @@ func (a *Agent) DiskUMount(diskPath string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return err.Error(), err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
@@ -623,6 +740,12 @@ func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -638,6 +761,11 @@ func (a *Agent) NetTCP() (*common.NetConnect, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.NetConnect{}
@@ -663,6 +791,11 @@ func (a *Agent) NetUDP() (*common.NetConnect, error) {
 		return nil, err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &common.NetConnect{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -684,6 +817,11 @@ func (a *Agent) NetIOCounter() (*common.IOCnt, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.IOCnt{}
@@ -709,6 +847,11 @@ func (a *Agent) NetNICConfig() (*common.NetInterfaceCard, error) {
 		return nil, err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &common.NetInterfaceCard{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -732,6 +875,11 @@ func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
 		return nil, err
 	}
 
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	info := &common.CurrentUser{}
 	err = resp_message.BindData(info)
 	if err != nil {
@@ -742,7 +890,7 @@ func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
 }
 
 // 获取所有用户的信息
-func (a *Agent) AllUser() (*common.AllUserInfo, error) {
+func (a *Agent) AllUser() ([]*common.AllUserInfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AllUser,
@@ -755,13 +903,18 @@ func (a *Agent) AllUser() (*common.AllUserInfo, error) {
 		return nil, err
 	}
 
-	info := &common.AllUserInfo{}
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
+	info := &[]*common.AllUserInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
 		logger.Error("bind AllUser data error:", err)
 		return nil, err
 	}
-	return info, nil
+	return *info, nil
 }
 
 // 创建新的用户，并新建家目录
@@ -777,6 +930,12 @@ func (a *Agent) AddLinuxUser(username, password string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -793,6 +952,12 @@ func (a *Agent) DelUser(username string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -809,6 +974,12 @@ func (a *Agent) ChangePermission(permission, file string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -825,6 +996,12 @@ func (a *Agent) ChangeFileOwner(user, file string) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -840,6 +1017,11 @@ func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.SystemAndCPUInfo{}
@@ -864,6 +1046,12 @@ func (a *Agent) HeartBeat() (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
@@ -879,6 +1067,11 @@ func (a *Agent) FirewalldConfig() (*common.FireWalldConfig, string, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.FireWalldConfig{}
@@ -903,6 +1096,12 @@ func (a *Agent) FirewalldSetDefaultZone(zone string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -918,6 +1117,11 @@ func (a *Agent) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, stri
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.FirewalldCMDList{}
@@ -942,6 +1146,12 @@ func (a *Agent) FirewalldServiceAdd(zone, service string) (interface{}, string, 
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -958,6 +1168,12 @@ func (a *Agent) FirewalldServiceRemove(zone, service string) (interface{}, strin
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -974,6 +1190,12 @@ func (a *Agent) FirewalldSourceAdd(zone, source string) (interface{}, string, er
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -990,6 +1212,12 @@ func (a *Agent) FirewalldSourceRemove(zone, source string) (interface{}, string,
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -1006,6 +1234,12 @@ func (a *Agent) FirewalldRestart() (bool, string, error) {
 		logger.Error("failed to run script on agent")
 		return false, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return false, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(bool), resp_message.Error, nil
 }
 
@@ -1022,6 +1256,12 @@ func (a *Agent) FirewalldStop() (bool, string, error) {
 		logger.Error("failed to run script on agent")
 		return false, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return false, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(bool), resp_message.Error, nil
 }
 
@@ -1038,6 +1278,12 @@ func (a *Agent) FirewalldZonePortAdd(zone, port, proto string) (string, string, 
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -1054,6 +1300,12 @@ func (a *Agent) FirewalldZonePortDel(zone, port, proto string) (string, string, 
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -1070,6 +1322,12 @@ func (a *Agent) CronStart(id int, spec string, command string) (string, string, 
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -1086,11 +1344,17 @@ func (a *Agent) CronStopAndDel(id int) (string, error) {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), nil
 }
 
 // 远程获取agent端的repo文件
-func (a *Agent) GetRepoSource() (*common.RepoSource, string, error) {
+func (a *Agent) GetRepoSource() ([]*common.RepoSource, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.GetRepoSource,
@@ -1103,13 +1367,18 @@ func (a *Agent) GetRepoSource() (*common.RepoSource, string, error) {
 		return nil, "", err
 	}
 
-	info := &common.RepoSource{}
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
+	info := &[]*common.RepoSource{}
 	err = resp_message.BindData(info)
 	if err != nil {
 		logger.Error("bind data error:", err)
 		return nil, resp_message.Error, err
 	}
-	return info, resp_message.Error, nil
+	return *info, resp_message.Error, nil
 }
 
 // 远程获取agent端的网络连接信息
@@ -1125,6 +1394,12 @@ func (a *Agent) GetNetWorkConnectInfo() (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -1141,6 +1416,12 @@ func (a *Agent) GetNetWorkConnInfo() (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -1156,6 +1437,11 @@ func (a *Agent) GetNICName() (string, string, error) {
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
 	return resp_message.Data.(string), resp_message.Error, nil
@@ -1174,6 +1460,12 @@ func (a *Agent) RestartNetWork(NIC string) (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, resp_message.Error, nil
 }
 
@@ -1190,6 +1482,12 @@ func (a *Agent) ReadFile(filepath string) (string, string, error) {
 		logger.Error("failed to run script on agent")
 		return "", "", err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
@@ -1210,6 +1508,11 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to run script on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &common.UpdateFile{}
@@ -1233,6 +1536,12 @@ func (a *Agent) GetTimeInfo() (interface{}, error) {
 		logger.Error("failed to get time on agent")
 		return nil, err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to get time on agent: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
 	return resp_message.Data, nil
 }
 
@@ -1243,11 +1552,17 @@ func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 		Type: protocol.AgentConfig,
 		Data: ConMess,
 	}
-	_, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to config on agent")
 		return err
 	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to config on agent: %s", resp_message.Error)
+		return fmt.Errorf(resp_message.Error)
+	}
+
 	return nil
 }
 
