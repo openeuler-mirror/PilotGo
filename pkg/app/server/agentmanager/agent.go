@@ -282,7 +282,7 @@ func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
 
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
-		logger.Error("failed to run script on agent")
+		logger.Error("failed to run script on agent: %s", err.Error())
 		return nil, err
 	}
 
@@ -532,7 +532,7 @@ func (a *Agent) RemoveRpm(rpm string) (interface{}, string, error) {
 }
 
 // 获取磁盘的使用情况
-func (a *Agent) DiskUsage() (*common.DiskUsageINfo, error) {
+func (a *Agent) DiskUsage() ([]*common.DiskUsageINfo, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.DiskUsage,
@@ -545,13 +545,13 @@ func (a *Agent) DiskUsage() (*common.DiskUsageINfo, error) {
 		return nil, err
 	}
 
-	info := &common.DiskUsageINfo{}
+	info := &[]*common.DiskUsageINfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
 		logger.Error("bind data error:", err)
 		return nil, err
 	}
-	return info, nil
+	return *info, nil
 }
 
 // 获取磁盘的IO信息
