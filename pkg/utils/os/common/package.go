@@ -35,16 +35,21 @@ type RpmInfo struct {
 	Summary      string
 }
 
+type RepoSource struct {
+	Name    string
+	Baseurl string
+}
+
 // TODO: yum源文件在agent端打开的情况下调用该接口匹配内容出错
-func GetRepoSource() (interface{}, error) {
+func GetRepoSource() ([]RepoSource, error) {
 	repos, err := utils.GetFiles(global.RepoPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to get repo source file: %s", err)
+		return nil, fmt.Errorf("failed to get repo source file: %s", err)
 	}
 
 	SysInfo, err := host.Info()
 	if err != nil {
-		return "", fmt.Errorf("failed to get system's native repo: %s", err)
+		return nil, fmt.Errorf("failed to get system's native repo: %s", err)
 	}
 	SysPlatform := SysInfo.Platform
 
@@ -66,7 +71,7 @@ func GetRepoSource() (interface{}, error) {
 
 	text, err := utils.FileReadString(global.RepoPath + "/" + repo)
 	if err != nil {
-		return "", fmt.Errorf("failed to read repo source data: %s", err)
+		return nil, fmt.Errorf("failed to read repo source data: %s", err)
 	}
 
 	reg1 := regexp.MustCompile(`\[.*]`)
@@ -81,11 +86,11 @@ func GetRepoSource() (interface{}, error) {
 		BaseURL = reg2.FindAllString(text, -1)
 	}
 
-	datas := make([]map[string]string, 0)
+	datas := make([]RepoSource, 0)
 	for i := 0; i < len(textType); i++ {
-		data := map[string]string{
-			"name":    textType[i][1 : len(textType[i])-1],
-			"baseurl": "http" + strings.Split(BaseURL[i], "http")[1],
+		data := RepoSource{
+			Name:    textType[i][1 : len(textType[i])-1],
+			Baseurl: "http" + strings.Split(BaseURL[i], "http")[1],
 		}
 		datas = append(datas, data)
 	}

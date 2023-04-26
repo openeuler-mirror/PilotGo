@@ -1083,7 +1083,7 @@ func (a *Agent) CronStopAndDel(id int) (interface{}, error) {
 }
 
 // 远程获取agent端的repo文件
-func (a *Agent) GetRepoSource() (interface{}, string, error) {
+func (a *Agent) GetRepoSource() (*common.RepoSource, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.GetRepoSource,
@@ -1095,7 +1095,14 @@ func (a *Agent) GetRepoSource() (interface{}, string, error) {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+
+	info := &common.RepoSource{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind data error:", err)
+		return nil, resp_message.Error, err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 远程获取agent端的网络连接信息
