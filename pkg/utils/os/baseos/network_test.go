@@ -77,15 +77,15 @@ func TestNetwork(t *testing.T) {
 		switch ip_assignment {
 		case "static":
 			text := NetworkStatic(oldnet, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, ipv4_dns2)
-			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+			_, err := utils.UpdateFile(global.NetWorkPath, nic_name, text)
 			assert.Nil(t, err)
-			err = osobj.RestartNetwork(nic_name.(string))
+			err = osobj.RestartNetwork(nic_name)
 			assert.Nil(t, err)
 		case "dhcp":
 			text := NetworkDHCP(oldnet)
-			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+			_, err := utils.UpdateFile(global.NetWorkPath, nic_name, text)
 			assert.Nil(t, err)
-			err = osobj.RestartNetwork(nic_name.(string))
+			err = osobj.RestartNetwork(nic_name)
 			assert.Nil(t, err)
 		}
 
@@ -102,15 +102,15 @@ func TestNetwork(t *testing.T) {
 		switch init_ip_assignment {
 		case "static":
 			text := NetworkStatic(oldnet, init_ipv4_addr, init_ipv4_netmask, init_ipv4_gateway, init_ipv4_dns1, init_ipv4_dns2)
-			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+			_, err := utils.UpdateFile(global.NetWorkPath, nic_name, text)
 			assert.Nil(t, err)
-			err = osobj.RestartNetwork(nic_name.(string))
+			err = osobj.RestartNetwork(nic_name)
 			assert.Nil(t, err)
 		case "dhcp":
 			text := NetworkDHCP(oldnet)
-			_, err := utils.UpdateFile(global.NetWorkPath, nic_name.(string), text)
+			_, err := utils.UpdateFile(global.NetWorkPath, nic_name, text)
 			assert.Nil(t, err)
-			err = osobj.RestartNetwork(nic_name.(string))
+			err = osobj.RestartNetwork(nic_name)
 			assert.Nil(t, err)
 		}
 	})

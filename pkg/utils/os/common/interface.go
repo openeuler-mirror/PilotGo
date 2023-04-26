@@ -61,7 +61,7 @@ type UserOperator interface {
 }
 
 type FirewallOperator interface {
-	FirewalldSetDefaultZone(string) (interface{}, error)
+	FirewalldSetDefaultZone(string) (string, error)
 	FirewalldZoneConfig(string) (interface{}, error)
 	FirewalldServiceAdd(string, string) error
 	FirewalldServiceRemove(string, string) error
@@ -82,7 +82,7 @@ type NetworkOperator interface {
 	GetNICConfig() ([]NetInterfaceCard, error)
 	ConfigNetworkConnect() ([]map[string]string, error)
 	GetNetworkConnInfo() (*NetworkConfig, error)
-	GetNICName() (interface{}, error)
+	GetNICName() (string, error)
 	RestartNetwork(string) error
 }
 
