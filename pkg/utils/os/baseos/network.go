@@ -118,13 +118,10 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 			NICConfig = append(NICConfig, tmp)
 		}
 		return NICConfig, nil
-	} else if stde != "" {
-		logger.Error("faile to get network card message: %s", stde)
-		return nil, fmt.Errorf("faile to get network card message: %s", stde)
-	} else {
-		logger.Error("faile to get network card message")
-		return nil, fmt.Errorf("faile to get network card message")
 	}
+	logger.Error("faile to get network card message: %d, %s, %s, %v", exitc, result, stde, err)
+	return nil, fmt.Errorf("faile to get network card message: %d, %s, %s, %v", exitc, result, stde, err)
+
 }
 
 // 配置网络连接
@@ -159,11 +156,9 @@ func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
 			oldnet = append(oldnet, net)
 		}
 		return oldnet, nil
-	} else if stde != "" {
-		return nil, fmt.Errorf("failed to read network configuration data: %s", stde)
-	} else {
-		return nil, fmt.Errorf("failed to read network configuration data")
 	}
+	return nil, fmt.Errorf("failed to read network configuration data: %d, %s, %s, %v", exitc, text, stde, err)
+
 }
 
 func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
@@ -197,10 +192,8 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 					}
 					ModuleMatch(strSlice[0], strSlice[1], network)
 				}
-			} else if stde != "" {
-				return nil, fmt.Errorf("failed to read network configuration source file: %s", stde)
 			} else {
-				return nil, fmt.Errorf("failed to read network configuration source file")
+				return nil, fmt.Errorf("failed to read network configuration source file: %d, %s, %s, %v", exitc, tmp, stde, err)
 			}
 		case "dhcp":
 			conn, err := net.Dial("udp", "openeuler.org:80")
@@ -212,25 +205,20 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 
 			exitc, gateway, stde, err := utils.RunCommandnew("route -n |awk '{print $2}' | sed -n '3p'")
 			if exitc == 0 && gateway != "" && stde == "" && err == nil {
-			} else if stde != "" {
-				return nil, fmt.Errorf("failed to get gateway: %s", stde)
 			} else {
-				return nil, fmt.Errorf("failed to get gateway")
+				return nil, fmt.Errorf("failed to get gateway: %d, %s, %s, %v", exitc, gateway, stde, err)
 			}
 
 			exitc, DNS, stde, err := utils.RunCommandnew("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
 			if exitc == 0 && DNS != "" && stde == "" && err == nil {
-			} else if stde != "" {
-				return nil, fmt.Errorf("failed to get dns: %s", stde)
 			} else {
-				return nil, fmt.Errorf("failed to get dns")
+				return nil, fmt.Errorf("failed to get dns: %d, %s, %s, %v", exitc, DNS, stde, err)
 			}
 
 			network.DNS1 = strings.Replace(DNS, "\n", "", -1)
 			network.BootProto = "dhcp"
 			network.IPAddr = ip
 			network.GateWay = strings.Replace(gateway, "\n", "", -1)
-
 		default:
 			exitc, tmp, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
 			if exitc == 0 && tmp != "" && stde == "" && err == nil {
@@ -243,18 +231,13 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 					}
 					ModuleMatch(strSlice[0], strSlice[1], network)
 				}
-			} else if stde != "" {
-				return nil, fmt.Errorf("failed to read network configuration source data: %s", stde)
 			} else {
-				return nil, fmt.Errorf("failed to read network configuration source data")
+				return nil, fmt.Errorf("failed to read network configuration source data: %d, %s, %s, %v", exitc, tmp, stde, err)
 			}
 		}
 		return network, nil
-	} else if stde != "" {
-		return nil, fmt.Errorf("failed to get BOOTPROTO: %s", stde)
-	} else {
-		return nil, fmt.Errorf("failed to get BOOTPROTO")
 	}
+	return nil, fmt.Errorf("failed to get BOOTPROTO: %d, %s, %s, %v", exitc, result, stde, err)
 }
 
 func (b *BaseOS) GetNICName() (interface{}, error) {
@@ -276,18 +259,14 @@ func (b *BaseOS) GetNICName() (interface{}, error) {
 func (b *BaseOS) RestartNetwork(nic string) error {
 	exitc, stdo, stde, err := utils.RunCommandnew("nmcli c reload")
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
-	} else if stde != "" {
-		return fmt.Errorf("failed to reload network configuration file: %s", stde)
 	} else {
-		return fmt.Errorf("failed to reload network configuration file")
+		return fmt.Errorf("failed to reload network configuration file: %d, %s, %s, %v", exitc, stdo, stde, err)
 	}
 
 	exitc2, stdo2, stde2, err2 := utils.RunCommandnew("nmcli c up " + strings.Split(nic, "-")[1])
 	if exitc2 == 0 && stdo2 != "" && stde2 == "" && err2 == nil {
-	} else if stde2 != "" {
-		return fmt.Errorf("network configuration file not effective: %s", stde2)
 	} else {
-		return fmt.Errorf("network configuration file not effective")
+		return fmt.Errorf("network configuration file not effective: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
 
 	return nil

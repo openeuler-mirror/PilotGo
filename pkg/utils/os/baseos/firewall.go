@@ -64,11 +64,8 @@ func (b *BaseOS) FirewalldSetDefaultZone(zone string) (interface{}, error) {
 	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --set-default-zone=%v", zone))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
 		return strings.Replace(stdo, "\n", "", -1), nil
-	} else if stde != "" {
-		return nil, fmt.Errorf(stde)
-	} else {
-		return nil, fmt.Errorf("failed to change default zone of firewall: %s", zone)
 	}
+	return nil, fmt.Errorf("failed to change default zone of firewall: %d, %s, %s, %v", exitc, stdo, stde, err)
 }
 
 func (b *BaseOS) FirewalldZoneConfig(zone string) (interface{}, error) {
@@ -100,13 +97,9 @@ func (b *BaseOS) FirewalldZoneConfig(zone string) (interface{}, error) {
 				continue
 			}
 		}
-
 		return firewall, nil
-	} else if stde != "" {
-		return nil, fmt.Errorf(stde)
-	} else {
-		return nil, fmt.Errorf("failed to get zone config: %s", zone)
 	}
+	return nil, fmt.Errorf("failed to get zone config: %d, %s, %s, %v", exitc, conf, stde, err)
 }
 
 func (b *BaseOS) FirewalldSourceAdd(zone, source string) error {
@@ -115,14 +108,11 @@ func (b *BaseOS) FirewalldSourceAdd(zone, source string) error {
 		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
-		} else {
-			return fmt.Errorf("failed to reload firewall")
 		}
-	} else if stde != "" {
-		return fmt.Errorf(stde)
-	} else {
-		return fmt.Errorf("failed to add source: %s", source)
+		return fmt.Errorf("failed to reload firewall: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
+	return fmt.Errorf("failed to add source %s: %d, %s, %s, %v", source, exitc, stdo, stde, err)
+
 }
 
 func (b *BaseOS) FirewalldSourceRemove(zone, source string) error {
@@ -131,14 +121,10 @@ func (b *BaseOS) FirewalldSourceRemove(zone, source string) error {
 		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
-		} else {
-			return fmt.Errorf("failed to reload firewall")
 		}
-	} else if stde != "" {
-		return fmt.Errorf(stde)
-	} else {
-		return fmt.Errorf("failed to remove source: %s", source)
+		return fmt.Errorf("failed to reload firewall: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
+	return fmt.Errorf("failed to remove source %s: %d, %s, %s, %v", source, exitc, stdo, stde, err)
 }
 
 func (b *BaseOS) FirewalldServiceAdd(zone, service string) error {
@@ -147,14 +133,10 @@ func (b *BaseOS) FirewalldServiceAdd(zone, service string) error {
 		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
-		} else {
-			return fmt.Errorf("failed to reload firewall")
 		}
-	} else if stde != "" {
-		return fmt.Errorf(stde)
-	} else {
-		return fmt.Errorf("failed to add service: %s", service)
+		return fmt.Errorf("failed to reload firewall: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
+	return fmt.Errorf("failed to add service %s: %d, %s, %s, %v", service, exitc, stdo, stde, err)
 }
 
 func (b *BaseOS) FirewalldServiceRemove(zone, service string) error {
@@ -163,14 +145,10 @@ func (b *BaseOS) FirewalldServiceRemove(zone, service string) error {
 		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
-		} else {
-			return fmt.Errorf("failed to reload firewall")
 		}
-	} else if stde != "" {
-		return fmt.Errorf(stde)
-	} else {
-		return fmt.Errorf("failed to remove service: %s", service)
+		return fmt.Errorf("failed to reload firewall: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
+	return fmt.Errorf("failed to remove service %s: %d, %s, %s, %v", service, exitc, stdo, stde, err)
 }
 
 func (b *BaseOS) Restart() bool {
@@ -196,14 +174,10 @@ func (b *BaseOS) DelZonePort(zone, port, protocol string) (string, error) { //zo
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			stdo2 = strings.Replace(stdo2, "\n", "", -1)
 			return stdo2, nil
-		} else {
-			return "", fmt.Errorf("failed to reload firewall")
 		}
-	} else if stde != "" {
-		return "", fmt.Errorf(stde)
-	} else {
-		return "", fmt.Errorf("failed to remove zone port: %s/%s", port, protocol)
+		return "", fmt.Errorf("failed to reload firewall: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
+	return "", fmt.Errorf("failed to remove zone port %s/%s: %d, %s, %s, %v", port, protocol, exitc, stdo, stde, err)
 }
 
 func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
@@ -213,14 +187,10 @@ func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zo
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			stdo2 = strings.Replace(stdo2, "\n", "", -1)
 			return stdo2, nil
-		} else {
-			return "", fmt.Errorf("failed to reload firewall")
 		}
-	} else if stde != "" {
-		return "", fmt.Errorf(stde)
-	} else {
-		return "", fmt.Errorf("failed to add zone port: %s/%s", port, protocol)
+		return "", fmt.Errorf("failed to reload firewall: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)
 	}
+	return "", fmt.Errorf("failed to add zone port %s/%s: %d, %s, %s, %v", port, protocol, exitc, stdo, stde, err)
 }
 
 // TODO: firewall完善zone interface的添加和删除接口，完善firewall接口重复add会报错的逻辑

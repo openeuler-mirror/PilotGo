@@ -23,10 +23,9 @@ func (b *BaseOS) GetCPUName() (string, error) {
 			cpuname = strings.TrimLeft(str[1], " ")
 		}
 		return cpuname, nil
-	} else {
-		logger.Error("failed to get cpu model name!")
-		return "", fmt.Errorf("failed to get cpu model name")
 	}
+	logger.Error("failed to get cpu model name: %d, %s, %s, %v", exitc, cpuname, stde, err)
+	return "", fmt.Errorf("failed to get cpu model name: %d, %s, %s, %v", exitc, cpuname, stde, err)
 }
 
 // 获取物理CPU个数
@@ -39,10 +38,9 @@ func (b *BaseOS) GetPhysicalCPU() (int, error) {
 			return -1, erratoi
 		}
 		return cpunum, nil
-	} else {
-		logger.Error("failed to get cpu num")
-		return -1, fmt.Errorf("failed to get cpu num")
 	}
+	logger.Error("failed to get cpu num: %d, %s, %s, %v", exitc, num, stde, err)
+	return -1, fmt.Errorf("failed to get cpu num: %d, %s, %s, %v", exitc, num, stde, err)
 }
 
 func (b *BaseOS) GetCPUInfo() (*common.CPUInfo, error) {
