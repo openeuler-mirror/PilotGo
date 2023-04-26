@@ -240,10 +240,10 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 	return nil, fmt.Errorf("failed to get BOOTPROTO: %d, %s, %s, %v", exitc, result, stde, err)
 }
 
-func (b *BaseOS) GetNICName() (interface{}, error) {
+func (b *BaseOS) GetNICName() (string, error) {
 	network, err := utils.GetFiles(global.NetWorkPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get network configuration file: %s", err)
+		return "", fmt.Errorf("failed to get network configuration file: %s", err)
 	}
 	var filename string
 	for _, n := range network {

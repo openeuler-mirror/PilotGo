@@ -19,7 +19,7 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	exitc, firewall_state, stde, err := utils.RunCommandnew("firewall-cmd --state")
 	if exitc != 0 && firewall_state == "" && strings.Replace(stde, "\n", "", -1) == "not running" && err == nil {
 		firewalldConfig.Status = "not running"
-		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		return firewalldConfig, nil
 	}
 
@@ -27,7 +27,7 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	if exitc == 0 && zone_default != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		return firewalldConfig, nil
 	}
 
@@ -35,7 +35,7 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	if exitc == 0 && zones != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 		return firewalldConfig, nil
 	}
@@ -45,14 +45,14 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	if exitc == 0 && services != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-		firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 		firewalldConfig.Zones = Zones
 		return firewalldConfig, nil
 	}
 	Services := strings.Split(strings.Replace(services, "\n", "", -1), " ")
 	firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-	firewalldConfig.Nic = strings.Split(nic_interface.(string), "-")[1]
+	firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 	firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 	firewalldConfig.Zones = Zones
 	firewalldConfig.Services = Services
@@ -60,12 +60,12 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	return firewalldConfig, nil
 }
 
-func (b *BaseOS) FirewalldSetDefaultZone(zone string) (interface{}, error) {
+func (b *BaseOS) FirewalldSetDefaultZone(zone string) (string, error) {
 	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --set-default-zone=%v", zone))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
 		return strings.Replace(stdo, "\n", "", -1), nil
 	}
-	return nil, fmt.Errorf("failed to change default zone of firewall: %d, %s, %s, %v", exitc, stdo, stde, err)
+	return "", fmt.Errorf("failed to change default zone of firewall: %d, %s, %s, %v", exitc, stdo, stde, err)
 }
 
 func (b *BaseOS) FirewalldZoneConfig(zone string) (interface{}, error) {

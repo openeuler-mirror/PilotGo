@@ -891,7 +891,7 @@ func (a *Agent) FirewalldConfig() (*common.FireWalldConfig, string, error) {
 }
 
 // 更改防火墙默认区域
-func (a *Agent) FirewalldSetDefaultZone(zone string) (interface{}, string, error) {
+func (a *Agent) FirewalldSetDefaultZone(zone string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldDefaultZone,
@@ -901,9 +901,9 @@ func (a *Agent) FirewalldSetDefaultZone(zone string) (interface{}, string, error
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 查看防火墙指定区域配置
@@ -1131,7 +1131,7 @@ func (a *Agent) GetNetWorkConnInfo() (interface{}, string, error) {
 }
 
 // 获取网卡名字
-func (a *Agent) GetNICName() (interface{}, string, error) {
+func (a *Agent) GetNICName() (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.GetNICName,
@@ -1141,9 +1141,10 @@ func (a *Agent) GetNICName() (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", "", err
 	}
-	return resp_message.Data, resp_message.Error, nil
+
+	return resp_message.Data.(string), resp_message.Error, nil
 }
 
 // 重启网卡配置
