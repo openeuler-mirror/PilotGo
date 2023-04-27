@@ -155,7 +155,7 @@ func (a *Agent) Init() error {
 }
 
 // 远程在agent上运行脚本
-func (a *Agent) RunScript(cmd string) (interface{}, error) {
+func (a *Agent) RunScript(cmd string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RunScript,
@@ -169,9 +169,9 @@ func (a *Agent) RunScript(cmd string) (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, err
+		return "", err
 	}
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // TODO: err未发挥作用
@@ -1404,7 +1404,7 @@ func (a *Agent) GetNetWorkConnectInfo() (interface{}, string, error) {
 }
 
 // 获取agent的基础网络配置
-func (a *Agent) GetNetWorkConnInfo() (interface{}, string, error) {
+func (a *Agent) GetNetWorkConnInfo() (*common.NetworkConfig, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.GetNetWorkConnInfo,
@@ -1422,7 +1422,13 @@ func (a *Agent) GetNetWorkConnInfo() (interface{}, string, error) {
 		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	info := &common.NetworkConfig{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind GetNetWorkConnInfo data error:", err)
+		return nil, resp_message.Error, err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 获取网卡名字
@@ -1525,7 +1531,7 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 }
 
 // 远程获取agent端的时间信息
-func (a *Agent) GetTimeInfo() (interface{}, error) {
+func (a *Agent) GetTimeInfo() (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AgentTime,
@@ -1534,15 +1540,15 @@ func (a *Agent) GetTimeInfo() (interface{}, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to get time on agent")
-		return nil, err
+		return "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to get time on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
+		return "", fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, nil
+	return resp_message.Data.(string), nil
 }
 
 // 监控配置文件
