@@ -900,7 +900,6 @@ func RegitsterHandler(c *network.SocketClient) {
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   struct{}{},
 		}
 		return c.Send(resp_msg)
 
@@ -926,7 +925,6 @@ func RegitsterHandler(c *network.SocketClient) {
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   struct{}{},
 		}
 		return c.Send(resp_msg)
 
@@ -952,7 +950,6 @@ func RegitsterHandler(c *network.SocketClient) {
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   struct{}{},
 		}
 		return c.Send(resp_msg)
 
@@ -978,7 +975,6 @@ func RegitsterHandler(c *network.SocketClient) {
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   struct{}{},
 		}
 		return c.Send(resp_msg)
 
@@ -1220,7 +1216,6 @@ func RegitsterHandler(c *network.SocketClient) {
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   struct{}{},
 		}
 		return c.Send(resp_msg)
 
