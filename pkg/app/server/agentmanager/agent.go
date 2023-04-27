@@ -1134,7 +1134,7 @@ func (a *Agent) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, stri
 }
 
 // 添加防火墙服务
-func (a *Agent) FirewalldServiceAdd(zone, service string) (interface{}, string, error) {
+func (a *Agent) FirewalldServiceAdd(zone, service string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldServiceAdd,
@@ -1144,19 +1144,19 @@ func (a *Agent) FirewalldServiceAdd(zone, service string) (interface{}, string, 
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+		return resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Error, nil
 }
 
 // 移除防火墙服务
-func (a *Agent) FirewalldServiceRemove(zone, service string) (interface{}, string, error) {
+func (a *Agent) FirewalldServiceRemove(zone, service string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldServiceRemove,
@@ -1166,19 +1166,19 @@ func (a *Agent) FirewalldServiceRemove(zone, service string) (interface{}, strin
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+		return resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Error, nil
 }
 
 // 防火墙添加允许来源地址
-func (a *Agent) FirewalldSourceAdd(zone, source string) (interface{}, string, error) {
+func (a *Agent) FirewalldSourceAdd(zone, source string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldSourceAdd,
@@ -1188,19 +1188,19 @@ func (a *Agent) FirewalldSourceAdd(zone, source string) (interface{}, string, er
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+		return resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Error, nil
 }
 
 // 防火墙移除允许来源地址
-func (a *Agent) FirewalldSourceRemove(zone, source string) (interface{}, string, error) {
+func (a *Agent) FirewalldSourceRemove(zone, source string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.FirewalldSourceRemove,
@@ -1210,15 +1210,15 @@ func (a *Agent) FirewalldSourceRemove(zone, source string) (interface{}, string,
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+		return resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Error, nil
 }
 
 // 重启防火墙
@@ -1460,7 +1460,7 @@ func (a *Agent) GetNICName() (string, string, error) {
 }
 
 // 重启网卡配置
-func (a *Agent) RestartNetWork(NIC string) (interface{}, string, error) {
+func (a *Agent) RestartNetWork(NIC string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RestartNetWork,
@@ -1470,15 +1470,15 @@ func (a *Agent) RestartNetWork(NIC string) (interface{}, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+		return resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	return resp_message.Error, nil
 }
 
 // 查看配置文件内容
