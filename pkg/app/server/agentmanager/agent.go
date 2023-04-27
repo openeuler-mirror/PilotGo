@@ -505,7 +505,7 @@ func (a *Agent) ServiceStart(service string) (string, string, error) {
 }
 
 // 获取全部安装的rpm包列表
-func (a *Agent) AllRpm() (interface{}, error) {
+func (a *Agent) AllRpm() ([]string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.AllRpm,
@@ -520,10 +520,10 @@ func (a *Agent) AllRpm() (interface{}, error) {
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, nil
+	return resp_message.Data.([]string), nil
 }
 
 // 获取源软件包名以及源
