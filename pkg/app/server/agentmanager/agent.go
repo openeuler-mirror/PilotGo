@@ -1382,7 +1382,7 @@ func (a *Agent) GetRepoSource() ([]*common.RepoSource, string, error) {
 }
 
 // 远程获取agent端的网络连接信息
-func (a *Agent) GetNetWorkConnectInfo() (interface{}, string, error) {
+func (a *Agent) GetNetWorkConnectInfo() (*map[string]string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.GetNetWorkConnectInfo,
@@ -1400,7 +1400,13 @@ func (a *Agent) GetNetWorkConnectInfo() (interface{}, string, error) {
 		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data, resp_message.Error, nil
+	info := &map[string]string{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind GetSysctlInfo data error:", err)
+		return nil, resp_message.Error, err
+	}
+	return info, resp_message.Error, nil
 }
 
 // 获取agent的基础网络配置
