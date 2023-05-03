@@ -90,7 +90,7 @@ func FirewalldServiceAdd(c *gin.Context) {
 		return
 	}
 
-	_, Err, err := agent.FirewalldServiceAdd(zp.Zone, zp.Service)
+	Err, err := agent.FirewalldServiceAdd(zp.Zone, zp.Service)
 	if len(Err) != 0 || err != nil {
 		response.Fail(c, nil, Err)
 		return
@@ -108,7 +108,7 @@ func FirewalldServiceRemove(c *gin.Context) {
 		return
 	}
 
-	_, Err, err := agent.FirewalldServiceRemove(zp.Zone, zp.Service)
+	Err, err := agent.FirewalldServiceRemove(zp.Zone, zp.Service)
 	if len(Err) != 0 || err != nil {
 		response.Fail(c, nil, Err)
 		return
@@ -126,7 +126,7 @@ func FirewalldSourceAdd(c *gin.Context) {
 		return
 	}
 
-	_, Err, err := agent.FirewalldSourceAdd(zp.Zone, zp.Source)
+	Err, err := agent.FirewalldSourceAdd(zp.Zone, zp.Source)
 	if len(Err) != 0 || err != nil {
 		response.Fail(c, nil, Err)
 		return
@@ -144,7 +144,7 @@ func FirewalldSourceRemove(c *gin.Context) {
 		return
 	}
 
-	_, Err, err := agent.FirewalldSourceRemove(zp.Zone, zp.Source)
+	Err, err := agent.FirewalldSourceRemove(zp.Zone, zp.Source)
 	if len(Err) != 0 || err != nil {
 		response.Fail(c, nil, Err)
 		return
