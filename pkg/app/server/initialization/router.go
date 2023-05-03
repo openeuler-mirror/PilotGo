@@ -196,11 +196,6 @@ func SetupRouter() *gin.Engine {
 
 	// 全局通用接口
 	router.GET("/ws", controller.ShellWs)
-	router.GET("/macList/machinealldata", controller.MachineAllDataHandler)
-	router.GET("/macList/departinfo", controller.DepartInfoHandler)
-	router.GET("/macList/depart", controller.DepartHandler)
-	// TODO: 不知道用途
-	router.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
 	router.GET("/event", controller.PushAlarmHandler)
 
 	other := api.Group("")

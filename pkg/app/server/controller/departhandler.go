@@ -31,6 +31,7 @@ func MachineListHandler(c *gin.Context) {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
+
 	machinelist, err := service.MachineList(DepId)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
