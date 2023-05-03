@@ -158,19 +158,22 @@ func ConfigNetworkConnect(c *gin.Context) {
 		response.Fail(c, nil, Err)
 		return
 	}
-	oldnets1 := oldnet.([]interface{})
-	var oldnets2 []map[string]interface{}
-	for _, m := range oldnets1 {
-		m1 := m.(map[string]interface{})
-		oldnets2 = append(oldnets2, m1)
-	}
-	var oldnets3 []map[string]string
-	for _, m := range oldnets2 {
-		for k, v := range m {
-			m2 := make(map[string]string)
-			m2[k] = v.(string)
-			oldnets3 = append(oldnets3, m2)
-		}
+	// oldnets1 := oldnet.([]interface{})
+	// var oldnets2 []map[string]interface{}
+	// for _, m := range *oldnet {
+	// 	m1 := m.(map[string]interface{})
+	// 	oldnets2 = append(oldnets2, m1)
+	// }
+	// var oldnets3 []map[string]string
+	// for _, m := range *oldnet {
+	// 	for k, v := range m {
+	// 		m2 := make(map[string]string)
+	// 		m2[k] = v.(string)
+	// 		oldnets3 = append(oldnets3, m2)
+	// 	}
+	// }
+	var oldnets3 = []map[string]string{
+		*oldnet,
 	}
 
 	switch ip_assignment {
@@ -181,7 +184,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 			response.Fail(c, nil, Err)
 			return
 		}
-		_, Err, err = agent.RestartNetWork(nic_name)
+		Err, err = agent.RestartNetWork(nic_name)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
 			return
@@ -195,7 +198,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 			response.Fail(c, nil, Err)
 			return
 		}
-		_, Err, err = agent.RestartNetWork(nic_name)
+		Err, err = agent.RestartNetWork(nic_name)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
 			return
