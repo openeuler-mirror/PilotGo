@@ -22,10 +22,16 @@ import (
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
+
+type CasbinRule struct {
+	PType    string `json:"ptype"`
+	RoleType string `json:"role"`
+	Url      string `json:"url"`
+	Method   string `json:"method"`
+}
 
 var (
 	enforcer *casbin.Enforcer
@@ -90,7 +96,7 @@ func AllPolicy() (interface{}, int) {
 	return casbin, total
 }
 
-func PolicyRemove(rule model.CasbinRule) bool {
+func PolicyRemove(rule CasbinRule) bool {
 	ok, err := global.PILOTGO_E.RemovePolicy(rule.RoleType, rule.Url, rule.Method)
 	if err == nil {
 		if !ok {
@@ -103,7 +109,7 @@ func PolicyRemove(rule model.CasbinRule) bool {
 	return false
 }
 
-func PolicyAdd(rule model.CasbinRule) bool {
+func PolicyAdd(rule CasbinRule) bool {
 	ok, err := global.PILOTGO_E.AddPolicy(rule.RoleType, rule.Url, rule.Method)
 	if err == nil {
 		if !ok {

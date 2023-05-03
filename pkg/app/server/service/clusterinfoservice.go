@@ -18,12 +18,28 @@ import (
 	"errors"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type ClusterInfoParam struct {
+	AgentTotal  int `json:"total"`
+	AgentStatus AgentStatus
+}
+
+type DepartMachineInfo struct {
+	DepartName  string `json:"depart"`
+	AgentStatus AgentStatus
+}
+
+type AgentStatus struct {
+	Normal  int `json:"normal"`
+	OffLine int `json:"offline"`
+	Free    int `json:"free"`
+}
+
 // 统计所有机器的状态
-func AgentStatusCounts(machines []model.MachineNode) (normal, Offline, free int) {
+func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
 	for _, agent := range machines {
 		state := agent.State
 		switch state {
@@ -40,18 +56,21 @@ func AgentStatusCounts(machines []model.MachineNode) (normal, Offline, free int)
 	return
 }
 
-//查找所有机器
-func SelectAllMachine() ([]model.MachineNode, error) {
-	machines := dao.AllMachine()
+// 查找所有机器
+func SelectAllMachine() ([]dao.MachineNode, error) {
+	machines, err := dao.AllMachine()
+	if err != nil {
+		return machines, err
+	}
 	if len(machines) == 0 {
 		return nil, errors.New("未获取到机器")
 	}
 	return machines, nil
 }
 
-//获取集群概览
-func ClusterInfo() (model.ClusterInfo, error) {
-	data := model.ClusterInfo{}
+// 获取集群概览
+func ClusterInfo() (ClusterInfoParam, error) {
+	data := ClusterInfoParam{}
 	machines, err := SelectAllMachine()
 	if err != nil {
 		return data, err
@@ -65,22 +84,30 @@ func ClusterInfo() (model.ClusterInfo, error) {
 	return data, nil
 }
 
-//获取各部门集群状态
-func DepartClusterInfo() []model.DepartMachineInfo {
-	var departs []model.DepartMachineInfo
+// 获取各部门集群状态
+func DepartClusterInfo() []DepartMachineInfo {
+	var departs []DepartMachineInfo
 
-	FirstDepartIds := dao.FirstDepartId()
+	FirstDepartIds, err := dao.FirstDepartId()
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	for _, depart_Id := range FirstDepartIds {
 		Departids := make([]int, 0)
 		Departids = append(Departids, depart_Id)
 		ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
 
-		lists := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
-
-		departName := dao.DepartIdToGetDepartName(depart_Id)
+		lists, err := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		departName, err := dao.DepartIdToGetDepartName(depart_Id)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		normal, Offline, free := AgentStatusCounts(lists)
 
-		departInfo := model.DepartMachineInfo{}
+		departInfo := DepartMachineInfo{}
 		departInfo.DepartName = departName
 		departInfo.AgentStatus.Normal = normal
 		departInfo.AgentStatus.OffLine = Offline

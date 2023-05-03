@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
+ * LastEditTime: 2023-02-21 19:02:55
  * Description: file monitor init
  ******************************************************************************/
 package filemonitor
@@ -24,20 +24,18 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
 var RESP_MSG = make(chan interface{})
 
 func FileMonitorInit() error {
 	//获取IP
-	IP, err := utils.RunCommand("hostname -I")
+	IP, err := uos.OS().GetHostIp()
 	if err != nil {
 		return fmt.Errorf("can not to get IP")
 	}
-	str := strings.Split(IP, " ")
-	IP = str[0]
 
 	// 1、NewWatcher 初始化一个 watcher
 	watcher, err := fsnotify.NewWatcher()
@@ -82,7 +80,7 @@ func FileMonitorInit() error {
 				if !ok {
 					return
 				}
-				logger.Error("error:", err)
+				logger.Error("error: %s", err)
 			}
 		}
 	}()
@@ -104,7 +102,7 @@ func FileMonitor(client *network.SocketClient) {
 		}
 
 		if err := client.Send(msg); err != nil {
-			logger.Debug("send message failed, error:", err)
+			logger.Debug("send message failed, error: %s", err)
 		}
 
 	}

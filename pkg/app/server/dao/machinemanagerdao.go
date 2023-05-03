@@ -17,64 +17,107 @@ package dao
 import (
 	"fmt"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-func IsUUIDExist(uuid string) bool {
-	var Machine model.MachineNode
-	global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine)
-	return Machine.DepartId != 0
+type MachineNode struct {
+	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	DepartId    int    `gorm:"type:int(100);not null" json:"departid"`
+	IP          string `gorm:"type:varchar(100)" json:"ip"`
+	MachineUUID string `gorm:"type:varchar(100);not null" json:"machineuuid"`
+	CPU         string `gorm:"type:varchar(100)" json:"CPU"`
+	State       int    `gorm:"type:varchar(100)" json:"state"`
+	Systeminfo  string `gorm:"type:varchar(100)" json:"sysinfo"`
+}
+
+type Res struct {
+	ID         int    `json:"id"`
+	Departid   int    `json:"departid"`
+	Departname string `json:"departname"`
+	IP         string `json:"ip"`
+	UUID       string `json:"uuid"`
+	CPU        string `json:"cpu"`
+	State      int    `json:"state"`
+	Systeminfo string `json:"systeminfo"`
+}
+
+func (m *MachineNode) ReturnMachine(departid int) (list *[]Res, tx *gorm.DB, res []Res) {
+	list = &[]Res{}
+	// tx := mysqlmanager.DB.Where("depart_id=?", departid).Find(&list)
+	tx = global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
+		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
+		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
+	res = make([]Res, 0)
+	for _, value := range *list {
+		if value.Departid == departid {
+			res = append(res, value)
+		}
+	}
+	return
+}
+
+type DeleteUUID struct {
+	Deluuid []string `json:"deluuid"`
+}
+
+func IsUUIDExist(uuid string) (bool, error) {
+	var Machine MachineNode
+	err := global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine).Error
+	return Machine.DepartId != 0, err
 }
 
 // 根据uuid获取部门id
-func UUIDForDepartId(uuid string) int {
-	var Machine model.MachineNode
-	global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine)
-	return Machine.DepartId
+func UUIDForDepartId(uuid string) (int, error) {
+	var Machine MachineNode
+	err := global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine).Error
+	return Machine.DepartId, err
 }
 
 // agent机器断开
-func MachineStatusToOffline(uuid string) {
-	var Machine model.MachineNode
-	Ma := model.MachineNode{
+func MachineStatusToOffline(uuid string) error {
+	var Machine MachineNode
+	Ma := MachineNode{
 		State: global.OffLine,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
 }
 
 // agent机器未分配
-func MachineStatusToFree(uuid, ip string) {
-	var Machine model.MachineNode
-	Ma := model.MachineNode{
+func MachineStatusToFree(uuid, ip string) error {
+	var Machine MachineNode
+	Ma := MachineNode{
 		State: global.Free,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
 }
 
 // agent机器连接正常
-func MachineStatusToNormal(uuid, ip string) {
-	var Machine model.MachineNode
-	Ma := model.MachineNode{
+func MachineStatusToNormal(uuid, ip string) error {
+	var Machine MachineNode
+	Ma := MachineNode{
 		State: global.Normal,
 		IP:    ip,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
 }
 
 // 新增agent机器
-func AddNewMachine(Machine model.MachineNode) {
-	global.PILOTGO_DB.Save(&Machine)
+func AddNewMachine(Machine MachineNode) error {
+	return global.PILOTGO_DB.Save(&Machine).Error
 }
 
 // 获取该部门下的所有机器
-func MachineList(departId []int) (machinelist []model.Res) {
+func MachineList(departId []int) (machinelist []Res, err error) {
 	for _, value := range departId {
-		list := &[]model.Res{}
-		global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
+		list := &[]Res{}
+		err = global.PILOTGO_DB.Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
 			"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
+			"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list).Error
+		if err != nil {
+			return
+		}
 		for _, value1 := range *list {
 			if value1.Departid == value {
 				machinelist = append(machinelist, value1)
@@ -84,97 +127,109 @@ func MachineList(departId []int) (machinelist []model.Res) {
 	return
 }
 
-func MachineStore(departid int) []model.MachineNode {
-	var Machineinfo []model.MachineNode
-	global.PILOTGO_DB.Where("depart_id=?", departid).Find(&Machineinfo)
-	return Machineinfo
+func MachineStore(departid int) ([]MachineNode, error) {
+	var Machineinfo []MachineNode
+	err := global.PILOTGO_DB.Where("depart_id=?", departid).Find(&Machineinfo).Error
+	return Machineinfo, err
 }
 
-func ModifyMachineDepart(MadId int, DeptId int) {
-	var Machine model.MachineNode
-	global.PILOTGO_DB.Where("id=?", MadId).Find(&Machine)
-	var Ma model.MachineNode
+func ModifyMachineDepart(MadId int, DeptId int) error {
+	var Machine MachineNode
+	err := global.PILOTGO_DB.Where("id=?", MadId).Find(&Machine).Error
+	if err != nil {
+		return err
+	}
+	var Ma MachineNode
 	if Machine.State == global.Free {
-		Ma = model.MachineNode{
+		Ma = MachineNode{
 			DepartId: DeptId,
 			State:    global.Normal,
 		}
 	} else {
 		if DeptId == global.UncateloguedDepartId {
-			Ma = model.MachineNode{
+			Ma = MachineNode{
 				DepartId: DeptId,
 				State:    global.Free,
 			}
 		} else {
-			Ma = model.MachineNode{
+			Ma = MachineNode{
 				DepartId: DeptId,
 			}
 		}
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
 }
-func ModifyMachineDepart2(MadId int, DeptId int) {
-	var Machine model.MachineNode
-	Ma := model.MachineNode{
+func ModifyMachineDepart2(MadId int, DeptId int) error {
+	var Machine MachineNode
+	Ma := MachineNode{
 		DepartId: DeptId,
 		State:    global.Free,
 	}
-	global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma)
+	return global.PILOTGO_DB.Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
 }
 
 // 根据机器id获取机器信息
-func MachineData(MacId int) model.MachineNode {
-	var m model.MachineNode
-	global.PILOTGO_DB.Where("id=?", MacId).Find(&m)
-	return m
+func MachineData(MacId int) (MachineNode, error) {
+	var m MachineNode
+	err := global.PILOTGO_DB.Where("id=?", MacId).Find(&m).Error
+	return m, err
 }
 
 // 获取所有机器
-func AllMachine() []model.MachineNode {
-	var m []model.MachineNode
-	global.PILOTGO_DB.Find(&m)
-
-	return m
+func AllMachine() ([]MachineNode, error) {
+	var m []MachineNode
+	err := global.PILOTGO_DB.Find(&m).Error
+	return m, err
 }
 
-func MachineAllData() []model.Res {
-	var mch []model.Res
-	global.PILOTGO_DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
+func MachineAllData() ([]Res, error) {
+	var mch []Res
+	err := global.PILOTGO_DB.Table("machine_node").Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch)
-	return mch
+		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&mch).Error
+	return mch, err
 }
 
 // 获取某一级部门下的所有机器
-func SomeDepartMachine(Departids []int) (lists []model.MachineNode) {
+func SomeDepartMachine(Departids []int) (lists []MachineNode, err error) {
 	for _, id := range Departids {
-		list := []model.MachineNode{}
-		global.PILOTGO_DB.Where("depart_id = ?", id).Find(&list)
+		list := []MachineNode{}
+		err = global.PILOTGO_DB.Where("depart_id = ?", id).Find(&list).Error
+		if err != nil {
+			return
+		}
 		lists = append(lists, list...)
 	}
 	return
 }
 
 // 根据uuid获取机器的ip、状态和部门
-func MachineBasic(uuid string) (ip string, state int, dept string) {
-	var machine model.MachineNode
-	var depart model.DepartNode
-	global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine)
-	global.PILOTGO_DB.Where("id = ?", machine.DepartId).Find(&depart)
-	return machine.IP, machine.State, depart.Depart
+func MachineBasic(uuid string) (ip string, state int, dept string, err error) {
+	var machine MachineNode
+	var depart DepartNode
+	err = global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine).Error
+	if err != nil {
+		return machine.IP, machine.State, "", err
+	}
+	err = global.PILOTGO_DB.Where("id = ?", machine.DepartId).Find(&depart).Error
+	return machine.IP, machine.State, depart.Depart, err
 }
 
 // 根据uuid获取机器的ip
-func UUID2MacIP(uuid string) (ip string) {
-	var machine model.MachineNode
-	global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine)
-	return machine.IP
+func UUID2MacIP(uuid string) (ip string, err error) {
+	var machine MachineNode
+	err = global.PILOTGO_DB.Where("machine_uuid = ?", uuid).Find(&machine).Error
+	return machine.IP, err
 }
 
 // 使用uuid删除机器
 func DeleteMachine(machinedeluuid string) (err error) {
-	var machine model.MachineNode
-	if IsUUIDExist(machinedeluuid) {
+	var machine MachineNode
+	UUIDExistbool, err := IsUUIDExist(machinedeluuid)
+	if err != nil {
+		return err
+	}
+	if UUIDExistbool {
 		if err := global.PILOTGO_DB.Where("machine_uuid=?", machinedeluuid).Unscoped().Delete(machine).Error; err != nil {
 			return err
 		}

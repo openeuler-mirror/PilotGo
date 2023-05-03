@@ -21,24 +21,24 @@ import (
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 // 返回全部的部门指针数组
-func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.DepartTreeNode, deptRoot model.DepartTreeNode) {
-	departnode := make([]model.DepartTreeNode, 0)
-	ptrchild = make([]*model.DepartTreeNode, 0)
+func Returnptrchild(depart []dao.DepartNode) (ptrchild []*dao.DepartTreeNode, deptRoot dao.DepartTreeNode) {
+	departnode := make([]dao.DepartTreeNode, 0)
+	ptrchild = make([]*dao.DepartTreeNode, 0)
 
 	for _, value := range depart {
 		if value.NodeLocate == 0 {
-			deptRoot = model.DepartTreeNode{
+			deptRoot = dao.DepartTreeNode{
 				Label: value.Depart,
 				Id:    value.ID,
 				Pid:   0,
 			}
 		} else {
-			departnode = append(departnode, model.DepartTreeNode{
+			departnode = append(departnode, dao.DepartTreeNode{
 				Label: value.Depart,
 				Id:    value.ID,
 				Pid:   value.PID,
@@ -47,7 +47,7 @@ func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.DepartTreeNode
 
 	}
 	ptrchild = append(ptrchild, &deptRoot)
-	var a *model.DepartTreeNode
+	var a *dao.DepartTreeNode
 	for key := range departnode {
 		a = &departnode[key]
 		ptrchild = append(ptrchild, a)
@@ -56,7 +56,7 @@ func Returnptrchild(depart []model.DepartNode) (ptrchild []*model.DepartTreeNode
 }
 
 // 生成部门树
-func MakeTree(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) {
+func MakeTree(node *dao.DepartTreeNode, ptrchild []*dao.DepartTreeNode) {
 	childs := findchild(node, ptrchild)
 	for _, value := range childs {
 		node.Children = append(node.Children, value)
@@ -67,7 +67,7 @@ func MakeTree(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) {
 }
 
 // 返回节点的子节点
-func findchild(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) (ret []*model.DepartTreeNode) {
+func findchild(node *dao.DepartTreeNode, ptrchild []*dao.DepartTreeNode) (ret []*dao.DepartTreeNode) {
 	for _, value := range ptrchild {
 		if node.Id == value.Pid {
 			ret = append(ret, value)
@@ -77,7 +77,7 @@ func findchild(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) (re
 }
 
 // 判断是否存在子节点
-func IsChildExist(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) bool {
+func IsChildExist(node *dao.DepartTreeNode, ptrchild []*dao.DepartTreeNode) bool {
 	for _, child := range ptrchild {
 		if node.Id == child.Pid {
 			return true
@@ -86,7 +86,7 @@ func IsChildExist(node *model.DepartTreeNode, ptrchild []*model.DepartTreeNode) 
 	return false
 }
 
-func LoopTree(node *model.DepartTreeNode, ID int, res **model.DepartTreeNode) {
+func LoopTree(node *dao.DepartTreeNode, ID int, res **dao.DepartTreeNode) {
 	if node.Children != nil {
 		for _, value := range node.Children {
 			if value.Id == ID {
@@ -100,7 +100,7 @@ func LoopTree(node *model.DepartTreeNode, ID int, res **model.DepartTreeNode) {
 	}
 }
 
-func DeleteDepartNode(DepartInfo []model.DepartNode, departid int) {
+func DeleteDepartNode(DepartInfo []dao.DepartNode, departid int) {
 	needdelete := make([]int, 0)
 	needdelete = append(needdelete, departid)
 	for _, value := range DepartInfo {
@@ -111,7 +111,10 @@ func DeleteDepartNode(DepartInfo []model.DepartNode, departid int) {
 		if len(needdelete) == 0 {
 			break
 		}
-		dao.Deletedepartdata(needdelete)
+		err := dao.Deletedepartdata(needdelete)
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		str := fmt.Sprintf("%d", needdelete[0])
 		needdelete = needdelete[1:]
 		dao.Insertdepartlist(needdelete, str)
@@ -119,20 +122,26 @@ func DeleteDepartNode(DepartInfo []model.DepartNode, departid int) {
 }
 
 // 获取部门下所有机器列表
-func MachineList(DepId int) ([]model.Res, error) {
+func MachineList(DepId int) ([]dao.Res, error) {
 	var departId []int
 	ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)
-	machinelist1 := dao.MachineList(departId)
+	machinelist1, err := dao.MachineList(departId)
+	if err != nil {
+		return machinelist1, err
+	}
 	return machinelist1, nil
 }
 
-func Dept(tmp int) (*model.DepartTreeNode, error) {
-	depart := dao.DepartStore()
+func Dept(tmp int) (*dao.DepartTreeNode, error) {
+	depart, err := dao.DepartStore()
+	if err != nil {
+		return nil, err
+	}
 	ptrchild, departRoot := Returnptrchild(depart)
 	MakeTree(&departRoot, ptrchild)
 	node := &departRoot
-	var d *model.DepartTreeNode
+	var d *dao.DepartTreeNode
 	if node.Id != tmp {
 		LoopTree(node, tmp, &d)
 		node = d
@@ -143,8 +152,11 @@ func Dept(tmp int) (*model.DepartTreeNode, error) {
 	return node, nil
 }
 
-func DepartInfo() (*model.DepartTreeNode, error) {
-	depart := dao.DepartStore()
+func DepartInfo() (*dao.DepartTreeNode, error) {
+	depart, err := dao.DepartStore()
+	if err != nil {
+		return nil, err
+	}
 	if len(depart) == 0 {
 		return nil, errors.New("当前无部门节点")
 	}
@@ -153,71 +165,115 @@ func DepartInfo() (*model.DepartTreeNode, error) {
 	return &departRoot, nil
 }
 
-func AddDepart(newDepart *model.AddDepart) error {
+func AddDepart(newDepart *dao.AddDepart) error {
 	pid := newDepart.ParentID
 	parentDepart := newDepart.ParentDepart
 	depart := newDepart.DepartName
-
-	if !dao.IsDepartIDExist(pid) {
+	temp, err := dao.IsDepartIDExist(pid)
+	if err != nil {
+		return err
+	}
+	if !temp {
 		return errors.New("部门PID有误,数据库中不存在该部门PID")
 	}
 
-	departNode := model.DepartNode{
+	departNode := dao.DepartNode{
 		PID:          pid,
 		ParentDepart: parentDepart,
 		Depart:       depart,
 	}
-	if dao.IsDepartNodeExist(parentDepart, depart) {
+	temp, err = dao.IsDepartNodeExist(parentDepart, depart)
+	if err != nil {
+		return err
+	}
+	if temp {
 		return errors.New("该部门节点已存在")
 	}
-	if len(parentDepart) != 0 && !dao.IsParentDepartExist(parentDepart) {
+	ParentDepartExistBool, err := dao.IsParentDepartExist(parentDepart)
+	if err != nil {
+		return err
+	}
+	if len(parentDepart) != 0 && !ParentDepartExistBool {
 		return errors.New("该部门上级部门不存在")
 	}
 	if len(depart) == 0 {
 		return errors.New("部门节点不能为空")
 	} else if len(parentDepart) == 0 {
-		if dao.IsRootExist() {
+		temp, err := dao.IsRootExist()
+		if err != nil {
+			return err
+		}
+		if temp {
 			return errors.New("已存在根节点,即组织名称")
 		} else {
 			departNode.NodeLocate = global.Departroot
-			if dao.AddDepart(global.PILOTGO_DB, &departNode) != nil {
+			if dao.AddDepartMessage(global.PILOTGO_DB, &departNode) != nil {
 				return errors.New("部门节点添加失败")
 			}
 		}
 	} else {
 		departNode.NodeLocate = global.DepartUnroot
-		if dao.AddDepart(global.PILOTGO_DB, &departNode) != nil {
+		if dao.AddDepartMessage(global.PILOTGO_DB, &departNode) != nil {
 			return errors.New("部门节点添加失败")
 		}
 	}
 	return nil
 }
 
-func DeleteDepartData(DelDept *model.DeleteDepart) error {
-	if !dao.IsDepartIDExist(DelDept.DepartID) {
+func DeleteDepartData(DelDept *dao.DeleteDepart) error {
+	temp, err := dao.IsDepartIDExist(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
+	if !temp {
 		return errors.New("不存在该机器")
 	}
-
-	for _, mac := range dao.MachineStore(DelDept.DepartID) {
-		dao.ModifyMachineDepart2(mac.ID, global.UncateloguedDepartId)
+	macli, err := dao.MachineStore(DelDept.DepartID)
+	if err != nil {
+		return err
 	}
-	for _, depart := range dao.SubDepartId(DelDept.DepartID) {
-		machine := dao.MachineStore(depart)
+	for _, mac := range macli {
+		err := dao.ModifyMachineDepart2(mac.ID, global.UncateloguedDepartId)
+		if err != nil {
+			return err
+		}
+	}
+	departs, err := dao.SubDepartId(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
+	for _, depart := range departs {
+		machine, err := dao.MachineStore(depart)
+		if err != nil {
+			return err
+		}
 		for _, m := range machine {
-			dao.ModifyMachineDepart2(m.ID, global.UncateloguedDepartId)
+			err := dao.ModifyMachineDepart2(m.ID, global.UncateloguedDepartId)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	DepartInfo := dao.Pid2Depart(DelDept.DepartID)
+	DepartInfo, err := dao.Pid2Depart(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
 	DeleteDepartNode(DepartInfo, DelDept.DepartID)
-	dao.DelUser(DelDept.DepartID)
+	err = dao.DelUser(DelDept.DepartID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func UpdateDepart(DepartID int, DepartName string) error {
-	dao.UpdateDepart(DepartID, DepartName)
-	dao.UpdateParentDepart(DepartID, DepartName)
-	return nil
+	err := dao.UpdateDepart(DepartID, DepartName)
+	if err != nil {
+		return err
+	}
+	err = dao.UpdateParentDepart(DepartID, DepartName)
+	return err
 }
 
 func ModifyMachineDepart(MachineID string, DepartID int) error {
@@ -227,7 +283,10 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 		ResIds[index], _ = strconv.Atoi(val)
 	}
 	for _, id := range ResIds {
-		dao.ModifyMachineDepart(id, DepartID)
+		err := dao.ModifyMachineDepart(id, DepartID)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

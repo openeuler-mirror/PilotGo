@@ -15,41 +15,78 @@
 package dao
 
 import (
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"time"
+
+	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type AgentLogParent struct {
+	ID         int       `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt  time.Time `json:"created_at"`
+	UserName   string    `json:"userName"`
+	DepartName string    `json:"departName"`
+	Type       string    `json:"type"`
+	Status     string    `json:"status"`
+}
+type AgentLog struct {
+	ID              int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	LogParentID     int    `gorm:"index" json:"logparent_id"`
+	IP              string `json:"ip"`
+	StatusCode      int    `json:"code"`
+	OperationObject string `json:"object"`
+	Action          string `json:"action"`
+	Message         string `json:"message"`
+}
+type AgentLogDel struct {
+	IDs []int `json:"ids"`
+}
+
+func (p *AgentLogParent) LogAll() (list *[]AgentLogParent, tx *gorm.DB) {
+	list = &[]AgentLogParent{}
+	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
+	return
+}
+
+func (p *AgentLog) AgentLog(parentId int) (list *[]AgentLog, tx *gorm.DB) {
+	list = &[]AgentLog{}
+	tx = global.PILOTGO_DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
+	return
+}
+
 // 删除agent日志
-func DeleteLog(PLogIds int) {
-	var logparent model.AgentLogParent
-	var log model.AgentLog
+func DeleteLog(PLogIds int) error {
+	var logparent AgentLogParent
+	var log AgentLog
 
-	global.PILOTGO_DB.Where("log_parent_id=?", PLogIds).Unscoped().Delete(log)
-	global.PILOTGO_DB.Where("id=?", PLogIds).Unscoped().Delete(logparent)
-
+	err := global.PILOTGO_DB.Where("log_parent_id=?", PLogIds).Unscoped().Delete(log).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return global.PILOTGO_DB.Where("id=?", PLogIds).Unscoped().Delete(logparent).Error
 }
 
 // 存储父日志
-func ParentAgentLog(PLog model.AgentLogParent) int {
-	global.PILOTGO_DB.Save(&PLog)
-	return PLog.ID
+func ParentAgentLog(PLog AgentLogParent) (int, error) {
+	err := global.PILOTGO_DB.Save(&PLog).Error
+	return PLog.ID, err
 }
 
 // 存储子日志
-func AgentLog(Log model.AgentLog) {
-	global.PILOTGO_DB.Save(&Log)
+func AgentLogMessage(Log AgentLog) error {
+	return global.PILOTGO_DB.Save(&Log).Error
 }
 
 // 查询子日志
-func Id2AgentLog(id int) []model.AgentLog {
-	var Log []model.AgentLog
-	global.PILOTGO_DB.Where("log_parent_id = ?", id).Find(&Log)
-	return Log
+func Id2AgentLog(id int) ([]AgentLog, error) {
+	var Log []AgentLog
+	err := global.PILOTGO_DB.Where("log_parent_id = ?", id).Find(&Log).Error
+	return Log, err
 }
 
 // 修改父日志的操作状态
-func UpdateParentAgentLog(PLogId int, status string) {
-	var ParentLog model.AgentLogParent
-	global.PILOTGO_DB.Model(&ParentLog).Where("id=?", PLogId).Update("status", status)
-
+func UpdateParentAgentLog(PLogId int, status string) error {
+	var ParentLog AgentLogParent
+	return global.PILOTGO_DB.Model(&ParentLog).Where("id=?", PLogId).Update("status", status).Error
 }

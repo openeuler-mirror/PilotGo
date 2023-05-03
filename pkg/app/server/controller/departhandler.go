@@ -15,11 +15,10 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -38,7 +37,10 @@ func MachineListHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, machinelist, "部门下所属机器获取成功")
+	if len(machinelist) == 0 {
+		response.Success(c, []interface{}{}, "部门下所属机器获取成功")
+	}
+	response.Success(c, machinelist, "部门下所属机器获取成功")
 }
 
 func DepartHandler(c *gin.Context) {
@@ -53,7 +55,7 @@ func DepartHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, node, "获取当前部门及子部门信息")
+	response.Success(c, node, "获取当前部门及子部门信息")
 }
 
 func DepartInfoHandler(c *gin.Context) {
@@ -62,11 +64,11 @@ func DepartInfoHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, departRoot, "获取全部的部门信息")
+	response.Success(c, departRoot, "获取全部的部门信息")
 }
 
 func AddDepartHandler(c *gin.Context) {
-	newDepart := model.AddDepart{}
+	newDepart := dao.AddDepart{}
 	if err := c.Bind(&newDepart); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -80,7 +82,7 @@ func AddDepartHandler(c *gin.Context) {
 }
 
 func DeleteDepartDataHandler(c *gin.Context) {
-	var DelDept model.DeleteDepart
+	var DelDept dao.DeleteDepart
 	if err := c.Bind(&DelDept); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -94,7 +96,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 }
 
 func UpdateDepartHandler(c *gin.Context) {
-	var new model.NewDepart
+	var new dao.NewDepart
 	if err := c.Bind(&new); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -108,7 +110,7 @@ func UpdateDepartHandler(c *gin.Context) {
 }
 
 func ModifyMachineDepartHandler(c *gin.Context) {
-	var M model.MachineModifyDepart
+	var M dao.MachineModifyDepart
 	if err := c.Bind(&M); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

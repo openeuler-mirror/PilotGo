@@ -16,123 +16,163 @@ package dao
 
 import (
 	"gorm.io/gorm"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-func IsParentDepartExist(parent string) bool {
-	var Depart model.DepartNode
-	global.PILOTGO_DB.Where("depart=? ", parent).Find(&Depart)
-	return Depart.ID != 0
+type DepartNode struct {
+	ID           int    `gorm:"primary_key;AUTO_INCREMENT"`
+	PID          int    `gorm:"type:int(100);not null" json:"pid"`
+	ParentDepart string `gorm:"type:varchar(100);not null" json:"parentdepart"`
+	Depart       string `gorm:"type:varchar(100);not null" json:"depart"`
+	NodeLocate   int    `gorm:"type:int(100);not null" json:"nodelocate"`
+	//根节点为0,普通节点为1
 }
-func IsDepartNodeExist(parent string, depart string) bool {
-	var Depart model.DepartNode
-	global.PILOTGO_DB.Where("depart=? and parent_depart=?", depart, parent).Find(&Depart)
+
+type DepartTreeNode struct {
+	Label    string            `json:"label"`
+	Id       int               `json:"id"`
+	Pid      int               `json:"pid"`
+	Children []*DepartTreeNode `json:"children"`
+}
+
+type NewDepart struct {
+	DepartID   int    `json:"DepartID"`
+	DepartName string `json:"DepartName"`
+}
+
+type MachineModifyDepart struct {
+	MachineID string `json:"machineid"`
+	DepartID  int    `json:"departid"`
+}
+
+type DeleteDepart struct {
+	DepartID int `json:"DepartID"`
+}
+type AddDepart struct {
+	ParentID     int    `json:"PID"`
+	ParentDepart string `json:"ParentDepart"`
+	DepartName   string `json:"Depart"`
+}
+type Depart struct {
+	ID int `form:"DepartId"`
+}
+
+func IsParentDepartExist(parent string) (bool, error) {
+	var Depart DepartNode
+	err := global.PILOTGO_DB.Where("depart=? ", parent).Find(&Depart).Error
+	return Depart.ID != 0, err
+}
+func IsDepartNodeExist(parent string, depart string) (bool, error) {
+	var Depart DepartNode
+	err := global.PILOTGO_DB.Where("depart=? and parent_depart=?", depart, parent).Find(&Depart).Error
 	// global.PILOTGO_DB.Where("", parent).Find(&Depart)
-	return Depart.ID != 0
+	return Depart.ID != 0, err
 }
-func IsDepartIDExist(ID int) bool {
-	var Depart model.DepartNode
-	global.PILOTGO_DB.Where("id=?", ID).Find(&Depart)
-	return Depart.ID != 0
-}
-
-func IsRootExist() bool {
-	var Depart model.DepartNode
-	global.PILOTGO_DB.Where("node_locate=?", 0).Find(&Depart)
-	return Depart.ID != 0
+func IsDepartIDExist(ID int) (bool, error) {
+	var Depart DepartNode
+	err := global.PILOTGO_DB.Where("id=?", ID).Find(&Depart).Error
+	return Depart.ID != 0, err
 }
 
-func DepartStore() []model.DepartNode {
-	var Depart []model.DepartNode
-	global.PILOTGO_DB.Find(&Depart)
-	return Depart
+func IsRootExist() (bool, error) {
+	var Depart DepartNode
+	err := global.PILOTGO_DB.Where("node_locate=?", 0).Find(&Depart).Error
+	return Depart.ID != 0, err
 }
 
-func UpdateDepart(DepartID int, DepartName string) {
-	var DepartInfo model.DepartNode
-	Depart := model.DepartNode{
+func DepartStore() ([]DepartNode, error) {
+	var Depart []DepartNode
+	err := global.PILOTGO_DB.Find(&Depart).Error
+	return Depart, err
+}
+
+func UpdateDepart(DepartID int, DepartName string) error {
+	var DepartInfo DepartNode
+	Depart := DepartNode{
 		Depart: DepartName,
 	}
-	global.PILOTGO_DB.Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart)
+	return global.PILOTGO_DB.Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart).Error
 }
 
-func UpdateParentDepart(DepartID int, DepartName string) {
-	var DepartInfo model.DepartNode
-	Depart := model.DepartNode{
+func UpdateParentDepart(DepartID int, DepartName string) error {
+	var DepartInfo DepartNode
+	Depart := DepartNode{
 		ParentDepart: DepartName,
 	}
-	global.PILOTGO_DB.Model(&DepartInfo).Where("p_id=?", DepartID).Updates(&Depart)
+	return global.PILOTGO_DB.Model(&DepartInfo).Where("p_id=?", DepartID).Updates(&Depart).Error
 }
 
-func Pid2Depart(pid int) []model.DepartNode {
-	var DepartInfo []model.DepartNode
-	global.PILOTGO_DB.Where("p_id=?", pid).Find(&DepartInfo)
-	return DepartInfo
+func Pid2Depart(pid int) ([]DepartNode, error) {
+	var DepartInfo []DepartNode
+	err := global.PILOTGO_DB.Where("p_id=?", pid).Find(&DepartInfo).Error
+	return DepartInfo, err
 }
 
-func Deletedepartdata(needdelete []int) {
-	var DepartInfo []model.DepartNode
-	global.PILOTGO_DB.Where("id=?", needdelete[0]).Delete(&DepartInfo)
+func Deletedepartdata(needdelete []int) error {
+	var DepartInfo []DepartNode
+	return global.PILOTGO_DB.Where("id=?", needdelete[0]).Delete(&DepartInfo).Error
 }
 
 // 向需要删除的depart的组内增加需要删除的子节点
-func Insertdepartlist(needdelete []int, str string) []int {
-	var DepartInfo []model.DepartNode
+func Insertdepartlist(needdelete []int, str string) ([]int, error) {
+	var DepartInfo []DepartNode
 
-	global.PILOTGO_DB.Where("p_id=?", str).Find(&DepartInfo)
+	err := global.PILOTGO_DB.Where("p_id=?", str).Find(&DepartInfo).Error
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
 	}
-	return needdelete
+	return needdelete, err
 }
 
 // 根据部门名字查询id和pid
-func GetPidAndId(depart string) (pid, id int) {
-	var dep model.DepartNode
-	global.PILOTGO_DB.Where("depart=?", depart).Find(&dep)
-	return dep.PID, dep.ID
+func GetPidAndId(depart string) (pid, id int, err error) {
+	var dep DepartNode
+	err = global.PILOTGO_DB.Where("depart=?", depart).Find(&dep).Error
+	return dep.PID, dep.ID, err
 }
 
 // 添加部门
-func AddDepart(db *gorm.DB, depart *model.DepartNode) error {
-	err := db.Create(depart).Error
-	return err
+func AddDepartMessage(db *gorm.DB, depart *DepartNode) error {
+	return db.Create(depart).Error
 }
 
 // 根据部门id获取部门名称
-func DepartIdToGetDepartName(id int) string {
-	var departNames model.DepartNode
-	global.PILOTGO_DB.Where("id =?", id).Find(&departNames)
-	return departNames.Depart
+func DepartIdToGetDepartName(id int) (string, error) {
+	var departNames DepartNode
+	err := global.PILOTGO_DB.Where("id =?", id).Find(&departNames).Error
+	return departNames.Depart, err
 }
 
 // 根据部门ids查询所属部门
 func DepartIdsToGetDepartNames(ids []int) (names []string) {
 	for _, id := range ids {
-		var depart model.DepartNode
-		global.PILOTGO_DB.Where("id = ?", id).Find(&depart)
+		var depart DepartNode
+		err := global.PILOTGO_DB.Where("id = ?", id).Find(&depart).Error
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		names = append(names, depart.Depart)
 	}
 	return
 }
 
 // 获取下级部门id
-func SubDepartId(id int) []int {
-	var depart []model.DepartNode
-	global.PILOTGO_DB.Where("p_id=?", id).Find(&depart)
+func SubDepartId(id int) ([]int, error) {
+	var depart []DepartNode
+	err := global.PILOTGO_DB.Where("p_id=?", id).Find(&depart).Error
 
 	res := make([]int, 0)
 	for _, value := range depart {
 		res = append(res, value.ID)
 	}
-	return res
+	return res, err
 }
 
 // 获取所有的一级部门id
-func FirstDepartId() (departIds []int) {
-	departs := []model.DepartNode{}
-	global.PILOTGO_DB.Where("p_id = ?", global.UncateloguedDepartId).Find(&departs)
+func FirstDepartId() (departIds []int, err error) {
+	departs := []DepartNode{}
+	err = global.PILOTGO_DB.Where("p_id = ?", global.UncateloguedDepartId).Find(&departs).Error
 	for _, depart := range departs {
 		departIds = append(departIds, depart.ID)
 	}
@@ -140,16 +180,20 @@ func FirstDepartId() (departIds []int) {
 }
 
 // 创建公司组织
-func CreateOrganization() {
-	var Depart model.DepartNode
-	global.PILOTGO_DB.Where("p_id=?", global.Departroot).Find(&Depart)
+func CreateOrganization() error {
+	var Depart DepartNode
+	err := global.PILOTGO_DB.Where("p_id=?", global.Departroot).Find(&Depart).Error
+	if err != nil {
+		return err
+	}
 	if Depart.ID == 0 {
-		Depart = model.DepartNode{
+		Depart = DepartNode{
 			PID:          global.Departroot,
 			ParentDepart: "",
 			Depart:       "组织名",
 			NodeLocate:   global.Departroot,
 		}
-		global.PILOTGO_DB.Save(&Depart)
+		return global.PILOTGO_DB.Save(&Depart).Error
 	}
+	return nil
 }

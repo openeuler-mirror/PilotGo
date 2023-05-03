@@ -16,39 +16,115 @@ package dao
 
 import (
 	"strings"
+	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
-func IsExistId(id int) bool {
-	var file model.Files
-	global.PILOTGO_DB.Where("id=?", id).Find(&file)
-	return file.ID != 0
+type Files struct {
+	ID              int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	FileName        string `json:"name"`
+	FilePath        string `json:"path"`
+	Type            string `json:"type"`
+	Description     string `json:"description"`
+	UserUpdate      string `json:"user"`
+	UserDept        string `json:"userDept"`
+	UpdatedAt       time.Time
+	ControlledBatch string `json:"batchId"`
+	TakeEffect      string `json:"activeMode"`
+	File            string `gorm:"type:text" json:"file"`
 }
 
-func IsExistFile(filename string) bool {
-	var file model.Files
-	global.PILOTGO_DB.Where("file_name = ?", filename).Find(&file)
-	return file.ID != 0
+type HistoryFiles struct {
+	ID          int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	FileID      int `json:"filePId"`
+	UpdatedAt   time.Time
+	UserUpdate  string `json:"user"`
+	UserDept    string `json:"userDept"`
+	FileName    string `json:"name"`
+	Description string `json:"description"`
+	File        string `gorm:"type:text" json:"file"`
 }
 
-func IsExistFileLatest(fileId int) (bool, int, string) {
-	var files []model.HistoryFiles
-	global.PILOTGO_DB.Order("id desc").Where("file_id = ?", fileId).Find(&files)
+type RollBackFiles struct {
+	HistoryFileID int    `json:"id"`
+	FileID        int    `json:"filePId"`
+	UserUpdate    string `json:"user"`
+	UserDept      string `json:"userDept"`
+}
+
+type DeleteFiles struct {
+	FileIDs []int `json:"ids"`
+}
+
+type SearchFile struct {
+	Search string `json:"search"`
+}
+
+type FileBroadcast struct {
+	BatchId  []int  `json:"batches"`
+	Path     string `json:"path"`
+	FileName string `json:"name"`
+	User     string `json:"user"`
+	UserDept string `json:"userDept"`
+	Text     string `json:"file"`
+}
+
+func (f *Files) AllFiles() (list *[]Files, tx *gorm.DB) {
+	list = &[]Files{}
+	tx = global.PILOTGO_DB.Order("id desc").Find(&list)
+	return
+}
+
+func (f *SearchFile) FileSearch(search string) (list *[]Files, tx *gorm.DB) {
+	list = &[]Files{}
+	tx = global.PILOTGO_DB.Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
+	if len(*list) == 0 {
+		tx = global.PILOTGO_DB.Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
+	}
+	return
+}
+
+func (f *HistoryFiles) HistoryFiles(fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
+	list = &[]HistoryFiles{}
+	tx = global.PILOTGO_DB.Order("id desc").Where("file_id=?", fileId).Find(&list)
+	return
+}
+
+func IsExistId(id int) (bool, error) {
+	var file Files
+	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
+	return file.ID != 0, err
+}
+
+func IsExistFile(filename string) (bool, error) {
+	var file Files
+	err := global.PILOTGO_DB.Where("file_name = ?", filename).Find(&file).Error
+	return file.ID != 0, err
+}
+
+func IsExistFileLatest(fileId int) (bool, int, string, error) {
+	var files []HistoryFiles
+	err := global.PILOTGO_DB.Order("id desc").Where("file_id = ?", fileId).Find(&files).Error
+	if err != nil {
+		return false, 0, "", err
+	}
 	for _, file := range files {
 		if ok := strings.Contains(file.FileName, "latest"); ok {
-			return true, file.ID, file.FileName
+			return true, file.ID, file.FileName, nil
 		}
 	}
-	return false, 0, ""
+	return false, 0, "", nil
 }
 
-func SaveHistoryFile(id int) {
-	var file model.Files
-	global.PILOTGO_DB.Where("id=?", id).Find(&file)
-
-	lastversion := model.HistoryFiles{
+func SaveHistoryFile(id int) error {
+	var file Files
+	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
+	if err != nil {
+		return err
+	}
+	lastversion := HistoryFiles{
 		FileID:      id,
 		UserUpdate:  file.UserUpdate,
 		UserDept:    file.UserDept,
@@ -56,14 +132,16 @@ func SaveHistoryFile(id int) {
 		Description: file.Description,
 		File:        file.File,
 	}
-	global.PILOTGO_DB.Save(&lastversion)
+	return global.PILOTGO_DB.Save(&lastversion).Error
 }
 
-func SaveLatestFile(id int) {
-	var file model.Files
-	global.PILOTGO_DB.Where("id = ?", id).Find(&file)
-
-	lastversion := model.HistoryFiles{
+func SaveLatestFile(id int) error {
+	var file Files
+	err := global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	if err != nil {
+		return err
+	}
+	lastversion := HistoryFiles{
 		FileID:      id,
 		UserUpdate:  file.UserUpdate,
 		UserDept:    file.UserDept,
@@ -71,59 +149,64 @@ func SaveLatestFile(id int) {
 		Description: file.Description,
 		File:        file.File,
 	}
-	global.PILOTGO_DB.Save(&lastversion)
+	return global.PILOTGO_DB.Save(&lastversion).Error
 }
 
-func UpdateFile(id int, f model.Files) {
-	var file model.Files
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f)
+func UpdateFile(id int, f Files) error {
+	var file Files
+	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
-func UpdateLastFile(id int, f model.HistoryFiles) {
-	var file model.HistoryFiles
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f)
+func UpdateLastFile(id int, f HistoryFiles) error {
+	var file HistoryFiles
+	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
-func RollBackFile(id int, text string) {
-	var file model.Files
-	fd := model.Files{
+func RollBackFile(id int, text string) error {
+	var file Files
+	fd := Files{
 		File: text,
 	}
-	global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&fd)
+	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&fd).Error
 }
-func DeleteFile(id int) {
-	var file model.Files
-	global.PILOTGO_DB.Where("id = ?", id).Unscoped().Delete(file)
-}
-
-func DeleteHistoryFile(filePId int) {
-	var file model.HistoryFiles
-	global.PILOTGO_DB.Where("file_id = ?", filePId).Unscoped().Delete(file)
+func DeleteFile(id int) error {
+	var file Files
+	return global.PILOTGO_DB.Where("id = ?", id).Unscoped().Delete(file).Error
 }
 
-func SaveFile(file model.Files) {
-	global.PILOTGO_DB.Save(&file)
+func DeleteHistoryFile(filePId int) error {
+	var file HistoryFiles
+	return global.PILOTGO_DB.Where("file_id = ?", filePId).Unscoped().Delete(file).Error
 }
 
-func FileText(id int) (text string) {
-	file := model.Files{}
-	global.PILOTGO_DB.Where("id = ?", id).Find(&file)
-	return file.File
+func SaveFile(file Files) error {
+	return global.PILOTGO_DB.Save(&file).Error
 }
-func LastFileText(id int) (text string) {
-	file := model.HistoryFiles{}
-	global.PILOTGO_DB.Where("id = ?", id).Find(&file)
-	return file.File
-}
-func FindLastVersionFile(uuid, filename string) []model.HistoryFiles {
-	var files []model.HistoryFiles
-	var lastfiles []model.HistoryFiles
 
-	global.PILOTGO_DB.Where("uuid = ? ", uuid).Find(&files)
+func FileText(id int) (text string, err error) {
+	file := Files{}
+	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	return file.File, err
+}
+
+func LastFileText(id int) (text string, err error) {
+	file := HistoryFiles{}
+	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	return file.File, err
+}
+
+func FindLastVersionFile(uuid, filename string) ([]HistoryFiles, error) {
+	var files []HistoryFiles
+	var lastfiles []HistoryFiles
+
+	err := global.PILOTGO_DB.Where("uuid = ? ", uuid).Find(&files).Error
+	if err != nil {
+		return lastfiles, err
+	}
 	for _, file := range files {
 		if ok := strings.Contains(file.FileName, filename); ok {
 			lastfiles = append(lastfiles, file)
 		}
 	}
-	return lastfiles
+	return lastfiles, nil
 }

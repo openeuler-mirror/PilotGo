@@ -16,11 +16,9 @@ package agentmanager
 
 import (
 	"net"
-	"strings"
 	"sync"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -110,31 +108,51 @@ func AddAgents2DB(a *Agent) {
 		logger.Error("获取uuid失败!")
 		return
 	}
-	agent_OS, err := agent_uuid.GetAgentOSInfo()
+	// TODO: 沒有对message对象status、Error字段进行判断，决定后续步骤是否执行
+	agent_os, err := agent_uuid.GetAgentOSInfo()
 	if err != nil {
-		logger.Error("初始化系统信息失败!")
+		logger.Error("初始化系统信息失败: %s", err.Error())
 		return
 	}
-	agentOS := strings.Split(agent_OS.(string), ";")
-
-	if dao.IsUUIDExist(a.UUID) {
-		logger.Warn("机器%s已经存在!", agentOS[0])
-		departId := dao.UUIDForDepartId(a.UUID)
+	UUIDExistbool, err := dao.IsUUIDExist(a.UUID)
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+	if UUIDExistbool {
+		logger.Warn("机器%s已经存在!", agent_os.IP)
+		departId, err := dao.UUIDForDepartId(a.UUID)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
 		if departId != global.UncateloguedDepartId {
-			dao.MachineStatusToNormal(a.UUID, agentOS[0])
+			err := dao.MachineStatusToNormal(a.UUID, agent_os.IP)
+			if err != nil {
+				logger.Error(err.Error())
+				return
+			}
 		} else {
-			dao.MachineStatusToFree(a.UUID, agentOS[0])
+			err := dao.MachineStatusToFree(a.UUID, agent_os.IP)
+			if err != nil {
+				logger.Error(err.Error())
+				return
+			}
 		}
 		return
 	}
 
-	agent_list := model.MachineNode{
-		IP:          agentOS[0],
+	agent_list := dao.MachineNode{
+		IP:          agent_os.IP,
 		MachineUUID: a.UUID,
 		DepartId:    global.UncateloguedDepartId,
-		Systeminfo:  agentOS[1] + " " + agentOS[2],
-		CPU:         agentOS[3],
+		Systeminfo:  agent_os.Platform + " " + agent_os.PlatformVersion,
+		CPU:         agent_os.ModelName,
 		State:       global.Free,
 	}
-	dao.AddNewMachine(agent_list)
+	err = dao.AddNewMachine(agent_list)
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
 }

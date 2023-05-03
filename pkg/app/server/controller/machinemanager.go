@@ -15,24 +15,22 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func MachineInfoHandler(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	depart := &model.Depart{}
+	depart := &dao.Depart{}
 	if c.ShouldBind(&depart) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -48,15 +46,15 @@ func MachineInfoHandler(c *gin.Context) {
 
 // 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
-	machine := model.MachineNode{}
-	query := &model.PaginationQ{}
+	machine := dao.MachineNode{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	list, tx, res := machine.ReturnMachine(query, global.UncateloguedDepartId)
+	list, tx, res := machine.ReturnMachine(global.UncateloguedDepartId)
 	total, err := service.CrudAll(query, tx, &res)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -73,12 +71,12 @@ func MachineAllDataHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.JSON(c, http.StatusOK, http.StatusOK, datas, "获取所有的机器数据")
+	response.Success(c, datas, "获取所有的机器数据")
 }
 
 // 删除机器
 func DeleteMachineHandler(c *gin.Context) {
-	var deleteuuid model.DeleteUUID
+	var deleteuuid dao.DeleteUUID
 	if c.Bind(&deleteuuid) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -86,8 +84,8 @@ func DeleteMachineHandler(c *gin.Context) {
 	machinelist := service.DeleteMachine(deleteuuid.Deluuid)
 
 	if len(machinelist) != 0 {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"machinelist": machinelist}, "机器删除失败")
+		response.Fail(c, gin.H{"machinelist": machinelist}, "机器删除失败")
 	} else {
-		response.Response(c, http.StatusOK, http.StatusOK, nil, "机器删除成功!")
+		response.Success(c, nil, "机器删除成功!")
 	}
 }

@@ -16,23 +16,12 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 )
-
-// 升级HTTP协议为WebSocket
-var Upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
 
 func ShellWs(c *gin.Context) {
 	msg := c.DefaultQuery("msg", "")
@@ -40,22 +29,22 @@ func ShellWs(c *gin.Context) {
 	rows := c.DefaultQuery("rows", "35")
 	col, _ := strconv.Atoi(cols)
 	row, _ := strconv.Atoi(rows)
-	terminal := model.Terminal{
+	terminal := dao.Terminal{
 		Columns: uint32(col),
 		Rows:    uint32(row),
 	}
 	// 后端获取到前端传来的主机信息,以此建立ssh客户端
-	sshClient, err := service.DecodedMsgToSSHClient(msg)
+	sshClient, err := webSocket.DecodedMsgToSSHClient(msg)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 	if sshClient.IpAddress == "" || sshClient.Password == "" {
-		c.Error(&model.ApiError{Message: "IP地址或密码不能为空", Code: 400})
+		c.Error(&dao.ApiError{Message: "IP地址或密码不能为空", Code: 400})
 		return
 	}
 	// 升级协议并获得socket连接
-	conn, err := Upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := webSocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.Error(err)
 		return

@@ -20,14 +20,50 @@ import (
 	"strings"
 	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
+type UserRole struct {
+	ID          int    `gorm:"primary_key;AUTO_INCREMENT"`
+	Role        string `json:"role"` // 超管和部门等级
+	Type        int    `json:"type"`
+	Description string `json:"description"`
+	Menus       string `json:"menus"`
+	ButtonID    string `json:"buttonId"`
+}
+
+type ReturnUserRole struct {
+	ID          int      `json:"id"`
+	Role        string   `json:"role"`
+	Type        int      `json:"type"`
+	Description string   `json:"description"`
+	Menus       string   `json:"menus"`
+	Buttons     []string `json:"buttons"`
+}
+
+type RoleButton struct {
+	ID     uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	Button string `json:"button"`
+}
+
+type RoleID struct {
+	RoleId []int `json:"roleId"`
+}
+
+type RolePermissionChange struct {
+	RoleID   int      `json:"id"`
+	Menus    []string `json:"menus"`
+	ButtonId []string `json:"buttonId"`
+}
+
 // 根据角色名称返回角色id和用户类型
-func GetRoleIdAndUserType(role string) (roleId string, user_type int) {
-	var Role model.UserRole
-	global.PILOTGO_DB.Where("role = ?", role).Find(&Role)
+func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error) {
+	var Role UserRole
+	err = global.PILOTGO_DB.Where("role = ?", role).Find(&Role).Error
+	if err != nil {
+		return "", 0, err
+	}
 	roleID := strconv.Itoa(Role.ID)
 	var userType int
 	if Role.ID > global.OrdinaryUserRoleId {
@@ -35,49 +71,55 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int) {
 	} else {
 		userType = Role.ID - 1
 	}
-	return roleID, userType
+	return roleID, userType, nil
 }
 
-// 根绝id获取该角色的所有信息
-func RoleIdToGetAllInfo(roleid int) model.UserRole {
-	var role model.UserRole
-	global.PILOTGO_DB.Where("id=?", roleid).Find(&role)
-	return role
+// 根据id获取该角色的所有信息
+func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
+	var role UserRole
+	err := global.PILOTGO_DB.Where("id=?", roleid).Find(&role).Error
+	return role, err
 }
 
 // 登录用户的权限按钮
-func PermissionButtons(button string) interface{} {
+func PermissionButtons(button string) (interface{}, error) {
 	var buttons []string
 	if len(button) == 0 {
-		return []interface{}{}
+		return []interface{}{}, nil
 	}
 	IDs := strings.Split(button, ",")
 
 	for _, id := range IDs {
-		var SubButton model.RoleButton
+		var SubButton RoleButton
 		i, err := strconv.Atoi(id)
 		if err != nil {
 			panic(err)
 		}
-		global.PILOTGO_DB.Where("id = ?", i).Find(&SubButton)
+		err = global.PILOTGO_DB.Where("id = ?", i).Find(&SubButton).Error
+		if err != nil {
+			return buttons, err
+		}
 		button := SubButton.Button
 		buttons = append(buttons, button)
 	}
-	return buttons
+	return buttons, nil
 }
 
 // 获取所有的用户角色
-func GetAllRoles() ([]model.ReturnUserRole, int) {
-	var roles []model.UserRole
-	var getRole []model.ReturnUserRole
-	global.PILOTGO_DB.Order("id desc").Find(&roles)
+func GetAllRoles() ([]ReturnUserRole, int, error) {
+	var roles []UserRole
+	var getRole []ReturnUserRole
+	err := global.PILOTGO_DB.Order("id desc").Find(&roles).Error
+	if err != nil {
+		return getRole, 0, err
+	}
 	total := len(roles)
 
 	for _, role := range roles {
 		var buts []string
 
 		if len(role.ButtonID) == 0 {
-			r := model.ReturnUserRole{
+			r := ReturnUserRole{
 				ID:          role.ID,
 				Role:        role.Role,
 				Type:        role.Type,
@@ -91,12 +133,15 @@ func GetAllRoles() ([]model.ReturnUserRole, int) {
 			buttonss := strings.Split(role.ButtonID, ",")
 
 			for _, button := range buttonss {
-				var but model.RoleButton
+				var but RoleButton
 				i, _ := strconv.Atoi(button)
-				global.PILOTGO_DB.Where("id=?", i).Find(&but)
+				err := global.PILOTGO_DB.Where("id=?", i).Find(&but).Error
+				if err != nil {
+					return getRole, total, err
+				}
 				buts = append(buts, but.Button)
 			}
-			r := model.ReturnUserRole{
+			r := ReturnUserRole{
 				ID:          role.ID,
 				Role:        role.Role,
 				Type:        role.Type,
@@ -107,79 +152,78 @@ func GetAllRoles() ([]model.ReturnUserRole, int) {
 			getRole = append(getRole, r)
 		}
 	}
-	return getRole, total
+	return getRole, total, nil
 }
 
 // 新增角色
-func AddRole(r model.UserRole) error {
+func AddRole(r UserRole) error {
 	role := r.Role
 	if len(role) == 0 {
 		return fmt.Errorf("用户角色不能为空")
 	}
-	userRole := model.UserRole{
+	userRole := UserRole{
 		Role:        role,
 		Type:        r.Type,
 		Description: r.Description,
 	}
-	global.PILOTGO_DB.Save(&userRole)
-	return nil
+	return global.PILOTGO_DB.Save(&userRole).Error
 }
 
 // 是否有用户绑定某角色
-func IsUserBindingRole(roleId int) bool {
-	var users []model.User
-	global.PILOTGO_DB.Find(&users)
+func IsUserBindingRole(roleId int) (bool, error) {
+	var users []User
+	err := global.PILOTGO_DB.Find(&users).Error
+	if err != nil {
+		return false, err
+	}
 	for _, user := range users {
 		id := user.RoleID
 		if find := strings.Contains(id, strconv.Itoa(roleId)); find {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 // 删除用户角色
-func DeleteRole(roleId int) {
-	var UserRole model.UserRole
-	global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole)
+func DeleteRole(roleId int) error {
+	var UserRole UserRole
+	return global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
 }
 
 // 修改角色名称
-func UpdateRoleName(roleId int, name string) {
-	var UserRole model.UserRole
-	global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name)
+func UpdateRoleName(roleId int, name string) error {
+	var UserRole UserRole
+	return global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
 }
 
 // 修改角色描述
-func UpdateRoleDescription(roleId int, desc string) {
-	var UserRole model.UserRole
-	global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc)
-
+func UpdateRoleDescription(roleId int, desc string) error {
+	var UserRole UserRole
+	return global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
 }
 
 // 变更用户角色权限
-func UpdateRolePermission(permission model.RolePermissionChange) model.UserRole {
-	var userRole model.UserRole
+func UpdateRolePermission(permission RolePermissionChange) (UserRole, error) {
+	var userRole UserRole
 	// 数组切片转为string
 	menus := strings.Replace(strings.Trim(fmt.Sprint(permission.Menus), "[]"), " ", ",", -1)
 	buttonId := strings.Replace(strings.Trim(fmt.Sprint(permission.ButtonId), "[]"), " ", ",", -1)
 
-	r := model.UserRole{
+	r := UserRole{
 		Menus:    menus,
 		ButtonID: buttonId,
 	}
-	global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r)
-	return userRole
+	err := global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r).Error
+	return userRole, err
 }
 
-// 创建超级管理员账户
-func CreateSuperAdministratorUser() {
-	var user model.User
-	var role model.UserRole
-	var roleButton model.RoleButton
+// 创建管理员账户
+func CreateAdministratorUser() error {
+	var role UserRole
 	global.PILOTGO_DB.Where("type =?", global.AdminUserType).Find(&role)
 	if role.ID == 0 {
-		role = model.UserRole{
+		role = UserRole{
 			Role:        "超级用户",
 			Type:        global.AdminUserType,
 			Description: "超级管理员",
@@ -187,19 +231,26 @@ func CreateSuperAdministratorUser() {
 			ButtonID:    global.PILOTGO_BUTTONID,
 		}
 		global.PILOTGO_DB.Create(&role)
-		user = model.User{
+		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
+		if err != nil {
+			return err
+		}
+
+		user := User{
 			CreatedAt:    time.Time{},
 			DepartFirst:  global.Departroot,
 			DepartSecond: global.UncateloguedDepartId,
 			DepartName:   "超级用户",
 			Username:     "admin",
-			Password:     global.DefaultUserPassword,
+			Password:     string(bs),
 			Email:        "admin@123.com",
 			UserType:     global.AdminUserType,
 			RoleID:       strconv.Itoa(role.ID),
 		}
 		global.PILOTGO_DB.Create(&user)
 	}
+
+	var roleButton RoleButton
 	global.PILOTGO_DB.First(&roleButton)
 	if roleButton.ID == 0 {
 		global.PILOTGO_DB.Raw("INSERT INTO role_button(id, button)" +
@@ -220,4 +271,5 @@ func CreateSuperAdministratorUser() {
 			"('14', 'config_install')," +
 			"('15', 'dept_change')").Scan(&roleButton)
 	}
+	return nil
 }

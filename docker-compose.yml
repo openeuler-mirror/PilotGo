@@ -1,5 +1,6 @@
 version: '3'
 services:
+  # TODO: For test
   server:
     # build: .
     image: pilotgo_server:latest

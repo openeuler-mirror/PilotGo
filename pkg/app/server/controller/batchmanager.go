@@ -1,17 +1,16 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func CreateBatchHandler(c *gin.Context) {
-	var batchinfo model.CreateBatch
+	var batchinfo service.CreateBatchParam
 	if err := c.Bind(&batchinfo); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -26,7 +25,7 @@ func CreateBatchHandler(c *gin.Context) {
 }
 
 func BatchInfoHandler(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -44,13 +43,15 @@ func BatchInfoHandler(c *gin.Context) {
 }
 
 func DeleteBatchHandler(c *gin.Context) {
-	var batchdel model.BatchDel
+	batchdel := struct {
+		BatchID []int `json:"BatchID"`
+	}{}
 	if err := c.Bind(&batchdel); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	if len(batchdel.BatchID) == 0 {
-		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "请输入删除批次ID")
+		response.Fail(c, nil, "请输入删除批次ID")
 		return
 	}
 
@@ -63,7 +64,11 @@ func DeleteBatchHandler(c *gin.Context) {
 }
 
 func UpdateBatchHandler(c *gin.Context) {
-	var batchinfo model.BatchUpdate
+	batchinfo := struct {
+		BatchId     int    `json:"BatchID"`
+		BatchName   string `json:"BatchName"`
+		Description string `json:"Description"`
+	}{}
 	if err := c.Bind(&batchinfo); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -78,10 +83,10 @@ func UpdateBatchHandler(c *gin.Context) {
 }
 
 func BatchMachineInfoHandler(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
@@ -101,7 +106,7 @@ func BatchMachineInfoHandler(c *gin.Context) {
 	// 分页
 	data, err := service.DataPaging(query, machinesInfo, len(machinesInfo))
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(len(machinesInfo)), query)

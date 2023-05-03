@@ -1,6 +1,8 @@
 package global
 
 import (
+	"os"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
@@ -16,19 +18,19 @@ type ConfigMessage struct {
 	Machine_uuid  string
 }
 
-//配置文件的监听器
+// 配置文件的监听器
 func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 	//创建一个监听器
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Error("NewWatcher failed: ", err)
+		logger.Error("NewWatcher failed: %s", err)
 		return err
 	}
 	defer watcher.Close()
 	done := make(chan bool)
 	err = watcher.Add(ConMess.ConfigName)
 	if err != nil {
-		logger.Error("Add failed:", err)
+		logger.Error("Add failed:%s", err)
 	}
 	go func() {
 		defer close(done)
@@ -39,11 +41,11 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 					return
 				}
 				logger.Debug("在文件 %s 上进行 : %s", event.Name, event.Op)
-				if event.Op&fsnotify.Rename == fsnotify.Rename || event.Op&fsnotify.Write == fsnotify.Write {
+				if event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Rename == fsnotify.Rename || event.Op&fsnotify.Write == fsnotify.Write {
 					ConMess.ConfigChange = event.Op.String()
 					ConMess.ConfigContent, err = utils.FileReadString(ConMess.ConfigName)
 					if err != nil {
-						logger.Debug("error:", err)
+						logger.Debug("error: %s", err)
 					}
 					msg := &protocol.Message{
 						UUID:   uuid.New().String(),
@@ -52,11 +54,17 @@ func Configfsnotify(ConMess ConfigMessage, client *network.SocketClient) error {
 						Data:   ConMess,
 					}
 					if err := client.Send(msg); err != nil {
-						logger.Debug("send message failed, error:", err)
+						logger.Debug("send message failed, error: %s", err)
+					}
+				}
+				if event.Op&fsnotify.Remove == fsnotify.Remove {
+					_, err := os.Stat(ConMess.ConfigName)
+					if err == nil {
+						err = watcher.Add(ConMess.ConfigName)
 					}
 				}
 			case err, ok := <-watcher.Errors:
-				logger.Debug("error:", err)
+				logger.Debug("error: %s", err)
 				if !ok {
 					return
 				}

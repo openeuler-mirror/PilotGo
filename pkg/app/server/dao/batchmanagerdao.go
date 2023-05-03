@@ -3,73 +3,95 @@ package dao
 import (
 	"strings"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-func IsExistName(name string) bool {
-	var batch model.Batch
-	global.PILOTGO_DB.Where("name=?", name).Find(&batch)
-	return batch.ID != 0
-}
-func IsExistID(id int) bool {
-	var batch model.Batch
-	global.PILOTGO_DB.Where("id=?", id).Find(&batch)
-	return batch.ID != 0
-}
-func GetBatchID(name string) uint {
-	var batch model.Batch
-	global.PILOTGO_DB.Where("name=?", name).Find(&batch)
-	return batch.ID
+type Batch struct {
+	gorm.Model
+	Name        string `gorm:"type:varchar(100);not null" json:"name"`
+	Description string `gorm:"type:varchar(100)" json:"description"`
+	Manager     string `gorm:"type:varchar(100)" json:"manager"`
+	Machinelist string `json:"machinelist"`
+	Depart      string `gorm:"type:varchar(100)"`
+	DepartName  string `gorm:"type:varchar(100)"`
 }
 
-func DeleteBatch(departid int) {
-	var batch model.Batch
-	global.PILOTGO_DB.Where("id=?", departid).Unscoped().Delete(&batch)
+func (b *Batch) ReturnBatch() (list *[]Batch, tx *gorm.DB) {
+	list = &[]Batch{}
+	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
+	return
 }
 
-func UpdateBatch(BatchID int, BatchName string, Descrip string) {
-	var Batch model.Batch
-	BatchNew := model.Batch{
+func IsExistName(name string) (bool, error) {
+	var batch Batch
+	err := global.PILOTGO_DB.Where("name=?", name).Find(&batch).Error
+	return batch.ID != 0, err
+}
+func IsExistID(id int) (bool, error) {
+	var batch Batch
+	err := global.PILOTGO_DB.Where("id=?", id).Find(&batch).Error
+	return batch.ID != 0, err
+}
+func GetBatchID(name string) (uint, error) {
+	var batch Batch
+	err := global.PILOTGO_DB.Where("name=?", name).Find(&batch).Error
+	return batch.ID, err
+}
+
+func DeleteBatch(departid int) error {
+	var batch Batch
+	return global.PILOTGO_DB.Where("id=?", departid).Unscoped().Delete(&batch).Error
+}
+
+func UpdateBatch(BatchID int, BatchName string, Descrip string) error {
+	var batch Batch
+	BatchNew := Batch{
 		Name:        BatchName,
 		Description: Descrip,
 	}
-	global.PILOTGO_DB.Model(&Batch).Where("id=?", BatchID).Updates(&BatchNew)
+	return global.PILOTGO_DB.Model(&batch).Where("id=?", BatchID).Updates(&BatchNew).Error
 }
 
-func GetMachineID(BatchID int) []string {
-	var Batch model.Batch
-	global.PILOTGO_DB.Where("id=?", BatchID).Find(&Batch)
+func GetMachineID(BatchID int) ([]string, error) {
+	var Batch Batch
+	err := global.PILOTGO_DB.Where("id=?", BatchID).Find(&Batch).Error
 	str := strings.Split(Batch.Machinelist, ",")
-	return str
+	return str, err
 }
 
 // 创建批次
-func CreateBatch(batch model.Batch) {
-	global.PILOTGO_DB.Create(&batch)
+func CreateBatchMessage(batch Batch) error {
+	return global.PILOTGO_DB.Create(&batch).Error
 }
 
 // 根据批次id获取所属的所有uuids
 func BatchIds2UUIDs(batchIds []int) (uuids []string) {
 	for _, batchId := range batchIds {
-		var batch model.Batch
-		global.PILOTGO_DB.Where("id=?", batchId).Find(&batch)
-
+		var batch Batch
+		err := global.PILOTGO_DB.Where("id=?", batchId).Find(&batch).Error
+		if err != nil {
+			logger.Error(err.Error())
+		}
 		str := strings.Split(batch.Machinelist, ",")
 		macIds := utils.String2Int(str)
 
 		for _, macId := range macIds {
-			var machine model.MachineNode
-			global.PILOTGO_DB.Where("id=?", macId).Find(&machine)
+			var machine MachineNode
+			err = global.PILOTGO_DB.Where("id=?", macId).Find(&machine).Error
+			if err != nil {
+				logger.Error(err.Error())
+			}
 			uuids = append(uuids, machine.MachineUUID)
 		}
 	}
 	return
 }
 
-func GetBatch() []model.Batch {
-	var batch []model.Batch
-	global.PILOTGO_DB.Find(&batch)
-	return batch
+func GetBatch() ([]Batch, error) {
+	var batch []Batch
+	err := global.PILOTGO_DB.Find(&batch).Error
+	return batch, err
 }

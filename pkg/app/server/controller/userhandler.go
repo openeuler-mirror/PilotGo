@@ -19,44 +19,46 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-var ServerAddr string
-
 func GetUserRoleHandler(c *gin.Context) {
-	roles := service.GetUserRole()
+	roles, err := service.GetUserRole()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
 	response.Success(c, gin.H{"role": roles}, "获取用户角色")
 }
 
 func RegisterHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	err := service.Register(user)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
 func LoginHandler(c *gin.Context) {
-	var user model.User //Data verification
+	var user dao.User //Data verification
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	token, departName, departId, userType, roleId, err := service.Login(user)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusInternalServerError, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId, "server": ServerAddr}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
 }
 
 // 退出
@@ -70,23 +72,27 @@ func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
-		"data": gin.H{"user": model.ToUserDto(user.(model.User))},
+		"data": gin.H{"user": dao.ToUserDto(user.(dao.User))},
 	})
 }
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	users, total := service.UserAll()
+	users, total, err := service.UserAll()
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
 	data, err := service.DataPaging(query, users, total)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(total), query)
@@ -94,22 +100,22 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	var email = user.Email
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
 	data, total, err := service.UserSearch(email, query)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, gin.H{"status": false}, err.Error())
+		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	service.JsonPagination(c, data, int64(total), query)
@@ -117,47 +123,47 @@ func UserSearchHandler(c *gin.Context) {
 
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	u, err := service.ResetPassword(user.Email)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 	} else {
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": u}, "密码重置成功!")
+		response.Success(c, gin.H{"data": u}, "密码重置成功!")
 	}
 }
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	var userdel model.Userdel
+	var userdel dao.Userdel
 	if c.Bind(&userdel) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	err := service.DeleteUser(userdel.Emails)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Response(c, http.StatusOK, http.StatusOK, nil, "用户删除成功!")
+	response.Success(c, nil, "用户删除成功!")
 }
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	var user model.User
+	var user dao.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	u, err := service.UpdateUser(user)
 	if err != nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, err.Error())
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Response(c, http.StatusOK, http.StatusOK, gin.H{"data": u}, "用户信息修改成功")
+	response.Success(c, gin.H{"data": u}, "用户信息修改成功")
 
 }
 
@@ -166,10 +172,11 @@ func ImportUser(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["upload"]
 	if files == nil {
-		response.Response(c, http.StatusOK, http.StatusBadRequest, nil, "请先选择要上传的文件")
+		response.Fail(c, nil, "请先选择要上传的文件")
 		return
 	}
 	UserExit := make([]string, 0)
+	var err error
 	for _, file := range files {
 		name := file.Filename
 		c.SaveUploadedFile(file, name)
@@ -177,12 +184,15 @@ func ImportUser(c *gin.Context) {
 		if error != nil {
 			return
 		}
-		UserExit = service.ReadFile(xlFile, UserExit)
+		UserExit, err = service.ReadFile(xlFile, UserExit)
+		if err != nil {
+			return
+		}
 	}
 
 	if len(UserExit) == 0 {
-		response.Response(c, http.StatusOK, http.StatusOK, nil, "导入用户信息成功")
+		response.Success(c, nil, "导入用户信息成功")
 	} else {
-		response.Response(c, http.StatusOK, http.StatusOK, gin.H{"UserExit": UserExit}, "以上用户已经存在")
+		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

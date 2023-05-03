@@ -1,18 +1,31 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"sync"
 
+	splugin "gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
+	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	//splugin "openeuler.org/PilotGo/plugin-sdk/plugin"
+)
+
+const (
+	PluginEnabled  = 1
+	PluginDisabled = 0
 )
 
 type Plugin struct {
+	UUID        string `json:"uuid"`
 	Name        string `json:"name"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
+	Author      string `json:"author"`
+	Email       string `json:"email"`
 	Url         string `json:"url"`
 	Enabled     int    `json:"enabled"`
 	Status      string `json:"status"`
@@ -20,7 +33,7 @@ type Plugin struct {
 
 // 初始化插件服务
 func PluginServiceInit() error {
-	return restorePluginInfo()
+	return globalManager.RestorePluginInfo()
 }
 
 // TODO： 替换成concurrent hashmap
@@ -35,23 +48,29 @@ var globalManager = &PluginManager{
 }
 
 // 从db中恢复插件信息
-func restorePluginInfo() error {
+func (pm *PluginManager) RestorePluginInfo() error {
 	plugins, err := dao.QueryPlugins()
 	if err != nil {
+		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return err
 	}
 
+	pm.lock.Lock()
+	defer pm.lock.Unlock()
 	for _, p := range plugins {
 		np := &Plugin{
+			UUID:        p.UUID,
 			Name:        p.Name,
 			Version:     p.Version,
 			Description: p.Version,
+			Author:      p.Author,
+			Email:       p.Email,
 			Url:         p.Url,
 			Enabled:     p.Enabled,
-			//Status:      splugin.StatusOffline,
+			Status:      splugin.StatusOffline,
 		}
 
-		globalManager.Add(np)
+		pm.loadedPlugin[np.Name] = np
 	}
 
 	return nil
@@ -65,39 +84,63 @@ func (pm *PluginManager) Add(p *Plugin) error {
 
 	pm.lock.Lock()
 	defer pm.lock.Unlock()
-
 	if _, ok := pm.loadedPlugin[p.Name]; ok {
 		return errors.New("plugin already registered")
 	}
+
+	// 记录到DB当中
+	err := dao.RecordPlugin(&dao.PluginModel{
+		UUID:        p.UUID,
+		Name:        p.Name,
+		Version:     p.Version,
+		Description: p.Description,
+		Author:      p.Author,
+		Email:       p.Email,
+		Url:         p.Url,
+		Enabled:     0,
+	})
+	if err != nil {
+		return err
+	}
+
+	// 记录db无报错之后才更新缓存数据
 	pm.loadedPlugin[p.Name] = p
 
 	return nil
 }
 
 // 移除注册的插件
-func (pm *PluginManager) Remove(name string) error {
+func (pm *PluginManager) Remove(uuid string) error {
+	if err := dao.DeletePlugin(uuid); err != nil {
+		// TODO: 细化db删除错误处理
+		logger.Error("failed to delete plugin info:%s", err.Error())
+	}
+
 	pm.lock.Lock()
 	defer pm.lock.Unlock()
-
-	if _, ok := pm.loadedPlugin[name]; ok {
-		delete(pm.loadedPlugin, name)
-		return nil
+	name := ""
+	for _, p := range pm.loadedPlugin {
+		if p.UUID == uuid {
+			name = p.Name
+			break
+		}
 	}
+	delete(pm.loadedPlugin, name)
 
 	return errors.New("plugin not found")
 }
 
 // 获取注册的插件
-func (pm *PluginManager) Get(name string) (string, error) {
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
+// func (pm *PluginManager) Get(name string) (string, error) {
+// 	pm.lock.RLock()
+// 	defer pm.lock.RUnlock()
 
-	if p, ok := pm.loadedPlugin[name]; ok {
-		return p.Url, nil
-	}
+// 	if p, ok := pm.loadedPlugin[name]; ok {
+// 		return p.Url, nil
+// 	}
 
-	return "", errors.New("plugin not found")
-}
+// 	return "", errors.New("plugin not found")
+// }
 
 // 获取所有的插件
 func (pm *PluginManager) GetAll() []*Plugin {
@@ -107,10 +150,14 @@ func (pm *PluginManager) GetAll() []*Plugin {
 	plugins := []*Plugin{}
 	for _, value := range pm.loadedPlugin {
 		p := &Plugin{
+			UUID:        value.UUID,
 			Name:        value.Name,
 			Version:     value.Version,
 			Description: value.Description,
+			Author:      value.Author,
+			Email:       value.Email,
 			Url:         value.Url,
+			Enabled:     value.Enabled,
 		}
 
 		plugins = append(plugins, p)
@@ -130,27 +177,44 @@ func (pm *PluginManager) Check(name string) bool {
 
 // 更新插件使能状态
 func (pm *PluginManager) UpdatePlugin(uuid string, enable int) error {
+	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
+		UUID:    uuid,
+		Enabled: enable,
+	}); err != nil {
+		return err
+	}
+
 	pm.lock.RLock()
 	defer pm.lock.RUnlock()
+	for _, p := range pm.loadedPlugin {
+		if p.UUID == uuid {
+			p.Enabled = enable
+		}
+		return nil
+	}
 
-	// TODO: 更新插件状态
 	return nil
 }
 
 // 检查插件是否使能
-func (pm *PluginManager) IsPluginEnabled(uuid string) bool {
+func (pm *PluginManager) IsPluginEnabled(uuid string) (int, error) {
 	pm.lock.RLock()
 	defer pm.lock.RUnlock()
 
-	// TODO: 查询插件状态
-	return false
+	pm.lock.RLock()
+	defer pm.lock.RUnlock()
+	for _, p := range pm.loadedPlugin {
+		if p.UUID == uuid {
+			return p.Enabled, nil
+		}
+	}
+	return PluginDisabled, errors.New("plugin not found")
 }
 
 func GetManager() *PluginManager {
 	return globalManager
 }
 
-/*
 // 请求plugin的接口服务，获取接口信息
 func CheckPlugin(url string) (*Plugin, error) {
 	info, err := requestPluginInfo(url)
@@ -193,31 +257,32 @@ func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
 	// TODO: check info valid
 	return info, nil
 }
-*/
+
 // 获取plugin清单
 func GetPlugins() []*Plugin {
 	return globalManager.GetAll()
 }
 
-/*
 func AddPlugin(url string) error {
 	logger.Debug("add login from %s", url)
+	url = strings.TrimRight(url, "/")
 
 	plugin, err := CheckPlugin(url + "/plugin_manage/info")
 	if err != nil {
 		return err
 	}
+	plugin.UUID = uuid.New().String()
 
 	if err := globalManager.Add(plugin); err != nil {
 		return err
 	}
 	return nil
-}*/
+}
 
-func DeletePlugin(id int) error {
-	logger.Debug("delete login: %d", id)
+func DeletePlugin(uuid string) error {
+	logger.Debug("delete login: %s", uuid)
 
-	if err := globalManager.Remove("id"); err != nil {
+	if err := globalManager.Remove(uuid); err != nil {
 		return err
 	}
 	return nil

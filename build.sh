@@ -42,6 +42,7 @@ function check_golang(){
 }
 
 function build_frontend() {
+    pushd frontend
     echo "dowoloading frontend libraries, please wait..."
     yarn install
     echo "compiling frontend, please wait..."
@@ -51,9 +52,10 @@ function build_frontend() {
         exit -1
     fi
 
-    # move frontend binary files to resource dir
-    cp ./dist/index.html ./resource/index.html
-    cp -r ./dist/static/* ./resource/
+    # # move frontend binary files to resource dir
+    # cp ./dist/index.html ./resource/index.html
+    # cp -r ./dist/static/* ./resource/
+    popd
 }
 
 function build_backend() {
@@ -81,7 +83,6 @@ function pack_tar() {
     echo "adding scripts and config files..."
     mkdir -p ${version_path}/server
     cp config_server.yaml.templete ${version_path}/server/config_server.yaml
-    cp alert.rules.templete ${version_path}/server/alert.rules
 
     mkdir -p ${version_path}/agent
     cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
@@ -96,7 +97,6 @@ function pack_tar() {
 function build_docker_image() {
     echo "adding config files..."
     cp config_server.yaml.templete ${version_path}/server/config_server.yaml
-    cp alert.rules.templete ${version_path}/server/alert.rules
 
     sudo docker build --force-rm --tag pilotgo_server:latest --build-arg ARCH=$1 .
 }

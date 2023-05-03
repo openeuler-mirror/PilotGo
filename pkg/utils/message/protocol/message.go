@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/mitchellh/mapstructure"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -68,8 +69,6 @@ const (
 	RemoveRpm = 28
 	//获取磁盘的使用情况
 	DiskUsage = 29
-	//创建挂载磁盘的目录
-	CreateDiskPath = 30
 	//挂载磁盘
 	DiskMount = 31
 	//卸载磁盘
@@ -154,6 +153,10 @@ type Message struct {
 	Status int    `json:"status"`
 	Data   interface{}
 	Error  string
+}
+
+func (m *Message) BindData(s interface{}) error {
+	return mapstructure.Decode(m.Data, s)
 }
 
 type MessageContext interface{}

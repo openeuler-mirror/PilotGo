@@ -15,26 +15,25 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // 查询所有父日志
 func LogAllHandler(c *gin.Context) {
-	query := &model.PaginationQ{}
+	query := &dao.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	logParent := model.AgentLogParent{}
-	list, tx := logParent.LogAll(query)
+	logParent := dao.AgentLogParent{}
+	list, tx := logParent.LogAll()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -64,18 +63,18 @@ func AgentLogsHandler(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, http.StatusOK, http.StatusOK, agentlog, "子日志查询成功!")
+	response.Success(c, agentlog, "子日志查询成功!")
 }
 
 // 删除机器日志
 func DeleteLogHandler(c *gin.Context) {
-	var logid model.AgentLogDel
+	var logid dao.AgentLogDel
 	if err := c.Bind(&logid); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	if len(logid.IDs) == 0 {
-		response.Response(c, http.StatusOK, http.StatusUnprocessableEntity, nil, "请输入删除机器日志ID")
+		response.Fail(c, nil, "请输入删除机器日志ID")
 		return
 	}
 	if err := service.DeleteLog(logid.IDs); err != nil {

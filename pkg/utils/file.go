@@ -17,6 +17,7 @@ package utils
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -75,4 +76,39 @@ func FileReadString(filePath string) (string, error) {
 func IsFileExist(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return err == nil
+}
+
+func GetFiles(filePath string) (fs []string, err error) {
+	files, err := ioutil.ReadDir(filePath)
+	if err != nil {
+		return fs, err
+	}
+	for _, file := range files {
+		if file.IsDir() {
+			tmp, err := GetFiles(filePath + "/" + file.Name())
+			if err != nil {
+				return fs, err
+			}
+			fs = append(fs, tmp...)
+		} else {
+			fs = append(fs, file.Name())
+		}
+	}
+	return fs, nil
+}
+
+func UpdateFile(path, filename, data interface{}) (lastversion string, err error) {
+	fullname := path.(string) + "/" + filename.(string)
+	if !IsFileExist(fullname) {
+		err := FileSaveString(fullname, data.(string))
+		if err != nil {
+			return "", err
+		}
+	}
+	lastversion, err = FileReadString(fullname)
+	if err != nil {
+		return "", err
+	}
+	err = FileSaveString(fullname, data.(string))
+	return lastversion, err
 }

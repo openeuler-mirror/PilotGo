@@ -3,6 +3,7 @@ module openeuler.org/PilotGo/PilotGo
 go 1.17
 
 require (
+	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230424083318-7433cd9ad297
 	github.com/casbin/casbin/v2 v2.55.1
 	github.com/casbin/gorm-adapter/v3 v3.10.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -12,11 +13,13 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/mitchellh/mapstructure v1.4.2
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
+	github.com/stretchr/testify v1.8.0
 	github.com/tealeg/xlsx v1.0.5
 	golang.org/x/crypto v0.0.0-20220919173607-35f4265a4bc0
 	gopkg.in/yaml.v2 v2.4.0
@@ -27,6 +30,7 @@ require (
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -58,11 +62,11 @@ require (
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
@@ -73,12 +77,13 @@ require (
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/net v0.0.0-20220923203811-8be639271d50 // indirect
-	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.3.10 // indirect
 	gorm.io/driver/sqlserver v1.3.2 // indirect
 	gorm.io/plugin/dbresolver v1.2.3 // indirect

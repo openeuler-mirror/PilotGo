@@ -23,7 +23,6 @@ import (
 
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -69,7 +68,7 @@ func UserType(s string) int {
 }
 
 // 读取xlsx文件
-func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
+func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 	for _, sheet := range xlFile.Sheets {
 		for rowIndex, row := range sheet.Rows {
 			//跳过第一行表头信息
@@ -79,17 +78,27 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
 			userName := row.Cells[0].Value //1:用户名
 			phone := row.Cells[1].Value    //2：手机号
 			email := row.Cells[2].Value    //3：邮箱
-			if dao.IsEmailExist(email) {
+			EmailBool, err := dao.IsEmailExist(email)
+			if err != nil {
+				return nil, err
+			}
+			if EmailBool {
 				UserExit = append(UserExit, email)
 				continue
 			}
-			departName := row.Cells[3].Value       //4：部门
-			pid, id := dao.GetPidAndId(departName) // 部门对应的PId和Id
+			departName := row.Cells[3].Value            //4：部门
+			pid, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
+			if err != nil {
 
-			userRole := row.Cells[4].Value                          // 5：角色
-			roleId, user_type := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
-			password := global.DefaultUserPassword                  // 设置默认密码为123456
-			u := model.User{
+				return UserExit, err
+			}
+			userRole := row.Cells[4].Value                               // 5：角色
+			roleId, user_type, err := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
+			if err != nil {
+				return UserExit, err
+			}
+			password := global.DefaultUserPassword // 设置默认密码为123456
+			u := dao.User{
 				Username:     userName,
 				Phone:        phone,
 				Password:     password,
@@ -100,44 +109,64 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) []string {
 				UserType:     user_type,
 				RoleID:       roleId,
 			}
-			dao.AddUser(u)
+			err = dao.AddUser(u)
+			if err != nil {
+				return UserExit, err
+			}
 		}
 	}
-	return UserExit
+	return UserExit, nil
 }
 
 func DeleteUser(Emails []string) error {
 	for _, userEmail := range Emails {
-		dao.DeleteUser(userEmail)
+		if err := dao.DeleteUser(userEmail); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 // 修改用户信息
-func UpdateUser(user model.User) (model.User, error) {
+func UpdateUser(user dao.User) (dao.User, error) {
 	email := user.Email
 	phone := user.Phone
 	Pid := user.DepartFirst
 	id := user.DepartSecond
 	departName := user.DepartName
-	u := dao.UserInfo(email)
+	u, err := dao.UserInfo(email)
+	if err != nil {
+		return u, err
+	}
 
 	if u.DepartName != departName && u.Phone != phone {
-		dao.UpdateUserDepart(email, departName, Pid, id)
-		dao.UpdateUserPhone(email, phone)
+		err := dao.UpdateUserDepart(email, departName, Pid, id)
+		if err != nil {
+			return u, err
+		}
+		err = dao.UpdateUserPhone(email, phone)
+		if err != nil {
+			return u, err
+		}
 		return u, nil
 	}
 	if u.DepartName == departName && u.Phone != phone {
-		dao.UpdateUserPhone(email, phone)
+		err = dao.UpdateUserPhone(email, phone)
+		if err != nil {
+			return u, err
+		}
 		return u, nil
 	}
 	if u.DepartName != departName && u.Phone == phone {
-		dao.UpdateUserDepart(email, departName, Pid, id)
+		err := dao.UpdateUserDepart(email, departName, Pid, id)
+		if err != nil {
+			return u, err
+		}
 	}
 	return u, nil
 }
 
-func ResetPassword(email string) (model.User, error) {
+func ResetPassword(email string) (dao.User, error) {
 	u, err := dao.ResetPassword(email)
 	if err != nil {
 		return u, err
@@ -145,8 +174,8 @@ func ResetPassword(email string) (model.User, error) {
 	return u, nil
 }
 
-func UserSearch(email string, query *model.PaginationQ) (interface{}, int, error) {
-	users, total := dao.UserSearch(email)
+func UserSearch(email string, query *dao.PaginationQ) (interface{}, int, error) {
+	users, total, err := dao.UserSearch(email)
 	data, err := DataPaging(query, users, total)
 	if err != nil {
 		return nil, 0, err
@@ -154,27 +183,33 @@ func UserSearch(email string, query *model.PaginationQ) (interface{}, int, error
 	return data, total, nil
 }
 
-func UserAll() ([]model.ReturnUser, int) {
-	users, total := dao.UserAll()
-	return users, total
+func UserAll() ([]dao.ReturnUser, int, error) {
+	users, total, err := dao.UserAll()
+	if err != nil {
+		return users, total, err
+	}
+	return users, total, nil
 }
 
-func Login(user model.User) (string, string, int, int, string, error) {
+func Login(user dao.User) (string, string, int, int, string, error) {
 	email := user.Email
-	password := user.Password
-
-	if !dao.IsEmailExist(email) {
-		return "", "", 0, 0, "", errors.New("用户不存在!")
-	}
-
-	DecryptedPassword, err := utils.JsAesDecrypt(password, email)
+	pwd := user.Password
+	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
-		return "", "", 0, 0, "", errors.New("密码解密失败")
+		return "", "", 0, 0, "", err
+	}
+	if !EmailBool {
+		return "", "", 0, 0, "", errors.New("用户不存在")
 	}
 
-	DBpassword, departName, roleId, departId, userType := dao.UserPassword(email)
-	if DBpassword != DecryptedPassword {
-		return "", "", 0, 0, "", errors.New("密码错误!")
+	u, err := dao.UserInfo(email)
+	if err != nil {
+		return "", "", 0, 0, "", errors.New("查询邮箱密码错误")
+	}
+
+	err = utils.ComparePassword(u.Password, pwd)
+	if err != nil {
+		return "", "", 0, 0, "", errors.New("密码错误")
 	}
 
 	// Issue token
@@ -182,10 +217,10 @@ func Login(user model.User) (string, string, int, int, string, error) {
 	if err != nil {
 		return "", "", 0, 0, "", err
 	}
-	return token, departName, departId, userType, roleId, nil
+	return token, u.DepartName, u.DepartSecond, u.UserType, u.RoleID, nil
 }
 
-func Register(user model.User) error {
+func Register(user dao.User) error {
 	username := user.Username
 	password := user.Password
 	email := user.Email
@@ -199,19 +234,28 @@ func Register(user model.User) error {
 		username = RandomString(5)
 	}
 	if len(password) == 0 {
-		password = global.DefaultUserPassword
+		return errors.New("密码不能为空")
 	}
 	if len(email) == 0 {
-		return errors.New("邮箱不能为空!")
+		return errors.New("邮箱不能为空")
 	}
-	if dao.IsEmailExist(email) {
-		return errors.New("邮箱已存在!")
+	EmailBool, err := dao.IsEmailExist(email)
+	if err != nil {
+		return err
+	}
+	if EmailBool {
+		return errors.New("邮箱已存在")
+	}
+
+	bs, err := utils.CryptoPassword(password)
+	if err != nil {
+		return errors.New("数据加密错误")
 	}
 
 	user_type := UserType(roleId)
-	user = model.User{ //Create user
+	user = dao.User{ //Create user
 		Username:     username,
-		Password:     password,
+		Password:     string(bs),
 		Phone:        phone,
 		Email:        email,
 		DepartName:   depart,
@@ -220,11 +264,17 @@ func Register(user model.User) error {
 		UserType:     user_type,
 		RoleID:       roleId,
 	}
-	dao.AddUser(user)
+	err = dao.AddUser(user)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func GetUserRole() []model.UserRole {
-	roles := dao.AllUserRole()
-	return roles
+func GetUserRole() ([]dao.UserRole, error) {
+	roles, err := dao.AllUserRole()
+	if err != nil {
+		return roles, err
+	}
+	return roles, nil
 }

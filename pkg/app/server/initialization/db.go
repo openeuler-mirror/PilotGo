@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
+ * LastEditTime: 2023-03-16 13:52:49
  * Description: db and redis init
  ******************************************************************************/
 package initialization
@@ -17,7 +17,6 @@ package initialization
 import (
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
@@ -47,26 +46,28 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 		return err
 	}
 
-	global.PILOTGO_DB.AutoMigrate(&model.CrontabList{})
-	global.PILOTGO_DB.AutoMigrate(&model.MachineNode{})
-	global.PILOTGO_DB.AutoMigrate(&model.RoleButton{})
-	global.PILOTGO_DB.AutoMigrate(&model.Batch{})
-	global.PILOTGO_DB.AutoMigrate(&model.AgentLogParent{})
-	global.PILOTGO_DB.AutoMigrate(&model.AgentLog{})
-	global.PILOTGO_DB.AutoMigrate(&model.Files{})
-	global.PILOTGO_DB.AutoMigrate(&model.HistoryFiles{})
-	global.PILOTGO_DB.AutoMigrate(&model.Script{})
-	global.PILOTGO_DB.AutoMigrate(&model.ConfigFile{})
+	global.PILOTGO_DB.AutoMigrate(&dao.CrontabList{})
+	global.PILOTGO_DB.AutoMigrate(&dao.MachineNode{})
+	global.PILOTGO_DB.AutoMigrate(&dao.RoleButton{})
+	global.PILOTGO_DB.AutoMigrate(&dao.Batch{})
+	global.PILOTGO_DB.AutoMigrate(&dao.AgentLogParent{})
+	global.PILOTGO_DB.AutoMigrate(&dao.AgentLog{})
+	global.PILOTGO_DB.AutoMigrate(&dao.Files{})
+	global.PILOTGO_DB.AutoMigrate(&dao.HistoryFiles{})
+	global.PILOTGO_DB.AutoMigrate(&dao.Script{})
+	global.PILOTGO_DB.AutoMigrate(&dao.ConfigFile{})
 	global.PILOTGO_DB.AutoMigrate(&dao.PluginModel{})
 
 	// 创建超级管理员账户
-	global.PILOTGO_DB.AutoMigrate(&model.User{})
-	global.PILOTGO_DB.AutoMigrate(&model.UserRole{})
-	dao.CreateSuperAdministratorUser()
+	global.PILOTGO_DB.AutoMigrate(&dao.User{})
+	global.PILOTGO_DB.AutoMigrate(&dao.UserRole{})
+	err = dao.CreateAdministratorUser()
+	if err != nil {
+		return err
+	}
 
 	// 创建公司组织
-	global.PILOTGO_DB.AutoMigrate(&model.DepartNode{})
-	dao.CreateOrganization()
+	global.PILOTGO_DB.AutoMigrate(&dao.DepartNode{})
 
-	return nil
+	return dao.CreateOrganization()
 }

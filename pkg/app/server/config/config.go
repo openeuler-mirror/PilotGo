@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
  * Date: 2022-04-06 13:27:45
- * LastEditTime: 2022-04-20 14:32:28
+ * LastEditTime: 2023-01-09 17:59:09
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
 package config
@@ -28,12 +28,6 @@ type HttpServer struct {
 }
 type SocketServer struct {
 	Addr string `yaml:"addr"`
-}
-type Monitor struct {
-	PrometheusAddr    string `yaml:"prometheus_addr"`
-	AlertManagerAddr  string `yaml:"alertmanager_addr"`
-	AlertRulesPath    string `yaml:"alert_rules_path"`
-	PrometheusYmlPath string `yaml:"prometheus_yml_path"`
 }
 type MysqlDBInfo struct {
 	HostName string `yaml:"host_name"`
@@ -54,7 +48,6 @@ type RedisDBInfo struct {
 type ServerConfig struct {
 	HttpServer   HttpServer     `yaml:"http_server"`
 	SocketServer SocketServer   `yaml:"socket_server"`
-	Monitor      Monitor        `yaml:"monitor"`
 	Logopts      logger.LogOpts `yaml:"log"`
 	MysqlDBinfo  MysqlDBInfo    `yaml:"mysql"`
 	RedisDBinfo  RedisDBInfo    `yaml:"redis"`

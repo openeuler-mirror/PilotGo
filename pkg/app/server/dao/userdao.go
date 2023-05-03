@@ -15,46 +15,94 @@
 package dao
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/model"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
+type User struct {
+	ID           uint `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt    time.Time
+	DepartFirst  int    `gorm:"size:25" json:"departPid,omitempty"`
+	DepartSecond int    `gorm:"size:25" json:"departId,omitempty"`
+	DepartName   string `gorm:"size:25" json:"departName,omitempty"`
+	Username     string `json:"username,omitempty"`
+	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
+	Phone        string `gorm:"size:11" json:"phone,omitempty"`
+	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
+	UserType     int    `json:"userType,omitempty"`
+	RoleID       string `json:"role,omitempty"`
+}
+type ReturnUser struct {
+	ID           uint     `json:"id"`
+	DepartFirst  int      `json:"departPId"`
+	DepartSecond int      `json:"departid"`
+	DepartName   string   `json:"departName"`
+	Username     string   `json:"username"`
+	Phone        string   `json:"phone"`
+	Email        string   `json:"email"`
+	UserType     int      `json:"userType"`
+	Roles        []string `json:"role"`
+}
+type UserDto struct {
+	Name     string `json:"username"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email"`
+}
+
+func ToUserDto(user User) UserDto {
+	return UserDto{
+		Name:     user.Username,
+		Password: user.Password,
+		Phone:    user.Phone,
+		Email:    user.Email,
+	}
+}
+
+type Userdel struct {
+	Emails []string `json:"email"`
+}
+
 // 获取所有的用户角色
-func AllUserRole() []model.UserRole {
-	var role []model.UserRole
-	global.PILOTGO_DB.Find(&role)
-	return role
+func AllUserRole() ([]UserRole, error) {
+	var role []UserRole
+	err := global.PILOTGO_DB.Find(&role).Error
+	return role, err
 }
 
 // 邮箱账户是否存在
-func IsEmailExist(email string) bool {
-	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	return user.ID != 0
+func IsEmailExist(email string) (bool, error) {
+	var user User
+	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	return user.ID != 0, err
 }
 
+/*
 // 查询数据库中账号密码、用户部门、部门ID、用户类型、用户角色
-func UserPassword(email string) (s1, s2, s3 string, i1, i2 int) {
+func UserPassword(email string) (s1, s2, s3 string, i1, i2 int, err error) {
 	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType
-}
+	err = global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, err
+	}
+	return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, nil
+}*/
 
 // 查询某用户信息
-func UserInfo(email string) model.User {
-	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	return user
+func UserInfo(email string) (User, error) {
+	var user User
+	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	return user, err
 }
 
 // 查询所有的用户
-func UserAll() ([]model.ReturnUser, int) {
-	var users []model.User
-	var redisUser []model.ReturnUser
+func UserAll() ([]ReturnUser, int, error) {
+	var users []User
+	var redisUser []ReturnUser
 
 	// 先从redis缓存中读取
 	// data, err := redismanager.Get("users", &redisUser)
@@ -64,7 +112,10 @@ func UserAll() ([]model.ReturnUser, int) {
 	// 	logger.Debug("%+v", "从缓存中读取")
 	// 	return redisUser
 	// } else {
-	global.PILOTGO_DB.Order("id desc").Find(&users)
+	err := global.PILOTGO_DB.Order("id desc").Find(&users).Error
+	if err != nil {
+		return redisUser, 0, err
+	}
 	totals := len(users)
 	for _, user := range users {
 		var roles []string
@@ -72,13 +123,16 @@ func UserAll() ([]model.ReturnUser, int) {
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := model.UserRole{}
+			userRole := UserRole{}
 			i, _ := strconv.Atoi(id)
-			global.PILOTGO_DB.Where("id = ?", i).Find(&userRole)
+			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
+			if err != nil {
+				return redisUser, totals, err
+			}
 			role := userRole.Role
 			roles = append(roles, role)
 		}
-		u := model.ReturnUser{
+		u := ReturnUser{
 			ID:           user.ID,
 			DepartFirst:  user.DepartFirst,
 			DepartSecond: user.DepartSecond,
@@ -92,16 +146,19 @@ func UserAll() ([]model.ReturnUser, int) {
 		redisUser = append(redisUser, u)
 	}
 	// redismanager.Set("users", &redisUser)
-	return redisUser, totals
+	return redisUser, totals, nil
 	// }
 }
 
 // 根据用户邮箱模糊查询
-func UserSearch(email string) ([]model.ReturnUser, int) {
-	var users []model.User
-	var redisUser []model.ReturnUser
+func UserSearch(email string) ([]ReturnUser, int, error) {
+	var users []User
+	var redisUser []ReturnUser
 
-	global.PILOTGO_DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users)
+	err := global.PILOTGO_DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users).Error
+	if err != nil {
+		return redisUser, 0, err
+	}
 	totals := len(users)
 	for _, user := range users {
 		var roles []string
@@ -109,13 +166,16 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := model.UserRole{}
+			userRole := UserRole{}
 			i, _ := strconv.Atoi(id)
-			global.PILOTGO_DB.Where("id = ?", i).Find(&userRole)
+			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
+			if err != nil {
+				return redisUser, totals, err
+			}
 			role := userRole.Role
 			roles = append(roles, role)
 		}
-		u := model.ReturnUser{
+		u := ReturnUser{
 			ID:           user.ID,
 			DepartFirst:  user.DepartFirst,
 			DepartSecond: user.DepartSecond,
@@ -128,50 +188,54 @@ func UserSearch(email string) ([]model.ReturnUser, int) {
 		}
 		redisUser = append(redisUser, u)
 	}
-	return redisUser, totals
+	return redisUser, totals, nil
 }
 
 // 重置密码
-func ResetPassword(email string) (model.User, error) {
-	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Find(&user)
-	if user.ID != 0 {
-		global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", "123456")
-		return user, nil
+func ResetPassword(email string) (User, error) {
+	var user User
+	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user, err
 	} else {
-		return user, fmt.Errorf("无此用户")
+		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
+		if err != nil {
+			return user, err
+		}
+		err = global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", string(bs)).Error
+		return user, err
 	}
 }
 
 // 删除用户
-func DeleteUser(email string) {
-	var user model.User
-	global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user)
+func DeleteUser(email string) error {
+	var user User
+	return global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user).Error
 }
 
 // 修改用户的部门信息
-func UpdateUserDepart(email, departName string, Pid, id int) {
-	var user model.User
-	u := model.User{
+func UpdateUserDepart(email, departName string, Pid, id int) error {
+	var user User
+	u := User{
 		DepartFirst:  Pid,
 		DepartSecond: id,
 		DepartName:   departName,
 	}
-	global.PILOTGO_DB.Model(&user).Where("email=?", email).Updates(&u)
+	return global.PILOTGO_DB.Model(&user).Where("email=?", email).Updates(&u).Error
 }
 
 // 添加用户
-func AddUser(u model.User) {
-	global.PILOTGO_DB.Save(&u)
+func AddUser(u User) error {
+	return global.PILOTGO_DB.Save(&u).Error
 }
 
 // 修改手机号
-func UpdateUserPhone(email, phone string) {
-	var user model.User
-	global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("phone", phone)
+func UpdateUserPhone(email, phone string) error {
+	var user User
+	return global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("phone", phone).Error
 }
 
-func DelUser(deptId int) {
-	var user model.User
-	global.PILOTGO_DB.Where("depart_second=?", deptId).Unscoped().Delete(user)
+func DelUser(deptId int) error {
+	var user User
+	return global.PILOTGO_DB.Where("depart_second=?", deptId).Unscoped().Delete(user).Error
 }

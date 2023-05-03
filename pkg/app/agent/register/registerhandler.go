@@ -9,12 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
+ * LastEditTime: 2023-04-19 16:21:52
  * Description: socket client register
  ******************************************************************************/
 package register
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +28,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
 var agent_version = "v0.0.1"
@@ -52,7 +54,7 @@ func Send_heartbeat(client *network.SocketClient) {
 		}
 	}
 
-	out, err := utils.RunCommand("date")
+	out, err := uos.OS().GetTime()
 	if err == nil {
 		logger.Debug(string(out))
 	}
@@ -82,21 +84,33 @@ func RegitsterHandler(c *network.SocketClient) {
 
 	c.BindHandler(protocol.AgentInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		IP, err := utils.RunCommand("hostname -I")
+		IP, err := uos.OS().GetHostIp()
 		if err != nil {
-			logger.Debug("获取IP失败!")
+			logger.Error("failed to get IP: %s", err.Error())
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  fmt.Sprintf("failed to get IP: %s", err.Error()),
+			}
+			return c.Send(resp_msg)
 		}
-		str := strings.Split(IP, " ")
-		IP = str[0]
+
+		result := struct {
+			AgentVersion string `json:"agent_version"`
+			IP           string `json:"IP"`
+			AgentUUID    string `json:"agent_uuid"`
+		}{
+			AgentVersion: agent_version,
+			IP:           IP,
+			AgentUUID:    localstorage.AgentUUID(),
+		}
+
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data: map[string]string{
-				"agent_version": agent_version,
-				"IP":            IP,
-				"agent_uuid":    localstorage.AgentUUID(),
-			},
+			Data:   result,
 		}
 		return c.Send(resp_msg)
 	})
@@ -104,8 +118,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.OsInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		sysinfo := uos.GetHostInfo()
-
+		sysinfo, err := uos.OS().GetHostInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -117,8 +139,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.CPUInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		cpuinfo := uos.GetCPUInfo()
-
+		cpuinfo, err := uos.OS().GetCPUInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -130,8 +160,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.MemoryInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		memoryinfo := uos.GetMemoryConfig()
-
+		memoryinfo, err := uos.OS().GetMemoryConfig()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -144,7 +182,7 @@ func RegitsterHandler(c *network.SocketClient) {
 		logger.Debug("process agent info command:%s", msg.String())
 
 		// TODO: process error
-		sysctlinfo, _ := uos.GetSysctlConfig()
+		sysctlinfo, _ := uos.OS().GetSysctlConfig()
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -157,7 +195,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.SysctlChange, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		args := msg.Data.(string)
-		sysctlchange := uos.TempModifyPar(args)
+		sysctlchange, _ := uos.OS().TempModifyPar(args)
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -170,7 +208,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.SysctlView, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		args := msg.Data.(string)
-		sysctlview := uos.GetVarNameValue(args)
+		sysctlview, _ := uos.OS().GetVarNameValue(args)
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -183,7 +221,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ServiceList, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		servicelist, _ := uos.GetServiceList()
+		servicelist, _ := uos.OS().GetServiceList()
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -196,7 +234,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ServiceStatus, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		service := msg.Data.(string)
-		servicestatus, _ := uos.GetServiceStatus(service)
+		servicestatus, _ := uos.OS().GetServiceStatus(service)
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -209,13 +247,13 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ServiceRestart, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		service := msg.Data.(string)
-		err := uos.RestartService(service)
+		err := uos.OS().RestartService(service)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -232,12 +270,12 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ServiceStart, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		service := msg.Data.(string)
-		err := uos.StartService(service)
+		err := uos.OS().StartService(service)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -254,13 +292,13 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ServiceStop, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		service := msg.Data.(string)
-		err := uos.StopService(service)
+		err := uos.OS().StopService(service)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -277,8 +315,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AllRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		allrpm := uos.GetAllRpm()
-
+		allrpm, err := uos.OS().GetAllRpm()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -290,8 +336,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RpmSource, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		rpmname := msg.Data.(string)
-		rpmsource, _ := uos.GetRpmSource(rpmname)
-
+		rpmsource, err := uos.OS().GetRpmSource(rpmname)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -303,14 +357,14 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RpmInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		rpmname := msg.Data.(string)
-		rpminfo, Err, err := uos.GetRpmInfo(rpmname)
-		if Err != nil && err != nil {
+		rpminfo, err := uos.OS().GetRpmInfo(rpmname)
+		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   rpminfo,
-				Error:  Err.Error(),
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		} else {
@@ -327,13 +381,13 @@ func RegitsterHandler(c *network.SocketClient) {
 		logger.Debug("process agent info command:%s", msg.String())
 		rpmname := msg.Data.(string)
 
-		err := uos.InstallRpm(rpmname)
+		err := uos.OS().InstallRpm(rpmname)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -350,13 +404,13 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RemoveRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		rpmname := msg.Data.(string)
-		err := uos.RemoveRpm(rpmname)
+		err := uos.OS().RemoveRpm(rpmname)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -373,8 +427,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.DiskUsage, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		diskusage := uos.GetDiskUsageInfo()
-
+		diskusage, err := uos.OS().GetDiskUsageInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -385,26 +447,21 @@ func RegitsterHandler(c *network.SocketClient) {
 	})
 	c.BindHandler(protocol.DiskInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		diskinfo := uos.GetDiskInfo()
-
+		diskinfo, err := uos.OS().GetDiskInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
 			Data:   diskinfo,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.CreateDiskPath, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		mountpath := msg.Data.(string)
-		creatdiskpath := uos.CreateDiskPath(mountpath)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   creatdiskpath,
 		}
 		return c.Send(resp_msg)
 	})
@@ -414,28 +471,46 @@ func RegitsterHandler(c *network.SocketClient) {
 		disks := strings.Split(disk, ",")
 		source := disks[0]
 		dest := disks[1]
-		mountpath := uos.DiskMount(source, dest)
-
+		info, err := uos.OS().DiskMount(source, dest)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   mountpath,
+			Data:   info,
 		}
 		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.DiskUMount, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		disk := msg.Data.(string)
-		diskPath := uos.DiskUMount(disk)
-
+		info, err := uos.OS().DiskUMount(disk)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   diskPath,
+			Data:   info,
 		}
 		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.DiskFormat, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -443,107 +518,116 @@ func RegitsterHandler(c *network.SocketClient) {
 		disks := strings.Split(disk, ",")
 		fileType := disks[0]
 		diskPath := disks[1]
-		formatpath := uos.DiskFormat(fileType, diskPath)
-
+		info, err := uos.OS().DiskFormat(fileType, diskPath)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   formatpath,
+			Data:   info,
 		}
 		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetTCP, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		nettcp, err := uos.GetTCP()
+		nettcp, err := uos.OS().GetTCP()
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   nettcp,
+				Status: -1,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   nettcp,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetUDP, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		netudp, err := uos.GetUDP()
+		netudp, err := uos.OS().GetUDP()
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   netudp,
+				Status: -1,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   netudp,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetIOCounter, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		netio, err := uos.GetIOCounter()
+		netio, err := uos.OS().GetIOCounter()
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   netio,
+				Status: -1,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   netio,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.NetNICConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-		netnic, err := uos.GetNICConfig()
+		netnic, err := uos.OS().GetNICConfig()
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
-				Data:   err,
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   netnic,
+				Status: -1,
+				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   netnic,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.CurrentUser, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		user_info := uos.GetCurrentUserInfo()
+		user_info := uos.OS().GetCurrentUserInfo()
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -556,8 +640,16 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AllUser, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		user_all := uos.GetAllUserInfo()
-
+		user_all, err := uos.OS().GetAllUserInfo()
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
@@ -572,12 +664,12 @@ func RegitsterHandler(c *network.SocketClient) {
 		users := strings.Split(user, ",")
 		username := users[0]
 		password := users[1]
-		err := uos.AddLinuxUser(username, password)
+		err := uos.OS().AddLinuxUser(username, password)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -595,12 +687,12 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.DelUser, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		username := msg.Data.(string)
-		user_del, err := uos.DelUser(username)
+		user_del, err := uos.OS().DelUser(username)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -620,13 +712,13 @@ func RegitsterHandler(c *network.SocketClient) {
 		datas := strings.Split(data, ",")
 		permission := datas[0]
 		file := datas[1]
-		user_per, err := uos.ChangePermission(permission, file)
+		user_per, err := uos.OS().ChangePermission(permission, file)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -646,13 +738,13 @@ func RegitsterHandler(c *network.SocketClient) {
 		disks := strings.Split(disk, ",")
 		fileType := disks[0]
 		diskPath := disks[1]
-		user_ower, err := uos.ChangeFileOwner(fileType, diskPath)
+		user_ower, err := uos.OS().ChangeFileOwner(fileType, diskPath)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Data:   err,
 			}
 			return c.Send(resp_msg)
@@ -669,83 +761,123 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AgentOSInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		os := uos.GetHostInfo()
-		cpu := uos.GetCPUInfo()
+		os, erros := uos.OS().GetHostInfo()
+		cpu, errcpu := uos.OS().GetCPUInfo()
+		systemAndCPUInfo := common.SystemAndCPUInfo{}
+
+		if erros != nil && errcpu != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  erros.Error(),
+				Data:   systemAndCPUInfo,
+			}
+			return c.Send(resp_msg)
+		} else if erros != nil && errcpu == nil {
+			systemAndCPUInfo.ModelName = cpu.ModelName
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  erros.Error(),
+				Data:   systemAndCPUInfo,
+			}
+			return c.Send(resp_msg)
+		} else if erros == nil && errcpu != nil {
+			systemAndCPUInfo.IP = os.IP
+			systemAndCPUInfo.Platform = os.Platform
+			systemAndCPUInfo.PlatformVersion = os.PlatformVersion
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  errcpu.Error(),
+				Data:   systemAndCPUInfo,
+			}
+			return c.Send(resp_msg)
+		}
+		systemAndCPUInfo = common.SystemAndCPUInfo{
+			IP:              os.IP,
+			Platform:        os.Platform,
+			PlatformVersion: os.PlatformVersion,
+			ModelName:       cpu.ModelName,
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   os.IP + ";" + os.Platform + ";" + os.PlatformVersion + ";" + cpu.ModelName,
+			Data:   systemAndCPUInfo,
 		}
 		return c.Send(resp_msg)
 	})
 	c.BindHandler(protocol.FirewalldConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		config, err := uos.Config()
+		config, err := uos.OS().Config()
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   config,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   config,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldDefaultZone, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
 		zone := msg.Data.(string)
-		default_zone, err := uos.FirewalldSetDefaultZone(zone)
+		default_zone, err := uos.OS().FirewalldSetDefaultZone(zone)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   default_zone,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   default_zone,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldZoneConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
 		zone := msg.Data.(string)
-		default_zone, err := uos.FirewalldZoneConfig(zone)
+		default_zone, err := uos.OS().FirewalldZoneConfig(zone)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   default_zone,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   default_zone,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldServiceAdd, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -754,24 +886,23 @@ func RegitsterHandler(c *network.SocketClient) {
 		zps := strings.Split(zp, ",")
 		zone := zps[0]
 		service := zps[1]
-		err := uos.FirewalldServiceAdd(zone, service)
+		err := uos.OS().FirewalldServiceAdd(zone, service)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldServiceRemove, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -780,24 +911,23 @@ func RegitsterHandler(c *network.SocketClient) {
 		zps := strings.Split(zp, ",")
 		zone := zps[0]
 		service := zps[1]
-		err := uos.FirewalldServiceRemove(zone, service)
+		err := uos.OS().FirewalldServiceRemove(zone, service)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldSourceAdd, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -806,24 +936,23 @@ func RegitsterHandler(c *network.SocketClient) {
 		zps := strings.Split(zp, ",")
 		zone := zps[0]
 		source := zps[1]
-		err := uos.FirewalldSourceAdd(zone, source)
+		err := uos.OS().FirewalldSourceAdd(zone, source)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldSourceRemove, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -832,68 +961,67 @@ func RegitsterHandler(c *network.SocketClient) {
 		zps := strings.Split(zp, ",")
 		zone := zps[0]
 		source := zps[1]
-		err := uos.FirewalldSourceRemove(zone, source)
+		err := uos.OS().FirewalldSourceRemove(zone, source)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldRestart, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		Restart := uos.Restart()
+		Restart := uos.OS().Restart()
 		if !Restart {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  "重启防火墙失败",
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   Restart,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   Restart,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldStop, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		Stop := uos.Stop()
+		Stop := uos.OS().Stop()
 		if !Stop {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  "关闭防火墙失败",
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   Stop,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   Stop,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldZonePortAdd, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -902,25 +1030,25 @@ func RegitsterHandler(c *network.SocketClient) {
 		zone := zps[0]
 		port := zps[1]
 		proto := zps[2]
-		add, err := uos.AddZonePort(zone, port, proto)
+		add, err := uos.OS().AddZonePort(zone, port, proto)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   add,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   add,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.FirewalldZonePortDel, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -929,25 +1057,25 @@ func RegitsterHandler(c *network.SocketClient) {
 		zone := zps[0]
 		port := zps[1]
 		proto := zps[2]
-		del, err := uos.DelZonePort(zone, port, proto)
+		del, err := uos.OS().DelZonePort(zone, port, proto)
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   del,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   del,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.CronStart, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -958,12 +1086,12 @@ func RegitsterHandler(c *network.SocketClient) {
 		spec := message[1]
 		command := message[2]
 
-		err := uos.CronStart(id, spec, command)
+		err := common.CronStart(id, spec, command)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -984,12 +1112,12 @@ func RegitsterHandler(c *network.SocketClient) {
 		message := strings.Split(msgg, ",")
 		id, _ := strconv.Atoi(message[0])
 
-		err := uos.StopAndDel(id)
+		err := common.StopAndDel(id)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1006,115 +1134,113 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.GetRepoSource, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		repo, err := uos.GetRepoSource()
+		repo, err := common.GetRepoSource()
 
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   repo,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   repo,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.GetNetWorkConnectInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		network, err := uos.ConfigNetworkConnect()
+		network, err := uos.OS().ConfigNetworkConnect()
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   network,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   network,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.GetNetWorkConnInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		network, err := uos.GetNetworkConnInfo()
+		network, err := uos.OS().GetNetworkConnInfo()
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   network,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   network,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.RestartNetWork, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
 		msgg := msg.Data.(string)
-		err := uos.RestartNetwork(msgg)
+		err := uos.OS().RestartNetwork(msgg)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   struct{}{},
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.GetNICName, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		nic_name, err := uos.GetNICName()
+		nic_name, err := uos.OS().GetNICName()
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   nic_name,
-			}
-			return c.Send(resp_msg)
 		}
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data:   nic_name,
+		}
+		return c.Send(resp_msg)
+
 	})
 	c.BindHandler(protocol.ReadFile, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
@@ -1125,7 +1251,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1141,18 +1267,25 @@ func RegitsterHandler(c *network.SocketClient) {
 	})
 	c.BindHandler(protocol.EditFile, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
-
-		file := msg.Data.(map[string]interface{})
-		filepath := file["path"]
-		filename := file["name"]
-		text := file["text"]
-
-		LastVersion, err := uos.UpdateFile(filepath, filename, text)
+		result := &common.UpdateFile{}
+		err := msg.BindData(result)
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
+				Error:  err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
+
+		LastVersion, err := utils.UpdateFile(result.FilePath, result.FileName, result.FileText)
+		result.FileVersion = LastVersion
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
 				Error:  err.Error(),
 			}
 			return c.Send(resp_msg)
@@ -1161,7 +1294,7 @@ func RegitsterHandler(c *network.SocketClient) {
 				UUID:   msg.UUID,
 				Type:   msg.Type,
 				Status: 0,
-				Data:   LastVersion,
+				Data:   result,
 			}
 			return c.Send(resp_msg)
 		}
@@ -1169,7 +1302,10 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.AgentTime, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
-		timeinfo := uos.GetTime()
+		timeinfo, err := uos.OS().GetTime()
+		if err != nil {
+			logger.Debug(err.Error())
+		}
 
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -1179,19 +1315,19 @@ func RegitsterHandler(c *network.SocketClient) {
 		}
 		return c.Send(resp_msg)
 	})
-
 	c.BindHandler(protocol.AgentConfig, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		p, ok := msg.Data.(map[string]interface{})
 		if ok {
 			var ConMess global.ConfigMessage
+			ConMess.Machine_uuid = p["Machine_uuid"].(string)
 			ConMess.ConfigName = p["ConfigName"].(string)
 			err := global.Configfsnotify(ConMess, c)
 			if err != nil {
 				resp_msg := &protocol.Message{
 					UUID:   msg.UUID,
 					Type:   msg.Type,
-					Status: 0,
+					Status: -1,
 					Error:  err.Error(),
 				}
 				return c.Send(resp_msg)
@@ -1208,7 +1344,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
 				Type:   msg.Type,
-				Status: 0,
+				Status: -1,
 				Error:  "监控文件有误",
 			}
 			return c.Send(resp_msg)
