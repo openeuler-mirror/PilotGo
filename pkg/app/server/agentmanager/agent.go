@@ -523,7 +523,16 @@ func (a *Agent) AllRpm() ([]string, error) {
 		return nil, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data.([]string), nil
+	if v, ok := resp_message.Data.([]interface{}); ok {
+		result := make([]string, len(v))
+		for i, item := range v {
+			if str, ok := item.(string); ok {
+				result[i] = str
+			}
+		}
+		return result, nil
+	}
+	return nil, fmt.Errorf("failed to convert interface{} in allrpm")
 }
 
 // 获取源软件包名以及源
