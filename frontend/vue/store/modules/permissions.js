@@ -103,11 +103,12 @@ const permission = {
         state.iframeComponent = []
         getPlugins().then((res) => {
           if (res.data.code === 200) {
-            [{
+            /*  data的数据格式新增frame_type： [{
               name: 'gala-ops',
               url: 'http://10.41.121.5:8081',
-
-            }].forEach((item, index) => {
+              frame_type: 'micro-app'
+            }] */
+            res.data.data.forEach((item, index) => {
               p.push({
                 path: '/plugin' + index,
                 name: 'Plugin' + index,
@@ -124,6 +125,7 @@ const permission = {
                 name: 'Plugin' + index,
                 component: _import('IFrame/IFrame'), // 组件文件的引用
                 url: item.url,
+                frame_type: item.frame_type
               }
               state.iframeComponents.push(iframeObj);
               Vue.component('Plugin' + index, _import('IFrame/IFrame'));
