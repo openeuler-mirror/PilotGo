@@ -1,7 +1,7 @@
 <template>
   <div class="iframe-div">
-    <!-- <iframe :src="url" class="iframe"></iframe> -->
-    <micro-app :name=name :url=url :baseroute=path class="micro_content"></micro-app>
+    <iframe :src="url" class="iframe" v-if="frame_type === 'iframe'"></iframe>
+    <micro-app v-else :name=name :url=url :baseroute=path class="micro_content"></micro-app>
   </div>
 </template>
 
@@ -11,7 +11,8 @@ export default {
   props: {
     url: String,
     name: String,
-    path: String
+    path: String,
+    frame_type: String,
   }
 }
 </script>
