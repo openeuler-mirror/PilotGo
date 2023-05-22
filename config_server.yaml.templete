@@ -2,6 +2,8 @@ http_server:
   addr: 0.0.0.0:8888
   session_count: 100
   max_age: 1800
+  # if true, will start pprof on :6060
+  debug: false
 socket_server:
   addr: 0.0.0.0:8889
 log:

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
+ * LastEditTime: 2023-05-22 15:58:25
  * Description: http server init
  ******************************************************************************/
 package initialization
@@ -33,23 +33,20 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 	go func() {
 		r := SetupRouter()
 		r.Run(conf.Addr)
-
-		err := http.ListenAndServe(conf.Addr, nil) // listen and serve
-		if err != nil {
-			logger.Error("failed to start http server, error:%v", err)
-		}
 	}()
 
-	go func() {
-		// 分解字符串然后添加后缀6060
-		pos := strings.Index(conf.Addr, ":")
-		dizhi := conf.Addr[:pos] + ":6060"
-		logger.Debug("start pprof service on: %s", dizhi)
-		err := http.ListenAndServe(dizhi, nil)
-		if err != nil {
-			logger.Error("failed to start pprof, error:%v", err)
-		}
-	}()
+	if conf.Debug {
+		go func() {
+			// 分解字符串然后添加后缀6060
+			portIndex := strings.Index(conf.Addr, ":")
+			addr := conf.Addr[:portIndex] + ":6060"
+			logger.Debug("start pprof service on: %s", addr)
+			err := http.ListenAndServe(addr, nil)
+			if err != nil {
+				logger.Error("failed to start pprof, error:%v", err)
+			}
+		}()
+	}
 
 	return nil
 }
