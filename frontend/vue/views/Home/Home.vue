@@ -15,10 +15,10 @@
 <template>
   <div style="width:calc(100%);height:calc(100%)">
     <el-container>
-      <el-aside style="width: 10%">
+      <el-aside style="width: 8%">
         <div class="logo">
           <img src="../../assets/logo.png" alt="">
-          <span>PilotGo</span>
+          <!-- <span>PilotGo</span> -->
         </div>
         <el-menu id="el-menu" :collapse="isCollapse" :unique-opened="true" @select="handleSelect"
           class="el-menu-vertical-demo" background-color="#fff" :default-active="activePanel">
@@ -224,18 +224,17 @@ export default {
     .logo {
       width: 100%;
       height: 10%;
-      font-size: 3em;
-      font-family: fantasy;
-      color: rgb(241, 139, 14);
       display: flex;
       justify-content: space-around;
       align-items: center;
       position: relative;
       z-index: 1999;
-      background: rgb(11, 35, 117);
+      background-color: #fff;
+      border-right: 1px solid #e6e6e6;
+      border-bottom: 1px solid #e6e6e6;
 
       img {
-        width: 50%;
+        height: 90%;
       }
 
       span {
