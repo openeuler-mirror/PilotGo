@@ -36,6 +36,8 @@ const (
 	LogTypePermission = "权限"
 	LogTypePlugin     = "插件"
 	LogTypeBatch      = "批次"
+	LogTypeOrganize   = "组织"
+	LogTypeMachine    = "机器"
 )
 
 // 日志执行操作动作
@@ -56,6 +58,35 @@ const (
 	LogTypeSysctl    = "配置内核参数"
 	LogTypeBroadcast = "配置文件下发"
 )
+
+func AddAuditLog(log dao.AuditLog) error {
+	return log.Record()
+}
+
+// 修改日志的操作状态
+func UpdateStatus(log dao.AuditLog, status string) error {
+	// TODO:
+	return log.UpdateStatus(status)
+}
+
+// 查询所有日志
+func GetAuditLog() ([]dao.AuditLog, error) {
+	return dao.GetAuditLog()
+}
+
+// 根据父UUid查询日志
+func GetAuditLogByParentId(parentUUId string) (dao.AuditLog, error) {
+	return dao.GetAuditLogByParentId(parentUUId)
+}
+
+// 查询子日志
+func GetAuditLogById(logUUId string) (dao.AuditLog, error) {
+	return dao.GetAuditLogById(logUUId)
+}
+
+func GetAuditLogByModule(name string) ([]dao.AuditLog, error) {
+	return dao.GetAuditLogByModule(name)
+}
 
 // 计算批量机器操作的状态：成功数，总数目，比率
 func BatchActionStatus(StatusCodes []string) (status string) {
