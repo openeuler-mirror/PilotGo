@@ -65,21 +65,3 @@ func AgentLogsHandler(c *gin.Context) {
 
 	response.Success(c, agentlog, "子日志查询成功!")
 }
-
-// 删除机器日志
-func DeleteLogHandler(c *gin.Context) {
-	var logid dao.AgentLogDel
-	if err := c.Bind(&logid); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	if len(logid.IDs) == 0 {
-		response.Fail(c, nil, "请输入删除机器日志ID")
-		return
-	}
-	if err := service.DeleteLog(logid.IDs); err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	response.Success(c, nil, "日志删除成功!")
-}
