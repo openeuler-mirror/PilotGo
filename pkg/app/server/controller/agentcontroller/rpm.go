@@ -22,7 +22,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -94,7 +93,7 @@ func InstallRpmHandler(c *gin.Context) {
 	logParent := dao.AgentLogParent{
 		UserName:   rpm.UserName,
 		DepartName: rpm.UserDeptName,
-		Type:       global.LogTypeRPM,
+		Type:       service.LogTypeRPM,
 	}
 	logParentId, err := dao.ParentAgentLog(logParent)
 	if err != nil {
@@ -114,7 +113,7 @@ func InstallRpmHandler(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
-				Action:          global.RPMInstall,
+				Action:          service.RPMInstall,
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
@@ -133,7 +132,7 @@ func InstallRpmHandler(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
-				Action:          global.RPMInstall,
+				Action:          service.RPMInstall,
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
@@ -148,7 +147,7 @@ func InstallRpmHandler(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
-				Action:          global.RPMInstall,
+				Action:          service.RPMInstall,
 				StatusCode:      http.StatusOK,
 				Message:         "安装成功",
 			}
@@ -176,7 +175,7 @@ func RemoveRpmHandler(c *gin.Context) {
 	logParent := dao.AgentLogParent{
 		UserName:   rpm.UserName,
 		DepartName: rpm.UserDeptName,
-		Type:       global.LogTypeRPM,
+		Type:       service.LogTypeRPM,
 	}
 	logParentId, err := dao.ParentAgentLog(logParent)
 	if err != nil {
@@ -195,7 +194,7 @@ func RemoveRpmHandler(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
-				Action:          global.RPMRemove,
+				Action:          service.RPMRemove,
 				StatusCode:      http.StatusBadRequest,
 				Message:         "获取uuid失败",
 			}
@@ -214,7 +213,7 @@ func RemoveRpmHandler(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
-				Action:          global.RPMRemove,
+				Action:          service.RPMRemove,
 				StatusCode:      http.StatusBadRequest,
 				Message:         Err,
 			}
@@ -230,7 +229,7 @@ func RemoveRpmHandler(c *gin.Context) {
 				LogParentID:     logParentId,
 				IP:              UUID_iP,
 				OperationObject: rpm.RPM,
-				Action:          global.RPMRemove,
+				Action:          service.RPMRemove,
 				StatusCode:      http.StatusOK,
 				Message:         "卸载成功",
 			}

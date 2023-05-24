@@ -22,6 +22,59 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type AuditLog struct {
+	ID            int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	LogUUID       string `gorm:"not null" json:"log_uuid"`
+	ParentLogUUID string `json:"parent_log_uuid"`
+	AgentUUID     string `json:"agent_uuid"`
+	Module        string `gorm:"type:varchar(30);not null" json:"module"`
+	Status        string `gorm:"type:varchar(30);not null" json:"status"`
+	OperatorID    string `gorm:"not null" json:"operator_id"`
+	Action        string `gorm:"not null" json:"action"`
+	Message       string `json:"message"`
+	CreatedAt     time.Time
+	UpdateAt      time.Time
+}
+
+// 存储日志
+func (p *AuditLog) Record() error {
+	return global.PILOTGO_DB.Save(p).Error
+}
+
+// 修改日志的操作状态
+func (p *AuditLog) UpdateStatus(status string) error {
+	// TODO:
+	return global.PILOTGO_DB.Model(&p).Where("log_uuid=?", p.LogUUID).Update("status", status).Error
+}
+
+// 查询所有日志
+func GetAuditLog() ([]AuditLog, error) {
+	var list []AuditLog
+	tx := global.PILOTGO_DB.Order("created_at desc").Find(&list)
+	return list, tx.Error
+}
+
+// 根据父UUid查询日志
+func GetAuditLogByParentId(parentUUId string) (AuditLog, error) {
+	var list AuditLog
+	tx := global.PILOTGO_DB.Order("ID desc").Where("parent_uuid=?", parentUUId).Find(list)
+	return list, tx.Error
+}
+
+// 查询子日志
+func GetAuditLogById(logUUId string) (AuditLog, error) {
+	var Log AuditLog
+	err := global.PILOTGO_DB.Where("log_uuid = ?", logUUId).Find(&Log).Error
+	return Log, err
+}
+
+// 根据模块名字查询日志
+func GetAuditLogByModule(name string) ([]AuditLog, error) {
+	var Log []AuditLog
+	err := global.PILOTGO_DB.Where("modulename = ?", name).Find(&Log).Error
+	return Log, err
+}
+
 type AgentLogParent struct {
 	ID         int       `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	CreatedAt  time.Time `json:"created_at"`

@@ -23,6 +23,41 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+// 日志执行操作状态
+const (
+	StatusSuccess     = "成功"
+	StatusPartSuccess = "部分成功"
+	StatusRunning     = "运行中"
+	StatusFail        = "失败"
+)
+
+// 日志记录归属模块
+const (
+	LogTypeUser       = "用户"
+	LogTypePermission = "权限"
+	LogTypePlugin     = "插件"
+	LogTypeBatch      = "批次"
+)
+
+// 日志执行操作动作
+const (
+	RPMInstall     = "软件包安装"
+	RPMRemove      = "软件包卸载"
+	SysctlChange   = "修改内核参数"
+	ServiceRestart = "重启服务"
+	ServiceStop    = "关闭服务"
+	ServiceStart   = "开启服务"
+	BroadcastFile  = "文件下发"
+)
+
+// 日志存储所属模块
+const (
+	LogTypeRPM       = "软件包安装/卸载"
+	LogTypeService   = "运行服务"
+	LogTypeSysctl    = "配置内核参数"
+	LogTypeBroadcast = "配置文件下发"
+)
+
 // 计算批量机器操作的状态：成功数，总数目，比率
 func BatchActionStatus(StatusCodes []string) (status string) {
 	var StatusOKCounts int
