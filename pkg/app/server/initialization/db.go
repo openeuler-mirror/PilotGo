@@ -52,6 +52,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	global.PILOTGO_DB.AutoMigrate(&dao.Batch{})
 	global.PILOTGO_DB.AutoMigrate(&dao.AgentLogParent{})
 	global.PILOTGO_DB.AutoMigrate(&dao.AgentLog{})
+	global.PILOTGO_DB.AutoMigrate(&dao.AuditLog{})
 	global.PILOTGO_DB.AutoMigrate(&dao.Files{})
 	global.PILOTGO_DB.AutoMigrate(&dao.HistoryFiles{})
 	global.PILOTGO_DB.AutoMigrate(&dao.Script{})

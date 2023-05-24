@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -73,7 +74,7 @@ func ServiceStartHandler(c *gin.Context) {
 	logParent := dao.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
-		Type:       global.LogTypeService,
+		Type:       service.LogTypeService,
 	}
 	logParentId, err := dao.ParentAgentLog(logParent)
 	if err != nil {
@@ -90,7 +91,7 @@ func ServiceStartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
-			Action:          global.ServiceStart,
+			Action:          service.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
@@ -111,7 +112,7 @@ func ServiceStartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
-			Action:          global.ServiceStart,
+			Action:          service.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
@@ -130,7 +131,7 @@ func ServiceStartHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
-		Action:          global.ServiceStart,
+		Action:          service.ServiceStart,
 		StatusCode:      http.StatusOK,
 		Message:         "启动服务成功",
 	}
@@ -150,7 +151,7 @@ func ServiceStopHandler(c *gin.Context) {
 	logParent := dao.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
-		Type:       global.LogTypeService,
+		Type:       service.LogTypeService,
 	}
 	logParentId, err := dao.ParentAgentLog(logParent)
 	if err != nil {
@@ -167,7 +168,7 @@ func ServiceStopHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
-			Action:          global.ServiceStop,
+			Action:          service.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
@@ -189,7 +190,7 @@ func ServiceStopHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
-			Action:          global.ServiceStop,
+			Action:          service.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
@@ -208,7 +209,7 @@ func ServiceStopHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
-		Action:          global.ServiceStop,
+		Action:          service.ServiceStop,
 		StatusCode:      http.StatusOK,
 		Message:         "关闭服务成功",
 	}
@@ -228,7 +229,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	logParent := dao.AgentLogParent{
 		UserName:   agentservice.UserName,
 		DepartName: agentservice.UserDeptName,
-		Type:       global.LogTypeService,
+		Type:       service.LogTypeService,
 	}
 	logParentId, err := dao.ParentAgentLog(logParent)
 	if err != nil {
@@ -245,7 +246,7 @@ func ServiceRestartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
-			Action:          global.ServiceRestart,
+			Action:          service.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
@@ -267,7 +268,7 @@ func ServiceRestartHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: agentservice.Service,
-			Action:          global.ServiceRestart,
+			Action:          service.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
 			Message:         Err,
 		}
@@ -286,7 +287,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: agentservice.Service,
-		Action:          global.ServiceRestart,
+		Action:          service.ServiceRestart,
 		StatusCode:      http.StatusOK,
 		Message:         "重启服务成功",
 	}

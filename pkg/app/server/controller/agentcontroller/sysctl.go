@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -50,7 +51,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	logParent := dao.AgentLogParent{
 		UserName:   username,
 		DepartName: userDeptName,
-		Type:       global.LogTypeSysctl,
+		Type:       service.LogTypeSysctl,
 	}
 	logParentId, err := dao.ParentAgentLog(logParent)
 	if err != nil {
@@ -67,7 +68,7 @@ func SysctlChangeHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: args,
-			Action:          global.SysctlChange,
+			Action:          service.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
@@ -88,7 +89,7 @@ func SysctlChangeHandler(c *gin.Context) {
 			LogParentID:     logParentId,
 			IP:              UUID_iP,
 			OperationObject: args,
-			Action:          global.SysctlChange,
+			Action:          service.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
 			Message:         err.Error(),
 		}
@@ -105,7 +106,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		LogParentID:     logParentId,
 		IP:              UUID_iP,
 		OperationObject: args,
-		Action:          global.SysctlChange,
+		Action:          service.SysctlChange,
 		StatusCode:      http.StatusOK,
 		Message:         "修改成功",
 	}
