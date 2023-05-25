@@ -65,7 +65,6 @@ func AddAuditLog(log dao.AuditLog) error {
 
 // 修改日志的操作状态
 func UpdateStatus(log dao.AuditLog, status string) error {
-	// TODO:
 	return log.UpdateStatus(status)
 }
 
@@ -79,7 +78,7 @@ func GetAuditLogByParentId(parentUUId string) (dao.AuditLog, error) {
 	return dao.GetAuditLogByParentId(parentUUId)
 }
 
-// 查询子日志
+// 查询单条日志
 func GetAuditLogById(logUUId string) (dao.AuditLog, error) {
 	return dao.GetAuditLogById(logUUId)
 }
