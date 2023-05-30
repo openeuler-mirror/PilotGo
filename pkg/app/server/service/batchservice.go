@@ -15,10 +15,11 @@
 package service
 
 import (
-	"errors"
+	//"errors"
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -40,7 +41,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	}
 	ExistNameBool, err := dao.IsExistName(batchinfo.Name)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "数据库")
 	}
 	if ExistNameBool {
 		return errors.New("已存在该名称批次")
@@ -52,7 +53,6 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartIDs) == 0 {
 		return errors.New("请先选择机器IP或部门")
 	}
-
 	// 机器id列表
 	var machinelist string
 	Departids := make([]int, 0)
@@ -66,7 +66,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 
 		machines, err := dao.MachineList(Departids)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "数据库")
 		}
 		for _, mamachine := range machines {
 			machineids = append(machineids, mamachine.ID)
@@ -119,8 +119,10 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		Machinelist: machinelist,
 	}
 	err = dao.CreateBatchMessage(Batch)
-
-	return err
+	if err != nil {
+		return errors.Wrap(err, "数据库")
+	}
+	return nil
 }
 
 // TODO: *[]model.Batch 应该定义为指针数组
