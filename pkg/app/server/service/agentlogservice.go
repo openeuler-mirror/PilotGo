@@ -59,7 +59,7 @@ const (
 	LogTypeBroadcast = "配置文件下发"
 )
 
-func AddAuditLog(log dao.AuditLog) error {
+func AddAuditLog(log *dao.AuditLog) error {
 	return log.Record()
 }
 

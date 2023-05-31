@@ -23,13 +23,13 @@ import (
 )
 
 type AuditLog struct {
-	ID            int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	ID            uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	LogUUID       string `gorm:"not null" json:"log_uuid"`
 	ParentLogUUID string `json:"parent_log_uuid"`
 	AgentUUID     string `json:"agent_uuid"`
 	Module        string `gorm:"type:varchar(30);not null" json:"module"`
 	Status        string `gorm:"type:varchar(30);not null" json:"status"`
-	OperatorID    string `gorm:"not null" json:"operator_id"`
+	OperatorID    uint   `gorm:"not null" json:"operator_id"`
 	Action        string `gorm:"not null" json:"action"`
 	Message       string `json:"message"`
 	CreatedAt     time.Time

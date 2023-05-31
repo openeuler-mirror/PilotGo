@@ -30,11 +30,13 @@ func IsExistName(name string) (bool, error) {
 	err := global.PILOTGO_DB.Where("name=?", name).Find(&batch).Error
 	return batch.ID != 0, err
 }
+
 func IsExistID(id int) (bool, error) {
 	var batch Batch
 	err := global.PILOTGO_DB.Where("id=?", id).Find(&batch).Error
 	return batch.ID != 0, err
 }
+
 func GetBatchID(name string) (uint, error) {
 	var batch Batch
 	err := global.PILOTGO_DB.Where("name=?", name).Find(&batch).Error
