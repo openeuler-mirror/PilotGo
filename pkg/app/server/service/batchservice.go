@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -35,13 +36,26 @@ type CreateBatchParam struct {
 	DepartIDs   []int    `json:"deptids"`
 }
 
+type BatchAuditLog = dao.AuditLog
+
+func NewBatchAuditLog(action, msg string, u User) *BatchAuditLog {
+	return &BatchAuditLog{
+		LogUUID:    uuid.New().String(),
+		Module:     LogTypeBatch,
+		Status:     StatusRunning,
+		OperatorID: u.ID,
+		Action:     action,
+		Message:    msg,
+	}
+}
+
 func CreateBatch(batchinfo *CreateBatchParam) error {
 	if len(batchinfo.Name) == 0 {
 		return errors.New("请输入批次名称")
 	}
 	ExistNameBool, err := dao.IsExistName(batchinfo.Name)
 	if err != nil {
-		return errors.Wrap(err, "数据库")
+		return err
 	}
 	if ExistNameBool {
 		return errors.New("已存在该名称批次")
@@ -66,7 +80,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 
 		machines, err := dao.MachineList(Departids)
 		if err != nil {
-			return errors.Wrap(err, "数据库")
+			return err
 		}
 		for _, mamachine := range machines {
 			machineids = append(machineids, mamachine.ID)
@@ -120,7 +134,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	}
 	err = dao.CreateBatchMessage(Batch)
 	if err != nil {
-		return errors.Wrap(err, "数据库")
+		return err
 	}
 	return nil
 }

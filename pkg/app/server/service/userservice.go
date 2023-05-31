@@ -28,6 +28,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
+type User = dao.User
+
 // 随机产生用户名字
 func RandomString(n int) string {
 	var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")

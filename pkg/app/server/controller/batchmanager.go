@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -17,19 +16,16 @@ func CreateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+	//TODO:
+	var user service.User
+	log := service.NewBatchAuditLog("创建批次", "", user)
 
-	log := dao.AuditLog{
-		LogUUID:    uuid.New().String(),
-		Module:     service.LogTypeBatch,
-		Status:     service.StatusRunning,
-		OperatorID: "uesr1",
-		Action:     "创建批次",
-		Message:    "详情",
-	}
 	if err := service.CreateBatch(&batchinfo); err != nil {
 		logger.Debug(err.Error())
+
 		log.Status = service.StatusFail
 		service.AddAuditLog(log)
+
 		response.Fail(c, nil, err.Error())
 		return
 	}
