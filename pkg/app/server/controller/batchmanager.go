@@ -91,12 +91,20 @@ func UpdateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+	//TODO:
+	var user service.User
+	log := service.NewBatchAuditLog("修改批次", "", user)
+
 	err := service.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
+		log.Status = service.StatusFail
+		service.AddAuditLog(log)
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
 
+	log.Status = service.StatusSuccess
+	service.AddAuditLog(log)
 	response.Success(c, nil, "批次修改成功")
 }
 
