@@ -65,11 +65,19 @@ func DeleteBatchHandler(c *gin.Context) {
 		return
 	}
 
+	//TODO:
+	var user service.User
+	log := service.NewBatchAuditLog("修改批次", "", user)
+
 	if err := service.DeleteBatch(batchdel.BatchID); err != nil {
+		log.Status = service.StatusFail
+		service.AddAuditLog(log)
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
+	log.Status = service.StatusSuccess
+	service.AddAuditLog(log)
 	response.Success(c, nil, "批次删除成功")
 }
 
