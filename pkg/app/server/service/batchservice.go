@@ -19,7 +19,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -34,19 +33,6 @@ type CreateBatchParam struct {
 	DepartID    []int    `json:"DepartID"`
 	Machines    []int    `json:"Machines"`
 	DepartIDs   []int    `json:"deptids"`
-}
-
-type BatchAuditLog = dao.AuditLog
-
-func NewBatchAuditLog(action, msg string, u User) *BatchAuditLog {
-	return &BatchAuditLog{
-		LogUUID:    uuid.New().String(),
-		Module:     LogTypeBatch,
-		Status:     StatusRunning,
-		OperatorID: u.ID,
-		Action:     action,
-		Message:    msg,
-	}
 }
 
 func CreateBatch(batchinfo *CreateBatchParam) error {

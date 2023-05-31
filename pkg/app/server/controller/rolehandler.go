@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -142,14 +143,23 @@ func UpdateUserRoleHandler(c *gin.Context) {
 }
 
 func RolePermissionChangeHandler(c *gin.Context) {
-	var roleChange dao.RolePermissionChange
+	var roleChange service.RolePermissionChange
 	if err := c.Bind(&roleChange); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	userRole, err := service.RolePermissionChange(roleChange)
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypePermission, "修改角色权限", "", user)
+	auditlog.AddAuditLog(log)
+
+	userRole, err := service.RolePermissionChangeMethod(roleChange)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, gin.H{"data": userRole}, "角色权限变更成功")
 }
