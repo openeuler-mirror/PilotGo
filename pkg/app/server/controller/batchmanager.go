@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -18,19 +19,17 @@ func CreateBatchHandler(c *gin.Context) {
 	}
 	//TODO:
 	var user service.User
-	log := service.NewBatchAuditLog("创建批次", "", user)
+	log := auditlog.NewAuditLog(auditlog.LogTypeBatch, "创建批次", "", user)
+	auditlog.AddAuditLog(log)
 
 	if err := service.CreateBatch(&batchinfo); err != nil {
 		logger.Debug(err.Error())
-
-		log.Status = service.StatusFail
-		service.AddAuditLog(log)
-
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	log.Status = service.StatusSuccess
-	service.AddAuditLog(log)
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "批次入库成功")
 }
 
@@ -67,17 +66,16 @@ func DeleteBatchHandler(c *gin.Context) {
 
 	//TODO:
 	var user service.User
-	log := service.NewBatchAuditLog("修改批次", "", user)
+	log := auditlog.NewAuditLog(auditlog.LogTypeBatch, "删除批次", "", user)
+	auditlog.AddAuditLog(log)
 
 	if err := service.DeleteBatch(batchdel.BatchID); err != nil {
-		log.Status = service.StatusFail
-		service.AddAuditLog(log)
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	log.Status = service.StatusSuccess
-	service.AddAuditLog(log)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "批次删除成功")
 }
 
@@ -93,18 +91,17 @@ func UpdateBatchHandler(c *gin.Context) {
 	}
 	//TODO:
 	var user service.User
-	log := service.NewBatchAuditLog("修改批次", "", user)
+	log := auditlog.NewAuditLog(auditlog.LogTypeBatch, "修改批次", "", user)
+	auditlog.AddAuditLog(log)
 
 	err := service.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
-		log.Status = service.StatusFail
-		service.AddAuditLog(log)
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
 
-	log.Status = service.StatusSuccess
-	service.AddAuditLog(log)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "批次修改成功")
 }
 

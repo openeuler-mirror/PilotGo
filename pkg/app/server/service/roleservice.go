@@ -20,6 +20,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 )
 
+type RolePermissionChange = dao.RolePermissionChange
+
 // 获取用户最高权限的角色id
 func RoleId(R dao.RoleID) int {
 	min := R.RoleId[0]
@@ -118,7 +120,7 @@ func UpdateUserRole(UserRole *dao.UserRole) error {
 	return errors.New("没有修改信息")
 }
 
-func RolePermissionChange(roleChange dao.RolePermissionChange) (*dao.UserRole, error) {
+func RolePermissionChangeMethod(roleChange dao.RolePermissionChange) (*dao.UserRole, error) {
 	userRole, err := dao.UpdateRolePermission(roleChange)
 	if err != nil {
 		return &userRole, err

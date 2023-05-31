@@ -20,12 +20,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // 查询所有审计日志
 func AuditLogAllHandler(c *gin.Context) {
-	loglist, err := service.GetAuditLog()
+	loglist, err := auditlog.GetAuditLog()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -39,7 +40,7 @@ func ModuleLogHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	loglist, err := service.GetAuditLogByModule(moduleName)
+	loglist, err := auditlog.GetAuditLogByModule(moduleName)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
