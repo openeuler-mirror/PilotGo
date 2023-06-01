@@ -186,6 +186,12 @@ func ImportUser(c *gin.Context) {
 		return
 	}
 	UserExit := make([]string, 0)
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "批量导入用户", "", user)
+	auditlog.AddAuditLog(log)
+
 	var err error
 	for _, file := range files {
 		name := file.Filename
@@ -201,8 +207,10 @@ func ImportUser(c *gin.Context) {
 	}
 
 	if len(UserExit) == 0 {
+		auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 		response.Success(c, nil, "导入用户信息成功")
 	} else {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }
