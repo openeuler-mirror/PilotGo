@@ -23,6 +23,7 @@ import (
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -70,7 +71,7 @@ func main() {
 	}
 
 	// 初始化插件组件
-	if err = service.PluginServiceInit(); err != nil {
+	if err = plugin.ServiceInit(); err != nil {
 		logger.Error("plugin service init failed, error:%v", err)
 		os.Exit(-1)
 	}

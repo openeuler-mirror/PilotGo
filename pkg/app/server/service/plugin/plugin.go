@@ -1,4 +1,4 @@
-package service
+package plugin
 
 import (
 	"encoding/json"
@@ -32,7 +32,7 @@ type Plugin struct {
 }
 
 // 初始化插件服务
-func PluginServiceInit() error {
+func ServiceInit() error {
 	return globalManager.RestorePluginInfo()
 }
 
@@ -261,6 +261,11 @@ func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
 // 获取plugin清单
 func GetPlugins() []*Plugin {
 	return globalManager.GetAll()
+}
+
+func GetPlugin(name string) *Plugin {
+	// TODO
+	return nil
 }
 
 func AddPlugin(url string) error {
