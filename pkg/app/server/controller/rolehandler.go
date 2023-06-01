@@ -117,15 +117,24 @@ func AddUserRoleHandler(c *gin.Context) {
 }
 
 func DeleteUserRoleHandler(c *gin.Context) {
-	var UserRole dao.UserRole
+	var UserRole service.UserRole
 	if err := c.Bind(&UserRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "删除角色", "", user)
+	auditlog.AddAuditLog(log)
+
 	err := service.DeleteUserRole(UserRole.ID)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "角色删除成功")
 }
 
