@@ -21,6 +21,7 @@ import (
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -64,6 +65,11 @@ func LoginHandler(c *gin.Context) {
 // 退出
 func Logout(c *gin.Context) {
 
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "用户注销", "", user)
+	auditlog.AddAuditLog(log)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "退出成功!")
 
 }
