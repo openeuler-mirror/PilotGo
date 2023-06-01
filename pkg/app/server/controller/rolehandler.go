@@ -104,15 +104,24 @@ func GetRolesHandler(c *gin.Context) {
 }
 
 func AddUserRoleHandler(c *gin.Context) {
-	var userRole dao.UserRole
+	var userRole service.UserRole
 	if err := c.Bind(&userRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "添加角色", "", user)
+	auditlog.AddAuditLog(log)
+
 	err := service.AddUserRole(&userRole)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "新增角色成功")
 }
 
