@@ -27,6 +27,7 @@ import (
 
 type AddDepart = dao.AddDepart
 type NewDepart = dao.NewDepart
+type DeleteDepart = dao.DeleteDepart
 
 // 返回全部的部门指针数组
 func Returnptrchild(depart []dao.DepartNode) (ptrchild []*dao.DepartTreeNode, deptRoot dao.DepartTreeNode) {
