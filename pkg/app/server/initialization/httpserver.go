@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-05-22 15:58:25
+ * LastEditTime: 2023-06-01 11:27:59
  * Description: http server init
  ******************************************************************************/
 package initialization
@@ -32,6 +32,7 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 
 	go func() {
 		r := SetupRouter()
+		logger.Info("start http service on: http://%s", conf.Addr)
 		r.Run(conf.Addr)
 	}()
 

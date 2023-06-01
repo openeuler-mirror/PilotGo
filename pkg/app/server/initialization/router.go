@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-04-14 10:07:34
+ * LastEditTime: 2023-06-01 11:19:37
  * Description: Interface routing forwarding
  ******************************************************************************/
 package initialization
@@ -32,9 +32,24 @@ func SetupRouter() *gin.Engine {
 	router.Use(middleware.LoggerDebug())
 	router.Use(middleware.Recover)
 
-	// TODO: 此处绑定 http api handler
-	api := router.Group("/api/v1")
+	// 绑定 http api handler
+	registerAPIs(router)
 
+	// 绑定前端静态资源handler
+	resource.StaticRouter(router)
+
+	// 绑定插件接口反向代理handler
+	registerPluginGateway(router)
+
+	// 全局通用接口
+	router.GET("/ws", controller.ShellWs)
+	router.GET("/event", controller.PushAlarmHandler)
+
+	return router
+}
+
+func registerAPIs(router *gin.Engine) {
+	api := router.Group("/api/v1")
 	overview := api.Group("/overview") // 机器概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)
@@ -181,21 +196,14 @@ func SetupRouter() *gin.Engine {
 
 	plugin := api.Group("plugins") // 插件
 	{
-		plugin.GET("", controller.GetPluginsHanlder)
-		plugin.PUT("", controller.AddPluginHanlder)
-		plugin.POST("/:uuid", controller.TogglePluginHanlder)
-		plugin.DELETE("/:uuid", controller.UnloadPluginHanlder)
+		plugin.GET("", controller.GetPluginsHandler)
+		plugin.PUT("", controller.AddPluginHandler)
+		plugin.POST("/:uuid", controller.TogglePluginHandler)
+		plugin.DELETE("/:uuid", controller.UnloadPluginHandler)
 	}
 
 	// 对插件提供的api接口
 	registerPluginApi(api)
-
-	// 此处绑定前端静态资源handler
-	resource.StaticRouter(router)
-
-	// 全局通用接口
-	router.GET("/ws", controller.ShellWs)
-	router.GET("/event", controller.PushAlarmHandler)
 
 	other := api.Group("")
 	{
@@ -209,7 +217,6 @@ func SetupRouter() *gin.Engine {
 		other.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 	}
 	go webSocket.CliManager.Start()
-	return router
 }
 
 func registerPluginApi(router *gin.RouterGroup) {
@@ -229,4 +236,9 @@ func registerPluginApi(router *gin.RouterGroup) {
 	{
 		pluginAPI.GET("/plugins", pluginapi.PluginList)
 	}
+}
+
+func registerPluginGateway(router *gin.Engine) {
+	gateway := router.Group("/plugin/:plugin_name")
+	gateway.Any("", controller.PluginGatewayHandler)
 }
