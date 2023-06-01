@@ -21,6 +21,7 @@ import (
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -138,16 +139,25 @@ func ResetPasswordHandler(c *gin.Context) {
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	var userdel dao.Userdel
+	var userdel service.Userdel
 	if c.Bind(&userdel) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "删除用户", "", user)
+	auditlog.AddAuditLog(log)
+
 	err := service.DeleteUser(userdel.Emails)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "用户删除成功!")
 }
 
