@@ -21,6 +21,7 @@ import (
 )
 
 type RolePermissionChange = dao.RolePermissionChange
+type UserRole = dao.UserRole
 
 // 获取用户最高权限的角色id
 func RoleId(R dao.RoleID) int {
