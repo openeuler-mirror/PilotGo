@@ -130,15 +130,24 @@ func DeleteUserRoleHandler(c *gin.Context) {
 }
 
 func UpdateUserRoleHandler(c *gin.Context) {
-	var UserRole dao.UserRole
+	var UserRole service.UserRole
 	if err := c.Bind(&UserRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "修改角色", "", user)
+	auditlog.AddAuditLog(log)
+
 	err := service.UpdateUserRole(&UserRole)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, gin.H{"data": UserRole}, "角色信息修改成功")
 }
 
