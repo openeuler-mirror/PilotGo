@@ -106,16 +106,24 @@ func DeleteDepartDataHandler(c *gin.Context) {
 }
 
 func UpdateDepartHandler(c *gin.Context) {
-	var new dao.NewDepart
+	var new service.NewDepart
 	if err := c.Bind(&new); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeOrganize, "修改部门信息", "", user)
+	auditlog.AddAuditLog(log)
+
 	err := service.UpdateDepart(new.DepartID, new.DepartName)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "部门更新成功")
 }
 
