@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -68,16 +69,25 @@ func DepartInfoHandler(c *gin.Context) {
 }
 
 func AddDepartHandler(c *gin.Context) {
-	newDepart := dao.AddDepart{}
+	newDepart := service.AddDepart{}
 	if err := c.Bind(&newDepart); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	err := service.AddDepart(&newDepart)
+
+	//TODO:
+	var user service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeOrganize, "添加部门信息", "", user)
+	auditlog.AddAuditLog(log)
+
+	err := service.AddDepartMethod(&newDepart)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "部门信息入库成功")
 }
 

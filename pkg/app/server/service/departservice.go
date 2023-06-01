@@ -25,6 +25,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type AddDepart = dao.AddDepart
+
 // 返回全部的部门指针数组
 func Returnptrchild(depart []dao.DepartNode) (ptrchild []*dao.DepartTreeNode, deptRoot dao.DepartTreeNode) {
 	departnode := make([]dao.DepartTreeNode, 0)
@@ -165,7 +167,7 @@ func DepartInfo() (*dao.DepartTreeNode, error) {
 	return &departRoot, nil
 }
 
-func AddDepart(newDepart *dao.AddDepart) error {
+func AddDepartMethod(newDepart *dao.AddDepart) error {
 	pid := newDepart.ParentID
 	parentDepart := newDepart.ParentDepart
 	depart := newDepart.DepartName
