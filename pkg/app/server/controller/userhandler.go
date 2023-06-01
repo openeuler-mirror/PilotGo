@@ -35,16 +35,25 @@ func GetUserRoleHandler(c *gin.Context) {
 }
 
 func RegisterHandler(c *gin.Context) {
-	var user dao.User
+	var user service.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	//TODO:
+	var user1 service.User
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "添加用户", "", user1)
+	auditlog.AddAuditLog(log)
+
 	err := service.Register(user)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
