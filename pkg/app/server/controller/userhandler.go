@@ -21,6 +21,7 @@ import (
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -48,16 +49,23 @@ func RegisterHandler(c *gin.Context) {
 }
 
 func LoginHandler(c *gin.Context) {
-	var user dao.User //Data verification
+	var user service.User //Data verification
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "用户登录", "", user)
+	auditlog.AddAuditLog(log)
+
 	token, departName, departId, userType, roleId, err := service.Login(user)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
 }
 
