@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -54,7 +53,7 @@ func PolicyAdd(c *gin.Context) {
 
 // 获取所有过滤策略
 func GetPolicy(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -74,7 +73,7 @@ func GetPolicy(c *gin.Context) {
 
 // 获取登录用户权限
 func GetLoginUserPermissionHandler(c *gin.Context) {
-	var RoleId dao.RoleID
+	var RoleId service.RoleID
 	if err := c.Bind(&RoleId); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -88,7 +87,7 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 }
 
 func GetRolesHandler(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

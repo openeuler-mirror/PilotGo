@@ -18,7 +18,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -137,7 +136,7 @@ func UpdateDepartHandler(c *gin.Context) {
 }
 
 func ModifyMachineDepartHandler(c *gin.Context) {
-	var M dao.MachineModifyDepart
+	var M service.MachineModifyDepart
 	if err := c.Bind(&M); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

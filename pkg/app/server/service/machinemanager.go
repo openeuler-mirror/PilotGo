@@ -4,7 +4,16 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 )
 
-func MachineInfo(depart *dao.Depart, query *dao.PaginationQ) (interface{}, int, error) {
+type MachineNode = dao.MachineNode
+type Depart struct {
+	ID int `form:"DepartId"`
+}
+
+type DeleteUUID struct {
+	Deluuid []string `json:"deluuid"`
+}
+
+func MachineInfo(depart *Depart, query *PaginationQ) (interface{}, int, error) {
 
 	var TheDeptAndSubDeptIds []int
 	ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)

@@ -25,8 +25,16 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type PaginationQ struct {
+	Ok             bool        `json:"ok"`
+	Size           int         `form:"size" json:"size"`
+	CurrentPageNum int         `form:"page" json:"page"`
+	Data           interface{} `json:"data" comment:"muster be a pointer of slice gorm.Model"` // save pagination list
+	TotalPage      int         `json:"total"`
+}
+
 // gorm分页查询方法
-func CrudAll(p *dao.PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
+func CrudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
 	if p.Size < 1 {
 		p.Size = 10
 	}
@@ -63,7 +71,7 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 }
 
 // 结构体分页查询方法
-func DataPaging(p *dao.PaginationQ, list interface{}, total int) (interface{}, error) {
+func DataPaging(p *PaginationQ, list interface{}, total int) (interface{}, error) {
 	data := make([]interface{}, 0)
 	if reflect.TypeOf(list).Kind() == reflect.Slice {
 		s := reflect.ValueOf(list)
@@ -100,7 +108,7 @@ func DataPaging(p *dao.PaginationQ, list interface{}, total int) (interface{}, e
 }
 
 // 拼装json 分页数据
-func JsonPagination(c *gin.Context, list interface{}, total int64, query *dao.PaginationQ) {
+func JsonPagination(c *gin.Context, list interface{}, total int64, query *PaginationQ) {
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code":  http.StatusOK,
 		"ok":    true,

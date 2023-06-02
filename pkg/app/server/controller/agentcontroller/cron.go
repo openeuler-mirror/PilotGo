@@ -204,7 +204,7 @@ func CronTaskStatus(c *gin.Context) {
 func CronTaskList(c *gin.Context) {
 	uuid := c.Query("uuid")
 
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

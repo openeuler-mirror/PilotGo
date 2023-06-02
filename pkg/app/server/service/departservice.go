@@ -29,6 +29,11 @@ type AddDepart = dao.AddDepart
 type NewDepart = dao.NewDepart
 type DeleteDepart = dao.DeleteDepart
 
+type MachineModifyDepart struct {
+	MachineID string `json:"machineid"`
+	DepartID  int    `json:"departid"`
+}
+
 // 返回全部的部门指针数组
 func Returnptrchild(depart []dao.DepartNode) (ptrchild []*dao.DepartTreeNode, deptRoot dao.DepartTreeNode) {
 	departnode := make([]dao.DepartTreeNode, 0)

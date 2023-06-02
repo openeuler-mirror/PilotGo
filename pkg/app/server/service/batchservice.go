@@ -126,7 +126,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 }
 
 // TODO: *[]model.Batch 应该定义为指针数组
-func GetBatches(query *dao.PaginationQ) (*[]dao.Batch, int64, error) {
+func GetBatches(query *PaginationQ) (*[]dao.Batch, int64, error) {
 
 	batch := dao.Batch{}
 	list, tx := batch.ReturnBatch()

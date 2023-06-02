@@ -9,6 +9,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 )
 
+type Script = dao.Script
+
 // 存储脚本文件
 func AddScript(script *dao.Script) error {
 	if len(script.Name) == 0 {
