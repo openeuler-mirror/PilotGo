@@ -184,16 +184,24 @@ func DeleteUserHandler(c *gin.Context) {
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	var user dao.User
+	var user service.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	//TODO:
+	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "修改用户信息", "", user)
+	auditlog.AddAuditLog(log)
+
 	u, err := service.UpdateUser(user)
 	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, gin.H{"data": u}, "用户信息修改成功")
 
 }
