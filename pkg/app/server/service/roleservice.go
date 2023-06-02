@@ -23,8 +23,12 @@ import (
 type RolePermissionChange = dao.RolePermissionChange
 type UserRole = dao.UserRole
 
+type RoleID struct {
+	RoleId []int `json:"roleId"`
+}
+
 // 获取用户最高权限的角色id
-func RoleId(R dao.RoleID) int {
+func RoleId(R RoleID) int {
 	min := R.RoleId[0]
 	if len(R.RoleId) > 1 {
 		for _, v := range R.RoleId {
@@ -36,7 +40,7 @@ func RoleId(R dao.RoleID) int {
 	return min
 }
 
-func GetLoginUserPermission(Roleid dao.RoleID) (dao.UserRole, interface{}, error) {
+func GetLoginUserPermission(Roleid RoleID) (dao.UserRole, interface{}, error) {
 	roleId := RoleId(Roleid) //用户的最高权限
 	userRole, err := dao.RoleIdToGetAllInfo(roleId)
 	if err != nil {
@@ -49,7 +53,7 @@ func GetLoginUserPermission(Roleid dao.RoleID) (dao.UserRole, interface{}, error
 	return userRole, buttons, nil
 }
 
-func GetRoles(query *dao.PaginationQ) (int, interface{}, error) {
+func GetRoles(query *PaginationQ) (int, interface{}, error) {
 	roles, total, err := dao.GetAllRoles()
 	if err != nil {
 		return total, nil, err

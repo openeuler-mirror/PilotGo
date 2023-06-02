@@ -19,14 +19,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func SaveFileToDatabaseHandler(c *gin.Context) {
-	var file dao.Files
+	var file service.Files
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -40,7 +39,7 @@ func SaveFileToDatabaseHandler(c *gin.Context) {
 }
 
 func DeleteFileHandler(c *gin.Context) {
-	var files dao.DeleteFiles
+	var files service.DeleteFiles
 	if err := c.Bind(&files); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -55,7 +54,7 @@ func DeleteFileHandler(c *gin.Context) {
 }
 
 func UpdateFileHandler(c *gin.Context) {
-	var file dao.Files
+	var file service.Files
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -69,14 +68,14 @@ func UpdateFileHandler(c *gin.Context) {
 }
 
 func AllFiles(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	files := dao.Files{}
+	files := service.Files{}
 	list, tx := files.AllFiles()
 
 	total, err := service.CrudAll(query, tx, list)
@@ -99,14 +98,14 @@ func AllFiles(c *gin.Context) {
 }
 
 func FileSearchHandler(c *gin.Context) {
-	var file dao.SearchFile
+	var file service.SearchFile
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	search := file.Search
 
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -124,7 +123,7 @@ func FileSearchHandler(c *gin.Context) {
 }
 
 func HistoryFilesHandler(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -138,7 +137,7 @@ func HistoryFilesHandler(c *gin.Context) {
 		return
 	}
 
-	files := dao.HistoryFiles{}
+	files := service.HistoryFiles{}
 	list, tx := files.HistoryFiles(FileId)
 
 	total, err := service.CrudAll(query, tx, list)
@@ -150,7 +149,7 @@ func HistoryFilesHandler(c *gin.Context) {
 }
 
 func LastFileRollBackHandler(c *gin.Context) {
-	var file dao.RollBackFiles
+	var file service.RollBackFiles
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

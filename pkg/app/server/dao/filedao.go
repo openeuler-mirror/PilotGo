@@ -47,28 +47,8 @@ type HistoryFiles struct {
 	File        string `gorm:"type:text" json:"file"`
 }
 
-type RollBackFiles struct {
-	HistoryFileID int    `json:"id"`
-	FileID        int    `json:"filePId"`
-	UserUpdate    string `json:"user"`
-	UserDept      string `json:"userDept"`
-}
-
-type DeleteFiles struct {
-	FileIDs []int `json:"ids"`
-}
-
 type SearchFile struct {
 	Search string `json:"search"`
-}
-
-type FileBroadcast struct {
-	BatchId  []int  `json:"batches"`
-	Path     string `json:"path"`
-	FileName string `json:"name"`
-	User     string `json:"user"`
-	UserDept string `json:"userDept"`
-	Text     string `json:"file"`
 }
 
 func (f *Files) AllFiles() (list *[]Files, tx *gorm.DB) {

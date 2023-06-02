@@ -47,10 +47,6 @@ type RoleButton struct {
 	Button string `json:"button"`
 }
 
-type RoleID struct {
-	RoleId []int `json:"roleId"`
-}
-
 type RolePermissionChange struct {
 	RoleID   int      `json:"id"`
 	Menus    []string `json:"menus"`

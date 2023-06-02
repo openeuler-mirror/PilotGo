@@ -16,21 +16,20 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func MachineInfoHandler(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	depart := &dao.Depart{}
+	depart := &service.Depart{}
 	if c.ShouldBind(&depart) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -46,8 +45,8 @@ func MachineInfoHandler(c *gin.Context) {
 
 // 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
-	machine := dao.MachineNode{}
-	query := &dao.PaginationQ{}
+	machine := service.MachineNode{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -76,7 +75,7 @@ func MachineAllDataHandler(c *gin.Context) {
 
 // 删除机器
 func DeleteMachineHandler(c *gin.Context) {
-	var deleteuuid dao.DeleteUUID
+	var deleteuuid service.DeleteUUID
 	if c.Bind(&deleteuuid) != nil {
 		response.Fail(c, nil, "parameter error")
 		return

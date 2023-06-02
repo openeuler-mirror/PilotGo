@@ -57,10 +57,6 @@ func (m *MachineNode) ReturnMachine(departid int) (list *[]Res, tx *gorm.DB, res
 	return
 }
 
-type DeleteUUID struct {
-	Deluuid []string `json:"deluuid"`
-}
-
 func IsUUIDExist(uuid string) (bool, error) {
 	var Machine MachineNode
 	err := global.PILOTGO_DB.Where("machine_uuid=?", uuid).Find(&Machine).Error

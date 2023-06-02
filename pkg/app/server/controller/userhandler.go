@@ -94,13 +94,13 @@ func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
-		"data": gin.H{"user": dao.ToUserDto(user.(dao.User))},
+		"data": gin.H{"user": dao.ToUserDto(user.(service.User))},
 	})
 }
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -122,13 +122,13 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user dao.User
+	var user service.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	var email = user.Email
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -145,7 +145,7 @@ func UserSearchHandler(c *gin.Context) {
 
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
-	var user dao.User
+	var user service.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return

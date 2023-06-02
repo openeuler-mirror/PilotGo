@@ -61,7 +61,7 @@ func GetAgentRepo(c *gin.Context) {
 }
 
 func FileBroadcastToAgents(c *gin.Context) {
-	var fb dao.FileBroadcast
+	var fb service.FileBroadcast
 	c.Bind(&fb)
 
 	batchIds := fb.BatchId

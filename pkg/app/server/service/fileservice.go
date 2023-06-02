@@ -24,6 +24,30 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type Files = dao.Files
+type SearchFile = dao.SearchFile
+type HistoryFiles = dao.HistoryFiles
+
+type DeleteFiles struct {
+	FileIDs []int `json:"ids"`
+}
+
+type RollBackFiles struct {
+	HistoryFileID int    `json:"id"`
+	FileID        int    `json:"filePId"`
+	UserUpdate    string `json:"user"`
+	UserDept      string `json:"userDept"`
+}
+
+type FileBroadcast struct {
+	BatchId  []int  `json:"batches"`
+	Path     string `json:"path"`
+	FileName string `json:"name"`
+	User     string `json:"user"`
+	UserDept string `json:"userDept"`
+	Text     string `json:"file"`
+}
+
 // 获取时间的日期函数 => 20200426-17:36:04
 func NowTime() string {
 	time := time.Now()
@@ -37,7 +61,7 @@ func NowTime() string {
 	return nowtime
 }
 
-func SaveFileToDatabase(file *dao.Files) error {
+func SaveFileToDatabase(file *Files) error {
 	filename := file.FileName
 	if len(filename) == 0 {
 		return errors.New("请输入配置文件名字")
@@ -72,7 +96,7 @@ func SaveFileToDatabase(file *dao.Files) error {
 		return errors.New("请重新检查文件内容")
 	}
 
-	fd := dao.Files{
+	fd := Files{
 		UserUpdate:      file.UserUpdate,
 		UserDept:        file.UserDept,
 		FileName:        filename,
@@ -99,7 +123,7 @@ func DeleteFile(fileIds []int) error {
 	}
 	return nil
 }
-func UpdateFile(file *dao.Files) error {
+func UpdateFile(file *Files) error {
 	id := file.ID
 	err := dao.SaveHistoryFile(id)
 	if err != nil {
@@ -131,7 +155,7 @@ func UpdateFile(file *dao.Files) error {
 			return err
 		}
 	}
-	f := dao.Files{
+	f := Files{
 		Type:            file.Type,
 		FileName:        filename,
 		FilePath:        file.FilePath,
@@ -145,7 +169,7 @@ func UpdateFile(file *dao.Files) error {
 	return dao.UpdateFile(id, f)
 }
 
-func LastFileRollBack(file *dao.RollBackFiles) error {
+func LastFileRollBack(file *RollBackFiles) error {
 	lastfileId := file.HistoryFileID
 	fileId := file.FileID
 	user := file.UserUpdate
@@ -163,7 +187,7 @@ func LastFileRollBack(file *dao.RollBackFiles) error {
 			return err
 		}
 	}
-	fd := dao.Files{
+	fd := Files{
 		UserUpdate: user,
 		UserDept:   userDept,
 		File:       lastfileText,

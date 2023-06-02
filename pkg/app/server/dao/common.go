@@ -15,10 +15,3 @@
 package dao
 
 // 分页查询结构体
-type PaginationQ struct {
-	Ok             bool        `json:"ok"`
-	Size           int         `form:"size" json:"size"`
-	CurrentPageNum int         `form:"page" json:"page"`
-	Data           interface{} `json:"data" comment:"muster be a pointer of slice gorm.Model"` // save pagination list
-	TotalPage      int         `json:"total"`
-}

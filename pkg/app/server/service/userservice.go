@@ -177,7 +177,7 @@ func ResetPassword(email string) (dao.User, error) {
 	return u, nil
 }
 
-func UserSearch(email string, query *dao.PaginationQ) (interface{}, int, error) {
+func UserSearch(email string, query *PaginationQ) (interface{}, int, error) {
 	users, total, err := dao.UserSearch(email)
 	data, err := DataPaging(query, users, total)
 	if err != nil {

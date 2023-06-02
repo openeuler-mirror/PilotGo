@@ -50,7 +50,7 @@ func ModuleLogHandler(c *gin.Context) {
 
 // 查询所有父日志
 func LogAllHandler(c *gin.Context) {
-	query := &dao.PaginationQ{}
+	query := &service.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())

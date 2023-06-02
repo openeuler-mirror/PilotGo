@@ -41,11 +41,6 @@ type NewDepart struct {
 	DepartName string `json:"DepartName"`
 }
 
-type MachineModifyDepart struct {
-	MachineID string `json:"machineid"`
-	DepartID  int    `json:"departid"`
-}
-
 type DeleteDepart struct {
 	DepartID int `json:"DepartID"`
 }
@@ -53,9 +48,6 @@ type AddDepart struct {
 	ParentID     int    `json:"PID"`
 	ParentDepart string `json:"ParentDepart"`
 	DepartName   string `json:"Depart"`
-}
-type Depart struct {
-	ID int `form:"DepartId"`
 }
 
 func IsParentDepartExist(parent string) (bool, error) {
