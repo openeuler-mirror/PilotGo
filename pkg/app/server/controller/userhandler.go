@@ -20,13 +20,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func GetUserRoleHandler(c *gin.Context) {
-	roles, err := service.GetUserRole()
+	roles, err := userservice.GetUserRole()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -35,18 +36,18 @@ func GetUserRoleHandler(c *gin.Context) {
 }
 
 func RegisterHandler(c *gin.Context) {
-	var user service.User
+	var user userservice.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user1 service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "添加用户", "", user1)
-	auditlog.AddAuditLog(log)
+	var user1 userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "添加用户", "", user1)
+	auditlog.Add(log)
 
-	err := service.Register(user)
+	err := userservice.Register(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -58,16 +59,16 @@ func RegisterHandler(c *gin.Context) {
 }
 
 func LoginHandler(c *gin.Context) {
-	var user service.User //Data verification
+	var user userservice.User //Data verification
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "用户登录", "", user)
-	auditlog.AddAuditLog(log)
+	log := auditlog.New(auditlog.LogTypeUser, "用户登录", "", user)
+	auditlog.Add(log)
 
-	token, departName, departId, userType, roleId, err := service.Login(user)
+	token, departName, departId, userType, roleId, err := userservice.Login(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -82,9 +83,9 @@ func LoginHandler(c *gin.Context) {
 func Logout(c *gin.Context) {
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "用户注销", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "用户注销", "", user)
+	auditlog.Add(log)
 	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "退出成功!")
 
@@ -94,63 +95,63 @@ func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
-		"data": gin.H{"user": dao.ToUserDto(user.(service.User))},
+		"data": gin.H{"user": dao.ToUserDto(user.(userservice.User))},
 	})
 }
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	users, total, err := service.UserAll()
+	users, total, err := userservice.UserAll()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	data, err := service.DataPaging(query, users, total)
+	data, err := common.DataPaging(query, users, total)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	service.JsonPagination(c, data, int64(total), query)
+	common.JsonPagination(c, data, int64(total), query)
 }
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user service.User
+	var user userservice.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	var email = user.Email
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	data, total, err := service.UserSearch(email, query)
+	data, total, err := userservice.UserSearch(email, query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	service.JsonPagination(c, data, int64(total), query)
+	common.JsonPagination(c, data, int64(total), query)
 }
 
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
-	var user service.User
+	var user userservice.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	u, err := service.ResetPassword(user.Email)
+	u, err := userservice.ResetPassword(user.Email)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 	} else {
@@ -160,18 +161,18 @@ func ResetPasswordHandler(c *gin.Context) {
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	var userdel service.Userdel
+	var userdel userservice.Userdel
 	if c.Bind(&userdel) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "删除用户", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "删除用户", "", user)
+	auditlog.Add(log)
 
-	err := service.DeleteUser(userdel.Emails)
+	err := userservice.DeleteUser(userdel.Emails)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -184,17 +185,17 @@ func DeleteUserHandler(c *gin.Context) {
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	var user service.User
+	var user userservice.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "修改用户信息", "", user)
-	auditlog.AddAuditLog(log)
+	log := auditlog.New(auditlog.LogTypeUser, "修改用户信息", "", user)
+	auditlog.Add(log)
 
-	u, err := service.UpdateUser(user)
+	u, err := userservice.UpdateUser(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -217,9 +218,9 @@ func ImportUser(c *gin.Context) {
 	UserExit := make([]string, 0)
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "批量导入用户", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "批量导入用户", "", user)
+	auditlog.Add(log)
 
 	var err error
 	for _, file := range files {
@@ -229,7 +230,7 @@ func ImportUser(c *gin.Context) {
 		if error != nil {
 			return
 		}
-		UserExit, err = service.ReadFile(xlFile, UserExit)
+		UserExit, err = userservice.ReadFile(xlFile, UserExit)
 		if err != nil {
 			return
 		}

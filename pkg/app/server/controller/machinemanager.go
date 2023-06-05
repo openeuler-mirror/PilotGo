@@ -16,37 +16,38 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	machineservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/machine"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func MachineInfoHandler(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	depart := &service.Depart{}
+	depart := &machineservice.Depart{}
 	if c.ShouldBind(&depart) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	data, lens, err := service.MachineInfo(depart, query)
+	data, lens, err := machineservice.MachineInfo(depart, query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	service.JsonPagination(c, data, int64(lens), query)
+	common.JsonPagination(c, data, int64(lens), query)
 }
 
 // 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
-	machine := service.MachineNode{}
-	query := &service.PaginationQ{}
+	machine := machineservice.MachineNode{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -54,18 +55,18 @@ func FreeMachineSource(c *gin.Context) {
 	}
 
 	list, tx, res := machine.ReturnMachine(global.UncateloguedDepartId)
-	total, err := service.CrudAll(query, tx, &res)
+	total, err := common.CrudAll(query, tx, &res)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
 	// 返回数据开始拼装分页的json
-	service.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, list, total, query)
 }
 
 func MachineAllDataHandler(c *gin.Context) {
-	datas, err := service.MachineAllData()
+	datas, err := machineservice.MachineAllData()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -75,12 +76,12 @@ func MachineAllDataHandler(c *gin.Context) {
 
 // 删除机器
 func DeleteMachineHandler(c *gin.Context) {
-	var deleteuuid service.DeleteUUID
+	var deleteuuid machineservice.DeleteUUID
 	if c.Bind(&deleteuuid) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	machinelist := service.DeleteMachine(deleteuuid.Deluuid)
+	machinelist := machineservice.DeleteMachine(deleteuuid.Deluuid)
 
 	if len(machinelist) != 0 {
 		response.Fail(c, gin.H{"machinelist": machinelist}, "机器删除失败")

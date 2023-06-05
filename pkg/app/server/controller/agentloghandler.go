@@ -21,12 +21,13 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // 查询所有审计日志
 func AuditLogAllHandler(c *gin.Context) {
-	loglist, err := auditlog.GetAuditLog()
+	loglist, err := auditlog.Get()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -40,7 +41,7 @@ func ModuleLogHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	loglist, err := auditlog.GetAuditLogByModule(moduleName)
+	loglist, err := auditlog.GetByModule(moduleName)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -50,7 +51,7 @@ func ModuleLogHandler(c *gin.Context) {
 
 // 查询所有父日志
 func LogAllHandler(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -64,13 +65,13 @@ func LogAllHandler(c *gin.Context) {
 		return
 	}
 
-	total, err := service.CrudAll(query, tx, list)
+	total, err := common.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	// 返回数据开始拼装分页的json
-	service.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, list, total, query)
 }
 
 // 查询所有子日志

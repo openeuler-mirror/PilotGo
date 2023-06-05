@@ -23,6 +23,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	fileservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/file"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -61,7 +62,7 @@ func GetAgentRepo(c *gin.Context) {
 }
 
 func FileBroadcastToAgents(c *gin.Context) {
-	var fb service.FileBroadcast
+	var fb fileservice.FileBroadcast
 	c.Bind(&fb)
 
 	batchIds := fb.BatchId

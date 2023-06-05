@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-21 15:37:48
  * Description: 用户模块逻辑代码
  ******************************************************************************/
-package service
+package user
 
 import (
 	"errors"
@@ -23,6 +23,7 @@ import (
 
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -177,9 +178,9 @@ func ResetPassword(email string) (dao.User, error) {
 	return u, nil
 }
 
-func UserSearch(email string, query *PaginationQ) (interface{}, int, error) {
+func UserSearch(email string, query *common.PaginationQ) (interface{}, int, error) {
 	users, total, err := dao.UserSearch(email)
-	data, err := DataPaging(query, users, total)
+	data, err := common.DataPaging(query, users, total)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -280,4 +281,64 @@ func GetUserRole() ([]dao.UserRole, error) {
 		return roles, err
 	}
 	return roles, nil
+}
+
+func AddUserRole(userRole *dao.UserRole) error {
+	err := dao.AddRole(*userRole)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteUserRole(ID int) error {
+	ok, err := dao.IsUserBindingRole(ID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		err := dao.DeleteRole(ID)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return errors.New("有用户绑定此角色，不可删除")
+	}
+}
+
+func UpdateUserRole(UserRole *dao.UserRole) error {
+	id := UserRole.ID
+	role := UserRole.Role
+	description := UserRole.Description
+	userRole, err := dao.RoleIdToGetAllInfo(id)
+	if err != nil {
+		return err
+	}
+	if userRole.Role != role && userRole.Description != description {
+		err = dao.UpdateRoleName(id, role)
+		if err != nil {
+			return err
+		}
+		err = dao.UpdateRoleDescription(id, description)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	if userRole.Role == role && userRole.Description != description {
+		err = dao.UpdateRoleDescription(id, description)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	if userRole.Role != role && userRole.Description == description {
+		err = dao.UpdateRoleName(id, role)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.New("没有修改信息")
 }

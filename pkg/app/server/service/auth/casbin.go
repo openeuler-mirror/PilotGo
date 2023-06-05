@@ -12,7 +12,7 @@
  * LastEditTime: 2022-07-04 09:25:41
  * Description: casbin服务
  ******************************************************************************/
-package service
+package auth
 
 import (
 	"fmt"

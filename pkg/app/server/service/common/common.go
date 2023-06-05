@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-22 14:18:14
  * Description: 公共函数
  ******************************************************************************/
-package service
+package common
 
 import (
 	"fmt"

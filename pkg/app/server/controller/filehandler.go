@@ -19,18 +19,19 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	fileservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/file"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func SaveFileToDatabaseHandler(c *gin.Context) {
-	var file service.Files
+	var file fileservice.Files
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	err := service.SaveFileToDatabase(&file)
+	err := fileservice.SaveToDatabase(&file)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -39,13 +40,13 @@ func SaveFileToDatabaseHandler(c *gin.Context) {
 }
 
 func DeleteFileHandler(c *gin.Context) {
-	var files service.DeleteFiles
+	var files fileservice.DeleteFiles
 	if err := c.Bind(&files); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	fileids := files.FileIDs
-	err := service.DeleteFile(fileids)
+	err := fileservice.Delete(fileids)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -54,12 +55,12 @@ func DeleteFileHandler(c *gin.Context) {
 }
 
 func UpdateFileHandler(c *gin.Context) {
-	var file service.Files
+	var file fileservice.Files
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	err := service.UpdateFile(&file)
+	err := fileservice.Update(&file)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -68,17 +69,17 @@ func UpdateFileHandler(c *gin.Context) {
 }
 
 func AllFiles(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	files := service.Files{}
+	files := fileservice.Files{}
 	list, tx := files.AllFiles()
 
-	total, err := service.CrudAll(query, tx, list)
+	total, err := common.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -98,14 +99,14 @@ func AllFiles(c *gin.Context) {
 }
 
 func FileSearchHandler(c *gin.Context) {
-	var file service.SearchFile
+	var file fileservice.SearchFile
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	search := file.Search
 
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -114,16 +115,16 @@ func FileSearchHandler(c *gin.Context) {
 
 	list, tx := file.FileSearch(search)
 
-	total, err := service.CrudAll(query, tx, list)
+	total, err := common.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	service.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, list, total, query)
 }
 
 func HistoryFilesHandler(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -137,24 +138,24 @@ func HistoryFilesHandler(c *gin.Context) {
 		return
 	}
 
-	files := service.HistoryFiles{}
+	files := fileservice.HistoryFiles{}
 	list, tx := files.HistoryFiles(FileId)
 
-	total, err := service.CrudAll(query, tx, list)
+	total, err := common.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	service.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, list, total, query)
 }
 
 func LastFileRollBackHandler(c *gin.Context) {
-	var file service.RollBackFiles
+	var file fileservice.RollBackFiles
 	if err := c.Bind(&file); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	err := service.LastFileRollBack(&file)
+	err := fileservice.LastFileRollBack(&file)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return

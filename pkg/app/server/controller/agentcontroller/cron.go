@@ -20,7 +20,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/cron"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -82,7 +83,7 @@ func CreatCron(c *gin.Context) {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
 		return
 	}
-	cron_start, err := service.CronStart(uuid, id, cronSpec, Command)
+	cron_start, err := cron.CronStart(uuid, id, cronSpec, Command)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
 		return
@@ -97,7 +98,7 @@ func DeleteCronTask(c *gin.Context) {
 	c.Bind(&crons)
 	uuid := crons.MachineUUID
 	for _, cronId := range crons.IDs {
-		_, err := service.StopAndDel(uuid, cronId)
+		_, err := cron.StopAndDel(uuid, cronId)
 		if err != nil {
 			cronIds = strconv.Itoa(cronId) + ","
 			continue
@@ -141,13 +142,13 @@ func UpdateCron(c *gin.Context) {
 	}
 
 	// 更新agent任务
-	_, err := service.StopAndDel(uuid, id)
+	_, err := cron.StopAndDel(uuid, id)
 	if err != nil {
 		msg := fmt.Sprintf("任务已保存,重启失败：%s", err)
 		response.Fail(c, nil, msg)
 		return
 	}
-	cron_start, err := service.CronStart(uuid, id, spec[:len(spec)-2], command)
+	cron_start, err := cron.CronStart(uuid, id, spec[:len(spec)-2], command)
 	if err != nil {
 		msg := fmt.Sprintf("任务已保存,重启失败：%s", err)
 		response.Fail(c, nil, msg)
@@ -178,7 +179,7 @@ func CronTaskStatus(c *gin.Context) {
 	}
 
 	if status {
-		cron_stop, err := service.StopAndDel(uuid, id)
+		cron_stop, err := cron.StopAndDel(uuid, id)
 		if err != nil {
 			response.Fail(c, nil, "任务暂停失败")
 			return
@@ -192,7 +193,7 @@ func CronTaskStatus(c *gin.Context) {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
 		return
 	}
-	cron_start, err := service.CronStart(uuid, id, cronSpec, Command)
+	cron_start, err := cron.CronStart(uuid, id, cronSpec, Command)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
 		return
@@ -204,7 +205,7 @@ func CronTaskStatus(c *gin.Context) {
 func CronTaskList(c *gin.Context) {
 	uuid := c.Query("uuid")
 
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -218,11 +219,11 @@ func CronTaskList(c *gin.Context) {
 		return
 	}
 
-	total, err := service.CrudAll(query, tx, list)
+	total, err := common.CrudAll(query, tx, list)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	// 返回数据开始拼装分页的json
-	service.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, list, total, query)
 }

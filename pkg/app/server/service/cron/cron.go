@@ -12,7 +12,7 @@
  * LastEditTime: 2022-05-23 15:16:10
  * Description: os scheduled task
  ******************************************************************************/
-package service
+package cron
 
 import (
 	"fmt"

@@ -1,7 +1,8 @@
-package service
+package machine
 
 import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 )
 
 type MachineNode = dao.MachineNode
@@ -13,17 +14,17 @@ type DeleteUUID struct {
 	Deluuid []string `json:"deluuid"`
 }
 
-func MachineInfo(depart *Depart, query *PaginationQ) (interface{}, int, error) {
+func MachineInfo(depart *Depart, query *common.PaginationQ) (interface{}, int, error) {
 
 	var TheDeptAndSubDeptIds []int
-	ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
+	common.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
 	machinelist, err := dao.MachineList(TheDeptAndSubDeptIds)
 	if err != nil {
 		return nil, 0, err
 	}
 	lens := len(machinelist)
-	data, err := DataPaging(query, machinelist, lens)
+	data, err := common.DataPaging(query, machinelist, lens)
 	if err != nil {
 		return nil, 0, err
 	}
