@@ -12,7 +12,7 @@
  * LastEditTime: 2022-03-08 11:21:31
  * Description: provide agent log manager functions.
  ******************************************************************************/
-package middleware
+package auth
 
 import (
 	"net/http"

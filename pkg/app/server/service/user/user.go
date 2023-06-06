@@ -23,8 +23,8 @@ import (
 
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -217,7 +217,7 @@ func Login(user dao.User) (string, string, int, int, string, error) {
 	}
 
 	// Issue token
-	token, err := middleware.ReleaseToken(user)
+	token, err := auth.ReleaseToken(user)
 	if err != nil {
 		return "", "", 0, 0, "", err
 	}
