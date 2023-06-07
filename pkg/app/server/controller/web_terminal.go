@@ -20,7 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 )
 
 func ShellWs(c *gin.Context) {
@@ -34,7 +34,7 @@ func ShellWs(c *gin.Context) {
 		Rows:    uint32(row),
 	}
 	// 后端获取到前端传来的主机信息,以此建立ssh客户端
-	sshClient, err := webSocket.DecodedMsgToSSHClient(msg)
+	sshClient, err := network.DecodedMsgToSSHClient(msg)
 	if err != nil {
 		c.Error(err)
 		return
@@ -44,7 +44,7 @@ func ShellWs(c *gin.Context) {
 		return
 	}
 	// 升级协议并获得socket连接
-	conn, err := webSocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := network.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.Error(err)
 		return

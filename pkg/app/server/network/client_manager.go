@@ -1,4 +1,4 @@
-package webSocket
+package network
 
 import (
 	"sync"

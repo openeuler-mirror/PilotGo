@@ -13,7 +13,7 @@
  * Description: 解析ssh 客户端连接信息
  ******************************************************************************/
 
-package webSocket
+package network
 
 import (
 	"encoding/base64"
