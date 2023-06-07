@@ -3,6 +3,7 @@ package plugin
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 	splugin "gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -215,8 +217,8 @@ func GetManager() *PluginManager {
 	return globalManager
 }
 
-// 请求plugin的接口服务，获取接口信息
-func CheckPlugin(url string) (*Plugin, error) {
+// 与plugin进行握手，交换必要信息
+func Handshake(url string) (*Plugin, error) {
 	info, err := requestPluginInfo(url)
 	if err != nil {
 		logger.Debug("")
@@ -234,8 +236,11 @@ func CheckPlugin(url string) (*Plugin, error) {
 	return plugin, nil
 }
 
-// 发起http请求获取到插件的基本信息
+// 发起http请求，提供server地址，同时获取到插件的基本信息
 func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
+	conf := config.Config().HttpServer
+	url = url + fmt.Sprintf("?server=%s", conf.Addr)
+
 	resp, err := http.Get(url)
 	if err != nil {
 		logger.Debug("request plugin info error:%s", err.Error())
@@ -272,7 +277,7 @@ func AddPlugin(url string) error {
 	logger.Debug("add login from %s", url)
 	url = strings.TrimRight(url, "/")
 
-	plugin, err := CheckPlugin(url + "/plugin_manage/info")
+	plugin, err := Handshake(url + "/plugin_manage/info")
 	if err != nil {
 		return err
 	}
