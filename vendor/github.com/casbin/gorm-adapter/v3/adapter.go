@@ -95,7 +95,7 @@ func finalizer(a *Adapter) {
 	}
 }
 
-//Select conn according to table name（use map store name-index）
+// Select conn according to table name（use map store name-index）
 type specificPolicy int
 
 func (p *specificPolicy) Resolve(connPools []gorm.ConnPool) gorm.ConnPool {
@@ -115,8 +115,10 @@ func (dbPool *DbPool) switchDb(dbName string) *gorm.DB {
 
 // NewAdapter is the constructor for Adapter.
 // Params : databaseName,tableName,dbSpecified
-//			databaseName,{tableName/dbSpecified}
-//			{database/dbSpecified}
+//
+//	databaseName,{tableName/dbSpecified}
+//	{database/dbSpecified}
+//
 // databaseName and tableName are user defined.
 // Their default value are "casbin" and "casbin_rule"
 //
@@ -232,9 +234,9 @@ func InitDbResolver(dbArr []gorm.Dialector, dbNames []string) (DbPool, error) {
 
 func NewAdapterByMulDb(dbPool DbPool, dbName string, prefix string, tableName string) (*Adapter, error) {
 	//change DB
-	dbPool.switchDb(dbName)
+	db := dbPool.switchDb(dbName)
 
-	return NewAdapterByDBUseTableName(dbPool.source, prefix, tableName)
+	return NewAdapterByDBUseTableName(db, prefix, tableName)
 }
 
 // NewFilteredAdapter is the constructor for FilteredAdapter.
@@ -246,6 +248,19 @@ func NewFilteredAdapter(driverName string, dataSourceName string, params ...inte
 	}
 	adapter.isFiltered = true
 	return adapter, err
+}
+
+// NewFilteredAdapterByDB is the constructor for FilteredAdapter.
+// Casbin will not automatically call LoadPolicy() for a filtered adapter.
+func NewFilteredAdapterByDB(db *gorm.DB, prefix string, tableName string) (*Adapter, error) {
+	adapter := &Adapter{
+		tablePrefix: prefix,
+		tableName:   tableName,
+		isFiltered:  true,
+	}
+	adapter.db = db.Scopes(adapter.casbinRuleTable()).Session(&gorm.Session{Context: db.Statement.Context})
+
+	return adapter, nil
 }
 
 // NewAdapterByDB creates gorm-adapter by an existing Gorm instance
@@ -313,7 +328,7 @@ func (a *Adapter) createDatabase() error {
 				return nil
 			}
 		}
-	} else if a.driverName != "sqlite3" {
+	} else if a.driverName != "sqlite3" && a.driverName != "sqlserver" {
 		err = db.Exec("CREATE DATABASE IF NOT EXISTS " + a.databaseName).Error
 	}
 	if err != nil {
@@ -339,6 +354,8 @@ func (a *Adapter) Open() error {
 			db, err = openDBConnection(a.driverName, a.dataSourceName+" dbname="+a.databaseName)
 		} else if a.driverName == "sqlite3" {
 			db, err = openDBConnection(a.driverName, a.dataSourceName)
+		} else if a.driverName == "sqlserver" {
+			db, err = openDBConnection(a.driverName, a.dataSourceName+"?database="+a.databaseName)
 		} else {
 			db, err = openDBConnection(a.driverName, a.dataSourceName+a.databaseName)
 		}
@@ -424,7 +441,7 @@ func (a *Adapter) truncateTable() error {
 	return a.db.Exec(fmt.Sprintf("truncate table %s", a.getFullTableName())).Error
 }
 
-func loadPolicyLine(line CasbinRule, model model.Model) {
+func loadPolicyLine(line CasbinRule, model model.Model) error {
 	var p = []string{line.Ptype,
 		line.V0, line.V1, line.V2,
 		line.V3, line.V4, line.V5}
@@ -435,8 +452,11 @@ func loadPolicyLine(line CasbinRule, model model.Model) {
 	}
 	index += 1
 	p = p[:index]
-
-	persist.LoadPolicyArray(p, model)
+	err := persist.LoadPolicyArray(p, model)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // LoadPolicy loads policy from database.
@@ -445,9 +465,15 @@ func (a *Adapter) LoadPolicy(model model.Model) error {
 	if err := a.db.Order("ID").Find(&lines).Error; err != nil {
 		return err
 	}
-
+	err := a.Preview(&lines, model)
+	if err != nil {
+		return err
+	}
 	for _, line := range lines {
-		loadPolicyLine(line, model)
+		err := loadPolicyLine(line, model)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -481,7 +507,10 @@ func (a *Adapter) LoadFilteredPolicy(model model.Model, filter interface{}) erro
 		}
 
 		for _, line := range lines {
-			loadPolicyLine(line, model)
+			err := loadPolicyLine(line, model)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	a.isFiltered = true
@@ -550,8 +579,17 @@ func (a *Adapter) savePolicyLine(ptype string, rule []string) CasbinRule {
 
 // SavePolicy saves policy to database.
 func (a *Adapter) SavePolicy(model model.Model) error {
-	err := a.truncateTable()
+	var err error
+	tx := a.db.Clauses(dbresolver.Write).Begin()
+
+	if a.db.Config.Name() == sqlite.DriverName {
+		err = tx.Exec(fmt.Sprintf("delete from %s", a.getFullTableName())).Error
+	} else {
+		err = tx.Exec(fmt.Sprintf("truncate table %s", a.getFullTableName())).Error
+	}
+
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -561,7 +599,8 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 		for _, rule := range ast.Policy {
 			lines = append(lines, a.savePolicyLine(ptype, rule))
 			if len(lines) > flushEvery {
-				if err := a.db.Create(&lines).Error; err != nil {
+				if err := tx.Create(&lines).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 				lines = nil
@@ -573,7 +612,8 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 		for _, rule := range ast.Policy {
 			lines = append(lines, a.savePolicyLine(ptype, rule))
 			if len(lines) > flushEvery {
-				if err := a.db.Create(&lines).Error; err != nil {
+				if err := tx.Create(&lines).Error; err != nil {
+					tx.Rollback()
 					return err
 				}
 				lines = nil
@@ -581,12 +621,14 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 		}
 	}
 	if len(lines) > 0 {
-		if err := a.db.Create(&lines).Error; err != nil {
+		if err := tx.Create(&lines).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
 
-	return nil
+	err = tx.Commit().Error
+	return err
 }
 
 // AddPolicy adds a policy rule to the storage.
@@ -821,17 +863,16 @@ func (a *Adapter) UpdateFilteredPolicies(sec string, ptype string, newPolicies [
 	}
 
 	tx := a.db.Begin()
-
+	str, args := line.queryString()
+	if err := tx.Where(str, args...).Find(&oldP).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	if err := tx.Where(str, args...).Delete([]CasbinRule{}).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	for i := range newP {
-		str, args := line.queryString()
-		if err := tx.Where(str, args...).Find(&oldP).Error; err != nil {
-			tx.Rollback()
-			return nil, err
-		}
-		if err := tx.Where(str, args...).Delete([]CasbinRule{}).Error; err != nil {
-			tx.Rollback()
-			return nil, err
-		}
 		if err := tx.Create(&newP[i]).Error; err != nil {
 			tx.Rollback()
 			return nil, err
@@ -845,6 +886,38 @@ func (a *Adapter) UpdateFilteredPolicies(sec string, ptype string, newPolicies [
 		oldPolicies = append(oldPolicies, oldPolicy)
 	}
 	return oldPolicies, tx.Commit().Error
+}
+
+// Preview Pre-checking to avoid causing partial load success and partial failure deep
+func (a *Adapter) Preview(rules *[]CasbinRule, model model.Model) error {
+	j := 0
+	for i, rule := range *rules {
+		r := []string{rule.Ptype,
+			rule.V0, rule.V1, rule.V2,
+			rule.V3, rule.V4, rule.V5}
+		index := len(r) - 1
+		for r[index] == "" {
+			index--
+		}
+		index += 1
+		p := r[:index]
+		key := p[0]
+		sec := key[:1]
+		ok, err := model.HasPolicyEx(sec, key, p[1:])
+		if err != nil {
+			return err
+		}
+		if ok {
+			(*rules)[j], (*rules)[i] = rule, (*rules)[j]
+			j++
+		}
+	}
+	(*rules) = (*rules)[j:]
+	return nil
+}
+
+func (a *Adapter) GetDb() *gorm.DB {
+	return a.db
 }
 
 func (c *CasbinRule) queryString() (interface{}, []interface{}) {
@@ -903,4 +976,28 @@ func (c *CasbinRule) toStringPolicy() []string {
 		policy = append(policy, c.V5)
 	}
 	return policy
+}
+
+// CombineType represents different types of condition combining strategies
+type CombineType uint32
+
+const (
+	CombineTypeOr  CombineType = iota // Combine conditions with OR operator
+	CombineTypeAnd                    // Combine conditions with AND operator
+)
+
+// ConditionsToGormQuery is a function that converts multiple query conditions into a GORM query statement
+// You can use the GetAllowedObjectConditions() API of Casbin to get conditions,
+// and choose the way of combining conditions through combineType.
+func ConditionsToGormQuery(db *gorm.DB, conditions []string, combineType CombineType) *gorm.DB {
+	queryDB := db
+	for _, cond := range conditions {
+		switch combineType {
+		case CombineTypeOr:
+			queryDB = queryDB.Or(cond)
+		case CombineTypeAnd:
+			queryDB = queryDB.Where(cond)
+		}
+	}
+	return queryDB
 }

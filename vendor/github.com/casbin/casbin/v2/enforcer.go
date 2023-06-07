@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"strings"
+	"sync"
 
 	"github.com/Knetic/govaluate"
 	"github.com/casbin/casbin/v2/effector"
@@ -42,6 +43,7 @@ type Enforcer struct {
 	watcher    persist.Watcher
 	dispatcher persist.Dispatcher
 	rmMap      map[string]rbac.RoleManager
+	matcherMap sync.Map
 
 	enabled              bool
 	autoSave             bool
@@ -64,13 +66,12 @@ type EnforceContext struct {
 //
 // File:
 //
-// 	e := casbin.NewEnforcer("path/to/basic_model.conf", "path/to/basic_policy.csv")
+//	e := casbin.NewEnforcer("path/to/basic_model.conf", "path/to/basic_policy.csv")
 //
 // MySQL DB:
 //
-// 	a := mysqladapter.NewDBAdapter("mysql", "mysql_username:mysql_password@tcp(127.0.0.1:3306)/")
-// 	e := casbin.NewEnforcer("path/to/basic_model.conf", a)
-//
+//	a := mysqladapter.NewDBAdapter("mysql", "mysql_username:mysql_password@tcp(127.0.0.1:3306)/")
+//	e := casbin.NewEnforcer("path/to/basic_model.conf", a)
 func NewEnforcer(params ...interface{}) (*Enforcer, error) {
 	e := &Enforcer{logger: &log.DefaultLogger{}}
 
@@ -198,6 +199,7 @@ func (e *Enforcer) initialize() {
 	e.rmMap = map[string]rbac.RoleManager{}
 	e.eft = effector.NewDefaultEffector()
 	e.watcher = nil
+	e.matcherMap = sync.Map{}
 
 	e.enabled = true
 	e.autoSave = true
@@ -273,11 +275,13 @@ func (e *Enforcer) GetNamedRoleManager(ptype string) rbac.RoleManager {
 
 // SetRoleManager sets the current role manager.
 func (e *Enforcer) SetRoleManager(rm rbac.RoleManager) {
+	e.invalidateMatcherMap()
 	e.rmMap["g"] = rm
 }
 
 // SetNamedRoleManager sets the role manager for the named policy.
 func (e *Enforcer) SetNamedRoleManager(ptype string, rm rbac.RoleManager) {
+	e.invalidateMatcherMap()
 	e.rmMap[ptype] = rm
 }
 
@@ -288,6 +292,8 @@ func (e *Enforcer) SetEffector(eft effector.Effector) {
 
 // ClearPolicy clears all policy.
 func (e *Enforcer) ClearPolicy() {
+	e.invalidateMatcherMap()
+
 	if e.dispatcher != nil && e.autoNotifyDispatcher {
 		_ = e.dispatcher.ClearPolicy()
 		return
@@ -297,6 +303,8 @@ func (e *Enforcer) ClearPolicy() {
 
 // LoadPolicy reloads the policy from file/database.
 func (e *Enforcer) LoadPolicy() error {
+	e.invalidateMatcherMap()
+
 	needToRebuild := false
 	newModel := e.model.Copy()
 	newModel.ClearPolicy()
@@ -340,6 +348,8 @@ func (e *Enforcer) LoadPolicy() error {
 }
 
 func (e *Enforcer) loadFilteredPolicy(filter interface{}) error {
+	e.invalidateMatcherMap()
+
 	var filteredAdapter persist.FilteredAdapter
 
 	// Attempt to cast the Adapter as a FilteredAdapter
@@ -350,6 +360,10 @@ func (e *Enforcer) loadFilteredPolicy(filter interface{}) error {
 		return errors.New("filtered policies are not supported by this adapter")
 	}
 	if err := filteredAdapter.LoadFilteredPolicy(e.model, filter); err != nil && err.Error() != "invalid file path, file path cannot be empty" {
+		return err
+	}
+
+	if err := e.model.SortPoliciesBySubjectHierarchy(); err != nil {
 		return err
 	}
 
@@ -415,6 +429,10 @@ func (e *Enforcer) initRmMap() {
 			_ = rm.Clear()
 		} else {
 			e.rmMap[ptype] = defaultrolemanager.NewRoleManager(10)
+			matchFun := "keyMatch(r_dom, p_dom)"
+			if strings.Contains(e.model["m"]["m"].Value, matchFun) {
+				e.AddNamedDomainMatchingFunc(ptype, "g", util.KeyMatch)
+			}
 		}
 	}
 }
@@ -468,6 +486,7 @@ func (e *Enforcer) BuildRoleLinks() error {
 
 // BuildIncrementalRoleLinks provides incremental build the role inheritance relations.
 func (e *Enforcer) BuildIncrementalRoleLinks(op model.PolicyOp, ptype string, rules [][]string) error {
+	e.invalidateMatcherMap()
 	return e.model.BuildIncrementalRoleLinks(e.rmMap, op, "g", ptype, rules)
 }
 
@@ -479,6 +498,10 @@ func NewEnforceContext(suffix string) EnforceContext {
 		EType: "e" + suffix,
 		MType: "m" + suffix,
 	}
+}
+
+func (e *Enforcer) invalidateMatcherMap() {
+	e.matcherMap = sync.Map{}
 }
 
 // enforce use a custom matcher to decides whether a "subject" can access a "object" with the operation "action", input parameters are usually: (matcher, sub, obj, act), use model matcher by default when matcher is "".
@@ -544,14 +567,12 @@ func (e *Enforcer) enforce(matcher string, explains *[]string, rvals ...interfac
 		pTokens: pTokens,
 	}
 
-	var expression *govaluate.EvaluableExpression
 	hasEval := util.HasEval(expString)
-
 	if hasEval {
 		functions["eval"] = generateEvalFunction(functions, &parameters)
 	}
-
-	expression, err = govaluate.NewEvaluableExpressionWithFunctions(expString, functions)
+	var expression *govaluate.EvaluableExpression
+	expression, err = e.getAndStoreMatcherExpression(hasEval, expString, functions)
 	if err != nil {
 		return false, err
 	}
@@ -686,6 +707,23 @@ func (e *Enforcer) enforce(matcher string, explains *[]string, rvals ...interfac
 	return result, nil
 }
 
+func (e *Enforcer) getAndStoreMatcherExpression(hasEval bool, expString string, functions map[string]govaluate.ExpressionFunction) (*govaluate.EvaluableExpression, error) {
+	var expression *govaluate.EvaluableExpression
+	var err error
+	var cachedExpression, isPresent = e.matcherMap.Load(expString)
+
+	if !hasEval && isPresent {
+		expression = cachedExpression.(*govaluate.EvaluableExpression)
+	} else {
+		expression, err = govaluate.NewEvaluableExpressionWithFunctions(expString, functions)
+		if err != nil {
+			return nil, err
+		}
+		e.matcherMap.Store(expString, expression)
+	}
+	return expression, nil
+}
+
 // Enforce decides whether a "subject" can access a "object" with the operation "action", input parameters are usually: (sub, obj, act).
 func (e *Enforcer) Enforce(rvals ...interface{}) (bool, error) {
 	return e.enforce("", nil, rvals...)
@@ -737,18 +775,18 @@ func (e *Enforcer) BatchEnforceWithMatcher(matcher string, requests [][]interfac
 }
 
 // AddNamedMatchingFunc add MatchingFunc by ptype RoleManager
-func (e *Enforcer) AddNamedMatchingFunc(ptype, name string, fn defaultrolemanager.MatchingFunc) bool {
+func (e *Enforcer) AddNamedMatchingFunc(ptype, name string, fn rbac.MatchingFunc) bool {
 	if rm, ok := e.rmMap[ptype]; ok {
-		rm.(*defaultrolemanager.RoleManager).AddMatchingFunc(name, fn)
+		rm.AddMatchingFunc(name, fn)
 		return true
 	}
 	return false
 }
 
 // AddNamedDomainMatchingFunc add MatchingFunc by ptype to RoleManager
-func (e *Enforcer) AddNamedDomainMatchingFunc(ptype, name string, fn defaultrolemanager.MatchingFunc) bool {
+func (e *Enforcer) AddNamedDomainMatchingFunc(ptype, name string, fn rbac.MatchingFunc) bool {
 	if rm, ok := e.rmMap[ptype]; ok {
-		rm.(*defaultrolemanager.RoleManager).AddDomainMatchingFunc(name, fn)
+		rm.AddDomainMatchingFunc(name, fn)
 		return true
 	}
 	return false
@@ -790,17 +828,17 @@ func (p enforceParameters) Get(name string) (interface{}, error) {
 func generateEvalFunction(functions map[string]govaluate.ExpressionFunction, parameters *enforceParameters) govaluate.ExpressionFunction {
 	return func(args ...interface{}) (interface{}, error) {
 		if len(args) != 1 {
-			return nil, fmt.Errorf("Function eval(subrule string) expected %d arguments, but got %d", 1, len(args))
+			return nil, fmt.Errorf("function eval(subrule string) expected %d arguments, but got %d", 1, len(args))
 		}
 
 		expression, ok := args[0].(string)
 		if !ok {
-			return nil, errors.New("Argument of eval(subrule string) must be a string")
+			return nil, errors.New("argument of eval(subrule string) must be a string")
 		}
 		expression = util.EscapeAssertion(expression)
 		expr, err := govaluate.NewEvaluableExpressionWithFunctions(expression, functions)
 		if err != nil {
-			return nil, fmt.Errorf("Error while parsing eval parameter: %s, %s", expression, err.Error())
+			return nil, fmt.Errorf("error while parsing eval parameter: %s, %s", expression, err.Error())
 		}
 		return expr.Eval(parameters)
 	}
