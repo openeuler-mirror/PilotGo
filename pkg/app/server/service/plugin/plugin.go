@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	splugin "gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
@@ -237,7 +238,7 @@ func Handshake(url string) (*Plugin, error) {
 }
 
 // 发起http请求，提供server地址，同时获取到插件的基本信息
-func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
+func requestPluginInfo(url string) (*client.PluginInfo, error) {
 	conf := config.Config().HttpServer
 	url = url + fmt.Sprintf("?server=%s", conf.Addr)
 
@@ -254,7 +255,7 @@ func requestPluginInfo(url string) (*splugin.PluginInfo, error) {
 		return nil, err
 	}
 
-	info := &splugin.PluginInfo{}
+	info := &client.PluginInfo{}
 	err = json.Unmarshal(body, info)
 	if err != nil {
 		logger.Debug("unmarshal request plugin info error:%s", err.Error())

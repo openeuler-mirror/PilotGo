@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/migrator"
+	"gorm.io/gorm/schema"
 )
 
 type Migrator struct {
@@ -16,15 +17,49 @@ type Migrator struct {
 }
 
 func (m Migrator) GetTables() (tableList []string, err error) {
-	return tableList, m.DB.Raw("SELECT table_name FROM INFORMATION_SCHEMA.tables WHERE  table_catalog = ?", m.CurrentDatabase()).Scan(&tableList).Error
+	return tableList, m.DB.Raw("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE  TABLE_CATALOG = ?", m.CurrentDatabase()).Scan(&tableList).Error
+}
+
+func getTableSchemaName(schema *schema.Schema) string {
+	// return the schema name if it is explicitly provided in the table name
+	// otherwise return a sql wildcard -> use any table_schema
+	if schema == nil || !strings.Contains(schema.Table, ".") {
+		return ""
+	}
+	_, schemaName, _ := splitFullQualifiedName(schema.Table)
+	return schemaName
+}
+
+func splitFullQualifiedName(name string) (string, string, string) {
+	nameParts := strings.Split(name, ".")
+	if len(nameParts) == 1 { // [table_name]
+		return "", "", nameParts[0]
+	} else if len(nameParts) == 2 { // [table_schema].[table_name]
+		return "", nameParts[0], nameParts[1]
+	} else if len(nameParts) == 3 { // [table_catalog].[table_schema].[table_name]
+		return nameParts[0], nameParts[1], nameParts[2]
+	}
+	return "", "", ""
+}
+
+func getFullQualifiedTableName(stmt *gorm.Statement) string {
+	fullQualifiedTableName := stmt.Table
+	if schemaName := getTableSchemaName(stmt.Schema); schemaName != "" {
+		fullQualifiedTableName = schemaName + "." + fullQualifiedTableName
+	}
+	return fullQualifiedTableName
 }
 
 func (m Migrator) HasTable(value interface{}) bool {
 	var count int
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
+		schemaName := getTableSchemaName(stmt.Schema)
+		if schemaName == "" {
+			schemaName = "%"
+		}
 		return m.DB.Raw(
-			"SELECT count(*) FROM INFORMATION_SCHEMA.tables WHERE table_name = ? AND table_catalog = ?",
-			stmt.Table, m.CurrentDatabase(),
+			"SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ? AND TABLE_CATALOG = ? and TABLE_SCHEMA like ?  AND TABLE_TYPE = ?",
+			stmt.Table, m.CurrentDatabase(), schemaName, "BASE TABLE",
 		).Row().Scan(&count)
 	})
 	return count > 0
@@ -40,7 +75,7 @@ func (m Migrator) DropTable(values ...interface{}) error {
 				Parent string
 			}
 			var constraints []constraint
-			err := tx.Raw("SELECT name, OBJECT_NAME(parent_object_id) as parent FROM sys.foreign_keys WHERE referenced_object_id = object_id(?)", stmt.Table).Scan(&constraints).Error
+			err := tx.Raw("SELECT name, OBJECT_NAME(parent_object_id) as parent FROM sys.foreign_keys WHERE referenced_object_id = object_id(?)", getFullQualifiedTableName(stmt)).Scan(&constraints).Error
 
 			for _, c := range constraints {
 				if err == nil {
@@ -95,12 +130,14 @@ func (m Migrator) HasColumn(value interface{}, field string) bool {
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
 		currentDatabase := m.DB.Migrator().CurrentDatabase()
 		name := field
-		if field := stmt.Schema.LookUpField(field); field != nil {
-			name = field.DBName
+		if stmt.Schema != nil {
+			if field := stmt.Schema.LookUpField(field); field != nil {
+				name = field.DBName
+			}
 		}
 
 		return m.DB.Raw(
-			"SELECT count(*) FROM INFORMATION_SCHEMA.columns WHERE table_catalog = ? AND table_name = ? AND column_name = ?",
+			"SELECT count(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?",
 			currentDatabase, stmt.Table, name,
 		).Row().Scan(&count)
 	})
@@ -110,18 +147,20 @@ func (m Migrator) HasColumn(value interface{}, field string) bool {
 
 func (m Migrator) AlterColumn(value interface{}, field string) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		if field := stmt.Schema.LookUpField(field); field != nil {
-			fieldType := clause.Expr{SQL: m.DataTypeOf(field)}
-			if field.NotNull {
-				fieldType.SQL += " NOT NULL"
-			} else {
-				fieldType.SQL += " NULL"
-			}
+		if stmt.Schema != nil {
+			if field := stmt.Schema.LookUpField(field); field != nil {
+				fieldType := clause.Expr{SQL: m.DataTypeOf(field)}
+				if field.NotNull {
+					fieldType.SQL += " NOT NULL"
+				} else {
+					fieldType.SQL += " NULL"
+				}
 
-			return m.DB.Exec(
-				"ALTER TABLE ? ALTER COLUMN ? ?",
-				clause.Table{Name: stmt.Table}, clause.Column{Name: field.DBName}, fieldType,
-			).Error
+				return m.DB.Exec(
+					"ALTER TABLE ? ALTER COLUMN ? ?",
+					clause.Table{Name: stmt.Table}, clause.Column{Name: field.DBName}, fieldType,
+				).Error
+			}
 		}
 		return fmt.Errorf("failed to look up field with name: %s", field)
 	})
@@ -129,12 +168,13 @@ func (m Migrator) AlterColumn(value interface{}, field string) error {
 
 func (m Migrator) RenameColumn(value interface{}, oldName, newName string) error {
 	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		if field := stmt.Schema.LookUpField(oldName); field != nil {
-			oldName = field.DBName
-		}
-
-		if field := stmt.Schema.LookUpField(newName); field != nil {
-			newName = field.DBName
+		if stmt.Schema != nil {
+			if field := stmt.Schema.LookUpField(oldName); field != nil {
+				oldName = field.DBName
+			}
+			if field := stmt.Schema.LookUpField(newName); field != nil {
+				newName = field.DBName
+			}
 		}
 
 		return m.DB.Exec(
@@ -150,7 +190,7 @@ var defaultValueTrimRegexp = regexp.MustCompile("^\\('?([^']*)'?\\)$")
 func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 	columnTypes := make([]gorm.ColumnType, 0)
 	execErr := m.RunWithValue(value, func(stmt *gorm.Statement) (err error) {
-		rows, err := m.DB.Session(&gorm.Session{}).Table(stmt.Table).Limit(1).Rows()
+		rows, err := m.DB.Session(&gorm.Session{}).Table(getFullQualifiedTableName(stmt)).Limit(1).Rows()
 		if err != nil {
 			return err
 		}
@@ -160,7 +200,7 @@ func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 
 		{
 			var (
-				columnTypeSQL   = "SELECT column_name, data_type, column_default, is_nullable, character_maximum_length, numeric_precision, numeric_precision_radix, numeric_scale, datetime_precision FROM INFORMATION_SCHEMA.COLUMNS WHERE table_catalog = ? AND table_name = ?"
+				columnTypeSQL   = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, NUMERIC_PRECISION_RADIX, NUMERIC_SCALE, DATETIME_PRECISION FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG = ? AND TABLE_NAME = ?"
 				columns, rowErr = m.DB.Raw(columnTypeSQL, m.CurrentDatabase(), stmt.Table).Rows()
 			)
 
@@ -218,7 +258,7 @@ func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 		}
 
 		{
-			columnTypeRows, err := m.DB.Raw("SELECT c.column_name, t.constraint_type FROM information_schema.table_constraints t JOIN information_schema.constraint_column_usage c ON c.constraint_name=t.constraint_name WHERE t.constraint_type IN ('PRIMARY KEY', 'UNIQUE') AND c.table_catalog = ? AND c.table_name = ?", m.CurrentDatabase(), stmt.Table).Rows()
+			columnTypeRows, err := m.DB.Raw("SELECT c.COLUMN_NAME, t.CONSTRAINT_TYPE FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS t JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE c ON c.CONSTRAINT_NAME=t.CONSTRAINT_NAME WHERE t.CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE') AND c.TABLE_CATALOG = ? AND c.TABLE_NAME = ?", m.CurrentDatabase(), stmt.Table).Rows()
 			if err != nil {
 				return err
 			}
@@ -250,16 +290,49 @@ func (m Migrator) ColumnTypes(value interface{}) ([]gorm.ColumnType, error) {
 	return columnTypes, execErr
 }
 
+func (m Migrator) CreateIndex(value interface{}, name string) error {
+	return m.RunWithValue(value, func(stmt *gorm.Statement) error {
+		var idx *schema.Index
+		if stmt.Schema != nil {
+			idx = stmt.Schema.LookIndex(name)
+		}
+		if idx == nil {
+			return fmt.Errorf("failed to create index with name %s", name)
+		}
+
+		opts := m.BuildIndexOptions(idx.Fields, stmt)
+		values := []interface{}{clause.Column{Name: idx.Name}, m.CurrentTable(stmt), opts}
+
+		createIndexSQL := "CREATE "
+		if idx.Class != "" {
+			createIndexSQL += idx.Class + " "
+		}
+		createIndexSQL += "INDEX ? ON ??"
+
+		if idx.Where != "" {
+			createIndexSQL += " WHERE " + idx.Where
+		}
+
+		if idx.Option != "" {
+			createIndexSQL += " " + idx.Option
+		}
+
+		return m.DB.Exec(createIndexSQL, values...).Error
+	})
+}
+
 func (m Migrator) HasIndex(value interface{}, name string) bool {
 	var count int
 	m.RunWithValue(value, func(stmt *gorm.Statement) error {
-		if idx := stmt.Schema.LookIndex(name); idx != nil {
-			name = idx.Name
+		if stmt.Schema != nil {
+			if idx := stmt.Schema.LookIndex(name); idx != nil {
+				name = idx.Name
+			}
 		}
 
 		return m.DB.Raw(
 			"SELECT count(*) FROM sys.indexes WHERE name=? AND object_id=OBJECT_ID(?)",
-			name, stmt.Table,
+			name, getFullQualifiedTableName(stmt),
 		).Row().Scan(&count)
 	})
 	return count > 0
@@ -285,9 +358,17 @@ func (m Migrator) HasConstraint(value interface{}, name string) bool {
 			name = chk.Name
 		}
 
+		tableCatalog, schema, tableName := splitFullQualifiedName(table)
+		if tableCatalog == "" {
+			tableCatalog = m.CurrentDatabase()
+		}
+		if schema == "" {
+			schema = "%"
+		}
+
 		return m.DB.Raw(
-			`SELECT count(*) FROM sys.foreign_keys as F inner join sys.tables as T on F.parent_object_id=T.object_id inner join information_schema.tables as I on I.TABLE_NAME = T.name WHERE F.name = ?  AND T.Name = ? AND I.TABLE_CATALOG = ?;`,
-			name, table, m.CurrentDatabase(),
+			`SELECT count(*) FROM sys.foreign_keys as F inner join sys.tables as T on F.parent_object_id=T.object_id inner join INFORMATION_SCHEMA.TABLES as I on I.TABLE_NAME = T.name WHERE F.name = ?  AND I.TABLE_NAME = ? AND I.TABLE_SCHEMA like ? AND I.TABLE_CATALOG = ?;`,
+			name, tableName, schema, tableCatalog,
 		).Row().Scan(&count)
 	})
 	return count > 0
@@ -295,5 +376,10 @@ func (m Migrator) HasConstraint(value interface{}, name string) bool {
 
 func (m Migrator) CurrentDatabase() (name string) {
 	m.DB.Raw("SELECT DB_NAME() AS [Current Database]").Row().Scan(&name)
+	return
+}
+
+func (m Migrator) DefaultSchema() (name string) {
+	m.DB.Raw("SELECT SCHEMA_NAME() AS [Default Schema]").Row().Scan(&name)
 	return
 }
