@@ -12,7 +12,7 @@
  * LastEditTime: 2023-03-16 16:31:01
  * Description: 批次管理业务逻辑
  ******************************************************************************/
-package service
+package batch
 
 import (
 	//"errors"
@@ -21,6 +21,7 @@ import (
 
 	"github.com/pkg/errors"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -61,7 +62,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		var machineids []int
 		for _, ids := range batchinfo.DepartIDs {
 			Departids = append(Departids, ids)
-			ReturnSpecifiedDepart(ids, &Departids)
+			common.ReturnSpecifiedDepart(ids, &Departids)
 		}
 
 		machines, err := dao.MachineList(Departids)
@@ -126,12 +127,12 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 }
 
 // TODO: *[]model.Batch 应该定义为指针数组
-func GetBatches(query *PaginationQ) (*[]dao.Batch, int64, error) {
+func GetBatches(query *common.PaginationQ) (*[]dao.Batch, int64, error) {
 
 	batch := dao.Batch{}
 	list, tx := batch.ReturnBatch()
 
-	total, err := CrudAll(query, tx, list)
+	total, err := common.CrudAll(query, tx, list)
 	if err != nil {
 		return nil, 0, err
 	}

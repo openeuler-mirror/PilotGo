@@ -21,7 +21,7 @@ import (
 	_ "net/http/pprof"
 
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -52,7 +52,7 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 	return nil
 }
 func SessionManagerInit(conf *sconfig.HttpServer) error {
-	var sessionManage service.SessionManage
+	var sessionManage network.SessionManage
 	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
 	return nil
 }

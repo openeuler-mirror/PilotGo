@@ -18,19 +18,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	roleservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/role"
+	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 // 删除过滤策略
 func PolicyDelete(c *gin.Context) {
-	var Rule service.CasbinRule
+	var Rule auth.CasbinRule
 	if err := c.Bind(&Rule); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	if ok := service.PolicyRemove(Rule); !ok {
+	if ok := auth.PolicyRemove(Rule); !ok {
 		response.Fail(c, nil, "Pilocy不存在")
 	} else {
 		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy删除成功")
@@ -39,12 +42,12 @@ func PolicyDelete(c *gin.Context) {
 
 // 增加过滤策略
 func PolicyAdd(c *gin.Context) {
-	var Rule service.CasbinRule
+	var Rule auth.CasbinRule
 	if err := c.Bind(&Rule); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	if ok := service.PolicyAdd(Rule); !ok {
+	if ok := auth.PolicyAdd(Rule); !ok {
 		response.Fail(c, nil, "Pilocy已存在")
 	} else {
 		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy添加成功")
@@ -53,32 +56,32 @@ func PolicyAdd(c *gin.Context) {
 
 // 获取所有过滤策略
 func GetPolicy(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	policy, total := service.AllPolicy()
+	policy, total := auth.AllPolicy()
 
-	data, err := service.DataPaging(query, policy, total)
+	data, err := common.DataPaging(query, policy, total)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	service.JsonPagination(c, data, int64(total), query)
+	common.JsonPagination(c, data, int64(total), query)
 }
 
 // 获取登录用户权限
 func GetLoginUserPermissionHandler(c *gin.Context) {
-	var RoleId service.RoleID
+	var RoleId roleservice.RoleID
 	if err := c.Bind(&RoleId); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	userRole, buttons, err := service.GetLoginUserPermission(RoleId)
+	userRole, buttons, err := roleservice.GetLoginUserPermission(RoleId)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -87,34 +90,34 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 }
 
 func GetRolesHandler(c *gin.Context) {
-	query := &service.PaginationQ{}
+	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	total, data, err := service.GetRoles(query)
+	total, data, err := roleservice.GetRoles(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	service.JsonPagination(c, data, int64(total), query)
+	common.JsonPagination(c, data, int64(total), query)
 }
 
 func AddUserRoleHandler(c *gin.Context) {
-	var userRole service.UserRole
+	var userRole roleservice.UserRole
 	if err := c.Bind(&userRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "添加角色", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "添加角色", "", user)
+	auditlog.Add(log)
 
-	err := service.AddUserRole(&userRole)
+	err := userservice.AddUserRole(&userRole)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
@@ -125,18 +128,18 @@ func AddUserRoleHandler(c *gin.Context) {
 }
 
 func DeleteUserRoleHandler(c *gin.Context) {
-	var UserRole service.UserRole
+	var UserRole roleservice.UserRole
 	if err := c.Bind(&UserRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "删除角色", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "删除角色", "", user)
+	auditlog.Add(log)
 
-	err := service.DeleteUserRole(UserRole.ID)
+	err := userservice.DeleteUserRole(UserRole.ID)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
@@ -147,18 +150,18 @@ func DeleteUserRoleHandler(c *gin.Context) {
 }
 
 func UpdateUserRoleHandler(c *gin.Context) {
-	var UserRole service.UserRole
+	var UserRole roleservice.UserRole
 	if err := c.Bind(&UserRole); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeUser, "修改角色", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeUser, "修改角色", "", user)
+	auditlog.Add(log)
 
-	err := service.UpdateUserRole(&UserRole)
+	err := userservice.UpdateUserRole(&UserRole)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -169,18 +172,18 @@ func UpdateUserRoleHandler(c *gin.Context) {
 }
 
 func RolePermissionChangeHandler(c *gin.Context) {
-	var roleChange service.RolePermissionChange
+	var roleChange roleservice.RolePermissionChange
 	if err := c.Bind(&roleChange); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypePermission, "修改角色权限", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", "", user)
+	auditlog.Add(log)
 
-	userRole, err := service.RolePermissionChangeMethod(roleChange)
+	userRole, err := roleservice.RolePermissionChangeMethod(roleChange)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())

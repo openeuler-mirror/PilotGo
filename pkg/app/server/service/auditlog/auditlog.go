@@ -3,7 +3,6 @@ package auditlog
 import (
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 )
 
 // 日志执行操作状态
@@ -26,7 +25,7 @@ const (
 
 type AuditLog = dao.AuditLog
 
-func NewAuditLog(module, action, msg string, u service.User) *AuditLog {
+func New(module, action, msg string, u dao.User) *AuditLog {
 	return &AuditLog{
 		LogUUID:    uuid.New().String(),
 		Module:     module,
@@ -37,7 +36,7 @@ func NewAuditLog(module, action, msg string, u service.User) *AuditLog {
 	}
 }
 
-func AddAuditLog(log *dao.AuditLog) error {
+func Add(log *dao.AuditLog) error {
 	return log.Record()
 }
 
@@ -47,20 +46,20 @@ func UpdateStatus(log *dao.AuditLog, status string) error {
 }
 
 // 查询所有日志
-func GetAuditLog() ([]dao.AuditLog, error) {
+func Get() ([]dao.AuditLog, error) {
 	return dao.GetAuditLog()
 }
 
 // 根据父UUid查询日志
-func GetAuditLogByParentId(parentUUId string) (dao.AuditLog, error) {
+func GetByParentId(parentUUId string) (dao.AuditLog, error) {
 	return dao.GetAuditLogByParentId(parentUUId)
 }
 
 // 查询单条日志
-func GetAuditLogById(logUUId string) (dao.AuditLog, error) {
+func GetById(logUUId string) (dao.AuditLog, error) {
 	return dao.GetAuditLogById(logUUId)
 }
 
-func GetAuditLogByModule(name string) ([]dao.AuditLog, error) {
+func GetByModule(name string) ([]dao.AuditLog, error) {
 	return dao.GetAuditLogByModule(name)
 }

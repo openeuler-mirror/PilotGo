@@ -12,12 +12,11 @@
  * LastEditTime: 2022-04-27 17:17:48
  * Description: 用户角色逻辑代码
  ******************************************************************************/
-package service
+package role
 
 import (
-	"errors"
-
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 )
 
 type RolePermissionChange = dao.RolePermissionChange
@@ -53,76 +52,16 @@ func GetLoginUserPermission(Roleid RoleID) (dao.UserRole, interface{}, error) {
 	return userRole, buttons, nil
 }
 
-func GetRoles(query *PaginationQ) (int, interface{}, error) {
+func GetRoles(query *common.PaginationQ) (int, interface{}, error) {
 	roles, total, err := dao.GetAllRoles()
 	if err != nil {
 		return total, nil, err
 	}
-	data, err := DataPaging(query, roles, total)
+	data, err := common.DataPaging(query, roles, total)
 	if err != nil {
 		return total, data, err
 	}
 	return total, data, nil
-}
-
-func AddUserRole(userRole *dao.UserRole) error {
-	err := dao.AddRole(*userRole)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func DeleteUserRole(ID int) error {
-	ok, err := dao.IsUserBindingRole(ID)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		err := dao.DeleteRole(ID)
-		if err != nil {
-			return err
-		}
-		return nil
-	} else {
-		return errors.New("有用户绑定此角色，不可删除")
-	}
-}
-
-func UpdateUserRole(UserRole *dao.UserRole) error {
-	id := UserRole.ID
-	role := UserRole.Role
-	description := UserRole.Description
-	userRole, err := dao.RoleIdToGetAllInfo(id)
-	if err != nil {
-		return err
-	}
-	if userRole.Role != role && userRole.Description != description {
-		err = dao.UpdateRoleName(id, role)
-		if err != nil {
-			return err
-		}
-		err = dao.UpdateRoleDescription(id, description)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	if userRole.Role == role && userRole.Description != description {
-		err = dao.UpdateRoleDescription(id, description)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	if userRole.Role != role && userRole.Description == description {
-		err = dao.UpdateRoleName(id, role)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	return errors.New("没有修改信息")
 }
 
 func RolePermissionChangeMethod(roleChange dao.RolePermissionChange) (*dao.UserRole, error) {

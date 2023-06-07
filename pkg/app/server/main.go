@@ -22,7 +22,7 @@ import (
 
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
@@ -55,7 +55,7 @@ func main() {
 	}
 
 	// 鉴权模块初始化
-	global.PILOTGO_E = service.Casbin(&sconfig.Config().MysqlDBinfo)
+	global.PILOTGO_E = auth.Casbin(&sconfig.Config().MysqlDBinfo)
 
 	// 启动agent socket server
 	if err := initialization.SocketServerInit(&sconfig.Config().SocketServer); err != nil {

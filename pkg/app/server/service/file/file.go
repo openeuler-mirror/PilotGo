@@ -12,7 +12,7 @@
  * LastEditTime: 2022-06-02 10:16:10
  * Description: agent config file service
  ******************************************************************************/
-package service
+package file
 
 import (
 	"errors"
@@ -61,7 +61,7 @@ func NowTime() string {
 	return nowtime
 }
 
-func SaveFileToDatabase(file *Files) error {
+func SaveToDatabase(file *Files) error {
 	filename := file.FileName
 	if len(filename) == 0 {
 		return errors.New("请输入配置文件名字")
@@ -110,7 +110,7 @@ func SaveFileToDatabase(file *Files) error {
 	return dao.SaveFile(fd)
 }
 
-func DeleteFile(fileIds []int) error {
+func Delete(fileIds []int) error {
 	for _, fileId := range fileIds {
 		err := dao.DeleteFile(fileId)
 		if err != nil {
@@ -123,7 +123,7 @@ func DeleteFile(fileIds []int) error {
 	}
 	return nil
 }
-func UpdateFile(file *Files) error {
+func Update(file *Files) error {
 	id := file.ID
 	err := dao.SaveHistoryFile(id)
 	if err != nil {

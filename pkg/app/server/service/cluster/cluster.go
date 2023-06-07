@@ -12,12 +12,13 @@
  * LastEditTime: 2022-04-29 09:25:41
  * Description: 集群概览业务逻辑
  ******************************************************************************/
-package service
+package cluster
 
 import (
 	"errors"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -95,7 +96,7 @@ func DepartClusterInfo() []DepartMachineInfo {
 	for _, depart_Id := range FirstDepartIds {
 		Departids := make([]int, 0)
 		Departids = append(Departids, depart_Id)
-		ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
+		common.ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
 
 		lists, err := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
 		if err != nil {

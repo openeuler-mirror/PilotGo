@@ -16,12 +16,12 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/cluster"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func ClusterInfoHandler(c *gin.Context) {
-	data, err := service.ClusterInfo()
+	data, err := cluster.ClusterInfo()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -30,7 +30,7 @@ func ClusterInfoHandler(c *gin.Context) {
 }
 
 func DepartClusterInfoHandler(c *gin.Context) {
-	departs := service.DepartClusterInfo()
+	departs := cluster.DepartClusterInfo()
 	if len(departs) == 0 {
 		response.Success(c, gin.H{"data": []interface{}{}}, "获取各部门集群状态成功")
 	} else {

@@ -12,7 +12,7 @@
  * LastEditTime: 2022-06-02 16:16:10
  * Description: depart info service
  ******************************************************************************/
-package service
+package depart
 
 import (
 	"errors"
@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -133,7 +134,7 @@ func DeleteDepartNode(DepartInfo []dao.DepartNode, departid int) {
 // 获取部门下所有机器列表
 func MachineList(DepId int) ([]dao.Res, error) {
 	var departId []int
-	ReturnSpecifiedDepart(DepId, &departId)
+	common.ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)
 	machinelist1, err := dao.MachineList(departId)
 	if err != nil {

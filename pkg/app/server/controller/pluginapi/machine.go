@@ -2,12 +2,12 @@ package pluginapi
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	machineservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/machine"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func MachineList(c *gin.Context) {
-	data, err := service.MachineAllData()
+	data, err := machineservice.MachineAllData()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return

@@ -18,8 +18,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/depart"
+	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -32,7 +33,7 @@ func MachineListHandler(c *gin.Context) {
 		return
 	}
 
-	machinelist, err := service.MachineList(DepId)
+	machinelist, err := depart.MachineList(DepId)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -50,7 +51,7 @@ func DepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "部门ID有误")
 		return
 	}
-	node, err := service.Dept(tmp)
+	node, err := depart.Dept(tmp)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -59,7 +60,7 @@ func DepartHandler(c *gin.Context) {
 }
 
 func DepartInfoHandler(c *gin.Context) {
-	departRoot, err := service.DepartInfo()
+	departRoot, err := depart.DepartInfo()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -68,18 +69,18 @@ func DepartInfoHandler(c *gin.Context) {
 }
 
 func AddDepartHandler(c *gin.Context) {
-	newDepart := service.AddDepart{}
+	newDepart := depart.AddDepart{}
 	if err := c.Bind(&newDepart); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeOrganize, "添加部门信息", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeOrganize, "添加部门信息", "", user)
+	auditlog.Add(log)
 
-	err := service.AddDepartMethod(&newDepart)
+	err := depart.AddDepartMethod(&newDepart)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -91,18 +92,18 @@ func AddDepartHandler(c *gin.Context) {
 }
 
 func DeleteDepartDataHandler(c *gin.Context) {
-	var DelDept service.DeleteDepart
+	var DelDept depart.DeleteDepart
 	if err := c.Bind(&DelDept); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeOrganize, "删除部门信息", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeOrganize, "删除部门信息", "", user)
+	auditlog.Add(log)
 
-	err := service.DeleteDepartData(&DelDept)
+	err := depart.DeleteDepartData(&DelDept)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -114,17 +115,17 @@ func DeleteDepartDataHandler(c *gin.Context) {
 }
 
 func UpdateDepartHandler(c *gin.Context) {
-	var new service.NewDepart
+	var new depart.NewDepart
 	if err := c.Bind(&new); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	//TODO:
-	var user service.User
-	log := auditlog.NewAuditLog(auditlog.LogTypeOrganize, "修改部门信息", "", user)
-	auditlog.AddAuditLog(log)
+	var user userservice.User
+	log := auditlog.New(auditlog.LogTypeOrganize, "修改部门信息", "", user)
+	auditlog.Add(log)
 
-	err := service.UpdateDepart(new.DepartID, new.DepartName)
+	err := depart.UpdateDepart(new.DepartID, new.DepartName)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -136,12 +137,12 @@ func UpdateDepartHandler(c *gin.Context) {
 }
 
 func ModifyMachineDepartHandler(c *gin.Context) {
-	var M service.MachineModifyDepart
+	var M depart.MachineModifyDepart
 	if err := c.Bind(&M); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	err := service.ModifyMachineDepart(M.MachineID, M.DepartID)
+	err := depart.ModifyMachineDepart(M.MachineID, M.DepartID)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
