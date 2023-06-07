@@ -12,7 +12,7 @@
  * LastEditTime: 2022-03-14 10:35:54
  * Description: casbin权限控制
  ******************************************************************************/
-package middleware
+package auth
 
 import (
 	"github.com/gin-gonic/gin"
@@ -46,7 +46,7 @@ func CasbinHandler() gin.HandlerFunc {
 	}
 }
 
-func AllPolicy() (interface{}, int) {
+func AllPolicy1() (interface{}, int) { //暂时没有调用，与casbin文件中的方法重复，所以暂时修改为AllPolicy1
 	casbin := make([]map[string]interface{}, 0)
 	list := global.PILOTGO_E.GetPolicy()
 	for _, vlist := range list {

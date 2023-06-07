@@ -22,15 +22,15 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/pluginapi"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/middleware"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/webSocket"
 )
 
 func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(middleware.LoggerDebug())
-	router.Use(middleware.Recover)
+	router.Use(auth.LoggerDebug())
+	router.Use(auth.Recover)
 
 	// 绑定 http api handler
 	registerAPIs(router)
@@ -142,7 +142,7 @@ func registerAPIs(router *gin.Engine) {
 		user.GET("/logout", controller.Logout)
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearchHandler)
-		user.GET("/info", middleware.AuthMiddleware(), controller.Info)
+		user.GET("/info", auth.AuthMiddleware(), controller.Info)
 		user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
 		user.GET("/role", controller.GetUserRoleHandler)
@@ -180,7 +180,7 @@ func registerAPIs(router *gin.Engine) {
 	}
 
 	Level := api.Group("")
-	Level.Use(middleware.CasbinHandler())
+	Level.Use(auth.CasbinHandler())
 	{
 		user.POST("/register", controller.RegisterHandler)
 		user.POST("/reset", controller.ResetPasswordHandler)
