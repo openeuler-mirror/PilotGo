@@ -16,46 +16,74 @@
 package controller
 
 import (
-	"strconv"
+	"bytes"
+	"context"
+	"sync"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
+	"github.com/gorilla/websocket"
+	Websocket "openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-func ShellWs(c *gin.Context) {
-	msg := c.DefaultQuery("msg", "")
-	cols := c.DefaultQuery("cols", "150")
-	rows := c.DefaultQuery("rows", "35")
-	col, _ := strconv.Atoi(cols)
-	row, _ := strconv.Atoi(rows)
-	terminal := dao.Terminal{
-		Columns: uint32(col),
-		Rows:    uint32(row),
-	}
-	// 后端获取到前端传来的主机信息,以此建立ssh客户端
-	sshClient, err := network.DecodedMsgToSSHClient(msg)
-	if err != nil {
-		c.Error(err)
-		return
-	}
-	if sshClient.IpAddress == "" || sshClient.Password == "" {
-		c.Error(&dao.ApiError{Message: "IP地址或密码不能为空", Code: 400})
-		return
-	}
+func WS(c *gin.Context) {
 	// 升级协议并获得socket连接
-	conn, err := network.Upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := Websocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		c.Error(err)
+		logger.Error("获取websocket连接失败:%s", err.Error())
 		return
 	}
-	// 生成ssh socket客户端，建立session、client、channel
-	err = sshClient.GenerateClient()
+	defer conn.Close()
+
+	// 后端获取到前端传来的主机信息,以此建立ssh客户端
+	msg := c.DefaultQuery("msg", "")
+	ssh, err := Websocket.DecodedMsgToSSHClient(msg)
 	if err != nil {
-		conn.WriteMessage(1, []byte("验证失败，请检查用户名或密码..."))
+		conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		return
+	}
+
+	// 生成ssh socket客户端，建立session、client、channel
+	client, err := ssh.NewSSHClient()
+	if err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 		conn.Close()
 		return
 	}
-	sshClient.RequestTerminal(terminal)
-	sshClient.Connect(conn)
+	defer client.Close()
+
+	terminal, err := Websocket.NewTerminal(conn, client)
+	if err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		return
+	}
+	defer terminal.Close()
+
+	var bufPool = sync.Pool{
+		New: func() interface{} {
+			return new(bytes.Buffer)
+		},
+	}
+	var logBuff = bufPool.Get().(*bytes.Buffer)
+	logBuff.Reset()
+	defer bufPool.Put(logBuff)
+	ctx, cancel := context.WithCancel(context.Background())
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		err := terminal.LoopRead(logBuff, ctx)
+		if err != nil {
+			logger.Error("%#v", err)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		err := terminal.SessionWait()
+		if err != nil {
+			logger.Error("%#v", err)
+		}
+		cancel()
+	}()
+	wg.Wait()
 }

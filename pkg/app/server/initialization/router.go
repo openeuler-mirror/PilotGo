@@ -21,7 +21,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/pluginapi"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 )
@@ -42,7 +42,7 @@ func SetupRouter() *gin.Engine {
 	registerPluginGateway(router)
 
 	// 全局通用接口
-	router.GET("/ws", controller.ShellWs)
+	router.GET("/ws", controller.WS)
 	router.GET("/event", controller.PushAlarmHandler)
 
 	return router
@@ -216,7 +216,7 @@ func registerAPIs(router *gin.Engine) {
 		// 健康监测
 		other.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 	}
-	go network.CliManager.Start()
+	go websocket.CliManager.Start()
 }
 
 func registerPluginApi(router *gin.RouterGroup) {
