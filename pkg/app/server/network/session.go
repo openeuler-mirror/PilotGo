@@ -6,6 +6,7 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -23,6 +24,12 @@ type SessionManage struct {
 
 type SessionInfo struct {
 	sessionTime time.Time
+}
+
+func SessionManagerInit(conf *sconfig.HttpServer) error {
+	var sessionManage SessionManage
+	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
+	return nil
 }
 
 func (s *SessionManage) Init(maxAge, maxLen int) bool {

@@ -12,21 +12,52 @@
  * LastEditTime: 2023-06-01 11:19:37
  * Description: Interface routing forwarding
  ******************************************************************************/
-package initialization
+package router
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/pluginapi"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-func SetupRouter() *gin.Engine {
+func HttpServerInit(conf *sconfig.HttpServer) error {
+	if err := network.SessionManagerInit(conf); err != nil {
+		return err
+	}
+
+	go func() {
+		r := setupRouter()
+		logger.Info("start http service on: http://%s", conf.Addr)
+		r.Run(conf.Addr)
+	}()
+
+	if conf.Debug {
+		go func() {
+			// 分解字符串然后添加后缀6060
+			portIndex := strings.Index(conf.Addr, ":")
+			addr := conf.Addr[:portIndex] + ":6060"
+			logger.Debug("start pprof service on: %s", addr)
+			err := http.ListenAndServe(addr, nil)
+			if err != nil {
+				logger.Error("failed to start pprof, error:%v", err)
+			}
+		}()
+	}
+
+	return nil
+}
+
+func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.Use(auth.LoggerDebug())
