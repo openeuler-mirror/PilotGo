@@ -19,12 +19,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
 func PushAlarmHandler(c *gin.Context) {
-	conn, err := network.Upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := websocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logger.Error(err.Error())
 		return
@@ -32,11 +32,11 @@ func PushAlarmHandler(c *gin.Context) {
 	logger.Debug("webSocket 建立连接: %s", conn.RemoteAddr().String())
 
 	currentTime := uint64(time.Now().Unix())
-	client := network.NewClient(conn.RemoteAddr().String(), conn, currentTime)
+	client := websocket.NewClient(conn.RemoteAddr().String(), conn, currentTime)
 
 	go client.Read()
 	go client.Write()
 
 	// 用户连接事件
-	network.CliManager.Register <- client
+	websocket.CliManager.Register <- client
 }

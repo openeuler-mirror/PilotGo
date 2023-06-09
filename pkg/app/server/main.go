@@ -22,7 +22,7 @@ import (
 
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/initialization"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
@@ -79,7 +79,7 @@ func main() {
 	logger.Info("start to serve.")
 
 	// 前端推送告警
-	go network.SendWarnMsgToWeb()
+	go websocket.SendWarnMsgToWeb()
 
 	// 信号监听
 	c := make(chan os.Signal, 1)

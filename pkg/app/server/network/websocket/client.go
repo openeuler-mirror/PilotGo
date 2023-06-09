@@ -1,7 +1,6 @@
-package network
+package websocket
 
 import (
-	"net/http"
 	"runtime/debug"
 	"time"
 
@@ -103,13 +102,4 @@ func (c *Client) IsHeartbeatTimeout() (timeout bool) {
 	}
 
 	return
-}
-
-// 升级HTTP协议为WebSocket
-var Upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
 }

@@ -230,6 +230,8 @@ func Handshake(url string) (*Plugin, error) {
 		Name:        info.Name,
 		Version:     info.Version,
 		Description: info.Description,
+		Author:      info.Author,
+		Email:       info.Email,
 		Url:         info.Url,
 		Status:      splugin.StatusLoaded,
 	}
@@ -275,7 +277,7 @@ func GetPlugin(name string) *Plugin {
 }
 
 func AddPlugin(url string) error {
-	logger.Debug("add login from %s", url)
+	logger.Debug("add plugin from %s", url)
 	url = strings.TrimRight(url, "/")
 
 	plugin, err := Handshake(url + "/plugin_manage/info")
@@ -291,7 +293,7 @@ func AddPlugin(url string) error {
 }
 
 func DeletePlugin(uuid string) error {
-	logger.Debug("delete login: %s", uuid)
+	logger.Debug("delete plugin: %s", uuid)
 
 	if err := globalManager.Remove(uuid); err != nil {
 		return err
