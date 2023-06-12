@@ -8,20 +8,29 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
- * Date: 2022-07-05 13:03:16
- * LastEditTime: 2022-07-05 14:10:23
- * Description: socket server init
+ * Date: 2022-02-18 02:39:36
+ * LastEditTime: 2022-03-04 02:25:56
+ * Description: provide agent log manager functions.
  ******************************************************************************/
-package initialization
+package network
 
 import (
+	"fmt"
+	"net"
+
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type SocketServer struct {
+	// MessageProcesser *protocol.MessageProcesser
+	OnAccept func(net.Conn)
+	OnStop   func()
+}
+
 func SocketServerInit(conf *sconfig.SocketServer) error {
-	server := &network.SocketServer{
+	server := &SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
 		OnAccept: agentmanager.AddandRunAgent,
 		OnStop:   agentmanager.StopAgentManager,
@@ -31,4 +40,25 @@ func SocketServerInit(conf *sconfig.SocketServer) error {
 		server.Run(conf.Addr)
 	}()
 	return nil
+}
+
+func (s *SocketServer) Run(addr string) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	logger.Debug("Waiting for agents")
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("accept error:", err)
+			continue
+		}
+		s.OnAccept(conn)
+	}
+}
+
+func (s *SocketServer) Stop() {
+
 }

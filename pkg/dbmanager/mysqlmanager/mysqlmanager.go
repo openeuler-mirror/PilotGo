@@ -62,3 +62,12 @@ func MysqlInit(ip, username, password, dbname string, port int) (*MysqlManager, 
 
 	return m, nil
 }
+
+type MysqlManager struct {
+	ip       string
+	port     int
+	userName string
+	passWord string
+	dbName   string
+	db       *gorm.DB
+}
