@@ -12,7 +12,7 @@
  * LastEditTime: 2023-06-01 11:19:37
  * Description: Interface routing forwarding
  ******************************************************************************/
-package router
+package network
 
 import (
 	"net/http"
@@ -23,7 +23,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/pluginapi"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
@@ -31,7 +30,7 @@ import (
 )
 
 func HttpServerInit(conf *sconfig.HttpServer) error {
-	if err := network.SessionManagerInit(conf); err != nil {
+	if err := SessionManagerInit(conf); err != nil {
 		return err
 	}
 
