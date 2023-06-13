@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 10:25:52
- * LastEditTime: 2023-01-09 15:00:34
+ * LastEditTime: 2023-06-12 15:18:57
  * Description: server main
  ******************************************************************************/
 package main
@@ -23,7 +23,6 @@ import (
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/router"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager"
@@ -66,7 +65,7 @@ func main() {
 	}
 
 	//此处启动前端及REST http server
-	err = router.HttpServerInit(&sconfig.Config().HttpServer)
+	err = network.HttpServerInit(&sconfig.Config().HttpServer)
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
