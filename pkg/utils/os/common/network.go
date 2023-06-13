@@ -27,21 +27,21 @@ type NetInterfaceCard struct {
 }
 
 type NetworkConfig struct {
-	NetworkType        string `json:"type"` //以太网、无线网
-	ProxyMethod        string `json:"proxy_method"`
-	BrowserOnly        string `json:"browser_only"`
-	DefRoute           string `json:"defroute"`
-	IPV4_Failure_Fatal string `json:"ipv4_failure_fatal"`
-	Name               string `json:"name"`   //接口名称
-	UUID               string `json:"uuid"`   //唯一识别码
-	Device             string `json:"device"` //网卡设备名字
-	OnBoot             string `json:"onboot"` //是否随网络服务启动当前网卡生效
+	NetworkType        string `json:"TYPE"` //以太网、无线网
+	ProxyMethod        string `json:"PROXY_METHOD"`
+	BrowserOnly        string `json:"BROWSER_ONLY"`
+	DefRoute           string `json:"DEFROUTE"`
+	IPV4_Failure_Fatal string `json:"IPV4_FAILURE_FATAL"`
+	Name               string `json:"NAME"`   //接口名称
+	UUID               string `json:"UUID"`   //唯一识别码
+	Device             string `json:"DEVICE"` //网卡设备名字
+	OnBoot             string `json:"ONBOOT"` //是否随网络服务启动当前网卡生效
 
-	IPV6Init           string `json:"ipv6_init"` //ipv6是否启用
-	IPV6_Autoconf      string `json:"ipv6_autoconf"`
-	IPV6_DefRoute      string `json:"ipv6_defroute"`
-	IPV6_Failure_Fatal string `json:"ipv6_failure_fatal"`
-	IPv6_Addr_Gen_Mode string `json:"ipv6_addr_gen_mode"`
+	IPV6Init           string `json:"IPV6INIT"` //ipv6是否启用
+	IPV6_Autoconf      string `json:"IPV6_AUTOCONF"`
+	IPV6_DefRoute      string `json:"IPV6_DEFROUTE"`
+	IPV6_Failure_Fatal string `json:"IPV6_FAILURE_FATAL"`
+	IPv6_Addr_Gen_Mode string `json:"IPV6_ADDR_GEN_MODE"`
 
 	MachineUUID string `json:"macUUID"`
 	BootProto   string `json:"BOOTPROTO"` //dhcp或者static
