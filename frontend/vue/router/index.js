@@ -60,7 +60,7 @@ export const routes = [
                 {
                   name: '系统', path: '/cluster', children: [
                     { name: 'createBatch', menuName: '创建批次' },
-                    { name: 'Prometheus', menuName: '性能监控' },
+                    // { name: 'Prometheus', menuName: '性能监控' },
                   ]
                 },
                 { name: '机器列表' },
@@ -79,7 +79,7 @@ export const routes = [
                     {
                       name: '系统', path: '/cluster', children: [
                         { name: 'createBatch', menuName: '创建批次' },
-                        { name: 'prometheus', menuName: '性能监控' },
+                        // { name: 'prometheus', menuName: '性能监控' },
                       ]
                     },
                     { name: '机器列表', path: '/cluster/' },
@@ -101,7 +101,7 @@ export const routes = [
                 {
                   name: '系统', path: '/cluster', children: [
                     { name: 'macList', menuName: '机器列表' },
-                    { name: 'Prometheus', menuName: '性能监控' },
+                    // { name: 'Prometheus', menuName: '性能监控' },
                   ]
                 },
                 { name: '创建批次' }
@@ -109,26 +109,26 @@ export const routes = [
               icon_class: ''
             }
           },
-          {
-            path: '/cluster/prometheus',
-            name: 'Prometheus',
-            component: _import('Prometheus/index'),
-            meta: {
-              header_title: "性能监控",
-              panel: "/cluster/prometheus",
-              breadcrumb: [
-                {
-                  name: '系统', path: '/cluster', children: [
-                    { name: 'macList', menuName: '机器列表' },
-                    { name: 'createBatch', menuName: '创建批次' },
-                  ]
-                },
-                { name: '性能监控' }
-              ],
-              icon_class: ''
-            },
-          },
-
+          /*  {
+             path: '/cluster/prometheus',
+             name: 'Prometheus',
+             component: _import('Prometheus/index'),
+             meta: {
+               header_title: "性能监控",
+               panel: "/cluster/prometheus",
+               breadcrumb: [
+                 {
+                   name: '系统', path: '/cluster', children: [
+                     { name: 'macList', menuName: '机器列表' },
+                     { name: 'createBatch', menuName: '创建批次' },
+                   ]
+                 },
+                 { name: '性能监控' }
+               ],
+               icon_class: ''
+             },
+           },
+  */
         ],
         submenu: [
           {
@@ -141,11 +141,11 @@ export const routes = [
             menuName: "创建批次",
             panel: 'cluster'
           },
-          {
+          /* {
             name: '/cluster/prometheus',
             menuName: "性能监控",
             panel: 'cluster'
-          },
+          }, */
         ]
       },
       {

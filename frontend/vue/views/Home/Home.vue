@@ -53,7 +53,7 @@
             </transition>
             <!--iframe页-->
             <component v-for="item in iframeComponents" :key="item.name" :is="item.name" :url="item.url"
-              :frame_type="item.frame_type" :name="item.name" :path="item.path" v-show="$route.path === item.path">
+              :plugin_type="item.plugin_type" :name="item.name" :path="item.path" v-show="$route.path === item.path">
             </component>
           </div>
         </el-main>
