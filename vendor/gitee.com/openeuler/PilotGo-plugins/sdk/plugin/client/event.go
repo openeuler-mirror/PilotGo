@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/utils"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
 
 type Event struct {
@@ -17,7 +17,7 @@ type EventCallback func(e *Event)
 // 注册event事件监听
 func (c *Client) ListenEvent(event Event, callback EventCallback) error {
 	url := c.Server + "/api/v1/pluginapi/listener"
-	data, err := utils.Request("PUT", url)
+	data, err := httputils.Put(url, nil)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (c *Client) ListenEvent(event Event, callback EventCallback) error {
 // 取消注册event事件监听
 func (c *Client) UnListenEvent(listenerID string) error {
 	url := c.Server + "/api/v1/pluginapi/listener"
-	data, err := utils.Request("DELETE", url)
+	data, err := httputils.Delete(url, nil)
 	if err != nil {
 		return err
 	}

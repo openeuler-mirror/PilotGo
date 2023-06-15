@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	splugin "gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
@@ -70,7 +70,7 @@ func (pm *PluginManager) RestorePluginInfo() error {
 			Email:       p.Email,
 			Url:         p.Url,
 			Enabled:     p.Enabled,
-			Status:      splugin.StatusOffline,
+			Status:      common.StatusOffline,
 		}
 
 		pm.loadedPlugin[np.Name] = np
@@ -233,7 +233,7 @@ func Handshake(url string) (*Plugin, error) {
 		Author:      info.Author,
 		Email:       info.Email,
 		Url:         info.Url,
-		Status:      splugin.StatusLoaded,
+		Status:      common.StatusLoaded,
 	}
 
 	return plugin, nil

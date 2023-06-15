@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/utils"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
 
-func (c *Client) ApplyConfig(batch []string, path, content string) error {
+func (c *Client) ApplyConfig(batch *common.Batch, path, content string) error {
 	url := c.Server + "/api/v1/pluginapi/apply_config"
-	data, err := utils.Request("PUT", url)
+	data, err := httputils.Put(url, nil)
 	if err != nil {
 		return err
 	}

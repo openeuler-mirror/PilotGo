@@ -1,34 +1,61 @@
 package client
 
 import (
+	"encoding/base64"
 	"encoding/json"
-	"io"
-	"net/http"
+
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
 
 type CmdResult struct {
 	MachineUUID string
 	MachineIP   string
-	Code        int
+	RetCode     int
 	Stdout      string
 	Stderr      string
 }
 
-func (c *Client) RunScript(batch []string, cmd string) ([]*CmdResult, error) {
+func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, error) {
+	url := c.Server + "/api/v1/pluginapi/run_command"
+
+	p := &struct {
+		Batch   *common.Batch `json:"batch"`
+		Command string        `json:"command"`
+	}{
+		Batch:   batch,
+		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
+	}
+
+	bs, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*CmdResult{}
+	if err := json.Unmarshal(bs, &res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, error) {
 	url := c.Server + "/api/v1/pluginapi/run_script"
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return nil, err
+
+	p := &struct {
+		Batch  *common.Batch `json:"batch"`
+		Script string        `json:"script"`
+	}{
+		Batch:  batch,
+		Script: base64.StdEncoding.EncodeToString([]byte(script)),
 	}
 
-	hc := &http.Client{}
-	resp, err := hc.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	bs, err := io.ReadAll(resp.Body)
+	bs, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+	})
 	if err != nil {
 		return nil, err
 	}
