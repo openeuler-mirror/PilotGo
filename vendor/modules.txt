@@ -1,8 +1,8 @@
-# gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230607072900-8e312f274b08
+# gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230614094742-f862b9a4303b
 ## explicit; go 1.18
-gitee.com/openeuler/PilotGo-plugins/sdk/plugin
+gitee.com/openeuler/PilotGo-plugins/sdk/common
 gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client
-gitee.com/openeuler/PilotGo-plugins/sdk/utils
+gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils
 # github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 ## explicit
 github.com/Knetic/govaluate

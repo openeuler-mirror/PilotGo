@@ -1,4 +1,5 @@
-package plugin
+// 提供公共数据结构定义
+package common
 
 const (
 	// 插件正在运行
