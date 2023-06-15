@@ -7,6 +7,12 @@
       <el-form-item label="主机地址:" prop="url">
         <el-input class="ipInput" controls-position="right" v-model="form.url" autocomplete="off"></el-input>
       </el-form-item>
+      <el-form-item label="展示类型:">
+        <el-select v-model="form.plugin_type" placeholder="请选择插件展示类型">
+          <el-option label="iframe" value="iframe"></el-option>
+          <el-option label="micro-app" value="micro-app"></el-option>
+        </el-select>
+      </el-form-item>
     </el-form>
 
     <div class="dialog-footer">
@@ -25,6 +31,7 @@ export default {
       form: {
         name: "",
         url: "",
+        plugin_type: "iframe",
       },
       rules: {
         name: [

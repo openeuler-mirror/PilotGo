@@ -1,6 +1,6 @@
 <template>
   <div class="iframe-div">
-    <iframe :src="url" class="iframe" v-if="frame_type === 'iframe'"></iframe>
+    <iframe :src="url" class="iframe" v-if="plugin_type === 'iframe'"></iframe>
     <micro-app v-else :name=name :url=url :baseroute=path class="micro_content"></micro-app>
   </div>
 </template>
@@ -12,7 +12,7 @@ export default {
     url: String,
     name: String,
     path: String,
-    frame_type: String,
+    plugin_type: String,
   }
 }
 </script>
