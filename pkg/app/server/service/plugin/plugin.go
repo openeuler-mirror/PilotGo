@@ -30,6 +30,7 @@ type Plugin struct {
 	Author      string `json:"author"`
 	Email       string `json:"email"`
 	Url         string `json:"url"`
+	PluginType  string `json:"plugin_type"`
 	Enabled     int    `json:"enabled"`
 	Status      string `json:"status"`
 }
@@ -65,10 +66,11 @@ func (pm *PluginManager) RestorePluginInfo() error {
 			UUID:        p.UUID,
 			Name:        p.Name,
 			Version:     p.Version,
-			Description: p.Version,
+			Description: p.Description,
 			Author:      p.Author,
 			Email:       p.Email,
 			Url:         p.Url,
+			PluginType:  p.PluginType,
 			Enabled:     p.Enabled,
 			Status:      common.StatusOffline,
 		}
@@ -100,7 +102,8 @@ func (pm *PluginManager) Add(p *Plugin) error {
 		Author:      p.Author,
 		Email:       p.Email,
 		Url:         p.Url,
-		Enabled:     0,
+		PluginType:  p.PluginType,
+		Enabled:     PluginEnabled,
 	})
 	if err != nil {
 		return err
@@ -160,6 +163,7 @@ func (pm *PluginManager) GetAll() []*Plugin {
 			Author:      value.Author,
 			Email:       value.Email,
 			Url:         value.Url,
+			PluginType:  value.PluginType,
 			Enabled:     value.Enabled,
 		}
 
@@ -180,9 +184,15 @@ func (pm *PluginManager) Check(name string) bool {
 
 // 更新插件使能状态
 func (pm *PluginManager) UpdatePlugin(uuid string, enable int) error {
+	var status int
+	if enable == PluginEnabled {
+		status = PluginDisabled
+	} else {
+		status = PluginEnabled
+	}
 	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
 		UUID:    uuid,
-		Enabled: enable,
+		Enabled: status,
 	}); err != nil {
 		return err
 	}
@@ -191,7 +201,7 @@ func (pm *PluginManager) UpdatePlugin(uuid string, enable int) error {
 	defer pm.lock.RUnlock()
 	for _, p := range pm.loadedPlugin {
 		if p.UUID == uuid {
-			p.Enabled = enable
+			p.Enabled = status
 		}
 		return nil
 	}
@@ -233,6 +243,7 @@ func Handshake(url string) (*Plugin, error) {
 		Author:      info.Author,
 		Email:       info.Email,
 		Url:         info.Url,
+		PluginType:  info.PluginType,
 		Status:      common.StatusLoaded,
 	}
 

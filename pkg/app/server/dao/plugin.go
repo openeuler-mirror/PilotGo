@@ -27,6 +27,7 @@ type PluginModel struct {
 	Author      string `gorm:"type:varchar(50)"`
 	Email       string `gorm:"type:varchar(100)"`
 	Url         string `gorm:"type:varchar(200)"`
+	PluginType  string `gorm:"type:varchar(50)"`
 	Enabled     int    `gorm:"type:int"`
 }
 
@@ -50,7 +51,8 @@ func QueryPlugins() ([]*PluginModel, error) {
 
 // 更新插件使能状态
 func UpdatePluginEnabled(plugin *PluginModel) error {
-	err := global.PILOTGO_DB.Model(&plugin).Update("Enabled", plugin.Enabled).Error
+	var p PluginModel
+	err := global.PILOTGO_DB.Model(&p).Where("uuid = ?", plugin.UUID).Update("enabled", plugin.Enabled).Error
 	return err
 }
 
