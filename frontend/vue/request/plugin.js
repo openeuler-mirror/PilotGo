@@ -20,7 +20,7 @@ export function insertPlugin(data) {
 // 启用/停用插件
 export function unLoadPlugin(data) {
   return request_v1({
-    url: '/plugins/'+data.UUID,
+    url: '/plugins/' + data.uuid,
     method: 'post',
     data
   })
@@ -29,7 +29,7 @@ export function unLoadPlugin(data) {
 //删除插件
 export function deletePlugins(data) {
   return request_v1({
-    url: '/plugins/'+data.UUID,
+    url: '/plugins/' + data.UUID,
     method: 'delete',
     data
   })

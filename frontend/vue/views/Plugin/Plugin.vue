@@ -17,7 +17,19 @@
         </el-table-column>
         <el-table-column prop="description" label="概述" show-overflow-tooltip>
         </el-table-column>
+        <el-table-column prop="url" label="服务端地址" width="250">
+        </el-table-column>
         <el-table-column prop="enabled" label="状态" width="150">
+          <template slot-scope="scope">
+            <span>{{ scope.row.enabled === 0 ? '禁用' : '启用' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" fixed="right">
+          <template slot-scope="scope">
+            <el-button size="mini" type="primary" plain name="default_all" @click="handlePluginState(scope.row)">
+              {{ scope.row.enabled === 1 ? '禁用' : '启用' }}
+            </el-button>
+          </template>
         </el-table-column>
       </template>
     </ky-table>
@@ -30,7 +42,7 @@
 </template>
 
 <script>
-import { getPlugins, deletePlugins } from "@/request/plugin";
+import { getPlugins, deletePlugins, unLoadPlugin } from "@/request/plugin";
 import AddForm from "./form/addForm.vue"
 import _import from '../../router/_import';
 export default {
@@ -80,6 +92,20 @@ export default {
         });
       });
     },
+    // 启用/停用插件
+    handlePluginState(item) {
+      unLoadPlugin({ uuid: item.uuid, enable: item.enabled }).then(res => {
+        if (res.data.code === 200) {
+          this.refresh();
+          this.$store.dispatch('SetDynamicRouters', []).then(() => {
+            this.$store.dispatch('GenerateRoutes');
+          })
+          this.$message.success(res.data.msg);
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      })
+    }
   },
 };
 </script>

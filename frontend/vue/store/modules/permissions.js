@@ -104,6 +104,11 @@ const permission = {
         getPlugins().then((res) => {
           if (res.data.code === 200) {
             res.data.data.forEach((item, index) => {
+              if (item.enabled === 0) {
+                // 0:禁用，1：启用
+                return;
+              }
+              console.log('添加插件', item.name)
               p.push({
                 path: '/plugin' + index,
                 name: 'Plugin' + index,
