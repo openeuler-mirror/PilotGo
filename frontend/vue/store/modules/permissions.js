@@ -100,7 +100,7 @@ const permission = {
       return new Promise(resolve => {
         // 获取动态插件路由
         let p = [];
-        state.iframeComponent = []
+        state.iframeComponents = []
         getPlugins().then((res) => {
           if (res.data.code === 200) {
             res.data.data.forEach((item, index) => {
@@ -108,13 +108,12 @@ const permission = {
                 // 0:禁用，1：启用
                 return;
               }
-              console.log('添加插件', item.name)
               p.push({
                 path: '/plugin' + index,
                 name: 'Plugin' + index,
                 iframeComponent: '',
                 meta: {
-                  title: 'plugin', header_title: item.name, panel: "plugin" + index, icon_class: 'el-icon-s-order', url: item.url,
+                  title: 'plugin', header_title: item.name, panel: "plugin" + index, icon_class: 'el-icon-s-ticket', url: item.url,
                   breadcrumb: [
                     { name: item.name },
                   ],

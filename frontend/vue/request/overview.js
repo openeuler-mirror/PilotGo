@@ -12,6 +12,7 @@
  * @LastEditTime: 2022-05-25 15:58:46
  */
 import request from './request'
+import request_prome from './request_prome'
 export function getData(data) {
   return request({
     url: '/prometheus/queryrange',
@@ -31,20 +32,20 @@ export function getPromeIp(data) {
   return request({
     url: '/machinemanager/machinealldata',
     method: 'get',
-    params:data
+    params: data
   })
 }
 // 告警信息列表
 export function getAlerts() {
-  return request({
-    url: '/prometheus/alert',
+  return request_prome({
+    url: '/plugin/Prometheus/api/v1/alerts',
     method: 'get',
   })
 }
 
 // 发送告警信息 
 export function sendMessage(data) {
-  return request({
+  return request_prome({
     url: '/prometheus/alertmanager',
     method: 'post',
     data

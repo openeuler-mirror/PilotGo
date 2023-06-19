@@ -86,6 +86,7 @@ export default {
               this.$store.dispatch('GenerateRoutes');
             })
             this.$message.success("删除成功");
+            this.del_plugin_tag(item.name)
           } else {
             this.$message.error("删除插件错误：" + res.data.msg)
           }
@@ -101,10 +102,21 @@ export default {
             this.$store.dispatch('GenerateRoutes');
           })
           this.$message.success(res.data.msg);
+          if (item.enabled === 1) {
+            // 禁用插件，删除tag标签
+            this.del_plugin_tag(item.name);
+          }
         } else {
           this.$message.error(res.data.msg);
         }
       })
+    },
+
+    // 删除对应tag标签显示
+    del_plugin_tag(tagName) {
+      let openTags = this.$store.getters.visitedViews;
+      let tagArr = openTags.filter(tag => tag.title === tagName);
+      this.$store.dispatch('tagsView/delView', tagArr[0]).then()
     }
   },
 };
