@@ -249,7 +249,7 @@ export const routes = [
         name: 'Plugin',
         component: _import('Plugin/Plugin'),
         meta: {
-          title: 'plugin', header_title: "插件管理", panel: "plugin", icon_class: 'el-icon-s-order',
+          title: 'plugin', header_title: "插件管理", panel: "plugin", icon_class: 'el-icon-s-ticket',
           breadcrumb: [
             { name: '插件管理' },
           ],

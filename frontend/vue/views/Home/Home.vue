@@ -51,9 +51,9 @@
                 <router-view :key="key" />
               </keep-alive>
             </transition>
-            <!--iframe页-->
+            <!--插件页-->
             <component v-for="item in iframeComponents" :key="item.name" :is="item.name" :url="item.url"
-              :plugin_type="item.plugin_type" :name="item.name" :path="item.path" v-show="$route.path === item.path">
+              :plugin_type="item.plugin_type" :name="item.name" :path="item.path" v-if="$route.path === item.path">
             </component>
           </div>
         </el-main>
@@ -83,7 +83,6 @@ export default {
   },
   mounted() {
     this.initSocket();
-    console.log(this.iframeComponents)
   },
   computed: {
     cachedViews() {

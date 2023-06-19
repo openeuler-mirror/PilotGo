@@ -8,18 +8,18 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
- * @Date: 2022-01-19 17:30:12
+ * @Date: 2023-06-15 16:30:12
  * @LastEditTime: 2023-02-07 09:47:06
- * @Description: provide agent log manager of pilotgo
+ * @Description: provide prometheus alert of pilotgo
  */
 import axios from 'axios'
 import store from '@/store'
 import router from '@/router'
 
 
-// 1.创建axios实例
+// 1.为prometheus告警创建axios实例
 const request = axios.create({
-  baseURL: '/api/v1',
+  baseURL: '',
   timeOut: 5000
 })
 
