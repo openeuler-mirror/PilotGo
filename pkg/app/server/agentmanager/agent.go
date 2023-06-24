@@ -169,7 +169,7 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
-		logger.Error("failed to run script on agent")
+		logger.Error("failed to run command on agent")
 		return nil, err
 	}
 
@@ -182,23 +182,29 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 }
 
 // 远程在agent上运行脚本文件
-func (a *Agent) RunScript(cmd string) (string, error) {
+func (a *Agent) RunScript(script string) (*utils.CmdResult, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RunScript,
 		Data: struct {
-			Command string
+			Script string
 		}{
-			Command: cmd,
+			Script: script,
 		},
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return "", err
+		return nil, err
 	}
-	return resp_message.Data.(string), nil
+
+	result := &utils.CmdResult{}
+	err = resp_message.BindData(result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // TODO: err未发挥作用

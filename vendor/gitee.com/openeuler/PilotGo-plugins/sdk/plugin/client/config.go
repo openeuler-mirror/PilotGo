@@ -10,7 +10,7 @@ import (
 
 func (c *Client) ApplyConfig(batch *common.Batch, path, content string) error {
 	url := c.Server + "/api/v1/pluginapi/apply_config"
-	data, err := httputils.Put(url, nil)
+	r, err := httputils.Put(url, nil)
 	if err != nil {
 		return err
 	}
@@ -19,7 +19,7 @@ func (c *Client) ApplyConfig(batch *common.Batch, path, content string) error {
 		Status string
 		Error  string
 	}{}
-	if err := json.Unmarshal(data, resp); err != nil {
+	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return err
 	}
 	if resp.Status != "ok" {

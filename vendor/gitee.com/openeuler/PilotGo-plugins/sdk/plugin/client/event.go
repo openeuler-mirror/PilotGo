@@ -17,7 +17,7 @@ type EventCallback func(e *Event)
 // 注册event事件监听
 func (c *Client) ListenEvent(event Event, callback EventCallback) error {
 	url := c.Server + "/api/v1/pluginapi/listener"
-	data, err := httputils.Put(url, nil)
+	r, err := httputils.Put(url, nil)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (c *Client) ListenEvent(event Event, callback EventCallback) error {
 		Status string
 		Error  string
 	}{}
-	if err := json.Unmarshal(data, resp); err != nil {
+	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return err
 	}
 	if resp.Status != "ok" {
@@ -40,7 +40,7 @@ func (c *Client) ListenEvent(event Event, callback EventCallback) error {
 // 取消注册event事件监听
 func (c *Client) UnListenEvent(listenerID string) error {
 	url := c.Server + "/api/v1/pluginapi/listener"
-	data, err := httputils.Delete(url, nil)
+	r, err := httputils.Delete(url, nil)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (c *Client) UnListenEvent(listenerID string) error {
 		Status string
 		Error  string
 	}{}
-	if err := json.Unmarshal(data, resp); err != nil {
+	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return err
 	}
 	if resp.Status != "ok" {

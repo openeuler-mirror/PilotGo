@@ -27,7 +27,7 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, erro
 		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
 	}
 
-	bs, err := httputils.Post(url, &httputils.Params{
+	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
 	})
 	if err != nil {
@@ -35,7 +35,7 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, erro
 	}
 
 	res := []*CmdResult{}
-	if err := json.Unmarshal(bs, &res); err != nil {
+	if err := json.Unmarshal(r.Body, &res); err != nil {
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, er
 		Script: base64.StdEncoding.EncodeToString([]byte(script)),
 	}
 
-	bs, err := httputils.Post(url, &httputils.Params{
+	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
 	})
 	if err != nil {
@@ -61,7 +61,7 @@ func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, er
 	}
 
 	res := []*CmdResult{}
-	if err := json.Unmarshal(bs, &res); err != nil {
+	if err := json.Unmarshal(r.Body, &res); err != nil {
 		return nil, err
 	}
 

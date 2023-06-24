@@ -15,7 +15,9 @@
 package register
 
 import (
+	"encoding/base64"
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -115,12 +117,65 @@ func RegitsterHandler(c *network.SocketClient) {
 
 	c.BindHandler(protocol.RunScript, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process run script command:%s", msg.String())
+		errorInfo := ""
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: 0,
-			Data:   "run script result",
 		}
+
+		var result *utils.CmdResult
+		var scriptPath string
+		var err error
+
+		d := &struct {
+			Script string
+		}{}
+
+		f := func(s string) (string, error) {
+			workDir := "/opt/pilotgo/agent/tmp/"
+
+			fileName := uuid.New().String()
+			filePath := path.Join(workDir, fileName+".sh")
+
+			content, err := base64.StdEncoding.DecodeString(s)
+			if err != nil {
+				return "", err
+			}
+
+			err = utils.FileSaveString(filePath, string(content))
+			if err != nil {
+				return "", err
+			}
+
+			return filePath, nil
+		}
+
+		err = msg.BindData(d)
+		if err != nil {
+			errorInfo = "parse data error:" + err.Error()
+			goto ERROR
+		}
+
+		scriptPath, err = f(d.Script)
+		if err != nil {
+			errorInfo = "run command error:" + err.Error()
+			goto ERROR
+		}
+
+		result, err = utils.RunScript(scriptPath)
+		if err != nil {
+			errorInfo = "run command error:" + err.Error()
+			goto ERROR
+		}
+
+		resp_msg.Status = 0
+		resp_msg.Data = result
+		return c.Send(resp_msg)
+
+	ERROR:
+		resp_msg.Status = -1
+		resp_msg.Error = errorInfo
 		return c.Send(resp_msg)
 	})
 

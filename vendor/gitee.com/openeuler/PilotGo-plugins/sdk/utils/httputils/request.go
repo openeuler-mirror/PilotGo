@@ -30,7 +30,7 @@ func Request(method, url string) ([]byte, error) {
 	return bs, nil
 }
 
-func request(method, url string, param *Params) ([]byte, error) {
+func request(method, url string, param *Params) (*Response, error) {
 	// 处理form参数
 	if param != nil && len(param.Form) > 0 {
 		s := ""
@@ -71,10 +71,15 @@ func request(method, url string, param *Params) ([]byte, error) {
 
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return &Response{
+			StatusCode: resp.StatusCode,
+		}, err
 	}
 
-	return bs, nil
+	return &Response{
+		StatusCode: resp.StatusCode,
+		Body:       bs,
+	}, nil
 }
 
 type Params struct {
@@ -86,18 +91,25 @@ type Params struct {
 	Body interface{}
 }
 
-func Post(url string, params *Params) ([]byte, error) {
+type Response struct {
+	// 返回状态码
+	StatusCode int
+	// 返回body数组，[]byte
+	Body []byte
+}
+
+func Post(url string, params *Params) (*Response, error) {
 	return request("POST", url, params)
 }
 
-func Get(url string, params *Params) ([]byte, error) {
+func Get(url string, params *Params) (*Response, error) {
 	return request("GET", url, params)
 }
 
-func Put(url string, params *Params) ([]byte, error) {
+func Put(url string, params *Params) (*Response, error) {
 	return request("PUT", url, params)
 }
 
-func Delete(url string, params *Params) ([]byte, error) {
+func Delete(url string, params *Params) (*Response, error) {
 	return request("DELETE", url, params)
 }
