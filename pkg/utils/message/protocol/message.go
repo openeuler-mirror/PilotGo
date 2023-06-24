@@ -26,7 +26,9 @@ const (
 	// agent端软件包回滚
 	PackageRollback = 7
 	// agent端执行shell脚本
-	RunScript = 8
+	RunCommand = 8
+	// agent端执行shell脚本
+	RunScript = 81
 	// agent升级
 	AgentUpdate = 9
 	// agent卸载
