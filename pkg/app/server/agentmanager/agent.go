@@ -24,6 +24,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
@@ -154,7 +155,33 @@ func (a *Agent) Init() error {
 	return nil
 }
 
-// 远程在agent上运行脚本
+// 远程在agent上运行shell命令
+func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.RunCommand,
+		Data: struct {
+			Command string
+		}{
+			Command: cmd,
+		},
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to run script on agent")
+		return nil, err
+	}
+
+	result := &utils.CmdResult{}
+	err = resp_message.BindData(result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// 远程在agent上运行脚本文件
 func (a *Agent) RunScript(cmd string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),

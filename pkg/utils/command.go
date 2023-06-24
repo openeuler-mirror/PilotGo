@@ -18,7 +18,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"strings"
 )
+
+type CmdResult struct {
+	RetCode int
+	Stdout  string
+	Stderr  string
+}
 
 func RunCommandnew(s string) (int, string, string, error) {
 	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; "+s)
@@ -43,13 +50,13 @@ func RunCommandnew(s string) (int, string, string, error) {
 	if err != nil {
 		return 0, "", "", err
 	}
-	s1 := string(b1)
+	s1 := strings.TrimRight(string(b1), "\n")
 
 	b2, err := ioutil.ReadAll(stderr)
 	if err != nil {
 		return 0, "", "", err
 	}
-	s2 := string(b2)
+	s2 := strings.TrimRight(string(b2), "\n")
 
 	err = cmd.Wait()
 	if err != nil {

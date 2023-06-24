@@ -71,6 +71,48 @@ func RegitsterHandler(c *network.SocketClient) {
 		return c.Send(resp_msg)
 	})
 
+	c.BindHandler(protocol.RunCommand, func(c *network.SocketClient, msg *protocol.Message) error {
+		logger.Debug("process run command:%s", msg.String())
+
+		d := &struct {
+			Command string
+		}{}
+
+		err := msg.BindData(d)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  "parse data error:" + err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
+
+		retCode, stdout, stderr, err := utils.RunCommandnew(d.Command)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  "run command error:" + err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
+
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: 0,
+			Data: &utils.CmdResult{
+				RetCode: retCode,
+				Stdout:  stdout,
+				Stderr:  stderr,
+			},
+		}
+		return c.Send(resp_msg)
+	})
+
 	c.BindHandler(protocol.RunScript, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process run script command:%s", msg.String())
 		resp_msg := &protocol.Message{

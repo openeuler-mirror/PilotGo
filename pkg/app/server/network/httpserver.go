@@ -253,7 +253,9 @@ func registerPluginApi(router *gin.RouterGroup) {
 	pluginAPI := router.Group("/pluginapi")
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
+		pluginAPI.POST("/run_command", pluginapi.RunCommandHandler)
 		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)
+
 		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
 		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
 
