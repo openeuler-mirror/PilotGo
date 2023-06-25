@@ -32,15 +32,13 @@ func RunCommandHandler(c *gin.Context) {
 	if err != nil {
 		logger.Debug("bind batch param error:%s", err)
 
-		response.Fail(c, nil, "unknown agent")
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	logger.Debug("run command on agents :%v", d.Batch.MachineUUIDs)
 
 	type RunResult struct {
-		// Result *utils.CmdResult
-
 		*utils.CmdResult
 		MachineUUID string
 	}
@@ -80,22 +78,54 @@ func RunCommandHandler(c *gin.Context) {
 // 远程运行脚本
 func RunScriptHandler(c *gin.Context) {
 	logger.Debug("process get agent request")
-	uuid := c.Query("uuid")
-	script := c.Query("script")
 
-	// TODO: support batch
-	agent := agentmanager.GetAgent(uuid)
-	if agent != nil {
-		data, err := agent.RunScript(script)
-		if err != nil {
-			logger.Error("run script error, agent:%s, script:%s", uuid, script)
-			response.Fail(c, nil, err.Error())
-		}
-		logger.Debug("run script on agent result:%v", data)
-		response.Success(c, data, "")
+	d := &struct {
+		Batch  *common.Batch `json:"batch"`
+		Script string        `json:"script"`
+	}{}
+	err := c.ShouldBind(&d)
+	if err != nil {
+		logger.Debug("bind batch param error:%s", err)
+
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	logger.Warn("unknown agent:%s", uuid)
-	response.Fail(c, nil, "unknown agent")
+	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
+
+	type RunResult struct {
+		*utils.CmdResult
+		MachineUUID string
+	}
+	result := []*RunResult{}
+
+	if d.Batch.MachineUUIDs != nil {
+		for _, uuid := range d.Batch.MachineUUIDs {
+			// TODO: support batch
+			agent := agentmanager.GetAgent(uuid)
+			if agent != nil {
+				data, err := agent.RunScript(d.Script)
+				if err != nil {
+					logger.Error("run command error, agent:%s, command:%s", uuid, d.Script)
+					response.Fail(c, nil, err.Error())
+					continue
+				}
+				logger.Debug("run command on agent result:%v", data)
+
+				result = append(result, &RunResult{
+					CmdResult:   data,
+					MachineUUID: uuid,
+				})
+				// response.Success(c, data, "")
+				// return
+			} else {
+				logger.Warn("unknown agent:%s", uuid)
+			}
+		}
+
+		response.Success(c, result, "")
+		return
+	} else {
+		response.Fail(c, nil, "empty machine uuids")
+	}
 }

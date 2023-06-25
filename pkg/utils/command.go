@@ -70,3 +70,53 @@ func RunCommandnew(s string) (int, string, string, error) {
 
 	return exitCode, s1, s2, nil
 }
+
+// 运行指定的shell脚本文件
+func RunScript(absPath string) (*CmdResult, error) {
+	cmd := exec.Command("/bin/bash", absPath)
+	cmd.Env = append(cmd.Env, "LANG=en_US.utf8")
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	exitCode := 0
+	err = cmd.Start()
+	if err != nil {
+		return nil, err
+	}
+
+	b1, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		return nil, err
+	}
+	s1 := strings.TrimRight(string(b1), "\n")
+
+	b2, err := ioutil.ReadAll(stderr)
+	if err != nil {
+		return nil, err
+	}
+	s2 := strings.TrimRight(string(b2), "\n")
+
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Println(err)
+		e, ok := err.(*exec.ExitError)
+		if !ok {
+			return nil, err
+		}
+		exitCode = e.ExitCode()
+	}
+
+	return &CmdResult{
+		RetCode: exitCode,
+		Stdout:  s1,
+		Stderr:  s2,
+	}, nil
+}

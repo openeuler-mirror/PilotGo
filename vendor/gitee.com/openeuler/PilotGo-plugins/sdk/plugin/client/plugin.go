@@ -19,13 +19,13 @@ type PluginInfo struct {
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
 	url := c.Server + "/api/v1/pluginapi/plugins"
-	data, err := httputils.Get(url, nil)
+	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &PluginInfo{}
-	if err := json.Unmarshal(data, resp); err != nil {
+	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return nil, err
 	}
 

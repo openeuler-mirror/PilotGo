@@ -9,13 +9,13 @@ import (
 
 func (c *Client) MachineList() ([]*common.MachineNode, error) {
 	url := c.Server + "/api/v1/pluginapi/machine_list"
-	body, err := httputils.Get(url, nil)
+	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	result := []*common.MachineNode{}
-	if err := json.Unmarshal(body, &result); err != nil {
+	if err := json.Unmarshal(r.Body, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
