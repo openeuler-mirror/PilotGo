@@ -27,7 +27,7 @@ func moduleMatch(name string, value int64, memconf *common.MemoryConfig) {
 }
 
 func (b *BaseOS) GetMemoryConfig() (*common.MemoryConfig, error) {
-	exitc, output, stde, err := utils.RunCommandnew("cat /proc/meminfo")
+	exitc, output, stde, err := utils.RunCommand("cat /proc/meminfo")
 	if exitc == 0 && output != "" && stde == "" && err == nil {
 		outputlines := strings.Split(output, "\n")
 		m := &common.MemoryConfig{}

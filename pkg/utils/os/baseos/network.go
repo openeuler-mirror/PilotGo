@@ -91,7 +91,7 @@ func (b *BaseOS) GetIOCounter() ([]common.IOCnt, error) {
 
 func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 	NICConfig := make([]common.NetInterfaceCard, 0)
-	exitc, result, stde, err := utils.RunCommandnew("cat /proc/net/arp")
+	exitc, result, stde, err := utils.RunCommand("cat /proc/net/arp")
 	if exitc == 0 && result != "" && stde == "" && err == nil {
 		reader := strings.NewReader(result)
 		scanner := bufio.NewScanner(reader)
@@ -138,7 +138,7 @@ func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
 		filename = n
 	}
 
-	exitc, text, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
+	exitc, text, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 	if exitc == 0 && text != "" && stde == "" && err == nil {
 		var oldnet []map[string]string
 		lines := strings.Split(text, "\n")
@@ -174,14 +174,14 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 		filename = n
 	}
 
-	exitc, result, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
+	exitc, result, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
 	if exitc == 0 && result != "" && stde == "" && err == nil {
 		ip_assignment_method := strings.Split(result, "=")[1]
 
 		var network = &common.NetworkConfig{}
 		switch strings.Replace(ip_assignment_method, "\n", "", -1) {
 		case "static":
-			exitc, tmp, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
+			exitc, tmp, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 			if exitc == 0 && tmp != "" && stde == "" && err == nil {
 				lines := strings.Split(tmp, "\n")
 				for _, line := range lines {
@@ -203,13 +203,13 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 			defer conn.Close()
 			ip := strings.Split(conn.LocalAddr().String(), ":")[0]
 
-			exitc, gateway, stde, err := utils.RunCommandnew("route -n |awk '{print $2}' | sed -n '3p'")
+			exitc, gateway, stde, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
 			if exitc == 0 && gateway != "" && stde == "" && err == nil {
 			} else {
 				return nil, fmt.Errorf("failed to get gateway: %d, %s, %s, %v", exitc, gateway, stde, err)
 			}
 
-			exitc, DNS, stde, err := utils.RunCommandnew("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
+			exitc, DNS, stde, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
 			if exitc == 0 && DNS != "" && stde == "" && err == nil {
 			} else {
 				return nil, fmt.Errorf("failed to get dns: %d, %s, %s, %v", exitc, DNS, stde, err)
@@ -220,7 +220,7 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 			network.IPAddr = ip
 			network.GateWay = strings.Replace(gateway, "\n", "", -1)
 		default:
-			exitc, tmp, stde, err := utils.RunCommandnew("cat " + global.NetWorkPath + "/" + filename)
+			exitc, tmp, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
 			if exitc == 0 && tmp != "" && stde == "" && err == nil {
 				lines := strings.Split(tmp, "\n")
 				for _, line := range lines {
@@ -257,13 +257,13 @@ func (b *BaseOS) GetNICName() (string, error) {
 }
 
 func (b *BaseOS) RestartNetwork(nic string) error {
-	exitc, stdo, stde, err := utils.RunCommandnew("nmcli c reload")
+	exitc, stdo, stde, err := utils.RunCommand("nmcli c reload")
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 	} else {
 		return fmt.Errorf("failed to reload network configuration file: %d, %s, %s, %v", exitc, stdo, stde, err)
 	}
 
-	exitc2, stdo2, stde2, err2 := utils.RunCommandnew("nmcli c up " + strings.Split(nic, "-")[1])
+	exitc2, stdo2, stde2, err2 := utils.RunCommand("nmcli c up " + strings.Split(nic, "-")[1])
 	if exitc2 == 0 && stdo2 != "" && stde2 == "" && err2 == nil {
 	} else {
 		return fmt.Errorf("network configuration file not effective: %d, %s, %s, %v", exitc2, stdo2, stde2, err2)

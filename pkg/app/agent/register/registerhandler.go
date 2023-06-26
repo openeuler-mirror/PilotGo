@@ -102,7 +102,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			return c.Send(resp_msg)
 		}
 
-		retCode, stdout, stderr, err := utils.RunCommandnew(string(content))
+		retCode, stdout, stderr, err := utils.RunCommand(string(content))
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,

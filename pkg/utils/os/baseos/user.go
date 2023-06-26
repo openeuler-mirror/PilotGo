@@ -31,7 +31,7 @@ func (b *BaseOS) GetCurrentUserInfo() common.CurrentUser {
 }
 
 func (b *BaseOS) GetAllUserInfo() ([]common.AllUserInfo, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew("cat /etc/passwd")
+	exitc, tmp, stde, err := utils.RunCommand("cat /etc/passwd")
 	if exitc == 0 && tmp != "" && stde == "" && err == nil {
 		reader := strings.NewReader(tmp)
 		scanner := bufio.NewScanner(reader)
@@ -63,14 +63,14 @@ func (b *BaseOS) GetAllUserInfo() ([]common.AllUserInfo, error) {
 
 // 创建新的用户，并修改新用户密码
 func (b *BaseOS) AddLinuxUser(username, password string) error {
-	exitc1, output1, stde1, err1 := utils.RunCommandnew("useradd -m " + username)
+	exitc1, output1, stde1, err1 := utils.RunCommand("useradd -m " + username)
 	if exitc1 == 0 && output1 == "" && stde1 == "" && err1 == nil {
 		logger.Info("successfully created user: %s", output1)
 
 		//下面两个是管道的两端
 		//linux可以使用  echo "password" | passwd --stdin username
 		//直接更改密码
-		exitc2, output2, stde2, err2 := utils.RunCommandnew("echo \"" + password + "\" | passwd --stdin " + username)
+		exitc2, output2, stde2, err2 := utils.RunCommand("echo \"" + password + "\" | passwd --stdin " + username)
 		if exitc2 == 0 && output2 != "" && stde2 == "" && err2 == nil {
 			logger.Info("successfully changed user passwd: %s", output2)
 			return nil
@@ -85,7 +85,7 @@ func (b *BaseOS) AddLinuxUser(username, password string) error {
 
 // 删除用户
 func (b *BaseOS) DelUser(username string) (string, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew(fmt.Sprintf("userdel -r %s", username))
+	exitc, tmp, stde, err := utils.RunCommand(fmt.Sprintf("userdel -r %s", username))
 	if exitc == 0 && tmp == "" && stde == "" && err == nil {
 		logger.Info("successfully deleted user: %s", tmp)
 		return tmp, nil
@@ -96,7 +96,7 @@ func (b *BaseOS) DelUser(username string) (string, error) {
 
 // chmod [-R] 权限值 文件名
 func (b *BaseOS) ChangePermission(permission, file string) (string, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew(fmt.Sprintf("chmod %s %s", permission, file))
+	exitc, tmp, stde, err := utils.RunCommand(fmt.Sprintf("chmod %s %s", permission, file))
 	if exitc == 0 && tmp == "" && stde == "" && err == nil {
 		logger.Info("successfully changed file permissions: %s", tmp)
 		return tmp, nil
@@ -107,7 +107,7 @@ func (b *BaseOS) ChangePermission(permission, file string) (string, error) {
 
 // chown [-R] 所有者 文件或目录
 func (b *BaseOS) ChangeFileOwner(user, file string) (string, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew(fmt.Sprintf("chown -R %s %s", user, file))
+	exitc, tmp, stde, err := utils.RunCommand(fmt.Sprintf("chown -R %s %s", user, file))
 	if exitc == 0 && tmp == "" && stde == "" && err == nil {
 		logger.Info("successfully changed file owner: %s", tmp)
 		return tmp, nil

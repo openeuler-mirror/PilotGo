@@ -8,7 +8,7 @@ import (
 
 // 获取机器时间
 func (b *BaseOS) GetTime() (string, error) {
-	exitc, nowtime, stde, err := utils.RunCommandnew("date +%s")
+	exitc, nowtime, stde, err := utils.RunCommand("date +%s")
 	if exitc == 0 && nowtime != "" && stde == "" && err == nil {
 		return nowtime, nil
 	}

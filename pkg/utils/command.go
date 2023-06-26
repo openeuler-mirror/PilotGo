@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2022-04-20 14:10:23
+ * LastEditTime: 2023-06-26 19:09:58
  * Description: Execute instruction function
  ******************************************************************************/
 package utils
@@ -27,7 +27,7 @@ type CmdResult struct {
 	Stderr  string
 }
 
-func RunCommandnew(s string) (int, string, string, error) {
+func RunCommand(s string) (int, string, string, error) {
 	cmd := exec.Command("/bin/bash", "-c", "export LANG=en_US.utf8 ; "+s)
 
 	stdout, err := cmd.StdoutPipe()
