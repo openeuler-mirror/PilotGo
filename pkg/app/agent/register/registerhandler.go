@@ -91,7 +91,18 @@ func RegitsterHandler(c *network.SocketClient) {
 			return c.Send(resp_msg)
 		}
 
-		retCode, stdout, stderr, err := utils.RunCommandnew(d.Command)
+		content, err := base64.StdEncoding.DecodeString(d.Command)
+		if err != nil {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  "run command error:" + err.Error(),
+			}
+			return c.Send(resp_msg)
+		}
+
+		retCode, stdout, stderr, err := utils.RunCommandnew(string(content))
 		if err != nil {
 			resp_msg := &protocol.Message{
 				UUID:   msg.UUID,
