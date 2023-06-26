@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-26 19:59:12
+ * LastEditTime: 2023-06-26 20:23:07
  * Description: socket client register
  ******************************************************************************/
 package register
@@ -128,119 +128,12 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.InstallRpm, handler.InstallRpmHandler)
 	c.BindHandler(protocol.RemoveRpm, handler.RemoveRpmHandler)
 
-	c.BindHandler(protocol.DiskUsage, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
+	c.BindHandler(protocol.DiskUsage, handler.DiskUsageHandler)
+	c.BindHandler(protocol.DiskInfo, handler.DiskInfoHandler)
+	c.BindHandler(protocol.DiskMount, handler.DiskMountHandler)
+	c.BindHandler(protocol.DiskUMount, handler.DiskUMountHandler)
+	c.BindHandler(protocol.DiskFormat, handler.DiskFormatHandler)
 
-		diskusage, err := uos.OS().GetDiskUsageInfo()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   diskusage,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.DiskInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		diskinfo, err := uos.OS().GetDiskInfo()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   diskinfo,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.DiskMount, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		disk := msg.Data.(string)
-		disks := strings.Split(disk, ",")
-		source := disks[0]
-		dest := disks[1]
-		info, err := uos.OS().DiskMount(source, dest)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   info,
-		}
-		return c.Send(resp_msg)
-
-	})
-	c.BindHandler(protocol.DiskUMount, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		disk := msg.Data.(string)
-		info, err := uos.OS().DiskUMount(disk)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   info,
-		}
-		return c.Send(resp_msg)
-
-	})
-	c.BindHandler(protocol.DiskFormat, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		disk := msg.Data.(string)
-		disks := strings.Split(disk, ",")
-		fileType := disks[0]
-		diskPath := disks[1]
-		info, err := uos.OS().DiskFormat(fileType, diskPath)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   info,
-		}
-		return c.Send(resp_msg)
-
-	})
 	c.BindHandler(protocol.NetTCP, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 		nettcp, err := uos.OS().GetTCP()
