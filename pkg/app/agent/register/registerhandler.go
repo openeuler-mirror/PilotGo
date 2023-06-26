@@ -108,69 +108,10 @@ func RegitsterHandler(c *network.SocketClient) {
 		return c.Send(resp_msg)
 	})
 
-	c.BindHandler(protocol.OsInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
+	c.BindHandler(protocol.OsInfo, handler.OSInfoHandler)
+	c.BindHandler(protocol.CPUInfo, handler.CPUInfoHandler)
+	c.BindHandler(protocol.MemoryInfo, handler.MemoryInfoHandler)
 
-		sysinfo, err := uos.OS().GetHostInfo()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   sysinfo,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.CPUInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		cpuinfo, err := uos.OS().GetCPUInfo()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   cpuinfo,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.MemoryInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		memoryinfo, err := uos.OS().GetMemoryConfig()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   memoryinfo,
-		}
-		return c.Send(resp_msg)
-	})
 	c.BindHandler(protocol.SysctlInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
