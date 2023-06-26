@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-26 19:35:09
+ * LastEditTime: 2023-06-26 19:59:12
  * Description: socket client register
  ******************************************************************************/
 package register
@@ -112,46 +112,10 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.CPUInfo, handler.CPUInfoHandler)
 	c.BindHandler(protocol.MemoryInfo, handler.MemoryInfoHandler)
 
-	c.BindHandler(protocol.SysctlInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
+	c.BindHandler(protocol.SysctlInfo, handler.SysctlInfoHandler)
+	c.BindHandler(protocol.SysctlChange, handler.SysctlChangeHandler)
+	c.BindHandler(protocol.SysctlView, handler.SysctlViewHandler)
 
-		// TODO: process error
-		sysctlinfo, _ := uos.OS().GetSysctlConfig()
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   sysctlinfo,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.SysctlChange, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		args := msg.Data.(string)
-		sysctlchange, _ := uos.OS().TempModifyPar(args)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   sysctlchange,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.SysctlView, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		args := msg.Data.(string)
-		sysctlview, _ := uos.OS().GetVarNameValue(args)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   sysctlview,
-		}
-		return c.Send(resp_msg)
-	})
 	c.BindHandler(protocol.ServiceList, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
