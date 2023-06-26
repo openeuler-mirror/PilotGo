@@ -12,7 +12,7 @@ import (
 
 // 获取CPU型号
 func (b *BaseOS) GetCPUName() (string, error) {
-	exitc, cpuname, stde, err := utils.RunCommandnew("lscpu | grep 'Model name' | sort | uniq")
+	exitc, cpuname, stde, err := utils.RunCommand("lscpu | grep 'Model name' | sort | uniq")
 	if exitc == 0 && len(cpuname) > 0 && stde == "" && err == nil {
 		cpuname = strings.Replace(cpuname, "\n", "", -1)
 		str := strings.Split(cpuname, ":")
@@ -30,7 +30,7 @@ func (b *BaseOS) GetCPUName() (string, error) {
 
 // 获取物理CPU个数
 func (b *BaseOS) GetPhysicalCPU() (int, error) {
-	exitc, num, stde, err := utils.RunCommandnew("cat /proc/cpuinfo| grep 'processor'| sort| uniq| wc -l")
+	exitc, num, stde, err := utils.RunCommand("cat /proc/cpuinfo| grep 'processor'| sort| uniq| wc -l")
 	if exitc == 0 && len(num) > 0 && stde == "" && err == nil {
 		num = strings.Replace(num, "\n", "", -1)
 		cpunum, erratoi := strconv.Atoi(num)

@@ -54,7 +54,7 @@ func TestConfigUser(t *testing.T) {
 	})
 
 	t.Run("test ChangePermission", func(t *testing.T) {
-		exitc, stdo, stde, err := utils.RunCommandnew("touch /home/" + username + "/" + file)
+		exitc, stdo, stde, err := utils.RunCommand("touch /home/" + username + "/" + file)
 		assert.Equal(t, 0, exitc)
 		assert.Equal(t, "", strings.Replace(stdo, "\n", "", -1))
 		assert.Equal(t, "", strings.Replace(stde, "\n", "", -1))
@@ -63,7 +63,7 @@ func TestConfigUser(t *testing.T) {
 		_, err = osobj.ChangePermission(permission, fileabs)
 		assert.Nil(t, err)
 
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("ls -l " + fileabs)
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("ls -l " + fileabs)
 		assert.Equal(t, 0, exitc2)
 		assert.NotNil(t, stdo2)
 		assert.Equal(t, "", strings.Replace(stde2, "\n", "", -1))
@@ -75,7 +75,7 @@ func TestConfigUser(t *testing.T) {
 		_, err := osobj.ChangeFileOwner(username, fileabs)
 		assert.Nil(t, err)
 
-		exitc, stdo, stde, err2 := utils.RunCommandnew("ls -l " + fileabs)
+		exitc, stdo, stde, err2 := utils.RunCommand("ls -l " + fileabs)
 		assert.Equal(t, 0, exitc)
 		assert.NotNil(t, stdo)
 		assert.Equal(t, "", strings.Replace(stde, "\n", "", -1))
@@ -87,7 +87,7 @@ func TestConfigUser(t *testing.T) {
 		_, err := osobj.DelUser(username)
 		assert.Nil(t, err)
 
-		exitc, stdo, stde, err2 := utils.RunCommandnew("cat /etc/passwd | cut -d : -f 1 | grep \"" + username + "\"")
+		exitc, stdo, stde, err2 := utils.RunCommand("cat /etc/passwd | cut -d : -f 1 | grep \"" + username + "\"")
 		assert.Equal(t, 1, exitc)
 		assert.Equal(t, "", strings.Replace(stde, "\n", "", -1))
 		assert.Nil(t, err2)

@@ -20,7 +20,7 @@ func (b *BaseOS) GetHostInfo() (*common.SystemInfo, error) {
 	defer conn.Close()
 	IP := strings.Split(conn.LocalAddr().String(), ":")[0]
 	SysInfo, _ := host.Info()
-	exitc, uptime, stde, err := utils.RunCommandnew(fmt.Sprintf("date -d '%v second ago'", SysInfo.Uptime))
+	exitc, uptime, stde, err := utils.RunCommand(fmt.Sprintf("date -d '%v second ago'", SysInfo.Uptime))
 	if exitc == 0 && uptime != "" && stde == "" && err == nil {
 		uptime = strings.Replace(uptime, "\n", "", -1)
 		sysinfo := &common.SystemInfo{

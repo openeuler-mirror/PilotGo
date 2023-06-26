@@ -16,14 +16,14 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 		return firewalldConfig, fmt.Errorf("failed to get network card name")
 	}
 
-	exitc, firewall_state, stde, err := utils.RunCommandnew("firewall-cmd --state")
+	exitc, firewall_state, stde, err := utils.RunCommand("firewall-cmd --state")
 	if exitc != 0 && firewall_state == "" && strings.Replace(stde, "\n", "", -1) == "not running" && err == nil {
 		firewalldConfig.Status = "not running"
 		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		return firewalldConfig, nil
 	}
 
-	exitc, zone_default, stde, err := utils.RunCommandnew("firewall-cmd --get-default-zone")
+	exitc, zone_default, stde, err := utils.RunCommand("firewall-cmd --get-default-zone")
 	if exitc == 0 && zone_default != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
@@ -31,7 +31,7 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 		return firewalldConfig, nil
 	}
 
-	exitc, zones, stde, err := utils.RunCommandnew("firewall-cmd --get-zones")
+	exitc, zones, stde, err := utils.RunCommand("firewall-cmd --get-zones")
 	if exitc == 0 && zones != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
@@ -41,7 +41,7 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	}
 	Zones := strings.Split(strings.Replace(zones, "\n", "", -1), " ")
 
-	exitc, services, stde, err := utils.RunCommandnew("firewall-cmd --get-services")
+	exitc, services, stde, err := utils.RunCommand("firewall-cmd --get-services")
 	if exitc == 0 && services != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
@@ -61,7 +61,7 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 }
 
 func (b *BaseOS) FirewalldSetDefaultZone(zone string) (string, error) {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --set-default-zone=%v", zone))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --set-default-zone=%v", zone))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
 		return strings.Replace(stdo, "\n", "", -1), nil
 	}
@@ -69,7 +69,7 @@ func (b *BaseOS) FirewalldSetDefaultZone(zone string) (string, error) {
 }
 
 func (b *BaseOS) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, error) {
-	exitc, conf, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --zone=%v --list-all", zone))
+	exitc, conf, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --zone=%v --list-all", zone))
 	if exitc == 0 && conf != "" && stde == "" && err == nil {
 		var firewall = &common.FirewalldCMDList{}
 		lines := strings.Split(conf, "\n")
@@ -103,9 +103,9 @@ func (b *BaseOS) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, err
 }
 
 func (b *BaseOS) FirewalldSourceAdd(zone, source string) error {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-source=%v", zone, source))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-source=%v", zone, source))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
 		}
@@ -116,9 +116,9 @@ func (b *BaseOS) FirewalldSourceAdd(zone, source string) error {
 }
 
 func (b *BaseOS) FirewalldSourceRemove(zone, source string) error {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-source=%v", zone, source))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-source=%v", zone, source))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
 		}
@@ -128,9 +128,9 @@ func (b *BaseOS) FirewalldSourceRemove(zone, source string) error {
 }
 
 func (b *BaseOS) FirewalldServiceAdd(zone, service string) error {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-service=%v", zone, service))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-service=%v", zone, service))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
 		}
@@ -140,9 +140,9 @@ func (b *BaseOS) FirewalldServiceAdd(zone, service string) error {
 }
 
 func (b *BaseOS) FirewalldServiceRemove(zone, service string) error {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-service=%v", zone, service))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-service=%v", zone, service))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			return nil
 		}
@@ -152,7 +152,7 @@ func (b *BaseOS) FirewalldServiceRemove(zone, service string) error {
 }
 
 func (b *BaseOS) Restart() bool {
-	exitc, stdo, stde, err := utils.RunCommandnew("systemctl restart firewalld.service")
+	exitc, stdo, stde, err := utils.RunCommand("systemctl restart firewalld.service")
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 		return true
 	}
@@ -160,7 +160,7 @@ func (b *BaseOS) Restart() bool {
 }
 
 func (b *BaseOS) Stop() bool {
-	exitc, stdo, stde, err := utils.RunCommandnew("systemctl stop firewalld.service")
+	exitc, stdo, stde, err := utils.RunCommand("systemctl stop firewalld.service")
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 		return true
 	}
@@ -168,9 +168,9 @@ func (b *BaseOS) Stop() bool {
 }
 
 func (b *BaseOS) DelZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-port=%v/%v", zone, port, protocol))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-port=%v/%v", zone, port, protocol))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			stdo2 = strings.Replace(stdo2, "\n", "", -1)
 			return stdo2, nil
@@ -181,9 +181,9 @@ func (b *BaseOS) DelZonePort(zone, port, protocol string) (string, error) { //zo
 }
 
 func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zone = block dmz drop external home internal public trusted work
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-port=%v/%v", zone, port, protocol))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-port=%v/%v", zone, port, protocol))
 	if exitc == 0 && strings.Replace(stdo, "\n", "", -1) == "success" && stde == "" && err == nil {
-		exitc2, stdo2, stde2, err2 := utils.RunCommandnew("firewall-cmd --reload")
+		exitc2, stdo2, stde2, err2 := utils.RunCommand("firewall-cmd --reload")
 		if exitc2 == 0 && strings.Replace(stdo2, "\n", "", -1) == "success" && stde2 == "" && err2 == nil {
 			stdo2 = strings.Replace(stdo2, "\n", "", -1)
 			return stdo2, nil
@@ -195,13 +195,13 @@ func (b *BaseOS) AddZonePort(zone, port, protocol string) (string, error) { //zo
 
 // TODO: firewall完善zone interface的添加和删除接口，完善firewall接口重复add会报错的逻辑
 func (b *BaseOS) AddZoneInterface(zone, NIC string) (string, error) {
-	_, tmp, _, _ := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-interface=%v", zone, NIC))
+	_, tmp, _, _ := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --add-interface=%v", zone, NIC))
 
 	return strings.Replace(tmp, "\n", "", -1), nil
 }
 
 func (b *BaseOS) DelZoneInterface(zone, NIC string) (string, error) {
-	_, tmp, _, _ := utils.RunCommandnew(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-interface=%v", zone, NIC))
+	_, tmp, _, _ := utils.RunCommand(fmt.Sprintf("firewall-cmd --permanent --zone=%v --remove-interface=%v", zone, NIC))
 
 	return strings.Replace(tmp, "\n", "", -1), nil
 }

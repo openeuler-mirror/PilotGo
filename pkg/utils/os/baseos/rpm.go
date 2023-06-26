@@ -28,7 +28,7 @@ import (
 // 获取全部安装的rpm包列表
 func (b *BaseOS) GetAllRpm() ([]string, error) {
 	listRpm := make([]string, 0)
-	exitc, result, stde, err := utils.RunCommandnew("rpm -qa")
+	exitc, result, stde, err := utils.RunCommand("rpm -qa")
 	if exitc == 0 && result != "" && stde == "" && err == nil {
 		reader := strings.NewReader(result)
 		scanner := bufio.NewScanner(reader)
@@ -54,7 +54,7 @@ func (b *BaseOS) GetRpmSource(rpm string) ([]common.RpmSrc, error) {
 	listRpmSource := make([]string, 0)
 	listRpmName := make([]string, 0)
 	listRpmProvides := make([]string, 0)
-	exitc, result, stde, err := utils.RunCommandnew("yum --nogpgcheck provides " + rpm)
+	exitc, result, stde, err := utils.RunCommand("yum --nogpgcheck provides " + rpm)
 	if exitc == 0 && result != "" && stde == "" && err == nil {
 		reader := strings.NewReader(result)
 		scanner := bufio.NewScanner(reader)
@@ -161,7 +161,7 @@ func readInfo(reader *strings.Reader, reg string) (string, error) {
 func (b *BaseOS) GetRpmInfo(rpm string) (*common.RpmInfo, error) {
 	rpminfo := common.RpmInfo{}
 
-	exitc, result, stde, err := utils.RunCommandnew("rpm -qi " + rpm)
+	exitc, result, stde, err := utils.RunCommand("rpm -qi " + rpm)
 	if exitc == 1 && strings.Replace(result, "\n", "", -1) == "package bind is not installed" && stde == "" && err == nil {
 		//未安装该软件包情况
 		logger.Error(" %s's RPM package not installed: %d, %s, %s, %v", rpm, exitc, result, stde, err)
@@ -282,7 +282,7 @@ func verifyRpmInstalled(reader *strings.Reader, reg string) bool {
 
 // 安装rpm软件包
 func (b *BaseOS) InstallRpm(rpm string) error {
-	exitc, result, stde, err := utils.RunCommandnew("yum -y --nogpgcheck install " + rpm)
+	exitc, result, stde, err := utils.RunCommand("yum -y --nogpgcheck install " + rpm)
 	if exitc == 0 && result != "" && err == nil {
 		if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
 			logger.Error("failed to run RPM package installation command due to package already being installed")
@@ -302,7 +302,7 @@ func (b *BaseOS) InstallRpm(rpm string) error {
 
 // 卸载rpm软件包
 func (b *BaseOS) RemoveRpm(rpm string) error {
-	exitc, result, stde, err := utils.RunCommandnew("yum -y --nogpgcheck remove " + rpm)
+	exitc, result, stde, err := utils.RunCommand("yum -y --nogpgcheck remove " + rpm)
 	if exitc == 0 && result != "" && err == nil {
 		if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
 			logger.Error("failed to run RPM package uninstallation command due to the package not being found")

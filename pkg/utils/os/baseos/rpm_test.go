@@ -35,7 +35,7 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 	var osobj BaseOS
 	rpm := "bind"
 
-	exitc, stdo, stde, err := utils.RunCommandnew("rpm -qi " + rpm)
+	exitc, stdo, stde, err := utils.RunCommand("rpm -qi " + rpm)
 	if exitc == 0 && len(stdo) > 0 && stde == "" && err == nil {
 		t.Run("test remove rpm", func(t *testing.T) {
 			assert.Nil(t, osobj.RemoveRpm(rpm))

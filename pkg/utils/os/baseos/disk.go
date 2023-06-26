@@ -103,7 +103,7 @@ func (b *BaseOS) DiskMount(sourceDisk, mountPath string) (string, error) {
 	}
 	logger.Info("successfully created a mounted directory: %s", mountPath)
 
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("mount %s %s", sourceDisk, mountPath))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("mount %s %s", sourceDisk, mountPath))
 	fmt.Printf("[diskmount]%v, %v, %v, %v\n", exitc, stdo, stde, err)
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 		logger.Info("successfully mounted disk: %s", stdo)
@@ -115,7 +115,7 @@ func (b *BaseOS) DiskMount(sourceDisk, mountPath string) (string, error) {
 
 // 卸载磁盘
 func (b *BaseOS) DiskUMount(diskPath string) (string, error) {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("umount %s", diskPath))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("umount %s", diskPath))
 	if exitc == 0 && stdo == "" && stde == "" && err == nil {
 		logger.Info("successfully unmounted the disk: %s", stdo)
 		return stdo, nil
@@ -126,7 +126,7 @@ func (b *BaseOS) DiskUMount(diskPath string) (string, error) {
 
 // 磁盘格式化
 func (b *BaseOS) DiskFormat(fileType, diskPath string) (string, error) {
-	exitc, stdo, stde, err := utils.RunCommandnew(fmt.Sprintf("mkfs.%s -F %s", fileType, diskPath))
+	exitc, stdo, stde, err := utils.RunCommand(fmt.Sprintf("mkfs.%s -F %s", fileType, diskPath))
 	if exitc == 0 && stdo != "" && stde != "" && err == nil {
 		logger.Info("successfully formatted the disk: %s", stdo)
 		return stdo, nil

@@ -9,7 +9,7 @@ import (
 )
 
 func (b *BaseOS) GetSysctlConfig() (map[string]string, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew("sysctl -a")
+	exitc, tmp, stde, err := utils.RunCommand("sysctl -a")
 	if exitc == 0 && tmp != "" && stde == "" && err == nil {
 		sysConfig := make(map[string]string)
 		lines := strings.Split(tmp, "\n")
@@ -33,7 +33,7 @@ func (b *BaseOS) GetSysctlConfig() (map[string]string, error) {
 
 // sysctl -w net.ipv4.ip_forward=1  临时修改系统参数
 func (b *BaseOS) TempModifyPar(arg string) (string, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew(fmt.Sprintf("sudo sysctl -w %s", arg))
+	exitc, tmp, stde, err := utils.RunCommand(fmt.Sprintf("sudo sysctl -w %s", arg))
 	if exitc == 0 && tmp != "" && stde == "" && err == nil {
 		tmp = strings.Replace(tmp, "\n", "", -1)
 		return tmp, nil
@@ -45,7 +45,7 @@ func (b *BaseOS) TempModifyPar(arg string) (string, error) {
 
 // sysctl -n net.ipv4.ip_forward  查看某个内核参数的值
 func (b *BaseOS) GetVarNameValue(arg string) (string, error) {
-	exitc, tmp, stde, err := utils.RunCommandnew(fmt.Sprintf("sysctl -n %s", arg))
+	exitc, tmp, stde, err := utils.RunCommand(fmt.Sprintf("sysctl -n %s", arg))
 	if exitc == 0 && tmp != "" && stde == "" && err == nil {
 		tmp = strings.Replace(tmp, "\n", "", -1)
 		return tmp, nil

@@ -118,7 +118,7 @@ func CronStart(id int, spec string, command string) error {
 
 	// 添加函数作为定时任务
 	taskFunc := func() {
-		utils.RunCommandnew(command)
+		utils.RunCommand(command)
 	}
 	if err := Cron.AddByFunc(id, spec, taskFunc); err != nil {
 		return fmt.Errorf("error to add crontab task: %s", err)
