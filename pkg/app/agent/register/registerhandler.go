@@ -116,100 +116,12 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.SysctlChange, handler.SysctlChangeHandler)
 	c.BindHandler(protocol.SysctlView, handler.SysctlViewHandler)
 
-	c.BindHandler(protocol.ServiceList, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
+	c.BindHandler(protocol.ServiceList, handler.ServiceListHandler)
+	c.BindHandler(protocol.ServiceStatus, handler.ServiceStatusHandler)
+	c.BindHandler(protocol.ServiceRestart, handler.ServiceRestartHandler)
+	c.BindHandler(protocol.ServiceStart, handler.ServiceStartHandler)
+	c.BindHandler(protocol.ServiceStop, handler.ServiceStopHandler)
 
-		servicelist, _ := uos.OS().GetServiceList()
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   servicelist,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.ServiceStatus, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		service := msg.Data.(string)
-		servicestatus, _ := uos.OS().GetServiceStatus(service)
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   servicestatus,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.ServiceRestart, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		service := msg.Data.(string)
-		err := uos.OS().RestartService(service)
-
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   "重启成功",
-			}
-			return c.Send(resp_msg)
-		}
-	})
-	c.BindHandler(protocol.ServiceStart, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		service := msg.Data.(string)
-		err := uos.OS().StartService(service)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   "启动成功",
-			}
-			return c.Send(resp_msg)
-		}
-	})
-	c.BindHandler(protocol.ServiceStop, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		service := msg.Data.(string)
-		err := uos.OS().StopService(service)
-
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   "关闭服务成功",
-			}
-			return c.Send(resp_msg)
-		}
-	})
 	c.BindHandler(protocol.AllRpm, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
