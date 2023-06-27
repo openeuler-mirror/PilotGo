@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/base64"
 	"path"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -66,7 +67,6 @@ func RunCommandHandler(c *network.SocketClient, msg *protocol.Message) error {
 }
 
 func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
-	logger.Debug("process run script command:%s", msg.String())
 	errorInfo := ""
 	resp_msg := &protocol.Message{
 		UUID:   msg.UUID,
@@ -77,23 +77,19 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 	var result *utils.CmdResult
 	var scriptPath string
 	var err error
+	var decoded_script []byte
 
 	d := &struct {
 		Script string
 	}{}
 
 	f := func(s string) (string, error) {
-		workDir := "/opt/pilotgo/agent/tmp/"
+		workDir := "/opt/PilotGo/agent/"
 
 		fileName := uuid.New().String()
 		filePath := path.Join(workDir, fileName+".sh")
 
-		content, err := base64.StdEncoding.DecodeString(s)
-		if err != nil {
-			return "", err
-		}
-
-		err = utils.FileSaveString(filePath, string(content))
+		err = utils.FileSaveString(filePath, s)
 		if err != nil {
 			return "", err
 		}
@@ -104,18 +100,29 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 	err = msg.BindData(d)
 	if err != nil {
 		errorInfo = "parse data error:" + err.Error()
+		logger.Error(errorInfo)
 		goto ERROR
 	}
 
-	scriptPath, err = f(d.Script)
+	decoded_script, err = base64.StdEncoding.DecodeString(d.Script)
+	if err != nil {
+		errorInfo = "Err decoding base64: " + err.Error()
+		logger.Error(errorInfo)
+		goto ERROR
+	}
+	logger.Debug("process run script command: %s", string(decoded_script))
+
+	scriptPath, err = f(strings.Replace(string(decoded_script), "\r", "", -1))
 	if err != nil {
 		errorInfo = "run command error:" + err.Error()
+		logger.Error(errorInfo)
 		goto ERROR
 	}
 
 	result, err = utils.RunScript(scriptPath)
 	if err != nil {
 		errorInfo = "run command error:" + err.Error()
+		logger.Error(errorInfo)
 		goto ERROR
 	}
 
