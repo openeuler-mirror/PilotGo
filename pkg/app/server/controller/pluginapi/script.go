@@ -28,7 +28,7 @@ func RunCommandHandler(c *gin.Context) {
 		Batch   *common.Batch `json:"batch"`
 		Command string        `json:"command"`
 	}{}
-	err := c.ShouldBind(&d)
+	err := c.ShouldBind(d)
 	if err != nil {
 		logger.Debug("bind batch param error:%s", err)
 
@@ -83,7 +83,7 @@ func RunScriptHandler(c *gin.Context) {
 		Batch  *common.Batch `json:"batch"`
 		Script string        `json:"script"`
 	}{}
-	err := c.ShouldBind(&d)
+	err := c.ShouldBind(d)
 	if err != nil {
 		logger.Debug("bind batch param error:%s", err)
 
