@@ -9,14 +9,12 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-28 11:32:43
+ * LastEditTime: 2023-06-28 11:38:19
  * Description: socket client register
  ******************************************************************************/
 package register
 
 import (
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,7 +23,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
 func Send_heartbeat(client *network.SocketClient) {
@@ -127,60 +124,8 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.FirewalldZonePortAdd, handler.FirewalldZonePortAddHandler)
 	c.BindHandler(protocol.FirewalldZonePortDel, handler.FirewalldZonePortDelHandler)
 
-	c.BindHandler(protocol.CronStart, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		msgg := msg.Data.(string)
-		message := strings.Split(msgg, ",")
-		id, _ := strconv.Atoi(message[0])
-		spec := message[1]
-		command := message[2]
-
-		err := common.CronStart(id, spec, command)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   "任务已开始",
-			}
-			return c.Send(resp_msg)
-		}
-	})
-	c.BindHandler(protocol.CronStopAndDel, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		msgg := msg.Data.(string)
-		message := strings.Split(msgg, ",")
-		id, _ := strconv.Atoi(message[0])
-
-		err := common.StopAndDel(id)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   "任务已暂停",
-			}
-			return c.Send(resp_msg)
-		}
-	})
+	c.BindHandler(protocol.CronStart, handler.CronStartHandler)
+	c.BindHandler(protocol.CronStopAndDel, handler.CronStopAndDelHandler)
 
 	c.BindHandler(protocol.ReadFile, handler.ReadFileHandler)
 	c.BindHandler(protocol.EditFile, handler.EditFileHandler)
