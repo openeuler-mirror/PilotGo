@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
 type ConfigFile struct {
@@ -21,7 +21,7 @@ func AddConfigFile(cf ConfigFile) error {
 		return err
 	}
 	if UUIDExistbool {
-		return global.PILOTGO_DB.Save(&cf).Error
+		return mysqlmanager.MySQL().Save(&cf).Error
 	}
 	return fmt.Errorf("机器不存在")
 }

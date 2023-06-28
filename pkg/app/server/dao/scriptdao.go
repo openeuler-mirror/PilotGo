@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
 type Script struct {
@@ -24,13 +24,13 @@ func AddScript(s Script) error {
 	if len(version) == 0 {
 		return fmt.Errorf("版本号不能为空")
 	}
-	return global.PILOTGO_DB.Save(&s).Error
+	return mysqlmanager.MySQL().Save(&s).Error
 }
 
 // 根据脚本版本号查询文件是否存在
 func IsVersionExist(scriptversion string) (bool, error) {
 	var script Script
-	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
+	err := mysqlmanager.MySQL().Where("version=?", scriptversion).Find(&script).Error
 	return script.Deleted == 0, err
 }
 
@@ -42,7 +42,7 @@ func DeleteScript(scriptversion string) error {
 		return err
 	}
 	if VersionExistBool {
-		if err := global.PILOTGO_DB.Model(&script).Where("version=?", scriptversion).Update("deleted", 1).Error; err != nil {
+		if err := mysqlmanager.MySQL().Model(&script).Where("version=?", scriptversion).Update("deleted", 1).Error; err != nil {
 			return err
 		}
 		return nil
@@ -53,6 +53,6 @@ func DeleteScript(scriptversion string) error {
 // 根据版本号查询脚本文件内容
 func ShowScript(scriptversion string) (string, error) {
 	var script Script
-	err := global.PILOTGO_DB.Where("version=?", scriptversion).Find(&script).Error
+	err := mysqlmanager.MySQL().Where("version=?", scriptversion).Find(&script).Error
 	return script.Content, err
 }

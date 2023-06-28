@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-06-27 09:59:30
- * LastEditTime: 2022-06-27 11:37:16
+ * LastEditTime: 2023-06-28 15:55:25
  * Description: provide global const of pilotgo
  ******************************************************************************/
 package global
@@ -17,13 +17,11 @@ package global
 import (
 	"github.com/casbin/casbin/v2"
 	"github.com/go-redis/redis/v8"
-
-	"gorm.io/gorm"
 )
 
 // 实例变量
 var (
-	PILOTGO_DB    *gorm.DB
+	// PILOTGO_DB    *gorm.DB
 	PILOTGO_REDIS *redis.Client
 	PILOTGO_E     *casbin.Enforcer
 )

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-03-16 15:25:41
+ * LastEditTime: 2023-06-28 16:00:48
  * Description: 用户模块相关数据获取
  ******************************************************************************/
 package dao
@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -70,14 +71,14 @@ type Userdel struct {
 // 获取所有的用户角色
 func AllUserRole() ([]UserRole, error) {
 	var role []UserRole
-	err := global.PILOTGO_DB.Find(&role).Error
+	err := mysqlmanager.MySQL().Find(&role).Error
 	return role, err
 }
 
 // 邮箱账户是否存在
 func IsEmailExist(email string) (bool, error) {
 	var user User
-	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	err := mysqlmanager.MySQL().Where("email=?", email).Find(&user).Error
 	return user.ID != 0, err
 }
 
@@ -85,7 +86,7 @@ func IsEmailExist(email string) (bool, error) {
 // 查询数据库中账号密码、用户部门、部门ID、用户类型、用户角色
 func UserPassword(email string) (s1, s2, s3 string, i1, i2 int, err error) {
 	var user model.User
-	err = global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	err = mysqlmanager.MySQL().Where("email=?", email).Find(&user).Error
 	if err != nil {
 		return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, err
 	}
@@ -95,7 +96,7 @@ func UserPassword(email string) (s1, s2, s3 string, i1, i2 int, err error) {
 // 查询某用户信息
 func UserInfo(email string) (User, error) {
 	var user User
-	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	err := mysqlmanager.MySQL().Where("email=?", email).Find(&user).Error
 	return user, err
 }
 
@@ -112,7 +113,7 @@ func UserAll() ([]ReturnUser, int, error) {
 	// 	logger.Debug("%+v", "从缓存中读取")
 	// 	return redisUser
 	// } else {
-	err := global.PILOTGO_DB.Order("id desc").Find(&users).Error
+	err := mysqlmanager.MySQL().Order("id desc").Find(&users).Error
 	if err != nil {
 		return redisUser, 0, err
 	}
@@ -125,7 +126,7 @@ func UserAll() ([]ReturnUser, int, error) {
 		for _, id := range roleId {
 			userRole := UserRole{}
 			i, _ := strconv.Atoi(id)
-			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
+			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
 				return redisUser, totals, err
 			}
@@ -155,7 +156,7 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 	var users []User
 	var redisUser []ReturnUser
 
-	err := global.PILOTGO_DB.Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users).Error
+	err := mysqlmanager.MySQL().Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users).Error
 	if err != nil {
 		return redisUser, 0, err
 	}
@@ -168,7 +169,7 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 		for _, id := range roleId {
 			userRole := UserRole{}
 			i, _ := strconv.Atoi(id)
-			err := global.PILOTGO_DB.Where("id = ?", i).Find(&userRole).Error
+			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
 				return redisUser, totals, err
 			}
@@ -194,7 +195,7 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 // 重置密码
 func ResetPassword(email string) (User, error) {
 	var user User
-	err := global.PILOTGO_DB.Where("email=?", email).Find(&user).Error
+	err := mysqlmanager.MySQL().Where("email=?", email).Find(&user).Error
 	if err != nil {
 		return user, err
 	} else {
@@ -202,7 +203,7 @@ func ResetPassword(email string) (User, error) {
 		if err != nil {
 			return user, err
 		}
-		err = global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("password", string(bs)).Error
+		err = mysqlmanager.MySQL().Model(&user).Where("email=?", email).Update("password", string(bs)).Error
 		return user, err
 	}
 }
@@ -210,7 +211,7 @@ func ResetPassword(email string) (User, error) {
 // 删除用户
 func DeleteUser(email string) error {
 	var user User
-	return global.PILOTGO_DB.Where("email=?", email).Unscoped().Delete(user).Error
+	return mysqlmanager.MySQL().Where("email=?", email).Unscoped().Delete(user).Error
 }
 
 // 修改用户的部门信息
@@ -221,21 +222,21 @@ func UpdateUserDepart(email, departName string, Pid, id int) error {
 		DepartSecond: id,
 		DepartName:   departName,
 	}
-	return global.PILOTGO_DB.Model(&user).Where("email=?", email).Updates(&u).Error
+	return mysqlmanager.MySQL().Model(&user).Where("email=?", email).Updates(&u).Error
 }
 
 // 添加用户
 func AddUser(u User) error {
-	return global.PILOTGO_DB.Save(&u).Error
+	return mysqlmanager.MySQL().Save(&u).Error
 }
 
 // 修改手机号
 func UpdateUserPhone(email, phone string) error {
 	var user User
-	return global.PILOTGO_DB.Model(&user).Where("email=?", email).Update("phone", phone).Error
+	return mysqlmanager.MySQL().Model(&user).Where("email=?", email).Update("phone", phone).Error
 }
 
 func DelUser(deptId int) error {
 	var user User
-	return global.PILOTGO_DB.Where("depart_second=?", deptId).Unscoped().Delete(user).Error
+	return mysqlmanager.MySQL().Where("depart_second=?", deptId).Unscoped().Delete(user).Error
 }
