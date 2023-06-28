@@ -19,16 +19,17 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 var (
 	EnableRedis bool
 	DialTimeout time.Duration
+
+	global_redis *redis.Client
 )
 
 func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Duration, enableRedis bool) error {
-	global.PILOTGO_REDIS = redis.NewClient(&redis.Options{
+	global_redis = redis.NewClient(&redis.Options{
 		Addr:     redisConn,
 		Password: redisPwd,
 		DB:       defaultDB,
@@ -36,11 +37,15 @@ func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Durat
 	// 使用超时上下文，验证redis
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), dialTimeout)
 	defer cancelFunc()
-	_, err := global.PILOTGO_REDIS.Ping(timeoutCtx).Result()
+	_, err := global_redis.Ping(timeoutCtx).Result()
 	if err != nil {
 		return err
 	}
 	DialTimeout = dialTimeout
 	EnableRedis = enableRedis
 	return nil
+}
+
+func Redis() *redis.Client {
+	return global_redis
 }
