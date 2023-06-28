@@ -11,6 +11,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 )
 
+var AgentVersion = "v0.0.1"
+
 type ConfigMessage struct {
 	ConfigName    string
 	ConfigContent string

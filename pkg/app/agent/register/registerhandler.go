@@ -9,30 +9,24 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-28 11:21:42
+ * LastEditTime: 2023-06-28 11:32:43
  * Description: socket client register
  ******************************************************************************/
 package register
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/register/handler"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
-
-var agent_version = "v0.0.1"
 
 func Send_heartbeat(client *network.SocketClient) {
 	for {
@@ -75,39 +69,9 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RunCommand, handler.RunCommandHandler)
 	c.BindHandler(protocol.RunScript, handler.RunScriptHandler)
 
-	c.BindHandler(protocol.AgentInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		IP, err := uos.OS().GetHostIp()
-		if err != nil {
-			logger.Error("failed to get IP: %s", err.Error())
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  fmt.Sprintf("failed to get IP: %s", err.Error()),
-			}
-			return c.Send(resp_msg)
-		}
-
-		result := struct {
-			AgentVersion string `json:"agent_version"`
-			IP           string `json:"IP"`
-			AgentUUID    string `json:"agent_uuid"`
-		}{
-			AgentVersion: agent_version,
-			IP:           IP,
-			AgentUUID:    localstorage.AgentUUID(),
-		}
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   result,
-		}
-		return c.Send(resp_msg)
-	})
-
+	c.BindHandler(protocol.AgentInfo, handler.AgentInfoHandler)
+	c.BindHandler(protocol.AgentTime, handler.AgentTimeHandler)
+	c.BindHandler(protocol.AgentOSInfo, handler.AgentOSInfoHandler)
 	c.BindHandler(protocol.OsInfo, handler.OSInfoHandler)
 	c.BindHandler(protocol.CPUInfo, handler.CPUInfoHandler)
 	c.BindHandler(protocol.MemoryInfo, handler.MemoryInfoHandler)
@@ -150,8 +114,6 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.DelUser, handler.DelUserHandler)
 	c.BindHandler(protocol.ChangePermission, handler.ChangePermissionHandler)
 	c.BindHandler(protocol.ChangeFileOwner, handler.ChangeFileOwnerHandler)
-
-	c.BindHandler(protocol.AgentOSInfo, handler.AgentOSInfoHandler)
 
 	c.BindHandler(protocol.FirewalldConfig, handler.FirewalldConfigHandler)
 	c.BindHandler(protocol.FirewalldDefaultZone, handler.FirewalldDefaultZoneHandler)
@@ -220,112 +182,7 @@ func RegitsterHandler(c *network.SocketClient) {
 		}
 	})
 
-	c.BindHandler(protocol.ReadFile, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		file := msg.Data.(string)
-		data, err := utils.FileReadString(file)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   data,
-			}
-			return c.Send(resp_msg)
-		}
-	})
-	c.BindHandler(protocol.EditFile, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		result := &common.UpdateFile{}
-		err := msg.BindData(result)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-
-		LastVersion, err := utils.UpdateFile(result.FilePath, result.FileName, result.FileText)
-		result.FileVersion = LastVersion
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: 0,
-				Data:   result,
-			}
-			return c.Send(resp_msg)
-		}
-	})
-	c.BindHandler(protocol.AgentTime, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		timeinfo, err := uos.OS().GetTime()
-		if err != nil {
-			logger.Debug(err.Error())
-		}
-
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   timeinfo,
-		}
-		return c.Send(resp_msg)
-	})
-	c.BindHandler(protocol.AgentConfig, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-		p, ok := msg.Data.(map[string]interface{})
-		if ok {
-			var ConMess global.ConfigMessage
-			ConMess.Machine_uuid = p["Machine_uuid"].(string)
-			ConMess.ConfigName = p["ConfigName"].(string)
-			err := global.Configfsnotify(ConMess, c)
-			if err != nil {
-				resp_msg := &protocol.Message{
-					UUID:   msg.UUID,
-					Type:   msg.Type,
-					Status: -1,
-					Error:  err.Error(),
-				}
-				return c.Send(resp_msg)
-			} else {
-				resp_msg := &protocol.Message{
-					UUID:   msg.UUID,
-					Type:   msg.Type,
-					Status: 0,
-					Data:   "正常监听文件",
-				}
-				return c.Send(resp_msg)
-			}
-		} else {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  "监控文件有误",
-			}
-			return c.Send(resp_msg)
-		}
-	})
+	c.BindHandler(protocol.ReadFile, handler.ReadFileHandler)
+	c.BindHandler(protocol.EditFile, handler.EditFileHandler)
+	c.BindHandler(protocol.AgentConfig, handler.AgentConfigHandler)
 }

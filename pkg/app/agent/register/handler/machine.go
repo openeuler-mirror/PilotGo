@@ -1,6 +1,10 @@
 package handler
 
 import (
+	"fmt"
+
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
@@ -74,6 +78,39 @@ func MemoryInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 	return c.Send(resp_msg)
 }
 
+func AgentInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
+	logger.Debug("process agent info command:%s", msg.String())
+	IP, err := uos.OS().GetHostIp()
+	if err != nil {
+		logger.Error("failed to get IP: %s", err.Error())
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  fmt.Sprintf("failed to get IP: %s", err.Error()),
+		}
+		return c.Send(resp_msg)
+	}
+
+	result := struct {
+		AgentVersion string `json:"agent_version"`
+		IP           string `json:"IP"`
+		AgentUUID    string `json:"agent_uuid"`
+	}{
+		AgentVersion: global.AgentVersion,
+		IP:           IP,
+		AgentUUID:    localstorage.AgentUUID(),
+	}
+
+	resp_msg := &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   result,
+	}
+	return c.Send(resp_msg)
+}
+
 func AgentOSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 	logger.Debug("process agent info command:%s", msg.String())
 
@@ -124,6 +161,23 @@ func AgentOSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 		Type:   msg.Type,
 		Status: 0,
 		Data:   systemAndCPUInfo,
+	}
+	return c.Send(resp_msg)
+}
+
+func AgentTimeHandler(c *network.SocketClient, msg *protocol.Message) error {
+	logger.Debug("process agent info command:%s", msg.String())
+
+	timeinfo, err := uos.OS().GetTime()
+	if err != nil {
+		logger.Debug(err.Error())
+	}
+
+	resp_msg := &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   timeinfo,
 	}
 	return c.Send(resp_msg)
 }
