@@ -5,6 +5,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
+	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 )
 
 func AllRpmHandler(c *network.SocketClient, msg *protocol.Message) error {
@@ -122,4 +123,27 @@ func RemoveRpmHandler(c *network.SocketClient, msg *protocol.Message) error {
 		}
 		return c.Send(resp_msg)
 	}
+}
+
+func GetRepoSourceHandler(c *network.SocketClient, msg *protocol.Message) error {
+	logger.Debug("process agent info command:%s", msg.String())
+
+	repo, err := common.GetRepoSource()
+
+	if err != nil {
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  err.Error(),
+		}
+		return c.Send(resp_msg)
+	}
+	resp_msg := &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   repo,
+	}
+	return c.Send(resp_msg)
 }
