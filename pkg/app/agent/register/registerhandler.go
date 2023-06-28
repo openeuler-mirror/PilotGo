@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-28 11:16:00
+ * LastEditTime: 2023-06-28 11:21:42
  * Description: socket client register
  ******************************************************************************/
 package register
@@ -139,6 +139,10 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.NetUDP, handler.NetUDPHandler)
 	c.BindHandler(protocol.NetIOCounter, handler.NetIOCounterHandler)
 	c.BindHandler(protocol.NetNICConfig, handler.NetNICConfigHandler)
+	c.BindHandler(protocol.GetNetWorkConnectInfo, handler.GetNetWorkConnectInfoHandler)
+	c.BindHandler(protocol.GetNetWorkConnInfo, handler.GetNetWorkConnInfoHandler)
+	c.BindHandler(protocol.RestartNetWork, handler.RestartNetWorkHandler)
+	c.BindHandler(protocol.GetNICName, handler.GetNICNameHandler)
 
 	c.BindHandler(protocol.CurrentUser, handler.CurrentUserHandler)
 	c.BindHandler(protocol.AllUser, handler.AllUserHandler)
@@ -147,59 +151,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ChangePermission, handler.ChangePermissionHandler)
 	c.BindHandler(protocol.ChangeFileOwner, handler.ChangeFileOwnerHandler)
 
-	c.BindHandler(protocol.AgentOSInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		os, erros := uos.OS().GetHostInfo()
-		cpu, errcpu := uos.OS().GetCPUInfo()
-		systemAndCPUInfo := common.SystemAndCPUInfo{}
-
-		if erros != nil && errcpu != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  erros.Error(),
-				Data:   systemAndCPUInfo,
-			}
-			return c.Send(resp_msg)
-		} else if erros != nil && errcpu == nil {
-			systemAndCPUInfo.ModelName = cpu.ModelName
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  erros.Error(),
-				Data:   systemAndCPUInfo,
-			}
-			return c.Send(resp_msg)
-		} else if erros == nil && errcpu != nil {
-			systemAndCPUInfo.IP = os.IP
-			systemAndCPUInfo.Platform = os.Platform
-			systemAndCPUInfo.PlatformVersion = os.PlatformVersion
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  errcpu.Error(),
-				Data:   systemAndCPUInfo,
-			}
-			return c.Send(resp_msg)
-		}
-		systemAndCPUInfo = common.SystemAndCPUInfo{
-			IP:              os.IP,
-			Platform:        os.Platform,
-			PlatformVersion: os.PlatformVersion,
-			ModelName:       cpu.ModelName,
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   systemAndCPUInfo,
-		}
-		return c.Send(resp_msg)
-	})
+	c.BindHandler(protocol.AgentOSInfo, handler.AgentOSInfoHandler)
 
 	c.BindHandler(protocol.FirewalldConfig, handler.FirewalldConfigHandler)
 	c.BindHandler(protocol.FirewalldDefaultZone, handler.FirewalldDefaultZoneHandler)
@@ -267,94 +219,7 @@ func RegitsterHandler(c *network.SocketClient) {
 			return c.Send(resp_msg)
 		}
 	})
-	c.BindHandler(protocol.GetNetWorkConnectInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
 
-		network, err := uos.OS().ConfigNetworkConnect()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   network,
-		}
-		return c.Send(resp_msg)
-
-	})
-	c.BindHandler(protocol.GetNetWorkConnInfo, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		network, err := uos.OS().GetNetworkConnInfo()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   network,
-		}
-		return c.Send(resp_msg)
-
-	})
-	c.BindHandler(protocol.RestartNetWork, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		msgg := msg.Data.(string)
-		err := uos.OS().RestartNetwork(msgg)
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-		}
-		return c.Send(resp_msg)
-
-	})
-	c.BindHandler(protocol.GetNICName, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		nic_name, err := uos.OS().GetNICName()
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   nic_name,
-		}
-		return c.Send(resp_msg)
-
-	})
 	c.BindHandler(protocol.ReadFile, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
 
