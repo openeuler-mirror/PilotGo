@@ -9,13 +9,14 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-04-28 13:08:08
- * LastEditTime: 2022-00-08 14:25:41
+ * LastEditTime: 2023-06-28 16:02:24
  * Description: depart相关数据获取
  ******************************************************************************/
 package dao
 
 import (
 	"gorm.io/gorm"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -52,30 +53,30 @@ type AddDepart struct {
 
 func IsParentDepartExist(parent string) (bool, error) {
 	var Depart DepartNode
-	err := global.PILOTGO_DB.Where("depart=? ", parent).Find(&Depart).Error
+	err := mysqlmanager.MySQL().Where("depart=? ", parent).Find(&Depart).Error
 	return Depart.ID != 0, err
 }
 func IsDepartNodeExist(parent string, depart string) (bool, error) {
 	var Depart DepartNode
-	err := global.PILOTGO_DB.Where("depart=? and parent_depart=?", depart, parent).Find(&Depart).Error
-	// global.PILOTGO_DB.Where("", parent).Find(&Depart)
+	err := mysqlmanager.MySQL().Where("depart=? and parent_depart=?", depart, parent).Find(&Depart).Error
+	// mysqlmanager.MySQL().Where("", parent).Find(&Depart)
 	return Depart.ID != 0, err
 }
 func IsDepartIDExist(ID int) (bool, error) {
 	var Depart DepartNode
-	err := global.PILOTGO_DB.Where("id=?", ID).Find(&Depart).Error
+	err := mysqlmanager.MySQL().Where("id=?", ID).Find(&Depart).Error
 	return Depart.ID != 0, err
 }
 
 func IsRootExist() (bool, error) {
 	var Depart DepartNode
-	err := global.PILOTGO_DB.Where("node_locate=?", 0).Find(&Depart).Error
+	err := mysqlmanager.MySQL().Where("node_locate=?", 0).Find(&Depart).Error
 	return Depart.ID != 0, err
 }
 
 func DepartStore() ([]DepartNode, error) {
 	var Depart []DepartNode
-	err := global.PILOTGO_DB.Find(&Depart).Error
+	err := mysqlmanager.MySQL().Find(&Depart).Error
 	return Depart, err
 }
 
@@ -84,7 +85,7 @@ func UpdateDepart(DepartID int, DepartName string) error {
 	Depart := DepartNode{
 		Depart: DepartName,
 	}
-	return global.PILOTGO_DB.Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart).Error
+	return mysqlmanager.MySQL().Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart).Error
 }
 
 func UpdateParentDepart(DepartID int, DepartName string) error {
@@ -92,25 +93,25 @@ func UpdateParentDepart(DepartID int, DepartName string) error {
 	Depart := DepartNode{
 		ParentDepart: DepartName,
 	}
-	return global.PILOTGO_DB.Model(&DepartInfo).Where("p_id=?", DepartID).Updates(&Depart).Error
+	return mysqlmanager.MySQL().Model(&DepartInfo).Where("p_id=?", DepartID).Updates(&Depart).Error
 }
 
 func Pid2Depart(pid int) ([]DepartNode, error) {
 	var DepartInfo []DepartNode
-	err := global.PILOTGO_DB.Where("p_id=?", pid).Find(&DepartInfo).Error
+	err := mysqlmanager.MySQL().Where("p_id=?", pid).Find(&DepartInfo).Error
 	return DepartInfo, err
 }
 
 func Deletedepartdata(needdelete []int) error {
 	var DepartInfo []DepartNode
-	return global.PILOTGO_DB.Where("id=?", needdelete[0]).Delete(&DepartInfo).Error
+	return mysqlmanager.MySQL().Where("id=?", needdelete[0]).Delete(&DepartInfo).Error
 }
 
 // 向需要删除的depart的组内增加需要删除的子节点
 func Insertdepartlist(needdelete []int, str string) ([]int, error) {
 	var DepartInfo []DepartNode
 
-	err := global.PILOTGO_DB.Where("p_id=?", str).Find(&DepartInfo).Error
+	err := mysqlmanager.MySQL().Where("p_id=?", str).Find(&DepartInfo).Error
 	for _, value := range DepartInfo {
 		needdelete = append(needdelete, value.ID)
 	}
@@ -120,7 +121,7 @@ func Insertdepartlist(needdelete []int, str string) ([]int, error) {
 // 根据部门名字查询id和pid
 func GetPidAndId(depart string) (pid, id int, err error) {
 	var dep DepartNode
-	err = global.PILOTGO_DB.Where("depart=?", depart).Find(&dep).Error
+	err = mysqlmanager.MySQL().Where("depart=?", depart).Find(&dep).Error
 	return dep.PID, dep.ID, err
 }
 
@@ -132,7 +133,7 @@ func AddDepartMessage(db *gorm.DB, depart *DepartNode) error {
 // 根据部门id获取部门名称
 func DepartIdToGetDepartName(id int) (string, error) {
 	var departNames DepartNode
-	err := global.PILOTGO_DB.Where("id =?", id).Find(&departNames).Error
+	err := mysqlmanager.MySQL().Where("id =?", id).Find(&departNames).Error
 	return departNames.Depart, err
 }
 
@@ -140,7 +141,7 @@ func DepartIdToGetDepartName(id int) (string, error) {
 func DepartIdsToGetDepartNames(ids []int) (names []string) {
 	for _, id := range ids {
 		var depart DepartNode
-		err := global.PILOTGO_DB.Where("id = ?", id).Find(&depart).Error
+		err := mysqlmanager.MySQL().Where("id = ?", id).Find(&depart).Error
 		if err != nil {
 			logger.Error(err.Error())
 		}
@@ -152,7 +153,7 @@ func DepartIdsToGetDepartNames(ids []int) (names []string) {
 // 获取下级部门id
 func SubDepartId(id int) ([]int, error) {
 	var depart []DepartNode
-	err := global.PILOTGO_DB.Where("p_id=?", id).Find(&depart).Error
+	err := mysqlmanager.MySQL().Where("p_id=?", id).Find(&depart).Error
 
 	res := make([]int, 0)
 	for _, value := range depart {
@@ -164,7 +165,7 @@ func SubDepartId(id int) ([]int, error) {
 // 获取所有的一级部门id
 func FirstDepartId() (departIds []int, err error) {
 	departs := []DepartNode{}
-	err = global.PILOTGO_DB.Where("p_id = ?", global.UncateloguedDepartId).Find(&departs).Error
+	err = mysqlmanager.MySQL().Where("p_id = ?", global.UncateloguedDepartId).Find(&departs).Error
 	for _, depart := range departs {
 		departIds = append(departIds, depart.ID)
 	}
@@ -174,7 +175,7 @@ func FirstDepartId() (departIds []int, err error) {
 // 创建公司组织
 func CreateOrganization() error {
 	var Depart DepartNode
-	err := global.PILOTGO_DB.Where("p_id=?", global.Departroot).Find(&Depart).Error
+	err := mysqlmanager.MySQL().Where("p_id=?", global.Departroot).Find(&Depart).Error
 	if err != nil {
 		return err
 	}
@@ -185,7 +186,7 @@ func CreateOrganization() error {
 			Depart:       "组织名",
 			NodeLocate:   global.Departroot,
 		}
-		return global.PILOTGO_DB.Save(&Depart).Error
+		return mysqlmanager.MySQL().Save(&Depart).Error
 	}
 	return nil
 }

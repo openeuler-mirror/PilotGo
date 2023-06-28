@@ -22,6 +22,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -217,13 +218,13 @@ func AddDepartMethod(newDepart *dao.AddDepart) error {
 			return errors.New("已存在根节点,即组织名称")
 		} else {
 			departNode.NodeLocate = global.Departroot
-			if dao.AddDepartMessage(global.PILOTGO_DB, &departNode) != nil {
+			if dao.AddDepartMessage(mysqlmanager.MySQL(), &departNode) != nil {
 				return errors.New("部门节点添加失败")
 			}
 		}
 	} else {
 		departNode.NodeLocate = global.DepartUnroot
-		if dao.AddDepartMessage(global.PILOTGO_DB, &departNode) != nil {
+		if dao.AddDepartMessage(mysqlmanager.MySQL(), &departNode) != nil {
 			return errors.New("部门节点添加失败")
 		}
 	}

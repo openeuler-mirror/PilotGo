@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -56,7 +57,7 @@ type RolePermissionChange struct {
 // 根据角色名称返回角色id和用户类型
 func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error) {
 	var Role UserRole
-	err = global.PILOTGO_DB.Where("role = ?", role).Find(&Role).Error
+	err = mysqlmanager.MySQL().Where("role = ?", role).Find(&Role).Error
 	if err != nil {
 		return "", 0, err
 	}
@@ -73,7 +74,7 @@ func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error)
 // 根据id获取该角色的所有信息
 func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
 	var role UserRole
-	err := global.PILOTGO_DB.Where("id=?", roleid).Find(&role).Error
+	err := mysqlmanager.MySQL().Where("id=?", roleid).Find(&role).Error
 	return role, err
 }
 
@@ -91,7 +92,7 @@ func PermissionButtons(button string) (interface{}, error) {
 		if err != nil {
 			panic(err)
 		}
-		err = global.PILOTGO_DB.Where("id = ?", i).Find(&SubButton).Error
+		err = mysqlmanager.MySQL().Where("id = ?", i).Find(&SubButton).Error
 		if err != nil {
 			return buttons, err
 		}
@@ -105,7 +106,7 @@ func PermissionButtons(button string) (interface{}, error) {
 func GetAllRoles() ([]ReturnUserRole, int, error) {
 	var roles []UserRole
 	var getRole []ReturnUserRole
-	err := global.PILOTGO_DB.Order("id desc").Find(&roles).Error
+	err := mysqlmanager.MySQL().Order("id desc").Find(&roles).Error
 	if err != nil {
 		return getRole, 0, err
 	}
@@ -131,7 +132,7 @@ func GetAllRoles() ([]ReturnUserRole, int, error) {
 			for _, button := range buttonss {
 				var but RoleButton
 				i, _ := strconv.Atoi(button)
-				err := global.PILOTGO_DB.Where("id=?", i).Find(&but).Error
+				err := mysqlmanager.MySQL().Where("id=?", i).Find(&but).Error
 				if err != nil {
 					return getRole, total, err
 				}
@@ -162,13 +163,13 @@ func AddRole(r UserRole) error {
 		Type:        r.Type,
 		Description: r.Description,
 	}
-	return global.PILOTGO_DB.Save(&userRole).Error
+	return mysqlmanager.MySQL().Save(&userRole).Error
 }
 
 // 是否有用户绑定某角色
 func IsUserBindingRole(roleId int) (bool, error) {
 	var users []User
-	err := global.PILOTGO_DB.Find(&users).Error
+	err := mysqlmanager.MySQL().Find(&users).Error
 	if err != nil {
 		return false, err
 	}
@@ -184,19 +185,19 @@ func IsUserBindingRole(roleId int) (bool, error) {
 // 删除用户角色
 func DeleteRole(roleId int) error {
 	var UserRole UserRole
-	return global.PILOTGO_DB.Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
+	return mysqlmanager.MySQL().Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
 }
 
 // 修改角色名称
 func UpdateRoleName(roleId int, name string) error {
 	var UserRole UserRole
-	return global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
+	return mysqlmanager.MySQL().Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
 }
 
 // 修改角色描述
 func UpdateRoleDescription(roleId int, desc string) error {
 	var UserRole UserRole
-	return global.PILOTGO_DB.Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
+	return mysqlmanager.MySQL().Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
 }
 
 // 变更用户角色权限
@@ -210,14 +211,14 @@ func UpdateRolePermission(permission RolePermissionChange) (UserRole, error) {
 		Menus:    menus,
 		ButtonID: buttonId,
 	}
-	err := global.PILOTGO_DB.Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r).Error
+	err := mysqlmanager.MySQL().Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r).Error
 	return userRole, err
 }
 
 // 创建管理员账户
 func CreateAdministratorUser() error {
 	var role UserRole
-	global.PILOTGO_DB.Where("type =?", global.AdminUserType).Find(&role)
+	mysqlmanager.MySQL().Where("type =?", global.AdminUserType).Find(&role)
 	if role.ID == 0 {
 		role = UserRole{
 			Role:        "超级用户",
@@ -226,7 +227,7 @@ func CreateAdministratorUser() error {
 			Menus:       global.PILOTGO_MENUS,
 			ButtonID:    global.PILOTGO_BUTTONID,
 		}
-		global.PILOTGO_DB.Create(&role)
+		mysqlmanager.MySQL().Create(&role)
 		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
 		if err != nil {
 			return err
@@ -243,13 +244,13 @@ func CreateAdministratorUser() error {
 			UserType:     global.AdminUserType,
 			RoleID:       strconv.Itoa(role.ID),
 		}
-		global.PILOTGO_DB.Create(&user)
+		mysqlmanager.MySQL().Create(&user)
 	}
 
 	var roleButton RoleButton
-	global.PILOTGO_DB.First(&roleButton)
+	mysqlmanager.MySQL().First(&roleButton)
 	if roleButton.ID == 0 {
-		global.PILOTGO_DB.Raw("INSERT INTO role_button(id, button)" +
+		mysqlmanager.MySQL().Raw("INSERT INTO role_button(id, button)" +
 			"VALUES" +
 			"('1', 'rpm_install')," +
 			"('2', 'rpm_uninstall')," +

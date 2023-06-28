@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
 type Files struct {
@@ -53,40 +53,40 @@ type SearchFile struct {
 
 func (f *Files) AllFiles() (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = global.PILOTGO_DB.Order("id desc").Find(&list)
+	tx = mysqlmanager.MySQL().Order("id desc").Find(&list)
 	return
 }
 
 func (f *SearchFile) FileSearch(search string) (list *[]Files, tx *gorm.DB) {
 	list = &[]Files{}
-	tx = global.PILOTGO_DB.Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
+	tx = mysqlmanager.MySQL().Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
 	if len(*list) == 0 {
-		tx = global.PILOTGO_DB.Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
+		tx = mysqlmanager.MySQL().Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
 	}
 	return
 }
 
 func (f *HistoryFiles) HistoryFiles(fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
 	list = &[]HistoryFiles{}
-	tx = global.PILOTGO_DB.Order("id desc").Where("file_id=?", fileId).Find(&list)
+	tx = mysqlmanager.MySQL().Order("id desc").Where("file_id=?", fileId).Find(&list)
 	return
 }
 
 func IsExistId(id int) (bool, error) {
 	var file Files
-	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
+	err := mysqlmanager.MySQL().Where("id=?", id).Find(&file).Error
 	return file.ID != 0, err
 }
 
 func IsExistFile(filename string) (bool, error) {
 	var file Files
-	err := global.PILOTGO_DB.Where("file_name = ?", filename).Find(&file).Error
+	err := mysqlmanager.MySQL().Where("file_name = ?", filename).Find(&file).Error
 	return file.ID != 0, err
 }
 
 func IsExistFileLatest(fileId int) (bool, int, string, error) {
 	var files []HistoryFiles
-	err := global.PILOTGO_DB.Order("id desc").Where("file_id = ?", fileId).Find(&files).Error
+	err := mysqlmanager.MySQL().Order("id desc").Where("file_id = ?", fileId).Find(&files).Error
 	if err != nil {
 		return false, 0, "", err
 	}
@@ -100,7 +100,7 @@ func IsExistFileLatest(fileId int) (bool, int, string, error) {
 
 func SaveHistoryFile(id int) error {
 	var file Files
-	err := global.PILOTGO_DB.Where("id=?", id).Find(&file).Error
+	err := mysqlmanager.MySQL().Where("id=?", id).Find(&file).Error
 	if err != nil {
 		return err
 	}
@@ -112,12 +112,12 @@ func SaveHistoryFile(id int) error {
 		Description: file.Description,
 		File:        file.File,
 	}
-	return global.PILOTGO_DB.Save(&lastversion).Error
+	return mysqlmanager.MySQL().Save(&lastversion).Error
 }
 
 func SaveLatestFile(id int) error {
 	var file Files
-	err := global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	err := mysqlmanager.MySQL().Where("id = ?", id).Find(&file).Error
 	if err != nil {
 		return err
 	}
@@ -129,17 +129,17 @@ func SaveLatestFile(id int) error {
 		Description: file.Description,
 		File:        file.File,
 	}
-	return global.PILOTGO_DB.Save(&lastversion).Error
+	return mysqlmanager.MySQL().Save(&lastversion).Error
 }
 
 func UpdateFile(id int, f Files) error {
 	var file Files
-	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f).Error
+	return mysqlmanager.MySQL().Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
 func UpdateLastFile(id int, f HistoryFiles) error {
 	var file HistoryFiles
-	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&f).Error
+	return mysqlmanager.MySQL().Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
 func RollBackFile(id int, text string) error {
@@ -147,31 +147,31 @@ func RollBackFile(id int, text string) error {
 	fd := Files{
 		File: text,
 	}
-	return global.PILOTGO_DB.Model(&file).Where("id = ?", id).Updates(&fd).Error
+	return mysqlmanager.MySQL().Model(&file).Where("id = ?", id).Updates(&fd).Error
 }
 func DeleteFile(id int) error {
 	var file Files
-	return global.PILOTGO_DB.Where("id = ?", id).Unscoped().Delete(file).Error
+	return mysqlmanager.MySQL().Where("id = ?", id).Unscoped().Delete(file).Error
 }
 
 func DeleteHistoryFile(filePId int) error {
 	var file HistoryFiles
-	return global.PILOTGO_DB.Where("file_id = ?", filePId).Unscoped().Delete(file).Error
+	return mysqlmanager.MySQL().Where("file_id = ?", filePId).Unscoped().Delete(file).Error
 }
 
 func SaveFile(file Files) error {
-	return global.PILOTGO_DB.Save(&file).Error
+	return mysqlmanager.MySQL().Save(&file).Error
 }
 
 func FileText(id int) (text string, err error) {
 	file := Files{}
-	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	err = mysqlmanager.MySQL().Where("id = ?", id).Find(&file).Error
 	return file.File, err
 }
 
 func LastFileText(id int) (text string, err error) {
 	file := HistoryFiles{}
-	err = global.PILOTGO_DB.Where("id = ?", id).Find(&file).Error
+	err = mysqlmanager.MySQL().Where("id = ?", id).Find(&file).Error
 	return file.File, err
 }
 
@@ -179,7 +179,7 @@ func FindLastVersionFile(uuid, filename string) ([]HistoryFiles, error) {
 	var files []HistoryFiles
 	var lastfiles []HistoryFiles
 
-	err := global.PILOTGO_DB.Where("uuid = ? ", uuid).Find(&files).Error
+	err := mysqlmanager.MySQL().Where("uuid = ? ", uuid).Find(&files).Error
 	if err != nil {
 		return lastfiles, err
 	}

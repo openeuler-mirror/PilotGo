@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -38,40 +38,40 @@ type AuditLog struct {
 
 // 存储日志
 func (p *AuditLog) Record() error {
-	return global.PILOTGO_DB.Save(p).Error
+	return mysqlmanager.MySQL().Save(p).Error
 }
 
 // 修改日志的操作状态
 func (p *AuditLog) UpdateStatus(status string) error {
 	// TODO:
-	return global.PILOTGO_DB.Model(&p).Where("log_uuid=?", p.LogUUID).Update("status", status).Error
+	return mysqlmanager.MySQL().Model(&p).Where("log_uuid=?", p.LogUUID).Update("status", status).Error
 }
 
 // 查询所有日志
 func GetAuditLog() ([]AuditLog, error) {
 	var list []AuditLog
-	tx := global.PILOTGO_DB.Order("created_at desc").Find(&list)
+	tx := mysqlmanager.MySQL().Order("created_at desc").Find(&list)
 	return list, tx.Error
 }
 
 // 根据父UUid查询日志
 func GetAuditLogByParentId(parentUUId string) (AuditLog, error) {
 	var list AuditLog
-	tx := global.PILOTGO_DB.Order("ID desc").Where("parent_uuid=?", parentUUId).Find(list)
+	tx := mysqlmanager.MySQL().Order("ID desc").Where("parent_uuid=?", parentUUId).Find(list)
 	return list, tx.Error
 }
 
 // 查询子日志
 func GetAuditLogById(logUUId string) (AuditLog, error) {
 	var Log AuditLog
-	err := global.PILOTGO_DB.Where("log_uuid = ?", logUUId).Find(&Log).Error
+	err := mysqlmanager.MySQL().Where("log_uuid = ?", logUUId).Find(&Log).Error
 	return Log, err
 }
 
 // 根据模块名字查询日志
 func GetAuditLogByModule(name string) ([]AuditLog, error) {
 	var Log []AuditLog
-	err := global.PILOTGO_DB.Where("modulename = ?", name).Find(&Log).Error
+	err := mysqlmanager.MySQL().Where("modulename = ?", name).Find(&Log).Error
 	return Log, err
 }
 
@@ -98,13 +98,13 @@ type AgentLogDel struct {
 
 func (p *AgentLogParent) LogAll() (list *[]AgentLogParent, tx *gorm.DB) {
 	list = &[]AgentLogParent{}
-	tx = global.PILOTGO_DB.Order("created_at desc").Find(&list)
+	tx = mysqlmanager.MySQL().Order("created_at desc").Find(&list)
 	return
 }
 
 func (p *AgentLog) AgentLog(parentId int) (list *[]AgentLog, tx *gorm.DB) {
 	list = &[]AgentLog{}
-	tx = global.PILOTGO_DB.Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
+	tx = mysqlmanager.MySQL().Order("ID desc").Where("log_parent_id=?", parentId).Find(list)
 	return
 }
 
@@ -113,33 +113,33 @@ func DeleteLog(PLogIds int) error {
 	var logparent AgentLogParent
 	var log AgentLog
 
-	err := global.PILOTGO_DB.Where("log_parent_id=?", PLogIds).Unscoped().Delete(log).Error
+	err := mysqlmanager.MySQL().Where("log_parent_id=?", PLogIds).Unscoped().Delete(log).Error
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	return global.PILOTGO_DB.Where("id=?", PLogIds).Unscoped().Delete(logparent).Error
+	return mysqlmanager.MySQL().Where("id=?", PLogIds).Unscoped().Delete(logparent).Error
 }
 
 // 存储父日志
 func ParentAgentLog(PLog AgentLogParent) (int, error) {
-	err := global.PILOTGO_DB.Save(&PLog).Error
+	err := mysqlmanager.MySQL().Save(&PLog).Error
 	return PLog.ID, err
 }
 
 // 存储子日志
 func AgentLogMessage(Log AgentLog) error {
-	return global.PILOTGO_DB.Save(&Log).Error
+	return mysqlmanager.MySQL().Save(&Log).Error
 }
 
 // 查询子日志
 func Id2AgentLog(id int) ([]AgentLog, error) {
 	var Log []AgentLog
-	err := global.PILOTGO_DB.Where("log_parent_id = ?", id).Find(&Log).Error
+	err := mysqlmanager.MySQL().Where("log_parent_id = ?", id).Find(&Log).Error
 	return Log, err
 }
 
 // 修改父日志的操作状态
 func UpdateParentAgentLog(PLogId int, status string) error {
 	var ParentLog AgentLogParent
-	return global.PILOTGO_DB.Model(&ParentLog).Where("id=?", PLogId).Update("status", status).Error
+	return mysqlmanager.MySQL().Model(&ParentLog).Where("id=?", PLogId).Update("status", status).Error
 }

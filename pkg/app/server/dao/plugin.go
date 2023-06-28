@@ -9,14 +9,12 @@
  * See the Mulan PSL v2 for more details.
  * Author: guozhengxin
  * Date: 2022-05-26 10:25:52
- * LastEditTime: 2022-06-02 10:16:10
+ * LastEditTime: 2023-06-28 15:59:45
  * Description: plugin info record
  ******************************************************************************/
 package dao
 
-import (
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
-)
+import "openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 
 type PluginModel struct {
 	ID          int    `gorm:"type:int"`
@@ -36,14 +34,14 @@ func (m *PluginModel) TableName() string {
 }
 
 func RecordPlugin(plugin *PluginModel) error {
-	err := global.PILOTGO_DB.Create(&plugin).Error
+	err := mysqlmanager.MySQL().Create(&plugin).Error
 	return err
 }
 
 // 查询所有插件信息
 func QueryPlugins() ([]*PluginModel, error) {
 	var plugins []*PluginModel
-	if err := global.PILOTGO_DB.Find(&plugins).Error; err != nil {
+	if err := mysqlmanager.MySQL().Find(&plugins).Error; err != nil {
 		return nil, err
 	}
 	return plugins, nil
@@ -52,12 +50,12 @@ func QueryPlugins() ([]*PluginModel, error) {
 // 更新插件使能状态
 func UpdatePluginEnabled(plugin *PluginModel) error {
 	var p PluginModel
-	err := global.PILOTGO_DB.Model(&p).Where("uuid = ?", plugin.UUID).Update("enabled", plugin.Enabled).Error
+	err := mysqlmanager.MySQL().Model(&p).Where("uuid = ?", plugin.UUID).Update("enabled", plugin.Enabled).Error
 	return err
 }
 
 // 删除插件
 func DeletePlugin(uuid string) error {
-	err := global.PILOTGO_DB.Where("uuid=?", uuid).Delete(&PluginModel{}).Error
+	err := mysqlmanager.MySQL().Where("uuid=?", uuid).Delete(&PluginModel{}).Error
 	return err
 }
