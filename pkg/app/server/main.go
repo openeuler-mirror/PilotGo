@@ -26,6 +26,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -92,7 +93,7 @@ func main() {
 			logger.Info("signal interrupted: %s", s.String())
 			// TODO: DO EXIT
 
-			global.PILOTGO_REDIS.Close()
+			redismanager.Redis().Close()
 
 			goto EXIT
 		default:

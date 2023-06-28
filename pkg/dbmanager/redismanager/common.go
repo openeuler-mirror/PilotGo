@@ -18,15 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 )
 
 func Set(key string, value interface{}) {
 	var ctx = context.Background()
 	if EnableRedis {
 		bytes, _ := json.Marshal(value)
-		err := global.PILOTGO_REDIS.Set(ctx, key, string(bytes), 0).Err()
+		err := Redis().Set(ctx, key, string(bytes), 0).Err()
 		if err != nil {
 			panic(err)
 		}
@@ -36,7 +34,7 @@ func Set(key string, value interface{}) {
 func Get(key string, obj interface{}) (interface{}, error) {
 	var ctx = context.Background()
 	if EnableRedis {
-		data, err := global.PILOTGO_REDIS.Get(ctx, key).Result()
+		data, err := Redis().Get(ctx, key).Result()
 		if err != nil {
 			return nil, err
 		}
