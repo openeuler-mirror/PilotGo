@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-28 11:02:06
+ * LastEditTime: 2023-06-28 11:16:00
  * Description: socket client register
  ******************************************************************************/
 package register
@@ -127,6 +127,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RpmInfo, handler.RpmInfoHandler)
 	c.BindHandler(protocol.InstallRpm, handler.InstallRpmHandler)
 	c.BindHandler(protocol.RemoveRpm, handler.RemoveRpmHandler)
+	c.BindHandler(protocol.GetRepoSource, handler.GetRepoSourceHandler)
 
 	c.BindHandler(protocol.DiskUsage, handler.DiskUsageHandler)
 	c.BindHandler(protocol.DiskInfo, handler.DiskInfoHandler)
@@ -265,29 +266,6 @@ func RegitsterHandler(c *network.SocketClient) {
 			}
 			return c.Send(resp_msg)
 		}
-	})
-	c.BindHandler(protocol.GetRepoSource, func(c *network.SocketClient, msg *protocol.Message) error {
-		logger.Debug("process agent info command:%s", msg.String())
-
-		repo, err := common.GetRepoSource()
-
-		if err != nil {
-			resp_msg := &protocol.Message{
-				UUID:   msg.UUID,
-				Type:   msg.Type,
-				Status: -1,
-				Error:  err.Error(),
-			}
-			return c.Send(resp_msg)
-		}
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   repo,
-		}
-		return c.Send(resp_msg)
-
 	})
 	c.BindHandler(protocol.GetNetWorkConnectInfo, func(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Debug("process agent info command:%s", msg.String())
