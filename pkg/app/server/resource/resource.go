@@ -9,12 +9,15 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-12 13:03:16
- * LastEditTime: 2022-07-12 14:10:23
+ * LastEditTime: 2023-07-04 14:31:05
  * Description: static router
  ******************************************************************************/
 package resource
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
@@ -37,13 +40,17 @@ func StaticRouter(router *gin.Engine) *gin.Engine {
 	router.Static("/static", "./frontend/dist/static")
 	router.StaticFile("/", "./frontend/dist/index.html")
 
-	// 关键点【解决页面刷新404的问题】
+	// 解决页面刷新404的问题
 	router.NoRoute(func(c *gin.Context) {
 		logger.Info("process noroute: %s", c.Request.URL.RawPath)
 		// c.HTML(http.StatusOK, "index.html", nil)
 
 		// TODO: for test
-		c.File("./frontend/dist/index.html")
+		if !strings.HasPrefix(c.Request.RequestURI, "/api/") && !strings.HasPrefix(c.Request.RequestURI, "/plugin/") {
+			c.File("./frontend/dist/index.html")
+			return
+		}
+		c.AbortWithStatus(http.StatusNotFound)
 	})
 	return router
 }
