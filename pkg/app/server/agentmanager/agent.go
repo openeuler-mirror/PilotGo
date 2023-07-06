@@ -182,14 +182,16 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 }
 
 // 远程在agent上运行脚本文件
-func (a *Agent) RunScript(script string) (*utils.CmdResult, error) {
+func (a *Agent) RunScript(script string, params []string) (*utils.CmdResult, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.RunScript,
 		Data: struct {
 			Script string
+			Params []string
 		}{
 			Script: script,
+			Params: params,
 		},
 	}
 

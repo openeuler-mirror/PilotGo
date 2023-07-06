@@ -32,7 +32,7 @@ func RunScript(c *gin.Context) {
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent != nil {
-		data, err := agent.RunScript(cmd)
+		data, err := agent.RunCommand(cmd)
 		if err != nil {
 			logger.Error("run script error, agent:%s, cmd:%s", uuid, cmd)
 			c.JSON(http.StatusOK, `{"status":-1}`)
