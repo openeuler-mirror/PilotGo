@@ -14,8 +14,6 @@ import (
 )
 
 func RunCommandHandler(c *network.SocketClient, msg *protocol.Message) error {
-	logger.Debug("process run command:%s", msg.String())
-
 	d := &struct {
 		Command string
 	}{}
@@ -41,6 +39,8 @@ func RunCommandHandler(c *network.SocketClient, msg *protocol.Message) error {
 		}
 		return c.Send(resp_msg)
 	}
+
+	logger.Debug("process run command:%s", string(content))
 
 	retCode, stdout, stderr, err := utils.RunCommand(string(content))
 	if err != nil {
@@ -75,27 +75,16 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 	}
 
 	var result *utils.CmdResult
-	var scriptPath string
 	var err error
 	var decoded_script []byte
+	workDir := "/opt/PilotGo/agent/"
+	fileName := uuid.New().String()
+	filePath := path.Join(workDir, fileName+".sh")
 
 	d := &struct {
 		Script string
+		Params []string
 	}{}
-
-	f := func(s string) (string, error) {
-		workDir := "/opt/PilotGo/agent/"
-
-		fileName := uuid.New().String()
-		filePath := path.Join(workDir, fileName+".sh")
-
-		err = utils.FileSaveString(filePath, s)
-		if err != nil {
-			return "", err
-		}
-
-		return filePath, nil
-	}
 
 	err = msg.BindData(d)
 	if err != nil {
@@ -110,16 +99,17 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 		logger.Error(errorInfo)
 		goto ERROR
 	}
-	logger.Debug("process run script command: %s", string(decoded_script))
 
-	scriptPath, err = f(strings.Replace(string(decoded_script), "\r", "", -1))
+	logger.Debug("process run script command: %s %v", filePath+" ", d.Params)
+
+	err = utils.FileSaveString(filePath, strings.Replace(string(decoded_script), "\r", "", -1))
 	if err != nil {
-		errorInfo = "run command error:" + err.Error()
+		errorInfo = "Err running filesavestring:" + err.Error()
 		logger.Error(errorInfo)
 		goto ERROR
 	}
 
-	result, err = utils.RunScript(scriptPath)
+	result, err = utils.RunScript(filePath, d.Params)
 	if err != nil {
 		errorInfo = "run command error:" + err.Error()
 		logger.Error(errorInfo)

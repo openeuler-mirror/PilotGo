@@ -72,8 +72,12 @@ func RunCommand(s string) (int, string, string, error) {
 }
 
 // 运行指定的shell脚本文件
-func RunScript(absPath string) (*CmdResult, error) {
-	cmd := exec.Command("/bin/bash", absPath)
+func RunScript(absPath string, params []string) (*CmdResult, error) {
+	arr_command := []string{}
+	arr_command = append(arr_command, absPath)
+	arr_command = append(arr_command, params...)
+
+	cmd := exec.Command("/bin/bash", arr_command...)
 	cmd.Env = append(cmd.Env, "LANG=en_US.utf8")
 
 	stdout, err := cmd.StdoutPipe()

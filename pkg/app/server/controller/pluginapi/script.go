@@ -3,6 +3,8 @@
 package pluginapi
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -24,6 +26,10 @@ func RunCommandHandler(c *gin.Context) {
 	// uuid := c.Query("uuid")
 	// script := c.Query("command")
 
+	// ttcode
+	fmt.Println("\033[32mc.request.headers\033[0m: ", c.Request.Header)
+	fmt.Println("\033[32mc.request.body\033[0m: ", c.Request.Body)
+
 	d := &struct {
 		Batch   *common.Batch `json:"batch"`
 		Command string        `json:"command"`
@@ -35,6 +41,10 @@ func RunCommandHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	// ttcode
+	fmt.Println("\033[32md\033[0m: ", d)
+	fmt.Println("\033[32md.batch\033[0m: ", d.Batch)
 
 	logger.Debug("run command on agents :%v", d.Batch.MachineUUIDs)
 
@@ -79,9 +89,14 @@ func RunCommandHandler(c *gin.Context) {
 func RunScriptHandler(c *gin.Context) {
 	logger.Debug("process get agent request")
 
+	// ttcode
+	fmt.Println("\033[32mc.request.headers\033[0m: ", c.Request.Header)
+	fmt.Println("\033[32mc.request.body\033[0m: ", c.Request.Body)
+
 	d := &struct {
 		Batch  *common.Batch `json:"batch"`
 		Script string        `json:"script"`
+		Params []string      `json:"params"`
 	}{}
 	err := c.ShouldBind(d)
 	if err != nil {
@@ -90,6 +105,10 @@ func RunScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	// ttcode
+	fmt.Println("\033[32md\033[0m: ", len(d.Script), len(d.Params))
+	fmt.Println("\033[32md.batch\033[0m: ", d.Batch)
 
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
 
@@ -104,7 +123,7 @@ func RunScriptHandler(c *gin.Context) {
 			// TODO: support batch
 			agent := agentmanager.GetAgent(uuid)
 			if agent != nil {
-				data, err := agent.RunScript(d.Script)
+				data, err := agent.RunScript(d.Script, d.Params)
 				if err != nil {
 					logger.Error("run command error, agent:%s, command:%s", uuid, d.Script)
 					response.Fail(c, nil, err.Error())
