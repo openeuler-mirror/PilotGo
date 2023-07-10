@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-18 02:33:55
- * LastEditTime: 2022-04-11 16:27:35
+ * LastEditTime: 2023-07-10 14:49:50
  * Description: socket server
  ******************************************************************************/
 package agentmanager
@@ -99,7 +99,7 @@ func AddandRunAgent(c net.Conn) {
 }
 
 func StopAgentManager() {
-
+	// TODO
 }
 
 func AddAgents2DB(a *Agent) {
