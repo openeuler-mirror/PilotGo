@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-05-18 09:08:08
- * LastEditTime: 2023-03-16 16:31:01
+ * LastEditTime: 2023-07-10 15:56:13
  * Description: 批次管理业务逻辑
  ******************************************************************************/
 package batch
@@ -24,6 +24,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+
+	scommon "gitee.com/openeuler/PilotGo-plugins/sdk/common"
 )
 
 type CreateBatchParam struct {
@@ -185,4 +187,14 @@ func GetBatchMachines(batchid int) ([]dao.MachineNode, error) {
 
 func SelectBatch() ([]dao.Batch, error) {
 	return dao.GetBatch()
+}
+
+// from batch get all machines
+func GetMachines(b *scommon.Batch) []string {
+	// TODO: support batch id
+
+	if b.MachineUUIDs != nil {
+		return b.MachineUUIDs
+	}
+	return []string{}
 }

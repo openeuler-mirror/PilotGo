@@ -3,21 +3,25 @@ package pluginapi
 import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 )
 
 func InstallPackage(c *gin.Context) {
 	param := struct {
-		Package string
-		Agents  []string
+		Batch   *common.Batch `json:"batch"`
+		Package string        `json:"package"`
 	}{}
 	if err := c.Bind(&param); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	for _, uuid := range param.Agents {
+	machines := batch.GetMachines(param.Batch)
+	for _, uuid := range machines {
 		// TODO: Improve error handling logic
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
@@ -36,15 +40,16 @@ func InstallPackage(c *gin.Context) {
 
 func UninstallPackage(c *gin.Context) {
 	param := struct {
+		Batch   *common.Batch `json:"batch"`
 		Package string
-		Agents  []string
 	}{}
 	if err := c.Bind(&param); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	for _, uuid := range param.Agents {
+	machines := batch.GetMachines(param.Batch)
+	for _, uuid := range machines {
 		// TODO: Improve error handling logic
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
