@@ -37,6 +37,7 @@ var WARN_MSG chan interface{}
 type Agent struct {
 	UUID             string
 	Version          string
+	IP               string
 	conn             net.Conn
 	MessageProcesser *protocol.MessageProcesser
 	messageChan      chan *protocol.Message
@@ -150,6 +151,7 @@ func (a *Agent) Init() error {
 	}
 
 	a.UUID = data.AgentUUID
+	a.IP = data.IP
 	a.Version = data.AgentVersion
 
 	return nil
@@ -233,8 +235,8 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Durat
 
 type AgentInfo struct {
 	AgentVersion string `mapstructure:"agent_version"`
-	IP           string `mapstructure:"IP"`
 	AgentUUID    string `mapstructure:"agent_uuid"`
+	IP           string `mapstructure:"IP"`
 }
 
 // 远程获取agent端的系统信息

@@ -18,6 +18,12 @@ func AuthCheck(c *gin.Context) {
 	c.Next()
 }
 
+type RunResult struct {
+	*utils.CmdResult
+	MachineUUID string
+	MachineIP   string
+}
+
 // 远程运行脚本
 func RunCommandHandler(c *gin.Context) {
 	logger.Debug("process get agent request")
@@ -38,10 +44,6 @@ func RunCommandHandler(c *gin.Context) {
 
 	logger.Debug("run command on agents :%v", d.Batch.MachineUUIDs)
 
-	type RunResult struct {
-		*utils.CmdResult
-		MachineUUID string
-	}
 	result := []*RunResult{}
 
 	if d.Batch.MachineUUIDs != nil {
@@ -60,6 +62,7 @@ func RunCommandHandler(c *gin.Context) {
 				result = append(result, &RunResult{
 					CmdResult:   data,
 					MachineUUID: uuid,
+					MachineIP:   agent.IP,
 				})
 				// response.Success(c, data, "")
 				// return
@@ -93,10 +96,6 @@ func RunScriptHandler(c *gin.Context) {
 
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
 
-	type RunResult struct {
-		*utils.CmdResult
-		MachineUUID string
-	}
 	result := []*RunResult{}
 
 	if d.Batch.MachineUUIDs != nil {
@@ -115,6 +114,7 @@ func RunScriptHandler(c *gin.Context) {
 				result = append(result, &RunResult{
 					CmdResult:   data,
 					MachineUUID: uuid,
+					MachineIP:   agent.IP,
 				})
 				// response.Success(c, data, "")
 				// return
