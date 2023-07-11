@@ -57,12 +57,12 @@ func StopService(c *gin.Context) {
 		return
 	}
 
-	service_start, Err, err := agent.ServiceStart(service)
+	service_stop, Err, err := agent.ServiceStop(service)
 	if len(Err) != 0 || err != nil {
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 		return
 	}
 
-	response.Success(c, gin.H{"service_start": service_start}, "Success")
+	response.Success(c, gin.H{"service_start": service_stop}, "Success")
 
 }
