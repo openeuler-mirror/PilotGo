@@ -44,7 +44,25 @@ func StartService(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"service_start": service_start}, "Success")
-
 }
 
-func StopService(c *gin.Context) {}
+func StopService(c *gin.Context) {
+	// TODO: support batch
+	uuid := c.Query("uuid")
+	service := c.Query("service")
+
+	agent := agentmanager.GetAgent(uuid)
+	if agent == nil {
+		response.Fail(c, nil, "获取uuid失败!")
+		return
+	}
+
+	service_start, Err, err := agent.ServiceStart(service)
+	if len(Err) != 0 || err != nil {
+		response.Fail(c, gin.H{"error": Err}, "Failed!")
+		return
+	}
+
+	response.Success(c, gin.H{"service_start": service_start}, "Success")
+
+}
