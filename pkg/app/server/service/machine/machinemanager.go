@@ -43,6 +43,14 @@ func MachineAllData() ([]map[string]string, error) {
 	return datas, nil
 }
 
+func Machines() ([]dao.Res, error) {
+	AllData, err := dao.MachineAllData()
+	if err != nil {
+		return nil, err
+	}
+	return AllData, nil
+}
+
 func DeleteMachine(Deluuid []string) map[string]string {
 	machinelist := make(map[string]string)
 	for _, machinedeluuid := range Deluuid {
