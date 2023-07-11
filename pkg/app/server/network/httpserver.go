@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-06-01 11:19:37
+ * LastEditTime: 2023-07-11 14:37:34
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -261,6 +261,10 @@ func registerPluginApi(router *gin.RouterGroup) {
 
 		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
 		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
+
+		pluginAPI.GET("/service/:name", pluginapi.Service)
+		pluginAPI.PUT("/start_service", pluginapi.StartService)
+		pluginAPI.PUT("/stop_service", pluginapi.StopService)
 
 		pluginAPI.GET("/machine_list", pluginapi.MachineList)
 	}
