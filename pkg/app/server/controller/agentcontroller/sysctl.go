@@ -58,15 +58,10 @@ func SysctlChangeHandler(c *gin.Context) {
 		logger.Error(err.Error())
 	}
 	agent := agentmanager.GetAgent(uuid)
-	UUID_iP, err := dao.UUID2MacIP(uuid)
-	if err != nil {
-		logger.Error(err.Error())
-	}
 	if agent == nil {
-
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              "", // TODO
 			OperationObject: args,
 			Action:          service.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
@@ -87,7 +82,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	if err != nil {
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              agent.IP,
 			OperationObject: args,
 			Action:          service.SysctlChange,
 			StatusCode:      http.StatusBadRequest,
@@ -104,7 +99,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	}
 	log := dao.AgentLog{
 		LogParentID:     logParentId,
-		IP:              UUID_iP,
+		IP:              agent.IP,
 		OperationObject: args,
 		Action:          service.SysctlChange,
 		StatusCode:      http.StatusOK,

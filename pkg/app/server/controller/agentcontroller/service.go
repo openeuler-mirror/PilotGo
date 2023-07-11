@@ -81,15 +81,10 @@ func ServiceStartHandler(c *gin.Context) {
 		logger.Error(err.Error())
 	}
 	agent := agentmanager.GetAgent(agentservice.UUID)
-	UUID_iP, err := dao.UUID2MacIP(agentservice.UUID)
-	if err != nil {
-		logger.Error(err.Error())
-	}
 	if agent == nil {
-
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              "", // TODO
 			OperationObject: agentservice.Service,
 			Action:          service.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
@@ -110,7 +105,7 @@ func ServiceStartHandler(c *gin.Context) {
 
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              agent.IP,
 			OperationObject: agentservice.Service,
 			Action:          service.ServiceStart,
 			StatusCode:      http.StatusBadRequest,
@@ -129,7 +124,7 @@ func ServiceStartHandler(c *gin.Context) {
 
 	log := dao.AgentLog{
 		LogParentID:     logParentId,
-		IP:              UUID_iP,
+		IP:              agent.IP,
 		OperationObject: agentservice.Service,
 		Action:          service.ServiceStart,
 		StatusCode:      http.StatusOK,
@@ -158,15 +153,11 @@ func ServiceStopHandler(c *gin.Context) {
 		logger.Error(err.Error())
 	}
 	agent := agentmanager.GetAgent(agentservice.UUID)
-	UUID_iP, err := dao.UUID2MacIP(agentservice.UUID)
-	if err != nil {
-		logger.Error(err.Error())
-	}
 	if agent == nil {
 
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              "", // TODO
 			OperationObject: agentservice.Service,
 			Action:          service.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
@@ -185,10 +176,9 @@ func ServiceStopHandler(c *gin.Context) {
 
 	service_stop, Err, err := agent.ServiceStop(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              agent.IP,
 			OperationObject: agentservice.Service,
 			Action:          service.ServiceStop,
 			StatusCode:      http.StatusBadRequest,
@@ -207,7 +197,7 @@ func ServiceStopHandler(c *gin.Context) {
 
 	log := dao.AgentLog{
 		LogParentID:     logParentId,
-		IP:              UUID_iP,
+		IP:              agent.IP,
 		OperationObject: agentservice.Service,
 		Action:          service.ServiceStop,
 		StatusCode:      http.StatusOK,
@@ -236,15 +226,10 @@ func ServiceRestartHandler(c *gin.Context) {
 		logger.Error(err.Error())
 	}
 	agent := agentmanager.GetAgent(agentservice.UUID)
-	UUID_iP, err := dao.UUID2MacIP(agentservice.UUID)
-	if err != nil {
-		logger.Error(err.Error())
-	}
 	if agent == nil {
-
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              "", // TODO
 			OperationObject: agentservice.Service,
 			Action:          service.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
@@ -266,7 +251,7 @@ func ServiceRestartHandler(c *gin.Context) {
 
 		log := dao.AgentLog{
 			LogParentID:     logParentId,
-			IP:              UUID_iP,
+			IP:              agent.IP,
 			OperationObject: agentservice.Service,
 			Action:          service.ServiceRestart,
 			StatusCode:      http.StatusBadRequest,
@@ -285,7 +270,7 @@ func ServiceRestartHandler(c *gin.Context) {
 
 	log := dao.AgentLog{
 		LogParentID:     logParentId,
-		IP:              UUID_iP,
+		IP:              agent.IP,
 		OperationObject: agentservice.Service,
 		Action:          service.ServiceRestart,
 		StatusCode:      http.StatusOK,

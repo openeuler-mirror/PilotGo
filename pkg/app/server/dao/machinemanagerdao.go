@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: wanghao
  * Date: 2022-01-04 12:56:59
- * LastEditTime: 2023-06-28 16:02:57
+ * LastEditTime: 2023-07-11 19:34:18
  * Description: 部门管理数据库相关函数
  ******************************************************************************/
 package dao
@@ -210,13 +210,6 @@ func MachineBasic(uuid string) (ip string, state int, dept string, err error) {
 	}
 	err = mysqlmanager.MySQL().Where("id = ?", machine.DepartId).Find(&depart).Error
 	return machine.IP, machine.State, depart.Depart, err
-}
-
-// 根据uuid获取机器的ip
-func UUID2MacIP(uuid string) (ip string, err error) {
-	var machine MachineNode
-	err = mysqlmanager.MySQL().Where("machine_uuid = ?", uuid).Find(&machine).Error
-	return machine.IP, err
 }
 
 // 使用uuid删除机器

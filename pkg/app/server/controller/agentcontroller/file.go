@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-05-26 10:25:52
- * LastEditTime: 2022-06-02 10:16:10
+ * LastEditTime: 2023-07-11 19:25:23
  * Description: agent config file handler
  ******************************************************************************/
 
@@ -97,14 +97,10 @@ func FileBroadcastToAgents(c *gin.Context) {
 
 	for _, uuid := range UUIDs {
 		agent := agentmanager.GetAgent(uuid)
-		UUID_iP, err := dao.UUID2MacIP(uuid)
-		if err != nil {
-			logger.Error(err.Error())
-		}
 		if agent == nil {
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              "", // TODO
 				OperationObject: filename,
 				Action:          service.BroadcastFile,
 				StatusCode:      http.StatusBadRequest,
@@ -123,7 +119,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              agent.IP,
 				OperationObject: filename,
 				Action:          service.BroadcastFile,
 				StatusCode:      http.StatusBadRequest,
@@ -138,7 +134,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 		} else {
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              agent.IP,
 				OperationObject: filename,
 				Action:          service.BroadcastFile,
 				StatusCode:      http.StatusOK,

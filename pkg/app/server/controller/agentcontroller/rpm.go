@@ -103,15 +103,10 @@ func InstallRpmHandler(c *gin.Context) {
 
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
-		UUID_iP, err := dao.UUID2MacIP(uuid)
-		if err != nil {
-			logger.Error(err.Error())
-		}
 		if agent == nil {
-
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              "", // TODO
 				OperationObject: rpm.RPM,
 				Action:          service.RPMInstall,
 				StatusCode:      http.StatusBadRequest,
@@ -127,10 +122,9 @@ func InstallRpmHandler(c *gin.Context) {
 
 		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
-
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              agent.IP,
 				OperationObject: rpm.RPM,
 				Action:          service.RPMInstall,
 				StatusCode:      http.StatusBadRequest,
@@ -142,10 +136,9 @@ func InstallRpmHandler(c *gin.Context) {
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              agent.IP,
 				OperationObject: rpm.RPM,
 				Action:          service.RPMInstall,
 				StatusCode:      http.StatusOK,
@@ -183,16 +176,11 @@ func RemoveRpmHandler(c *gin.Context) {
 	}
 	StatusCodes := make([]string, 0)
 	for _, uuid := range rpm.UUIDs {
-
 		agent := agentmanager.GetAgent(uuid)
-		UUID_iP, err := dao.UUID2MacIP(uuid)
-		if err != nil {
-			logger.Error(err.Error())
-		}
 		if agent == nil {
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              "", // TODO
 				OperationObject: rpm.RPM,
 				Action:          service.RPMRemove,
 				StatusCode:      http.StatusBadRequest,
@@ -208,10 +196,9 @@ func RemoveRpmHandler(c *gin.Context) {
 
 		_, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
-
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              agent.IP,
 				OperationObject: rpm.RPM,
 				Action:          service.RPMRemove,
 				StatusCode:      http.StatusBadRequest,
@@ -224,10 +211,9 @@ func RemoveRpmHandler(c *gin.Context) {
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-
 			log := dao.AgentLog{
 				LogParentID:     logParentId,
-				IP:              UUID_iP,
+				IP:              agent.IP,
 				OperationObject: rpm.RPM,
 				Action:          service.RPMRemove,
 				StatusCode:      http.StatusOK,
