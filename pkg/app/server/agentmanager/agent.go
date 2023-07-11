@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-02-18 02:33:55
- * LastEditTime: 2023-04-19 16:19:56
+ * LastEditTime: 2023-07-11 16:52:58
  * Description: socket server's agentmanager
  ******************************************************************************/
 package agentmanager
@@ -92,15 +92,11 @@ func (a *Agent) startListen() {
 		if err != nil {
 			err := dao.MachineStatusToOffline(a.UUID)
 			if err != nil {
-				logger.Error(err.Error())
+				logger.Error("update machine status failed: %s", err.Error())
 			}
 			DeleteAgent(a.UUID)
-			UUID_ip, err := dao.UUID2MacIP(a.UUID)
-			if err != nil {
-				logger.Error(err.Error())
-			}
-			str := "agent机器" + UUID_ip + "已断开连接"
-			logger.Error("%s", str)
+			str := "agent机器" + a.IP + "已断开连接"
+			logger.Warn("agent %s disconnected, ip:%s", a.UUID, a.IP)
 			WARN_MSG <- str
 			return
 		}
