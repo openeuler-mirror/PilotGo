@@ -16,16 +16,17 @@ package batch
 
 import (
 	//"errors"
+
 	"strconv"
 	"strings"
 
+	scommon "gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"github.com/pkg/errors"
+	"github.com/sourcegraph/conc/iter"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
-
-	scommon "gitee.com/openeuler/PilotGo-plugins/sdk/common"
 )
 
 type CreateBatchParam struct {
@@ -197,4 +198,17 @@ func GetMachines(b *scommon.Batch) []string {
 		return b.MachineUUIDs
 	}
 	return []string{}
+}
+
+type R any
+type handle func(string, interface{}) R
+
+func BatchProcess(b *scommon.Batch, f handle, it interface{}) R {
+	uuids := GetMachines(b)
+	mapper := iter.Mapper[string, R]{}
+
+	result := mapper.Map(uuids, func(v *string) R {
+		return f(*v, it)
+	})
+	return result
 }
