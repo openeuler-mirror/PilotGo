@@ -63,6 +63,6 @@ func StopService(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, gin.H{"service_start": service_stop}, "Success")
+	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
 
 }
