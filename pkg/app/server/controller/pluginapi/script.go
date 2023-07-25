@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -54,38 +55,26 @@ func RunCommandHandler(c *gin.Context) {
 
 	logger.Debug("run command on agents :%v", d.Batch.MachineUUIDs)
 
-	result := []*RunResult{}
-
-	if d.Batch.MachineUUIDs != nil {
-		for _, uuid := range d.Batch.MachineUUIDs {
-			// TODO: support batch
-			agent := agentmanager.GetAgent(uuid)
-			if agent != nil {
-				data, err := agent.RunCommand(d.Command)
-				if err != nil {
-					logger.Error("run command error, agent:%s, command:%s", uuid, d.Command)
-					response.Fail(c, nil, err.Error())
-					continue
-				}
-				logger.Debug("run command on agent result:%v", data)
-
-				result = append(result, &RunResult{
-					CmdResult:   data,
-					MachineUUID: uuid,
-					MachineIP:   agent.IP,
-				})
-				// response.Success(c, data, "")
-				// return
-			} else {
-				logger.Warn("unknown agent:%s", uuid)
+	f := func(uuid string) batch.R {
+		agent := agentmanager.GetAgent(uuid)
+		if agent != nil {
+			data, err := agent.RunCommand(d.Command)
+			if err != nil {
+				logger.Error("run command error, agent:%s, command:%s", uuid, d.Command)
 			}
+			logger.Debug("run command on agent result:%v", data)
+			re := RunResult{
+				CmdResult:   data,
+				MachineUUID: uuid,
+				MachineIP:   agent.IP,
+			}
+			return re
 		}
-
-		response.Success(c, result, "")
-		return
-	} else {
-		response.Fail(c, nil, "empty machine uuids")
+		return RunResult{}
 	}
+
+	result := batch.BatchProcess(d.Batch, f, d.Command)
+	response.Success(c, result, "")
 }
 
 // 远程运行脚本
