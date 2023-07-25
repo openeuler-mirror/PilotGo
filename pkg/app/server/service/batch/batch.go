@@ -201,14 +201,15 @@ func GetMachines(b *scommon.Batch) []string {
 }
 
 type R any
-type handle func(string, interface{}) R
 
-func BatchProcess(b *scommon.Batch, f handle, it interface{}) R {
+//type handle func(uuid string) R
+
+func BatchProcess(b *scommon.Batch, f func(uuid string) R, it interface{}) []R {
 	uuids := GetMachines(b)
 	mapper := iter.Mapper[string, R]{}
 
 	result := mapper.Map(uuids, func(v *string) R {
-		return f(*v, it)
+		return f(*v)
 	})
 	return result
 }
