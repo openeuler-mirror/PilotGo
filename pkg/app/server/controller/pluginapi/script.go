@@ -74,7 +74,7 @@ func RunCommandHandler(c *gin.Context) {
 	}
 
 	result := batch.BatchProcess(d.Batch, f, d.Command)
-	response.Success(c, result, "")
+	response.Success(c, result, "run cmd succeed")
 }
 
 // 远程运行脚本
@@ -101,39 +101,26 @@ func RunScriptHandler(c *gin.Context) {
 	// ttcode
 	fmt.Println("\033[32md\033[0m: ", len(d.Script), len(d.Params))
 	fmt.Println("\033[32md.batch\033[0m: ", d.Batch)
-
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
 
-	result := []*RunResult{}
-
-	if d.Batch.MachineUUIDs != nil {
-		for _, uuid := range d.Batch.MachineUUIDs {
-			// TODO: support batch
-			agent := agentmanager.GetAgent(uuid)
-			if agent != nil {
-				data, err := agent.RunScript(d.Script, d.Params)
-				if err != nil {
-					logger.Error("run command error, agent:%s, command:%s", uuid, d.Script)
-					response.Fail(c, nil, err.Error())
-					continue
-				}
-				logger.Debug("run command on agent result:%v", data)
-
-				result = append(result, &RunResult{
-					CmdResult:   data,
-					MachineUUID: uuid,
-					MachineIP:   agent.IP,
-				})
-				// response.Success(c, data, "")
-				// return
-			} else {
-				logger.Warn("unknown agent:%s", uuid)
+	f := func(uuid string) batch.R {
+		agent := agentmanager.GetAgent(uuid)
+		if agent != nil {
+			data, err := agent.RunScript(d.Script, d.Params)
+			if err != nil {
+				logger.Error("run script error, agent:%s, command:%s", uuid, d.Script)
 			}
+			logger.Debug("run script on agent result:%v", data)
+			re := RunResult{
+				CmdResult:   data,
+				MachineUUID: uuid,
+				MachineIP:   agent.IP,
+			}
+			return re
 		}
-
-		response.Success(c, result, "")
-		return
-	} else {
-		response.Fail(c, nil, "empty machine uuids")
+		return RunResult{}
 	}
+
+	result := batch.BatchProcess(d.Batch, f, d.Script, d.Params)
+	response.Success(c, result, "run script succeed")
 }
