@@ -20,22 +20,25 @@ func InstallPackage(c *gin.Context) {
 		return
 	}
 
-	machines := batch.GetMachines(param.Batch)
-	for _, uuid := range machines {
-		// TODO: Improve error handling logic
+	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
-		if agent != nil {
-			logger.Error("cannot find agent %s", uuid)
-			continue
-		}
 
-		_, _, err := agent.InstallRpm(param.Package)
-		if err != nil {
-			logger.Error("agent %s install package %s failed: %s", uuid, param.Package, err)
+		if agent != nil {
+			data, resp_message_err, err := agent.InstallRpm(param.Package)
+			if resp_message_err != "" {
+				logger.Error(resp_message_err)
+			}
+			if err != nil {
+				logger.Error("agent %s install package %s failed: %s", uuid, param.Package, err)
+			}
+			logger.Debug("install package on agent result:%v", data)
+			return data
 		}
+		return ""
 	}
 
-	response.Success(c, nil, "软件包安装完成!")
+	result := batch.BatchProcess(param.Batch, f, param.Package)
+	response.Success(c, result, "软件包安装完成!")
 }
 
 func UninstallPackage(c *gin.Context) {
@@ -48,20 +51,23 @@ func UninstallPackage(c *gin.Context) {
 		return
 	}
 
-	machines := batch.GetMachines(param.Batch)
-	for _, uuid := range machines {
-		// TODO: Improve error handling logic
+	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
-		if agent != nil {
-			logger.Error("cannot find agent %s", uuid)
-			continue
-		}
 
-		_, _, err := agent.RemoveRpm(param.Package)
-		if err != nil {
-			logger.Error("agent %s uninstall package %s failed: %s", uuid, param.Package, err)
+		if agent != nil {
+			data, resp_message_err, err := agent.RemoveRpm(param.Package)
+			if resp_message_err != "" {
+				logger.Error(resp_message_err)
+			}
+			if err != nil {
+				logger.Error("agent %s uninstall package %s failed: %s", uuid, param.Package, err)
+			}
+			logger.Debug("uninstall package on agent result:%v", data)
+			return data
 		}
+		return ""
 	}
 
-	response.Success(c, nil, "软件包安装完成!")
+	result := batch.BatchProcess(param.Batch, f, param.Package)
+	response.Success(c, result, "软件包卸载完成!")
 }
