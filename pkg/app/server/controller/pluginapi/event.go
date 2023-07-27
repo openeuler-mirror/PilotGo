@@ -3,6 +3,7 @@
 package pluginapi
 
 import (
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/eventbus"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -10,10 +11,7 @@ import (
 )
 
 func RegisterListenerHandler(c *gin.Context) {
-	p := struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	}{}
+	p := client.PluginInfo{}
 	if err := c.ShouldBindQuery(p); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -21,17 +19,14 @@ func RegisterListenerHandler(c *gin.Context) {
 
 	eventbus.AddListener(&eventbus.Listener{
 		Name: p.Name,
-		URL:  p.URL,
+		URL:  p.Url,
 	})
 
 	logger.Info("")
 }
 
 func UnregisterListenerHandler(c *gin.Context) {
-	p := struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	}{}
+	p := client.PluginInfo{}
 	if err := c.ShouldBindQuery(p); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -39,6 +34,6 @@ func UnregisterListenerHandler(c *gin.Context) {
 
 	eventbus.RemoveListener(&eventbus.Listener{
 		Name: p.Name,
-		URL:  p.URL,
+		URL:  p.Url,
 	})
 }
