@@ -5,14 +5,13 @@ package pluginapi
 import (
 	"fmt"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
-
-	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 )
 
 // 检查plugin接口调用权限
@@ -37,10 +36,7 @@ func RunCommandHandler(c *gin.Context) {
 	fmt.Println("\033[32mc.request.headers\033[0m: ", c.Request.Header)
 	fmt.Println("\033[32mc.request.body\033[0m: ", c.Request.Body)
 
-	d := &struct {
-		Batch   *common.Batch `json:"batch"`
-		Command string        `json:"command"`
-	}{}
+	d := &client.CmdStruct{}
 	err := c.ShouldBind(d)
 	if err != nil {
 		logger.Debug("bind batch param error:%s", err)
@@ -85,11 +81,7 @@ func RunScriptHandler(c *gin.Context) {
 	fmt.Println("\033[32mc.request.headers\033[0m: ", c.Request.Header)
 	fmt.Println("\033[32mc.request.body\033[0m: ", c.Request.Body)
 
-	d := &struct {
-		Batch  *common.Batch `json:"batch"`
-		Script string        `json:"script"`
-		Params []string      `json:"params"`
-	}{}
+	d := &client.ScriptStruct{}
 	err := c.ShouldBind(d)
 	if err != nil {
 		logger.Debug("bind batch param error:%s", err)
