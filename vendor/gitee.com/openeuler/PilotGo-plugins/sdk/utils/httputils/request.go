@@ -6,29 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
-
-// Deprecated: use other api. TODO: will remove this
-func Request(method, url string) ([]byte, error) {
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	hc := &http.Client{}
-	resp, err := hc.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	bs, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return bs, nil
-}
 
 func request(method, url string, param *Params) (*Response, error) {
 	// 处理form参数
@@ -56,9 +35,23 @@ func request(method, url string, param *Params) (*Response, error) {
 	}
 
 	// 处理header参数
-	if param != nil && len(param.Header) > 0 {
-		for k, v := range param.Header {
-			req.Header.Add(k, v)
+	if param != nil {
+		if len(param.Header) > 0 {
+			for k, v := range param.Header {
+				req.Header.Add(k, v)
+			}
+		}
+
+		// 如果存在body数据，则自动加入到Content-Type信息当中
+		if param.Body != nil {
+			typeStr := req.Header.Get("Content-Type")
+			if typeStr == "" {
+				req.Header.Set("Content-Type", "application/json")
+			} else {
+				if !strings.Contains(typeStr, "application/json") {
+					req.Header.Set("Content-Type", typeStr+"; application/json")
+				}
+			}
 		}
 	}
 

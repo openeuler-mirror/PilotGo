@@ -3,7 +3,7 @@ module openeuler.org/PilotGo/PilotGo
 go 1.18
 
 require (
-	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230621142757-6abec7df7db8
+	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230727031320-075ac5eb1134
 	github.com/casbin/casbin/v2 v2.69.1
 	github.com/casbin/gorm-adapter/v3 v3.18.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

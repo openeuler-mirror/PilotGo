@@ -1,20 +1,16 @@
 package pluginapi
 
 import (
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
-
-	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 )
 
 func InstallPackage(c *gin.Context) {
-	param := struct {
-		Batch   *common.Batch `json:"batch"`
-		Package string        `json:"package"`
-	}{}
+	param := client.PackageStruct{}
 	if err := c.Bind(&param); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -42,10 +38,7 @@ func InstallPackage(c *gin.Context) {
 }
 
 func UninstallPackage(c *gin.Context) {
-	param := struct {
-		Batch   *common.Batch `json:"batch"`
-		Package string
-	}{}
+	param := client.PackageStruct{}
 	if err := c.Bind(&param); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
