@@ -7,27 +7,10 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
 
-type ServiceResult struct {
-	MachineUUID   string
-	MachineIP     string
-	RetCode       int
-	ServiceStatus string
-}
-
-type PackageStruct struct {
-	Batch   *common.Batch `json:"batch"`
-	Package string
-}
-
-type ServiceStruct struct {
-	Batch       *common.Batch `json:batch`
-	ServiceName string        `json:service`
-}
-
-func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*ServiceResult, error) {
+func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*common.ServiceResult, error) {
 	url := c.Server + "/api/v1/pluginapi/service/:name"
 
-	p := &ServiceStruct{
+	p := &common.ServiceStruct{
 		Batch:       batch,
 		ServiceName: servicename,
 	}
@@ -39,11 +22,7 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*Serv
 		return nil, err
 	}
 
-	res := &struct {
-		Code    int              `json:"code"`
-		Mseeage string           `json:"msg"`
-		Data    []*ServiceResult `json:"data`
-	}{}
+	res := &common.Result{}
 	if err := json.Unmarshal(r.Body, res); err != nil {
 		return nil, err
 	}
@@ -51,10 +30,10 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*Serv
 	return res.Data, nil
 }
 
-func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*ServiceResult, error) {
+func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
 	url := c.Server + "/api/v1/pluginapi/start_service"
 
-	p := &ServiceStruct{
+	p := &common.ServiceStruct{
 		Batch:       batch,
 		ServiceName: serviceName,
 	}
@@ -66,11 +45,7 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*Servi
 		return nil, err
 	}
 
-	res := &struct {
-		Code    int              `json:"code"`
-		Message string           `json:"msg"`
-		Data    []*ServiceResult `json:"data"`
-	}{}
+	res := &common.Result{}
 	if err := json.Unmarshal(r.Body, res); err != nil {
 		return nil, err
 	}
@@ -78,10 +53,10 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*Servi
 	return res.Data, nil
 }
 
-func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*ServiceResult, error) {
+func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
 	url := c.Server + "/api/v1/pluginapi/stop_service"
 
-	p := &ServiceStruct{
+	p := &common.ServiceStruct{
 		Batch:       batch,
 		ServiceName: serviceName,
 	}
@@ -93,11 +68,7 @@ func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*Servic
 		return nil, err
 	}
 
-	res := &struct {
-		Code    int              `json:"code"`
-		Message string           `json:"msg"`
-		Data    []*ServiceResult `json:"data"`
-	}{}
+	res := &common.Result{}
 	if err := json.Unmarshal(r.Body, res); err != nil {
 		return nil, err
 	}
