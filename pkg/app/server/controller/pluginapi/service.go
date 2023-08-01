@@ -3,66 +3,115 @@ package pluginapi
 import (
 	"github.com/gin-gonic/gin"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-func Service(ctx *gin.Context) {
+func Service(c *gin.Context) {
 	// TODO: support batch
-	uuid := ctx.Query("uuid")
-	service := ctx.Query("service")
-
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(ctx, nil, "获取uuid失败!")
-		return
-	}
-
-	service_status, err := agent.ServiceStatus(service)
+	d := &common.ServiceStruct{}
+	err := c.ShouldBind(d)
 	if err != nil {
-		response.Fail(ctx, nil, "获取服务状态失败!")
+		logger.Debug("bind batch param error:%s", err)
+		response.Fail(c, nil, "parameter error")
 		return
 	}
-	response.Success(ctx, gin.H{"service_status": service_status}, "Success")
+
+	f := func(uuid string) batch.R {
+		agent := agentmanager.GetAgent(uuid)
+		if agent != nil {
+			//修改底层方法传回结构体
+			service_status, err := agent.ServiceStatus(d.ServiceName)
+			if err != nil {
+				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
+			}
+			logger.Debug("获取服务状态结果:%v", service_status)
+			re := common.ServiceResult{
+				MachineUUID:         uuid,
+				MachineIP:           agent.IP,
+				ServiceActiveStatus: service_status,
+				ServiceLoadedStatus: service_status,
+				//ServiceSample :
+			}
+			return re
+		}
+		return common.ServiceResult{}
+	}
+
+	result := batch.BatchProcess(d.Batch, f, d.ServiceName)
+	response.Success(c, gin.H{"service_status": result}, "Success")
 }
 
 func StartService(c *gin.Context) {
 	// TODO: support batch
-	uuid := c.Query("uuid")
-	service := c.Query("service")
-
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+	d := &common.ServiceStruct{}
+	err := c.ShouldBind(d)
+	if err != nil {
+		logger.Debug("bind batch param error:%s", err)
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	service_start, Err, err := agent.ServiceStart(service)
-	if len(Err) != 0 || err != nil {
-		response.Fail(c, gin.H{"error": Err}, "Failed!")
-		return
+	f := func(uuid string) batch.R {
+		agent := agentmanager.GetAgent(uuid)
+		if agent != nil {
+			//修改底层方法传回结构体
+			service_status, Err, err := agent.ServiceStart(d.ServiceName)
+			if len(Err) != 0 || err != nil {
+				logger.Error("开启服务失败!, agent:%s, command:%s", uuid, d.ServiceName)
+			}
+			logger.Debug("开启服务结果:%v", service_status)
+			re := common.ServiceResult{
+				MachineUUID: uuid,
+				MachineIP:   agent.IP,
+				//ServiceActiveStatus: service_status,
+				//ServiceLoadedStatus: service_status,
+				//ServiceSample :
+			}
+			return re
+		}
+		return common.ServiceResult{}
 	}
 
-	response.Success(c, gin.H{"service_start": service_start}, "Success")
+	result := batch.BatchProcess(d.Batch, f, d.ServiceName)
+	response.Success(c, gin.H{"service_start": result}, "Success")
 }
 
 func StopService(c *gin.Context) {
 	// TODO: support batch
-	uuid := c.Query("uuid")
-	service := c.Query("service")
-
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
+	d := &common.ServiceStruct{}
+	err := c.ShouldBind(d)
+	if err != nil {
+		logger.Debug("bind batch param error:%s", err)
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	service_stop, Err, err := agent.ServiceStop(service)
-	if len(Err) != 0 || err != nil {
-		response.Fail(c, gin.H{"error": Err}, "Failed!")
-		return
+	f := func(uuid string) batch.R {
+		agent := agentmanager.GetAgent(uuid)
+		if agent != nil {
+			//修改底层方法传回结构体
+			service_status, Err, err := agent.ServiceStop(d.ServiceName)
+			if len(Err) != 0 || err != nil {
+				logger.Error("停止服务失败!, agent:%s, command:%s", uuid, d.ServiceName)
+			}
+			logger.Debug("停止服务结果:%v", service_status)
+			re := common.ServiceResult{
+				MachineUUID: uuid,
+				MachineIP:   agent.IP,
+				//ServiceActiveStatus: service_status,
+				//ServiceLoadedStatus: service_status,
+				//ServiceSample :
+			}
+			return re
+		}
+		return common.ServiceResult{}
 	}
 
-	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
+	result := batch.BatchProcess(d.Batch, f, d.ServiceName)
+	response.Success(c, gin.H{"service_stop": result}, "Success")
 
 }
