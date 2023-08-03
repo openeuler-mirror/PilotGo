@@ -80,109 +80,114 @@ func (b *BaseOS) GetService(service string) *common.ServiceInfo {
 	if err != nil {
 		logger.Error("failed to get service status: %d, %s, %s, %v", exitc, tmp, stde, err)
 	}
+	if stde != "" {
+		logger.Error(stde)
+		return nil
+	}
 	serviceInfo := parseServiceInfo(tmp)
 	return serviceInfo
 }
 
 func parseServiceInfo(tmp string) *common.ServiceInfo {
 	service := &common.ServiceInfo{}
-	serviceResult := strings.SplitN(tmp, "\n", -1)
-	if len(serviceResult) < 2 {
-		logger.Error(serviceResult[0])
-		return nil
-	}
-	service.UnitName = strings.Trim(strings.SplitN(serviceResult[0], " - ", -1)[0], "● ")
-	service.ServiceName = strings.SplitN(service.UnitName, ".", -1)[0]
-	switch strings.SplitN(service.UnitName, ".", -1)[1] {
-	case "service":
-		service.UnitType = common.ServiceUnit
-		break
-	case "socket":
-		service.UnitType = common.SocketUnit
-		break
-	case "target":
-		service.UnitType = common.TargetUnit
-		break
-	case "mount":
-		service.UnitType = common.MountUnit
-		break
-	case "automount":
-		service.UnitType = common.AutomountUnit
-		break
-	case "path":
-		service.UnitType = common.PathUnit
-		break
-	case "time":
-		service.UnitType = common.TimeUnit
-		break
-	default:
-		service.UnitType = common.UNKnown
-		break
-	}
-	for i, value := range strings.SplitN(strings.Trim(serviceResult[1], " "), " ", -1) {
-		if i == 2 {
-			service.ServicePath = strings.Trim(value, "(;")
+	serviceResult := strings.Split(tmp, "\n")
+
+	if len(serviceResult) > 2 {
+		service.UnitName = strings.Trim(strings.Split(serviceResult[0], " - ")[0], "● ")
+		service.ServiceName = strings.Split(service.UnitName, ".")[0]
+		switch strings.Split(service.UnitName, ".")[1] {
+		case "service":
+			service.UnitType = common.ServiceUnit
+			break
+		case "socket":
+			service.UnitType = common.SocketUnit
+			break
+		case "target":
+			service.UnitType = common.TargetUnit
+			break
+		case "mount":
+			service.UnitType = common.MountUnit
+			break
+		case "automount":
+			service.UnitType = common.AutomountUnit
+			break
+		case "path":
+			service.UnitType = common.PathUnit
+			break
+		case "time":
+			service.UnitType = common.TimeUnit
+			break
+		default:
+			service.UnitType = common.UNKnown
+			break
+		}
+		for i, value := range strings.Split(strings.Trim(serviceResult[1], " "), " ") {
+			if i == 2 {
+				service.ServicePath = strings.Trim(value, "(;")
+			}
+
+			if i == 3 {
+				switch strings.Trim(value, ";") {
+				case "enabled":
+					service.ServiceLoadedStatus = common.ServiceLoadedStatusEnabled
+					break
+				case "disabled":
+					service.ServiceLoadedStatus = common.ServiceLoadedStatusDisabled
+					break
+				case "static":
+					service.ServiceLoadedStatus = common.ServiceLoadedStatusStatic
+					break
+				case "mask":
+					service.ServiceLoadedStatus = common.ServiceLoadedStatusMask
+					break
+				default:
+					service.ServiceLoadedStatus = common.ServiceLoadedStatusUnknown
+					break
+				}
+			}
 		}
 
-		if i == 3 {
-			switch strings.Trim(value, ";") {
-			case "enabled":
-				service.ServiceLoadedStatus = common.ServiceLoadedStatusEnabled
-				break
-			case "disabled":
-				service.ServiceLoadedStatus = common.ServiceLoadedStatusDisabled
-				break
-			case "static":
-				service.ServiceLoadedStatus = common.ServiceLoadedStatusStatic
-				break
-			case "mask":
-				service.ServiceLoadedStatus = common.ServiceLoadedStatusMask
-				break
-			default:
-				service.ServiceLoadedStatus = common.ServiceLoadedStatusUnknown
-				break
+		for i, value := range strings.Split(strings.Trim(serviceResult[2], " "), " ") {
+			if i == 1 {
+				switch value {
+				case "inactive":
+					service.ServiceActiveStatus = common.ServiceActiveStatusInactive
+					break
+				case "active":
+					service.ServiceActiveStatus = "active"
+					break
+				default:
+					service.ServiceActiveStatus = common.ServiceActiveStatusUnknown
+					break
+				}
+			}
+			if i == 2 && service.ServiceActiveStatus == "active" {
+				switch strings.Trim(value, "()") {
+				case "running":
+					service.ServiceActiveStatus = common.ServiceActiveStatusRunning
+					break
+				case "exited":
+					service.ServiceActiveStatus = common.ServiceActiveStatusExited
+					break
+				case "waiting":
+					service.ServiceActiveStatus = common.ServiceActiveStatusWaiting
+					break
+				}
+			}
+			if i == 5 {
+				service.ServiceTime = value
+			}
+			if i == 6 {
+				service.ServiceTime = service.ServiceTime + " " + value
 			}
 		}
-	}
 
-	for i, value := range strings.SplitN(strings.Trim(serviceResult[2], " "), " ", -1) {
-		if i == 1 {
-			switch value {
-			case "inactive":
-				service.ServiceActiveStatus = common.ServiceActiveStatusInactive
-				break
-			case "active":
-				service.ServiceActiveStatus = "active"
-				break
-			default:
-				service.ServiceActiveStatus = common.ServiceActiveStatusUnknown
-				break
-			}
+		if len(serviceResult) > 3 && strings.Split(strings.Trim(serviceResult[3], " "), " ")[0] == "Process:" {
+			service.ServiceExectStart = strings.Split(strings.Split(strings.Trim(serviceResult[3], " "), " ")[2], "=")[1]
 		}
-		if i == 2 && service.ServiceActiveStatus == "active" {
-			switch strings.Trim(value, "()") {
-			case "running":
-				service.ServiceActiveStatus = common.ServiceActiveStatusRunning
-				break
-			case "exited":
-				service.ServiceActiveStatus = common.ServiceActiveStatusExited
-				break
-			case "waiting":
-				service.ServiceActiveStatus = common.ServiceActiveStatusWaiting
-				break
-			}
-		}
-		if i == 5 {
-			service.ServiceTime = value
-		}
-		if i == 6 {
-			service.ServiceTime = service.ServiceTime + " " + value
-		}
+		return service
 	}
-	if len(serviceResult) > 3 && strings.SplitN(strings.Trim(serviceResult[3], " "), " ", -1)[0] == "Process:" {
-		service.ServiceExectStart = strings.SplitN(strings.SplitN(strings.Trim(serviceResult[3], " "), " ", -1)[2], "=", -1)[1]
-	}
-	return service
+	return nil
 }
 
 func verifyStatus(output string, operate int) bool {
