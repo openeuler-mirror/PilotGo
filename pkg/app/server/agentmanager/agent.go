@@ -180,7 +180,7 @@ func (a *Agent) HeartBeat() (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.Heartbeat,
-		Data: "连接正常",
+		Data: "connection is normal",
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
