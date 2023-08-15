@@ -26,6 +26,12 @@ type NetInterfaceCard struct {
 	MacAddr string
 }
 
+type NIC struct {
+	Device string
+	Type   string
+	State  string
+}
+
 type NetworkConfig struct {
 	NetworkType        string `json:"TYPE"` //以太网、无线网
 	ProxyMethod        string `json:"PROXY_METHOD"`

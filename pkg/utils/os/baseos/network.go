@@ -240,20 +240,37 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 	return nil, fmt.Errorf("failed to get BOOTPROTO: %d, %s, %s, %v", exitc, result, stde, err)
 }
 
+// Deprecated
 func (b *BaseOS) GetNICName() (string, error) {
-	network, err := utils.GetFiles(global.NetWorkPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to get network configuration file: %s", err)
-	}
-	var filename string
-	for _, n := range network {
-		if ok := strings.Contains(n, "ifcfg-e"); !ok {
-			continue
+	names, err := b.GetNICS()
+	for _, value := range names {
+		if value.Type == "ethernet" {
+			return value.Device, nil
 		}
-		filename = n
+	}
+	return "", err
+}
+
+func (b *BaseOS) GetNICS() ([]common.NIC, error) {
+	var nics []common.NIC
+	exitc, stdo, stde, err := utils.RunCommand("nmcli device")
+	if err != nil || stde != "" {
+		return nics, fmt.Errorf("failed to reload network configuration file: %d, %s, %s, %v", exitc, stdo, stde, err)
 	}
 
-	return filename, nil
+	if len(strings.Split(stdo, "\n")) > 1 {
+		for _, ns := range strings.Split(stdo, "\n")[1:] {
+			n := strings.Fields(ns)
+			u := common.NIC{
+				Device: n[0],
+				Type:   n[1],
+				State:  n[2],
+			}
+			nics = append(nics, u)
+		}
+	}
+
+	return nics, nil
 }
 
 func (b *BaseOS) RestartNetwork(nic string) error {

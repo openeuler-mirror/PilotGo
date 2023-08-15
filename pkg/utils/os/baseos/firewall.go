@@ -9,9 +9,10 @@ import (
 )
 
 func (b *BaseOS) Config() (common.FireWalldConfig, error) {
-	nic_interface, err := b.GetNICName()
+	var err error
 	firewalldConfig := common.FireWalldConfig{}
 	firewalldConfig.Set()
+	firewalldConfig.Nic, err = b.GetNICName()
 	if err != nil {
 		return firewalldConfig, fmt.Errorf("failed to get network card name")
 	}
@@ -19,7 +20,6 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	exitc, firewall_state, stde, err := utils.RunCommand("firewall-cmd --state")
 	if exitc != 0 && firewall_state == "" && strings.Replace(stde, "\n", "", -1) == "not running" && err == nil {
 		firewalldConfig.Status = "not running"
-		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		return firewalldConfig, nil
 	}
 
@@ -27,7 +27,6 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	if exitc == 0 && zone_default != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		return firewalldConfig, nil
 	}
 
@@ -35,7 +34,6 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	if exitc == 0 && zones != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 		return firewalldConfig, nil
 	}
@@ -45,14 +43,12 @@ func (b *BaseOS) Config() (common.FireWalldConfig, error) {
 	if exitc == 0 && services != "" && stde == "" && err == nil {
 	} else {
 		firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-		firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 		firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 		firewalldConfig.Zones = Zones
 		return firewalldConfig, nil
 	}
 	Services := strings.Split(strings.Replace(services, "\n", "", -1), " ")
 	firewalldConfig.Status = strings.Replace(firewall_state, "\n", "", -1)
-	firewalldConfig.Nic = strings.Split(nic_interface, "-")[1]
 	firewalldConfig.DefaultZone = strings.Replace(zone_default, "\n", "", -1)
 	firewalldConfig.Zones = Zones
 	firewalldConfig.Services = Services
