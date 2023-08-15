@@ -1,6 +1,7 @@
 package baseos
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,6 +45,13 @@ func TestNetwork(t *testing.T) {
 	t.Run("test GetNICName", func(t *testing.T) {
 		_, err := osobj.GetNICName()
 		assert.Nil(t, err)
+	})
+
+	t.Run("test GetNICS", func(t *testing.T) {
+		tmp, err := osobj.GetNICS()
+		fmt.Println(tmp)
+		assert.Nil(t, err)
+		fmt.Println(err)
 	})
 
 	t.Run("test GetHostIp", func(t *testing.T) {
