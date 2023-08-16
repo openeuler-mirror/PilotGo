@@ -1,5 +1,7 @@
 http_server:
   addr: 0.0.0.0:8888
+  cert_file: ""
+  key_file: ""
   session_count: 100
   max_age: 1800
   # if true, will start pprof on :6060
