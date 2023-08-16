@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-07-11 14:37:34
+ * LastEditTime: 2023-08-16 15:44:53
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -37,7 +37,9 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 	go func() {
 		r := setupRouter()
 		logger.Info("start http service on: http://%s", conf.Addr)
-		r.Run(conf.Addr)
+		if err := r.RunTLS(conf.Addr, conf.CertFile, conf.KeyFile); err != nil {
+			logger.Error("start http server failed:%v", err)
+		}
 	}()
 
 	if conf.Debug {
@@ -46,7 +48,7 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 			portIndex := strings.Index(conf.Addr, ":")
 			addr := conf.Addr[:portIndex] + ":6060"
 			logger.Debug("start pprof service on: %s", addr)
-			err := http.ListenAndServe(addr, nil)
+			err := http.ListenAndServeTLS(addr, conf.CertFile, conf.KeyFile, nil)
 			if err != nil {
 				logger.Error("failed to start pprof, error:%v", err)
 			}

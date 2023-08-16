@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
  * Date: 2022-04-06 13:27:45
- * LastEditTime: 2023-05-22 15:53:04
+ * LastEditTime: 2023-08-16 15:42:25
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
 package config
@@ -26,6 +26,8 @@ type HttpServer struct {
 	SessionCount  int    `yaml:"session_count"`
 	SessionMaxAge int    `yaml:"session_max_age"`
 	Debug         bool   `yaml:"debug"`
+	CertFile      string `yaml:"cert_file"`
+	KeyFile       string `yaml:"key_file"`
 }
 type SocketServer struct {
 	Addr string `yaml:"addr"`
