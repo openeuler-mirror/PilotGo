@@ -86,16 +86,19 @@ func DeleteAgent(uuid string) {
 	}
 }
 
-func AddandRunAgent(c net.Conn) {
+func AddandRunAgent(c net.Conn) error {
 	agent, err := NewAgent(c)
 	if err != nil {
 		logger.Warn("create agent from conn error, error:%s , remote addr is:%s",
 			err.Error(), c.RemoteAddr().String())
+		return err
 	}
 
 	AddAgent(agent)
 	logger.Info("Add new agent from:%s", c.RemoteAddr().String())
 	AddAgents2DB(agent)
+
+	return nil
 }
 
 func StopAgentManager() {
