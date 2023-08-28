@@ -25,7 +25,7 @@ import (
 
 type SocketServer struct {
 	// MessageProcesser *protocol.MessageProcesser
-	OnAccept func(net.Conn)
+	OnAccept func(net.Conn) error
 	OnStop   func()
 }
 
@@ -55,7 +55,10 @@ func (s *SocketServer) Run(addr string) error {
 			fmt.Println("accept error:", err)
 			continue
 		}
-		s.OnAccept(conn)
+
+		if err := s.OnAccept(conn); err != nil {
+			logger.Error("failed to add and run agent: %s", err)
+		}
 	}
 }
 

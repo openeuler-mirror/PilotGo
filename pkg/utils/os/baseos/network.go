@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	gnet "github.com/shirou/gopsutil/net"
+	aconfig "openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
@@ -309,7 +310,7 @@ func ModuleMatch(key string, value string, network *common.NetworkConfig) {
 }
 
 func (b *BaseOS) GetHostIp() (string, error) {
-	conn, err := net.Dial("udp", "openeuler.org:80")
+	conn, err := net.Dial("udp", aconfig.Config().Server.Addr)
 	if err != nil {
 		return "", err
 	}

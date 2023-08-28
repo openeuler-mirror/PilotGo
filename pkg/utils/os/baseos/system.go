@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/shirou/gopsutil/host"
+	aconfig "openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
@@ -13,7 +14,7 @@ import (
 
 func (b *BaseOS) GetHostInfo() (*common.SystemInfo, error) {
 	//获取IP
-	conn, err := net.Dial("udp", "openeuler.org:80")
+	conn, err := net.Dial("udp", aconfig.Config().Server.Addr)
 	if err != nil {
 		fmt.Println("failed to get IP")
 	}

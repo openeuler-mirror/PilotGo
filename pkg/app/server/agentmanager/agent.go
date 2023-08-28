@@ -142,6 +142,7 @@ func (a *Agent) Init() error {
 	data, err := a.AgentInfo()
 	if err != nil {
 		logger.Error("fail to get agent info, address:%s", a.conn.RemoteAddr().String())
+		return err
 	}
 
 	a.UUID = data.AgentUUID
