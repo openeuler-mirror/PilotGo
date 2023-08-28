@@ -42,10 +42,10 @@
       <span slot="label"> 防火墙信息</span>
       <firewall-info v-if="firewall"></firewall-info>
     </el-tab-pane>
-    <el-tab-pane name="crontab">
+    <!-- <el-tab-pane name="crontab">
       <span slot="label"> 定时任务信息</span>
       <crontab-info v-if="crontab"></crontab-info>
-    </el-tab-pane>
+    </el-tab-pane> -->
     <el-tab-pane name="terminal">
       <span slot="label"> 终端信息</span>
       <terminal-info v-if="terminal"></terminal-info>
