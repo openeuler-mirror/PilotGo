@@ -26,6 +26,7 @@ type HttpServer struct {
 	SessionCount  int    `yaml:"session_count"`
 	SessionMaxAge int    `yaml:"session_max_age"`
 	Debug         bool   `yaml:"debug"`
+	UseHttps      bool   `yaml:"use_https"`
 	CertFile      string `yaml:"cert_file"`
 	KeyFile       string `yaml:"key_file"`
 }

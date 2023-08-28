@@ -1,5 +1,6 @@
 http_server:
   addr: 0.0.0.0:8888
+  use_https: false
   cert_file: ""
   key_file: ""
   session_count: 100

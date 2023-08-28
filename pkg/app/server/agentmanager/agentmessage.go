@@ -36,7 +36,7 @@ func (a *Agent) AgentInfo() (*AgentInfo, error) {
 	info := &AgentInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind AgentInfo data error:", err)
+		logger.Error("bind AgentInfo data error: %v", err)
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ func (a *Agent) GetOSInfo() (*common.SystemInfo, error) {
 	info := &common.SystemInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetOSInfo data error:", err)
+		logger.Error("bind GetOSInfo data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -93,7 +93,7 @@ func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 	info := &common.CPUInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetCPUInfo data error:", err)
+		logger.Error("bind GetCPUInfo data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -121,7 +121,7 @@ func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
 	info := &common.MemoryConfig{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetMemoryInfo data error:", err)
+		logger.Error("bind GetMemoryInfo data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -149,7 +149,7 @@ func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
 	info := &map[string]string{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetSysctlInfo data error:", err)
+		logger.Error("bind GetSysctlInfo data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -199,7 +199,7 @@ func (a *Agent) DiskUsage() ([]*common.DiskUsageINfo, error) {
 	info := &[]*common.DiskUsageINfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind DiskUsage data error:", err)
+		logger.Error("bind DiskUsage data error: %v", err)
 		return nil, err
 	}
 	return *info, nil
@@ -227,7 +227,7 @@ func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 	info := &common.DiskIOInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind DiskInfo data error", err)
+		logger.Error("bind DiskInfo data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -238,7 +238,6 @@ func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 1.创建挂载磁盘的目录
 2.挂载磁盘
 */
-
 func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -259,6 +258,7 @@ func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
 
 	return resp_message.Data.(string), nil
 }
+
 func (a *Agent) DiskUMount(diskPath string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -279,6 +279,7 @@ func (a *Agent) DiskUMount(diskPath string) (string, error) {
 
 	return resp_message.Data.(string), nil
 }
+
 func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -322,7 +323,7 @@ func (a *Agent) NetTCP() (*common.NetConnect, error) {
 	info := &common.NetConnect{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind NetTCP data error:", err)
+		logger.Error("bind NetTCP data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -350,7 +351,7 @@ func (a *Agent) NetUDP() (*common.NetConnect, error) {
 	info := &common.NetConnect{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind NetUDP data error:", err)
+		logger.Error("bind NetUDP data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -378,7 +379,7 @@ func (a *Agent) NetIOCounter() (*common.IOCnt, error) {
 	info := &common.IOCnt{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind NetIOCounter data error:", err)
+		logger.Error("bind NetIOCounter data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -406,7 +407,7 @@ func (a *Agent) NetNICConfig() (*common.NetInterfaceCard, error) {
 	info := &common.NetInterfaceCard{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind NetNICConfig data error:", err)
+		logger.Error("bind NetNICConfig data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -434,7 +435,7 @@ func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
 	info := &common.SystemAndCPUInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetAgentOSInfo data error:", err)
+		logger.Error("bind GetAgentOSInfo data error: %v", err)
 		return nil, err
 	}
 	return info, nil
@@ -462,7 +463,7 @@ func (a *Agent) GetRepoSource() ([]*common.RepoSource, string, error) {
 	info := &[]*common.RepoSource{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind data error:", err)
+		logger.Error("bind data error: %v", err)
 		return nil, resp_message.Error, err
 	}
 	return *info, resp_message.Error, nil

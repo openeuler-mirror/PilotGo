@@ -36,9 +36,21 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 
 	go func() {
 		r := setupRouter()
-		logger.Info("start http service on: http://%s", conf.Addr)
-		if err := r.RunTLS(conf.Addr, conf.CertFile, conf.KeyFile); err != nil {
-			logger.Error("start http server failed:%v", err)
+		if conf.UseHttps {
+			if conf.CertFile == "" || conf.KeyFile == "" {
+				logger.Error("https cert or key not configd")
+				return
+			}
+
+			logger.Info("start http service on: https://%s", conf.Addr)
+			if err := r.RunTLS(conf.Addr, conf.CertFile, conf.KeyFile); err != nil {
+				logger.Error("start http server failed:%v", err)
+			}
+		} else {
+			logger.Info("start http service on: http://%s", conf.Addr)
+			if err := r.Run(conf.Addr); err != nil {
+				logger.Error("start http server failed:%v", err)
+			}
 		}
 	}()
 
@@ -48,9 +60,21 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 			portIndex := strings.Index(conf.Addr, ":")
 			addr := conf.Addr[:portIndex] + ":6060"
 			logger.Debug("start pprof service on: %s", addr)
-			err := http.ListenAndServeTLS(addr, conf.CertFile, conf.KeyFile, nil)
-			if err != nil {
-				logger.Error("failed to start pprof, error:%v", err)
+			if conf.UseHttps {
+				if conf.CertFile == "" || conf.KeyFile == "" {
+					logger.Error("https cert or key not configd")
+					return
+				}
+
+				err := http.ListenAndServeTLS(addr, conf.CertFile, conf.KeyFile, nil)
+				if err != nil {
+					logger.Error("failed to start pprof, error:%v", err)
+				}
+			} else {
+				err := http.ListenAndServe(addr, nil)
+				if err != nil {
+					logger.Error("failed to start pprof, error:%v", err)
+				}
 			}
 		}()
 	}
