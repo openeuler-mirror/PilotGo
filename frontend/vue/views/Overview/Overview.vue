@@ -78,7 +78,7 @@
 <script>
 import DepartChart from './charts/dept.vue';
 import AlertDetail from './form/detail.vue';
-import { getAlerts, getPanelDatas } from '@/request/overview'
+import { getPanelDatas } from '@/request/overview'
 import _import from '../../router/_import';
 export default {
   name: "Overview",
@@ -147,7 +147,6 @@ export default {
         this.normal = data.AgentStatus.normal
       }
     })
-    this.getAlerts();
     this.resize();
     window.addEventListener("resize", this.resize);
     this.carHeight = this.$refs.curr.clientHeight + 'px';
@@ -157,14 +156,6 @@ export default {
       let cWidth = document.getElementsByClassName('dept')[0].clientWidth;
       let cHeight = document.getElementsByClassName('dept')[0].clientHeight;
       this.$refs.dept.resize({ width: cWidth, height: cHeight })
-    },
-    getAlerts() {
-      getAlerts().then(res => {
-        if (res.data.status === 'success' && res.data.data.alerts.length > 0) {
-          this.Message = res.data.data.alerts;
-          this.messageNum = res.data.data.alerts.length;
-        }
-      })
     },
     handleClose() {
       this.display = false;
