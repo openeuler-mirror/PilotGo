@@ -101,7 +101,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 			if err != nil {
 				return UserExit, err
 			}
-			password := global.DefaultUserPassword // 设置默认密码为123456
+			password := strings.Split(email, "@")[0]
 			u := dao.User{
 				Username:     userName,
 				Phone:        phone,
@@ -170,6 +170,15 @@ func UpdateUser(user dao.User) (dao.User, error) {
 	return u, nil
 }
 
+func UpdatePassword(email, newPWD string) (dao.User, error) {
+
+	u, err := dao.UpdatePassword(email, newPWD)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
+}
+
 func ResetPassword(email string) (dao.User, error) {
 	u, err := dao.ResetPassword(email)
 	if err != nil {
@@ -180,6 +189,9 @@ func ResetPassword(email string) (dao.User, error) {
 
 func UserSearch(email string, query *common.PaginationQ) (interface{}, int, error) {
 	users, total, err := dao.UserSearch(email)
+	if err != nil {
+		return nil, 0, err
+	}
 	data, err := common.DataPaging(query, users, total)
 	if err != nil {
 		return nil, 0, err

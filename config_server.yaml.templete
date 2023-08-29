@@ -8,7 +8,7 @@ http_server:
   # if true, will start pprof on :6060
   debug: false
 socket_server:
-  addr: 0.0.0.0:8889
+  addr: 0.0.0.0:8879
 log:
   level: debug
   driver: stdout    #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。
@@ -16,13 +16,13 @@ log:
   max_file: 1
   max_size: 10485760
 mysql:
-  host_name: mysql
+  host_name: localhost
   port: 3306
   user_name: 'root'
   password: '1234'
   data_base: PilotGo
 redis:
-  redis_conn: redis:6379
+  redis_conn: localhost:6379
   redis_pwd: ''
   defaultDB: 0
   dialTimeout: 5s #redis连接超时时间.默认5s

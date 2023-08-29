@@ -43,8 +43,8 @@ const (
 	OtherUserType = 3
 	//普通用户角色id
 	OrdinaryUserRoleId = 3
-	// 默认用户密码
-	DefaultUserPassword = "123456"
+	// 超级用户
+	SuperUser = "admin@123.com"
 )
 
 // 单机操作成功状态:是否成功，机器数量，比率

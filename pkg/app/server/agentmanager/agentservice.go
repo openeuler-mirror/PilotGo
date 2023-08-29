@@ -31,7 +31,7 @@ func (a *Agent) ServiceList() ([]*common.ListService, error) {
 	info := &[]*common.ListService{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind ServiceList data error:", err)
+		logger.Error("bind ServiceList data error:%s", err)
 		return nil, err
 	}
 	return *info, nil

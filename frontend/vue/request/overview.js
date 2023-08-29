@@ -36,12 +36,12 @@ export function getPromeIp(data) {
   })
 }
 // 告警信息列表
-export function getAlerts() {
-  return request_prome({
-    url: '/plugin/Prometheus/api/v1/alerts',
-    method: 'get',
-  })
-}
+// export function getAlerts() {
+//   return request_prome({
+//     url: '/plugin/Prometheus/api/v1/alerts',
+//     method: 'get',
+//   })
+// }
 
 // 发送告警信息 
 export function sendMessage(data) {

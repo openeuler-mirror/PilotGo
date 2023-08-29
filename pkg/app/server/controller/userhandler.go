@@ -144,6 +144,21 @@ func UserSearchHandler(c *gin.Context) {
 	common.JsonPagination(c, data, int64(total), query)
 }
 
+// 修改密码
+func UpdatePasswordHandler(c *gin.Context) {
+	var user userservice.User
+	if c.Bind(&user) != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	u, err := userservice.UpdatePassword(user.Email, user.Password)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+	} else {
+		response.Success(c, gin.H{"data": u}, "密码修改成功!")
+	}
+}
+
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
 	var user userservice.User

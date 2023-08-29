@@ -31,7 +31,7 @@ func (a *Agent) FirewalldConfig() (*common.FireWalldConfig, string, error) {
 	info := &common.FireWalldConfig{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind FirewalldConfig data error:", err)
+		logger.Error("bind FirewalldConfig data error:%s", err)
 		return nil, resp_message.Error, err
 	}
 	return info, resp_message.Error, nil
@@ -81,7 +81,7 @@ func (a *Agent) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, stri
 	info := &common.FirewalldCMDList{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind data error:", err)
+		logger.Error("bind data error:%s", err)
 		return nil, resp_message.Error, err
 	}
 	return info, resp_message.Error, nil

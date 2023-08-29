@@ -62,7 +62,7 @@ func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 	info := &common.RpmSrc{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind RpmSource data error:", err)
+		logger.Error("bind RpmSource data error:%s", err)
 		return nil, err
 	}
 	return info, nil
@@ -90,7 +90,7 @@ func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 	info := &common.RpmInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind RpmInfo data error:", err)
+		logger.Error("bind RpmInfo data error:%s", err)
 		return nil, "", err
 	}
 	return info, resp_message.Error, nil
