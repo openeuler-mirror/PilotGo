@@ -26,6 +26,23 @@
         </el-menu>
       </el-aside>
       <el-container>
+        <el-dialog title="修改密码" :visible.sync="dialogFormVisible" width="650px">
+          <el-form :model="form" ref="form" label-width="80px" :rules="rules">
+            <el-form-item label="邮箱">
+              <el-input :value="username" autocomplete="off" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码" prop="password">
+              <el-input type="password" v-model="form.password" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="passwordValid">
+              <el-input type="password" v-model="form.passwordValid" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="confirmClick">确 定</el-button>
+          </div>
+        </el-dialog>
         <el-header style="height: 6%">
           <bread-crumb class="breadCrumb"></bread-crumb>
           <div class="header-function">
@@ -35,7 +52,7 @@
                 <span>{{ username.length > 16 ? username.split('@')[0] : username }}</span>
               </div>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native="updatePwd">修改密码</el-dropdown-item>
+                <el-dropdown-item @click.native="update">修改密码</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <div class="logOut" title="退出" @click="handleLogOut">
@@ -66,6 +83,7 @@
 import SidebarItem from "./components/SidebarItem";
 import BreadCrumb from "./components/BreadCrumb";
 import TagsView from "./components/TagsView";
+import { updatePwd } from "@/request/user";
 export default {
   name: "Home",
   components: {
@@ -74,12 +92,48 @@ export default {
     TagsView
   },
   data() {
+    var validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'));
+      } else {
+        if (this.form.passwordValid !== '') {
+          this.$refs.form.validateField('passwordValid');
+        }
+        callback();
+      }
+    };
+    var validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'));
+      } else if (value !== this.form.password) {
+        callback(new Error('两次输入密码不一致!'));
+      } else {
+        callback();
+      }
+    };
     return {
       ws: null,
       crumbs: [],
       isCollapse: false,
+      dialogFormVisible: false,
       // cachedViews: ['Batch','Overview','Prometheus']
-    };
+      form: {
+        name: '',
+        password: '',
+        passwordValid: ''
+      },
+      rules: {
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 3, max: 16, message: '最大长度16位', trigger: 'blur' },
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        passwordValid: [
+          { validator: validatePass2, trigger: 'blur' }
+        ]
+      },
+
+    }
   },
   mounted() {
     this.initSocket();
@@ -140,23 +194,25 @@ export default {
 
       })
     },
-    updatePwd() {
-      this.$prompt('请输入邮箱', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
-        inputErrorMessage: '邮箱格式不正确'
-      }).then(({ value }) => {
-        this.$message({
-          type: 'success',
-          message: '你的邮箱是: ' + value
-        });
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '取消输入'
-        });
-      });
+    update() {
+      this.dialogFormVisible = true
+      this.$refs.form.clearValidate();
+      // this.$prompt('请输入邮箱', '提示', {
+      //   confirmButtonText: '确定',
+      //   cancelButtonText: '取消',
+      //   inputPattern: /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
+      //   inputErrorMessage: '邮箱格式不正确'
+      // }).then(({ value }) => {
+      //   this.$message({
+      //     type: 'success',
+      //     message: '你的邮箱是: ' + value
+      //   });
+      // }).catch(() => {
+      //   this.$message({
+      //     type: 'info',
+      //     message: '取消输入'
+      //   });
+      // });
     },
     // socket
     initSocket() {
@@ -202,6 +258,25 @@ export default {
         this.$message.error('websoket连接失败,请刷新!')
       }
     },
+    confirmClick() {
+      this.$refs.form.validate(async (valid) => {
+        if (valid) {
+          const res = await updatePwd({
+            email: this.username,
+            password: this.form.password
+          })
+          if (res.data.code === 200) {
+            this.$message.success('修改成功')
+          } else {
+            this.$message.error(res.data.msg)
+          }
+          this.dialogFormVisible = false
+          this.$refs.form.resetFields();
+
+        }
+      });
+
+    }
 
   },
   beforeDestroy() {

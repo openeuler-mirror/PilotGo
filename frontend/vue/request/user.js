@@ -84,6 +84,14 @@ export function resetPwd(data) {
     data
   })
 }
+// 更改密码
+export function updatePwd(data) {
+  return request({
+    url: '/user/updatepwd',
+    method: 'post',
+    data
+  })
+}
 // 批量导入用户
 export function importUser(data) {
   return request({
