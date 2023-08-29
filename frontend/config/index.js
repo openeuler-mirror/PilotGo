@@ -16,7 +16,7 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 
 const path = require('path')
-const basePath = 'http://localhost:8888'; 
+const basePath = 'http://localhost:8888';
 //'http://172.17.127.21:8000', // wang 
 //172.17.127.18:10086, zhang
 module.exports = {
@@ -25,19 +25,19 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    https:true,
+    https: true,
     proxyTable: {
       '/api/v1': {
         target: basePath,
         changeOrigin: true,  //改变源
-        secure:true,
+        secure: true,
         pathRewrite: {
           '^/config/macList': '/macList'   //路径重写
         }
       },
     },
     // Various Dev Server settings
-    host: '0.0.0.0', 
+    host: '0.0.0.0',
     port: 8888,
     autoOpenBrowser: false,
     errorOverlay: true,

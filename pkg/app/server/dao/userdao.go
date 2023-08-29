@@ -15,12 +15,12 @@
 package dao
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"time"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
@@ -192,6 +192,27 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 	return redisUser, totals, nil
 }
 
+// 修改密码
+func UpdatePassword(email, newPWD string) (User, error) {
+	var user User
+	err := mysqlmanager.MySQL().Where("email=?", email).Find(&user).Error
+	if err != nil {
+		return user, err
+	} else {
+		err = utils.ComparePassword(user.Password, newPWD)
+		if err == nil {
+			return user, errors.New("新密码和旧密码一致")
+		}
+
+		bs, err := utils.CryptoPassword(newPWD)
+		if err != nil {
+			return user, err
+		}
+		err = mysqlmanager.MySQL().Model(&user).Where("email=?", email).Update("password", string(bs)).Error
+		return user, err
+	}
+}
+
 // 重置密码
 func ResetPassword(email string) (User, error) {
 	var user User
@@ -199,7 +220,7 @@ func ResetPassword(email string) (User, error) {
 	if err != nil {
 		return user, err
 	} else {
-		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
+		bs, err := utils.CryptoPassword(strings.Split(email, "@")[0])
 		if err != nil {
 			return user, err
 		}

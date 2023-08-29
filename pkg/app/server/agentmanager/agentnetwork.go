@@ -31,7 +31,7 @@ func (a *Agent) GetNetWorkConnectInfo() (*map[string]string, string, error) {
 	info := &map[string]string{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetSysctlInfo data error:", err)
+		logger.Error("bind GetSysctlInfo data error:%s", err)
 		return nil, resp_message.Error, err
 	}
 	return info, resp_message.Error, nil
@@ -59,7 +59,7 @@ func (a *Agent) GetNetWorkConnInfo() (*common.NetworkConfig, string, error) {
 	info := &common.NetworkConfig{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind GetNetWorkConnInfo data error:", err)
+		logger.Error("bind GetNetWorkConnInfo data error:%s", err)
 		return nil, resp_message.Error, err
 	}
 	return info, resp_message.Error, nil
@@ -158,7 +158,7 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 	info := &common.UpdateFile{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind UpdateFile data error:", err)
+		logger.Error("bind UpdateFile data error:%s", err)
 		return nil, resp_message.Error, err
 	}
 	return info, resp_message.Error, nil

@@ -195,6 +195,7 @@ func registerAPIs(router *gin.Engine) {
 	user := api.Group("user") // 用户管理
 	{
 		user.POST("/login", controller.LoginHandler)
+		user.POST("/updatepwd", controller.UpdatePasswordHandler)
 		user.GET("/logout", controller.Logout)
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearchHandler)

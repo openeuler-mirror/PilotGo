@@ -228,7 +228,7 @@ func CreateAdministratorUser() error {
 			ButtonID:    global.PILOTGO_BUTTONID,
 		}
 		mysqlmanager.MySQL().Create(&role)
-		bs, err := utils.CryptoPassword(global.DefaultUserPassword)
+		bs, err := utils.CryptoPassword(strings.Split(global.SuperUser, "@")[0])
 		if err != nil {
 			return err
 		}
@@ -238,9 +238,9 @@ func CreateAdministratorUser() error {
 			DepartFirst:  global.Departroot,
 			DepartSecond: global.UncateloguedDepartId,
 			DepartName:   "超级用户",
-			Username:     "admin",
+			Username:     strings.Split(global.SuperUser, "@")[0],
 			Password:     string(bs),
-			Email:        "admin@123.com",
+			Email:        global.SuperUser,
 			UserType:     global.AdminUserType,
 			RoleID:       strconv.Itoa(role.ID),
 		}

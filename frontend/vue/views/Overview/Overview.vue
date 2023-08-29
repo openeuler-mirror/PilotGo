@@ -24,7 +24,13 @@
           <span>您的身份：{{ userType }}</span>
         </div>
         <div class="mac">
-          <el-carousel ref="carousel" trigger="click" :interval="8000" :height="carHeight" indicator-position="none">
+          <el-carousel
+            ref="carousel"
+            trigger="click"
+            :interval="8000"
+            :height="carHeight"
+            indicator-position="none"
+          >
             <el-carousel-item v-for="item in tooltips" :key="item.id">
               <h4 class="small">{{ item.name }}</h4>
               <p>{{ item.description }}</p>
@@ -33,14 +39,17 @@
         </div>
       </div>
       <div class="top">
-        <div class="top_panel zx"><span>在线机器</span>
-          <p style="color:rgb(92, 123, 217)">{{ normal }}</p>
+        <div class="top_panel zx">
+          <span>在线机器</span>
+          <p style="color: rgb(92, 123, 217)">{{ normal }}</p>
         </div>
-        <div class="top_panel lx"><span>离线机器</span>
-          <p style="color:rgb(138, 138, 138)">{{ offline }}</p>
+        <div class="top_panel lx">
+          <span>离线机器</span>
+          <p style="color: rgb(138, 138, 138)">{{ offline }}</p>
         </div>
-        <div class="top_panel kx"><span>未分配机器</span>
-          <p style="color: rgb(253,190,0)">{{ free }}</p>
+        <div class="top_panel kx">
+          <span>未分配机器</span>
+          <p style="color: rgb(253, 190, 0)">{{ free }}</p>
         </div>
       </div>
     </div>
@@ -53,12 +62,22 @@
         </el-badge>
       </div>
       <el-timeline :reverse="reverse">
-        <el-timeline-item v-for="item in Message" :key="item.$index" :timestamp="item.activeAt | dateFormat"
-          color="rgb(92, 123, 217)" size="large" placement="top">
+        <el-timeline-item
+          v-for="item in Message"
+          :key="item.$index"
+          :timestamp="item.activeAt | dateFormat"
+          color="rgb(92, 123, 217)"
+          size="large"
+          placement="top"
+        >
           <el-card>
             <h4 style="display: inline-block">{{ item.labels.alertname }}</h4>
-            <span style="color:rgb(11, 35, 117); cursor:pointer" v-if="item.state"
-              @click="handleDetail(item)">&emsp;>>详情</span>
+            <span
+              style="color: rgb(11, 35, 117); cursor: pointer"
+              v-if="item.state"
+              @click="handleDetail(item)"
+              >&emsp;>>详情</span
+            >
             <br /><br />
             <p>{{ item.annotations.summary }}</p>
           </el-card>
@@ -66,20 +85,27 @@
       </el-timeline>
     </div>
     <div class="dept panel">
-      <depart-chart ref="dept">
-      </depart-chart>
+      <depart-chart ref="dept"> </depart-chart>
     </div>
-    <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" width="70%">
-      <alert-detail v-if="type === 'detail'" :row="row" @click="handleClose"></alert-detail>
+    <el-dialog
+      :title="title"
+      :before-close="handleClose"
+      :visible.sync="display"
+      width="70%"
+    >
+      <alert-detail
+        v-if="type === 'detail'"
+        :row="row"
+        @click="handleClose"
+      ></alert-detail>
     </el-dialog>
   </div>
-
 </template>
 <script>
-import DepartChart from './charts/dept.vue';
-import AlertDetail from './form/detail.vue';
-import { getPanelDatas } from '@/request/overview'
-import _import from '../../router/_import';
+import DepartChart from "./charts/dept.vue";
+import AlertDetail from "./form/detail.vue";
+import { getPanelDatas } from "@/request/overview";
+import _import from "../../router/_import";
 export default {
   name: "Overview",
   components: {
@@ -88,47 +114,50 @@ export default {
   },
   data() {
     return {
-      userName: '暂无',
-      userDeptName: '暂无',
-      userType: '暂无',
+      userName: "暂无",
+      userDeptName: "暂无",
+      userType: "暂无",
       messageNum: 0,
       tooltips: [
         {
           id: 1,
-          name: '系统',
-          description: '按部门树节点查看一台机器各指标详情，监控性能变化，创建批次方便批量操作'
+          name: "系统",
+          description:
+            "按部门树节点查看一台机器各指标详情，监控性能变化，创建批次方便批量操作",
         },
         {
           id: 2,
-          name: '批次',
-          description: '查看创建批次，执行下发rpm包动作'
+          name: "批次",
+          description: "查看创建批次，执行下发rpm包动作",
         },
         {
           id: 3,
-          name: '日志',
-          description: '查看执行动作的结果以及失败的具体原因'
-        }
+          name: "日志",
+          description: "查看执行动作的结果以及失败的具体原因",
+        },
       ],
-      carHeight: '',
+      carHeight: "",
       row: {},
       reverse: false,
       display: false,
-      title: '',
-      type: '',
+      title: "",
+      type: "",
       total: 0,
       normal: 0,
       offline: 0,
       free: 0,
-      Message: [{
-        activeAt: '',
-        labels: {
-          alertname: '暂无',
+      Message: [
+        {
+          activeAt: "",
+          labels: {
+            alertname: "暂无",
+          },
+          annotations: {
+            summary: "暂无",
+          },
         },
-        annotations: {
-          summary: '暂无'
-        }
-      }],
-    }
+      ],
+    };
   },
   activated() {
     window.addEventListener("resize", this.resize);
@@ -136,26 +165,26 @@ export default {
   mounted() {
     this.userName = this.$store.getters.userName;
     this.userDeptName = this.$store.getters.UserDepartName;
-    this.userType = this.$store.getters.userType === 0 ?
-      '超级管理员' : '普通用户';
-    getPanelDatas().then(res => {
+    this.userType =
+      this.$store.getters.userType === 0 ? "超级管理员" : "普通用户";
+    getPanelDatas().then((res) => {
       if (res.data.code === 200) {
         let data = res.data.data.data;
         this.total = data.total;
         this.offline = data.AgentStatus.offline;
         this.free = data.AgentStatus.free;
-        this.normal = data.AgentStatus.normal
+        this.normal = data.AgentStatus.normal;
       }
-    })
+    });
     this.resize();
     window.addEventListener("resize", this.resize);
-    this.carHeight = this.$refs.curr.clientHeight + 'px';
+    this.carHeight = this.$refs.curr.clientHeight + "px";
   },
   methods: {
     resize() {
-      let cWidth = document.getElementsByClassName('dept')[0].clientWidth;
-      let cHeight = document.getElementsByClassName('dept')[0].clientHeight;
-      this.$refs.dept.resize({ width: cWidth, height: cHeight })
+      let cWidth = document.getElementsByClassName("dept")[0].clientWidth;
+      let cHeight = document.getElementsByClassName("dept")[0].clientHeight;
+      this.$refs.dept.resize({ width: cWidth, height: cHeight });
     },
     handleClose() {
       this.display = false;
@@ -171,16 +200,20 @@ export default {
   },
   filters: {
     dateFormat: function (value) {
-      if (value != '') {
-        let date = value.split('T')[0];
-        let time = value.split('T')[1].split('.')[0]
-        return date + ' ' + time;
+      if (value != "") {
+        let date = value.split("T")[0];
+        let time = value.split("T")[1].split(".")[0];
+        return date + " " + time;
       } else {
-        return new Date().getFullYear() + '.' +
-          (new Date().getMonth() + 1) + '.' +
-          new Date().getDate();
+        return (
+          new Date().getFullYear() +
+          "." +
+          (new Date().getMonth() + 1) +
+          "." +
+          new Date().getDate()
+        );
       }
-    }
+    },
   },
   deactivated() {
     window.removeEventListener("resize", this.resize);
@@ -188,8 +221,8 @@ export default {
   beforeDestroy() {
     //keep-alive关闭的话生效
     window.removeEventListener("resize", this.resize);
-  }
-}
+  },
+};
 </script>
 <style scoped lang="scss">
 .content {
@@ -309,7 +342,7 @@ export default {
       width: 100%;
       height: 13%;
       // padding: 2.6%;
-      box-shadow: 0 6px 12px 0 rgba(0, 0, 0, .1);
+      box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
     }
   }
 

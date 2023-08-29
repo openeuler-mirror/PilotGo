@@ -31,7 +31,7 @@ func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
 	info := &common.CurrentUser{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind CurrentUser data error:", err)
+		logger.Error("bind CurrentUser data error:%s", err)
 		return nil, err
 	}
 	return info, nil
@@ -59,7 +59,7 @@ func (a *Agent) AllUser() ([]*common.AllUserInfo, error) {
 	info := &[]*common.AllUserInfo{}
 	err = resp_message.BindData(info)
 	if err != nil {
-		logger.Error("bind AllUser data error:", err)
+		logger.Error("bind AllUser data error:%s", err)
 		return nil, err
 	}
 	return *info, nil
