@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:22
-  LastEditTime: 2022-07-01 14:12:56
+ LastEditTime: 2023-08-29 10:58:09
  -->
 <template>
  <div class="content">
@@ -38,11 +38,11 @@
       <span slot="label"> 软件包信息</span>
       <rpm-info v-if="npm"></rpm-info>
     </el-tab-pane>
-    <el-tab-pane name="firewall">
+    <!-- <el-tab-pane name="firewall">
       <span slot="label"> 防火墙信息</span>
       <firewall-info v-if="firewall"></firewall-info>
     </el-tab-pane>
-    <!-- <el-tab-pane name="crontab">
+    <el-tab-pane name="crontab">
       <span slot="label"> 定时任务信息</span>
       <crontab-info v-if="crontab"></crontab-info>
     </el-tab-pane> -->
@@ -60,9 +60,9 @@ import ServiceInfo from './service.vue'
 import NetworkInfo from './network.vue'
 import SysctlInfo from './sysctl.vue'
 import RpmInfo from './rpm.vue'
-import FirewallInfo from './firewall.vue'
+// import FirewallInfo from './firewall.vue'
 import TerminalInfo from './terminal.vue'
-import CrontabInfo from './crontab.vue'
+// import CrontabInfo from './crontab.vue'
 export default {
   name: "Detail",
   components: {
@@ -72,9 +72,9 @@ export default {
     NetworkInfo,
     SysctlInfo,
     RpmInfo,
-    FirewallInfo,
+    // FirewallInfo,
     TerminalInfo,
-    CrontabInfo,
+    // CrontabInfo,
   },
   data() {
     return {

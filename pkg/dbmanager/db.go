@@ -43,10 +43,10 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	mysqlmanager.MySQL().AutoMigrate(&dao.Script{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.ConfigFile{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{})
-
-	// 创建超级管理员账户
 	mysqlmanager.MySQL().AutoMigrate(&dao.User{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.UserRole{})
+
+	// 创建超级管理员账户
 	err = dao.CreateAdministratorUser()
 	if err != nil {
 		return err
