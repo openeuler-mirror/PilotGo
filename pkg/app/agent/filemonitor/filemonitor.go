@@ -21,21 +21,18 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
-	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 )
 
 var RESP_MSG = make(chan interface{})
 
 func FileMonitorInit() error {
-	//获取IP
-	IP, err := uos.OS().GetHostIp()
-	if err != nil {
-		return fmt.Errorf("can not to get IP")
-	}
+	// get agent uuid
+	uuid := localstorage.AgentUUID()
 
 	// 1、NewWatcher 初始化一个 watcher
 	watcher, err := fsnotify.NewWatcher()
@@ -73,7 +70,7 @@ func FileMonitorInit() error {
 				}
 
 				if e.Op&fsnotify.Write == fsnotify.Write {
-					RESP_MSG <- fmt.Sprintf("机器 %s 上的文件已被修改 : %s", IP, e.Name)
+					RESP_MSG <- fmt.Sprintf("机器 %s 上的文件已被修改 : %s", uuid, e.Name)
 				}
 
 			case err, ok := <-watcher.Errors:
