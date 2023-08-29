@@ -12,58 +12,49 @@
   LastEditTime: 2022-07-01 15:41:13
  -->
 <template>
- <div class="content">
-   <div class="repo">
-     <small-table
-        class="tab"
-        ref="stable"
-        :data="totalRepo">
+  <div class="content">
+    <div class="repo">
+      <small-table class="tab" ref="stable" :data="totalRepo">
         <template v-slot:content>
-        <el-table-column prop="name" label="repo名称"></el-table-column>
-        <el-table-column prop="baseurl" label="repo地址"></el-table-column>
+          <el-table-column prop="Name" label="repo名称"></el-table-column>
+          <el-table-column prop="Baseurl" label="repo地址"></el-table-column>
         </template>
       </small-table>
-   </div>
-   <div class="packages">
-      <el-autocomplete
-        style="width:86%"
-        class="inline-input"
-        v-model="packageName"
-        :fetch-suggestions="querySearch"
-        placeholder="请输入内容"
-        @select="handleSelect"
-      ></el-autocomplete>
+    </div>
+    <div class="packages">
+      <el-autocomplete style="width:86%" class="inline-input" v-model="packageName" :fetch-suggestions="querySearch"
+        placeholder="请输入内容" @select="handleSelect"></el-autocomplete>
       <auth-button name="default_all" @click="handleSelect">搜索</auth-button>
       <auth-button name="rpm_install" @click="handleInstall">安装</auth-button>
       <auth-button name="rpm_uninstall" @click="handleUnInstall">卸载</auth-button>
-   </div>
-   <div class="info">
-     <div class="detail" v-if="display">
-       <p class="title">软件包详情：</p>
-       <el-descriptions :column="3" size="medium" border>
-        <el-descriptions-item label="软件包名">{{ rpmInfo.Name }}</el-descriptions-item>
-        <el-descriptions-item label="Version">{{ rpmInfo.Version }}</el-descriptions-item>
-        <el-descriptions-item label="Release">{{ rpmInfo.Release }}</el-descriptions-item>
-        <el-descriptions-item label="Architecture">{{ rpmInfo.Architecture }}</el-descriptions-item>
-        <el-descriptions-item label="说明">{{ rpmInfo.Summary }}</el-descriptions-item>
-      </el-descriptions>
-     </div>
-     <div class="result" v-else>
-       <p class="title">执行结果：</p>
-       <el-descriptions :column="2" size="medium" border>
-        <el-descriptions-item label="软件包名">{{ packageName }}</el-descriptions-item>
-        <el-descriptions-item label="执行动作">{{ action }}</el-descriptions-item>
-        <el-descriptions-item label="结果">
-          {{result+":"}}
-          <p class="progress" v-show="result != ''">
-            <span :style="{background: result === '成功' ? 'rgb(109, 123, 172)' : 'rgb(223, 96, 88)'}">100%</span>
-          </p>
-        </el-descriptions-item>
-      </el-descriptions>
-     </div>
-   </div>
+    </div>
+    <div class="info">
+      <div class="detail" v-if="display">
+        <p class="title">软件包详情：</p>
+        <el-descriptions :column="3" size="medium" border>
+          <el-descriptions-item label="软件包名">{{ rpmInfo.Name }}</el-descriptions-item>
+          <el-descriptions-item label="Version">{{ rpmInfo.Version }}</el-descriptions-item>
+          <el-descriptions-item label="Release">{{ rpmInfo.Release }}</el-descriptions-item>
+          <el-descriptions-item label="Architecture">{{ rpmInfo.Architecture }}</el-descriptions-item>
+          <el-descriptions-item label="说明">{{ rpmInfo.Summary }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      <div class="result" v-else>
+        <p class="title">执行结果：</p>
+        <el-descriptions :column="2" size="medium" border>
+          <el-descriptions-item label="软件包名">{{ packageName }}</el-descriptions-item>
+          <el-descriptions-item label="执行动作">{{ action }}</el-descriptions-item>
+          <el-descriptions-item label="结果">
+            {{ result + ":" }}
+            <p class="progress" v-show="result != ''">
+              <span :style="{ background: result === '成功' ? 'rgb(109, 123, 172)' : 'rgb(223, 96, 88)' }">100%</span>
+            </p>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </div>
 
- </div>
+  </div>
 </template>
 <script>
 import { rpmAll, getDetail, rpmIssue, rpmUnInstall, repoAll } from '@/request/cluster'
@@ -92,11 +83,11 @@ export default {
     }
   },
   mounted() {
-    this.params = {uuid:this.$route.params.detail};
-    if(this.$route.params.detail != undefined) {
+    this.params = { uuid: this.$route.params.detail };
+    if (this.$route.params.detail != undefined) {
       this.getAllRpm();
       repoAll(this.params).then(res => {
-        if(res.data.code === 200) {
+        if (res.data.code === 200) {
           this.totalRepo = res.data.data && res.data.data;
         } else {
           console.log(res.data.msg)
@@ -106,12 +97,12 @@ export default {
   },
   methods: {
     getAllRpm() {
-       rpmAll(this.params).then(res => {
-        if(res.data.code === 200) {
+      rpmAll(this.params).then(res => {
+        if (res.data.code === 200) {
           let result = res.data.data && res.data.data.rpm_all;
           this.totalPackages = result.length;
           result.forEach(item => {
-            this.rpmData.push({'value':item})
+            this.rpmData.push({ 'value': item })
           })
         } else {
           console.log(res.data.msg)
@@ -122,14 +113,14 @@ export default {
       var rpmData = this.rpmData;
       var results = queryString ? rpmData.filter((item) => {
         return item.value.indexOf(queryString) === 0;
-      }): rpmData;
+      }) : rpmData;
       cb(results);
     },
     handleSelect(item) {
       this.display = true;
       let rpmName = (item && item.value) || this.packageName;
-      getDetail({uuid: this.$route.params.detail,rpm: rpmName}).then(res => {
-        if(res.data.code == 200) {  
+      getDetail({ uuid: this.$route.params.detail, rpm: rpmName }).then(res => {
+        if (res.data.code == 200) {
           this.rpmInfo = res.data.data && res.data.data.rpm_info;
         } else {
           this.$message.error((res.data.data && res.data.data.error) || res.data.msg)
@@ -137,7 +128,7 @@ export default {
       })
     },
     handleResult(res) {
-      if(res.data.code === 200) {
+      if (res.data.code === 200) {
         this.result = "成功";
         this.getAllRpm();
       } else {
@@ -146,14 +137,14 @@ export default {
     },
     handleInstall() {
       this.display = false;
-      this.action ="软件包下发";
+      this.action = "软件包下发";
       let params = {
         uuid: [this.$route.params.detail],
         rpm: this.packageName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      if(this.packageName == '') {
+      if (this.packageName == '') {
         this.$message.error("软件包名不能为空")
       } else {
         rpmIssue(params).then(res => {
@@ -162,18 +153,18 @@ export default {
           console.log("api error")
         })
       }
-      
+
     },
     handleUnInstall() {
       this.display = false;
-      this.action ="软件包卸载";
+      this.action = "软件包卸载";
       let params = {
         uuid: [this.$route.params.detail],
         rpm: this.packageName,
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      if(this.packageName == '') {
+      if (this.packageName == '') {
         this.$message.error("软件包名不能为空")
       } else {
         rpmUnInstall(params).then(res => {
@@ -197,46 +188,55 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
+
   .repo {
     width: 98%;
     height: 30%;
   }
+
   .packages {
     width: 98%;
     height: 6%;
     display: flex;
     align-items: center;
   }
+
   .info {
     width: 98%;
     height: 50%;
     overflow: hidden;
+
     .detail {
       width: 100%;
       height: 100%;
+
       .title {
         width: 30%;
         margin: 2% 0;
       }
     }
+
     .result {
       width: 100%;
       height: 100%;
+
       .title {
         width: 30%;
         margin: 2% 0;
       }
+
       .progress {
         display: inline-block;
-        width:74%; 
+        width: 74%;
         margin-left: 2%;
-        border: 1px solid rgba(11, 35, 117,.5);  
-        background: #fff; 
-        border-radius: 10px; 
-        text-align:left;
+        border: 1px solid rgba(11, 35, 117, .5);
+        background: #fff;
+        border-radius: 10px;
+        text-align: left;
+
         span {
           display: inline-block;
-          text-align:center;
+          text-align: center;
           color: #fff;
           width: 100%;
           border: 1px solid #fff;
