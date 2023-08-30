@@ -1,0 +1,14 @@
+[Unit]
+Description=PilotGo server
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3s
+WorkingDirectory=/opt/PilotGo/server
+ExecStart=/opt/PilotGo/server/PilotGo-server --config.file=/opt/PilotGo/server/config_server.yaml
+
+[Install]
+WantedBy=multi-user.target
