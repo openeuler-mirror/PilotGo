@@ -152,7 +152,6 @@ func (a *Agent) Init() error {
 	return nil
 }
 
-// TODO: err未发挥作用
 func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Duration) (*protocol.Message, error) {
 	logger.Debug("send message:%s", msg.String())
 
