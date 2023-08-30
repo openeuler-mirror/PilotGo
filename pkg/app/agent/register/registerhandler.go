@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-05 13:03:16
- * LastEditTime: 2023-06-28 11:38:19
+ * LastEditTime: 2023-08-30 16:00:51
  * Description: socket client register
  ******************************************************************************/
 package register
@@ -66,6 +66,7 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.RunCommand, handler.RunCommandHandler)
 	c.BindHandler(protocol.RunScript, handler.RunScriptHandler)
 
+	c.BindHandler(protocol.AgentOverview, handler.AgentOverviewHandler)
 	c.BindHandler(protocol.AgentInfo, handler.AgentInfoHandler)
 	c.BindHandler(protocol.AgentTime, handler.AgentTimeHandler)
 	c.BindHandler(protocol.AgentOSInfo, handler.AgentOSInfoHandler)

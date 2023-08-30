@@ -7,6 +7,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	mc "openeuler.org/PilotGo/PilotGo/pkg/utils/message/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
@@ -74,6 +75,78 @@ func MemoryInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 		Type:   msg.Type,
 		Status: 0,
 		Data:   memoryInfo,
+	}
+	return c.Send(resp_msg)
+}
+
+func AgentOverviewHandler(c *network.SocketClient, msg *protocol.Message) error {
+	var ip string
+	var sysinfo *common.SystemInfo
+	var diskusage []common.DiskUsageINfo
+	var memoryInfo *common.MemoryConfig
+	var cpuinfo *common.CPUInfo
+
+	var resp_msg *protocol.Message
+	var result mc.AgentOverview
+	var err error
+	logger.Debug("process agent overview command:%s", msg.String())
+	// 获取IP信息
+	ip, err = uos.OS().GetHostIp()
+	if err != nil {
+		logger.Error("failed to get IP: %s", err.Error())
+		goto OnError
+	}
+
+	// 获取host主机信息
+	sysinfo, err = uos.OS().GetHostInfo()
+	if err != nil {
+		logger.Error("failed to get host info: %s", err.Error())
+		goto OnError
+	}
+
+	// 获取host cpu信息
+	cpuinfo, err = uos.OS().GetCPUInfo()
+	if err != nil {
+		logger.Error("failed to get host info: %s", err.Error())
+		goto OnError
+	}
+
+	// 获取内存信息
+	memoryInfo, err = uos.OS().GetMemoryConfig()
+	if err != nil {
+		logger.Error("failed to get memory info: %s", err.Error())
+		goto OnError
+	}
+
+	// 获取磁盘信息
+	diskusage, err = uos.OS().GetDiskUsageInfo()
+	if err != nil {
+		logger.Error("failed to get dist usage info: %s", err.Error())
+		goto OnError
+	}
+
+	result = mc.AgentOverview{
+		IP:         ip,
+		SysInfo:    sysinfo,
+		DiskUsage:  diskusage,
+		MemoryInfo: memoryInfo,
+		CpuInfo:    cpuinfo,
+	}
+
+	resp_msg = &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   result,
+	}
+	return c.Send(resp_msg)
+
+OnError:
+	resp_msg = &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: -1,
+		Error:  err.Error(),
 	}
 	return c.Send(resp_msg)
 }

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
-  LastEditTime: 2022-07-01 16:16:13
+ LastEditTime: 2023-08-30 10:49:02
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -53,13 +53,7 @@
                 <state-dot :state="scope.row.state"></state-dot>
               </template>
             </el-table-column>
-            <el-table-column prop="systeminfo" label="系统信息">
-            </el-table-column>
-            <el-table-column label="操作" fixed="right">
-              <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain name="default_all" @click="handleProme(scope.row.ip)"> 监控
-                </el-button>
-              </template>
+            <el-table-column prop="systeminfo" label="系统">
             </el-table-column>
           </template>
         </ky-table>

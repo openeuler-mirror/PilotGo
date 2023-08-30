@@ -147,6 +147,8 @@ const (
 	AgentConfig = 67
 	//配置文件修改
 	ConfigFileMonitor = 68
+	// 主机概览信息
+	AgentOverview = 69
 )
 
 type Message struct {
