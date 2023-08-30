@@ -19,14 +19,14 @@
         <div slot="header" class="clearfix">
           <span>机器列表</span>
         </div>
-          <div v-for="item in macs" :key="item.id" class="text item">
-            {{ item.ip }}
-          </div>
-        </el-card>
+        <div v-for="item in macs" :key="item.id" class="text item">
+          {{ item.ip }}
+        </div>
+      </el-card>
     </div>
     <div class="action">
-      <el-input class="input"  placeholder="请输入rpm名称" v-model="input" clearable></el-input>
-      <el-button :disabled="input.length == 0" type="primary"  @click="handleRpm"> {{ btnName }} </el-button>
+      <el-input class="input" placeholder="请输入rpm名称" v-model="input" clearable></el-input>
+      <el-button :disabled="input.length == 0" type="primary" @click="handleRpm"> {{ btnName }} </el-button>
       <div class="info">
         <el-descriptions class="margin-top" :title='title + "结果"' size="medium" :column="4">
           <el-descriptions-item label="结果" :span="4">{{ result }}</el-descriptions-item>
@@ -71,12 +71,19 @@ export default {
       let params = {
         uuid: this.ids,
         rpm: this.input,
-        userName: this.$store.getters.userName
+        userName: this.$store.getters.userName,
+        userDept: this.$store.getters.UserDepartName
       }
       this.acType == '软件包下发' ? this.handleIssue(params) : this.handleUnInstall(params);
+      this.$emit('click', true)
     },
     handleResult(res) {
-      this.result = res.data.data.code === 200 ? '成功' : '失败'
+      this.result = res.data.code === 200 ? '成功' : '失败'
+      if (res.data.code === 200) {
+        this.$message.success(res.data.msg)
+      } else {
+        this.$message.error(res.data.msg)
+      }
     },
     handleIssue(params) {
       rpmIssue(params).then(res => {
@@ -96,30 +103,36 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-  .content {
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-    .mac {
-      width: 32%;
-      max-height: 400px;
-      overflow:auto;
-      .clearfix {
-        font-size: 16px;
-      }
-      .text {
-        font-size: 16px;
-      }
+.content {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+
+  .mac {
+    width: 32%;
+    max-height: 400px;
+    overflow: auto;
+
+    .clearfix {
+      font-size: 16px;
     }
-    .action {
-      width: 60%;
-      .input {
-        width: 70%;
-      }
-      .info {
-        margin: 16px 0 0 10px;
-      }
+
+    .text {
+      font-size: 16px;
     }
   }
+
+  .action {
+    width: 60%;
+
+    .input {
+      width: 70%;
+    }
+
+    .info {
+      margin: 16px 0 0 10px;
+    }
+  }
+}
 </style>

@@ -13,44 +13,34 @@
   Description: provide agent log manager of pilotgo
  -->
 <template>
- <div style="height: 100%">
-   <ky-table
-        class="cluster-table"
-        ref="table"
-        :showSelect="showSelect"
-        :searchData="searchData"
-        :getData="getBatchDetail"
-      >
-        <template v-slot:table_search>
-          <div>机器列表</div>
-        </template>
-        <template v-slot:table_action>
-          <auth-button name="rpm_install"  @click="handleIssue()"> rpm下发 </auth-button>
-          <auth-button name="rpm_uninstall" @click="handleUnInstall()"> rpm卸载</auth-button>
-        </template>
-        <template v-slot:table>
-         <el-table-column prop="ip" label="IP">
-          </el-table-column>
-          <el-table-column prop="CPU" label="cpu"> 
-          </el-table-column>
-          <el-table-column label="状态" width="150">
-            <template slot-scope="scope">
-              <state-dot :state="scope.row.state"></state-dot>
-            </template>
-          </el-table-column>
-           <el-table-column prop="sysinfo" label="系统信息"> 
-          </el-table-column>
-        </template>
-      </ky-table>
-      <el-dialog 
-        :title="title"
-        :before-close="handleClose" 
-        :visible.sync="display" 
-        width="560px"
-      >
-        <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>
-      </el-dialog>
- </div>
+  <div style="height: 100%">
+    <ky-table class="cluster-table" ref="table" :showSelect="showSelect" :searchData="searchData"
+      :getData="getBatchDetail">
+      <template v-slot:table_search>
+        <div>机器列表</div>
+      </template>
+      <template v-slot:table_action>
+        <auth-button name="rpm_install" @click="handleIssue()"> rpm下发 </auth-button>
+        <auth-button name="rpm_uninstall" @click="handleUnInstall()"> rpm卸载</auth-button>
+      </template>
+      <template v-slot:table>
+        <el-table-column prop="ip" label="IP">
+        </el-table-column>
+        <el-table-column prop="CPU" label="cpu">
+        </el-table-column>
+        <el-table-column label="状态" width="150">
+          <template slot-scope="scope">
+            <state-dot :state="scope.row.state"></state-dot>
+          </template>
+        </el-table-column>
+        <el-table-column prop="sysinfo" label="系统信息">
+        </el-table-column>
+      </template>
+    </ky-table>
+    <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" width="560px">
+      <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>
+    </el-dialog>
+  </div>
 </template>
 <script>
 import { getBatchDetail } from "@/request/batch";
@@ -79,8 +69,7 @@ export default {
       showSelect: false,
     }
   },
-  mounted() {
-  },  
+  mounted() { },
   methods: {
     getBatchDetail,
     handleClose(type) {
@@ -89,17 +78,18 @@ export default {
       this.type = "";
     },
     handleIssue() {
+      this.machines = this.$refs.table.tableData;
       this.display = true;
       this.title = "软件包下发";
-      this.type = "issue"; 
+      this.type = "issue";
     },
     handleUnInstall() {
+      this.machines = this.$refs.table.tableData;
       this.display = true;
       this.title = "软件包卸载";
-      this.type = "issue"; 
+      this.type = "issue";
     },
   }
 }
 </script>
-<style scoped>
-</style>
+<style scoped></style>
