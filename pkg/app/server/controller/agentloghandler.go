@@ -15,11 +15,7 @@
 package controller
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -27,7 +23,7 @@ import (
 
 // 查询所有审计日志
 func AuditLogAllHandler(c *gin.Context) {
-	loglist, err := auditlog.Get()
+	loglist, _, err := auditlog.Get()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -58,8 +54,9 @@ func LogAllHandler(c *gin.Context) {
 		return
 	}
 
-	logParent := dao.AgentLogParent{}
-	list, tx := logParent.LogAll()
+	// logParent := dao.AgentLogParent{}
+	// list, tx := logParent.LogAll()
+	list, tx, err := auditlog.Get()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -77,13 +74,14 @@ func LogAllHandler(c *gin.Context) {
 // 查询所有子日志
 func AgentLogsHandler(c *gin.Context) {
 	ParentId := c.Query("id")
-	parentId, err := strconv.Atoi(ParentId)
-	if err != nil {
-		response.Fail(c, nil, "父日志ID输入格式有误")
-		return
-	}
+	// parentId, err := strconv.Atoi(ParentId)
+	// if err != nil {
+	// 	response.Fail(c, nil, "父日志ID输入格式有误")
+	// 	return
+	// }
 
-	agentlog, err := service.AgentLogs(parentId)
+	// agentlog, err := service.AgentLogs(parentId)
+	agentlog, _, err := auditlog.GetByParentId(ParentId)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, "获取子日志失败: "+err.Error())
 		return

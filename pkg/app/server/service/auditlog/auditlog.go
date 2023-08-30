@@ -2,6 +2,7 @@ package auditlog
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 )
 
@@ -17,10 +18,14 @@ const (
 const (
 	LogTypeUser       = "用户"
 	LogTypePermission = "权限"
-	LogTypePlugin     = "插件"
+	LogTypePlugin     = "插件" // null
 	LogTypeBatch      = "批次"
 	LogTypeOrganize   = "组织"
-	LogTypeMachine    = "机器"
+	LogTypeMachine    = "机器"       // null
+	LogTypeRPM        = "软件包安装/卸载" // null
+	LogTypeService    = "运行服务"     // null
+	LogTypeSysctl     = "配置内核参数"   // null
+	LogTypeBroadcast  = "配置文件下发"   // null
 )
 
 type AuditLog = dao.AuditLog
@@ -46,12 +51,12 @@ func UpdateStatus(log *dao.AuditLog, status string) error {
 }
 
 // 查询所有日志
-func Get() ([]dao.AuditLog, error) {
+func Get() (*[]dao.AuditLog, *gorm.DB, error) {
 	return dao.GetAuditLog()
 }
 
 // 根据父UUid查询日志
-func GetByParentId(parentUUId string) (dao.AuditLog, error) {
+func GetByParentId(parentUUId string) (*[]dao.AuditLog, *gorm.DB, error) {
 	return dao.GetAuditLogByParentId(parentUUId)
 }
 
