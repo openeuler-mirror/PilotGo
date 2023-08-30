@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 12:47:34
-  LastEditTime: 2022-07-01 15:16:07
+ LastEditTime: 2023-08-30 17:24:08
  -->
 <template>
  <div class="content">
@@ -189,11 +189,10 @@ export default {
   justify-content: space-around;
   .services {
     width: 98%;
-    height: 16%;
   }
   .info {
     width: 98%;
-    height: 80%;
+    flex: 1;
     overflow: hidden;
     .detail {
       width: 100%;
