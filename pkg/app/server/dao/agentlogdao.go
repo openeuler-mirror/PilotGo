@@ -33,7 +33,7 @@ type AuditLog struct {
 	Action        string `gorm:"not null" json:"action"`
 	Message       string `json:"message"`
 	CreatedAt     time.Time
-	UpdateAt      time.Time
+	UpdatedAt     time.Time
 }
 
 // 存储日志
