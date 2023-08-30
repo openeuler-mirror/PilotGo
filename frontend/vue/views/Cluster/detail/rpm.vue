@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
-  LastEditTime: 2022-07-01 15:41:13
+ LastEditTime: 2023-08-30 17:26:46
  -->
 <template>
   <div class="content">
@@ -191,19 +191,17 @@ export default {
 
   .repo {
     width: 98%;
-    height: 30%;
   }
 
   .packages {
     width: 98%;
-    height: 6%;
     display: flex;
     align-items: center;
   }
 
   .info {
     width: 98%;
-    height: 50%;
+    flex: 1;
     overflow: hidden;
 
     .detail {
