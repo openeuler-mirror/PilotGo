@@ -64,9 +64,11 @@ func WS(c *gin.Context) {
 			return new(bytes.Buffer)
 		},
 	}
+
 	var logBuff = bufPool.Get().(*bytes.Buffer)
 	logBuff.Reset()
 	defer bufPool.Put(logBuff)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	wg := sync.WaitGroup{}
 	wg.Add(2)

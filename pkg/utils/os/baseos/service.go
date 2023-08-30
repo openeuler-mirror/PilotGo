@@ -19,7 +19,7 @@ const (
 // 获取服务列表
 func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 	list := make([]common.ListService, 0)
-	exitc, result1, stde, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*active' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
+	exitc, result1, stde, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
 	if exitc == 0 && result1 != "" && stde == "" && err == nil {
 	} else {
 		logger.Error("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result1, stde, err)

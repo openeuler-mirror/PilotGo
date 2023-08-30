@@ -90,6 +90,11 @@ func InstallRpmHandler(c *gin.Context) {
 	var rpm RPMS
 	c.Bind(&rpm)
 
+	if len(rpm.UUIDs) == 0 {
+		response.Fail(c, nil, "机器uuid不能为空")
+		return
+	}
+
 	logParent := dao.AgentLogParent{
 		UserName:   rpm.UserName,
 		DepartName: rpm.UserDeptName,
@@ -164,6 +169,11 @@ func InstallRpmHandler(c *gin.Context) {
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
 	c.Bind(&rpm)
+
+	if len(rpm.UUIDs) == 0 {
+		response.Fail(c, nil, "机器uuid不能为空")
+		return
+	}
 
 	logParent := dao.AgentLogParent{
 		UserName:   rpm.UserName,
