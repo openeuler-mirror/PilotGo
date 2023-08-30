@@ -47,18 +47,20 @@ func (p *AuditLog) UpdateStatus(status string) error {
 	return mysqlmanager.MySQL().Model(&p).Where("log_uuid=?", p.LogUUID).Update("status", status).Error
 }
 
-// 查询所有日志
-func GetAuditLog() ([]AuditLog, error) {
-	var list []AuditLog
-	tx := mysqlmanager.MySQL().Order("created_at desc").Find(&list)
-	return list, tx.Error
+// 查询所有父日志
+func GetAuditLog() (list *[]AuditLog, tx *gorm.DB, err error) {
+	list = &[]AuditLog{}
+	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_log_uuid=?", "").Find(&list)
+	err = tx.Error
+	return
 }
 
 // 根据父UUid查询日志
-func GetAuditLogByParentId(parentUUId string) (AuditLog, error) {
-	var list AuditLog
-	tx := mysqlmanager.MySQL().Order("ID desc").Where("parent_uuid=?", parentUUId).Find(list)
-	return list, tx.Error
+func GetAuditLogByParentId(parentUUId string) (list *[]AuditLog, tx *gorm.DB, err error) {
+	list = &[]AuditLog{}
+	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_log_uuid=?", parentUUId).Find(&list)
+	err = tx.Error
+	return 
 }
 
 // 查询子日志
