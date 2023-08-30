@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2022-04-11 14:03:11
+ * LastEditTime: 2023-08-30 16:53:32
  * Description: Get the basic information of the machine
  ******************************************************************************/
 package agentcontroller
@@ -24,18 +24,67 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-func AgentInfoHandler(c *gin.Context) {
-	logger.Debug("process get agent request")
-	// TODO: process agent info
-	agent := agentmanager.GetAgent("uuid")
+func AgentOverviewHandler(c *gin.Context) {
+	logger.Debug("process get agent overview request")
+	uuid := c.Query("uuid")
+	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
 		c.JSON(http.StatusOK, `{"status":-1}`)
 	}
 
-	agent.AgentInfo()
-	// TODO: 此处处理并返回agent信息
+	info, err := agent.AgentOverview()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+	}
 
-	c.JSON(http.StatusOK, `{"status":0}`)
+	ip, state, dept, err := dao.MachineBasic(uuid)
+	if err != nil {
+		response.Fail(c, gin.H{"IP": ip, "state": state, "depart": dept}, err.Error())
+	}
+
+	type DiskUsage struct {
+		Device      string `json:"device"`
+		Path        string `json:"path"`
+		Total       string `json:"total"`
+		UsedPercent string `json:"used_percent"`
+	}
+	dus := []DiskUsage{}
+	for _, du := range info.DiskUsage {
+		dus = append(dus, DiskUsage{
+			Device:      du.Device,
+			Path:        du.Path,
+			Total:       du.Total,
+			UsedPercent: du.UsedPercent,
+		})
+	}
+
+	result := struct {
+		IP              string      `json:"ip"`
+		Department      string      `json:"department"`
+		State           int         `json:"state"`
+		Platform        string      `json:"platform"`
+		PlatformVersion string      `json:"platform_version"`
+		KernelArch      string      `json:"kernel_arch"`
+		KernelVersion   string      `json:"kernel_version"`
+		CPUNum          int         `json:"cpu_num"`
+		ModelName       string      `json:"model_name"`
+		MemoryTotal     int64       `json:"memory_total"`
+		DiskUsage       []DiskUsage `json:"disk_usage"`
+	}{
+		IP:              info.IP,
+		Department:      dept,
+		State:           state,
+		Platform:        info.SysInfo.Platform,
+		PlatformVersion: info.SysInfo.PlatformVersion,
+		KernelArch:      info.SysInfo.KernelArch,
+		KernelVersion:   info.SysInfo.KernelVersion,
+		CPUNum:          info.CpuInfo.CpuNum,
+		ModelName:       info.CpuInfo.ModelName,
+		MemoryTotal:     info.MemoryInfo.MemTotal,
+		DiskUsage:       dus,
+	}
+
+	response.Success(c, result, "Success")
 }
 
 func AgentListHandler(c *gin.Context) {

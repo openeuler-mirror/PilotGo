@@ -188,6 +188,15 @@ export function getBasicInfo(data) {
   })
 }
 
+// 获取机器overview信息
+export function getOverview(data) {
+  return request({
+    url: 'api/agent_overview',
+    method: 'get',
+    params: data
+  })
+}
+
 // 获取OS
 export function getOS(data) {
   return request({

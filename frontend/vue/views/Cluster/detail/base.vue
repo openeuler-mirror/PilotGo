@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
- LastEditTime: 2023-04-18 09:31:34
+ LastEditTime: 2023-08-30 16:51:10
  -->
 <template>
   <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -25,14 +25,14 @@
       <el-descriptions-item :label="item.device" :span="2" v-for="item in diskData" :key="item.$index">
         <span class="diskMount">{{ "挂载点：" + item.path + "(" + item.total + ")" }}</span>
         <p class="progress">
-          <span :style="{ width: item.usedPercent }">{{ item.usedPercent }}</span>
+          <span :style="{ width: item.used_percent }">{{ item.used_percent }}</span>
         </p>
       </el-descriptions-item>
     </el-descriptions>
   </div>
 </template>
 <script>
-import { getBasicInfo, getCpu, getOS, getMemory, getDisk } from '@/request/cluster';
+import { getBasicInfo, getCpu, getOS, getMemory, getDisk, getOverview } from '@/request/cluster';
 export default {
   name: "BaseInfo",
   data() {
@@ -67,52 +67,25 @@ export default {
     let obj = this.params = { uuid: this.$route.params.detail };
     if (this.$route.params.detail != undefined) {
       this.$nextTick(() => {
-        getBasicInfo(obj).then(res => {
+        getOverview(obj).then(res => {
           if (res.data.code === 200) {
-            this.basic.IP = res.data.data.IP;
-            this.basic.dept = res.data.data.depart;
-            this.basic.status = res.data.data.state === 1 ? '在线' : res.data.data.state === 2 ? '离线' : '未分配';
-          } else {
-            console.log(res.data.msg)
-          }
-        })
-        getOS(obj).then((res) => {
-          if (res.data.code === 200) {
-            let result = res.data.data.os_info;
-            this.basic.macPlatform = result.Platform + ' ' + result.PlatformVersion;
-            this.basic.mackernel = result.KernelArch;
-            this.basic.osVersion = result.KernelVersion;
-          } else {
-            console.log(res.data.msg)
-          }
-        })
-        getCpu(obj).then((res) => {
-          if (res.data.code === 200) {
-            this.basic.macCPU = res.data.data.CPU_info.CpuNum + '核 ' + res.data.data.CPU_info.ModelName;
-          } else {
-            console.log(res.data.msg)
-          }
-        })
-        getMemory(obj).then((res) => {
-          let memTotal = 0;
-          if (res.data.code === 200) {
-            memTotal = res.data.data.memory_info.MemTotal / 1024 / 1024;
+            let result = res.data.data
+            this.basic.IP = result.ip;
+            this.basic.dept = result.department;
+            this.basic.status = result.state === 1 ? '在线' : result.state === 2 ? '离线' : '未分配';
+            this.basic.macPlatform = result.platform + ' ' + result.platform_version;
+            this.basic.mackernel = result.kernel_arch;
+            this.basic.osVersion = result.kernel_version;
+            this.basic.macCPU = result.cpu_num + '核 ' + result.model_name;
+            let memTotal = 0;
+            memTotal = result.memory_total / 1024 / 1024;
             this.basic.macMEM = memTotal.toFixed(2) + 'G';
+            this.diskData = result.disk_usage;
           } else {
             console.log(res.data.msg)
           }
         })
-        getDisk(obj).then((res) => {
-          if (res.data.code === 200) {
-            console.log('res', res)
-            this.diskData = res.data.data.disk_use;
-          } else {
-            console.log(res.data.msg)
-          }
-        })
-      }
-      )
-
+      })
     }
   }
 }

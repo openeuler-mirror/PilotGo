@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-08-16 15:44:53
+ * LastEditTime: 2023-08-30 10:54:41
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -126,7 +126,7 @@ func registerAPIs(router *gin.Engine) {
 
 	macDetails := api.Group("/api") // 机器详情
 	{
-		macDetails.GET("/agent_info", agentcontroller.AgentInfoHandler)
+		macDetails.GET("/agent_overview", agentcontroller.AgentOverviewHandler)
 		macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
 		macDetails.GET("/run_script", agentcontroller.RunScript)
 		macDetails.GET("/os_info", agentcontroller.OSInfoHandler)

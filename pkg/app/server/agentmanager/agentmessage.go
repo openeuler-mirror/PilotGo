@@ -7,7 +7,36 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	mc "openeuler.org/PilotGo/PilotGo/pkg/utils/message/common"
 )
+
+// 远程获取agent端的主机的概览信息
+func (a *Agent) AgentOverview() (*mc.AgentOverview, error) {
+	msg := &protocol.Message{
+		UUID: uuid.New().String(),
+		Type: protocol.AgentOverview,
+	}
+
+	resp_message, err := a.sendMessage(msg, true, 0)
+	if err != nil {
+		logger.Error("failed to send agent message: %v", err)
+		return nil, err
+	}
+
+	if resp_message.Status == -1 || resp_message.Error != "" {
+		logger.Error("failed to get agent overview: %s", resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
+	}
+
+	info := &mc.AgentOverview{}
+	err = resp_message.BindData(info)
+	if err != nil {
+		logger.Error("bind AgentOverview data error: %v", err)
+		return nil, err
+	}
+
+	return info, nil
+}
 
 type AgentInfo struct {
 	AgentVersion string `mapstructure:"agent_version"`
