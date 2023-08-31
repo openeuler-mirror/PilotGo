@@ -65,7 +65,7 @@ func ToUserDto(user User) UserDto {
 }
 
 type Userdel struct {
-	Emails []string `json:"email"`
+	Params []string `json:"params"`
 }
 
 // 获取所有的用户角色
@@ -247,8 +247,8 @@ func UpdateUserDepart(email, departName string, Pid, id int) error {
 }
 
 // 添加用户
-func AddUser(u User) error {
-	return mysqlmanager.MySQL().Save(&u).Error
+func AddUser(u *User) error {
+	return mysqlmanager.MySQL().Save(u).Error
 }
 
 // 修改手机号

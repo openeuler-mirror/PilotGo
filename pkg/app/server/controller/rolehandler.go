@@ -113,7 +113,7 @@ func AddUserRoleHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user userservice.User
+	var user *userservice.User
 	log := auditlog.New(auditlog.LogTypeUser, "添加角色", "", user)
 	auditlog.Add(log)
 
@@ -135,7 +135,7 @@ func DeleteUserRoleHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user userservice.User
+	var user *userservice.User
 	log := auditlog.New(auditlog.LogTypeUser, "删除角色", "", user)
 	auditlog.Add(log)
 
@@ -157,7 +157,7 @@ func UpdateUserRoleHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user userservice.User
+	var user *userservice.User
 	log := auditlog.New(auditlog.LogTypeUser, "修改角色", "", user)
 	auditlog.Add(log)
 
@@ -179,7 +179,7 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user userservice.User
+	var user *userservice.User
 	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", "", user)
 	auditlog.Add(log)
 

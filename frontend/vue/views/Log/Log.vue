@@ -27,9 +27,9 @@
         <template v-slot:table_action>
         </template>
         <template v-slot:table>
-          <el-table-column prop="type" label="日志名称">
+          <el-table-column prop="action" label="日志名称">
           </el-table-column>
-          <el-table-column prop="userName" label="创建者"> 
+          <el-table-column prop="email" label="创建者"> 
           </el-table-column>
           <el-table-column prop="departName" label="部门"> 
           </el-table-column>
@@ -46,9 +46,9 @@
               </el-progress>
             </template> 
           </el-table-column>
-          <el-table-column prop="created_at" label="创建时间" sortable>
+          <el-table-column prop="CreatedAt" label="创建时间" sortable>
             <template slot-scope="scope">
-              <span>{{scope.row.created_at | dateFormat}}</span>
+              <span>{{scope.row.CreatedAt | dateFormat}}</span>
             </template>
           </el-table-column>
           <el-table-column prop="operation" label="详情">

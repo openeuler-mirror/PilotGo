@@ -102,7 +102,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				return UserExit, err
 			}
 			password := strings.Split(email, "@")[0]
-			u := dao.User{
+			u := &dao.User{
 				Username:     userName,
 				Phone:        phone,
 				Password:     password,
@@ -122,12 +122,11 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 	return UserExit, nil
 }
 
-func DeleteUser(Emails []string) error {
-	for _, userEmail := range Emails {
-		if err := dao.DeleteUser(userEmail); err != nil {
-			return err
-		}
+func DeleteUser(Email string) error {
+	if err := dao.DeleteUser(Email); err != nil {
+		return err
 	}
+
 	return nil
 }
 
@@ -236,7 +235,7 @@ func Login(user dao.User) (string, string, int, int, string, error) {
 	return token, u.DepartName, u.DepartSecond, u.UserType, u.RoleID, nil
 }
 
-func Register(user dao.User) error {
+func Register(user *dao.User) error {
 	username := user.Username
 	password := user.Password
 	email := user.Email
@@ -269,7 +268,7 @@ func Register(user dao.User) error {
 	}
 
 	user_type := UserType(roleId)
-	user = dao.User{ //Create user
+	user = &dao.User{ //Create user
 		Username:     username,
 		Password:     string(bs),
 		Phone:        phone,
