@@ -21,16 +21,14 @@ func GetPluginsHandler(c *gin.Context) {
 
 // 添加插件
 func AddPluginHandler(c *gin.Context) {
-	param := struct {
-		Url string `json:"url"`
-	}{}
+	param := &plugin.AddPluginParam{}
 
 	if err := c.BindJSON(&param); err != nil {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
 
-	if err := plugin.AddPlugin(param.Url); err != nil {
+	if err := plugin.AddPlugin(param); err != nil {
 		response.Fail(c, nil, "add plugin failed:"+err.Error())
 		return
 	}

@@ -83,7 +83,7 @@ func (pm *PluginManager) RestorePluginInfo() error {
 
 // 添加一个插件
 func (pm *PluginManager) Add(p *Plugin) error {
-	if p.Url == "" || p.Name == "" {
+	if p.Url == "" || p.Name == "" || p.PluginType == "" {
 		return errors.New("invalid plugin parameter")
 	}
 
@@ -103,7 +103,7 @@ func (pm *PluginManager) Add(p *Plugin) error {
 		Email:       p.Email,
 		Url:         p.Url,
 		PluginType:  p.PluginType,
-		Enabled:     PluginEnabled,
+		Enabled:     PluginDisabled,
 	})
 	if err != nil {
 		return err
@@ -287,7 +287,14 @@ func GetPlugin(name string) *Plugin {
 	return nil
 }
 
-func AddPlugin(url string) error {
+type AddPluginParam struct {
+	Name string `json:"name"`
+	Type string `json:"plugin_type"`
+	Url  string `json:"url"`
+}
+
+func AddPlugin(param *AddPluginParam) error {
+	url := param.Url
 	logger.Debug("add plugin from %s", url)
 	url = strings.TrimRight(url, "/")
 
@@ -296,6 +303,7 @@ func AddPlugin(url string) error {
 		return err
 	}
 	plugin.UUID = uuid.New().String()
+	plugin.PluginType = param.Type
 
 	if err := globalManager.Add(plugin); err != nil {
 		return err
