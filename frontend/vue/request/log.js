@@ -30,12 +30,3 @@ export function getLogDetail(data) {
     params: data
   })
 }
-
-// 日志删除
-export function deleteLog(data) {
-  return request({
-    url: '/log/delete',
-    method: 'post',
-    data
-  })
-}

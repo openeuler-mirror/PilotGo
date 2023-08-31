@@ -2,7 +2,7 @@
   <div style="height:100%">
     <ky-table
       :getData="libFileList"
-      ref="table"
+      ref="libfile_table"
     >
       <template v-slot:table_search>
         <el-input placeholder="请输入关键字进行搜索..." prefix-icon="el-icon-search"
@@ -14,8 +14,8 @@
         </el-button>
       </template>
       <template v-slot:table_action>
-        <auth-button name="user_del" @click="handleCreate"> 新增 </auth-button>
-        <auth-button name="user_del" slot="reference" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" @click="handleConfirm"> 删除 </auth-button>
+        <auth-button name="user_add" @click="handleCreate"> 新增 </auth-button>
+        <auth-button name="user_del" slot="reference" :disabled="$refs.libfile_table && $refs.libfile_table.selectRow.rows.length == 0" @click="handleConfirm"> 删除 </auth-button>
       </template>
       <template v-slot:table>
         <el-table-column  prop="name" label="名称">
@@ -46,10 +46,12 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template slot-scope="scope">
-            <auth-button name="default_all" type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</auth-button>
-            <auth-button name="default_all" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
-            <auth-button name="default_all" type="primary" plain size="mini" @click="handleHistory(scope.row)">历史版本</auth-button>
-            <auth-button name="config_install" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
+            <div  style="display: flex; flex-wrap: wrap; width: 80%; margin-left: auto; margin-right: auto;">
+              <auth-button style="flex:1 1 60%; margin-bottom: 2px" name="default_all" type="primary" plain size="mini" @click="handleOpen(scope.row)">查看</auth-button>
+              <auth-button style="flex:1 1 60%; margin-bottom: 2px" name="default_all" type="primary" plain size="mini" @click="handleEdit(scope.row)">编辑</auth-button>
+              <auth-button style="flex:1 1 60%; margin-bottom: 2px" name="default_all" type="primary" plain size="mini" @click="handleHistory(scope.row)">历史版本</auth-button>
+              <auth-button style="flex:1 1 60%; margin-bottom: 2px" name="config_install" type="primary" plain size="mini" @click="handleInstall(scope.row)">下发</auth-button>
+            </div>
           </template>
         </el-table-column>
       </template>
@@ -115,12 +117,12 @@ export default {
       this.refresh();
     }, 
     refresh(){
-      this.$refs.table.handleSearch();
+      this.$refs.libfile_table.handleSearch();
     },
     handleSearch() {
       libFileSearch({'search': this.searchInput}).then((res) => {
         if(res.data.code === 200) {
-          this.$refs.table.handleLoadSearch(res.data.data);
+          this.$refs.libfile_table.handleLoadSearch(res.data.data);
         }
       })
     },
@@ -169,7 +171,7 @@ export default {
         });
     },
     handleDelete() {
-      delLibFile({ids: this.$refs.table.selectRow.ids}).then(res => {
+      delLibFile({ids: this.$refs.libfile_table.selectRow.ids}).then(res => {
         if(res.status === 200) {
           this.$message.success(res.data.msg);
           this.refresh();

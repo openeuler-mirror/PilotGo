@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
- LastEditTime: 2023-08-30 16:51:10
+ LastEditTime: 2023-08-31 09:18:05
  -->
 <template>
   <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
@@ -72,7 +72,7 @@ export default {
             let result = res.data.data
             this.basic.IP = result.ip;
             this.basic.dept = result.department;
-            this.basic.status = result.state === 1 ? '在线' : result.state === 2 ? '离线' : '未分配';
+            this.basic.status = result.state === 1 ? '在线' : result.state === 2 ? '离线' : 'unknown';
             this.basic.macPlatform = result.platform + ' ' + result.platform_version;
             this.basic.mackernel = result.kernel_arch;
             this.basic.osVersion = result.kernel_version;

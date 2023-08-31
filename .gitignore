@@ -48,3 +48,7 @@ config.json
 # secret files
 *.crt
 *.key
+
+# bin files
+/server
+/agent
