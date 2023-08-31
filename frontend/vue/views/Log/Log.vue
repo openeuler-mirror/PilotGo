@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:45
-  LastEditTime: 2022-06-24 16:39:58
+ LastEditTime: 2023-08-31 11:19:30
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -17,7 +17,7 @@
    <ky-table
         class="cluster-table"
         ref="table"
-        :showSelect="showSelect"
+        :showSelect=false
         :getData="getLogs"
         :searchData="searchData"
       >
@@ -77,7 +77,7 @@
 <script>
 import kyTable from "@/components/KyTable";
 import LogDetail from "./form/detail.vue"
-import { getLogs, deleteLog } from "@/request/log";
+import { getLogs} from "@/request/log";
 export default {
   name: "Log",
   components: {
@@ -95,7 +95,6 @@ export default {
       searchData: {
         departId: this.$store.getters.UserDepartId || '',
       },
-      showSelect: true,
     }
   },
   methods: {

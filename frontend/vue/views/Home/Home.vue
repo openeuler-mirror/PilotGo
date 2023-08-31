@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
- LastEditTime: 2023-02-06 13:49:27
+ LastEditTime: 2023-08-31 11:28:33
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -430,6 +430,8 @@ export default {
       .bodyContent {
         width: 100%;
         height: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
       }
 
       .breadCrumb {
