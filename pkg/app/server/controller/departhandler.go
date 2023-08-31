@@ -77,7 +77,7 @@ func AddDepartHandler(c *gin.Context) {
 
 	//TODO:
 	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeOrganize, "添加部门信息", "", user)
+	log := auditlog.New(auditlog.LogTypeOrganize, "添加部门信息", "", &user)
 	auditlog.Add(log)
 
 	err := depart.AddDepartMethod(&newDepart)
@@ -100,7 +100,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 
 	//TODO:
 	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeOrganize, "删除部门信息", "", user)
+	log := auditlog.New(auditlog.LogTypeOrganize, "删除部门信息", "", &user)
 	auditlog.Add(log)
 
 	err := depart.DeleteDepartData(&DelDept)
@@ -122,7 +122,7 @@ func UpdateDepartHandler(c *gin.Context) {
 	}
 	//TODO:
 	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeOrganize, "修改部门信息", "", user)
+	log := auditlog.New(auditlog.LogTypeOrganize, "修改部门信息", "", &user)
 	auditlog.Add(log)
 
 	err := depart.UpdateDepart(new.DepartID, new.DepartName)

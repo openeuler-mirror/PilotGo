@@ -16,7 +16,7 @@ const (
 
 // 日志记录归属模块
 const (
-	LogTypeUser       = "用户"
+	LogTypeUser       = "用户"  // 登录 注销(null) 添加 删除 修改密码 重置密码 修改用户信息
 	LogTypePermission = "权限"
 	LogTypePlugin     = "插件" // null
 	LogTypeBatch      = "批次"
@@ -30,14 +30,17 @@ const (
 
 type AuditLog = dao.AuditLog
 
-func New(module, action, msg string, u dao.User) *AuditLog {
+func New(module, action, msg string, u *dao.User) *AuditLog {
 	return &AuditLog{
 		LogUUID:    uuid.New().String(),
 		Module:     module,
 		Status:     StatusRunning,
-		OperatorID: u.ID,
+		UserName:   u.Username,
+		DepartName: u.DepartName,
+		Email:      u.Email,
 		Action:     action,
 		Message:    msg,
+		// OperatorID: u.ID,
 	}
 }
 

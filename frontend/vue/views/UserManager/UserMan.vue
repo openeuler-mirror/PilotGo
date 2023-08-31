@@ -155,9 +155,9 @@ export default {
     handleDelete() {
       let delDatas = [];
       this.$refs.table.selectRow.rows.forEach(item => {
-        delDatas.push(item.email);
+        delDatas.push(item.email + "/" + item.departName);
       });
-      delUser({email: delDatas}).then(res => {
+      delUser({params: delDatas}).then(res => {
         if(res.status === 200) {
           this.$message.success(res.data.msg);
           this.refresh();
