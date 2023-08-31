@@ -64,8 +64,11 @@ func ToUserDto(user User) UserDto {
 	}
 }
 
-type Userdel struct {
-	Params []string `json:"params"`
+type Frontdata struct {
+	Username   string   `json:"userName"`
+	Departname string   `json:"departName"`
+	Email      string   `json:"email"`
+	Deldatas   []string `json:"delDatas"`
 }
 
 // 获取所有的用户角色

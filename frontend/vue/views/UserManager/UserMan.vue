@@ -153,11 +153,15 @@ export default {
       })
     },
     handleDelete() {
-      let delDatas = [];
+      let params = {
+        userName: this.$store.getters.userName,
+        departName: this.$store.getters.departName,
+        delDatas: []
+      };
       this.$refs.table.selectRow.rows.forEach(item => {
-        delDatas.push(item.email + "/" + item.departName);
+        params.delDatas.push(item.email + "/" + item.departName);
       });
-      delUser({params: delDatas}).then(res => {
+      delUser(params).then(res => {
         if(res.status === 200) {
           this.$message.success(res.data.msg);
           this.refresh();

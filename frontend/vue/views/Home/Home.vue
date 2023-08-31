@@ -187,7 +187,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$store.dispatch("logOut").then((res) => {
+        let params = {
+          email: this.$store.getters.email,
+          departName: this.$store.getters.departName
+        };
+        this.$store.dispatch("logOut", params).then((res) => {
           this.$router.push("/login");
         });
       }).catch(() => {

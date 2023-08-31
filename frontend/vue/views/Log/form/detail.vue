@@ -68,7 +68,7 @@ export default {
   mounted() {
     this.status = this.log.status.split(',')[2] === '1.00' ? '成功' : '失败';
     this.percent = this.log.status.split(',')[0] + '/' + this.log.status.split(',')[1];
-    getLogDetail({id: this.log.id}).then(res => {
+    getLogDetail({id: this.log.log_uuid}).then(res => {
       this.result = res.data.data;
       this.type = res.data.data[0].action;
       this.opObject = res.data.data[0].object;
