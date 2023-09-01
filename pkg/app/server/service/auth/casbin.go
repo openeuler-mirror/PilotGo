@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-07-04 09:08:08
- * LastEditTime: 2023-09-01 15:36:32
+ * LastEditTime: 2023-09-01 16:22:14
  * Description: casbin服务
  ******************************************************************************/
 package auth
@@ -50,7 +50,7 @@ func Casbin(conf *sconfig.MysqlDBInfo) {
 	g = _, _
 
 	[matchers]
-	m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && r.act == p.act
+	m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 
 	[policy_effect]
 	e = some(where (p.eft == allow))
@@ -137,7 +137,7 @@ func addPolicy(role, resource, action string) (bool, error) {
 func initAdminPolicy() {
 	G_Enfocer.AddRoleForUser("admin", "admin")
 
-	ok, err := addPolicy("admin", "/*", "get")
+	ok, err := addPolicy("admin", "/*", ".*")
 	if err != nil {
 		logger.Error("init admin policy failed:%s", err)
 	}
