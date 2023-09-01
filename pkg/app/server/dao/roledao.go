@@ -48,12 +48,6 @@ type RoleButton struct {
 	Button string `json:"button"`
 }
 
-type RolePermissionChange struct {
-	RoleID   int      `json:"id"`
-	Menus    []string `json:"menus"`
-	ButtonId []string `json:"buttonId"`
-}
-
 // 根据角色名称返回角色id和用户类型
 func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error) {
 	var Role UserRole
@@ -201,7 +195,7 @@ func UpdateRoleDescription(roleId int, desc string) error {
 }
 
 // 变更用户角色权限
-func UpdateRolePermission(permission RolePermissionChange) (UserRole, error) {
+func UpdateRolePermission(permission *Frontdata) (UserRole, error) {
 	var userRole UserRole
 	// 数组切片转为string
 	menus := strings.Replace(strings.Trim(fmt.Sprint(permission.Menus), "[]"), " ", ",", -1)
@@ -211,7 +205,7 @@ func UpdateRolePermission(permission RolePermissionChange) (UserRole, error) {
 		Menus:    menus,
 		ButtonID: buttonId,
 	}
-	err := mysqlmanager.MySQL().Model(&userRole).Where("id = ?", permission.RoleID).Updates(&r).Error
+	err := mysqlmanager.MySQL().Model(&userRole).Where("id = ?", permission.Role_roleid).Updates(&r).Error
 	return userRole, err
 }
 

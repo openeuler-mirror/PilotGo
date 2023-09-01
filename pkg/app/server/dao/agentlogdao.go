@@ -22,6 +22,27 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+type Frontdata struct {
+	ID                uint   `json:"id"`
+	Username_creaate  string `json:"userName_create,omitempty"`
+	Departname_create string `json:"departName_create,omitempty"`
+	RoleID            string `json:"roleid,omitempty"`
+
+	Deldatas     []string `json:"delDatas,omitempty"`
+	Username     string   `json:"userName,omitempty"`
+	Departname   string   `json:"departName,omitempty"`
+	Email        string   `json:"email,omitempty"`
+	DepartFirst  int      `json:"departPid,omitempty"`
+	DepartSecond int      `json:"departId,omitempty"`
+	Password     string   `json:"password,omitempty"`
+	Phone        string   `json:"phone,omitempty"`
+	UserType     int      `json:"userType,omitempty"`
+
+	Menus       []string `json:"menus,omitempty"`
+	ButtonId    []string `json:"buttonId,omitempty"`
+	Role_roleid int      `json:"role_roleid,omitempty"`
+}
+
 type AuditLog struct {
 	ID              uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	LogUUID         string `gorm:"not null;unique" json:"log_uuid"`

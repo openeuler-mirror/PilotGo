@@ -16,8 +16,11 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
@@ -172,23 +175,26 @@ func UpdateUserRoleHandler(c *gin.Context) {
 }
 
 func RolePermissionChangeHandler(c *gin.Context) {
-	var roleChange roleservice.RolePermissionChange
-	if err := c.Bind(&roleChange); err != nil {
-		response.Fail(c, nil, "parameter error")
+	fd := &userservice.Frontdata{}
+	if err := c.Bind(fd); err != nil {
+		response.Fail(c, nil, "parameter error"+":"+err.Error())
 		return
 	}
 
-	//TODO:
-	fd := &userservice.Frontdata{}
 	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", "", fd)
 	auditlog.Add(log)
 
-	userRole, err := roleservice.RolePermissionChangeMethod(roleChange)
+	userRole, err := roleservice.RolePermissionChangeMethod(fd)
 	if err != nil {
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strconv.Itoa(fd.Role_roleid), http.StatusBadRequest)
+		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
+		return
 	}
 
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)
+	auditlog.Add(log_s)
+	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, gin.H{"data": userRole}, "角色权限变更成功")
 }

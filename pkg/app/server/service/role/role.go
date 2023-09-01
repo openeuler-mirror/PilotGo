@@ -19,7 +19,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 )
 
-type RolePermissionChange = dao.RolePermissionChange
 type UserRole = dao.UserRole
 
 type RoleID struct {
@@ -64,7 +63,7 @@ func GetRoles(query *common.PaginationQ) (int, interface{}, error) {
 	return total, data, nil
 }
 
-func RolePermissionChangeMethod(roleChange dao.RolePermissionChange) (*dao.UserRole, error) {
+func RolePermissionChangeMethod(roleChange *dao.Frontdata) (*dao.UserRole, error) {
 	userRole, err := dao.UpdateRolePermission(roleChange)
 	if err != nil {
 		return &userRole, err
