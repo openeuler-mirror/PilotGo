@@ -144,7 +144,12 @@ export default {
       this.title = "变更权限";
     },
     handleDelete(id) {
-      delRole({id: id}).then(res => {
+      let params = {
+          userName_create: this.$store.getters.userName,
+          departName_create: this.$store.getters.UserDepartName,
+          role_roleid: id
+      };
+      delRole(params).then(res => {
         if(res.status === 200) {
           this.$message.success(res.data.msg);
           this.$refs.table.handleSearch();

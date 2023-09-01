@@ -21,7 +21,7 @@ const (
 // 日志记录归属模块
 const (
 	LogTypeUser       = "用户" // 登录 注销(父日志没有创建者和部门信息) 添加 删除 修改密码 重置密码 修改用户信息
-	LogTypePermission = "权限" // 角色权限
+	LogTypePermission = "权限" // 角色权限 编辑角色 删除角色
 	LogTypePlugin     = "插件" // null
 	LogTypeBatch      = "批次"
 	LogTypeOrganize   = "组织"
