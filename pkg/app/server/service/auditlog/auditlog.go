@@ -1,6 +1,10 @@
 package auditlog
 
 import (
+	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
@@ -16,7 +20,7 @@ const (
 
 // 日志记录归属模块
 const (
-	LogTypeUser       = "用户"  // 登录 注销(null) 添加 删除 修改密码 重置密码 修改用户信息
+	LogTypeUser       = "用户" // 登录 注销(null) 添加 删除 修改密码 重置密码 修改用户信息
 	LogTypePermission = "权限"
 	LogTypePlugin     = "插件" // null
 	LogTypeBatch      = "批次"
@@ -30,17 +34,49 @@ const (
 
 type AuditLog = dao.AuditLog
 
+// 单机操作成功状态:是否成功，机器数量，比率
+const (
+	ActionOK    = "1,1,1.00"
+	ActionFalse = "0,1,0.00"
+)
+
+// 计算批量机器操作的状态：成功数，总数目，比率
+func BatchActionStatus(StatusCodes []string) (status string) {
+	var StatusOKCounts int
+	for _, success := range StatusCodes {
+		if success == strconv.Itoa(http.StatusOK) {
+			StatusOKCounts++
+		}
+	}
+	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(StatusOKCounts)/float64(len(StatusCodes))), 64)
+	rate := strconv.FormatFloat(num, 'f', 2, 64)
+	status = strconv.Itoa(StatusOKCounts) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
+	return
+}
+
 func New(module, action, msg string, u *dao.User) *AuditLog {
 	return &AuditLog{
 		LogUUID:    uuid.New().String(),
 		Module:     module,
-		Status:     StatusRunning,
+		Status:     "",
 		UserName:   u.Username,
 		DepartName: u.DepartName,
 		Email:      u.Email,
 		Action:     action,
 		Message:    msg,
 		// OperatorID: u.ID,
+	}
+}
+
+func New_sub(puuid, ip, action, message, obj string, statuscode int) *AuditLog {
+	return &AuditLog{
+		LogUUID:         uuid.New().String(),
+		ParentLogUUID:   puuid,
+		IP:              ip,
+		OperationObject: obj,
+		Action:          action,
+		Message:         message,
+		StatusCode:      statuscode,
 	}
 }
 

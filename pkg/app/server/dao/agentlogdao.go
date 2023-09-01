@@ -23,19 +23,22 @@ import (
 )
 
 type AuditLog struct {
-	ID            uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	LogUUID       string `gorm:"not null;unique" json:"log_uuid"`
-	ParentLogUUID string `json:"parent_log_uuid"`
-	AgentUUID     string `json:"agent_uuid"`
-	Module        string `gorm:"type:varchar(30);not null" json:"module"`
-	Status        string `gorm:"type:varchar(30);not null" json:"status"`
-	UserName      string `gorm:"not null" json:"userName"`
-	DepartName    string `gorm:"not null" json:"departName"`
-	Email         string `gorm:"not null" json:"email"`
-	Action        string `gorm:"not null" json:"action"`
-	Message       string `json:"message"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID              uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	LogUUID         string `gorm:"not null;unique" json:"log_uuid"`
+	ParentLogUUID   string `json:"parent_log_uuid"`
+	AgentUUID       string `json:"agent_uuid"`
+	Module          string `gorm:"type:varchar(30);not null" json:"module"`
+	Status          string `gorm:"type:varchar(30);not null" json:"status"`
+	UserName        string `gorm:"not null" json:"userName"`
+	DepartName      string `gorm:"not null" json:"departName"`
+	Email           string `gorm:"not null" json:"email"`
+	Action          string `gorm:"not null" json:"action"`
+	Message         string `json:"message"`
+	IP              string `json:"ip"`
+	StatusCode      int    `json:"code"`
+	OperationObject string `json:"object"`
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 	// OperatorID    uint   `gorm:"not null" json:"operator_id"`
 }
 
