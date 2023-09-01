@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
@@ -70,18 +71,20 @@ func UnloadPluginHandler(c *gin.Context) {
 func PluginGatewayHandler(c *gin.Context) {
 	// TODO
 	name := c.Param("plugin_name")
-	p := plugin.GetPlugin(name)
-	if p == nil {
-		c.String(http.StatusNotFound, "plugin not found")
+	p, err := plugin.GetPlugin(name)
+	if err != nil {
+		c.String(http.StatusNotFound, "plugin not found: "+err.Error())
 		return
 	}
 
-	target, err := url.Parse(p.Url)
+	s := strings.TrimRight(p.Url, "/plugin/"+name)
+	target, err := url.Parse(s)
 	if err != nil {
-		// return 404
 		c.String(http.StatusNotFound, "parse plugin url error: "+err.Error())
 		return
 	}
+	logger.Debug("proxy plugin request to: %s", target)
+
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.ServeHTTP(c.Writer, c.Request)
 }

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-09-01 15:35:00
+ * LastEditTime: 2023-09-01 17:14:14
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -92,15 +92,15 @@ func setupRouter() *gin.Engine {
 	// 绑定 http api handler
 	registerAPIs(router)
 
-	// 绑定前端静态资源handler
-	resource.StaticRouter(router)
-
 	// 绑定插件接口反向代理handler
 	registerPluginGateway(router)
 
 	// 全局通用接口
 	router.GET("/ws", controller.WS)
 	router.GET("/event", controller.PushAlarmHandler)
+
+	// 绑定前端静态资源handler
+	resource.StaticRouter(router)
 
 	return router
 }
@@ -308,6 +308,7 @@ func registerPluginApi(router *gin.RouterGroup) {
 }
 
 func registerPluginGateway(router *gin.Engine) {
-	gateway := router.Group("/plugin/:plugin_name")
-	gateway.Any("", controller.PluginGatewayHandler)
+	gateway := router.Group("/plugin")
+	logger.Info("gateway process plugin request")
+	gateway.Any("/:plugin_name/*action", controller.PluginGatewayHandler)
 }

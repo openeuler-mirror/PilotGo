@@ -137,16 +137,16 @@ func (pm *PluginManager) Remove(uuid string) error {
 }
 
 // 获取注册的插件
-// func (pm *PluginManager) Get(name string) (string, error) {
-// 	pm.lock.RLock()
-// 	defer pm.lock.RUnlock()
+func (pm *PluginManager) Get(name string) (*Plugin, error) {
+	pm.lock.RLock()
+	defer pm.lock.RUnlock()
 
-// 	if p, ok := pm.loadedPlugin[name]; ok {
-// 		return p.Url, nil
-// 	}
+	if p, ok := pm.loadedPlugin[name]; ok {
+		return p, nil
+	}
 
-// 	return "", errors.New("plugin not found")
-// }
+	return nil, errors.New("plugin not found")
+}
 
 // 获取所有的插件
 func (pm *PluginManager) GetAll() []*Plugin {
@@ -282,9 +282,8 @@ func GetPlugins() []*Plugin {
 	return globalManager.GetAll()
 }
 
-func GetPlugin(name string) *Plugin {
-	// TODO
-	return nil
+func GetPlugin(name string) (*Plugin, error) {
+	return globalManager.Get(name)
 }
 
 type AddPluginParam struct {

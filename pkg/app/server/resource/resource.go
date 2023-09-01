@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-07-12 13:03:16
- * LastEditTime: 2023-07-04 14:31:05
+ * LastEditTime: 2023-09-01 17:04:59
  * Description: static router
  ******************************************************************************/
 package resource
@@ -42,7 +42,7 @@ func StaticRouter(router *gin.Engine) *gin.Engine {
 
 	// 解决页面刷新404的问题
 	router.NoRoute(func(c *gin.Context) {
-		logger.Info("process noroute: %s", c.Request.URL.RawPath)
+		logger.Info("process noroute: %s", c.Request.URL.String())
 		// c.HTML(http.StatusOK, "index.html", nil)
 
 		// TODO: for test
