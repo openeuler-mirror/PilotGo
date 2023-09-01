@@ -20,7 +20,7 @@ const (
 
 // 日志记录归属模块
 const (
-	LogTypeUser       = "用户" // 登录 注销(null) 添加 删除 修改密码 重置密码 修改用户信息
+	LogTypeUser       = "用户" // 登录 注销(父日志没有创建者和部门信息) 添加 删除 修改密码 重置密码 修改用户信息
 	LogTypePermission = "权限"
 	LogTypePlugin     = "插件" // null
 	LogTypeBatch      = "批次"
@@ -54,21 +54,21 @@ func BatchActionStatus(StatusCodes []string) (status string) {
 	return
 }
 
-func New(module, action, msg string, u *dao.User) *AuditLog {
+func New(module, action, msg string, f *dao.Frontdata) *AuditLog {
 	return &AuditLog{
 		LogUUID:    uuid.New().String(),
 		Module:     module,
 		Status:     "",
-		UserName:   u.Username,
-		DepartName: u.DepartName,
-		Email:      u.Email,
+		UserName:   f.Username_creaate,
+		DepartName: f.Departname_create,
+		Email:      f.Email,
 		Action:     action,
 		Message:    msg,
 		// OperatorID: u.ID,
 	}
 }
 
-func New_sub(puuid, ip, action, message, obj string, statuscode int) *AuditLog {
+func New_sub(puuid, ip, action, message, obj, target string, statuscode int) *AuditLog {
 	return &AuditLog{
 		LogUUID:         uuid.New().String(),
 		ParentLogUUID:   puuid,
@@ -77,6 +77,7 @@ func New_sub(puuid, ip, action, message, obj string, statuscode int) *AuditLog {
 		Action:          action,
 		Message:         message,
 		StatusCode:      statuscode,
+		Target:          target,
 	}
 }
 

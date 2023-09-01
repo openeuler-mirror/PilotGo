@@ -29,7 +29,7 @@
         <template v-slot:table>
           <el-table-column prop="action" label="日志名称">
           </el-table-column>
-          <el-table-column prop="email" label="创建者"> 
+          <el-table-column prop="userName" label="创建者"> 
           </el-table-column>
           <el-table-column prop="departName" label="部门"> 
           </el-table-column>

@@ -19,8 +19,8 @@ func CreateBatchHandler(c *gin.Context) {
 		return
 	}
 	//TODO:
-	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeBatch, "创建批次", "", &user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypeBatch, "创建批次", "", fd)
 	auditlog.Add(log)
 
 	if err := batch.CreateBatch(&batchinfo); err != nil {
@@ -66,8 +66,8 @@ func DeleteBatchHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeBatch, "删除批次", "", &user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypeBatch, "删除批次", "", fd)
 	auditlog.Add(log)
 
 	if err := batch.DeleteBatch(batchdel.BatchID); err != nil {
@@ -91,8 +91,8 @@ func UpdateBatchHandler(c *gin.Context) {
 		return
 	}
 	//TODO:
-	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeBatch, "修改批次", "", &user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypeBatch, "修改批次", "", fd)
 	auditlog.Add(log)
 
 	err := batch.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)

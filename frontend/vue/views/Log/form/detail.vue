@@ -28,6 +28,7 @@
         :data="result">
         <template v-slot:content>
         <el-table-column prop="ip" label="ip"></el-table-column>
+        <el-table-column prop="target" label="对象"></el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
             {{ scope.row.code == 200 ? '成功' : '失败' }}

@@ -71,6 +71,8 @@ export default {
     return {
       disabled: true,
       form: {
+        userName_create: this.$store.getters.userName,
+        departName_create: this.$store.getters.UserDepartName,
         username: "",
         departName: "",
         departId: 0,
