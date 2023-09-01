@@ -9,14 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-03-07 15:25:53
- * LastEditTime: 2022-03-14 10:35:54
+ * LastEditTime: 2023-09-01 09:34:45
  * Description: casbin权限控制
  ******************************************************************************/
 package auth
 
 import (
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -31,7 +30,7 @@ func CasbinHandler() gin.HandlerFunc {
 		// 获取用户的角色
 		sub := role
 		//判断策略中是否存在
-		ok, err := global.PILOTGO_E.Enforce(sub, obj, act)
+		ok, err := G_Enfocer.Enforce(sub, obj, act)
 		if err == nil {
 			if ok {
 				logger.Info("恭喜您,权限验证通过")
@@ -48,7 +47,7 @@ func CasbinHandler() gin.HandlerFunc {
 
 func AllPolicy1() (interface{}, int) { //暂时没有调用，与casbin文件中的方法重复，所以暂时修改为AllPolicy1
 	casbin := make([]map[string]interface{}, 0)
-	list := global.PILOTGO_E.GetPolicy()
+	list := G_Enfocer.GetPolicy()
 	for _, vlist := range list {
 		policy := make(map[string]interface{})
 		policy["role"] = vlist[0]

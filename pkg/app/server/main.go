@@ -27,7 +27,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -57,7 +56,7 @@ func main() {
 	}
 
 	// 鉴权模块初始化
-	global.PILOTGO_E = auth.Casbin(&sconfig.Config().MysqlDBinfo)
+	auth.Casbin(&sconfig.Config().MysqlDBinfo)
 
 	// 启动agent socket server
 	if err := network.SocketServerInit(&sconfig.Config().SocketServer); err != nil {

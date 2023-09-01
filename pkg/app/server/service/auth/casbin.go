@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-07-04 09:08:08
- * LastEditTime: 2022-07-04 09:25:41
+ * LastEditTime: 2023-09-01 15:36:32
  * Description: casbin服务
  ******************************************************************************/
 package auth
@@ -22,9 +22,10 @@ import (
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
+
+var G_Enfocer *casbin.Enforcer
 
 type CasbinRule struct {
 	PType    string `json:"ptype"`
@@ -34,12 +35,10 @@ type CasbinRule struct {
 }
 
 var (
-	enforcer *casbin.Enforcer
-	once     sync.Once
+	once sync.Once
 )
 
-func Casbin(conf *sconfig.MysqlDBInfo) *casbin.Enforcer {
-
+func Casbin(conf *sconfig.MysqlDBInfo) {
 	text := `
 	[request_definition]
 	r = sub, obj, act
@@ -50,18 +49,19 @@ func Casbin(conf *sconfig.MysqlDBInfo) *casbin.Enforcer {
 	[role_definition]
 	g = _, _
 
+	[matchers]
+	m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && r.act == p.act
+
 	[policy_effect]
 	e = some(where (p.eft == allow))
-
-	[matchers]
-	m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	`
 
 	once.Do(func() {
 		// m := casbinmodel.Model{}
 		m, err := casbinmodel.NewModelFromString(text)
 		if err != nil {
-			logger.Fatal("casbin model create failed: %s", err)
+			logger.Error("casbin model create failed: %s", err)
+			return
 		}
 
 		url := fmt.Sprintf("%s:%s@tcp(%s:%d)/",
@@ -71,20 +71,28 @@ func Casbin(conf *sconfig.MysqlDBInfo) *casbin.Enforcer {
 			conf.Port)
 		a, err := gormadapter.NewAdapter("mysql", url, conf.DataBase)
 		if err != nil {
-			logger.Fatal("casbin adapter create failed: %s", err)
+			logger.Error("casbin adapter create failed: %s", err)
+			return
 		}
-		enforcer, err = casbin.NewEnforcer(m, a)
+		enforcer, err := casbin.NewEnforcer(m, a)
 		if err != nil {
-			logger.Fatal("casbin enforcer create failed: %s", err)
+			logger.Error("casbin enforcer create failed: %s", err)
+			return
 		}
-		enforcer.LoadPolicy()
+		if err := enforcer.LoadPolicy(); err != nil {
+			logger.Error("casbin load Policy failed: %s", err.Error())
+		}
+
+		G_Enfocer = enforcer
+
+		// TODO:
+		initAdminPolicy()
 	})
-	return enforcer
 }
 
 func AllPolicy() (interface{}, int) {
 	casbin := make([]map[string]interface{}, 0)
-	list := global.PILOTGO_E.GetPolicy()
+	list := G_Enfocer.GetPolicy()
 	for _, vlist := range list {
 		policy := make(map[string]interface{})
 		policy["role"] = vlist[0]
@@ -97,7 +105,7 @@ func AllPolicy() (interface{}, int) {
 }
 
 func PolicyRemove(rule CasbinRule) bool {
-	ok, err := global.PILOTGO_E.RemovePolicy(rule.RoleType, rule.Url, rule.Method)
+	ok, err := G_Enfocer.RemovePolicy(rule.RoleType, rule.Url, rule.Method)
 	if err == nil {
 		if !ok {
 			return false
@@ -110,7 +118,7 @@ func PolicyRemove(rule CasbinRule) bool {
 }
 
 func PolicyAdd(rule CasbinRule) bool {
-	ok, err := global.PILOTGO_E.AddPolicy(rule.RoleType, rule.Url, rule.Method)
+	ok, err := G_Enfocer.AddPolicy(rule.RoleType, rule.Url, rule.Method)
 	if err == nil {
 		if !ok {
 			return false
@@ -120,4 +128,24 @@ func PolicyAdd(rule CasbinRule) bool {
 	}
 	logger.Error("add policy error:%s", err)
 	return false
+}
+
+func addPolicy(role, resource, action string) (bool, error) {
+	return G_Enfocer.AddPolicy(role, resource, action)
+}
+
+func initAdminPolicy() {
+	G_Enfocer.AddRoleForUser("admin", "admin")
+
+	ok, err := addPolicy("admin", "/*", "get")
+	if err != nil {
+		logger.Error("init admin policy failed:%s", err)
+	}
+	if !ok {
+		logger.Info("admin policy already exists")
+	}
+}
+
+func CheckAuth(user, resource, action string) (bool, error) {
+	return G_Enfocer.Enforce(user, resource, action)
 }
