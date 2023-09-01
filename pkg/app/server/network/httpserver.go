@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-08-30 10:54:41
+ * LastEditTime: 2023-09-01 15:35:00
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -23,6 +23,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/agentcontroller"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/controller/pluginapi"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
@@ -105,7 +106,13 @@ func setupRouter() *gin.Engine {
 }
 
 func registerAPIs(router *gin.Engine) {
+	noAuthenApis := router.Group("/api/v1")
+	{
+		noAuthenApis.POST("user/login", controller.LoginHandler)
+	}
+
 	api := router.Group("/api/v1")
+	api.Use(middleware.AuthMiddleware)
 	overview := api.Group("/overview") // 机器概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)
@@ -194,12 +201,11 @@ func registerAPIs(router *gin.Engine) {
 
 	user := api.Group("user") // 用户管理
 	{
-		user.POST("/login", controller.LoginHandler)
 		user.POST("/updatepwd", controller.UpdatePasswordHandler)
 		user.GET("/logout", controller.Logout)
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearchHandler)
-		user.GET("/info", auth.AuthMiddleware(), controller.Info)
+		user.GET("/info", controller.Info)
 		user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
 		user.GET("/role", controller.GetUserRoleHandler)

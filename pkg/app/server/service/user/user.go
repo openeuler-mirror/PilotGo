@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-03-21 15:32:50
- * LastEditTime: 2022-04-21 15:37:48
+ * LastEditTime: 2023-09-01 13:15:42
  * Description: 用户模块逻辑代码
  ******************************************************************************/
 package user
@@ -228,7 +228,7 @@ func Login(user dao.Frontdata) (string, string, int, int, string, error) {
 	}
 
 	// Issue token
-	token, err := auth.ReleaseToken(user)
+	token, err := auth.ReleaseToken(u)
 	if err != nil {
 		return "", "", 0, 0, "", err
 	}

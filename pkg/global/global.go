@@ -9,21 +9,10 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-06-27 09:59:30
- * LastEditTime: 2023-06-28 16:10:54
+ * LastEditTime: 2023-08-31 20:59:42
  * Description: provide global const of pilotgo
  ******************************************************************************/
 package global
-
-import (
-	"github.com/casbin/casbin/v2"
-)
-
-// 实例变量
-var (
-	// PILOTGO_DB    *gorm.DB
-	// PILOTGO_REDIS *redis.Client
-	PILOTGO_E *casbin.Enforcer
-)
 
 // 权限菜单、按钮
 const (

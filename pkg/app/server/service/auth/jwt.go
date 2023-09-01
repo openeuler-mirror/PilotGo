@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-1 15:08:08
- * LastEditTime: 2022-03-08 09:46:30
+ * LastEditTime: 2023-09-01 13:18:04
  * Description: jwt是一个基于token的轻量级认证方式
  ******************************************************************************/
 package auth
@@ -24,15 +24,19 @@ import (
 var jwtKey = []byte("a_secret_crect")
 var Issue = "PilotGo"
 
-type Claims struct {
-	UserId uint
+type MyClaims struct {
 	jwt.StandardClaims
+
+	UserId   uint
+	UserName string
 }
 
-func ReleaseToken(user dao.Frontdata) (string, error) {
+func ReleaseToken(user dao.User) (string, error) {
 	expirationTime := time.Now().Add(6 * 60 * time.Minute) //到期时间
-	claims := &Claims{
-		UserId: user.ID,
+	claims := &MyClaims{
+		UserId:   user.ID,
+		UserName: user.Username,
+
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -48,10 +52,9 @@ func ReleaseToken(user dao.Frontdata) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (i interface{}, err error) {
+func ParseToken(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (i interface{}, err error) {
 		return jwtKey, nil
 	})
-	return token, claims, err
+	return token, err
 }
