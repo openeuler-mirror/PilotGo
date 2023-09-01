@@ -107,7 +107,7 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	user.Email = frontdata.Email
+	user.Username = frontdata.Username
 	user.DepartName = frontdata.Departname
 	log := auditlog.New(auditlog.LogTypeUser, "用户注销", "", &user)
 	auditlog.Add(log)

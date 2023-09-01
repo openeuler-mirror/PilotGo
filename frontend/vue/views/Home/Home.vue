@@ -188,8 +188,8 @@ export default {
         type: 'warning'
       }).then(() => {
         let params = {
-          email: this.$store.getters.email,
-          departName: this.$store.getters.departName
+          userName: this.$store.getters.userName,
+          departName: this.$store.getters.UserDepartName,
         };
         this.$store.dispatch("logOut", params).then((res) => {
           this.$router.push("/login");

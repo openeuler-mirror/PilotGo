@@ -155,7 +155,7 @@ export default {
     handleDelete() {
       let params = {
         userName: this.$store.getters.userName,
-        departName: this.$store.getters.departName,
+        departName: this.$store.getters.UserDepartName,
         delDatas: []
       };
       this.$refs.table.selectRow.rows.forEach(item => {
