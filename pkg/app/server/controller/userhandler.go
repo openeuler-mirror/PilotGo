@@ -261,7 +261,7 @@ func DeleteUserHandler(c *gin.Context) {
 
 		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strings.Split(ps, "/")[0], http.StatusOK)
 		auditlog.Add(log_s)
-		auditlog.UpdateStatus(log, auditlog.ActionOK)
+		statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 	}
 
 	status := service.BatchActionStatus(statuscodes)
