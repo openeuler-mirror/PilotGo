@@ -80,7 +80,9 @@ export default {
     },
     handleconfirm() {
       let params = {
-        id: this.row.id,
+        userName_create: this.$store.getters.userName,
+        departName_create: this.$store.getters.UserDepartName,
+        role_roleid: this.row.id,
         role: this.form.rolename,
         description: this.form.description
       }

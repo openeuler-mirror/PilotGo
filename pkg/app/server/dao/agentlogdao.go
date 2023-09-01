@@ -26,7 +26,6 @@ type Frontdata struct {
 	ID                uint   `json:"id"`
 	Username_creaate  string `json:"userName_create,omitempty"`
 	Departname_create string `json:"departName_create,omitempty"`
-	RoleID            string `json:"roleid,omitempty"`
 
 	Deldatas     []string `json:"delDatas,omitempty"`
 	Username     string   `json:"userName,omitempty"`
@@ -37,10 +36,13 @@ type Frontdata struct {
 	Password     string   `json:"password,omitempty"`
 	Phone        string   `json:"phone,omitempty"`
 	UserType     int      `json:"userType,omitempty"`
+	RoleID       string   `json:"roleid,omitempty"`
 
 	Menus       []string `json:"menus,omitempty"`
 	ButtonId    []string `json:"buttonId,omitempty"`
 	Role_roleid int      `json:"role_roleid,omitempty"`
+	Role        string   `json:"role,omitempty"` // 超管和部门等级
+	Description string   `json:"description,omitempty"`
 }
 
 type AuditLog struct {
