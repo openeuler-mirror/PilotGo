@@ -113,8 +113,8 @@ func AddUserRoleHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user *userservice.User
-	log := auditlog.New(auditlog.LogTypeUser, "添加角色", "", user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypeUser, "添加角色", "", fd)
 	auditlog.Add(log)
 
 	err := userservice.AddUserRole(&userRole)
@@ -135,8 +135,8 @@ func DeleteUserRoleHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user *userservice.User
-	log := auditlog.New(auditlog.LogTypeUser, "删除角色", "", user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypeUser, "删除角色", "", fd)
 	auditlog.Add(log)
 
 	err := userservice.DeleteUserRole(UserRole.ID)
@@ -157,8 +157,8 @@ func UpdateUserRoleHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user *userservice.User
-	log := auditlog.New(auditlog.LogTypeUser, "修改角色", "", user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypeUser, "修改角色", "", fd)
 	auditlog.Add(log)
 
 	err := userservice.UpdateUserRole(&UserRole)
@@ -179,8 +179,8 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	}
 
 	//TODO:
-	var user *userservice.User
-	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", "", user)
+	fd := &userservice.Frontdata{}
+	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", "", fd)
 	auditlog.Add(log)
 
 	userRole, err := roleservice.RolePermissionChangeMethod(roleChange)

@@ -65,10 +65,19 @@ func ToUserDto(user User) UserDto {
 }
 
 type Frontdata struct {
-	Username   string   `json:"userName"`
-	Departname string   `json:"departName"`
-	Email      string   `json:"email"`
-	Deldatas   []string `json:"delDatas"`
+	ID                uint     `json:"id"`
+	Username_creaate  string   `json:"userName_create,omitempty"`
+	Departname_create string   `json:"departName_create,omitempty"`
+	Deldatas          []string `json:"delDatas,omitempty"`
+	Username          string   `json:"userName,omitempty"`
+	Departname        string   `json:"departName,omitempty"`
+	Email             string   `json:"email,omitempty"`
+	DepartFirst       int      `json:"departPid,omitempty"`
+	DepartSecond      int      `json:"departId,omitempty"`
+	Password          string   `json:"password,omitempty"`
+	Phone             string   `json:"phone,omitempty"`
+	UserType          int      `json:"userType,omitempty"`
+	RoleID            string   `json:"role,omitempty"`
 }
 
 // 获取所有的用户角色

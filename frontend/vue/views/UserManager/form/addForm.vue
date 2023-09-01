@@ -186,7 +186,9 @@ export default {
     },
     handleAdd() {
       let params = {
-        username: this.form.username,
+        userName_create: this.$store.getters.userName,
+        departName_create: this.$store.getters.UserDepartName,
+        userName: this.form.username,
         password: this.form.password,
         phone: this.form.phone,
         email: this.form.email,

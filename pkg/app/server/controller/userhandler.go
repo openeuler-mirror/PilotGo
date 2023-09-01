@@ -40,58 +40,59 @@ func GetUserRoleHandler(c *gin.Context) {
 }
 
 func RegisterHandler(c *gin.Context) {
-	var user *userservice.User
-	if err := c.Bind(&user); err != nil {
+	fd := &userservice.Frontdata{}
+	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypeUser, "添加用户", "", user)
+	log := auditlog.New(auditlog.LogTypeUser, "添加用户", "", fd)
 	auditlog.Add(log)
 
-	err := userservice.Register(user)
+	err := userservice.Register(fd)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusFail, log.Module, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, fd.Username, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Username, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
 func LoginHandler(c *gin.Context) {
-	var user *userservice.User //Data verification
-	if c.Bind(&user) != nil {
+	fd := &userservice.Frontdata{}
+	if c.Bind(fd) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	u, err := dao.UserInfo(user.Email)
+	u, err := dao.UserInfo(fd.Email)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	user.DepartName = u.DepartName
+	fd.Username_creaate = u.Email
+	fd.Departname_create = u.DepartName
 
-	log := auditlog.New(auditlog.LogTypeUser, "用户登录", "", user)
+	log := auditlog.New(auditlog.LogTypeUser, "用户登录", "", fd)
 	auditlog.Add(log)
 
-	token, departName, departId, userType, roleId, err := userservice.Login(*user)
+	token, departName, departId, userType, roleId, err := userservice.Login(*fd)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusFail, log.Module, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, u.Username, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, u.Username, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
@@ -100,18 +101,16 @@ func LoginHandler(c *gin.Context) {
 
 // 退出
 func Logout(c *gin.Context) {
-	frontdata := &userservice.Frontdata{}
-	var user userservice.User
-	if err := c.Bind(frontdata); err != nil {
+	fd := &userservice.Frontdata{}
+	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	user.Username = frontdata.Username
-	user.DepartName = frontdata.Departname
-	log := auditlog.New(auditlog.LogTypeUser, "用户注销", "", &user)
+	fd.Email = fd.Username
+	log := auditlog.New(auditlog.LogTypeUser, "用户注销", "", fd)
 	auditlog.Add(log)
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Username, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "退出成功!")
@@ -173,33 +172,31 @@ func UserSearchHandler(c *gin.Context) {
 
 // 修改密码
 func UpdatePasswordHandler(c *gin.Context) {
-	var user *userservice.User
-	if c.Bind(&user) != nil {
+	fd := &userservice.Frontdata{}
+	if c.Bind(fd) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	u, err := dao.UserInfo(user.Email)
+	u, err := dao.UserInfo(fd.Email)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	user.DepartName = u.DepartName
-
-	log := auditlog.New(auditlog.LogTypeUser, "修改密码", "", user)
+	log := auditlog.New(auditlog.LogTypeUser, "修改密码", "", fd)
 	auditlog.Add(log)
 
-	u, err = userservice.UpdatePassword(user.Email, user.Password)
+	u, err = userservice.UpdatePassword(u.Email, fd.Password)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusFail, log.Module, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, u.Username, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, u.Username, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, gin.H{"data": u}, "密码修改成功!")
@@ -207,33 +204,31 @@ func UpdatePasswordHandler(c *gin.Context) {
 
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
-	var user *userservice.User
-	if c.Bind(&user) != nil {
+	fd := &userservice.Frontdata{}
+	if c.Bind(fd) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	u, err := dao.UserInfo(user.Email)
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
+	// u, err := dao.UserInfo(fd.Email)
+	// if err != nil {
+	// 	response.Fail(c, nil, err.Error())
+	// 	return
+	// }
 
-	user.DepartName = u.DepartName
-
-	log := auditlog.New(auditlog.LogTypeUser, "重置密码", "", user)
+	log := auditlog.New(auditlog.LogTypeUser, "重置密码", "", fd)
 	auditlog.Add(log)
 
-	u, err = userservice.ResetPassword(user.Email)
+	u, err := userservice.ResetPassword(fd.Email)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusFail, log.Module, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, u.Username, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, u.Username, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, gin.H{"data": u}, "密码重置成功!")
@@ -242,32 +237,29 @@ func ResetPasswordHandler(c *gin.Context) {
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	user := &dao.User{}
 	fail_m := map[string]string{}
 	statuscodes := []string{}
-	userdel := &userservice.Frontdata{}
+	fd := &userservice.Frontdata{}
 
-	if err := c.Bind(&userdel); err != nil {
+	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	user.Email = userdel.Username
-	user.DepartName = userdel.Departname
-	log := auditlog.New(auditlog.LogTypeUser, "删除用户", "", user)
+	log := auditlog.New(auditlog.LogTypeUser, "删除用户", "", fd)
 	auditlog.Add(log)
 
-	for _, ps := range userdel.Deldatas {
+	for _, ps := range fd.Deldatas {
 		err := userservice.DeleteUser(strings.Split(ps, "/")[0])
 		if err != nil {
-			log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusFail, log.Module, http.StatusBadRequest)
+			log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strings.Split(ps, "/")[0], http.StatusBadRequest)
 			auditlog.Add(log_s)
-			fail_m[user.Email] = err.Error()
+			fail_m[strings.Split(ps, "/")[0]] = err.Error()
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strings.Split(ps, "/")[0], http.StatusOK)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionOK)
 	}
@@ -289,25 +281,25 @@ func DeleteUserHandler(c *gin.Context) {
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	var user *userservice.User
-	if c.Bind(&user) != nil {
+	fd := &userservice.Frontdata{}
+	if c.Bind(fd) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypeUser, "修改用户信息", "", user)
+	log := auditlog.New(auditlog.LogTypeUser, "修改用户信息", "", fd)
 	auditlog.Add(log)
 
-	u, err := userservice.UpdateUser(*user)
+	u, err := userservice.UpdateUser(*fd)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusFail, log.Module, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, fd.Username, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, auditlog.StatusSuccess, log.Module, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Username, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, gin.H{"data": u}, "用户信息修改成功")
@@ -324,9 +316,14 @@ func ImportUser(c *gin.Context) {
 	}
 	UserExit := make([]string, 0)
 
-	//TODO:
-	var user userservice.User
-	log := auditlog.New(auditlog.LogTypeUser, "批量导入用户", "", &user)
+	// TODO:
+	fd := &userservice.Frontdata{}
+	if err := c.Bind(fd); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+
+	log := auditlog.New(auditlog.LogTypeUser, "批量导入用户", "", fd)
 	auditlog.Add(log)
 
 	var err error
@@ -344,10 +341,14 @@ func ImportUser(c *gin.Context) {
 	}
 
 	if len(UserExit) == 0 {
-		auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, "", http.StatusOK)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionOK)
 		response.Success(c, nil, "导入用户信息成功")
 	} else {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, "", http.StatusBadRequest)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

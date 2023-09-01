@@ -37,6 +37,7 @@ type AuditLog struct {
 	IP              string `json:"ip"`
 	StatusCode      int    `json:"code"`
 	OperationObject string `json:"object"`
+	Target          string `json:"target"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	// OperatorID    uint   `gorm:"not null" json:"operator_id"`

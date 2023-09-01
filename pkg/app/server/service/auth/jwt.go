@@ -29,7 +29,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func ReleaseToken(user dao.User) (string, error) {
+func ReleaseToken(user dao.Frontdata) (string, error) {
 	expirationTime := time.Now().Add(6 * 60 * time.Minute) //到期时间
 	claims := &Claims{
 		UserId: user.ID,

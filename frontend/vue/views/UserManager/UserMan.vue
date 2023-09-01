@@ -143,7 +143,12 @@ export default {
       this.type = "update";
     },
     handleReset(email) {
-      resetPwd({'email': email}).then((res) => {
+      let params = {
+          userName_create: this.$store.getters.userName,
+          departName_create: this.$store.getters.UserDepartName,
+          email: email
+      };
+      resetPwd(params).then((res) => {
         if(res.data.code === 200){
           this.$message.success("重置密码成功")
           this.refresh();
@@ -154,8 +159,8 @@ export default {
     },
     handleDelete() {
       let params = {
-        userName: this.$store.getters.userName,
-        departName: this.$store.getters.UserDepartName,
+        userName_create: this.$store.getters.userName,
+        departName_create: this.$store.getters.UserDepartName,
         delDatas: []
       };
       this.$refs.table.selectRow.rows.forEach(item => {

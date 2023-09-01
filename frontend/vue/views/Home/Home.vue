@@ -188,6 +188,8 @@ export default {
         type: 'warning'
       }).then(() => {
         let params = {
+          userName_create: this.$store.getters.userName,
+          departName_create: this.$store.getters.UserDepartName,
           userName: this.$store.getters.userName,
           departName: this.$store.getters.UserDepartName,
         };
@@ -266,6 +268,8 @@ export default {
       this.$refs.form.validate(async (valid) => {
         if (valid) {
           const res = await updatePwd({
+            userName_create: this.$store.getters.userName,
+            departName_create: this.$store.getters.UserDepartName,
             email: this.username,
             password: this.form.password
           })
