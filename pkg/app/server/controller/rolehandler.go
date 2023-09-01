@@ -15,7 +15,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -132,24 +131,26 @@ func AddUserRoleHandler(c *gin.Context) {
 }
 
 func DeleteUserRoleHandler(c *gin.Context) {
-	var UserRole roleservice.UserRole
-	if err := c.Bind(&UserRole); err != nil {
+	fd := &userservice.Frontdata{}
+	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	//TODO:
-	fd := &userservice.Frontdata{}
 	log := auditlog.New(auditlog.LogTypePermission, "删除角色", "", fd)
 	auditlog.Add(log)
 
-	err := userservice.DeleteUserRole(UserRole.ID)
+	err := userservice.DeleteUserRole(fd.Role_roleid)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strconv.Itoa(fd.Role_roleid), http.StatusBadRequest)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 	}
 
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)
+	auditlog.Add(log_s)
+	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "角色删除成功")
 }
 
@@ -164,8 +165,6 @@ func UpdateUserRoleHandler(c *gin.Context) {
 	userrole.ID = fd.Role_roleid
 	userrole.Role = fd.Role
 	userrole.Description = fd.Description
-
-	fmt.Printf("\033[32muserrole\033[0m: %+v\n", userrole)
 
 	log := auditlog.New(auditlog.LogTypePermission, "修改角色", "", fd)
 	auditlog.Add(log)
