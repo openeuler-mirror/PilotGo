@@ -23,7 +23,7 @@ import (
 )
 
 type Frontdata struct {
-	ID                uint   `json:"id"`
+	ID                uint   `json:"id,omitempty"`
 	Username_creaate  string `json:"userName_create,omitempty"`
 	Departname_create string `json:"departName_create,omitempty"`
 
