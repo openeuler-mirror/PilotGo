@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2023-02-07 09:47:06
+ * @LastEditTime: 2023-09-02 10:19:49
  * @Description: provide agent log manager of pilotgo
  */
 import axios from 'axios'
@@ -44,9 +44,8 @@ request.interceptors.response.use(response => {
   if (error.response) {
     switch (error.response.status) {
       case 401:
-        store.dispatch('logOutFont').then(function () {
-          router.push("/login")
-        })
+        store.dispatch('logOut')
+        router.push("/login")
     }
     /* Message({
       message: error.message,
