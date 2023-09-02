@@ -67,7 +67,17 @@ export default {
     }
   },
   mounted() {
-    this.status = this.log.status.split(',')[2] === '1.00' ? '成功' : '失败';
+    switch (this.log.status.split(',')[2]) {
+      case '1.00':
+        this.status = '成功';
+        break;
+      case '0.00':
+        this.status = '失败';
+        break;
+      default:
+        this.status = '部分成功';
+        break;
+    }
     this.percent = this.log.status.split(',')[0] + '/' + this.log.status.split(',')[1];
     getLogDetail({id: this.log.log_uuid}).then(res => {
       this.result = res.data.data;
