@@ -29,7 +29,7 @@ const (
 	LogTypeRPM        = "软件包安装/卸载" // null
 	LogTypeService    = "运行服务"     // null
 	LogTypeSysctl     = "配置内核参数"   // null
-	LogTypeBroadcast  = "配置文件下发"   // null
+	LogTypeBroadcast  = "配置文件下发"   // 配置文件下发
 )
 
 type AuditLog = dao.AuditLog

@@ -121,11 +121,6 @@ func FileBroadcastToAgents(c *gin.Context) {
 		logger.Error("failed to update father log status: %s", err.Error())
 	}
 
-	if strings.Split(status, ",")[2] == "0.00" {
-		response.Fail(c, nil, "配置文件下发失败")
-		return
-	}
-
 	switch strings.Split(status, ",")[2] {
 	case "0.00":
 		response.Fail(c, nil, "配置文件下发失败")

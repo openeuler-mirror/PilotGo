@@ -237,7 +237,6 @@ func ResetPasswordHandler(c *gin.Context) {
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	fail_m := map[string]string{}
 	statuscodes := []string{}
 	fd := &userservice.Frontdata{}
 
@@ -254,7 +253,6 @@ func DeleteUserHandler(c *gin.Context) {
 		if err != nil {
 			log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strings.Split(ps, "/")[0], http.StatusBadRequest)
 			auditlog.Add(log_s)
-			fail_m[strings.Split(ps, "/")[0]] = err.Error()
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -267,16 +265,15 @@ func DeleteUserHandler(c *gin.Context) {
 	status := service.BatchActionStatus(statuscodes)
 	auditlog.UpdateStatus(log, status)
 
-	if len(fail_m) != 0 {
-		fail_sl := []string{}
-		for k, v := range fail_m {
-			fail_sl = append(fail_sl, k+":"+v)
-		}
-		response.Fail(c, nil, strings.Join(fail_sl, " "))
+	switch strings.Split(status, ",")[2] {
+	case "0.00":
+		response.Fail(c, nil, "用户删除失败")
 		return
+	case "1.00":
+		response.Success(c, nil, "用户删除成功")
+	default:
+		response.Success(c, nil, "用户删除部分成功")
 	}
-
-	response.Success(c, nil, "用户删除成功!")
 }
 
 // 修改用户信息
