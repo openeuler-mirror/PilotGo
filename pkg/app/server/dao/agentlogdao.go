@@ -44,6 +44,11 @@ type Frontdata struct {
 	Role             string   `json:"role,omitempty"` // 超管和部门等级
 	Role_Description string   `json:"role_description,omitempty"`
 	Role_type        int      `json:"role_type,omitempty"`
+
+	FileBroadcast_BatchId  []int  `json:"filebroadcast_batches"`
+	FileBroadcast_Path     string `json:"filebroadcast_path"`
+	FileBroadcast_FileName string `json:"filebroadcast_name"`
+	FileBroadcast_Text     string `json:"filebroadcast_file"`
 }
 
 type AuditLog struct {

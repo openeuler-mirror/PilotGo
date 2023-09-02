@@ -23,7 +23,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
-	fileservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/file"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -62,15 +62,18 @@ func GetAgentRepo(c *gin.Context) {
 }
 
 func FileBroadcastToAgents(c *gin.Context) {
-	var fb fileservice.FileBroadcast
-	c.Bind(&fb)
+	fd := &dao.Frontdata{}
+	if err := c.Bind(fd); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 
-	batchIds := fb.BatchId
+	batchIds := fd.FileBroadcast_BatchId
 	UUIDs := dao.BatchIds2UUIDs(batchIds)
 
-	path := fb.Path
-	filename := fb.FileName
-	text := fb.Text
+	path := fd.FileBroadcast_Path
+	filename := fd.FileBroadcast_FileName
+	text := fd.FileBroadcast_Text
 
 	if len(path) == 0 {
 		response.Fail(c, nil, "路径为空，请检查配置文件路径")
@@ -84,74 +87,40 @@ func FileBroadcastToAgents(c *gin.Context) {
 		response.Fail(c, nil, "文件内容为空，请重新检查文件内容")
 		return
 	}
-	logParent := dao.AgentLogParent{
-		UserName:   fb.User,
-		DepartName: fb.UserDept,
-		Type:       service.LogTypeBroadcast,
-	}
-	logParentId, err := dao.ParentAgentLog(logParent)
-	if err != nil {
-		logger.Error(err.Error())
-	}
-	StatusCodes := make([]string, 0)
+
+	log := auditlog.New(auditlog.LogTypeBroadcast, "配置文件下发", "", fd)
+	auditlog.Add(log)
+
+	statuscodes := []string{}
 
 	for _, uuid := range UUIDs {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              "", // TODO
-				OperationObject: filename,
-				Action:          service.BroadcastFile,
-				StatusCode:      http.StatusBadRequest,
-				Message:         "获取uuid失败",
-			}
-			if dao.AgentLogMessage(log) != nil {
-				logger.Error(err.Error())
-			}
-
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			log_s := auditlog.New_sub(log.LogUUID, uuid, log.Action, "获取uuid失败", log.Module, path+"/"+filename, http.StatusBadRequest)
+			auditlog.Add(log_s)
+			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
 		_, Err, err := agent.UpdateFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
-
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              agent.IP,
-				OperationObject: filename,
-				Action:          service.BroadcastFile,
-				StatusCode:      http.StatusBadRequest,
-				Message:         Err,
-			}
-			if dao.AgentLogMessage(log) != nil {
-				logger.Error(err.Error())
-			}
-
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			log_s := auditlog.New_sub(log.LogUUID, uuid, log.Action, Err, log.Module, path+"/"+filename, http.StatusBadRequest)
+			auditlog.Add(log_s)
+			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              agent.IP,
-				OperationObject: filename,
-				Action:          service.BroadcastFile,
-				StatusCode:      http.StatusOK,
-				Message:         "配置文件下发成功",
-			}
-			if dao.AgentLogMessage(log) != nil {
-				logger.Error(err.Error())
-			}
-
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
+			log_s := auditlog.New_sub(log.LogUUID, uuid, log.Action, "配置文件下发成功", log.Module, path+"/"+filename, http.StatusOK)
+			auditlog.Add(log_s)
+			statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 		}
 	}
-	status := service.BatchActionStatus(StatusCodes)
-	if dao.UpdateParentAgentLog(logParentId, status) != nil {
-		logger.Error(err.Error())
+
+	status := service.BatchActionStatus(statuscodes)
+	if err := auditlog.UpdateStatus(log, status); err != nil {
+		logger.Error("failed to update father log status: %s", err.Error())
 	}
-	if ok := service.ActionStatus(StatusCodes); !ok {
+
+	if ok := service.ActionStatus(statuscodes); !ok {
 		response.Fail(c, nil, "配置文件下发失败")
 		return
 	}
