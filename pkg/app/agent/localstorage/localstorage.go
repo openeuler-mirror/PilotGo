@@ -35,7 +35,7 @@ var globalLock sync.Mutex
 
 // init local storage, if file not found, then init new one
 func Init() error {
-	if !utils.IsFileExist(LocalStorageFile) {
+	if fok, _ := utils.IsFileExist(LocalStorageFile); !fok {
 		if err := reset(); err != nil {
 			logger.Error("init local storage failed:%s", err.Error())
 			return err

@@ -134,9 +134,9 @@ func (a *Agent) ReadFile(filepath string) (string, string, error) {
 // 更新配置文件
 func (a *Agent) UpdateFile(filepath string, filename string, text string) (*common.UpdateFile, string, error) {
 	updatefile := common.UpdateFile{
-		FilePath: filepath,
-		FileName: filename,
-		FileText: text,
+		Path: filepath,
+		Name: filename,
+		Text: text,
 	}
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),

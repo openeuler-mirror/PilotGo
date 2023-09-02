@@ -47,8 +47,8 @@ func EditFileHandler(c *network.SocketClient, msg *protocol.Message) error {
 		return c.Send(resp_msg)
 	}
 
-	LastVersion, err := utils.UpdateFile(result.FilePath, result.FileName, result.FileText)
-	result.FileVersion = LastVersion
+	LastVersion, err := utils.UpdateFile(result.Path, result.Name, result.Text)
+	result.FileLastVersion = LastVersion
 	if err != nil {
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
