@@ -136,12 +136,12 @@ export default {
     },
     handleconfirm() {
       let params = {
-        batches:this.form.batches,
-        path: this.form.path,
-        name: this.form.name,
-        file: this.form.file,
-        user: this.$store.getters.userName,
-        userDept: this.$store.getters.UserDepartName,
+        filebroadcast_batches:this.form.batches,
+        filebroadcast_path: this.form.path,
+        filebroadcast_name: this.form.name,
+        filebroadcast_file: this.form.file,
+        userName_create: this.$store.getters.userName,
+        departName_create: this.$store.getters.UserDepartName,
       }
       this.$refs.form.validate((valid) => {
         if (valid) {
