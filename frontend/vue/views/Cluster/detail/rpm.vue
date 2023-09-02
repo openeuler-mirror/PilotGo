@@ -137,7 +137,7 @@ export default {
     },
     handleInstall() {
       this.display = false;
-      this.action = "软件包下发";
+      this.action = "软件包安装";
       let params = {
         uuid: [this.$route.params.detail],
         rpm: this.packageName,
