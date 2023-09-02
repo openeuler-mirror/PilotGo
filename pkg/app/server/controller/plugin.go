@@ -77,7 +77,7 @@ func PluginGatewayHandler(c *gin.Context) {
 		return
 	}
 
-	s := strings.TrimRight(p.Url, "/plugin/"+name)
+	s := strings.Replace(p.Url, "/plugin/"+name, "", 1)
 	target, err := url.Parse(s)
 	if err != nil {
 		c.String(http.StatusNotFound, "parse plugin url error: "+err.Error())
