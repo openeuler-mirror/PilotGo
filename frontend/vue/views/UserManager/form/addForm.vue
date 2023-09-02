@@ -195,7 +195,7 @@ export default {
         departName: this.form.departName,
         departId: this.form.departId,
         departPid: this.form.departPid,
-        role: this.form.role.toString(),
+        roleid: this.form.role.toString(),
       }
       this.$refs.form.validate((valid) => {
         if (valid) {

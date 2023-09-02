@@ -57,15 +57,15 @@ func EditFileHandler(c *network.SocketClient, msg *protocol.Message) error {
 			Error:  err.Error(),
 		}
 		return c.Send(resp_msg)
-	} else {
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: 0,
-			Data:   result,
-		}
-		return c.Send(resp_msg)
 	}
+
+	resp_msg := &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   result,
+	}
+	return c.Send(resp_msg)
 }
 
 func AgentConfigHandler(c *network.SocketClient, msg *protocol.Message) error {
