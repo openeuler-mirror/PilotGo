@@ -16,6 +16,7 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -72,10 +73,18 @@ func FileReadString(filePath string) (string, error) {
 	return string(result), nil
 }
 
-// 获取文件状态，如果无错误则认为文件存在
-func IsFileExist(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
+// 获取文件状态，return (true, false):文件存在； (false, true):文件不存在但存在同名目录
+func IsFileExist(filePath string) (bool, bool) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return false, false
+	}
+
+	if info.IsDir() {
+		return false, true
+	}
+
+	return true, false
 }
 
 func GetFiles(filePath string) (fs []string, err error) {
@@ -99,7 +108,10 @@ func GetFiles(filePath string) (fs []string, err error) {
 
 func UpdateFile(path, filename, data interface{}) (lastversion string, err error) {
 	fullname := path.(string) + "/" + filename.(string)
-	if !IsFileExist(fullname) {
+	if fok, dok := IsFileExist(fullname); !fok {
+		if dok {
+			return "", fmt.Errorf("存在同名目录,文件下发失败")
+		}
 		err := FileSaveString(fullname, data.(string))
 		if err != nil {
 			return "", err

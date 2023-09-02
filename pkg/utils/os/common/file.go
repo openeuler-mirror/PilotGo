@@ -1,8 +1,8 @@
 package common
 
 type UpdateFile struct {
-	FilePath    string `json:"path"`
-	FileName    string `json:"name"`
-	FileText    string `json:"text"`
-	FileVersion string `json:"filelast_version"`
+	Path            string `json:"path"`
+	Name            string `json:"name"`
+	Text            string `json:"text"`
+	FileLastVersion string `json:"filelastversion"`
 }
