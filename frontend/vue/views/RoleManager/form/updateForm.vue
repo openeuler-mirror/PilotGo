@@ -84,7 +84,7 @@ export default {
         departName_create: this.$store.getters.UserDepartName,
         role_roleid: this.row.id,
         role: this.form.rolename,
-        description: this.form.description
+        role_description: this.form.description
       }
       this.$refs.form.validate((valid) => {
         if (valid) {

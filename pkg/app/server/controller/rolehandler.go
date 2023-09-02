@@ -109,24 +109,32 @@ func GetRolesHandler(c *gin.Context) {
 }
 
 func AddUserRoleHandler(c *gin.Context) {
-	var userRole roleservice.UserRole
-	if err := c.Bind(&userRole); err != nil {
+	fd := &userservice.Frontdata{}
+	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	//TODO:
-	fd := &userservice.Frontdata{}
 	log := auditlog.New(auditlog.LogTypePermission, "添加角色", "", fd)
 	auditlog.Add(log)
 
-	err := userservice.AddUserRole(&userRole)
+	userRole := &roleservice.UserRole{}
+	userRole.Type = fd.Role_type
+	userRole.Role = fd.Role
+	userRole.Description = fd.Role_Description
+
+	err := userservice.AddUserRole(userRole)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, fd.Role, http.StatusBadRequest)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
+		return
 	}
 
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Role, http.StatusOK)
+	auditlog.Add(log_s)
+	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "新增角色成功")
 }
 
@@ -142,13 +150,14 @@ func DeleteUserRoleHandler(c *gin.Context) {
 
 	err := userservice.DeleteUserRole(fd.Role_roleid)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strconv.Itoa(fd.Role_roleid), http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, fd.Role, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
+		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Role, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "角色删除成功")
@@ -161,13 +170,13 @@ func UpdateUserRoleHandler(c *gin.Context) {
 		return
 	}
 
+	log := auditlog.New(auditlog.LogTypePermission, "修改角色", "", fd)
+	auditlog.Add(log)
+
 	userrole := &roleservice.UserRole{}
 	userrole.ID = fd.Role_roleid
 	userrole.Role = fd.Role
-	userrole.Description = fd.Description
-
-	log := auditlog.New(auditlog.LogTypePermission, "修改角色", "", fd)
-	auditlog.Add(log)
+	userrole.Description = fd.Role_Description
 
 	err := userservice.UpdateUserRole(userrole)
 	if err != nil {
@@ -175,6 +184,7 @@ func UpdateUserRoleHandler(c *gin.Context) {
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
+		return
 	}
 
 	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)

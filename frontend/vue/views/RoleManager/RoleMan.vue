@@ -50,7 +50,7 @@
               title="确定删除此角色?"
               cancel-button-type="default"
               confirm-button-type="danger"
-              @confirm="handleDelete(scope.row.id)">
+              @confirm="handleDelete(scope.row.id, scope.row.role)">
               <auth-button :disabled="[1].includes(scope.row.id)" slot="reference" name="role_delete" size="mini"> 删除 </auth-button>
             </el-popconfirm>
           </template>
@@ -143,10 +143,11 @@ export default {
       this.showPop = false;
       this.title = "变更权限";
     },
-    handleDelete(id) {
+    handleDelete(id, role) {
       let params = {
           userName_create: this.$store.getters.userName,
           departName_create: this.$store.getters.UserDepartName,
+          role: role,
           role_roleid: id
       };
       delRole(params).then(res => {
