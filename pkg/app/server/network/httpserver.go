@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-09-01 17:14:14
+ * LastEditTime: 2023-09-02 10:17:40
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -108,7 +108,9 @@ func setupRouter() *gin.Engine {
 func registerAPIs(router *gin.Engine) {
 	noAuthenApis := router.Group("/api/v1")
 	{
-		noAuthenApis.POST("user/login", controller.LoginHandler)
+		noAuthenApis.POST("/user/login", controller.LoginHandler)
+		noAuthenApis.GET("/user/logout", controller.Logout)
+		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
 	}
 
 	api := router.Group("/api/v1")
@@ -202,11 +204,11 @@ func registerAPIs(router *gin.Engine) {
 	user := api.Group("user") // 用户管理
 	{
 		user.POST("/updatepwd", controller.UpdatePasswordHandler)
-		user.GET("/logout", controller.Logout)
+		// user.GET("/logout", controller.Logout)
 		user.GET("/searchAll", controller.UserAll)
 		user.POST("/userSearch", controller.UserSearchHandler)
 		user.GET("/info", controller.Info)
-		user.POST("/permission", controller.GetLoginUserPermissionHandler)
+		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
 		user.GET("/role", controller.GetUserRoleHandler)
 		user.POST("/addRole", controller.AddUserRoleHandler)

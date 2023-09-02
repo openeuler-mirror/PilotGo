@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2022-05-16 16:49:18
+ * @LastEditTime: 2023-09-02 10:12:26
  * @Description:  v1 api client encapsulation
  */
 import axios from 'axios'
@@ -48,10 +48,9 @@ request_v1.interceptors.response.use(response => {
   if (error.response) {
     switch (error.response.status) {
       case 401:
-        store.dispatch('logOutFont').then(function() {
-          router.push("/login")
-      })
-    }
+        store.dispatch('logOut')
+        router.push("/login")
+      }
     return Promise.reject(error.response.data);
   }
 });
