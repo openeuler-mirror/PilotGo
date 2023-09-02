@@ -38,11 +38,12 @@ type Frontdata struct {
 	UserType     int      `json:"userType,omitempty"`
 	RoleID       string   `json:"roleid,omitempty"`
 
-	Menus       []string `json:"menus,omitempty"`
-	ButtonId    []string `json:"buttonId,omitempty"`
-	Role_roleid int      `json:"role_roleid,omitempty"`
-	Role        string   `json:"role,omitempty"` // 超管和部门等级
-	Description string   `json:"description,omitempty"`
+	Menus            []string `json:"menus,omitempty"`
+	ButtonId         []string `json:"buttonId,omitempty"`
+	Role_roleid      int      `json:"role_roleid,omitempty"`
+	Role             string   `json:"role,omitempty"` // 超管和部门等级
+	Role_Description string   `json:"role_description,omitempty"`
+	Role_type        int      `json:"role_type,omitempty"`
 }
 
 type AuditLog struct {
