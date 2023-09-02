@@ -18,6 +18,7 @@ package agentcontroller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
@@ -120,9 +121,18 @@ func FileBroadcastToAgents(c *gin.Context) {
 		logger.Error("failed to update father log status: %s", err.Error())
 	}
 
-	if ok := service.ActionStatus(statuscodes); !ok {
+	if strings.Split(status, ",")[2] == "0.00" {
 		response.Fail(c, nil, "配置文件下发失败")
 		return
 	}
-	response.Success(c, nil, "配置文件下发完成!")
+
+	switch strings.Split(status, ",")[2] {
+	case "0.00":
+		response.Fail(c, nil, "配置文件下发失败")
+		return
+	case "1.00":
+		response.Success(c, nil, "配置文件下发完成")
+	default:
+		response.Success(c, nil, "配置文件下发部分完成")
+	}
 }
