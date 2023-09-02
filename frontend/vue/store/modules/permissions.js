@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-01-19 17:30:12
- * @LastEditTime: 2023-02-06 15:42:40
+ * @LastEditTime: 2023-09-02 11:09:25
  */
 import Vue from 'vue';
 import { constantRouterMap, routes } from '@/router'
@@ -122,6 +122,7 @@ const permission = {
               let iframeObj = {
                 path: '/plugin' + index,
                 name: 'Plugin' + index,
+                src: '/plugin/' + item.name,
                 component: _import('IFrame/IFrame'), // 组件文件的引用
                 url: item.url,
                 plugin_type: item.plugin_type

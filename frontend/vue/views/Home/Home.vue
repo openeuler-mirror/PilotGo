@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
- LastEditTime: 2023-08-31 11:28:33
+ LastEditTime: 2023-09-02 11:02:55
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -69,7 +69,7 @@
               </keep-alive>
             </transition>
             <!--插件页-->
-            <component v-for="item in iframeComponents" :key="item.name" :is="item.name" :url="item.url"
+            <component v-for="item in iframeComponents" :key="item.name" :is="item.name" :url="item.src"
               :plugin_type="item.plugin_type" :name="item.name" :path="item.path" v-if="$route.path === item.path">
             </component>
           </div>
