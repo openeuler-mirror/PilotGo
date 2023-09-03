@@ -90,6 +90,7 @@ func Casbin(conf *sconfig.MysqlDBInfo) {
 	})
 }
 
+// deprecated
 func AllPolicy() (interface{}, int) {
 	casbin := make([]map[string]interface{}, 0)
 	list := G_Enfocer.GetPolicy()
@@ -104,6 +105,7 @@ func AllPolicy() (interface{}, int) {
 	return casbin, total
 }
 
+// deprecated
 func PolicyRemove(rule CasbinRule) bool {
 	ok, err := G_Enfocer.RemovePolicy(rule.RoleType, rule.Url, rule.Method)
 	if err == nil {
@@ -117,6 +119,7 @@ func PolicyRemove(rule CasbinRule) bool {
 	return false
 }
 
+// deprecated
 func PolicyAdd(rule CasbinRule) bool {
 	ok, err := G_Enfocer.AddPolicy(rule.RoleType, rule.Url, rule.Method)
 	if err == nil {
@@ -134,18 +137,109 @@ func addPolicy(role, resource, action string) (bool, error) {
 	return G_Enfocer.AddPolicy(role, resource, action)
 }
 
+var (
+	PermissionList = []string{
+		"rpm_install",
+		"rpm_uninstall",
+		"batch_update",
+		"batch_delete",
+		"user_add",
+		"user_import",
+		"user_edit",
+		"user_reset",
+		"user_del",
+		"role_add",
+		"role_update",
+		"role_delete",
+		"role_modify",
+		"config_install",
+		"dept_change",
+	}
+
+	MenuList = []string{
+		"overview",
+		"cluster",
+		"batch",
+		"usermanager",
+		"rolemanager",
+		"config",
+		"log",
+		"plugin",
+	}
+)
+
 func initAdminPolicy() {
 	G_Enfocer.AddRoleForUser("admin", "admin")
 
-	ok, err := addPolicy("admin", "/*", ".*")
-	if err != nil {
-		logger.Error("init admin policy failed:%s", err)
+	for _, p := range PermissionList {
+		ok, err := addPolicy("admin", p, "button")
+		if err != nil {
+			logger.Error("init admin policy failed:%s", err)
+		}
+		if !ok {
+			logger.Debug("admin button permission already exists: %s", p)
+		}
 	}
-	if !ok {
-		logger.Info("admin policy already exists")
+
+	for _, m := range MenuList {
+		ok, err := addPolicy("admin", m, "menu")
+		if err != nil {
+			logger.Error("init admin policy failed:%s", err)
+		}
+		if !ok {
+			logger.Debug("admin menu access permission already exists: %s", m)
+		}
+	}
+
+	// test
+	{
+		ok, err := addPolicy("admin", "plugins", "get")
+		if err != nil {
+			logger.Error("init admin policy failed:%s", err)
+		}
+		if !ok {
+			logger.Debug("admin test permission already exists")
+		}
 	}
 }
 
 func CheckAuth(user, resource, action string) (bool, error) {
-	return G_Enfocer.Enforce(user, resource, action)
+	ok, err := G_Enfocer.Enforce(user, resource, action)
+	logger.Debug("check auth: %s %s %s, result: %t", user, resource, action, ok)
+	return ok, err // return true, nil
+}
+
+func GetRoles() []string {
+	return G_Enfocer.GetAllRoles()
+}
+
+// func AddRole(role string) error {
+// 	return nil
+// }
+
+// 获取指定用户的buttion权限和menu权限
+func GetPermissionsOfUser(user string) ([]string, []string, error) {
+	ps, err := G_Enfocer.GetImplicitPermissionsForUser(user)
+	if err != nil {
+		return nil, nil, err
+	}
+	// fmt.Printf("user permissions: %v\n", ps)
+
+	pbutton := []string{}
+	pmenu := []string{}
+	for _, ss := range ps {
+		// user := ss[0]
+		resource := ss[1]
+		ptype := ss[2]
+
+		switch ptype {
+		case "button":
+			pbutton = append(pbutton, resource)
+		case "menu":
+			pmenu = append(pmenu, resource)
+		default:
+			logger.Warn("unknown permission type: %s", ptype)
+		}
+	}
+	return pbutton, pmenu, nil
 }

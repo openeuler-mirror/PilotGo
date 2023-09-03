@@ -57,12 +57,10 @@ type ServerConfig struct {
 	RedisDBinfo  RedisDBInfo    `yaml:"redis"`
 }
 
-const config_file = "./config_server.yaml"
-
 var global_config ServerConfig
 
-func Init() error {
-	return utils.Load(config_file, &global_config)
+func Init(path string) error {
+	return utils.Load(path, &global_config)
 }
 
 func Config() *ServerConfig {
