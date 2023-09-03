@@ -78,12 +78,10 @@ export default {
           this.menus.push(item.menuName)
         });
         checkedNodes.filter(item => item.btnId).forEach(item => {
-          this.btns.push(item.btnId+'')
+          this.btns.push(item.menuName)
         });
         let params = {
-          userName_create: this.$store.getters.userName,
-          departName_create: this.$store.getters.UserDepartName,
-          role_roleid: this.row.id,
+          role: this.row.role,
           menus: this.menus,
           buttonId: this.btns
         }

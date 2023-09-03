@@ -206,16 +206,26 @@ func initAdminPolicy() {
 func CheckAuth(user, resource, action string) (bool, error) {
 	ok, err := G_Enfocer.Enforce(user, resource, action)
 	logger.Debug("check auth: %s %s %s, result: %t", user, resource, action, ok)
-	return ok, err // return true, nil
+	return ok, err
 }
 
-func GetRoles() []string {
+func GetAllRoles() []string {
 	return G_Enfocer.GetAllRoles()
 }
 
-// func AddRole(role string) error {
-// 	return nil
-// }
+func GetUserRoles(user string) ([]string, error) {
+	// TODO:
+	// return G_Enfocer.GetImplicitRolesForUser(user)
+	return G_Enfocer.GetRolesForUser(user)
+}
+
+func AddRole(role string) error {
+	// TODO: 为了兼容历史版本创建空role，创建一个无用的权限
+	addPolicy(role, "empty", "emply")
+	return nil
+}
+
+func AddPolicy(role, resource, action string) {}
 
 // 获取指定用户的buttion权限和menu权限
 func GetPermissionsOfUser(user string) ([]string, []string, error) {
@@ -237,9 +247,35 @@ func GetPermissionsOfUser(user string) ([]string, []string, error) {
 			pbutton = append(pbutton, resource)
 		case "menu":
 			pmenu = append(pmenu, resource)
+		case "empty":
+			// TODO: 历史兼容性保留的空权限
+			continue
 		default:
 			logger.Warn("unknown permission type: %s", ptype)
 		}
 	}
 	return pbutton, pmenu, nil
+}
+
+func UpdateRolePermissions(role string, buttons, menus []string) error {
+	if _, err := G_Enfocer.DeleteRole(role); err != nil {
+		return err
+	}
+
+	for _, p := range buttons {
+		_, err := addPolicy(role, p, "button")
+		if err != nil {
+			logger.Error("add role:%s buttion policy failed:%s", role, err)
+			return err
+		}
+	}
+
+	for _, m := range menus {
+		_, err := addPolicy(role, m, "menu")
+		if err != nil {
+			logger.Error("add role:%s menu policy failed:%s", role, err)
+			return err
+		}
+	}
+	return nil
 }

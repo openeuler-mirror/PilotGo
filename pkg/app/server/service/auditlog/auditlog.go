@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 )
 
 // 日志执行操作状态
@@ -54,6 +55,7 @@ func BatchActionStatus(StatusCodes []string) (status string) {
 	return
 }
 
+// deprecated
 func New(module, action, msg string, f *dao.Frontdata) *AuditLog {
 	return &AuditLog{
 		LogUUID:    uuid.New().String(),
@@ -62,6 +64,20 @@ func New(module, action, msg string, f *dao.Frontdata) *AuditLog {
 		UserName:   f.Username_creaate,
 		DepartName: f.Departname_create,
 		Email:      f.Email,
+		Action:     action,
+		Message:    msg,
+		// OperatorID: u.ID,
+	}
+}
+
+func NewByUser(module, action, msg string, user *common.User) *AuditLog {
+	return &AuditLog{
+		LogUUID:    uuid.New().String(),
+		Module:     module,
+		Status:     "",
+		UserName:   user.Username,
+		DepartName: user.DepartName,
+		Email:      user.Email,
 		Action:     action,
 		Message:    msg,
 		// OperatorID: u.ID,

@@ -63,6 +63,7 @@ func GetRoles(query *common.PaginationQ) (int, interface{}, error) {
 	return total, data, nil
 }
 
+// deprecated
 func RolePermissionChangeMethod(roleChange *dao.Frontdata) (*dao.UserRole, error) {
 	userRole, err := dao.UpdateRolePermission(roleChange)
 	if err != nil {

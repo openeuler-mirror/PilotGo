@@ -96,6 +96,13 @@ func UserInfo(email string) (User, error) {
 	return user, err
 }
 
+// 查询某用户信息
+func QueryUserByID(userID int) (*User, error) {
+	user := &User{}
+	err := mysqlmanager.MySQL().Where("id=?", strconv.Itoa(userID)).Find(user).Error
+	return user, err
+}
+
 // 查询所有的用户
 func UserAll() ([]ReturnUser, int, error) {
 	var users []User

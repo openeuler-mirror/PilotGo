@@ -121,7 +121,8 @@ func Info(c *gin.Context) {
 	user, _ := c.Get("x-user")
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
-		"data": gin.H{"user": dao.ToUserDto(user.(userservice.User))},
+		// TODO: fix type assertion
+		"data": gin.H{"user": dao.ToUserDto(user.(common.User))},
 	})
 }
 
@@ -149,7 +150,7 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user userservice.User
+	var user common.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return

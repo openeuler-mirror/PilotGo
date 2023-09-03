@@ -194,16 +194,28 @@ func UpdateUserRoleHandler(c *gin.Context) {
 }
 
 func RolePermissionChangeHandler(c *gin.Context) {
+	params := &struct {
+		ButtonId []string `json:"buttonId"`
+		Menus    []string `json:"menus"`
+		Role     string   `json:"role"`
+	}{}
 	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
-		response.Fail(c, nil, "parameter error"+":"+err.Error())
+	if err := c.Bind(params); err != nil {
+		response.Fail(c, nil, "parameter error:"+err.Error())
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", "", fd)
+	user, err := auth.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypePermission, "修改角色权限", "", user)
 	auditlog.Add(log)
 
-	userRole, err := roleservice.RolePermissionChangeMethod(fd)
+	// userRole, err := roleservice.RolePermissionChangeMethod(fd)
+	err = auth.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus)
 	if err != nil {
 		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strconv.Itoa(fd.Role_roleid), http.StatusBadRequest)
 		auditlog.Add(log_s)
@@ -215,5 +227,6 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
-	response.Success(c, gin.H{"data": userRole}, "角色权限变更成功")
+
+	response.Success(c, nil, "角色权限变更成功")
 }

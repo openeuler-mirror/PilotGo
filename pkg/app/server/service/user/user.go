@@ -29,7 +29,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-type User = dao.User
 type Frontdata = dao.Frontdata
 
 // 随机产生用户名字

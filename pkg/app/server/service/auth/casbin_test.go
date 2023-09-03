@@ -25,10 +25,17 @@ import (
 )
 
 func TestGetRoles(t *testing.T) {
-	roles := GetRoles()
+	roles := GetAllRoles()
 	assert.NotNil(t, roles)
 
 	fmt.Printf("roles: %v\n", roles)
+}
+
+func TestGetUserRoles(t *testing.T) {
+	roles, err := GetUserRoles("admin")
+	assert.NoError(t, err)
+
+	fmt.Printf("user roles: %v\n", roles)
 }
 
 func TestMain(m *testing.M) {
