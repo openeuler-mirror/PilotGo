@@ -21,6 +21,7 @@
           size="medium"
           v-model="form.rolename"
           autocomplete="off"
+          :disabled="true"
         ></el-input>
       </el-form-item>
       <el-form-item label="描述:" prop="description">
@@ -80,11 +81,11 @@ export default {
     },
     handleconfirm() {
       let params = {
-        userName_create: this.$store.getters.userName,
-        departName_create: this.$store.getters.UserDepartName,
-        role_roleid: this.row.id,
+        // userName_create: this.$store.getters.userName,
+        // departName_create: this.$store.getters.UserDepartName,
+        // role_roleid: this.row.id,
         role: this.form.rolename,
-        role_description: this.form.description
+        description: this.form.description
       }
       this.$refs.form.validate((valid) => {
         if (valid) {

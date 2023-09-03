@@ -16,66 +16,15 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	roleservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/role"
-	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
-
-// 删除过滤策略
-func PolicyDelete(c *gin.Context) {
-	var Rule auth.CasbinRule
-	if err := c.Bind(&Rule); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	if ok := auth.PolicyRemove(Rule); !ok {
-		response.Fail(c, nil, "Pilocy不存在")
-	} else {
-		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy删除成功")
-	}
-}
-
-// 增加过滤策略
-func PolicyAdd(c *gin.Context) {
-	var Rule auth.CasbinRule
-	if err := c.Bind(&Rule); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	if ok := auth.PolicyAdd(Rule); !ok {
-		response.Fail(c, nil, "Pilocy已存在")
-	} else {
-		response.Success(c, gin.H{"code": http.StatusOK}, "Pilocy添加成功")
-	}
-}
-
-// 获取所有过滤策略
-func GetPolicy(c *gin.Context) {
-	query := &common.PaginationQ{}
-	err := c.ShouldBindQuery(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-
-	policy, total := auth.AllPolicy()
-
-	data, err := common.DataPaging(query, policy, total)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-
-	common.JsonPagination(c, data, int64(total), query)
-}
 
 // 获取登录用户权限
 func GetLoginUserPermissionHandler(c *gin.Context) {
@@ -84,113 +33,129 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	userRole, buttons, err := roleservice.GetLoginUserPermission(RoleId)
+	userType, menu, buttons, err := roleservice.GetLoginUserPermission(RoleId)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"userType": userRole.Type, "menu": userRole.Menus, "button": buttons}, "用户权限列表")
+	response.Success(c, gin.H{"userType": userType, "menu": menu, "button": buttons}, "用户权限列表")
 }
 
 func GetRolesHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
-	err := c.ShouldBindQuery(query)
+	data, err := roleservice.GetRoles()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	total, data, err := roleservice.GetRoles(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	common.JsonPagination(c, data, int64(total), query)
+	response.Success(c, data, "角色权限列表")
 }
 
-func AddUserRoleHandler(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
-		response.Fail(c, nil, "parameter error")
+func AddRoleHandler(c *gin.Context) {
+	params := &struct {
+		Role        string `json:"role"`
+		Description string `json:"description"`
+	}{}
+	if err := c.Bind(params); err != nil {
+		response.Fail(c, nil, "parameter error:"+err.Error())
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypePermission, "添加角色", "", fd)
+	user, err := auth.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypePermission, "添加角色", "", user)
 	auditlog.Add(log)
 
-	userRole := &roleservice.UserRole{}
-	userRole.Type = fd.Role_type
-	userRole.Role = fd.Role
-	userRole.Description = fd.Role_Description
+	userRole := &roleservice.UserRole{
+		Type:        roleservice.RoleTypeNotBuildin,
+		Role:        params.Role,
+		Description: params.Description,
+	}
 
-	err := userservice.AddUserRole(userRole)
+	err = roleservice.AddRole(userRole)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, fd.Role, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Role, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "新增角色成功")
 }
 
-func DeleteUserRoleHandler(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
-		response.Fail(c, nil, "parameter error")
+func DeleteRoleHandler(c *gin.Context) {
+	params := &struct {
+		Role string `json:"role"`
+	}{}
+	if err := c.Bind(params); err != nil {
+		response.Fail(c, nil, "parameter error:"+err.Error())
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypePermission, "删除角色", "", fd)
+	user, err := auth.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypePermission, "删除角色", "", user)
 	auditlog.Add(log)
 
-	err := userservice.DeleteUserRole(fd.Role_roleid)
+	err = roleservice.DeleteRole(params.Role)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, fd.Role, http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, fd.Role, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "角色删除成功")
 }
 
-func UpdateUserRoleHandler(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
-		response.Fail(c, nil, "parameter error")
+func UpdateRoleInfoHandler(c *gin.Context) {
+	params := &struct {
+		Role        string `json:"role"`
+		Description string `json:"description"`
+	}{}
+	if err := c.Bind(params); err != nil {
+		response.Fail(c, nil, "parameter error:"+err.Error())
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypePermission, "修改角色", "", fd)
+	user, err := auth.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypePermission, "修改角色信息", "", user)
 	auditlog.Add(log)
 
-	userrole := &roleservice.UserRole{}
-	userrole.ID = fd.Role_roleid
-	userrole.Role = fd.Role
-	userrole.Description = fd.Role_Description
-
-	err := userservice.UpdateUserRole(userrole)
+	err = roleservice.UpdateRoleInfo(params.Role, params.Description)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strconv.Itoa(fd.Role_roleid), http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
-	response.Success(c, gin.H{"data": userrole}, "角色信息修改成功")
+	response.Success(c, nil, "角色信息修改成功")
 }
 
 func RolePermissionChangeHandler(c *gin.Context) {
@@ -199,7 +164,6 @@ func RolePermissionChangeHandler(c *gin.Context) {
 		Menus    []string `json:"menus"`
 		Role     string   `json:"role"`
 	}{}
-	fd := &userservice.Frontdata{}
 	if err := c.Bind(params); err != nil {
 		response.Fail(c, nil, "parameter error:"+err.Error())
 		return
@@ -214,17 +178,16 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	log := auditlog.NewByUser(auditlog.LogTypePermission, "修改角色权限", "", user)
 	auditlog.Add(log)
 
-	// userRole, err := roleservice.RolePermissionChangeMethod(fd)
-	err = auth.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus)
+	err = roleservice.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strconv.Itoa(fd.Role_roleid), http.StatusBadRequest)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
 		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strconv.Itoa(fd.Role_roleid), http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 

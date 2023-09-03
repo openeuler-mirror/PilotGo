@@ -225,7 +225,25 @@ func AddRole(role string) error {
 	return nil
 }
 
-func AddPolicy(role, resource, action string) {}
+type Policy struct {
+	Role     string
+	Resource string
+	Action   string
+}
+
+func GetAllPolicies() []Policy {
+	policies := G_Enfocer.GetPolicy()
+
+	result := []Policy{}
+	for _, p := range policies {
+		result = append(result, Policy{
+			Role:     p[0],
+			Resource: p[1],
+			Action:   p[2],
+		})
+	}
+	return result
+}
 
 // 获取指定用户的buttion权限和menu权限
 func GetPermissionsOfUser(user string) ([]string, []string, error) {
@@ -276,6 +294,13 @@ func UpdateRolePermissions(role string, buttons, menus []string) error {
 			logger.Error("add role:%s menu policy failed:%s", role, err)
 			return err
 		}
+	}
+	return nil
+}
+
+func DeleteRole(role string) error {
+	if _, err := G_Enfocer.DeleteRole(role); err != nil {
+		return err
 	}
 	return nil
 }

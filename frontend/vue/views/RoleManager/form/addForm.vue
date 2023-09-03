@@ -70,11 +70,8 @@ export default {
     },
     handleAdd() {
       let params = {
-        userName_create: this.$store.getters.userName,
-        departName_create: this.$store.getters.UserDepartName,
         role: this.form.rolename,
-        role_type: 3,
-        role_description: this.form.description
+        description: this.form.description
       }
       this.$refs.form.validate((valid) => {
         if (valid) {

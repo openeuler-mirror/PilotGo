@@ -134,9 +134,9 @@ func registerAPIs(router *gin.Engine) {
 			user.POST("/update", middleware.NeedPermission("user_edit", "button"), controller.UpdateUserHandler)
 			user.POST("/import", middleware.NeedPermission("user_import", "button"), controller.ImportUser)
 
-			user.POST("/addRole", middleware.NeedPermission("role_add", "button"), controller.AddUserRoleHandler)
-			user.POST("/delRole", middleware.NeedPermission("role_delete", "button"), controller.DeleteUserRoleHandler)
-			user.POST("/updateRole", middleware.NeedPermission("role_update", "button"), controller.UpdateUserRoleHandler)
+			user.POST("/addRole", middleware.NeedPermission("role_add", "button"), controller.AddRoleHandler)
+			user.POST("/delRole", middleware.NeedPermission("role_delete", "button"), controller.DeleteRoleHandler)
+			user.POST("/updateRole", middleware.NeedPermission("role_update", "button"), controller.UpdateRoleInfoHandler)
 			user.POST("/roleChange", middleware.NeedPermission("role_modify", "button"), controller.RolePermissionChangeHandler)
 		}
 		{
@@ -246,7 +246,7 @@ func registerAPIs(router *gin.Engine) {
 		user.GET("/info", controller.Info)
 		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
-		user.GET("/role", controller.GetUserRoleHandler)
+		user.GET("/role_list", controller.GetRoleListHandler)
 	}
 
 	configmanager := api.Group("config") // 配置管理
@@ -265,14 +265,6 @@ func registerAPIs(router *gin.Engine) {
 	{
 		userLog.GET("/log_all", controller.LogAllHandler)
 		userLog.GET("/logs", controller.AgentLogsHandler)
-	}
-
-	// 此处绑定casbin过滤规则
-	policy := api.Group("casbin")
-	{
-		policy.GET("/get", controller.GetPolicy)
-		policy.POST("/delete", controller.PolicyDelete)
-		policy.POST("/add", controller.PolicyAdd)
 	}
 
 	plugin := api.Group("plugins") // 插件

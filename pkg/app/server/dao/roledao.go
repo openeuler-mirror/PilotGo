@@ -34,15 +34,6 @@ type UserRole struct {
 	ButtonID    string `json:"buttonId"`
 }
 
-type ReturnUserRole struct {
-	ID          int      `json:"id"`
-	Role        string   `json:"role"`
-	Type        int      `json:"type"`
-	Description string   `json:"description"`
-	Menus       string   `json:"menus"`
-	Buttons     []string `json:"buttons"`
-}
-
 type RoleButton struct {
 	ID     uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	Button string `json:"button"`
@@ -73,10 +64,10 @@ func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
 }
 
 // 登录用户的权限按钮
-func PermissionButtons(button string) (interface{}, error) {
+func PermissionButtons(button string) ([]string, error) {
 	var buttons []string
-	if len(button) == 0 {
-		return []interface{}{}, nil
+	if button == "" {
+		return []string{}, nil
 	}
 	IDs := strings.Split(button, ",")
 
@@ -97,67 +88,22 @@ func PermissionButtons(button string) (interface{}, error) {
 }
 
 // 获取所有的用户角色
-func GetAllRoles() ([]ReturnUserRole, int, error) {
+func GetRoleList() ([]UserRole, error) {
 	var roles []UserRole
-	var getRole []ReturnUserRole
 	err := mysqlmanager.MySQL().Order("id desc").Find(&roles).Error
 	if err != nil {
-		return getRole, 0, err
+		return nil, err
 	}
-	total := len(roles)
-
-	for _, role := range roles {
-		var buts []string
-
-		if len(role.ButtonID) == 0 {
-			r := ReturnUserRole{
-				ID:          role.ID,
-				Role:        role.Role,
-				Type:        role.Type,
-				Description: role.Description,
-				Menus:       role.Menus,
-				Buttons:     []string{},
-			}
-			getRole = append(getRole, r)
-			continue
-		} else {
-			buttonss := strings.Split(role.ButtonID, ",")
-
-			for _, button := range buttonss {
-				var but RoleButton
-				i, _ := strconv.Atoi(button)
-				err := mysqlmanager.MySQL().Where("id=?", i).Find(&but).Error
-				if err != nil {
-					return getRole, total, err
-				}
-				buts = append(buts, but.Button)
-			}
-			r := ReturnUserRole{
-				ID:          role.ID,
-				Role:        role.Role,
-				Type:        role.Type,
-				Description: role.Description,
-				Menus:       role.Menus,
-				Buttons:     buts,
-			}
-			getRole = append(getRole, r)
-		}
-	}
-	return getRole, total, nil
+	return roles, nil
 }
 
 // 新增角色
-func AddRole(r UserRole) error {
-	role := r.Role
-	if len(role) == 0 {
-		return fmt.Errorf("用户角色不能为空")
+func AddRole(r *UserRole) error {
+	if r.Role == "" {
+		return fmt.Errorf("角色名不能为空")
 	}
-	userRole := UserRole{
-		Role:        role,
-		Type:        r.Type,
-		Description: r.Description,
-	}
-	return mysqlmanager.MySQL().Save(&userRole).Error
+
+	return mysqlmanager.MySQL().Save(r).Error
 }
 
 // 是否有用户绑定某角色
@@ -177,9 +123,9 @@ func IsUserBindingRole(roleId int) (bool, error) {
 }
 
 // 删除用户角色
-func DeleteRole(roleId int) error {
+func DeleteRole(role string) error {
 	var UserRole UserRole
-	return mysqlmanager.MySQL().Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
+	return mysqlmanager.MySQL().Where("role = ?", role).Unscoped().Delete(UserRole).Error
 }
 
 // 修改角色名称
@@ -189,9 +135,9 @@ func UpdateRoleName(roleId int, name string) error {
 }
 
 // 修改角色描述
-func UpdateRoleDescription(roleId int, desc string) error {
+func UpdateRoleDescription(role, desc string) error {
 	var UserRole UserRole
-	return mysqlmanager.MySQL().Model(&UserRole).Where("id = ?", roleId).Update("description", desc).Error
+	return mysqlmanager.MySQL().Model(&UserRole).Where("role = ?", role).Update("description", desc).Error
 }
 
 // 变更用户角色权限
@@ -215,7 +161,7 @@ func CreateAdministratorUser() error {
 	mysqlmanager.MySQL().Where("type =?", global.AdminUserType).Find(&role)
 	if role.ID == 0 {
 		role = UserRole{
-			Role:        "超级用户",
+			Role:        "admin",
 			Type:        global.AdminUserType,
 			Description: "超级管理员",
 			Menus:       global.PILOTGO_MENUS,
@@ -241,26 +187,5 @@ func CreateAdministratorUser() error {
 		mysqlmanager.MySQL().Create(&user)
 	}
 
-	var roleButton RoleButton
-	mysqlmanager.MySQL().First(&roleButton)
-	if roleButton.ID == 0 {
-		mysqlmanager.MySQL().Raw("INSERT INTO role_button(id, button)" +
-			"VALUES" +
-			"('1', 'rpm_install')," +
-			"('2', 'rpm_uninstall')," +
-			"('3', 'batch_update')," +
-			"('4', 'batch_delete')," +
-			"('5', 'user_add')," +
-			"('6', 'user_import')," +
-			"('7', 'user_edit')," +
-			"('8', 'user_reset')," +
-			"('9', 'user_del')," +
-			"('10', 'role_add')," +
-			"('11', 'role_update')," +
-			"('12', 'role_delete')," +
-			"('13', 'role_modify')," +
-			"('14', 'config_install')," +
-			"('15', 'dept_change')").Scan(&roleButton)
-	}
 	return nil
 }
