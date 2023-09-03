@@ -145,10 +145,7 @@ export default {
     },
     handleDelete(id, role) {
       let params = {
-          userName_create: this.$store.getters.userName,
-          departName_create: this.$store.getters.UserDepartName,
           role: role,
-          role_roleid: id
       };
       delRole(params).then(res => {
         if(res.status === 200) {

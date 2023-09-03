@@ -38,6 +38,12 @@ func TestGetUserRoles(t *testing.T) {
 	fmt.Printf("user roles: %v\n", roles)
 }
 
+func TestGetAllPolicy(t *testing.T) {
+	policies := GetAllPolicies()
+
+	fmt.Printf("policies: %v\n", policies)
+}
+
 func TestMain(m *testing.M) {
 	err := sconfig.Init("D:\\tmp\\PilotGo-projects\\PilotGo\\config_server.yaml")
 	if err != nil {

@@ -16,7 +16,11 @@ package role
 
 import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
+)
+
+const (
+	RoleTypeNotBuildin = 3
 )
 
 type UserRole = dao.UserRole
@@ -51,23 +55,87 @@ func GetLoginUserPermission(Roleid RoleID) (dao.UserRole, interface{}, error) {
 	return userRole, buttons, nil
 }
 
-func GetRoles(query *common.PaginationQ) (int, interface{}, error) {
-	roles, total, err := dao.GetAllRoles()
-	if err != nil {
-		return total, nil, err
-	}
-	data, err := common.DataPaging(query, roles, total)
-	if err != nil {
-		return total, data, err
-	}
-	return total, data, nil
+type ReturnRole struct {
+	ID          int      `json:"id"`
+	Role        string   `json:"role"`
+	Type        int      `json:"type"`
+	Description string   `json:"description"`
+	Menus       string   `json:"menus"`
+	Buttons     []string `json:"buttons"`
 }
 
-// deprecated
-func RolePermissionChangeMethod(roleChange *dao.Frontdata) (*dao.UserRole, error) {
+func GetRoles() ([]*ReturnRole, error) {
+	result := []*ReturnRole{}
+	roles, err := dao.GetRoleList()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, role := range roles {
+		result = append(result, &ReturnRole{
+			ID:          role.ID,
+			Role:        role.Role,
+			Type:        role.Type,
+			Description: role.Description,
+			Menus:       "",
+			Buttons:     []string{},
+		})
+	}
+
+	policies := auth.GetAllPolicies()
+
+	for _, item := range result {
+		for _, p := range policies {
+			if item.Role == p.Role {
+				switch p.Action {
+				case "menu":
+					item.Menus = item.Menus + "," + p.Resource
+				case "button":
+					item.Buttons = append(item.Buttons, p.Resource)
+				}
+			}
+		}
+		if len(item.Menus) > 0 {
+			item.Menus = item.Menus[1:]
+		}
+	}
+
+	return result, nil
+}
+
+// TODO:
+func ChangeRolePermission(roleChange *dao.Frontdata) (*dao.UserRole, error) {
 	userRole, err := dao.UpdateRolePermission(roleChange)
 	if err != nil {
 		return &userRole, err
 	}
 	return &userRole, nil
+}
+
+func AddRole(userRole *UserRole) error {
+	err := dao.AddRole(userRole)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteRole(role string) error {
+	if err := auth.DeleteRole(role); err != nil {
+		return err
+	}
+
+	err := dao.DeleteRole(role)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateRoleInfo(role, description string) error {
+	return dao.UpdateRoleDescription(role, description)
+}
+
+func UpdateRolePermissions(role string, buttons, menus []string) error {
+	return auth.UpdateRolePermissions(role, buttons, menus)
 }

@@ -30,7 +30,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-func GetUserRoleHandler(c *gin.Context) {
+func GetRoleListHandler(c *gin.Context) {
 	roles, err := userservice.GetUserRole()
 	if err != nil {
 		response.Fail(c, nil, err.Error())

@@ -20,9 +20,9 @@ export function getRoles() {
   })
 }
 // 获取角色列表不分页
-export function getAllRole() {
+export function getRoleList() {
   return request({
-    url: '/user/role',
+    url: '/user/role_list',
     method: 'get',
   })
 }
