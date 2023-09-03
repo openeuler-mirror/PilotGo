@@ -64,10 +64,10 @@ func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
 }
 
 // 登录用户的权限按钮
-func PermissionButtons(button string) (interface{}, error) {
+func PermissionButtons(button string) ([]string, error) {
 	var buttons []string
-	if len(button) == 0 {
-		return []interface{}{}, nil
+	if button == "" {
+		return []string{}, nil
 	}
 	IDs := strings.Split(button, ",")
 

@@ -42,17 +42,18 @@ func RoleId(R RoleID) int {
 	return min
 }
 
-func GetLoginUserPermission(Roleid RoleID) (dao.UserRole, interface{}, error) {
+// return user_type, menu, button, error
+func GetLoginUserPermission(Roleid RoleID) (int, string, []string, error) {
+	// TODO: multi role case
 	roleId := RoleId(Roleid) //用户的最高权限
-	userRole, err := dao.RoleIdToGetAllInfo(roleId)
+	role, err := dao.RoleIdToGetAllInfo(roleId)
 	if err != nil {
-		return userRole, nil, err
+		return 0, "", nil, err
 	}
-	buttons, err := dao.PermissionButtons(userRole.ButtonID)
-	if err != nil {
-		return userRole, buttons, err
-	}
-	return userRole, buttons, nil
+
+	menu, buttons := getRoleMenuButtons(role.Role)
+
+	return role.Type, menu, buttons, nil
 }
 
 type ReturnRole struct {
@@ -101,6 +102,29 @@ func GetRoles() ([]*ReturnRole, error) {
 	}
 
 	return result, nil
+}
+
+func getRoleMenuButtons(role string) (string, []string) {
+	menu := ""
+	buttons := []string{}
+
+	policies := auth.GetAllPolicies()
+	for _, p := range policies {
+		if role == p.Role {
+			switch p.Action {
+			case "button":
+				buttons = append(buttons, p.Resource)
+			case "menu":
+				menu = menu + "," + p.Resource
+			}
+		}
+	}
+
+	if len(menu) > 0 {
+		menu = menu[1:]
+	}
+
+	return menu, buttons
 }
 
 // TODO:

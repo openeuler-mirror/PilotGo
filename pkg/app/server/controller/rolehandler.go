@@ -33,12 +33,12 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	userRole, buttons, err := roleservice.GetLoginUserPermission(RoleId)
+	userType, menu, buttons, err := roleservice.GetLoginUserPermission(RoleId)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"userType": userRole.Type, "menu": userRole.Menus, "button": buttons}, "用户权限列表")
+	response.Success(c, gin.H{"userType": userType, "menu": menu, "button": buttons}, "用户权限列表")
 }
 
 func GetRolesHandler(c *gin.Context) {
