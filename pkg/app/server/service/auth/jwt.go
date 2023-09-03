@@ -15,10 +15,14 @@
 package auth
 
 import (
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 )
 
 var jwtKey = []byte("a_secret_crect")
@@ -57,4 +61,57 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 		return jwtKey, nil
 	})
 	return token, err
+}
+
+func ParseUser(c *gin.Context) (*common.User, error) {
+	claims, err := ParseMyClaims(c)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := dao.QueryUserByID(int(claims.UserId))
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func ParseMyClaims(c *gin.Context) (*MyClaims, error) {
+	var tokenString string
+	var token *jwt.Token
+	var cookie *http.Cookie
+	var claims *MyClaims
+
+	var err error
+	var ok bool
+
+	cookie, err = c.Request.Cookie("Admin-Token") //Get authorization header
+	if err != nil {
+		goto OnError
+	}
+	tokenString = cookie.Value
+	if tokenString == "" {
+		err = fmt.Errorf("token is empty")
+		goto OnError
+	}
+
+	token, err = ParseToken(tokenString)
+	if err != nil {
+		goto OnError
+	}
+
+	if token != nil && !token.Valid {
+		err = fmt.Errorf("token is invalid")
+		goto OnError
+	}
+
+	claims, ok = token.Claims.(*MyClaims)
+	if !ok {
+		err = fmt.Errorf("token claims is invalid")
+		goto OnError
+	}
+	return claims, nil
+
+OnError:
+	return nil, err
 }

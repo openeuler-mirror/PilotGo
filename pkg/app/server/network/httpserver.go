@@ -111,10 +111,48 @@ func registerAPIs(router *gin.Engine) {
 		noAuthenApis.POST("/user/login", controller.LoginHandler)
 		noAuthenApis.GET("/user/logout", controller.Logout)
 		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
+		noAuthenApis.GET("/plugins", controller.GetPluginsHandler)
+	}
+
+	authenApi := router.Group("/api/v1")
+	{
+		{
+			macBasicModify := authenApi.Group("/agent")
+			macBasicModify.POST("/rpm_install", middleware.NeedPermission("rpm_install", "button"), agentcontroller.InstallRpmHandler)
+			macBasicModify.POST("/rpm_remove", middleware.NeedPermission("rpm_uninstall", "button"), agentcontroller.RemoveRpmHandler)
+		}
+		{
+			batchmanager := authenApi.Group("batchmanager")
+			batchmanager.POST("/updatebatch", middleware.NeedPermission("batch_update", "button"), controller.UpdateBatchHandler)
+			batchmanager.POST("/deletebatch", middleware.NeedPermission("batch_delete", "button"), controller.DeleteBatchHandler)
+		}
+		{
+			user := authenApi.Group("user")
+			user.POST("/register", middleware.NeedPermission("user_add", "button"), controller.RegisterHandler)
+			user.POST("/reset", middleware.NeedPermission("user_reset", "button"), controller.ResetPasswordHandler)
+			user.POST("/delete", middleware.NeedPermission("user_del", "button"), controller.DeleteUserHandler)
+			user.POST("/update", middleware.NeedPermission("user_edit", "button"), controller.UpdateUserHandler)
+			user.POST("/import", middleware.NeedPermission("user_import", "button"), controller.ImportUser)
+
+			user.POST("/addRole", middleware.NeedPermission("role_add", "button"), controller.AddUserRoleHandler)
+			user.POST("/delRole", middleware.NeedPermission("role_delete", "button"), controller.DeleteUserRoleHandler)
+			user.POST("/updateRole", middleware.NeedPermission("role_update", "button"), controller.UpdateUserRoleHandler)
+			user.POST("/roleChange", middleware.NeedPermission("role_modify", "button"), controller.RolePermissionChangeHandler)
+		}
+		{
+			macList := authenApi.Group("/macList")
+			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_change", "button"), controller.DeleteDepartDataHandler)
+			macList.POST("/adddepart", middleware.NeedPermission("dept_change", "button"), controller.AddDepartHandler)
+			macList.POST("/updatedepart", middleware.NeedPermission("dept_change", "button"), controller.UpdateDepartHandler)
+		}
+		{
+			configmanager := authenApi.Group("config")
+			configmanager.POST("/file_broadcast", middleware.NeedPermission("config_install", "button"), agentcontroller.FileBroadcastToAgents)
+		}
 	}
 
 	api := router.Group("/api/v1")
-	api.Use(middleware.AuthMiddleware)
+	// api.Use(middleware.AuthMiddleware)
 	overview := api.Group("/overview") // 机器概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)
@@ -169,8 +207,6 @@ func registerAPIs(router *gin.Engine) {
 		macBasicModify.POST("/service_stop", agentcontroller.ServiceStopHandler)
 		macBasicModify.POST("/service_start", agentcontroller.ServiceStartHandler)
 		macBasicModify.POST("/service_restart", agentcontroller.ServiceRestartHandler)
-		macBasicModify.POST("/rpm_install", agentcontroller.InstallRpmHandler)
-		macBasicModify.POST("/rpm_remove", agentcontroller.RemoveRpmHandler)
 		macBasicModify.GET("/disk_mount", agentcontroller.DiskMountHandler)
 		macBasicModify.GET("/disk_umount", agentcontroller.DiskUMountHandler)
 		macBasicModify.GET("/disk_format", agentcontroller.DiskFormatHandler)
@@ -211,10 +247,6 @@ func registerAPIs(router *gin.Engine) {
 		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
 		user.GET("/role", controller.GetUserRoleHandler)
-		user.POST("/addRole", controller.AddUserRoleHandler)
-		user.POST("/delRole", controller.DeleteUserRoleHandler)
-		user.POST("/updateRole", controller.UpdateUserRoleHandler)
-		user.POST("/roleChange", controller.RolePermissionChangeHandler)
 	}
 
 	configmanager := api.Group("config") // 配置管理
@@ -227,7 +259,6 @@ func registerAPIs(router *gin.Engine) {
 		configmanager.POST("/file_delete", controller.DeleteFileHandler)
 		configmanager.GET("/lastfile_all", controller.HistoryFilesHandler)
 		configmanager.POST("/lastfile_rollback", controller.LastFileRollBackHandler)
-		configmanager.POST("/file_broadcast", agentcontroller.FileBroadcastToAgents)
 	}
 
 	userLog := api.Group("log") // 日志管理
@@ -244,24 +275,8 @@ func registerAPIs(router *gin.Engine) {
 		policy.POST("/add", controller.PolicyAdd)
 	}
 
-	Level := api.Group("")
-	Level.Use(auth.CasbinHandler())
-	{
-		user.POST("/register", controller.RegisterHandler)
-		user.POST("/reset", controller.ResetPasswordHandler)
-		user.POST("/delete", controller.DeleteUserHandler)
-		user.POST("/update", controller.UpdateUserHandler)
-		user.POST("/import", controller.ImportUser)
-		macList.POST("/deletedepartdata", controller.DeleteDepartDataHandler)
-		macList.POST("/adddepart", controller.AddDepartHandler)
-		macList.POST("/updatedepart", controller.UpdateDepartHandler)
-		batchmanager.POST("/updatebatch", controller.UpdateBatchHandler)
-		batchmanager.POST("/deletebatch", controller.DeleteBatchHandler)
-	}
-
 	plugin := api.Group("plugins") // 插件
 	{
-		plugin.GET("", controller.GetPluginsHandler)
 		plugin.PUT("", controller.AddPluginHandler)
 		plugin.POST("/:uuid", controller.TogglePluginHandler)
 		plugin.DELETE("/:uuid", controller.UnloadPluginHandler)

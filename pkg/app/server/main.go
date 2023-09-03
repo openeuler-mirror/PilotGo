@@ -30,8 +30,10 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+const config_file = "./config_server.yaml"
+
 func main() {
-	err := sconfig.Init()
+	err := sconfig.Init(config_file)
 	if err != nil {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
