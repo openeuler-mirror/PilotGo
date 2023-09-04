@@ -24,7 +24,8 @@ import { AttachAddon } from 'xterm-addon-attach'
 import { debounce } from 'lodash' // resize相关
 import Config from '../../../config/index.js'
 import 'xterm/css/xterm.css'
-
+import Base64 from "crypto-js/enc-base64"
+import Utf8 from "crypto-js/enc-utf8"
 const packResize = (col, row) =>
   JSON.stringify({
     Op: 'resize',
@@ -35,9 +36,9 @@ export default {
   name: 'Terminal',
   props: {
     msg: {
-        type: String
+      type: String
     }
-    },
+  },
   data() {
     return {
       first: true,
@@ -56,7 +57,7 @@ export default {
         theme: {
           background: '#181d28'
         },
-        cols: 10
+        cols: 200
       }
     }
   },
@@ -65,16 +66,19 @@ export default {
       return this.ws && this.ws.readyState === 1
     },
     socketUrl() {
-      return (location.protocol === "http:" ? "ws" : "wss") + "://" + 
-        Config.dev.proxyTable['/'].target.split('//')[1] + 
-        "/ws"+ "?" + "msg=" + this.msg + "&rows=" + this.rows + "&cols=" + this.cols;
+      console.log("Config", Config, this.rows, this.cols)
+      return (location.protocol === "http:" ? "ws" : "wss") + "://" +
+        Config.dev.proxyTable['/api/v1'].target.split('//')[1] +
+        "/ws" + "?" + "msg=" + this.msg + "&rows=" + this.rows + "&cols=" + this.cols;
     }
   },
   mounted() {
     this.initSocket();
+    // this.onTerminalResize()
     setTimeout(() => {
-      this.fitAddon.fit()
-    }, 60) 
+      // this.fitAddon.fit()
+      this.onTerminalKeyPress()
+    }, 100)
   },
   beforeDestroy() {
     this.ws.close();
@@ -83,6 +87,7 @@ export default {
   methods: {
     initTerm() {
       const term = new Terminal(this.option)
+      console.log('term', term)
       this.attachAddon = new AttachAddon(this.ws);
       this.fitAddon = new FitAddon()
       term.loadAddon(this.attachAddon)
@@ -95,36 +100,54 @@ export default {
 
     // resize 相关
     resizeRemoteTerminal() {
+      console.log(this.isWsOpen, 234)
       const { cols, rows } = this.term
-      this.isWsOpen && this.ws.send(packResize(cols, rows))
+      // this.isWsOpen && this.ws.send(packResize(cols, rows))
+      this.isWsOpen && this.ws.send('2' + Base64.stringify(Utf8.parse(
+        JSON.stringify({
+          columns: cols,
+          rows: rows
+        })
+      )))
     },
     onResize: debounce(function () {
       this.fitAddon.fit()
     }, 500),
     onTerminalResize() {
+      console.log('hihi', this.term)
       window.addEventListener('resize', this.onResize)
       this.term.onResize(this.resizeRemoteTerminal)
+      // this.resizeRemoteTerminal()
     },
     removeResizeListener() {
       window.removeEventListener('resize', this.onResize)
     },
-
+    onTerminalKeyPress() {
+      this.term.onData(data => {
+        console.log(33333333, this.isWsOpen, data)
+        this.isWsOpen && this.ws.send('1' + Base64.stringify(Utf8.parse(data)))
+      })
+    },
     // socket
     initSocket() {
       this.ws = new WebSocket(this.socketUrl)
       this.openSocket()
       this.closeSocket()
       this.errorSocket()
+      this.messageSocket()
     },
     // 打开连接
     openSocket() {
       this.ws.onopen = () => {
-        this.initTerm();
+        this.term = this.initTerm();
+        // this.initTerm();
+        console.log('连上了')
       }
     },
     // 关闭连接
     closeSocket() {
       this.ws.onclose = () => {
+        console.log('关上了')
       }
     },
     // 连接错误
@@ -133,6 +156,20 @@ export default {
         this.$message.error('websoket连接失败,请刷新!')
       }
     },
+    // 接收消息
+    messageSocket() {
+      this.ws.onmessage = res => {
+        console.log('data', res.data)
+        const term = this.term
+        if (this.first) {
+          this.first = false
+          term.reset()
+          term.element && term.focus()
+          this.resizeRemoteTerminal()
+        }
+      }
+    }
+
   }
 }
 //
@@ -143,8 +180,10 @@ export default {
   background: rgb(24, 29, 40);
   padding: 12px;
   color: rgb(255, 255, 255);
+
   .xterm-scroll-area::-webkit-scrollbar-thumb {
-    background-color: #b7c4d1; /* 滚动条的背景颜色 */
+    background-color: #b7c4d1;
+    /* 滚动条的背景颜色 */
   }
 }
 </style>
