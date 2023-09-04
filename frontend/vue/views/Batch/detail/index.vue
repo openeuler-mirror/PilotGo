@@ -37,7 +37,7 @@
         </el-table-column>
       </template>
     </ky-table>
-    <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" width="560px">
+    <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" width="700px">
       <rpm-issue v-if="type === 'issue'" :acType='title' :machines='machines' @click="handleClose"></rpm-issue>
     </el-dialog>
   </div>

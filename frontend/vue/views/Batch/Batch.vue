@@ -41,7 +41,7 @@
           </el-table-column>
         </template>
       </ky-table>
-      <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" width="560px">
+      <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" width="700px">
         <add-form v-if="type === 'create'" @click="handleClose"></add-form>
         <update-form :row="rowData" v-if="type === 'update'" @click="handleClose"></update-form>
       </el-dialog>
