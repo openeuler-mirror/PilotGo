@@ -9,6 +9,8 @@ http_server:
   debug: false
 socket_server:
   addr: 0.0.0.0:8879
+jwt:
+  secret_key: ""
 log:
   level: debug
   driver: stdout    #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。

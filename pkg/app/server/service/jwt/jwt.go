@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-1 15:08:08
- * LastEditTime: 2023-09-04 11:09:10
+ * LastEditTime: 2023-09-04 16:24:48
  * Description: jwt是一个基于token的轻量级认证方式
  ******************************************************************************/
 package jwt
@@ -21,11 +21,12 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 )
 
-var jwtKey = []byte("a_secret_crect")
 var Issue = "PilotGo"
 
 type MyClaims struct {
@@ -49,7 +50,7 @@ func ReleaseToken(user dao.User) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(config.Config().JWT.SecretKey)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +59,7 @@ func ReleaseToken(user dao.User) (string, error) {
 
 func ParseToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (i interface{}, err error) {
-		return jwtKey, nil
+		return config.Config().JWT.SecretKey, nil
 	})
 	return token, err
 }

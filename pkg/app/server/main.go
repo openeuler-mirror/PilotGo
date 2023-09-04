@@ -20,7 +20,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
@@ -33,41 +33,41 @@ import (
 const config_file = "./config_server.yaml"
 
 func main() {
-	err := sconfig.Init(config_file)
+	err := config.Init(config_file)
 	if err != nil {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
 
-	if err := logger.Init(&sconfig.Config().Logopts); err != nil {
+	if err := logger.Init(&config.Config().Logopts); err != nil {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
 	// redis db初始化
-	if err := dbmanager.RedisdbInit(&sconfig.Config().RedisDBinfo); err != nil {
+	if err := dbmanager.RedisdbInit(&config.Config().RedisDBinfo); err != nil {
 		logger.Error("redis db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
 
 	// mysql db初始化
-	if err := dbmanager.MysqldbInit(&sconfig.Config().MysqlDBinfo); err != nil {
+	if err := dbmanager.MysqldbInit(&config.Config().MysqlDBinfo); err != nil {
 		logger.Error("mysql db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
 
 	// 鉴权模块初始化
-	auth.Casbin(&sconfig.Config().MysqlDBinfo)
+	auth.Casbin(&config.Config().MysqlDBinfo)
 
 	// 启动agent socket server
-	if err := network.SocketServerInit(&sconfig.Config().SocketServer); err != nil {
+	if err := network.SocketServerInit(&config.Config().SocketServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
 	}
 
 	//此处启动前端及REST http server
-	err = network.HttpServerInit(&sconfig.Config().HttpServer)
+	err = network.HttpServerInit(&config.Config().HttpServer)
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		os.Exit(-1)
