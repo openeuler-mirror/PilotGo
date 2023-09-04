@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: yangzhao1
  * Date: 2022-04-06 13:27:45
- * LastEditTime: 2023-08-16 15:42:25
+ * LastEditTime: 2023-09-04 16:16:36
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
 package config
@@ -30,9 +30,15 @@ type HttpServer struct {
 	CertFile      string `yaml:"cert_file"`
 	KeyFile       string `yaml:"key_file"`
 }
+
 type SocketServer struct {
 	Addr string `yaml:"addr"`
 }
+
+type JWTConfig struct {
+	SecretKey string `yaml:"secret_key"`
+}
+
 type MysqlDBInfo struct {
 	HostName string `yaml:"host_name"`
 	UserName string `yaml:"user_name"`
@@ -52,6 +58,7 @@ type RedisDBInfo struct {
 type ServerConfig struct {
 	HttpServer   HttpServer     `yaml:"http_server"`
 	SocketServer SocketServer   `yaml:"socket_server"`
+	JWT          JWTConfig      `api:"jwt"`
 	Logopts      logger.LogOpts `yaml:"log"`
 	MysqlDBinfo  MysqlDBInfo    `yaml:"mysql"`
 	RedisDBinfo  RedisDBInfo    `yaml:"redis"`
