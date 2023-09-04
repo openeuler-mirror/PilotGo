@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-03-21 15:32:50
- * LastEditTime: 2023-09-01 13:15:42
+ * LastEditTime: 2023-09-04 13:54:45
  * Description: 用户模块逻辑代码
  ******************************************************************************/
 package user
@@ -25,7 +25,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
-	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
@@ -40,34 +39,6 @@ func RandomString(n int) string {
 		result[k] = letters[rand.Intn(len(letters))]
 	}
 	return string(result)
-}
-
-// 判断用户类型
-func UserType(s string) int {
-	// 找出字符串中包含的最小数字，例：“1,2,3,4”，最小的是1
-	roleIds := strings.Split(s, ",")
-	res := make([]int, len(s))
-
-	for k, v := range roleIds {
-		res[k], _ = strconv.Atoi(v)
-	}
-
-	min := res[0]
-	if len(res) > 1 {
-		for _, v := range res {
-			if v < min {
-				min = v
-			}
-		}
-	}
-
-	var user_type int
-	if min > global.OrdinaryUserRoleId {
-		user_type = global.OtherUserType
-	} else {
-		user_type = min - 1
-	}
-	return user_type
 }
 
 // 读取xlsx文件
@@ -95,8 +66,8 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 
 				return UserExit, err
 			}
-			userRole := row.Cells[4].Value                               // 5：角色
-			roleId, user_type, err := dao.GetRoleIdAndUserType(userRole) //角色对应id和用户类型
+			userRole := row.Cells[4].Value         // 5：角色
+			roleId, err := dao.GetRoleId(userRole) //角色对应id和用户类型
 			if err != nil {
 				return UserExit, err
 			}
@@ -109,7 +80,6 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				DepartName:   departName, //4：部门
 				DepartFirst:  pid,
 				DepartSecond: id,
-				UserType:     user_type,
 				RoleID:       roleId,
 			}
 			err = dao.AddUser(u)
@@ -205,33 +175,33 @@ func UserAll() ([]dao.ReturnUser, int, error) {
 	return users, total, nil
 }
 
-func Login(user dao.Frontdata) (string, string, int, int, string, error) {
+func Login(user dao.Frontdata) (string, string, int, string, error) {
 	email := user.Email
 	pwd := user.Password
 	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
-		return "", "", 0, 0, "", err
+		return "", "", 0, "", err
 	}
 	if !EmailBool {
-		return "", "", 0, 0, "", errors.New("用户不存在")
+		return "", "", 0, "", errors.New("用户不存在")
 	}
 
 	u, err := dao.UserInfo(email)
 	if err != nil {
-		return "", "", 0, 0, "", errors.New("查询邮箱密码错误")
+		return "", "", 0, "", errors.New("查询邮箱密码错误")
 	}
 
 	err = utils.ComparePassword(u.Password, pwd)
 	if err != nil {
-		return "", "", 0, 0, "", errors.New("密码错误")
+		return "", "", 0, "", errors.New("密码错误")
 	}
 
 	// Issue token
 	token, err := jwt.ReleaseToken(u)
 	if err != nil {
-		return "", "", 0, 0, "", err
+		return "", "", 0, "", err
 	}
-	return token, u.DepartName, u.DepartSecond, u.UserType, u.RoleID, nil
+	return token, u.DepartName, u.DepartSecond, u.RoleID, nil
 }
 
 func Register(fd *dao.Frontdata) error {
@@ -266,7 +236,6 @@ func Register(fd *dao.Frontdata) error {
 		return errors.New("数据加密错误")
 	}
 
-	user_type := UserType(roleId)
 	user := &dao.User{ //Create user
 		Username:     username,
 		Password:     string(bs),
@@ -275,7 +244,6 @@ func Register(fd *dao.Frontdata) error {
 		DepartName:   depart,
 		DepartFirst:  departPid,
 		DepartSecond: departId,
-		UserType:     user_type,
 		RoleID:       roleId,
 	}
 	err = dao.AddUser(user)

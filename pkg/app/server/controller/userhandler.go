@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-12-18 02:33:55
- * LastEditTime: 2023-09-01 13:15:16
+ * LastEditTime: 2023-09-04 14:06:46
  * Description: 用户登录、增删改查
  ******************************************************************************/
 package controller
@@ -83,7 +83,7 @@ func LoginHandler(c *gin.Context) {
 	log := auditlog.New(auditlog.LogTypeUser, "用户登录", "", fd)
 	auditlog.Add(log)
 
-	token, departName, departId, userType, roleId, err := userservice.Login(*fd)
+	token, departName, departId, roleId, err := userservice.Login(*fd)
 	if err != nil {
 		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, u.Username, http.StatusBadRequest)
 		auditlog.Add(log_s)
@@ -96,7 +96,7 @@ func LoginHandler(c *gin.Context) {
 	auditlog.Add(log_s)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
-	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "userType": userType, "roleId": roleId}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "roleId": roleId}, "登陆成功!")
 }
 
 // 退出

@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-24 15:08:08
- * LastEditTime: 2022-04-27 17:25:41
+ * LastEditTime: 2023-09-04 14:03:47
  * Description: 角色模块相关数据获取
  ******************************************************************************/
 package dao
@@ -26,9 +26,10 @@ import (
 )
 
 type UserRole struct {
-	ID          int    `gorm:"primary_key;AUTO_INCREMENT"`
-	Role        string `json:"role"` // 超管和部门等级
-	Type        int    `json:"type"`
+	ID   int    `gorm:"primary_key;AUTO_INCREMENT"`
+	Role string `json:"role"` // 超管和部门等级
+	// deprecated
+	// Type        int    `json:"type"`
 	Description string `json:"description"`
 	Menus       string `json:"menus"`
 	ButtonID    string `json:"buttonId"`
@@ -40,20 +41,14 @@ type RoleButton struct {
 }
 
 // 根据角色名称返回角色id和用户类型
-func GetRoleIdAndUserType(role string) (roleId string, user_type int, err error) {
+func GetRoleId(role string) (roleId string, err error) {
 	var Role UserRole
 	err = mysqlmanager.MySQL().Where("role = ?", role).Find(&Role).Error
 	if err != nil {
-		return "", 0, err
+		return "", err
 	}
 	roleID := strconv.Itoa(Role.ID)
-	var userType int
-	if Role.ID > global.OrdinaryUserRoleId {
-		userType = global.OtherUserType
-	} else {
-		userType = Role.ID - 1
-	}
-	return roleID, userType, nil
+	return roleID, nil
 }
 
 // 根据id获取该角色的所有信息
@@ -158,14 +153,11 @@ func UpdateRolePermission(permission *Frontdata) (UserRole, error) {
 // 创建管理员账户
 func CreateAdministratorUser() error {
 	var role UserRole
-	mysqlmanager.MySQL().Where("type =?", global.AdminUserType).Find(&role)
+	mysqlmanager.MySQL().Where("role =?", "admin").Find(&role)
 	if role.ID == 0 {
 		role = UserRole{
 			Role:        "admin",
-			Type:        global.AdminUserType,
 			Description: "超级管理员",
-			Menus:       global.PILOTGO_MENUS,
-			ButtonID:    global.PILOTGO_BUTTONID,
 		}
 		mysqlmanager.MySQL().Create(&role)
 		bs, err := utils.CryptoPassword(strings.Split(global.SuperUser, "@")[0])
@@ -181,7 +173,6 @@ func CreateAdministratorUser() error {
 			Username:     strings.Split(global.SuperUser, "@")[0],
 			Password:     string(bs),
 			Email:        global.SuperUser,
-			UserType:     global.AdminUserType,
 			RoleID:       strconv.Itoa(role.ID),
 		}
 		mysqlmanager.MySQL().Create(&user)

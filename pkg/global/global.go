@@ -9,29 +9,13 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-06-27 09:59:30
- * LastEditTime: 2023-08-31 20:59:42
+ * LastEditTime: 2023-09-04 14:01:21
  * Description: provide global const of pilotgo
  ******************************************************************************/
 package global
 
-// 权限菜单、按钮
-const (
-	PILOTGO_MENUS    = "overview,cluster,batch,usermanager,rolemanager,config,log,plugin"
-	PILOTGO_BUTTONID = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
-)
-
 // 用户、角色
 const (
-	// 超级管理员
-	AdminUserType = 0
-	// 部门管理员
-	DepartManagerType = 1
-	// 普通用户
-	OrdinaryUserType = 2
-	// 其他用户，如实习生
-	OtherUserType = 3
-	//普通用户角色id
-	OrdinaryUserRoleId = 3
 	// 超级用户
 	SuperUser = "admin@123.com"
 )

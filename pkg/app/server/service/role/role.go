@@ -19,10 +19,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 )
 
-const (
-	RoleTypeNotBuildin = 3
-)
-
 type UserRole = dao.UserRole
 
 type RoleID struct {
@@ -42,18 +38,18 @@ func RoleId(R RoleID) int {
 	return min
 }
 
-// return user_type, menu, button, error
-func GetLoginUserPermission(Roleid RoleID) (int, string, []string, error) {
+// return menu, button, error
+func GetLoginUserPermission(Roleid RoleID) (string, []string, error) {
 	// TODO: multi role case
 	roleId := RoleId(Roleid) //用户的最高权限
 	role, err := dao.RoleIdToGetAllInfo(roleId)
 	if err != nil {
-		return 0, "", nil, err
+		return "", nil, err
 	}
 
 	menu, buttons := getRoleMenuButtons(role.Role)
 
-	return role.Type, menu, buttons, nil
+	return menu, buttons, nil
 }
 
 type ReturnRole struct {
@@ -76,7 +72,6 @@ func GetRoles() ([]*ReturnRole, error) {
 		result = append(result, &ReturnRole{
 			ID:          role.ID,
 			Role:        role.Role,
-			Type:        role.Type,
 			Description: role.Description,
 			Menus:       "",
 			Buttons:     []string{},
