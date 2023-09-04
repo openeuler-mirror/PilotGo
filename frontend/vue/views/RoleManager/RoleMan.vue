@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-01-19 17:30:12
-  LastEditTime: 2022-07-01 16:44:41
+ LastEditTime: 2023-09-04 13:57:49
  -->
 <template>
   <div style="width: 100%; height: 100%" class="panel">
@@ -25,15 +25,15 @@
         <auth-button name="role_add"  @click="handleCreate"> 添加 </auth-button>
       </template>
       <template v-slot:table>
-        <el-table-column prop="id" label="编号" sortable>
+        <el-table-column prop="id" label="角色ID" sortable>
         </el-table-column>
         <el-table-column  prop="role" label="角色名">
         </el-table-column>
-        <el-table-column  prop="username" label="平台自带">
+        <!-- <el-table-column  prop="username" label="平台自带">
           <template slot-scope="scope">
             {{ [0].includes(scope.row.type)  ? "是" : "否"}}
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column  prop="description" label="描述">
         </el-table-column>
         <el-table-column label="权限">

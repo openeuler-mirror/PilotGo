@@ -35,8 +35,8 @@ type Frontdata struct {
 	DepartSecond int      `json:"departId,omitempty"`
 	Password     string   `json:"password,omitempty"`
 	Phone        string   `json:"phone,omitempty"`
-	UserType     int      `json:"userType,omitempty"`
-	RoleID       string   `json:"roleid,omitempty"`
+	// UserType     int      `json:"userType,omitempty"`
+	RoleID string `json:"roleid,omitempty"`
 
 	Menus            []string `json:"menus,omitempty"`
 	ButtonId         []string `json:"buttonId,omitempty"`

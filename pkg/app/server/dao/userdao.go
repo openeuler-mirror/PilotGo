@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-24 15:08:08
- * LastEditTime: 2023-09-04 11:34:39
+ * LastEditTime: 2023-09-04 14:02:00
  * Description: 用户模块相关数据获取
  ******************************************************************************/
 package dao
@@ -34,8 +34,9 @@ type User struct {
 	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
 	Phone        string `gorm:"size:11" json:"phone,omitempty"`
 	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
-	UserType     int    `json:"userType,omitempty"`
 	RoleID       string `json:"role,omitempty"`
+	// deprecated
+	// UserType int    `json:"userType,omitempty"`
 }
 type ReturnUser struct {
 	ID           uint     `json:"id"`
@@ -45,8 +46,9 @@ type ReturnUser struct {
 	Username     string   `json:"username"`
 	Phone        string   `json:"phone"`
 	Email        string   `json:"email"`
-	UserType     int      `json:"userType"`
 	Roles        []string `json:"role"`
+	// deprecated
+	// UserType int      `json:"userType"`
 }
 type UserDto struct {
 	Name     string `json:"username"`
@@ -78,17 +80,6 @@ func IsEmailExist(email string) (bool, error) {
 	return user.ID != 0, err
 }
 
-/*
-// 查询数据库中账号密码、用户部门、部门ID、用户类型、用户角色
-func UserPassword(email string) (s1, s2, s3 string, i1, i2 int, err error) {
-	var user model.User
-	err = mysqlmanager.MySQL().Where("email=?", email).Find(&user).Error
-	if err != nil {
-		return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, err
-	}
-	return user.Password, user.DepartName, user.RoleID, user.DepartSecond, user.UserType, nil
-}*/
-
 // 查询某用户信息
 func UserInfo(email string) (User, error) {
 	var user User
@@ -114,14 +105,6 @@ func UserAll() ([]ReturnUser, int, error) {
 	var users []User
 	var redisUser []ReturnUser
 
-	// 先从redis缓存中读取
-	// data, err := redismanager.Get("users", &redisUser)
-	// if err == nil {
-	// 	resByre, _ := json.Marshal(data)
-	// 	json.Unmarshal(resByre, &redisUser)
-	// 	logger.Debug("%+v", "从缓存中读取")
-	// 	return redisUser
-	// } else {
 	err := mysqlmanager.MySQL().Order("id desc").Find(&users).Error
 	if err != nil {
 		return redisUser, 0, err
@@ -150,14 +133,11 @@ func UserAll() ([]ReturnUser, int, error) {
 			Username:     user.Username,
 			Phone:        user.Phone,
 			Email:        user.Email,
-			UserType:     user.UserType,
 			Roles:        roles,
 		}
 		redisUser = append(redisUser, u)
 	}
-	// redismanager.Set("users", &redisUser)
 	return redisUser, totals, nil
-	// }
 }
 
 // 根据用户邮箱模糊查询
@@ -193,7 +173,6 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 			Username:     user.Username,
 			Phone:        user.Phone,
 			Email:        user.Email,
-			UserType:     user.UserType,
 			Roles:        roles,
 		}
 		redisUser = append(redisUser, u)
