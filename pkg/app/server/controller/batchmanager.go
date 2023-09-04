@@ -1,36 +1,62 @@
 package controller
 
 import (
+	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
-	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
 func CreateBatchHandler(c *gin.Context) {
-	var batchinfo batch.CreateBatchParam
-	if err := c.Bind(&batchinfo); err != nil {
+	params := &struct {
+		Name        string   `json:"Name"`
+		Description string   `json:"Descrip"`
+		Manager     string   `json:"Manager"`
+		DepartName  []string `json:"DepartName"`
+		DepartID    []int    `json:"DepartID"`
+		Machines    []int    `json:"Machines"`
+	}{}
+	if err := c.Bind(params); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	//TODO:
-	fd := &userservice.Frontdata{}
-	log := auditlog.New(auditlog.LogTypeBatch, "创建批次", "", fd)
+
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypeBatch, "创建批次", "", user)
 	auditlog.Add(log)
 
-	if err := batch.CreateBatch(&batchinfo); err != nil {
-		logger.Debug(err.Error())
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+	batchinfo := &batch.CreateBatchParam{
+		Name:        params.Name,
+		Description: params.Description,
+		Manager:     params.Manager,
+		DepartName:  params.DepartName,
+		DepartID:    params.DepartID,
+		Machines:    params.Machines,
+	}
+
+	if err := batch.CreateBatch(batchinfo); err != nil {
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Name, http.StatusBadRequest)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Name, http.StatusOK)
+	auditlog.Add(log_s)
+	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次入库成功")
 }
 
@@ -65,18 +91,31 @@ func DeleteBatchHandler(c *gin.Context) {
 		return
 	}
 
-	//TODO:
-	fd := &userservice.Frontdata{}
-	log := auditlog.New(auditlog.LogTypeBatch, "删除批次", "", fd)
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypeBatch, "删除批次", "", user)
 	auditlog.Add(log)
 
+	batchesname := []string{}
+	for _, batchid := range batchdel.BatchID {
+		batchesname = append(batchesname, strconv.Itoa(batchid))
+	}
+
 	if err := batch.DeleteBatch(batchdel.BatchID); err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strings.Join(batchesname, "/"), http.StatusBadRequest)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strings.Join(batchesname, "/"), http.StatusOK)
+	auditlog.Add(log_s)
+	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次删除成功")
 }
 
@@ -90,19 +129,28 @@ func UpdateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	//TODO:
-	fd := &userservice.Frontdata{}
-	log := auditlog.New(auditlog.LogTypeBatch, "修改批次", "", fd)
+
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypeBatch, "编辑批次", "", user)
 	auditlog.Add(log)
 
-	err := batch.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
+	err = batch.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, batchinfo.BatchName, http.StatusBadRequest)
+		auditlog.Add(log_s)
+		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
 
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, batchinfo.BatchName, http.StatusOK)
+	auditlog.Add(log_s)
+	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次修改成功")
 }
 
