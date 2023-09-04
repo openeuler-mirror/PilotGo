@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-01-24 15:08:08
- * LastEditTime: 2023-06-28 16:00:48
+ * LastEditTime: 2023-09-04 11:34:39
  * Description: 用户模块相关数据获取
  ******************************************************************************/
 package dao
@@ -100,6 +100,12 @@ func UserInfo(email string) (User, error) {
 func QueryUserByID(userID int) (*User, error) {
 	user := &User{}
 	err := mysqlmanager.MySQL().Where("id=?", strconv.Itoa(userID)).Find(user).Error
+	return user, err
+}
+
+func QueryUserByName(name string) (*User, error) {
+	user := &User{}
+	err := mysqlmanager.MySQL().Where("username=?", name).Find(user).Error
 	return user, err
 }
 

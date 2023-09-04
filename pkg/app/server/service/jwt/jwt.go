@@ -9,10 +9,10 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-1 15:08:08
- * LastEditTime: 2023-09-01 13:18:04
+ * LastEditTime: 2023-09-04 11:09:10
  * Description: jwt是一个基于token的轻量级认证方式
  ******************************************************************************/
-package auth
+package jwt
 
 import (
 	"fmt"

@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-01 13:59:42
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
-package auth
+package middleware
 
 import (
 	"time"

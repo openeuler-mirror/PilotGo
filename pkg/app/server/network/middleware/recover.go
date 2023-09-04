@@ -12,7 +12,7 @@
  * LastEditTime: 2022-07-11 10:35:54
  * Description: panic recover
  ******************************************************************************/
-package auth
+package middleware
 
 import (
 	"net/http"

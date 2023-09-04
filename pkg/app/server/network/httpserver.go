@@ -26,7 +26,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -86,8 +85,8 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(auth.LoggerDebug())
-	router.Use(auth.Recover)
+	router.Use(middleware.LoggerDebug())
+	router.Use(middleware.Recover)
 
 	// 绑定 http api handler
 	registerAPIs(router)
