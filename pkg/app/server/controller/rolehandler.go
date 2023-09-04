@@ -21,7 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
 	roleservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/role"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -61,7 +61,7 @@ func AddRoleHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := auth.ParseUser(c)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
@@ -100,7 +100,7 @@ func DeleteRoleHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := auth.ParseUser(c)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
@@ -134,7 +134,7 @@ func UpdateRoleInfoHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := auth.ParseUser(c)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
@@ -169,7 +169,7 @@ func RolePermissionChangeHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := auth.ParseUser(c)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return

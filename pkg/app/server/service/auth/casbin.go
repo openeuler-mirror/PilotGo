@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-07-04 09:08:08
- * LastEditTime: 2023-09-01 16:22:14
+ * LastEditTime: 2023-09-04 11:12:43
  * Description: casbin服务
  ******************************************************************************/
 package auth
@@ -22,6 +22,7 @@ import (
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
+	suser "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
@@ -204,9 +205,24 @@ func initAdminPolicy() {
 }
 
 func CheckAuth(user, resource, action string) (bool, error) {
-	ok, err := G_Enfocer.Enforce(user, resource, action)
-	logger.Debug("check auth: %s %s %s, result: %t", user, resource, action, ok)
-	return ok, err
+	roles, err := suser.GetUserRoles(user)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range roles {
+		ok, err := G_Enfocer.Enforce(role, resource, action)
+		logger.Debug("check %s auth: %s %s %s, result: %t", user, role, resource, action, ok)
+
+		if err != nil {
+			return false, err
+		}
+		if ok {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func GetAllRoles() []string {

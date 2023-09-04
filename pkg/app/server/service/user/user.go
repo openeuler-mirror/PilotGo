@@ -23,8 +23,8 @@ import (
 
 	"github.com/tealeg/xlsx"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auth"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -227,7 +227,7 @@ func Login(user dao.Frontdata) (string, string, int, int, string, error) {
 	}
 
 	// Issue token
-	token, err := auth.ReleaseToken(u)
+	token, err := jwt.ReleaseToken(u)
 	if err != nil {
 		return "", "", 0, 0, "", err
 	}
@@ -291,4 +291,31 @@ func GetUserRole() ([]dao.UserRole, error) {
 		return roles, err
 	}
 	return roles, nil
+}
+
+func GetUserRoles(username string) ([]string, error) {
+	result := []string{}
+
+	user, err := dao.QueryUserByName(username)
+	if err != nil {
+		return nil, err
+	}
+
+	// 查找角色
+	roleids := user.RoleID
+	roleId := strings.Split(roleids, ",")
+	for _, id_str := range roleId {
+		id, err := strconv.Atoi(id_str)
+		if err != nil {
+			return nil, err
+		}
+		role, err := dao.RoleIdToGetAllInfo(id)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, role.Role)
+	}
+
+	return result, nil
 }
