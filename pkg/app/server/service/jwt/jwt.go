@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-1 15:08:08
- * LastEditTime: 2023-09-04 16:24:48
+ * LastEditTime: 2023-09-04 16:52:24
  * Description: jwt是一个基于token的轻量级认证方式
  ******************************************************************************/
 package jwt
@@ -50,7 +50,7 @@ func ReleaseToken(user dao.User) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(config.Config().JWT.SecretKey)
+	tokenString, err := token.SignedString([]byte(config.Config().JWT.SecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +59,7 @@ func ReleaseToken(user dao.User) (string, error) {
 
 func ParseToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (i interface{}, err error) {
-		return config.Config().JWT.SecretKey, nil
+		return []byte(config.Config().JWT.SecretKey), nil
 	})
 	return token, err
 }

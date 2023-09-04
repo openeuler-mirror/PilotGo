@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-09-02 16:58:20
+ * LastEditTime: 2023-09-04 16:59:08
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -151,7 +151,7 @@ func registerAPIs(router *gin.Engine) {
 	}
 
 	api := router.Group("/api/v1")
-	// api.Use(middleware.AuthMiddleware)
+	api.Use(middleware.TokenCheckMiddleware)
 	overview := api.Group("/overview") // 机器概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)

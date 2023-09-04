@@ -70,3 +70,16 @@ func NeedPermission(resource, action string) func(c *gin.Context) {
 		c.Next()
 	}
 }
+
+func TokenCheckMiddleware(c *gin.Context) {
+	_, err := jwt.ParseMyClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 401,
+			"msg":  "user token check error:" + err.Error()})
+		c.Abort()
+		return
+	}
+
+	c.Next()
+}
