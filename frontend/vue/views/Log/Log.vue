@@ -13,71 +13,52 @@
   Description: provide agent log manager of pilotgo
  -->
 <template>
- <div style="width: 100%;height:100%">
-   <ky-table
-        class="cluster-table"
-        ref="table"
-        :showSelect=false
-        :getData="getLogs"
-        :searchData="searchData"
-      >
-        <template v-slot:table_search>
-          <div>日志列表</div>
-        </template>
-        <template v-slot:table_action>
-        </template>
-        <template v-slot:table>
-          <el-table-column prop="action" label="日志名称">
-          </el-table-column>
-          <el-table-column prop="userName" label="创建者"> 
-          </el-table-column>
-          <el-table-column prop="departName" label="部门"> 
-          </el-table-column>
-          <el-table-column label="进度">
-            <template slot-scope="scope">
-              <el-progress style="width: 100%" 
-                type="line" 
-                text-inside
-                :stroke-width="strokeW"
-                :format="format"
-                :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 || 0" 
-                :status="scope.row.status.split(',')[2] === '0.00' ? 'exception' : 
-                    scope.row.status.split(',')[2] === '1.00' ? 'success' : 'warning' ">
-              </el-progress>
-            </template> 
-          </el-table-column>
-          <el-table-column prop="CreatedAt" label="创建时间" sortable>
-            <template slot-scope="scope">
-              <span>{{scope.row.CreatedAt | dateFormat}}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="operation" label="详情">
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                type="primary"
-                plain
-                @click="handleDetail(scope.row)">
-                查看
-              </el-button>
-            </template>
-          </el-table-column>
-        </template>
-      </ky-table>
-      <el-dialog 
-        :title="title"
-        :before-close="handleClose" 
-        :visible.sync="display" 
-        :width="dialogWidth"
-      >
-        <log-detail class="detail" v-if="type === 'detail'" :log="log" @click="handleClose"></log-detail>
-      </el-dialog>
- </div>
+  <div style="width: 100%;height:100%">
+    <ky-table class="cluster-table" ref="table" :showSelect=false :getData="getLogs" :searchData="searchData">
+      <template v-slot:table_search>
+        <div>日志列表</div>
+      </template>
+      <template v-slot:table_action>
+      </template>
+      <template v-slot:table>
+        <el-table-column prop="action" label="日志名称">
+        </el-table-column>
+        <el-table-column prop="userName" label="创建者">
+        </el-table-column>
+        <el-table-column prop="departName" label="部门">
+        </el-table-column>
+        <el-table-column label="进度">
+          <template slot-scope="scope">
+            <el-progress style="width: 100%" type="line" text-inside :stroke-width="strokeW" :format="format"
+              :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 || 0"
+              :status="scope.row.status.split(',')[2] === '0.00' ? 'exception' :
+                scope.row.status.split(',')[2] === '1.00' ? 'success' : 'warning'">
+            </el-progress>
+          </template>
+        </el-table-column>
+        <el-table-column prop="CreatedAt" label="创建时间" sortable>
+          <template slot-scope="scope">
+            <span>{{ scope.row.CreatedAt | dateFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="operation" label="详情">
+          <template slot-scope="scope">
+            <el-button size="mini" type="primary" plain @click="handleDetail(scope.row)">
+              查看
+            </el-button>
+          </template>
+        </el-table-column>
+      </template>
+    </ky-table>
+    <el-dialog :title="title" :before-close="handleClose" :visible.sync="display" :width="dialogWidth">
+      <log-detail class="detail" v-if="type === 'detail'" :log="log" @click="handleClose"></log-detail>
+    </el-dialog>
+  </div>
 </template>
 <script>
 import kyTable from "@/components/KyTable";
 import LogDetail from "./form/detail.vue"
-import { getLogs} from "@/request/log";
+import { getLogs } from "@/request/log";
 export default {
   name: "Log",
   components: {
@@ -97,9 +78,12 @@ export default {
       },
     }
   },
+  activated() {
+    this.$refs.table.handleSearch();
+  },
   methods: {
     getLogs,
-    refresh(){
+    refresh() {
       this.$refs.table.handleSearch();
     },
     handleClose() {
@@ -115,13 +99,13 @@ export default {
       this.log = row;
     },
     format(value) {
-      if(value) {
+      if (value) {
         return `${value}%`;
       }
     }
   },
   filters: {
-    dateFormat: function(value) {
+    dateFormat: function (value) {
       let date = new Date(value);
       let y = date.getFullYear();
       let MM = date.getMonth() + 1;
@@ -140,7 +124,7 @@ export default {
 }
 </script>
 <style scoped>
-  .detail {
-    height: 60vh;
-  }
+.detail {
+  height: 60vh;
+}
 </style>

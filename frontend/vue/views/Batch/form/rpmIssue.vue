@@ -108,6 +108,7 @@ export default {
   width: 100%;
   flex-direction: row;
   justify-content: space-between;
+  min-height: 400px;
 
   .mac {
     width: 32%;

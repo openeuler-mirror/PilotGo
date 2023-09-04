@@ -138,7 +138,7 @@ export default {
       this.$refs.table.selectRow.rows.forEach(item => {
         delDatas.push(item.email);
       });
-      delUser({ email: delDatas }).then(res => {
+      delUser({ delDatas: delDatas }).then(res => {
         if (res.status === 200) {
           this.$message.success(res.data.msg);
           this.refresh();
