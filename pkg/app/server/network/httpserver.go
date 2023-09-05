@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-11-18 13:03:16
- * LastEditTime: 2023-09-04 16:59:08
+ * LastEditTime: 2023-09-05 11:08:13
  * Description: Interface routing forwarding
  ******************************************************************************/
 package network
@@ -274,7 +274,7 @@ func registerAPIs(router *gin.Engine) {
 	}
 
 	// 对插件提供的api接口
-	registerPluginApi(api)
+	registerPluginApi(router)
 
 	other := api.Group("")
 	{
@@ -290,8 +290,8 @@ func registerAPIs(router *gin.Engine) {
 	go websocket.CliManager.Start()
 }
 
-func registerPluginApi(router *gin.RouterGroup) {
-	pluginAPI := router.Group("/pluginapi")
+func registerPluginApi(router *gin.Engine) {
+	pluginAPI := router.Group("/api/v1/pluginapi")
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
 		pluginAPI.POST("/run_command", pluginapi.RunCommandHandler)
