@@ -25,6 +25,31 @@ import (
 
 var global_db *gorm.DB
 
+func ensureDatabase(m *MysqlManager) error {
+	Url := fmt.Sprintf("%s:%s@(%s:%d)/?charset=utf8mb4&parseTime=true",
+		m.userName,
+		m.passWord,
+		m.ip,
+		m.port)
+	db, err := gorm.Open(mysql.Open(Url))
+	if err != nil {
+		return err
+	}
+
+	creatDataBase := "CREATE DATABASE IF NOT EXISTS " + m.dbName + " DEFAULT CHARSET utf8 COLLATE utf8_general_ci"
+	db.Exec(creatDataBase)
+
+	d, err := db.DB()
+	if err != nil {
+		return err
+	}
+	if err = d.Close(); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
 func MysqlInit(ip, username, password, dbname string, port int) (*MysqlManager, error) {
 	m := &MysqlManager{
 		ip:       ip,
@@ -33,13 +58,17 @@ func MysqlInit(ip, username, password, dbname string, port int) (*MysqlManager, 
 		passWord: password,
 		dbName:   dbname,
 	}
+	var err error
+	err = ensureDatabase(m)
+	if err != nil {
+		return nil, err
+	}
 	url := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8mb4&parseTime=true",
 		m.userName,
 		m.passWord,
 		m.ip,
 		m.port,
 		m.dbName)
-	var err error
 	// gorm db does not need to close
 	m.db, err = gorm.Open(mysql.Open(url), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
