@@ -111,7 +111,10 @@ export default {
     };
   },
   mounted() {
-    this.showChange = [0].includes(this.$store.getters.userType);
+    let btnArray = this.$store.getters.getOperations || ['default_all'];
+    if (btnArray && btnArray.length > 0) {
+      this.showChange = btnArray.includes("dept_change") ? true : false;
+    }
     this.departName = this.$store.getters.tableTitle || '机器列表';
   },
   watch: {
