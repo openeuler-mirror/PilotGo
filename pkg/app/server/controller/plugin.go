@@ -84,6 +84,7 @@ func PluginGatewayHandler(c *gin.Context) {
 		return
 	}
 	logger.Debug("proxy plugin request to: %s", target)
+	c.Request.Host = target.Host
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.ServeHTTP(c.Writer, c.Request)

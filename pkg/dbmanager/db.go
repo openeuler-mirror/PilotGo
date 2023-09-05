@@ -33,7 +33,6 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 
 	mysqlmanager.MySQL().AutoMigrate(&dao.CrontabList{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.MachineNode{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.RoleButton{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.Batch{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.AgentLogParent{})
 	mysqlmanager.MySQL().AutoMigrate(&dao.AgentLog{})
