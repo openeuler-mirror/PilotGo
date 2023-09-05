@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * @Author: zhaozhenfang
  * @Date: 2022-05-25 17:52:50
- * @LastEditTime: 2022-06-28 13:54:58
+ * @LastEditTime: 2023-09-05 09:26:46
  */
 'use strict'
 // Template version: 1.3.1
@@ -38,7 +38,7 @@ module.exports = {
     },
     // Various Dev Server settings
     host: '0.0.0.0',
-    port: 8888,
+    port: 8890,
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
