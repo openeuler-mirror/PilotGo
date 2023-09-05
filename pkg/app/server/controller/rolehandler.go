@@ -84,7 +84,7 @@ func AddRoleHandler(c *gin.Context) {
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
+	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "新增角色成功", log.Module, params.Role, http.StatusOK)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "新增角色成功")

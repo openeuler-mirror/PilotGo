@@ -27,6 +27,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
+	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
@@ -264,7 +265,9 @@ func DeleteUserHandler(c *gin.Context) {
 	}
 
 	status := service.BatchActionStatus(statuscodes)
-	auditlog.UpdateStatus(log, status)
+	if err := auditlog.UpdateStatus(log, status); err != nil {
+		logger.Error(err.Error())
+	}
 
 	switch strings.Split(status, ",")[2] {
 	case "0.00":

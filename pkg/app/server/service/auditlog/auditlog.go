@@ -27,7 +27,7 @@ const (
 	LogTypeBatch      = "批次" // 添加批次 删除批次 编辑批次
 	LogTypeOrganize   = "组织"
 	LogTypeMachine    = "机器"       // null
-	LogTypeRPM        = "软件包安装/卸载" // null
+	LogTypeRPM        = "软件包安装/卸载" // rpm安装 rpm卸载
 	LogTypeService    = "运行服务"     // null
 	LogTypeSysctl     = "配置内核参数"   // null
 	LogTypeBroadcast  = "配置文件下发"   // 配置文件下发

@@ -17,11 +17,13 @@ package agentcontroller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
@@ -89,83 +91,67 @@ func RpmInfoHandler(c *gin.Context) {
 func InstallRpmHandler(c *gin.Context) {
 	var rpm RPMS
 	c.Bind(&rpm)
-
 	if len(rpm.UUIDs) == 0 {
 		response.Fail(c, nil, "机器uuid不能为空")
 		return
 	}
 
-	logParent := dao.AgentLogParent{
-		UserName:   rpm.UserName,
-		DepartName: rpm.UserDeptName,
-		Type:       service.LogTypeRPM,
-	}
-	logParentId, err := dao.ParentAgentLog(logParent)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypeRPM, "rpm软件包安装", "", user)
+	if err := auditlog.Add(log); err != nil {
 		logger.Error(err.Error())
 	}
+
 	StatusCodes := make([]string, 0)
 
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              "", // TODO
-				OperationObject: rpm.RPM,
-				Action:          service.RPMInstall,
-				StatusCode:      http.StatusBadRequest,
-				Message:         "获取uuid失败",
-			}
-			if dao.AgentLogMessage(log) != nil {
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "获取uuid失败", log.Module, rpm.RPM, http.StatusBadRequest)
+			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
-
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
 		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              agent.IP,
-				OperationObject: rpm.RPM,
-				Action:          service.RPMInstall,
-				StatusCode:      http.StatusBadRequest,
-				Message:         Err,
-			}
-			if dao.AgentLogMessage(log) != nil {
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, Err, log.Module, rpm.RPM, http.StatusBadRequest)
+			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              agent.IP,
-				OperationObject: rpm.RPM,
-				Action:          service.RPMInstall,
-				StatusCode:      http.StatusOK,
-				Message:         "安装成功",
-			}
-			if dao.AgentLogMessage(log) != nil {
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "", log.Module, rpm.RPM, http.StatusOK)
+			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
-
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 	status := service.BatchActionStatus(StatusCodes)
-	if dao.UpdateParentAgentLog(logParentId, status) != nil {
+	if err := auditlog.UpdateStatus(log, status); err != nil {
 		logger.Error(err.Error())
 	}
-	if ok := service.ActionStatus(StatusCodes); !ok {
+
+	switch strings.Split(status, ",")[2] {
+	case "0.00":
 		response.Fail(c, nil, "软件包安装失败")
 		return
+	case "1.00":
+		response.Success(c, nil, "软件包安装成功")
+	default:
+		response.Success(c, nil, "软件包安装部分成功")
 	}
-	response.Success(c, nil, "软件包安装完成!")
 }
+
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
 	c.Bind(&rpm)
@@ -175,75 +161,58 @@ func RemoveRpmHandler(c *gin.Context) {
 		return
 	}
 
-	logParent := dao.AgentLogParent{
-		UserName:   rpm.UserName,
-		DepartName: rpm.UserDeptName,
-		Type:       service.LogTypeRPM,
-	}
-	logParentId, err := dao.ParentAgentLog(logParent)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	log := auditlog.NewByUser(auditlog.LogTypeRPM, "rpm软件包卸载", "", user)
+	if err := auditlog.Add(log); err != nil {
 		logger.Error(err.Error())
 	}
+
 	StatusCodes := make([]string, 0)
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              "", // TODO
-				OperationObject: rpm.RPM,
-				Action:          service.RPMRemove,
-				StatusCode:      http.StatusBadRequest,
-				Message:         "获取uuid失败",
-			}
-			if dao.AgentLogMessage(log) != nil {
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "获取uuid失败", log.Module, rpm.RPM, http.StatusBadRequest)
+			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
-
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
 		_, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              agent.IP,
-				OperationObject: rpm.RPM,
-				Action:          service.RPMRemove,
-				StatusCode:      http.StatusBadRequest,
-				Message:         Err,
-			}
-			if dao.AgentLogMessage(log) != nil {
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, Err, log.Module, rpm.RPM, http.StatusBadRequest)
+			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
-
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			log := dao.AgentLog{
-				LogParentID:     logParentId,
-				IP:              agent.IP,
-				OperationObject: rpm.RPM,
-				Action:          service.RPMRemove,
-				StatusCode:      http.StatusOK,
-				Message:         "卸载成功",
-			}
-			if dao.AgentLogMessage(log) != nil {
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "", log.Module, rpm.RPM, http.StatusOK)
+			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
-
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 
 	status := service.BatchActionStatus(StatusCodes)
-	if dao.UpdateParentAgentLog(logParentId, status) != nil {
+	if err := auditlog.UpdateStatus(log, status); err != nil {
 		logger.Error(err.Error())
 	}
-	if ok := service.ActionStatus(StatusCodes); !ok {
+
+	switch strings.Split(status, ",")[2] {
+	case "0.00":
 		response.Fail(c, nil, "软件包卸载失败")
 		return
+	case "1.00":
+		response.Success(c, nil, "软件包卸载成功")
+	default:
+		response.Success(c, nil, "软件包卸载部分成功")
 	}
-	response.Success(c, nil, "软件包卸载完成!")
 }
