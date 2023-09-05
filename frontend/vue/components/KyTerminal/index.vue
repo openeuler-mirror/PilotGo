@@ -13,7 +13,7 @@
  -->
 <template>
   <div class="terminal-cantainer">
-    <div id="xterm" ref="terminal" style="width: 100%; height: 100%; display: block"></div>
+    <div id="xterm" ref="terminal" style="width: 100%; height: 92%; display: block"></div>
   </div>
 </template>
 
@@ -47,7 +47,7 @@ export default {
       attachAddon: null,
       ws: null,
       rows: 20,
-      cols: 300,
+      cols: 200,
       option: {
         lineHeight: 1.2,
         cursorBlink: true,
@@ -57,7 +57,7 @@ export default {
         theme: {
           background: '#181d28'
         },
-        cols: 300
+        cols: 200
       }
     }
   },
@@ -75,7 +75,7 @@ export default {
     this.initSocket();
     // this.onTerminalResize()
     setTimeout(() => {
-      // this.fitAddon.fit()
+      this.fitAddon.fit()
       this.onTerminalKeyPress()
     }, 100)
   },
