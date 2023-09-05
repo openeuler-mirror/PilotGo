@@ -97,7 +97,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 	for _, uuid := range UUIDs {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			log_s := auditlog.New_sub(log.LogUUID, uuid, log.Action, "获取uuid失败", log.Module, path+"/"+filename, http.StatusBadRequest)
+			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, "获取uuid失败", log.Module, path+"/"+filename, http.StatusBadRequest)
 			auditlog.Add(log_s)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -105,12 +105,12 @@ func FileBroadcastToAgents(c *gin.Context) {
 
 		_, Err, err := agent.UpdateFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
-			log_s := auditlog.New_sub(log.LogUUID, uuid, log.Action, Err, log.Module, path+"/"+filename, http.StatusBadRequest)
+			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, Err, log.Module, path+"/"+filename, http.StatusBadRequest)
 			auditlog.Add(log_s)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			log_s := auditlog.New_sub(log.LogUUID, uuid, log.Action, "配置文件下发成功", log.Module, path+"/"+filename, http.StatusOK)
+			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, "配置文件下发成功", log.Module, path+"/"+filename, http.StatusOK)
 			auditlog.Add(log_s)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 		}
