@@ -16,7 +16,7 @@
         </el-popconfirm>
         <el-button type="primary" plain @click="handleExport"> 导出 </el-button>
         <el-upload :show-file-list="false" :before-upload="beforeUpload" :on-success="onSuccess" :on-error="onError"
-          name="upload" accept="xlsx" style="display: inline-flex;margin-right: 8px" action="/user/import">
+          name="upload" accept="xlsx" style="display: inline-flex;margin-right: 8px" action="/api/v1/user/import">
           <auth-button name="user_import"> 批量导入 </auth-button>
         </el-upload>
       </template>
