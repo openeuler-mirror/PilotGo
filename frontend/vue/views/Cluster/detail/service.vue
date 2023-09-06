@@ -12,58 +12,52 @@
  LastEditTime: 2023-08-30 17:24:08
  -->
 <template>
- <div class="content">
+  <div class="content">
     <div class="services">
-      <el-autocomplete
-        style="width:50%"
-        class="inline-input"
-        v-model="serviceName"
-        :fetch-suggestions="querySearch"
-        placeholder="请输入服务名称"
-        @select="handleSelect"
-      ></el-autocomplete>
-      <el-button plain  type="primary" @click="handleSelect">搜索</el-button>
-      <el-button plain  type="primary" @click="handleStart">启动</el-button>
+      <el-autocomplete style="width:50%" class="inline-input" v-model="serviceName" :fetch-suggestions="querySearch"
+        placeholder="请输入服务名称" @select="handleSelect"></el-autocomplete>
+      <el-button plain type="primary" @click="handleSelect">搜索</el-button>
+      <el-button plain type="primary" @click="handleStart">启动</el-button>
       <el-button plain type="primary" @click="handleStop">停止</el-button>
       <el-button plain type="primary" @click="handleRestart">重启</el-button>
-   </div>
-   <div class="info">
-     <div class="detail" v-if="display">
-       <p class="title">服务详情：</p>
-       <el-descriptions :column="2" size="medium" border>
-        <el-descriptions-item label="服务名">{{ serviceInfo.Name }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ serviceInfo.Active ==="active" ? "正在运行" : "已停止" }}</el-descriptions-item>
-        <el-descriptions-item label="模块是否加载">{{ serviceInfo.LOAD === "loaded" ? "已加载" : "未加载" }}</el-descriptions-item>
-        <el-descriptions-item label="SUB">{{ serviceInfo.SUB }}</el-descriptions-item>
-      </el-descriptions>
-     </div>
-     <div class="result" v-else>
-       <p class="title">执行结果：</p>
-       <el-descriptions :column="2" size="medium" border>
-        <el-descriptions-item label="软件包名">{{ serviceName }}</el-descriptions-item>
-        <el-descriptions-item label="执行动作">{{ action }}</el-descriptions-item>
-        <el-descriptions-item label="结果">
-          {{result+":"}}
-          <p class="progress" v-show="result != ''">
-            <span :style="{background: result === '成功' ? 'rgb(109, 123, 172)' : 'rgb(223, 96, 88)'}">100%</span>
-          </p>
-        </el-descriptions-item>
-      </el-descriptions>
-     </div>
-   </div>
+    </div>
+    <div class="info">
+      <div class="detail" v-if="display">
+        <p class="title">服务详情：</p>
+        <el-descriptions :column="2" size="medium" border>
+          <el-descriptions-item label="服务名">{{ serviceInfo.Name }}</el-descriptions-item>
+          <el-descriptions-item label="状态">{{ serviceInfo.Active === "active" ? "正在运行" : "已停止" }}</el-descriptions-item>
+          <el-descriptions-item label="模块是否加载">{{ serviceInfo.LOAD === "loaded" ? "已加载" : "未加载" }}</el-descriptions-item>
+          <el-descriptions-item label="SUB">{{ serviceInfo.SUB }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+      <div class="result" v-else>
+        <p class="title">执行结果：</p>
+        <el-descriptions :column="2" size="medium" border>
+          <el-descriptions-item label="软件包名">{{ serviceName }}</el-descriptions-item>
+          <el-descriptions-item label="执行动作">{{ action }}</el-descriptions-item>
+          <el-descriptions-item label="结果">
+            {{ result + ":" }}
+            <p class="progress" v-show="result != ''">
+              <span :style="{ background: result === '成功' ? 'rgb(109, 123, 172)' : 'rgb(223, 96, 88)' }">100%</span>
+            </p>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </div>
 
 
 
- </div>
+  </div>
 </template>
 <script>
-import { getserviceList,serviceStart, serviceStop, serviceRestart } from '@/request/cluster';
+import { getserviceList, serviceStart, serviceStop, serviceRestart } from '@/request/cluster';
 export default {
   name: "ServiceInfo",
   data() {
     return {
       params: {},
-      serviceName:"",
+      serviceName: "",
       serviceData: [],
       allService: [],
       action: '',
@@ -80,21 +74,21 @@ export default {
   },
   mounted() {
     this.params = {
-      uuid:this.$route.params.detail, 
-      userName:this.$store.getters.userName,
+      uuid: this.$route.params.detail,
+      userName: this.$store.getters.userName,
     }
-    if(this.$route.params.detail != undefined) {
+    if (this.$route.params.detail != undefined) {
       this.getAllService();
     }
   },
   methods: {
     getAllService() {
-      getserviceList({uuid:this.$route.params.detail}).then((res) => {
-        if(res.data.code === 200) {
+      getserviceList({ uuid: this.$route.params.detail }).then((res) => {
+        if (res.data.code === 200) {
           let result = this.allService = res.data.data && res.data.data.service_list;
           result.forEach(item => {
-              this.serviceData.push({'value':item.Name})
-            })
+            this.serviceData.push({ 'value': item.Name })
+          })
         } else {
           console.log(res.data.msg)
         }
@@ -104,24 +98,25 @@ export default {
       var serviceData = this.serviceData;
       var results = queryString ? serviceData.filter((item) => {
         return item.value.indexOf(queryString) === 0;
-      }): serviceData;
+      }) : serviceData;
       cb(results);
     },
     handleSelect(item) {
-      if(this.serviceName == '') {
+      if (this.serviceName == '') {
         this.$message.error("服务名不能为空");
         return;
       }
+      this.display = true
       let serviceName = (item && item.value) || this.serviceName;
       let serviceDetail = this.allService.filter(item => item.Name === serviceName);
-      if(serviceDetail.length > 0) {
+      if (serviceDetail.length > 0) {
         this.serviceInfo = serviceDetail[0];
       } else {
-        this.$message.error("未获取到"+serviceName+"的服务信息")
+        this.$message.error("未获取到" + serviceName + "的服务信息")
       }
     },
     handleResult(res) {
-      if(res.data.code === 200) {
+      if (res.data.code === 200) {
         this.result = "成功";
         this.getAllService();
       } else {
@@ -129,7 +124,7 @@ export default {
       }
     },
     handleStart() {
-      if(this.serviceName == '') {
+      if (this.serviceName == '') {
         this.$message.error("服务名不能为空");
         return;
       }
@@ -140,12 +135,12 @@ export default {
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      serviceStart({...this.params, ...params}).then(res => {
+      serviceStart({ ...this.params, ...params }).then(res => {
         this.handleResult(res)
       })
     },
     handleStop() {
-      if(this.serviceName == '') {
+      if (this.serviceName == '') {
         this.$message.error("服务名不能为空");
         return;
       }
@@ -156,12 +151,12 @@ export default {
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      serviceStop({...this.params, ...params}).then(res => {
+      serviceStop({ ...this.params, ...params }).then(res => {
         this.handleResult(res)
       })
     },
     handleRestart() {
-      if(this.serviceName == '') {
+      if (this.serviceName == '') {
         this.$message.error("服务名不能为空");
         return;
       }
@@ -172,7 +167,7 @@ export default {
         userName: this.$store.getters.userName,
         userDept: this.$store.getters.UserDepartName,
       }
-      serviceRestart({...this.params, ...params}).then(res => {
+      serviceRestart({ ...this.params, ...params }).then(res => {
         this.handleResult(res)
       })
     },
@@ -187,39 +182,47 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+
   .services {
     width: 98%;
   }
+
   .info {
     width: 98%;
     flex: 1;
     overflow: hidden;
+
     .detail {
       width: 100%;
       height: 100%;
+
       .title {
         width: 30%;
         margin: 2% 0;
       }
     }
+
     .result {
       width: 100%;
       height: 100%;
+
       .title {
         width: 30%;
         margin: 2% 0;
       }
+
       .progress {
         display: inline-block;
-        width:74%; 
+        width: 74%;
         margin-left: 2%;
-        border: 1px solid rgba(11, 35, 117,.5);  
-        background: #fff; 
-        border-radius: 10px; 
-        text-align:left;
+        border: 1px solid rgba(11, 35, 117, .5);
+        background: #fff;
+        border-radius: 10px;
+        text-align: left;
+
         span {
           display: inline-block;
-          text-align:center;
+          text-align: center;
           color: #fff;
           width: 100%;
           border: 1px solid #fff;
