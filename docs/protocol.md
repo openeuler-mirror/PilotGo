@@ -224,7 +224,7 @@ url：/user/login
                 "token":"xxxxx",
                 "userType":0
             },
-        "msg":"登陆成功!"
+        "msg":"登录成功!"
     }
 #### 用户退出
 描述：用户退出系统  
@@ -638,7 +638,7 @@ url：/user/permission
 字段描述：  
 |名称|类型|说明|是否必须|备注|
 |-|-|-|-|-|
-|button|[]string|登陆用户拥有的权限按钮|y|数组|
+|button|[]string|登录用户拥有的权限按钮|y|数组|
 |menu|[]string|登录用户拥有的权限菜单|y|数组|
 |userType|string|用户类型|y||  
 
@@ -665,7 +665,7 @@ url：/user/roles
 字段描述：  
 |名称|类型|说明|是否必须|备注|
 |-|-|-|-|-|
-|button|[]string|登陆用户拥有的权限按钮|y|数组|
+|button|[]string|登录用户拥有的权限按钮|y|数组|
 |menu|[]string|登录用户拥有的权限菜单|y|数组|
 |type|string|用户类型|y||
 |role|string|用户角色|y||
