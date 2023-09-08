@@ -15,6 +15,7 @@ const cluster = {
     state: {
         selectIp: '',
         tableTitle: '',
+        immutable: false,
     },
     mutations: {
         SET_SELECTIP(state, ip) {
@@ -22,6 +23,9 @@ const cluster = {
         },
         SET_TABLETITLE(state,title) {
             state.tableTitle = new String(title);
+        },
+        SET_IMMUTABLE(state, yes) {
+            state.immutable = yes;
         },
     },
     actions: {

@@ -9,19 +9,19 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-08 11:34:55
- LastEditTime: 2023-08-31 09:18:05
+ LastEditTime: 2023-09-08 16:24:49
  -->
 <template>
   <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
     <el-descriptions :column="2" size="medium" border>
-      <el-descriptions-item label="机器IP">{{ basic.IP }}</el-descriptions-item>
-      <el-descriptions-item label="所属部门">{{ basic.dept }}</el-descriptions-item>
-      <el-descriptions-item label="监控状态">{{ basic.status }}</el-descriptions-item>
-      <el-descriptions-item label="系统版本">{{ basic.macPlatform }}</el-descriptions-item>
-      <el-descriptions-item label="架构">{{ basic.mackernel }}</el-descriptions-item>
-      <el-descriptions-item label="cpu">{{ basic.macCPU }}</el-descriptions-item>
-      <el-descriptions-item label="内存">{{ basic.macMEM }}</el-descriptions-item>
-      <el-descriptions-item label="内核版本">{{ basic.osVersion }}</el-descriptions-item>
+      <el-descriptions-item label="机器IP">{{ IP }}</el-descriptions-item>
+      <el-descriptions-item label="所属部门">{{ dept }}</el-descriptions-item>
+      <el-descriptions-item label="监控状态">{{ status }}</el-descriptions-item>
+      <el-descriptions-item label="系统版本">{{ macPlatform }}</el-descriptions-item>
+      <el-descriptions-item label="架构">{{ mackernel }}</el-descriptions-item>
+      <el-descriptions-item label="cpu">{{ macCPU }}</el-descriptions-item>
+      <el-descriptions-item label="内存">{{ macMEM }}</el-descriptions-item>
+      <el-descriptions-item label="内核版本">{{ osVersion }}</el-descriptions-item>
       <el-descriptions-item :label="item.device" :span="2" v-for="item in diskData" :key="item.$index">
         <span class="diskMount">{{ "挂载点：" + item.path + "(" + item.total + ")" }}</span>
         <p class="progress">
@@ -49,18 +49,16 @@ export default {
         //   "usedPercent": "71%"
         // }
       ],
-      basic: {
-        IP: '',
-        dept: '',
-        manager: '',
-        status: '',
-        IP: '',
-        macPlatform: '',
-        mackernel: '',
-        macCPU: '',
-        macMEM: '',
-        osVersion: ''
-      },
+      IP: '',
+      dept: '',
+      manager: '',
+      status: '',
+      IP: '',
+      macPlatform: '',
+      mackernel: '',
+      macCPU: '',
+      macMEM: '',
+      osVersion: ''
     }
   },
   mounted() {
@@ -70,17 +68,19 @@ export default {
         getOverview(obj).then(res => {
           if (res.data.code === 200) {
             let result = res.data.data
-            this.basic.IP = result.ip;
-            this.basic.dept = result.department;
-            this.basic.status = result.state === 1 ? '在线' : result.state === 2 ? '离线' : 'unknown';
-            this.basic.macPlatform = result.platform + ' ' + result.platform_version;
-            this.basic.mackernel = result.kernel_arch;
-            this.basic.osVersion = result.kernel_version;
-            this.basic.macCPU = result.cpu_num + '核 ' + result.model_name;
+            this.IP = result.ip;
+            this.dept = result.department;
+            this.status = result.state === 1 ? '在线' : result.state === 2 ? '离线' : 'unknown';
+            this.macPlatform = result.platform + ' ' + result.platform_version;
+            this.mackernel = result.kernel_arch;
+            this.osVersion = result.kernel_version;
+            this.macCPU = result.cpu_num + '核 ' + result.model_name;
             let memTotal = 0;
             memTotal = result.memory_total / 1024 / 1024;
-            this.basic.macMEM = memTotal.toFixed(2) + 'G';
+            this.macMEM = memTotal.toFixed(2) + 'G';
             this.diskData = result.disk_usage;
+
+            this.$store.commit('SET_IMMUTABLE', result.immutable)
           } else {
             console.log(res.data.msg)
           }

@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-02-25 16:33:46
- LastEditTime: 2023-08-30 10:49:02
+ LastEditTime: 2023-09-08 16:27:01
   Description: provide agent log manager of pilotgo
  -->
 <template>
@@ -203,6 +203,7 @@ export default {
     },
     handleSelectIP(ip) {
       this.$store.dispatch('setSelectIp', ip)
+      this.$store.commit('SET_IMMUTABLE', false)
     },
     handleProme(ip) {
       this.handleSelectIP(ip);
