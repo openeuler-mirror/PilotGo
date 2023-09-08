@@ -9,7 +9,7 @@
   See the Mulan PSL v2 for more details.
   Author: zhaozhenfang
   Date: 2022-04-11 13:09:12
- LastEditTime: 2023-08-30 17:26:46
+ LastEditTime: 2023-09-08 17:49:22
  -->
 <template>
   <div class="content">
@@ -22,11 +22,11 @@
       </small-table>
     </div>
     <div class="packages">
-      <el-autocomplete style="width:86%" class="inline-input" v-model="packageName" :fetch-suggestions="querySearch"
+      <el-autocomplete style="width:30%" class="inline-input" v-model="packageName" :fetch-suggestions="querySearch"
         placeholder="请输入内容" @select="handleSelect"></el-autocomplete>
       <auth-button name="default_all" @click="handleSelect">搜索</auth-button>
-      <auth-button name="rpm_install" @click="handleInstall">安装</auth-button>
-      <auth-button name="rpm_uninstall" @click="handleUnInstall">卸载</auth-button>
+      <auth-button :show="showOperate" name="rpm_install" @click="handleInstall">安装</auth-button>
+      <auth-button :show="showOperate" name="rpm_uninstall" @click="handleUnInstall">卸载</auth-button>
     </div>
     <div class="info">
       <div class="detail" v-if="display">
@@ -80,6 +80,8 @@ export default {
         Summary: "",
         Version: "",
       },
+
+      showOperate: false,
     }
   },
   mounted() {
@@ -94,6 +96,8 @@ export default {
         }
       })
     }
+
+    this.showOperate = !this.$store.getters.immutable;
   },
   methods: {
     getAllRpm() {
@@ -197,6 +201,8 @@ export default {
     width: 98%;
     display: flex;
     align-items: center;
+    margin-top: 5px;
+    justify-content: flex-end;
   }
 
   .info {

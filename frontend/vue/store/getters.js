@@ -22,6 +22,7 @@ const getters = {
   iframeComponents: state => state.permissions.iframeComponents,
   selectIp: state => state.cluster.selectIp,
   tableTitle: state => state.cluster.tableTitle,
+  immutable: state => state.cluster.immutable,
   visitedViews: state => state.tagsView.visitedViews,
   cachedViews: state => state.tagsView.cachedViews,
   messageNum: state => state.message.messageNum,

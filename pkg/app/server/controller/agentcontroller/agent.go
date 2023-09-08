@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2022-01-24 15:08:08
- * LastEditTime: 2023-08-30 16:53:32
+ * LastEditTime: 2023-09-08 16:45:13
  * Description: Get the basic information of the machine
  ******************************************************************************/
 package agentcontroller
@@ -58,6 +58,12 @@ func AgentOverviewHandler(c *gin.Context) {
 		})
 	}
 
+	immutable := false
+	// TODO:
+	if info.SysInfo.Platform == "NestOS" {
+		immutable = true
+	}
+
 	result := struct {
 		IP              string      `json:"ip"`
 		Department      string      `json:"department"`
@@ -70,6 +76,7 @@ func AgentOverviewHandler(c *gin.Context) {
 		ModelName       string      `json:"model_name"`
 		MemoryTotal     int64       `json:"memory_total"`
 		DiskUsage       []DiskUsage `json:"disk_usage"`
+		Immutable       bool        `json:"immutable"`
 	}{
 		IP:              info.IP,
 		Department:      dept,
@@ -82,6 +89,7 @@ func AgentOverviewHandler(c *gin.Context) {
 		ModelName:       info.CpuInfo.ModelName,
 		MemoryTotal:     info.MemoryInfo.MemTotal,
 		DiskUsage:       dus,
+		Immutable:       immutable,
 	}
 
 	response.Success(c, result, "Success")
