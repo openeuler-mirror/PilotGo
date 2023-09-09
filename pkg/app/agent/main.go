@@ -39,6 +39,14 @@ func main() {
 		os.Exit(-1)
 	}
 
+	//初始化os
+	osinfo, err := common.InitOSName()
+	if err != nil {
+		logger.Error("os init failed: %s", err)
+		os.Exit(-1)
+	}
+	logger.Info("osname is %s,id is %s.", osinfo.OSName, osinfo.ID)
+
 	// 初始化日志
 	if err := logger.Init(&aconfig.Config().Logopts); err != nil {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
