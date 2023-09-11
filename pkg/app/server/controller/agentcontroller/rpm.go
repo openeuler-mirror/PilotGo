@@ -120,6 +120,20 @@ func InstallRpmHandler(c *gin.Context) {
 			continue
 		}
 
+		info, err := agent.AgentOverview()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		if info.SysInfo.Platform == "NestOS For Container" {
+			logger.Error("Install rpm is not supported on NestOS For Container")
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "Install rpm is not supported on NestOS For Container", log.Module, rpm.RPM, http.StatusBadRequest)
+			if err := auditlog.Add(log_s); err != nil {
+				logger.Error(err.Error())
+			}
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			continue
+		}
+
 		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
 			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, Err, log.Module, rpm.RPM, http.StatusBadRequest)
@@ -177,6 +191,20 @@ func RemoveRpmHandler(c *gin.Context) {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
 			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "获取uuid失败", log.Module, rpm.RPM, http.StatusBadRequest)
+			if err := auditlog.Add(log_s); err != nil {
+				logger.Error(err.Error())
+			}
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			continue
+		}
+
+		info, err := agent.AgentOverview()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		if info.SysInfo.Platform == "NestOS For Container" {
+			logger.Error("Remove rpm is not supported on NestOS For Container")
+			log_s := auditlog.New_sub(log.LogUUID, agent.IP, log.Action, "Remove rpm is not supported on NestOS For Container", log.Module, rpm.RPM, http.StatusBadRequest)
 			if err := auditlog.Add(log_s); err != nil {
 				logger.Error(err.Error())
 			}
