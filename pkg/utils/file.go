@@ -18,7 +18,6 @@ package utils
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -88,7 +87,7 @@ func IsFileExist(filePath string) (bool, bool) {
 }
 
 func GetFiles(filePath string) (fs []string, err error) {
-	files, err := ioutil.ReadDir(filePath)
+	files, err := os.ReadDir(filePath)
 	if err != nil {
 		return fs, err
 	}
