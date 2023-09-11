@@ -167,78 +167,113 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network configuration source file: %s", err)
 	}
-	var filename string
-	for _, n := range netPath {
-		if ok := strings.Contains(n, "ifcfg-e"); !ok {
-			continue
+	var network = &common.NetworkConfig{}
+
+	if len(netPath) == 0 {
+		conn, err := net.Dial("udp", "openeuler.org:80")
+		if err != nil {
+			return nil, fmt.Errorf("failed to get IP: %s", err)
 		}
-		filename = n
-	}
+		defer conn.Close()
+		ip := strings.Split(conn.LocalAddr().String(), ":")[0]
 
-	exitc, result, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
-	if exitc == 0 && result != "" && stde == "" && err == nil {
-		ip_assignment_method := strings.Split(result, "=")[1]
-
-		var network = &common.NetworkConfig{}
-		switch strings.Replace(ip_assignment_method, "\n", "", -1) {
-		case "static":
-			exitc, tmp, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
-			if exitc == 0 && tmp != "" && stde == "" && err == nil {
-				lines := strings.Split(tmp, "\n")
-				for _, line := range lines {
-					line = strings.TrimSpace(line)
-					strSlice := strings.Split(line, "=")
-					if len(strSlice) == 1 {
-						continue
-					}
-					ModuleMatch(strSlice[0], strSlice[1], network)
-				}
-			} else {
-				return nil, fmt.Errorf("failed to read network configuration source file: %d, %s, %s, %v", exitc, tmp, stde, err)
-			}
-		case "dhcp":
-			conn, err := net.Dial("udp", "openeuler.org:80")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get IP: %s", err)
-			}
-			defer conn.Close()
-			ip := strings.Split(conn.LocalAddr().String(), ":")[0]
-
-			exitc, gateway, stde, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
-			if exitc == 0 && gateway != "" && stde == "" && err == nil {
-			} else {
-				return nil, fmt.Errorf("failed to get gateway: %d, %s, %s, %v", exitc, gateway, stde, err)
-			}
-
-			exitc, DNS, stde, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
-			if exitc == 0 && DNS != "" && stde == "" && err == nil {
-			} else {
-				return nil, fmt.Errorf("failed to get dns: %d, %s, %s, %v", exitc, DNS, stde, err)
-			}
-
-			network.DNS1 = strings.Replace(DNS, "\n", "", -1)
-			network.BootProto = "dhcp"
-			network.IPAddr = ip
-			network.GateWay = strings.Replace(gateway, "\n", "", -1)
-		default:
-			exitc, tmp, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
-			if exitc == 0 && tmp != "" && stde == "" && err == nil {
-				lines := strings.Split(tmp, "\n")
-				for _, line := range lines {
-					line = strings.TrimSpace(line)
-					strSlice := strings.Split(line, "=")
-					if len(strSlice) == 1 {
-						continue
-					}
-					ModuleMatch(strSlice[0], strSlice[1], network)
-				}
-			} else {
-				return nil, fmt.Errorf("failed to read network configuration source data: %d, %s, %s, %v", exitc, tmp, stde, err)
-			}
+		exitc, gateway, stde, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
+		if exitc == 0 && gateway != "" && stde == "" && err == nil {
+		} else {
+			return nil, fmt.Errorf("failed to get gateway: %d, %s, %s, %v", exitc, gateway, stde, err)
 		}
+
+		exitc, DNS, stde, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
+		if exitc == 0 && DNS != "" && stde == "" && err == nil {
+		} else {
+			return nil, fmt.Errorf("failed to get dns: %d, %s, %s, %v", exitc, DNS, stde, err)
+		}
+
+		exitc, NETMASK, stde, err := utils.RunCommand("ifconfig |grep netmask|awk '{print $4}'|awk 'NR==1'")
+		if exitc == 0 && NETMASK != "" && stde == "" && err == nil {
+		} else {
+			return nil, fmt.Errorf("failed to get dns: %d, %s, %s, %v", exitc, DNS, stde, err)
+		}
+		network.NetMask = strings.Replace(NETMASK, "\n", "", -1)
+		network.DNS1 = strings.Replace(DNS, "\n", "", -1)
+		network.BootProto = "dhcp"
+		network.IPAddr = ip
+		network.GateWay = strings.Replace(gateway, "\n", "", -1)
 		return network, nil
+
+	} else {
+
+		var filename string
+		for _, n := range netPath {
+			if ok := strings.Contains(n, "ifcfg-e"); !ok {
+				continue
+			}
+			filename = n
+		}
+
+		exitc, result, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
+		if exitc == 0 && result != "" && stde == "" && err == nil {
+			ip_assignment_method := strings.Split(result, "=")[1]
+			switch strings.Replace(ip_assignment_method, "\n", "", -1) {
+			case "static":
+				exitc, tmp, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
+				if exitc == 0 && tmp != "" && stde == "" && err == nil {
+					lines := strings.Split(tmp, "\n")
+					for _, line := range lines {
+						line = strings.TrimSpace(line)
+						strSlice := strings.Split(line, "=")
+						if len(strSlice) == 1 {
+							continue
+						}
+						ModuleMatch(strSlice[0], strSlice[1], network)
+					}
+				} else {
+					return nil, fmt.Errorf("failed to read network configuration source file: %d, %s, %s, %v", exitc, tmp, stde, err)
+				}
+			case "dhcp":
+				conn, err := net.Dial("udp", "openeuler.org:80")
+				if err != nil {
+					return nil, fmt.Errorf("failed to get IP: %s", err)
+				}
+				defer conn.Close()
+				ip := strings.Split(conn.LocalAddr().String(), ":")[0]
+
+				exitc, gateway, stde, err := utils.RunCommand("route -n |awk '{print $2}' | sed -n '3p'")
+				if exitc == 0 && gateway != "" && stde == "" && err == nil {
+				} else {
+					return nil, fmt.Errorf("failed to get gateway: %d, %s, %s, %v", exitc, gateway, stde, err)
+				}
+
+				exitc, DNS, stde, err := utils.RunCommand("cat /etc/resolv.conf | egrep 'nameserver' | awk '{print $2}'")
+				if exitc == 0 && DNS != "" && stde == "" && err == nil {
+				} else {
+					return nil, fmt.Errorf("failed to get dns: %d, %s, %s, %v", exitc, DNS, stde, err)
+				}
+
+				network.DNS1 = strings.Replace(DNS, "\n", "", -1)
+				network.BootProto = "dhcp"
+				network.IPAddr = ip
+				network.GateWay = strings.Replace(gateway, "\n", "", -1)
+			default:
+				exitc, tmp, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
+				if exitc == 0 && tmp != "" && stde == "" && err == nil {
+					lines := strings.Split(tmp, "\n")
+					for _, line := range lines {
+						line = strings.TrimSpace(line)
+						strSlice := strings.Split(line, "=")
+						if len(strSlice) == 1 {
+							continue
+						}
+						ModuleMatch(strSlice[0], strSlice[1], network)
+					}
+				} else {
+					return nil, fmt.Errorf("failed to read network configuration source data: %d, %s, %s, %v", exitc, tmp, stde, err)
+				}
+			}
+			return network, nil
+		}
+		return nil, fmt.Errorf("failed to get BOOTPROTO: %d, %s, %s, %v", exitc, result, stde, err)
 	}
-	return nil, fmt.Errorf("failed to get BOOTPROTO: %d, %s, %s, %v", exitc, result, stde, err)
 }
 
 // Deprecated
