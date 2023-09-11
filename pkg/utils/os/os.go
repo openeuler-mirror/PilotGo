@@ -28,9 +28,9 @@ func OS() common.OSOperator {
 	case NestOS:
 		switch osinfo.ID {
 		case "NestOS For Container":
-			return &nestos.NestOS{}
+			return &nestos.NestOS4Container{}
 		case "NestOS For Virt":
-			return &openeuler.OpenEuler{}
+			return &nestos.NestOS4Virt{}
 		}
 	}
 	return nil
