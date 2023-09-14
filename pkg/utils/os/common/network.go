@@ -32,6 +32,20 @@ type NIC struct {
 	State  string
 }
 
+type InterfaceInfo struct {
+	Name       string
+	Type       string
+	State      string
+	Inet4      string
+	Netmask    string
+	GATEWAY    string
+	DNS1       string
+	DNS2       string
+	Inet6      string
+	IP6GATEWAY string
+	MACAddress string
+}
+
 type NetworkConfig struct {
 	NetworkType        string `json:"TYPE"` //以太网、无线网
 	ProxyMethod        string `json:"PROXY_METHOD"`
