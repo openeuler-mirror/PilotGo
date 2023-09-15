@@ -9,7 +9,7 @@
  * See the Mulan PSL v2 for more details.
  * Author: zhanghan
  * Date: 2021-05-18 09:08:08
- * LastEditTime: 2023-07-10 15:56:13
+ * LastEditTime: 2023-09-15 14:58:17
  * Description: 批次管理业务逻辑
  ******************************************************************************/
 package batch
@@ -22,7 +22,6 @@ import (
 
 	scommon "gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"github.com/pkg/errors"
-	"github.com/sourcegraph/conc/iter"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
@@ -200,14 +199,20 @@ func GetMachines(b *scommon.Batch) []string {
 	return []string{}
 }
 
-type R any
+type R interface{}
 
 func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []R {
 	uuids := GetMachines(b)
-	mapper := iter.Mapper[string, R]{}
 
-	result := mapper.Map(uuids, func(v *string) R {
-		return f(*v)
-	})
+	result := []R{}
+	for _, uuid := range uuids {
+		r := f(uuid)
+		result = append(result, r)
+	}
+
+	// mapper := iter.Mapper[string, R]{}
+	// result := mapper.Map(uuids, func(v *string) R {
+	// 	return f(*v)
+	// })
 	return result
 }
