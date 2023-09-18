@@ -39,6 +39,7 @@ type InterfaceInfo struct {
 	Inet4      string
 	Netmask    string
 	GATEWAY    string
+	BootProto  string
 	DNS1       string
 	DNS2       string
 	Inet6      string
