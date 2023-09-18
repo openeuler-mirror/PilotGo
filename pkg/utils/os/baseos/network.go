@@ -224,26 +224,19 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 	exitc, message, stde, err := utils.RunCommand("nmcli d show")
 	if exitc == 0 && message != "" && stde == "" && err == nil {
 		interfaces := parseInterfaces(message)
-		netPath, err := utils.GetFiles(global.NetWorkPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get network configuration source file: %s", err)
-		}
-		if len(netPath) == 0 {
-			network.BootProto = "dhcp"
-		} else {
-			var filename string
-			for _, n := range netPath {
-				if ok := strings.Contains(n, "ifcfg-e"); !ok {
-					continue
-				}
-				filename = n
+		for _, info := range interfaces {
+			name := info.Name
+			exitc, message, stde, err := utils.RunCommand("ip addr show " + name + " dynamic")
+			if exitc == 0 && message != "" && stde == "" && err == nil {
+				info.BootProto = "dhcp"
+				continue
 			}
-			exitc, result, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename + " | egrep 'BOOTPROTO=.*'")
-			if exitc == 0 && result != "" && stde == "" && err == nil {
-				network.BootProto = strings.Replace(strings.Split(result, "=")[1], "\n", "", -1)
+			exitc, message, stde, err = utils.RunCommand("ip addr show " + name + " permanent")
+			if exitc == 0 && message != "" && stde == "" && err == nil {
+				info.BootProto = "static"
 			}
 		}
-
+		network.BootProto = interfaces[0].BootProto
 		network.IPAddr = interfaces[0].Inet4
 		network.NetMask = interfaces[0].Netmask
 		network.GateWay = interfaces[0].GATEWAY

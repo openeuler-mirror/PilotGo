@@ -97,7 +97,7 @@ func LoginHandler(c *gin.Context) {
 	auditlog.Add(log_s)
 	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
-	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "roleId": roleId}, "登陆成功!")
+	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "roleId": roleId}, "登录成功!")
 }
 
 // 退出
