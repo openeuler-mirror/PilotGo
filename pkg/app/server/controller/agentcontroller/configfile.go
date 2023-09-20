@@ -29,7 +29,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
 )
 
-func ReadFile(c *gin.Context) {
+func ReadConfigFile(c *gin.Context) {
 	uuid := c.Query("uuid")
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
@@ -38,7 +38,7 @@ func ReadFile(c *gin.Context) {
 	}
 
 	filepath := c.Query("file")
-	result, Err, err := agent.ReadFile(filepath)
+	result, Err, err := agent.ReadConfigFile(filepath)
 	if err != nil {
 		response.Fail(c, nil, Err)
 		return
@@ -62,7 +62,7 @@ func GetAgentRepo(c *gin.Context) {
 	response.Success(c, repos, "获取到repo源")
 }
 
-func FileBroadcastToAgents(c *gin.Context) {
+func ConfigFileBroadcastToAgents(c *gin.Context) {
 	fd := &dao.Frontdata{}
 	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
@@ -103,7 +103,7 @@ func FileBroadcastToAgents(c *gin.Context) {
 			continue
 		}
 
-		_, Err, err := agent.UpdateFile(path, filename, text)
+		_, Err, err := agent.UpdateConfigFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
 			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, Err, log.Module, path+"/"+filename, http.StatusBadRequest)
 			auditlog.Add(log_s)

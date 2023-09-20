@@ -22,7 +22,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
 )
 
-type Files struct {
+type ConfigFiles struct {
 	ID              int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	FileName        string `json:"name"`
 	FilePath        string `json:"path"`
@@ -36,7 +36,7 @@ type Files struct {
 	File            string `gorm:"type:text" json:"file"`
 }
 
-type HistoryFiles struct {
+type HistoryConfigFiles struct {
 	ID          int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	FileID      int `json:"filePId"`
 	UpdatedAt   time.Time
@@ -47,18 +47,18 @@ type HistoryFiles struct {
 	File        string `gorm:"type:text" json:"file"`
 }
 
-type SearchFile struct {
+type SearchConfigFile struct {
 	Search string `json:"search"`
 }
 
-func (f *Files) AllFiles() (list *[]Files, tx *gorm.DB) {
-	list = &[]Files{}
+func (f *ConfigFiles) AllConfigFiles() (list *[]ConfigFiles, tx *gorm.DB) {
+	list = &[]ConfigFiles{}
 	tx = mysqlmanager.MySQL().Order("id desc").Find(&list)
 	return
 }
 
-func (f *SearchFile) FileSearch(search string) (list *[]Files, tx *gorm.DB) {
-	list = &[]Files{}
+func (f *SearchConfigFile) ConfigFileSearch(search string) (list *[]ConfigFiles, tx *gorm.DB) {
+	list = &[]ConfigFiles{}
 	tx = mysqlmanager.MySQL().Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
 	if len(*list) == 0 {
 		tx = mysqlmanager.MySQL().Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
@@ -66,26 +66,26 @@ func (f *SearchFile) FileSearch(search string) (list *[]Files, tx *gorm.DB) {
 	return
 }
 
-func (f *HistoryFiles) HistoryFiles(fileId int) (list *[]HistoryFiles, tx *gorm.DB) {
-	list = &[]HistoryFiles{}
+func (f *HistoryConfigFiles) HistoryConfigFiles(fileId int) (list *[]HistoryConfigFiles, tx *gorm.DB) {
+	list = &[]HistoryConfigFiles{}
 	tx = mysqlmanager.MySQL().Order("id desc").Where("file_id=?", fileId).Find(&list)
 	return
 }
 
 func IsExistId(id int) (bool, error) {
-	var file Files
+	var file ConfigFiles
 	err := mysqlmanager.MySQL().Where("id=?", id).Find(&file).Error
 	return file.ID != 0, err
 }
 
-func IsExistFile(filename string) (bool, error) {
-	var file Files
+func IsExistConfigFile(filename string) (bool, error) {
+	var file ConfigFiles
 	err := mysqlmanager.MySQL().Where("file_name = ?", filename).Find(&file).Error
 	return file.ID != 0, err
 }
 
-func IsExistFileLatest(fileId int) (bool, int, string, error) {
-	var files []HistoryFiles
+func IsExistConfigFileLatest(fileId int) (bool, int, string, error) {
+	var files []HistoryConfigFiles
 	err := mysqlmanager.MySQL().Order("id desc").Where("file_id = ?", fileId).Find(&files).Error
 	if err != nil {
 		return false, 0, "", err
@@ -98,13 +98,13 @@ func IsExistFileLatest(fileId int) (bool, int, string, error) {
 	return false, 0, "", nil
 }
 
-func SaveHistoryFile(id int) error {
-	var file Files
+func SaveHistoryConfigFile(id int) error {
+	var file ConfigFiles
 	err := mysqlmanager.MySQL().Where("id=?", id).Find(&file).Error
 	if err != nil {
 		return err
 	}
-	lastversion := HistoryFiles{
+	lastversion := HistoryConfigFiles{
 		FileID:      id,
 		UserUpdate:  file.UserUpdate,
 		UserDept:    file.UserDept,
@@ -115,13 +115,13 @@ func SaveHistoryFile(id int) error {
 	return mysqlmanager.MySQL().Save(&lastversion).Error
 }
 
-func SaveLatestFile(id int) error {
-	var file Files
+func SaveLatestConfigFile(id int) error {
+	var file ConfigFiles
 	err := mysqlmanager.MySQL().Where("id = ?", id).Find(&file).Error
 	if err != nil {
 		return err
 	}
-	lastversion := HistoryFiles{
+	lastversion := HistoryConfigFiles{
 		FileID:      id,
 		UserUpdate:  file.UserUpdate,
 		UserDept:    file.UserDept,
@@ -132,52 +132,52 @@ func SaveLatestFile(id int) error {
 	return mysqlmanager.MySQL().Save(&lastversion).Error
 }
 
-func UpdateFile(id int, f Files) error {
-	var file Files
+func UpdateConfigFile(id int, f ConfigFiles) error {
+	var file ConfigFiles
 	return mysqlmanager.MySQL().Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
-func UpdateLastFile(id int, f HistoryFiles) error {
-	var file HistoryFiles
+func UpdateLastConfigFile(id int, f HistoryConfigFiles) error {
+	var file HistoryConfigFiles
 	return mysqlmanager.MySQL().Model(&file).Where("id = ?", id).Updates(&f).Error
 }
 
 func RollBackFile(id int, text string) error {
-	var file Files
-	fd := Files{
+	var file ConfigFiles
+	fd := ConfigFiles{
 		File: text,
 	}
 	return mysqlmanager.MySQL().Model(&file).Where("id = ?", id).Updates(&fd).Error
 }
-func DeleteFile(id int) error {
-	var file Files
+func DeleteConfigFile(id int) error {
+	var file ConfigFiles
 	return mysqlmanager.MySQL().Where("id = ?", id).Unscoped().Delete(file).Error
 }
 
-func DeleteHistoryFile(filePId int) error {
-	var file HistoryFiles
+func DeleteHistoryConfigFile(filePId int) error {
+	var file HistoryConfigFiles
 	return mysqlmanager.MySQL().Where("file_id = ?", filePId).Unscoped().Delete(file).Error
 }
 
-func SaveFile(file Files) error {
+func SaveConfigFile(file ConfigFiles) error {
 	return mysqlmanager.MySQL().Save(&file).Error
 }
 
-func FileText(id int) (text string, err error) {
-	file := Files{}
+func ConfigFileText(id int) (text string, err error) {
+	file := ConfigFiles{}
 	err = mysqlmanager.MySQL().Where("id = ?", id).Find(&file).Error
 	return file.File, err
 }
 
-func LastFileText(id int) (text string, err error) {
-	file := HistoryFiles{}
+func LastConfigFileText(id int) (text string, err error) {
+	file := HistoryConfigFiles{}
 	err = mysqlmanager.MySQL().Where("id = ?", id).Find(&file).Error
 	return file.File, err
 }
 
-func FindLastVersionFile(uuid, filename string) ([]HistoryFiles, error) {
-	var files []HistoryFiles
-	var lastfiles []HistoryFiles
+func FindLastVersionConfigFile(uuid, filename string) ([]HistoryConfigFiles, error) {
+	var files []HistoryConfigFiles
+	var lastfiles []HistoryConfigFiles
 
 	err := mysqlmanager.MySQL().Where("uuid = ? ", uuid).Find(&files).Error
 	if err != nil {
