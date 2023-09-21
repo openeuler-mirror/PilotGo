@@ -1,5 +1,5 @@
-//go:build !production
-// +build !production
+//go:build production
+// +build production
 
 /******************************************************************************
  * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
@@ -18,6 +18,8 @@
 package resource
 
 import (
+	"embed"
+	"io/fs"
 	"net/http"
 	"strings"
 
@@ -25,15 +27,29 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
+//go:embed static index.html
+var StaticFiles embed.FS
+
 func StaticRouter(router *gin.Engine) {
-	router.Static("/static", "./frontend/dist/static")
-	router.StaticFile("/", "./frontend/dist/index.html")
+	sf, err := fs.Sub(StaticFiles, "static")
+	if err != nil {
+		logger.Error("failed to load frontend static files: %s", err.Error())
+		return
+	}
+
+	router.StaticFS("/static", http.FS(sf))
+	router.GET("/", func(c *gin.Context) {
+		c.FileFromFS("/", http.FS(StaticFiles))
+	})
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.FileFromFS("/favicon.ico", http.FS(StaticFiles))
+	})
 
 	// 解决页面刷新404的问题
 	router.NoRoute(func(c *gin.Context) {
 		logger.Debug("process noroute: %s", c.Request.URL.String())
 		if !strings.HasPrefix(c.Request.RequestURI, "/api/") && !strings.HasPrefix(c.Request.RequestURI, "/plugin/") {
-			c.File("./frontend/dist/index.html")
+			c.FileFromFS("/", http.FS(StaticFiles))
 			return
 		}
 		c.AbortWithStatus(http.StatusNotFound)
