@@ -12,7 +12,7 @@
  * LastEditTime: 2022-06-02 10:16:10
  * Description: agent config file service
  ******************************************************************************/
-package file
+package configmanage
 
 import (
 	"errors"
@@ -24,22 +24,22 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-type Files = dao.Files
-type SearchFile = dao.SearchFile
-type HistoryFiles = dao.HistoryFiles
+type ConfigFiles = dao.ConfigFiles
+type SearchConfigFile = dao.SearchConfigFile
+type HistoryConfigFiles = dao.HistoryConfigFiles
 
-type DeleteFiles struct {
+type DeleteConfigFiles struct {
 	FileIDs []int `json:"ids"`
 }
 
-type RollBackFiles struct {
+type RollBackConfigFiles struct {
 	HistoryFileID int    `json:"id"`
 	FileID        int    `json:"filePId"`
 	UserUpdate    string `json:"user"`
 	UserDept      string `json:"userDept"`
 }
 
-type FileBroadcast struct {
+type ConfigFileBroadcast struct {
 	BatchId  []int  `json:"batches"`
 	Path     string `json:"path"`
 	FileName string `json:"name"`
@@ -61,7 +61,7 @@ func NowTime() string {
 	return nowtime
 }
 
-func SaveToDatabase(file *Files) error {
+func SaveToDatabase(file *ConfigFiles) error {
 	filename := file.FileName
 	if len(filename) == 0 {
 		return errors.New("请输入配置文件名字")
@@ -71,7 +71,7 @@ func SaveToDatabase(file *Files) error {
 	if len(filepath) == 0 {
 		return errors.New("请输入下发文件路径")
 	}
-	temp, err := dao.IsExistFile(filename)
+	temp, err := dao.IsExistConfigFile(filename)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func SaveToDatabase(file *Files) error {
 		return errors.New("请重新检查文件内容")
 	}
 
-	fd := Files{
+	fd := ConfigFiles{
 		UserUpdate:      file.UserUpdate,
 		UserDept:        file.UserDept,
 		FileName:        filename,
@@ -107,25 +107,25 @@ func SaveToDatabase(file *Files) error {
 		TakeEffect:      file.TakeEffect,
 		File:            text,
 	}
-	return dao.SaveFile(fd)
+	return dao.SaveConfigFile(fd)
 }
 
-func Delete(fileIds []int) error {
+func DeleteConfig(fileIds []int) error {
 	for _, fileId := range fileIds {
-		err := dao.DeleteFile(fileId)
+		err := dao.DeleteConfigFile(fileId)
 		if err != nil {
 			logger.Error(err.Error())
 		}
-		err = dao.DeleteHistoryFile(fileId)
+		err = dao.DeleteHistoryConfigFile(fileId)
 		if err != nil {
 			logger.Error(err.Error())
 		}
 	}
 	return nil
 }
-func Update(file *Files) error {
+func UpdateConfig(file *ConfigFiles) error {
 	id := file.ID
-	err := dao.SaveHistoryFile(id)
+	err := dao.SaveHistoryConfigFile(id)
 	if err != nil {
 		return err
 	}
@@ -142,20 +142,20 @@ func Update(file *Files) error {
 	if !ExistIdBool {
 		return errors.New("id有误,请重新确认该文件是否存在")
 	}
-	if ok, lastfileId, fileName, err := dao.IsExistFileLatest(id); ok {
+	if ok, lastfileId, fileName, err := dao.IsExistConfigFileLatest(id); ok {
 		if err != nil {
 			return err
 		}
 		fname := strings.Split(fileName, "-")
-		f := dao.HistoryFiles{
+		f := dao.HistoryConfigFiles{
 			FileName: fname[0],
 		}
-		err = dao.UpdateLastFile(lastfileId, f)
+		err = dao.UpdateLastConfigFile(lastfileId, f)
 		if err != nil {
 			return err
 		}
 	}
-	f := Files{
+	f := ConfigFiles{
 		Type:            file.Type,
 		FileName:        filename,
 		FilePath:        file.FilePath,
@@ -166,31 +166,31 @@ func Update(file *Files) error {
 		TakeEffect:      file.TakeEffect,
 		File:            text,
 	}
-	return dao.UpdateFile(id, f)
+	return dao.UpdateConfigFile(id, f)
 }
 
-func LastFileRollBack(file *RollBackFiles) error {
+func LastConfigFileRollBack(file *RollBackConfigFiles) error {
 	lastfileId := file.HistoryFileID
 	fileId := file.FileID
 	user := file.UserUpdate
 	userDept := file.UserDept
-	lastfileText, err := dao.LastFileText(lastfileId)
+	lastfileText, err := dao.LastConfigFileText(lastfileId)
 	if err != nil {
 		return err
 	}
-	if ok, _, _, err := dao.IsExistFileLatest(fileId); !ok {
+	if ok, _, _, err := dao.IsExistConfigFileLatest(fileId); !ok {
 		if err != nil {
 			return err
 		}
-		err := dao.SaveLatestFile(fileId)
+		err := dao.SaveLatestConfigFile(fileId)
 		if err != nil {
 			return err
 		}
 	}
-	fd := Files{
+	fd := ConfigFiles{
 		UserUpdate: user,
 		UserDept:   userDept,
 		File:       lastfileText,
 	}
-	return dao.UpdateFile(fileId, fd)
+	return dao.UpdateConfigFile(fileId, fd)
 }

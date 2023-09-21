@@ -146,7 +146,7 @@ func registerAPIs(router *gin.Engine) {
 		}
 		{
 			configmanager := authenApi.Group("config")
-			configmanager.POST("/file_broadcast", middleware.NeedPermission("config_install", "button"), agentcontroller.FileBroadcastToAgents)
+			configmanager.POST("/file_broadcast", middleware.NeedPermission("config_install", "button"), agentcontroller.ConfigFileBroadcastToAgents)
 		}
 	}
 
@@ -250,14 +250,20 @@ func registerAPIs(router *gin.Engine) {
 
 	configmanager := api.Group("config") // 配置管理
 	{
-		configmanager.GET("/read_file", agentcontroller.ReadFile)
-		configmanager.POST("/fileSaveAdd", controller.SaveFileToDatabaseHandler)
-		configmanager.GET("/file_all", controller.AllFiles)
-		configmanager.POST("/file_search", controller.FileSearchHandler)
-		configmanager.POST("/file_update", controller.UpdateFileHandler)
-		configmanager.POST("/file_delete", controller.DeleteFileHandler)
-		configmanager.GET("/lastfile_all", controller.HistoryFilesHandler)
-		configmanager.POST("/lastfile_rollback", controller.LastFileRollBackHandler)
+		configmanager.GET("/read_file", agentcontroller.ReadConfigFile)
+		configmanager.POST("/fileSaveAdd", controller.SaveConfigFileToDatabaseHandler)
+		configmanager.GET("/file_all", controller.AllConfigFiles)
+		configmanager.POST("/file_search", controller.ConfigFileSearchHandler)
+		configmanager.POST("/file_update", controller.UpdateConfigFileHandler)
+		configmanager.POST("/file_delete", controller.DeleteConfigFileHandler)
+		configmanager.GET("/lastfile_all", controller.HistoryConfigFilesHandler)
+		configmanager.POST("/lastfile_rollback", controller.LastConfigFileRollBackHandler)
+	}
+
+	fileservive := api.Group("") //文件服务
+	{
+		fileservive.POST("/upload", controller.Upload)
+		fileservive.GET("/download/:filename", controller.Download)
 	}
 
 	userLog := api.Group("log") // 日志管理
