@@ -59,7 +59,7 @@ func AgentOverviewHandler(c *gin.Context) {
 	}
 
 	immutable := false
-	if info.SysInfo.Platform == "NestOS For Container" {
+	if info.SysInfo.Platform == "nestos-for-container" {
 		immutable = true
 	}
 
