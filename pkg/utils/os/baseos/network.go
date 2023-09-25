@@ -224,16 +224,13 @@ func (b *BaseOS) GetNetworkConnInfo() (*common.NetworkConfig, error) {
 	exitc, message, stde, err := utils.RunCommand("nmcli d show")
 	if exitc == 0 && message != "" && stde == "" && err == nil {
 		interfaces := parseInterfaces(message)
-		for _, info := range interfaces {
+		for i, info := range interfaces {
 			name := info.Name
 			exitc, message, stde, err := utils.RunCommand("ip addr show " + name + " dynamic")
 			if exitc == 0 && message != "" && stde == "" && err == nil {
-				info.BootProto = "dhcp"
-				continue
-			}
-			exitc, message, stde, err = utils.RunCommand("ip addr show " + name + " permanent")
-			if exitc == 0 && message != "" && stde == "" && err == nil {
-				info.BootProto = "static"
+				interfaces[i].BootProto = "dhcp"
+			} else {
+				interfaces[i].BootProto = "static"
 			}
 		}
 		network.BootProto = interfaces[0].BootProto
