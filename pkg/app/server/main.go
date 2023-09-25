@@ -30,7 +30,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-const config_file = "./config_server.yaml"
+const config_file = "/etc/PilotGo/server/config_server.yaml"
 
 func main() {
 	err := config.Init(config_file)

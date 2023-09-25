@@ -7,8 +7,7 @@ After=network-online.target
 Type=simple
 Restart=always
 RestartSec=3s
-WorkingDirectory=/opt/PilotGo/server
-ExecStart=/opt/PilotGo/server/PilotGo-server --config.file=/opt/PilotGo/server/config_server.yaml
+ExecStart=/usr/bin/PilotGo-server --config.file=/etc/PilotGo/server/config_server.yaml
 
 [Install]
 WantedBy=multi-user.target
