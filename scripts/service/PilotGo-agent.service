@@ -7,8 +7,7 @@ After=network-online.target
 Type=simple
 Restart=always
 RestartSec=3s
-WorkingDirectory=/opt/PilotGo/agent
-ExecStart=/opt/PilotGo/agent/PilotGo-agent --config.file=/opt/PilotGo/agent/config_agent.yaml
+ExecStart=/usr/bin/PilotGo-agent --config.file=/etc/PilotGo/agent/config_agent.yaml
 
 [Install]
 WantedBy=multi-user.target

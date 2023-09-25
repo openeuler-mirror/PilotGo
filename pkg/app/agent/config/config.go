@@ -29,7 +29,7 @@ type AgentConfig struct {
 	Logopts logger.LogOpts `yaml:"log"`
 }
 
-const config_file = "./config_agent.yaml"
+const config_file = "/etc/PilotGo/agent/config_agent.yaml"
 
 var global_config AgentConfig
 

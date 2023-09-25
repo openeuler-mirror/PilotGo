@@ -24,7 +24,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-const LocalStorageFile = "./.pilotgo-agent.data"
+const LocalStorageFile = "/etc/PilotGo/agent/.pilotgo-agent.data"
 
 type localData struct {
 	AgentUUID string `json:"agent_uuid"`
