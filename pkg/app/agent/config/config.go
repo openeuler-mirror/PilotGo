@@ -16,6 +16,8 @@
 package config
 
 import (
+	"flag"
+
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
@@ -29,12 +31,14 @@ type AgentConfig struct {
 	Logopts logger.LogOpts `yaml:"log"`
 }
 
-const config_file = "/etc/PilotGo/agent/config_agent.yaml"
+var Config_file string
 
 var global_config AgentConfig
 
 func Init() error {
-	return utils.Load(config_file, &global_config)
+	flag.StringVar(&Config_file, "conf", "./config_agent.yaml", "pilotgo-agent configuration file")
+	flag.Parse()
+	return utils.Load(Config_file, &global_config)
 }
 
 func Config() *AgentConfig {

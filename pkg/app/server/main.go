@@ -15,6 +15,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -30,9 +31,11 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 )
 
-const config_file = "/etc/PilotGo/server/config_server.yaml"
+var config_file string
 
 func main() {
+	flag.StringVar(&config_file, "conf", "./config_server.yaml", "pilotgo-server configuration file")
+	flag.Parse()
 	err := config.Init(config_file)
 	if err != nil {
 		fmt.Println("failed to load configure, exit..", err)
