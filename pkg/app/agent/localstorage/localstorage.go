@@ -17,6 +17,7 @@ package localstorage
 
 import (
 	"encoding/json"
+	"flag"
 	"sync"
 
 	"github.com/google/uuid"
@@ -24,17 +25,18 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 )
 
-const LocalStorageFile = "/etc/PilotGo/agent/.pilotgo-agent.data"
-
 type localData struct {
 	AgentUUID string `json:"agent_uuid"`
 }
 
 var globalLocalData *localData
 var globalLock sync.Mutex
+var LocalStorageFile string
 
 // init local storage, if file not found, then init new one
 func Init() error {
+	flag.StringVar(&LocalStorageFile, "uuid", "./.pilotgo-agent.data", "pilotgo-agent uuid data")
+	flag.Parse()
 	if fok, _ := utils.IsFileExist(LocalStorageFile); !fok {
 		if err := reset(); err != nil {
 			logger.Error("init local storage failed:%s", err.Error())
