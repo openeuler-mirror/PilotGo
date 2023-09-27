@@ -58,11 +58,6 @@ func AgentOverviewHandler(c *gin.Context) {
 		})
 	}
 
-	immutable := false
-	if info.SysInfo.Platform == "nestos-for-container" {
-		immutable = true
-	}
-
 	result := struct {
 		IP              string      `json:"ip"`
 		Department      string      `json:"department"`
@@ -88,7 +83,7 @@ func AgentOverviewHandler(c *gin.Context) {
 		ModelName:       info.CpuInfo.ModelName,
 		MemoryTotal:     info.MemoryInfo.MemTotal,
 		DiskUsage:       dus,
-		Immutable:       immutable,
+		Immutable:       info.IsImmutable,
 	}
 
 	response.Success(c, result, "Success")

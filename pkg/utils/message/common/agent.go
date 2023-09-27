@@ -6,9 +6,10 @@ import (
 )
 
 type AgentOverview struct {
-	IP         string `mapstructure:"IP"`
-	SysInfo    *ocommon.SystemInfo
-	DiskUsage  []ocommon.DiskUsageINfo
-	MemoryInfo *ocommon.MemoryConfig
-	CpuInfo    *ocommon.CPUInfo
+	IP          string `mapstructure:"IP"`
+	SysInfo     *ocommon.SystemInfo
+	DiskUsage   []ocommon.DiskUsageINfo
+	MemoryInfo  *ocommon.MemoryConfig
+	CpuInfo     *ocommon.CPUInfo
+	IsImmutable bool
 }

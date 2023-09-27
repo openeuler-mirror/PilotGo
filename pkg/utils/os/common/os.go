@@ -19,11 +19,11 @@ func InitOSName() (osinfo OSInfo, err error) {
 	}
 	name := strings.Split(contents, " ")[0]
 	switch name {
-	case "NestOS_For_Container":
+	case "NestOS-For-Container":
 		osinfo.OSName = "NestOS"
 		osinfo.ID = "NestOS For Container"
 		return osinfo, nil
-	case "NestOS_For_Virt":
+	case "NestOS-For-Virt":
 		osinfo.OSName = "NestOS"
 		osinfo.ID = "NestOS For Virt"
 		return osinfo, nil
