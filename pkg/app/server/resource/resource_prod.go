@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 //go:embed static index.html

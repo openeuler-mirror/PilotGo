@@ -19,7 +19,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	machineservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/machine"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func MachineInfoHandler(c *gin.Context) {

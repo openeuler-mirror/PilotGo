@@ -3,7 +3,7 @@ package websocket
 import (
 	"sync"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 var (

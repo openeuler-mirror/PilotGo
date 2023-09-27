@@ -17,8 +17,8 @@ package config
 import (
 	"time"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type HttpServer struct {

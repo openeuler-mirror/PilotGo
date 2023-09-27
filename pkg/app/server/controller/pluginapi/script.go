@@ -5,13 +5,13 @@ package pluginapi
 import (
 	"fmt"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/plugin/client"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 // 检查plugin接口调用权限

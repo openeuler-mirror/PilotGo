@@ -9,12 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/plugin/client"
 )
 
 const (

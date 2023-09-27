@@ -20,12 +20,12 @@ import (
 	"strconv"
 	"strings"
 
-	scommon "gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"github.com/pkg/errors"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	scommon "openeuler.org/PilotGo/PilotGo/sdk/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type CreateBatchParam struct {

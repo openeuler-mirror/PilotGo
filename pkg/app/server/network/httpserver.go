@@ -26,7 +26,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/middleware"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/network/websocket"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/resource"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 func HttpServerInit(conf *sconfig.HttpServer) error {

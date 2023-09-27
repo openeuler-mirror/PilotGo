@@ -6,9 +6,9 @@ import (
 	"os/user"
 	"strings"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 func handleErr(err error) {

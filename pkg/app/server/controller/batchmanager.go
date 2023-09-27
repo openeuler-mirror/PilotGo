@@ -11,7 +11,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func CreateBatchHandler(c *gin.Context) {

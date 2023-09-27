@@ -27,8 +27,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/register"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 func main() {

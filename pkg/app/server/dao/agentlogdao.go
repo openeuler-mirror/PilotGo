@@ -19,7 +19,7 @@ import (
 
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/mysqlmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type Frontdata struct {

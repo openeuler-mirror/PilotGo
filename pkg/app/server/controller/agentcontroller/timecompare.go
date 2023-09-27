@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func CompareTimeHandler(c *gin.Context) {

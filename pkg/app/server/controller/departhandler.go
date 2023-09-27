@@ -21,7 +21,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/depart"
 	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 // 获取部门下所有机器列表

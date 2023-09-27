@@ -18,8 +18,8 @@ package config
 import (
 	"flag"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type Server struct {

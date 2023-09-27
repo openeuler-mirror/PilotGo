@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/mitchellh/mapstructure"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 const (

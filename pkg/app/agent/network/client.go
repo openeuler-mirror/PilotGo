@@ -18,9 +18,9 @@ import (
 	"net"
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	pnet "openeuler.org/PilotGo/PilotGo/pkg/utils/message/net"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type AgentMessageHandler func(*SocketClient, *protocol.Message) error

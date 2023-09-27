@@ -23,7 +23,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/baseos"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func NetTCPHandler(c *gin.Context) {

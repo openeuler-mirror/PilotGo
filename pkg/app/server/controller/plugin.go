@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 // 查询插件清单

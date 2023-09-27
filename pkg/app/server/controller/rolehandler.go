@@ -23,7 +23,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
 	roleservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/role"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 // 获取登录用户权限

@@ -28,7 +28,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/plugin"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/dbmanager/redismanager"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 var config_file string

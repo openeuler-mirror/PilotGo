@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 // 远程在agent上运行shell命令
