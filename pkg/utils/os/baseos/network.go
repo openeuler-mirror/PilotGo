@@ -25,9 +25,9 @@ import (
 	gnet "github.com/shirou/gopsutil/net"
 	aconfig "openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 // 获取当前TCP网络连接信息

@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 // 获取当前用户信息

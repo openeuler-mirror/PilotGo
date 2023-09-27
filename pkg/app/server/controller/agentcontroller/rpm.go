@@ -24,8 +24,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 type RPMS struct {

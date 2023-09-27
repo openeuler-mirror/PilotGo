@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	mc "openeuler.org/PilotGo/PilotGo/pkg/utils/message/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
-	mc "openeuler.org/PilotGo/PilotGo/pkg/utils/message/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 // 远程获取agent端的主机的概览信息

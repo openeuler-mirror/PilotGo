@@ -27,8 +27,8 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/auditlog"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	userservice "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func GetRoleListHandler(c *gin.Context) {

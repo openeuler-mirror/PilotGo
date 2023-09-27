@@ -7,9 +7,9 @@ import (
 
 	"github.com/shirou/gopsutil/host"
 	aconfig "openeuler.org/PilotGo/PilotGo/pkg/app/agent/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 func (b *BaseOS) GetHostInfo() (*common.SystemInfo, error) {

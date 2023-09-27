@@ -20,7 +20,7 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type SocketServer struct {

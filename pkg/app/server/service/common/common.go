@@ -22,7 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/dao"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type PaginationQ struct {

@@ -22,7 +22,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/common"
 	config "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/configmanage"
 	"openeuler.org/PilotGo/PilotGo/pkg/global"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func SaveConfigFileToDatabaseHandler(c *gin.Context) {

@@ -3,7 +3,7 @@ package eventbus
 import (
 	"sync"
 
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 type Listener struct {
@@ -57,7 +57,7 @@ func (e *EventBus) RemoveListener(l *Listener) {
 	defer e.Unlock()
 
 	for index, v := range e.listeners {
-		if v.Name == l.Name && v.URL == v.URL {
+		if v.Name == l.Name && v.URL == l.URL {
 			e.listeners = append(e.listeners[:index], e.listeners[index+1:]...)
 		}
 	}

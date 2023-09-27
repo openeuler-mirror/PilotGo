@@ -23,7 +23,7 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	sconfig "openeuler.org/PilotGo/PilotGo/pkg/app/server/config"
 	suser "openeuler.org/PilotGo/PilotGo/pkg/app/server/service/user"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 var G_Enfocer *casbin.Enforcer

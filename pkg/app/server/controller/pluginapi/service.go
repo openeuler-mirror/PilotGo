@@ -3,11 +3,11 @@ package pluginapi
 import (
 	"github.com/gin-gonic/gin"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func Service(c *gin.Context) {

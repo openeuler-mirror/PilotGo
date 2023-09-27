@@ -1,11 +1,11 @@
 package os
 
 import (
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/kylin"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/nestos"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/openeuler"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 const (

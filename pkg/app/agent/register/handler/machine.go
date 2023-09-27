@@ -6,11 +6,11 @@ import (
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/global"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/localstorage"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/agent/network"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	mc "openeuler.org/PilotGo/PilotGo/pkg/utils/message/common"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/message/protocol"
 	uos "openeuler.org/PilotGo/PilotGo/pkg/utils/os"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/os/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
 )
 
 func OSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {

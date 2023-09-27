@@ -3,11 +3,11 @@
 package pluginapi
 
 import (
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/eventbus"
-	"openeuler.org/PilotGo/PilotGo/pkg/logger"
-	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
+	"openeuler.org/PilotGo/PilotGo/sdk/logger"
+	"openeuler.org/PilotGo/PilotGo/sdk/plugin/client"
+	"openeuler.org/PilotGo/PilotGo/sdk/response"
 )
 
 func RegisterListenerHandler(c *gin.Context) {

@@ -1,0 +1,22 @@
+package client
+
+import (
+	"encoding/json"
+
+	"openeuler.org/PilotGo/PilotGo/sdk/common"
+	"openeuler.org/PilotGo/PilotGo/sdk/utils/httputils"
+)
+
+func (c *Client) MachineList() ([]*common.MachineNode, error) {
+	url := c.Server + "/api/v1/pluginapi/machine_list"
+	r, err := httputils.Get(url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []*common.MachineNode{}
+	if err := json.Unmarshal(r.Body, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
