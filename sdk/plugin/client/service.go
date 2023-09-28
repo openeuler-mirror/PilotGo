@@ -3,8 +3,8 @@ package client
 import (
 	"encoding/json"
 
-	"openeuler.org/PilotGo/PilotGo/sdk/common"
-	"openeuler.org/PilotGo/PilotGo/sdk/utils/httputils"
+	"gitee.com/PilotGo/PilotGo/sdk/common"
+	"gitee.com/PilotGo/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*common.ServiceResult, error) {

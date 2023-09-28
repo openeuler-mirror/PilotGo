@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 
-	"openeuler.org/PilotGo/PilotGo/sdk/utils/httputils"
+	"gitee.com/PilotGo/PilotGo/sdk/utils/httputils"
 )
 
 type PluginInfo struct {
