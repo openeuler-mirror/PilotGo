@@ -43,7 +43,7 @@ type ServiceInfo struct {
 	ServiceExectStart      string //实际执行daemon的指令或脚本程序
 	ServiceActiveStatus    string
 	ServiceLoadedStatus    string
-	ServiceTime            string //开启时间
+	StartTime              string
 }
 
 type ServiceStruct struct {

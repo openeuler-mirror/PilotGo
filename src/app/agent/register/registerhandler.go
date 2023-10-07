@@ -80,7 +80,6 @@ func RegitsterHandler(c *network.SocketClient) {
 
 	c.BindHandler(protocol.ServiceList, handler.ServiceListHandler)
 	c.BindHandler(protocol.GetService, handler.GetServiceHandler)
-	c.BindHandler(protocol.ServiceStatus, handler.ServiceStatusHandler)
 	c.BindHandler(protocol.ServiceRestart, handler.ServiceRestartHandler)
 	c.BindHandler(protocol.ServiceStart, handler.ServiceStartHandler)
 	c.BindHandler(protocol.ServiceStop, handler.ServiceStopHandler)

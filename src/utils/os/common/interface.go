@@ -39,7 +39,6 @@ type DateTimeOperator interface {
 type ServiceOperator interface {
 	GetServiceList() ([]ListService, error)
 	GetService(service string) (*ServiceInfo, error)
-	GetServiceStatus(string) (string, error)
 	RestartService(string) error
 	StartService(string) error
 	StopService(string) error
