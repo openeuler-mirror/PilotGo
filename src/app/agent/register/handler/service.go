@@ -21,6 +21,20 @@ func ServiceListHandler(c *network.SocketClient, msg *protocol.Message) error {
 	return c.Send(resp_msg)
 }
 
+func GetServiceHandler(c *network.SocketClient, msg *protocol.Message) error {
+	logger.Debug("process agent info command:%s", msg.String())
+	service := msg.Data.(string)
+	serviceInfo, _ := uos.OS().GetService(service)
+
+	resp_msg := &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   serviceInfo,
+	}
+	return c.Send(resp_msg)
+}
+
 func ServiceStatusHandler(c *network.SocketClient, msg *protocol.Message) error {
 	logger.Debug("process agent info command:%s", msg.String())
 	service := msg.Data.(string)

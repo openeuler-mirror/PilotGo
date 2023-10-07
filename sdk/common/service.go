@@ -25,11 +25,9 @@ const (
 )
 
 type ServiceResult struct {
-	MachineUUID         string
-	MachineIP           string
-	ServiceActiveStatus string
-	ServiceLoadedStatus string
-	ServiceSample       ServiceInfo
+	MachineUUID   string
+	MachineIP     string
+	ServiceSample ServiceInfo
 }
 
 type ServiceInfo struct {
@@ -43,6 +41,9 @@ type ServiceInfo struct {
 	ServiceWants           string //与requires相反
 	ServiceEnvironmentFile string //启动脚本的环境配置文件
 	ServiceExectStart      string //实际执行daemon的指令或脚本程序
+	ServiceActiveStatus    string
+	ServiceLoadedStatus    string
+	ServiceTime            string //开启时间
 }
 
 type ServiceStruct struct {

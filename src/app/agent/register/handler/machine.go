@@ -133,6 +133,10 @@ func AgentOverviewHandler(c *network.SocketClient, msg *protocol.Message) error 
 		CpuInfo:    cpuinfo,
 	}
 
+	if sysinfo.Platform == "nestos-for-container" {
+		result.IsImmutable = true
+	}
+
 	resp_msg = &protocol.Message{
 		UUID:   msg.UUID,
 		Type:   msg.Type,
