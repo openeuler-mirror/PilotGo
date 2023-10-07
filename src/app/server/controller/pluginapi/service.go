@@ -36,7 +36,7 @@ func Service(c *gin.Context) {
 				ServiceExectStart:   serviceInfo.ServiceExectStart,
 				ServiceActiveStatus: serviceInfo.ServiceActiveStatus,
 				ServiceLoadedStatus: serviceInfo.ServiceLoadedStatus,
-				ServiceTime:         serviceInfo.ServiceTime,
+				StartTime:           serviceInfo.ServiceTime,
 			}
 			re := common.ServiceResult{
 				MachineUUID:   uuid,
@@ -83,7 +83,7 @@ func StartService(c *gin.Context) {
 				ServiceExectStart:   serviceInfo.ServiceExectStart,
 				ServiceActiveStatus: serviceInfo.ServiceActiveStatus,
 				ServiceLoadedStatus: serviceInfo.ServiceLoadedStatus,
-				ServiceTime:         serviceInfo.ServiceTime,
+				StartTime:           serviceInfo.ServiceTime,
 			}
 			re := common.ServiceResult{
 				MachineUUID:   uuid,
@@ -130,7 +130,7 @@ func StopService(c *gin.Context) {
 				ServiceExectStart:   serviceInfo.ServiceExectStart,
 				ServiceActiveStatus: serviceInfo.ServiceActiveStatus,
 				ServiceLoadedStatus: serviceInfo.ServiceLoadedStatus,
-				ServiceTime:         serviceInfo.ServiceTime,
+				StartTime:           serviceInfo.ServiceTime,
 			}
 			re := common.ServiceResult{
 				MachineUUID:   uuid,

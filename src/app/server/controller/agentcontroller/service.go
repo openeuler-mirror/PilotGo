@@ -59,12 +59,12 @@ func ServiceStatusHandler(c *gin.Context) {
 		return
 	}
 
-	service_status, err := agent.ServiceStatus(service)
+	serviceInfo, err := agent.GetService(service)
 	if err != nil {
 		response.Fail(c, nil, "获取服务状态失败!")
 		return
 	}
-	response.Success(c, gin.H{"service_status": service_status}, "Success")
+	response.Success(c, gin.H{"service_status": serviceInfo.ServiceActiveStatus}, "Success")
 }
 
 func ServiceStartHandler(c *gin.Context) {

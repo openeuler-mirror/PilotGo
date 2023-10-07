@@ -64,28 +64,6 @@ func (a *Agent) GetService(service string) (*common.ServiceInfo, error) {
 	return serviceInfo, nil
 }
 
-// 查看某个服务的状态
-func (a *Agent) ServiceStatus(service string) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.ServiceStatus,
-		Data: service,
-	}
-
-	resp_message, err := a.sendMessage(msg, true, 0)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
-}
-
 // 重启服务
 func (a *Agent) ServiceRestart(service string) (string, string, error) {
 	msg := &protocol.Message{
