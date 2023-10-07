@@ -71,7 +71,7 @@ func (b *BaseOS) GetServiceStatus(service string) (string, error) {
 	}
 }
 
-func (b *BaseOS) GetService(service string) *common.ServiceInfo {
+func (b *BaseOS) GetService(service string) (*common.ServiceInfo, error) {
 	var build strings.Builder
 	build.WriteString("systemctl status ")
 	build.WriteString(service)
@@ -79,13 +79,13 @@ func (b *BaseOS) GetService(service string) *common.ServiceInfo {
 	exitc, tmp, stde, err := utils.RunCommand(command)
 	if err != nil {
 		logger.Error("failed to get service status: %d, %s, %s, %v", exitc, tmp, stde, err)
+		return nil, err
 	}
 	if stde != "" {
 		logger.Error(stde)
-		return nil
 	}
 	serviceInfo := parseServiceInfo(tmp)
-	return serviceInfo
+	return serviceInfo, nil
 }
 
 func parseServiceInfo(tmp string) *common.ServiceInfo {

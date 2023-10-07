@@ -23,18 +23,25 @@ func Service(c *gin.Context) {
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			//修改底层方法传回结构体
-			service_status, err := agent.ServiceStatus(d.ServiceName)
+			serviceInfo, err := agent.GetService(d.ServiceName)
 			if err != nil {
 				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
-			logger.Debug("获取服务状态结果:%v", service_status)
+			logger.Debug("获取服务状态结果:%v", serviceInfo)
+			serviceSample := common.ServiceInfo{
+				ServiceName:         serviceInfo.ServiceName,
+				UnitName:            serviceInfo.UnitName,
+				UnitType:            serviceInfo.UnitType,
+				ServicePath:         serviceInfo.ServicePath,
+				ServiceExectStart:   serviceInfo.ServiceExectStart,
+				ServiceActiveStatus: serviceInfo.ServiceActiveStatus,
+				ServiceLoadedStatus: serviceInfo.ServiceLoadedStatus,
+				ServiceTime:         serviceInfo.ServiceTime,
+			}
 			re := common.ServiceResult{
-				MachineUUID:         uuid,
-				MachineIP:           agent.IP,
-				ServiceActiveStatus: service_status,
-				ServiceLoadedStatus: service_status,
-				//ServiceSample :
+				MachineUUID:   uuid,
+				MachineIP:     agent.IP,
+				ServiceSample: serviceSample,
 			}
 			return re
 		}
@@ -58,18 +65,30 @@ func StartService(c *gin.Context) {
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			//修改底层方法传回结构体
 			service_status, Err, err := agent.ServiceStart(d.ServiceName)
 			if len(Err) != 0 || err != nil {
 				logger.Error("开启服务失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("开启服务结果:%v", service_status)
+			serviceInfo, err := agent.GetService(d.ServiceName)
+			if err != nil {
+				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
+			}
+			logger.Debug("获取服务状态结果:%v", serviceInfo)
+			serviceSample := common.ServiceInfo{
+				ServiceName:         serviceInfo.ServiceName,
+				UnitName:            serviceInfo.UnitName,
+				UnitType:            serviceInfo.UnitType,
+				ServicePath:         serviceInfo.ServicePath,
+				ServiceExectStart:   serviceInfo.ServiceExectStart,
+				ServiceActiveStatus: serviceInfo.ServiceActiveStatus,
+				ServiceLoadedStatus: serviceInfo.ServiceLoadedStatus,
+				ServiceTime:         serviceInfo.ServiceTime,
+			}
 			re := common.ServiceResult{
-				MachineUUID: uuid,
-				MachineIP:   agent.IP,
-				//ServiceActiveStatus: service_status,
-				//ServiceLoadedStatus: service_status,
-				//ServiceSample :
+				MachineUUID:   uuid,
+				MachineIP:     agent.IP,
+				ServiceSample: serviceSample,
 			}
 			return re
 		}
@@ -93,18 +112,30 @@ func StopService(c *gin.Context) {
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			//修改底层方法传回结构体
 			service_status, Err, err := agent.ServiceStop(d.ServiceName)
 			if len(Err) != 0 || err != nil {
 				logger.Error("停止服务失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("停止服务结果:%v", service_status)
+			serviceInfo, err := agent.GetService(d.ServiceName)
+			if err != nil {
+				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
+			}
+			logger.Debug("获取服务状态结果:%v", serviceInfo)
+			serviceSample := common.ServiceInfo{
+				ServiceName:         serviceInfo.ServiceName,
+				UnitName:            serviceInfo.UnitName,
+				UnitType:            serviceInfo.UnitType,
+				ServicePath:         serviceInfo.ServicePath,
+				ServiceExectStart:   serviceInfo.ServiceExectStart,
+				ServiceActiveStatus: serviceInfo.ServiceActiveStatus,
+				ServiceLoadedStatus: serviceInfo.ServiceLoadedStatus,
+				ServiceTime:         serviceInfo.ServiceTime,
+			}
 			re := common.ServiceResult{
-				MachineUUID: uuid,
-				MachineIP:   agent.IP,
-				//ServiceActiveStatus: service_status,
-				//ServiceLoadedStatus: service_status,
-				//ServiceSample :
+				MachineUUID:   uuid,
+				MachineIP:     agent.IP,
+				ServiceSample: serviceSample,
 			}
 			return re
 		}

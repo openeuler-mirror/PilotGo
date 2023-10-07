@@ -149,6 +149,8 @@ const (
 	ConfigFileMonitor = 68
 	// 主机概览信息
 	AgentOverview = 69
+	//获取服务信息
+	GetService = 70
 )
 
 type Message struct {

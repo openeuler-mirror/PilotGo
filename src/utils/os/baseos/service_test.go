@@ -31,12 +31,13 @@ func TestGetServiceStatus(t *testing.T) {
 func TestGetService(t *testing.T) {
 	var osobj BaseOS
 	service := "mysqld"
-	tmp := osobj.GetService(service)
+	tmp, err := osobj.GetService(service)
 	fmt.Println(tmp)
 	if tmp == nil {
 		fmt.Println("service is nil")
 		return
 	}
+	assert.Nil(t, err)
 	assert.Equal(t, "mysqld", tmp.ServiceName)
 	assert.Equal(t, "mysqld.service", tmp.UnitName)
 	assert.Equal(t, common.ServiceUnit, tmp.UnitType)
