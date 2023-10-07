@@ -2,6 +2,7 @@ package os
 
 import (
 	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/PilotGo/PilotGo/utils/os/centos"
 	"gitee.com/PilotGo/PilotGo/utils/os/common"
 	"gitee.com/PilotGo/PilotGo/utils/os/kylin"
 	"gitee.com/PilotGo/PilotGo/utils/os/nestos"
@@ -12,6 +13,7 @@ const (
 	OpenEuler = "openEuler"
 	Kylin     = "kylin"
 	NestOS    = "NestOS"
+	CentOS    = "CentOS"
 )
 
 func OS() common.OSOperator {
@@ -32,6 +34,8 @@ func OS() common.OSOperator {
 		case "NestOS For Virt":
 			return &nestos.NestOS4Virt{}
 		}
+	case CentOS:
+		return &centos.CentOS{}
 	}
 	return nil
 }
