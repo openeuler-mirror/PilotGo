@@ -7,7 +7,7 @@ import (
 
 	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 const (
@@ -72,7 +72,7 @@ func (s *SessionManage) FindAndFlush(key string) bool {
 }
 
 func CreateSessionId() string {
-	return uuid.NewV4().String()
+	return uuid.New().String()
 }
 
 func checkOutSessionId(s *SessionManage) {
