@@ -27,7 +27,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
-	gnet "github.com/shirou/gopsutil/net"
+	gnet "github.com/shirou/gopsutil/v3/net"
 )
 
 // 获取当前TCP网络连接信息

@@ -7,7 +7,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/utils"
-	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v3/host"
 )
 
 // 形如	openssl-1:1.1.1f-4.oe1.x86_64
