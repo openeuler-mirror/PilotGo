@@ -17,11 +17,11 @@ package register
 import (
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/app/agent/network"
-	"gitee.com/PilotGo/PilotGo/app/agent/register/handler"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
-	uos "gitee.com/PilotGo/PilotGo/utils/os"
+	"gitee.com/openeuler/PilotGo/app/agent/network"
+	"gitee.com/openeuler/PilotGo/app/agent/register/handler"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
+	uos "gitee.com/openeuler/PilotGo/utils/os"
 	"github.com/google/uuid"
 )
 

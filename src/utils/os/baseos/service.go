@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 )
 
 // 获取服务列表

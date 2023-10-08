@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
 )
 
 type Script = dao.Script

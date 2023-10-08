@@ -3,7 +3,7 @@ package common
 import (
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils"
 )
 
 type OSInfo struct {

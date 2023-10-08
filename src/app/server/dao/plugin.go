@@ -14,7 +14,7 @@
  ******************************************************************************/
 package dao
 
-import "gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
+import "gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 
 type PluginModel struct {
 	ID          int    `gorm:"type:int"`

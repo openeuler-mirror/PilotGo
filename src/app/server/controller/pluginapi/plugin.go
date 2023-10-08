@@ -1,8 +1,8 @@
 package pluginapi
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/server/service/plugin"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

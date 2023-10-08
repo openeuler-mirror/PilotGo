@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/app/server/service/auditlog"
-	"gitee.com/PilotGo/PilotGo/app/server/service/batch"
-	"gitee.com/PilotGo/PilotGo/app/server/service/common"
-	"gitee.com/PilotGo/PilotGo/app/server/service/jwt"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	"gitee.com/openeuler/PilotGo/app/server/service/batch"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

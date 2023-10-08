@@ -3,14 +3,14 @@ package handler
 import (
 	"fmt"
 
-	"gitee.com/PilotGo/PilotGo/app/agent/global"
-	"gitee.com/PilotGo/PilotGo/app/agent/localstorage"
-	"gitee.com/PilotGo/PilotGo/app/agent/network"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	mc "gitee.com/PilotGo/PilotGo/utils/message/common"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
-	uos "gitee.com/PilotGo/PilotGo/utils/os"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/app/agent/global"
+	"gitee.com/openeuler/PilotGo/app/agent/localstorage"
+	"gitee.com/openeuler/PilotGo/app/agent/network"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	mc "gitee.com/openeuler/PilotGo/utils/message/common"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
+	uos "gitee.com/openeuler/PilotGo/utils/os"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 )
 
 func OSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {

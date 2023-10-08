@@ -1,7 +1,7 @@
 package kylin
 
 import (
-	"gitee.com/PilotGo/PilotGo/utils/os/baseos"
+	"gitee.com/openeuler/PilotGo/utils/os/baseos"
 )
 
 type Kylin struct {

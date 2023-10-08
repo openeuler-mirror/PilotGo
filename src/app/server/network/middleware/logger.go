@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 

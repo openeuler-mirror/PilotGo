@@ -1,8 +1,8 @@
 package controller
 
 import (
-	scriptservice "gitee.com/PilotGo/PilotGo/app/server/service/script"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	scriptservice "gitee.com/openeuler/PilotGo/app/server/service/script"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

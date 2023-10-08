@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gitee.com/PilotGo/PilotGo/sdk/utils/httputils"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 type Event struct {

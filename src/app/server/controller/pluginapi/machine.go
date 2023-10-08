@@ -1,11 +1,11 @@
 package pluginapi
 
 import (
-	"gitee.com/PilotGo/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"github.com/gin-gonic/gin"
 
-	machineservice "gitee.com/PilotGo/PilotGo/app/server/service/machine"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	machineservice "gitee.com/openeuler/PilotGo/app/server/service/machine"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 )
 
 func MachineList(c *gin.Context) {

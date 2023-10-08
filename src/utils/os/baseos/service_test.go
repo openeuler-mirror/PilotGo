@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,19 +13,6 @@ func TestGetServiceList(t *testing.T) {
 	tmp, err := osobj.GetServiceList()
 	assert.Nil(t, err)
 	assert.NotNil(t, tmp)
-}
-
-func TestGetServiceStatus(t *testing.T) {
-	var osobj BaseOS
-	service := "named.service"
-	tmp, err := osobj.GetServiceStatus(service)
-	switch tmp {
-	case "active", "inactive":
-		break
-	default:
-		assert.Nil(t, err)
-		assert.NotNil(t, tmp)
-	}
 }
 
 func TestGetService(t *testing.T) {
@@ -49,25 +36,25 @@ func TestGetService(t *testing.T) {
 func TestConfigService(t *testing.T) {
 	var osobj BaseOS
 	service := "named.service"
-	tmp, err := osobj.GetServiceStatus(service)
-	switch tmp {
+	tmp, err := osobj.GetService(service)
+	switch tmp.ServiceActiveStatus {
 	case "active", "inactive":
 		break
 	default:
 		assert.Nil(t, err)
 	}
-	if tmp == "inactive" {
+	if tmp.ServiceActiveStatus == "inactive" {
 		t.Run("test StartService", func(t *testing.T) {
 			assert.Nil(t, osobj.StartService(service))
-			status, err := osobj.GetServiceStatus(service)
+			status, err := osobj.GetService(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active", status)
+			assert.Equal(t, "active", status.ServiceActiveStatus)
 		})
 
 		t.Run("test StopService", func(t *testing.T) {
 			assert.Nil(t, osobj.StopService(service))
-			status, err := osobj.GetServiceStatus(service)
-			switch status {
+			status, err := osobj.GetService(service)
+			switch status.ServiceActiveStatus {
 			case "active", "inactive":
 				assert.Equal(t, "inactive", status)
 			default:
@@ -78,22 +65,22 @@ func TestConfigService(t *testing.T) {
 
 		t.Run("test RestartService", func(t *testing.T) {
 			assert.Nil(t, osobj.RestartService(service))
-			status, err := osobj.GetServiceStatus(service)
+			status, err := osobj.GetService(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active", status)
+			assert.Equal(t, "active", status.ServiceActiveStatus)
 		})
 	} else {
 		t.Run("test RestartService", func(t *testing.T) {
 			assert.Nil(t, osobj.RestartService(service))
-			status, err := osobj.GetServiceStatus(service)
+			status, err := osobj.GetService(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active", status)
+			assert.Equal(t, "active", status.ServiceActiveStatus)
 		})
 
 		t.Run("test StopService", func(t *testing.T) {
 			assert.Nil(t, osobj.StopService(service))
-			status, err := osobj.GetServiceStatus(service)
-			switch status {
+			status, err := osobj.GetService(service)
+			switch status.ServiceActiveStatus {
 			case "active", "inactive":
 				assert.Equal(t, "inactive", status)
 			default:
@@ -104,9 +91,9 @@ func TestConfigService(t *testing.T) {
 
 		t.Run("test StartService", func(t *testing.T) {
 			assert.Nil(t, osobj.StartService(service))
-			status, err := osobj.GetServiceStatus(service)
+			status, err := osobj.GetService(service)
 			assert.Nil(t, err)
-			assert.Equal(t, "active", status)
+			assert.Equal(t, "active", status.ServiceActiveStatus)
 		})
 	}
 

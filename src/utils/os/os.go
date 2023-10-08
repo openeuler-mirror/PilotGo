@@ -1,12 +1,12 @@
 package os
 
 import (
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils/os/centos"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
-	"gitee.com/PilotGo/PilotGo/utils/os/kylin"
-	"gitee.com/PilotGo/PilotGo/utils/os/nestos"
-	"gitee.com/PilotGo/PilotGo/utils/os/openeuler"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils/os/centos"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/utils/os/kylin"
+	"gitee.com/openeuler/PilotGo/utils/os/nestos"
+	"gitee.com/openeuler/PilotGo/utils/os/openeuler"
 )
 
 const (

@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 

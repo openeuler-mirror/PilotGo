@@ -18,8 +18,8 @@ package controller
 import (
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/app/server/network/websocket"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 

@@ -21,14 +21,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/app/server/network"
-	"gitee.com/PilotGo/PilotGo/app/server/network/websocket"
-	"gitee.com/PilotGo/PilotGo/app/server/service/auth"
-	"gitee.com/PilotGo/PilotGo/app/server/service/plugin"
-	"gitee.com/PilotGo/PilotGo/dbmanager"
-	"gitee.com/PilotGo/PilotGo/dbmanager/redismanager"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/network"
+	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
+	"gitee.com/openeuler/PilotGo/app/server/service/auth"
+	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
+	"gitee.com/openeuler/PilotGo/dbmanager"
+	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 var config_file string

@@ -19,7 +19,7 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils"
 	cron "github.com/robfig/cron/v3"
 )
 

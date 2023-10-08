@@ -17,7 +17,7 @@ package dao
 import (
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gorm.io/gorm"
 )
 

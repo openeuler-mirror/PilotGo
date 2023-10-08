@@ -15,10 +15,10 @@
 package controller
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/server/service/common"
-	machineservice "gitee.com/PilotGo/PilotGo/app/server/service/machine"
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	machineservice "gitee.com/openeuler/PilotGo/app/server/service/machine"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

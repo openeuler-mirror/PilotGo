@@ -2,7 +2,7 @@
 package common
 
 import (
-	ocommon "gitee.com/PilotGo/PilotGo/utils/os/common"
+	ocommon "gitee.com/openeuler/PilotGo/utils/os/common"
 )
 
 type AgentOverview struct {

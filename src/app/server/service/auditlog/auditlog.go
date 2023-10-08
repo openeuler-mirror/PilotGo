@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )

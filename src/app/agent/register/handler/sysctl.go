@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/agent/network"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
-	uos "gitee.com/PilotGo/PilotGo/utils/os"
+	"gitee.com/openeuler/PilotGo/app/agent/network"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
+	uos "gitee.com/openeuler/PilotGo/utils/os"
 )
 
 func SysctlInfoHandler(c *network.SocketClient, msg *protocol.Message) error {

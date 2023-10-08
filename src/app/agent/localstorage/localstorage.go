@@ -20,8 +20,8 @@ import (
 	"flag"
 	"sync"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/google/uuid"
 )
 

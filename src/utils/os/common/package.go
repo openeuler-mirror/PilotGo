@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/shirou/gopsutil/host"
 )
 

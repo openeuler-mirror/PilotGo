@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"gitee.com/PilotGo/PilotGo/sdk/common"
-	"gitee.com/PilotGo/PilotGo/sdk/utils/httputils"
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) ApplyConfig(batch *common.Batch, path, content string) error {

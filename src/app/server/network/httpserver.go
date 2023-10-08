@@ -18,14 +18,14 @@ import (
 	"net/http"
 	"strings"
 
-	sconfig "gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/app/server/controller"
-	"gitee.com/PilotGo/PilotGo/app/server/controller/agentcontroller"
-	"gitee.com/PilotGo/PilotGo/app/server/controller/pluginapi"
-	"gitee.com/PilotGo/PilotGo/app/server/network/middleware"
-	"gitee.com/PilotGo/PilotGo/app/server/network/websocket"
-	"gitee.com/PilotGo/PilotGo/app/server/resource"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/controller"
+	"gitee.com/openeuler/PilotGo/app/server/controller/agentcontroller"
+	"gitee.com/openeuler/PilotGo/app/server/controller/pluginapi"
+	"gitee.com/openeuler/PilotGo/app/server/network/middleware"
+	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
+	"gitee.com/openeuler/PilotGo/app/server/resource"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 

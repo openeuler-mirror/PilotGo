@@ -18,11 +18,11 @@ import (
 	"net/http"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/app/server/service/auditlog"
-	"gitee.com/PilotGo/PilotGo/app/server/service/jwt"
-	roleservice "gitee.com/PilotGo/PilotGo/app/server/service/role"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
+	roleservice "gitee.com/openeuler/PilotGo/app/server/service/role"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

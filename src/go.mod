@@ -1,4 +1,4 @@
-module gitee.com/PilotGo/PilotGo
+module gitee.com/openeuler/PilotGo
 
 go 1.17
 

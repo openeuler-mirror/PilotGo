@@ -7,10 +7,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"gitee.com/PilotGo/PilotGo/app/agent/network"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
+	"gitee.com/openeuler/PilotGo/app/agent/network"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 )
 
 func RunCommandHandler(c *network.SocketClient, msg *protocol.Message) error {

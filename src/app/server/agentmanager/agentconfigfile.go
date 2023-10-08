@@ -3,9 +3,9 @@ package agentmanager
 import (
 	"fmt"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 	"github.com/google/uuid"
 )
 

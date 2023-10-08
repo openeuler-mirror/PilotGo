@@ -20,8 +20,8 @@ import (
 	"context"
 	"sync"
 
-	Websocket "gitee.com/PilotGo/PilotGo/app/server/network/websocket"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	Websocket "gitee.com/openeuler/PilotGo/app/server/network/websocket"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )

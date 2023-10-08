@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 )
 
 type ConfigFile struct {
