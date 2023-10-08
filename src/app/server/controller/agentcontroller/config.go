@@ -1,9 +1,9 @@
 package agentcontroller
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/agent/global"
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/agent/global"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

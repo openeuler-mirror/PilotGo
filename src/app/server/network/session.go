@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	sconfig "gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	uuid "github.com/satori/go.uuid"
 )
 

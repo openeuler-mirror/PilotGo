@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

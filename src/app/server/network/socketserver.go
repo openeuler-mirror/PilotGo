@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"net"
 
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
-	sconfig "gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 type SocketServer struct {

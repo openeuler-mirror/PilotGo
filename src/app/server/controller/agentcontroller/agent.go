@@ -17,10 +17,10 @@ package agentcontroller
 import (
 	"net/http"
 
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

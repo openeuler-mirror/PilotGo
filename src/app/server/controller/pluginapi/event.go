@@ -3,10 +3,10 @@
 package pluginapi
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/server/service/eventbus"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/sdk/plugin/client"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

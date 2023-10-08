@@ -20,11 +20,11 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/app/server/service/common"
-	scommon "gitee.com/PilotGo/PilotGo/sdk/common"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	scommon "gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/pkg/errors"
 )
 

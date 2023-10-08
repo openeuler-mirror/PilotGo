@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"sync"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/mitchellh/mapstructure"
 )
 

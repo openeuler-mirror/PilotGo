@@ -18,11 +18,11 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
-	"gitee.com/PilotGo/PilotGo/utils/os/baseos"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/utils/os/baseos"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 	"github.com/gin-gonic/gin"
 )
 

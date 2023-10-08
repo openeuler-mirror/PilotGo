@@ -17,10 +17,10 @@ package controller
 import (
 	"strconv"
 
-	"gitee.com/PilotGo/PilotGo/app/server/service/auditlog"
-	"gitee.com/PilotGo/PilotGo/app/server/service/depart"
-	userservice "gitee.com/PilotGo/PilotGo/app/server/service/user"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	"gitee.com/openeuler/PilotGo/app/server/service/depart"
+	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

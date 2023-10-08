@@ -1,6 +1,6 @@
 package common
 
-import "gitee.com/PilotGo/PilotGo/app/server/dao"
+import "gitee.com/openeuler/PilotGo/app/server/dao"
 
 type User = dao.User
 

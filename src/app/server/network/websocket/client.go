@@ -4,8 +4,8 @@ import (
 	"runtime/debug"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gorilla/websocket"
 )
 

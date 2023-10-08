@@ -3,7 +3,7 @@ package baseos
 import (
 	"testing"
 
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"strings"
 
-	aconfig "gitee.com/PilotGo/PilotGo/app/agent/config"
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	aconfig "gitee.com/openeuler/PilotGo/app/agent/config"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 	gnet "github.com/shirou/gopsutil/net"
 )
 

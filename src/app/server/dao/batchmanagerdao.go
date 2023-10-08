@@ -3,9 +3,9 @@ package dao
 import (
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 	"gorm.io/gorm"
 )
 

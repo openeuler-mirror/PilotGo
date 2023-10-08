@@ -22,13 +22,13 @@ import (
 	"syscall"
 	"time"
 
-	aconfig "gitee.com/PilotGo/PilotGo/app/agent/config"
-	"gitee.com/PilotGo/PilotGo/app/agent/filemonitor"
-	"gitee.com/PilotGo/PilotGo/app/agent/localstorage"
-	"gitee.com/PilotGo/PilotGo/app/agent/network"
-	"gitee.com/PilotGo/PilotGo/app/agent/register"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils/os/common"
+	aconfig "gitee.com/openeuler/PilotGo/app/agent/config"
+	"gitee.com/openeuler/PilotGo/app/agent/filemonitor"
+	"gitee.com/openeuler/PilotGo/app/agent/localstorage"
+	"gitee.com/openeuler/PilotGo/app/agent/network"
+	"gitee.com/openeuler/PilotGo/app/agent/register"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils/os/common"
 )
 
 func main() {

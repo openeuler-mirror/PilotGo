@@ -5,12 +5,12 @@ package pluginapi
 import (
 	"fmt"
 
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
-	"gitee.com/PilotGo/PilotGo/app/server/service/batch"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/sdk/plugin/client"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/app/server/service/batch"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/gin-gonic/gin"
 )
 

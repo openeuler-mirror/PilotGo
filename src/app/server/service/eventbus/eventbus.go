@@ -3,7 +3,7 @@ package eventbus
 import (
 	"sync"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 type Listener struct {

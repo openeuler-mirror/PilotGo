@@ -3,7 +3,7 @@ package baseos
 import (
 	"fmt"
 
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils"
 )
 
 // 获取机器时间

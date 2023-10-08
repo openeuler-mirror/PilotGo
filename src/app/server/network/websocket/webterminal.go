@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"io"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gorilla/websocket"
 	"golang.org/x/crypto/ssh"
 )

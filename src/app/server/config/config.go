@@ -17,8 +17,8 @@ package config
 import (
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 )
 
 type HttpServer struct {

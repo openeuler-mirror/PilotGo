@@ -1,10 +1,10 @@
 package dbmanager
 
 import (
-	sconfig "gitee.com/PilotGo/PilotGo/app/server/config"
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/PilotGo/PilotGo/dbmanager/redismanager"
+	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 )
 
 func RedisdbInit(conf *sconfig.RedisDBInfo) error {

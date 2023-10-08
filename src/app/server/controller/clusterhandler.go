@@ -15,8 +15,8 @@
 package controller
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/server/service/cluster"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/service/cluster"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

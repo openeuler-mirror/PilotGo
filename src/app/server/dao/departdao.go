@@ -15,9 +15,9 @@
 package dao
 
 import (
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gorm.io/gorm"
 )
 

@@ -3,9 +3,9 @@ package middleware
 import (
 	"net/http"
 
-	"gitee.com/PilotGo/PilotGo/app/server/service/auth"
-	"gitee.com/PilotGo/PilotGo/app/server/service/jwt"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/app/server/service/auth"
+	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 

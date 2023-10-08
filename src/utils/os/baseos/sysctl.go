@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 )
 
 func (b *BaseOS) GetSysctlConfig() (map[string]string, error) {

@@ -17,7 +17,7 @@ package cron
 import (
 	"fmt"
 
-	"gitee.com/PilotGo/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 )
 
 // 开启任务

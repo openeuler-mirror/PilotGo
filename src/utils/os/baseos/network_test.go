@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/stretchr/testify/assert"
 )
 

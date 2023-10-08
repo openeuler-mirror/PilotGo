@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	sconfig "gitee.com/PilotGo/PilotGo/app/server/config"
+	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
 )
 
 func TestGetRoles(t *testing.T) {

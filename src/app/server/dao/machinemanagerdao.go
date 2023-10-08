@@ -17,8 +17,8 @@ package dao
 import (
 	"fmt"
 
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/PilotGo/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/global"
 	"gorm.io/gorm"
 )
 

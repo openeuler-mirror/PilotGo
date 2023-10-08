@@ -20,8 +20,8 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 type ConfigFiles = dao.ConfigFiles

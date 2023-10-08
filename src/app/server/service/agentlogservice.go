@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
 )
 
 // 日志执行操作动作

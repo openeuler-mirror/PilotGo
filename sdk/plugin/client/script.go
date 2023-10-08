@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"gitee.com/PilotGo/PilotGo/sdk/common"
-	"gitee.com/PilotGo/PilotGo/sdk/utils/httputils"
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 type CmdResult struct {

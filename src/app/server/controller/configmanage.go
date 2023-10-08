@@ -18,10 +18,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitee.com/PilotGo/PilotGo/app/server/service/common"
-	config "gitee.com/PilotGo/PilotGo/app/server/service/configmanage"
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	config "gitee.com/openeuler/PilotGo/app/server/service/configmanage"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 

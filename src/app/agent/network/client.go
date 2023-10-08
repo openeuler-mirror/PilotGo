@@ -17,10 +17,10 @@ package network
 import (
 	"net"
 
-	"gitee.com/PilotGo/PilotGo/app/agent/config"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	pnet "gitee.com/PilotGo/PilotGo/utils/message/net"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
+	"gitee.com/openeuler/PilotGo/app/agent/config"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	pnet "gitee.com/openeuler/PilotGo/utils/message/net"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 )
 
 type AgentMessageHandler func(*SocketClient, *protocol.Message) error

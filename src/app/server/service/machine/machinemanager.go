@@ -1,8 +1,8 @@
 package machine
 
 import (
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
 )
 
 type MachineNode = dao.MachineNode

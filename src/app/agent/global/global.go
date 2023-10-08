@@ -3,10 +3,10 @@ package global
 import (
 	"os"
 
-	"gitee.com/PilotGo/PilotGo/app/agent/network"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	"gitee.com/PilotGo/PilotGo/utils"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
+	"gitee.com/openeuler/PilotGo/app/agent/network"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 )

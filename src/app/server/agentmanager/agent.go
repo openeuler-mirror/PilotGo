@@ -20,11 +20,11 @@ import (
 	"strconv"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/app/agent/global"
-	"gitee.com/PilotGo/PilotGo/app/server/dao"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
-	pnet "gitee.com/PilotGo/PilotGo/utils/message/net"
-	"gitee.com/PilotGo/PilotGo/utils/message/protocol"
+	"gitee.com/openeuler/PilotGo/app/agent/global"
+	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	pnet "gitee.com/openeuler/PilotGo/utils/message/net"
+	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 	"github.com/google/uuid"
 )
 

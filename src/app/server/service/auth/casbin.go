@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"sync"
 
-	sconfig "gitee.com/PilotGo/PilotGo/app/server/config"
-	suser "gitee.com/PilotGo/PilotGo/app/server/service/user"
-	"gitee.com/PilotGo/PilotGo/sdk/logger"
+	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	suser "gitee.com/openeuler/PilotGo/app/server/service/user"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/casbin/casbin/v2"
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"

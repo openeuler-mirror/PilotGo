@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/PilotGo/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/PilotGo/PilotGo/global"
-	"gitee.com/PilotGo/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/utils"
 )
 
 type UserRole struct {
