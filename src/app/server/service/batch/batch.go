@@ -190,8 +190,25 @@ func SelectBatch() ([]dao.Batch, error) {
 }
 
 // from batch get all machines
-func GetMachines(b *scommon.Batch) []string {
-	// TODO: support batch id
+func GetMachineUUIDS(b *scommon.Batch) []string {
+	if b.BatchId != 0 {
+		machinelist, err := dao.GetMachineID(b.BatchId)
+		if err != nil {
+			return nil
+		}
+		machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
+
+		// 获取机器的所有信息
+		uuids := make([]string, 0)
+		for _, macId := range machineIdlist {
+			macuuid, err := dao.MachineIdToUUID(macId)
+			if err != nil {
+				return nil
+			}
+			uuids = append(uuids, macuuid)
+		}
+		return uuids
+	}
 
 	if b.MachineUUIDs != nil {
 		return b.MachineUUIDs
@@ -202,7 +219,7 @@ func GetMachines(b *scommon.Batch) []string {
 type R interface{}
 
 func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []R {
-	uuids := GetMachines(b)
+	uuids := GetMachineUUIDS(b)
 
 	result := []R{}
 	for _, uuid := range uuids {
@@ -210,9 +227,5 @@ func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []
 		result = append(result, r)
 	}
 
-	// mapper := iter.Mapper[string, R]{}
-	// result := mapper.Map(uuids, func(v *string) R {
-	// 	return f(*v)
-	// })
 	return result
 }

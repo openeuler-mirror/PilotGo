@@ -2,6 +2,7 @@ package httputils
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -55,7 +56,11 @@ func request(method, url string, param *Params) (*Response, error) {
 		}
 	}
 
-	hc := &http.Client{}
+	hc := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}}
 	resp, err := hc.Do(req)
 	if err != nil {
 		return nil, err
