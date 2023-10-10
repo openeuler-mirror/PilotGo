@@ -1,12 +1,16 @@
 package client
 
 import (
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"github.com/gin-gonic/gin"
 )
 
 type Client struct {
 	Server     string
 	PluginInfo *PluginInfo
+
+	// 用于event消息处理
+	eventChan chan *common.EventMessage
 }
 
 var global_client *Client
@@ -30,9 +34,16 @@ func GetClient() *Client {
 // GET /plugin_manage/info
 func (c *Client) RegisterHandlers(router *gin.Engine) {
 	// 提供插件基本信息
-	mg := router.Group("plugin_manage/")
+	mg := router.Group("/plugin_manage/")
 	{
 		mg.GET("/info", InfoHandler)
+	}
+
+	api := router.Group("/plugin_manage/api/v1/")
+	{
+		api.PUT("/event", func(c *gin.Context) {
+			c.Set("__internal__client_instance", c)
+		}, EventHandler)
 	}
 
 	// pg := router.Group("/plugin/" + desc.Name)

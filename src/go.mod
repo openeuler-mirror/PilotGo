@@ -96,4 +96,4 @@ require (
 	modernc.org/sqlite v1.23.0 // indirect
 )
 
-// replace gitee.com/openeuler/PilotGo/PilotGo/sdk => ../sdk
+replace gitee.com/openeuler/PilotGo/PilotGo/sdk => ../sdk
