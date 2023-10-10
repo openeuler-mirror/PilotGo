@@ -16,7 +16,7 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os/exec"
 	"strings"
 )
@@ -46,13 +46,13 @@ func RunCommand(s string) (int, string, string, error) {
 		return 0, "", "", err
 	}
 
-	b1, err := ioutil.ReadAll(stdout)
+	b1, err := io.ReadAll(stdout)
 	if err != nil {
 		return 0, "", "", err
 	}
 	s1 := strings.TrimRight(string(b1), "\n")
 
-	b2, err := ioutil.ReadAll(stderr)
+	b2, err := io.ReadAll(stderr)
 	if err != nil {
 		return 0, "", "", err
 	}
@@ -96,13 +96,13 @@ func RunScript(absPath string, params []string) (*CmdResult, error) {
 		return nil, err
 	}
 
-	b1, err := ioutil.ReadAll(stdout)
+	b1, err := io.ReadAll(stdout)
 	if err != nil {
 		return nil, err
 	}
 	s1 := strings.TrimRight(string(b1), "\n")
 
-	b2, err := ioutil.ReadAll(stderr)
+	b2, err := io.ReadAll(stderr)
 	if err != nil {
 		return nil, err
 	}
