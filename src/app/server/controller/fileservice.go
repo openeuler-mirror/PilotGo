@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -18,7 +17,7 @@ func Upload(c *gin.Context) {
 
 	if contentType == "multipart/form-data" {
 		// 直接读取request body内容
-		bodyBuf, err := ioutil.ReadAll(c.Request.Body)
+		bodyBuf, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			logger.Error("没获取到request body: %s", err.Error())
 			response.Fail(c, gin.H{"error": err.Error()}, "获取文件request body失败")

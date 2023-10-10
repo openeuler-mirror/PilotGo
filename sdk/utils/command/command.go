@@ -1,7 +1,7 @@
 package command
 
 import (
-	"io/ioutil"
+	"io"
 	"os/exec"
 )
 
@@ -24,13 +24,13 @@ func RunCommand(s string) (int, string, string, error) {
 		return 0, "", "", err
 	}
 
-	b1, err := ioutil.ReadAll(StdoutPipe)
+	b1, err := io.ReadAll(StdoutPipe)
 	if err != nil {
 		return 0, "", "", err
 	}
 	stdout := string(b1)
 
-	b2, err := ioutil.ReadAll(StderrPipe)
+	b2, err := io.ReadAll(StderrPipe)
 	if err != nil {
 		return 0, "", "", err
 	}
