@@ -46,3 +46,18 @@ func EventHandler(c *gin.Context) {
 	client.ProcessEvent(nil)
 
 }
+
+func CommandResultHandler(c *gin.Context) {
+	// TODO: get client instance and call client.ProcessEvent
+	v, ok := c.Get("__internal__client_instance")
+	if !ok {
+		return
+	}
+	client, ok := v.(*Client)
+	if !ok {
+		return
+	}
+
+	client.ProcessEvent(nil)
+
+}

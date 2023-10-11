@@ -8,6 +8,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -32,7 +33,7 @@ type RunResult struct {
 func RunCommandHandler(c *gin.Context) {
 	logger.Debug("process get agent request")
 
-	d := &client.CmdStruct{}
+	d := &common.CmdStruct{}
 	err := c.ShouldBind(d)
 	if err != nil {
 		logger.Debug("bind batch param error:%s", err)
@@ -101,16 +102,15 @@ func RunScriptHandler(c *gin.Context) {
 }
 
 // 异步远程运行脚本回调
-func RunCommandAsyncCallbackHandler(c *gin.Context) {
+func RunCommandAsyncHandler(c *gin.Context) {
 	name := c.Query("plugin_name")
 	p, err := plugin.GetPlugin(name)
 	if err != nil {
 		response.Fail(c, nil, "plugin not found: %v"+err.Error())
 		return
 	}
-	url := p.Url + "/command_result"
 
-	d := &client.CmdStruct{}
+	d := &common.CmdStruct{}
 	if err := c.ShouldBind(d); err != nil {
 		logger.Debug("bind batch param error:%s", err)
 		response.Fail(c, nil, "parameter error")
@@ -118,46 +118,46 @@ func RunCommandAsyncCallbackHandler(c *gin.Context) {
 	}
 
 	taskId := time.Now().Format("20060102150405")
+	caller := p.Url + "/command_result"
 	for _, macuuid := range batch.GetMachineUUIDS(d.Batch) {
 		uuid := macuuid
-		go runCommandCallback(uuid, d.Command, taskId, func(result client.TaskCmdResult) {
-			_, err := httputils.Post(url, &httputils.Params{
-				Body: result,
-			})
-			if err != nil {
-				logger.Error("agent %v 结果返回失败", uuid)
-				return
-			}
-			logger.Info("agent %v 执行命令结果已经返回", uuid)
-		})
+		go asyncCommandRunner(uuid, d.Command, taskId, caller)
 	}
 
 	logger.Info("批次agents正在远程执行命令: %v", d.Command)
-	response.Success(c, nil, "远程命令已经发送")
+	response.Success(c, struct {
+		TaskID string `json:"task_id"`
+	}{
+		TaskID: taskId,
+	}, "远程命令已经发送")
 }
 
-func runCommandCallback(uuid string, command string, taskId string, callback func(client.TaskCmdResult)) {
-	agent := agentmanager.GetAgent(uuid)
+func asyncCommandRunner(macuuid string, command string, taskId string, caller string) {
+	agent := agentmanager.GetAgent(macuuid)
 	if agent != nil {
 		data, err := agent.RunCommand(command)
 		if err != nil {
-			logger.Error("run command error, agent:%s, command:%s", uuid, command)
+			logger.Error("run command error, agent:%s, command:%s", macuuid, command)
 		}
-		re := client.TaskCmdResult{
-			TaskId: taskId,
-			Result: client.CmdResult{
-				MachineUUID: uuid,
+		re := common.AsyncCmdResult{
+			TaskID: taskId,
+			Result: []*common.CmdResult{{
+				MachineUUID: macuuid,
 				MachineIP:   agent.IP,
 				RetCode:     data.RetCode,
 				Stdout:      data.Stdout,
 				Stderr:      data.Stderr,
-			},
+			}},
 		}
 
-		callback(re)
+		_, err = httputils.Post(caller, &httputils.Params{
+			Body: re,
+		})
+		if err != nil {
+			logger.Error("agent %v 结果返回失败", macuuid)
+			return
+		}
+		logger.Info("agent %v 执行命令结果已经返回", macuuid)
 	}
-	callback(client.TaskCmdResult{
-		TaskId: taskId,
-		Result: client.CmdResult{MachineUUID: uuid},
-	})
+	// TODO: return error info
 }

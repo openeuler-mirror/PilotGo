@@ -1,4 +1,4 @@
-# gitee.com/openeuler/PilotGo/sdk v0.0.0-20231008025439-b87209596d18
+# gitee.com/openeuler/PilotGo/sdk v0.0.0-20231011015127-5b665caa1962
 ## explicit; go 1.17
 gitee.com/openeuler/PilotGo/sdk/common
 gitee.com/openeuler/PilotGo/sdk/logger
@@ -463,3 +463,4 @@ modernc.org/memory
 # modernc.org/sqlite v1.23.0
 ## explicit; go 1.18
 modernc.org/sqlite/lib
+# gitee.com/openeuler/PilotGo/PilotGo/sdk => ../sdk
