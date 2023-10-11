@@ -71,6 +71,13 @@ func UUIDForDepartId(uuid string) (int, error) {
 	return Machine.DepartId, err
 }
 
+// 根据机器id获取机器的uuid
+func MachineIdToUUID(id int) (string, error) {
+	var Machine MachineNode
+	err := mysqlmanager.MySQL().Where("id=?", id).Find(&Machine).Error
+	return Machine.MachineUUID, err
+}
+
 // agent机器断开
 func MachineStatusToOffline(uuid string) error {
 	var Machine MachineNode

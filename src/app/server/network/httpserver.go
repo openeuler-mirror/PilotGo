@@ -300,6 +300,7 @@ func registerPluginApi(router *gin.Engine) {
 	pluginAPI := router.Group("/api/v1/pluginapi")
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
+		pluginAPI.POST("/run_command_async", pluginapi.RunCommandAsyncCallbackHandler)
 		pluginAPI.POST("/run_command", pluginapi.RunCommandHandler)
 		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)
 
