@@ -8,17 +8,22 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
+type TaskCmdResult struct {
+	TaskId string    `json:"taskId"`
+	Result CmdResult `json:"result"`
+}
 type CmdResult struct {
-	MachineUUID string
-	MachineIP   string
-	RetCode     int
-	Stdout      string
-	Stderr      string
+	MachineUUID string `json:"machine_uuid"`
+	MachineIP   string `json:"machine_ip"`
+	RetCode     int    `json:"retcode"`
+	Stdout      string `json:"stdout"`
+	Stderr      string `json:"stderr"`
 }
 
 type CmdStruct struct {
 	Batch   *common.Batch `json:"batch"`
 	Command string        `json:"command"`
+	TaskId  string        `json:"taskId"`
 }
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, error) {

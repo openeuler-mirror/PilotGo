@@ -10,7 +10,7 @@ type MachineNode struct {
 }
 
 type Batch struct {
-	BatchUUID     string   `json:"batch_id"`
+	BatchId       int      `json:"batch_id"`
 	DepartmentIDs []string `json:"department_ids"`
 	MachineUUIDs  []string `json:"machine_uuids"`
 }
