@@ -10,7 +10,8 @@ type Client struct {
 	PluginInfo *PluginInfo
 
 	// 用于event消息处理
-	eventChan chan *common.EventMessage
+	eventChan        chan *common.EventMessage
+	eventCallbackMap map[int]EventCallback
 
 	// 用于异步command及script执行结果处理机
 	asyncCmdResultChan      chan *common.AsyncCmdResult
@@ -68,5 +69,4 @@ func (c *Client) RegisterHandlers(router *gin.Engine) {
 	// TODO: start command result process service
 	c.startEventProcessor()
 	c.startCommandResultProcessor()
-
 }
