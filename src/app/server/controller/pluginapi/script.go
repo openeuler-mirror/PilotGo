@@ -3,6 +3,7 @@
 package pluginapi
 
 import (
+	"net/url"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
@@ -103,13 +104,6 @@ func RunScriptHandler(c *gin.Context) {
 
 // 异步远程运行脚本回调
 func RunCommandAsyncHandler(c *gin.Context) {
-	name := c.Query("plugin_name")
-	p, err := plugin.GetPlugin(name)
-	if err != nil {
-		response.Fail(c, nil, "plugin not found: %v"+err.Error())
-		return
-	}
-
 	d := &common.CmdStruct{}
 	if err := c.ShouldBind(d); err != nil {
 		logger.Debug("bind batch param error:%s", err)
@@ -117,8 +111,23 @@ func RunCommandAsyncHandler(c *gin.Context) {
 		return
 	}
 
+	// 获取插件地址和回调url
+	name := c.Query("plugin_name")
+	p, err := plugin.GetPlugin(name)
+	if err != nil {
+		response.Fail(c, nil, "plugin not found: %v"+err.Error())
+		return
+	}
+	parsedURL, err := url.Parse(p.Url)
+	if err != nil {
+		logger.Error("URL解析失败:%v", err)
+		response.Fail(c, nil, "解析插件url失败")
+		return
+	}
+	caller := "http://" + parsedURL.Host + "/plugin_manage/api/v1/command_result"
+
 	taskId := time.Now().Format("20060102150405")
-	caller := p.Url + "/command_result"
+
 	for _, macuuid := range batch.GetMachineUUIDS(d.Batch) {
 		uuid := macuuid
 		go asyncCommandRunner(uuid, d.Command, taskId, caller)
@@ -134,12 +143,13 @@ func RunCommandAsyncHandler(c *gin.Context) {
 
 func asyncCommandRunner(macuuid string, command string, taskId string, caller string) {
 	agent := agentmanager.GetAgent(macuuid)
+	var result common.AsyncCmdResult
 	if agent != nil {
 		data, err := agent.RunCommand(command)
 		if err != nil {
 			logger.Error("run command error, agent:%s, command:%s", macuuid, command)
 		}
-		re := common.AsyncCmdResult{
+		result = common.AsyncCmdResult{
 			TaskID: taskId,
 			Result: []*common.CmdResult{{
 				MachineUUID: macuuid,
@@ -149,15 +159,19 @@ func asyncCommandRunner(macuuid string, command string, taskId string, caller st
 				Stderr:      data.Stderr,
 			}},
 		}
-
-		_, err = httputils.Post(caller, &httputils.Params{
-			Body: re,
-		})
-		if err != nil {
-			logger.Error("agent %v 结果返回失败", macuuid)
-			return
+	} else {
+		result = common.AsyncCmdResult{
+			TaskID: taskId,
+			Error:  "agent " + macuuid + " 不存在或者已经离线，请检查机器状态",
 		}
-		logger.Info("agent %v 执行命令结果已经返回", macuuid)
 	}
-	// TODO: return error info
+
+	_, err := httputils.Post(caller, &httputils.Params{
+		Body: result,
+	})
+	if err != nil {
+		logger.Error("agent %v 结果返回失败", macuuid)
+		return
+	}
+	logger.Info("agent %v 执行命令结果已经返回", macuuid)
 }

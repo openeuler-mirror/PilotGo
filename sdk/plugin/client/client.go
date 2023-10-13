@@ -53,7 +53,7 @@ func (c *Client) RegisterHandlers(router *gin.Engine) {
 			c.Set("__internal__client_instance", c)
 		}, EventHandler)
 
-		api.PUT("/command_result", func(c *gin.Context) {
+		api.POST("/command_result", func(c *gin.Context) {
 			c.Set("__internal__client_instance", c)
 		}, CommandResultHandler)
 	}

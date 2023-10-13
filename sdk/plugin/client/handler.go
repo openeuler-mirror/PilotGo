@@ -1,12 +1,16 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,16 +52,28 @@ func EventHandler(c *gin.Context) {
 }
 
 func CommandResultHandler(c *gin.Context) {
-	// TODO: get client instance and call client.ProcessEvent
+	j, err := io.ReadAll(c.Request.Body) // 接收数据
+	if err != nil {
+		logger.Error("没获取到：%s", err.Error())
+		return
+	}
+	var result common.AsyncCmdResult
+	if err := json.Unmarshal(j, &result); err != nil {
+		logger.Error("反序列化结果失败%s", err.Error())
+		return
+	}
+
 	v, ok := c.Get("__internal__client_instance")
 	if !ok {
+		logger.Error("%v", "未获取到client值信息")
 		return
 	}
 	client, ok := v.(*Client)
 	if !ok {
+		logger.Error("%v", "client获取失败")
 		return
 	}
 
-	client.ProcessEvent(nil)
+	client.ProcessCommandResult(&result)
 
 }

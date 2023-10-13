@@ -35,7 +35,7 @@ func (c *Client) ListenEvent(eventType int, callback EventCallback) error {
 }
 
 // 取消注册event事件监听
-func (c *Client) UnListenEvent(listenerID string) error {
+func (c *Client) UnListenEvent(eventType int) error {
 	url := c.Server + "/api/v1/pluginapi/listener"
 	r, err := httputils.Delete(url, nil)
 	if err != nil {
@@ -54,6 +54,7 @@ func (c *Client) UnListenEvent(listenerID string) error {
 	}
 
 	// TODO: unregister event handler here
+	c.unregisterEventCallback(eventType)
 	return nil
 }
 
@@ -64,7 +65,11 @@ func (c *Client) PublishEvent(msg common.EventMessage) error {
 }
 
 func (c *Client) registerEventCallback(eventType int, callback EventCallback) {
-	// TODO:
+	c.eventCallbackMap[eventType] = callback
+}
+
+func (c *Client) unregisterEventCallback(eventType int) {
+	delete(c.eventCallbackMap, eventType)
 }
 
 func (c *Client) ProcessEvent(event *common.EventMessage) {
@@ -76,6 +81,9 @@ func (c *Client) startEventProcessor() {
 		e := <-c.eventChan
 
 		// TODO: process event message
-		e = e
+		cb, ok := c.eventCallbackMap[e.MessageType]
+		if ok {
+			cb(e)
+		}
 	}
 }
