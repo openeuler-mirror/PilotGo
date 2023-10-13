@@ -1,10 +1,12 @@
 package eventbus
 
 import (
+	"encoding/json"
 	"sync"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 type Listener struct {
@@ -20,11 +22,14 @@ type EventBus struct {
 	event     chan *common.EventMessage
 }
 
+var eventTypeMap map[int][]Listener
+
 func (e *EventBus) AddListener(l *Listener) {
 	e.Lock()
 	defer e.Unlock()
 
 	e.listeners = append(e.listeners, l)
+	//EeventTypeMap[1] = append(eventTypeMap[1], l)
 }
 
 func (e *EventBus) RemoveListener(l *Listener) {
@@ -65,6 +70,28 @@ func (e *EventBus) publish(m *common.EventMessage) {
 
 func (e *EventBus) broadcast() {
 	// TODO：将event message发送给监听的listener
+	mes := <-e.event
+	listeners, ok := eventTypeMap[mes.MessageType]
+	if ok {
+		for _, listener := range listeners {
+			r, err := httputils.Put(listener.URL+"/plugin_manage/api/v1/event", &httputils.Params{
+				Body: mes,
+			})
+			if err != nil {
+				logger.Error(listener.Name + " plugin request error:" + err.Error())
+			}
+			resp := &struct {
+				Status string
+				Error  string
+			}{}
+			if err := json.Unmarshal(r.Body, resp); err != nil {
+				logger.Error(listener.Name + " plugin response error:" + err.Error())
+			}
+			if resp.Status != "ok" {
+				logger.Error(listener.Name + " plugin response status:" + resp.Error)
+			}
+		}
+	}
 }
 
 var globalEventBus *EventBus
