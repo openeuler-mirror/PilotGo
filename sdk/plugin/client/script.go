@@ -72,7 +72,7 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 }
 
 func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
-	url := c.Server + "/api/v1/pluginapi/run_command_async"
+	url := c.Server + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
 
 	p := &common.CmdStruct{
 		Batch:   batch,
@@ -117,4 +117,8 @@ func (c *Client) startCommandResultProcessor() {
 
 func (c *Client) registerCommandResultCallback(taskID string, callback RunCommandCallback) {
 	c.cmdProcessorCallbackMap[taskID] = callback
+}
+
+func (c *Client) ProcessCommandResult(command_result *common.AsyncCmdResult) {
+	c.asyncCmdResultChan <- command_result
 }
