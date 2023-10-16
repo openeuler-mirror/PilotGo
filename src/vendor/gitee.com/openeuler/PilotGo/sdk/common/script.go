@@ -3,6 +3,7 @@ package common
 type AsyncCmdResult struct {
 	TaskID string       `json:"task_id"`
 	Result []*CmdResult `json:"result"`
+	Error  string       `json:"error"`
 }
 
 type CmdResult struct {
@@ -16,5 +17,4 @@ type CmdResult struct {
 type CmdStruct struct {
 	Batch   *Batch `json:"batch"`
 	Command string `json:"command"`
-	TaskId  string `json:"taskId"`
 }

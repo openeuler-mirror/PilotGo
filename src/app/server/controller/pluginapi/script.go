@@ -151,26 +151,34 @@ func asyncCommandRunner(macuuid string, command string, taskId string, caller st
 		}
 		result = common.AsyncCmdResult{
 			TaskID: taskId,
-			Result: []*common.CmdResult{{
-				MachineUUID: macuuid,
-				MachineIP:   agent.IP,
-				RetCode:     data.RetCode,
-				Stdout:      data.Stdout,
-				Stderr:      data.Stderr,
+			Result: []*common.RunResult{{
+				CmdResult: common.CmdResult{
+					MachineUUID: macuuid,
+					MachineIP:   agent.IP,
+					RetCode:     data.RetCode,
+					Stdout:      data.Stdout,
+					Stderr:      data.Stderr,
+				},
+				Error: nil,
 			}},
 		}
 	} else {
 		result = common.AsyncCmdResult{
 			TaskID: taskId,
-			Error:  "agent " + macuuid + " 不存在或者已经离线，请检查机器状态",
+			Result: []*common.RunResult{{
+				CmdResult: common.CmdResult{
+					MachineUUID: macuuid,
+				},
+				Error: "agent " + macuuid + " 不存在或者已经离线，请检查机器状态",
+			}},
 		}
 	}
 
-	_, err := httputils.Post(caller, &httputils.Params{
+	_, err := httputils.Put(caller, &httputils.Params{
 		Body: result,
 	})
 	if err != nil {
-		logger.Error("agent %v 结果返回失败", macuuid)
+		logger.Error("agent %v 结果返回失败：%v", macuuid, err)
 		return
 	}
 	logger.Info("agent %v 执行命令结果已经返回", macuuid)
