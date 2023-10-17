@@ -25,6 +25,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network"
 	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
+	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
@@ -81,6 +82,9 @@ func main() {
 		logger.Error("plugin service init failed, error:%v", err)
 		os.Exit(-1)
 	}
+
+	//初始化eventbus
+	eventbus.Init()
 
 	logger.Info("start to serve.")
 

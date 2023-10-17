@@ -27,9 +27,7 @@ var eventTypeMap map[int][]Listener
 func (e *EventBus) AddListener(l *Listener) {
 	e.Lock()
 	defer e.Unlock()
-
 	e.listeners = append(e.listeners, l)
-	//EeventTypeMap[1] = append(eventTypeMap[1], l)
 }
 
 func (e *EventBus) RemoveListener(l *Listener) {
@@ -38,9 +36,48 @@ func (e *EventBus) RemoveListener(l *Listener) {
 
 	for index, v := range e.listeners {
 		if v.Name == l.Name && v.URL == l.URL {
-			e.listeners = append(e.listeners[:index], e.listeners[index+1:]...)
+			if index == len(e.listeners)-1 {
+				e.listeners = e.listeners[:index]
+			} else {
+				e.listeners = append(e.listeners[:index], e.listeners[index+1:]...)
+			}
+			break
 		}
 	}
+}
+
+func (e *EventBus) AddEventMap(eventtpye int, l *Listener) {
+	e.Lock()
+	defer e.Unlock()
+	eventTypeMap[eventtpye] = append(eventTypeMap[eventtpye], *l)
+}
+
+func (e *EventBus) RemoveEventMap(eventtpye int, l *Listener) {
+	e.Lock()
+	defer e.Unlock()
+	for i, v := range eventTypeMap[eventtpye] {
+		if (v.Name == l.Name) && (v.URL == l.URL) {
+			if i == len(eventTypeMap[eventtpye])-1 {
+				eventTypeMap[eventtpye] = eventTypeMap[eventtpye][:i]
+			} else {
+				eventTypeMap[eventtpye] = append(eventTypeMap[eventtpye][:i], eventTypeMap[eventtpye][i+1:]...)
+			}
+			break
+		}
+	}
+}
+
+func (e *EventBus) IsExitEventMap(l *Listener) bool {
+	e.Lock()
+	defer e.Unlock()
+	for _, value := range eventTypeMap {
+		for _, v := range value {
+			if (v.Name == l.Name) && (v.URL == l.URL) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (e *EventBus) Run() {
@@ -74,7 +111,7 @@ func (e *EventBus) broadcast() {
 	listeners, ok := eventTypeMap[mes.MessageType]
 	if ok {
 		for _, listener := range listeners {
-			r, err := httputils.Put(listener.URL+"/plugin_manage/api/v1/event", &httputils.Params{
+			r, err := httputils.Post(listener.URL+"/plugin_manage/api/v1/event", &httputils.Params{
 				Body: mes,
 			})
 			if err != nil {
@@ -97,6 +134,7 @@ func (e *EventBus) broadcast() {
 var globalEventBus *EventBus
 
 func Init() {
+	eventTypeMap = make(map[int][]Listener)
 	globalEventBus = &EventBus{}
 	globalEventBus.Run()
 }
@@ -115,4 +153,16 @@ func RemoveListener(l *Listener) {
 
 func PublishEvent(m *common.EventMessage) {
 	globalEventBus.publish(m)
+}
+
+func AddEventMap(eventtype int, l *Listener) {
+	globalEventBus.AddEventMap(eventtype, l)
+}
+
+func RemoveEventMap(eventtype int, l *Listener) {
+	globalEventBus.RemoveEventMap(eventtype, l)
+}
+
+func IsExitEventMap(l *Listener) bool {
+	return globalEventBus.IsExitEventMap(l)
 }

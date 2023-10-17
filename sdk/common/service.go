@@ -56,3 +56,12 @@ type Result struct {
 	Mseeage string           `json:"msg"`
 	Data    []*ServiceResult `json:"data"`
 }
+
+type RespResult struct {
+	Code int `json:"code"`
+	Data struct {
+		Status string `json:"status"`
+		Error  string `json:"error"`
+	} `json:"data"`
+	Msg string `json:"msg"`
+}
