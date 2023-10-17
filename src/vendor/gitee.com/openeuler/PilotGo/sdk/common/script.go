@@ -2,10 +2,13 @@ package common
 
 type AsyncCmdResult struct {
 	TaskID string       `json:"task_id"`
-	Result []*CmdResult `json:"result"`
-	Error  string       `json:"error"`
+	Result []*RunResult `json:"result"`
 }
 
+type RunResult struct {
+	CmdResult CmdResult   `json:"cmd_result"`
+	Error     interface{} `json:"error"`
+}
 type CmdResult struct {
 	MachineUUID string `json:"machine_uuid"`
 	MachineIP   string `json:"machine_ip"`

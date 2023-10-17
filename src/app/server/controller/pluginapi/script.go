@@ -127,17 +127,19 @@ func RunCommandAsyncHandler(c *gin.Context) {
 	caller := "http://" + parsedURL.Host + "/plugin_manage/api/v1/command_result"
 
 	taskId := time.Now().Format("20060102150405")
-
-	for _, macuuid := range batch.GetMachineUUIDS(d.Batch) {
+	macuuids := batch.GetMachineUUIDS(d.Batch)
+	for _, macuuid := range macuuids {
 		uuid := macuuid
 		go asyncCommandRunner(uuid, d.Command, taskId, caller)
 	}
 
 	logger.Info("批次agents正在远程执行命令: %v", d.Command)
 	response.Success(c, struct {
-		TaskID string `json:"task_id"`
+		TaskID  string `json:"task_id"`
+		TaskLen int    `json:"task_len"`
 	}{
-		TaskID: taskId,
+		TaskID:  taskId,
+		TaskLen: len(macuuids),
 	}, "远程命令已经发送")
 }
 
