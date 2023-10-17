@@ -94,13 +94,16 @@ func (c *Client) ProcessEvent(event *common.EventMessage) {
 }
 
 func (c *Client) startEventProcessor() {
-	for {
-		e := <-c.eventChan
+	go func() {
+		for {
+			e := <-c.eventChan
 
-		// TODO: process event message
-		cb, ok := c.eventCallbackMap[e.MessageType]
-		if ok {
-			cb(e)
+			// TODO: process event message
+			cb, ok := c.eventCallbackMap[e.MessageType]
+			if ok {
+				cb(e)
+			}
 		}
-	}
+	}()
+
 }

@@ -60,8 +60,25 @@ func (c *Client) UnListenEvent(eventType int) error {
 
 // 发布event事件
 func (c *Client) PublishEvent(msg common.EventMessage) error {
-	// TODO:
-	return errors.New("not implemented")
+	url := c.Server + "/api/v1/pluginapi/publish_event"
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: &msg,
+	})
+	if err != nil {
+		return err
+	}
+
+	resp := &struct {
+		Status string
+		Error  string
+	}{}
+	if err := json.Unmarshal(r.Body, resp); err != nil {
+		return err
+	}
+	if resp.Status != "ok" {
+		return errors.New(resp.Error)
+	}
+	return nil
 }
 
 func (c *Client) registerEventCallback(eventType int, callback EventCallback) {

@@ -8,6 +8,11 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
+type CallbackHandler struct {
+	RunCommandCallback RunCommandCallback
+	TaskLen            int
+}
+
 type RunCommandCallback func([]*common.RunResult)
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
@@ -86,37 +91,49 @@ func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCo
 		return err
 	}
 
-	res := &struct {
-		TaskID string `json:"task_id"`
+	res := struct {
+		Code int `json:"code"`
+		Data struct {
+			TaskID  string `json:"task_id"`
+			TaskLen int    `json:"task_len"`
+		} `json:"data"`
 	}{}
-	if err := json.Unmarshal(r.Body, res); err != nil {
+	if err := json.Unmarshal(r.Body, &res); err != nil {
 		return err
 	}
 
-	taskID := res.TaskID
-	c.registerCommandResultCallback(taskID, callback)
+	taskID := res.Data.TaskID
+	TaskLen := res.Data.TaskLen
+	c.registerCommandResultCallback(taskID, TaskLen, callback)
 
 	return nil
 }
 
 func (c *Client) startCommandResultProcessor() {
-	// TODO：do exit
-	for {
-		d := <-c.asyncCmdResultChan
+	go func() {
+		for {
+			d := <-c.asyncCmdResultChan
 
-		cb, ok := c.cmdProcessorCallbackMap[d.TaskID]
-		if !ok {
-			continue
+			cb, ok := c.cmdProcessorCallbackMap[d.TaskID]
+			if !ok {
+				continue
+			}
+
+			// 注意：map并发安全
+			cb.RunCommandCallback(d.Result)
+			cb.TaskLen = cb.TaskLen - len(d.Result)
+			if cb.TaskLen == 0 {
+				delete(c.cmdProcessorCallbackMap, d.TaskID)
+			}
 		}
-
-		// 注意：map并发安全
-		cb(d.Result)
-		delete(c.cmdProcessorCallbackMap, d.TaskID)
-	}
+	}()
 }
 
-func (c *Client) registerCommandResultCallback(taskID string, callback RunCommandCallback) {
-	c.cmdProcessorCallbackMap[taskID] = callback
+func (c *Client) registerCommandResultCallback(taskID string, taskLen int, callback RunCommandCallback) {
+	rccb := c.cmdProcessorCallbackMap[taskID]
+	rccb.RunCommandCallback = callback
+	rccb.TaskLen = taskLen
+	c.cmdProcessorCallbackMap[taskID] = rccb
 }
 
 func (c *Client) ProcessCommandResult(command_result *common.AsyncCmdResult) {
