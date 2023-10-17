@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 	"sync"
 
@@ -14,6 +12,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/google/uuid"
 )
 
@@ -254,22 +253,14 @@ func Handshake(url string) (*Plugin, error) {
 func requestPluginInfo(url string) (*client.PluginInfo, error) {
 	conf := config.Config().HttpServer
 	url = url + fmt.Sprintf("?server=%s", conf.Addr)
-
-	resp, err := http.Get(url)
+	resp, err := httputils.Get(url, nil)
 	if err != nil {
 		logger.Debug("request plugin info error:%s", err.Error())
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		logger.Debug("read request plugin info body error:%s", err.Error())
-		return nil, err
-	}
 
 	info := &client.PluginInfo{}
-	err = json.Unmarshal(body, info)
+	err = json.Unmarshal(resp.Body, info)
 	if err != nil {
 		logger.Debug("unmarshal request plugin info error:%s", err.Error())
 	}
