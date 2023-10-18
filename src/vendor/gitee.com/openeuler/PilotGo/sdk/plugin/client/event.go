@@ -3,6 +3,8 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+	"strconv"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -12,21 +14,21 @@ type EventCallback func(e *common.EventMessage)
 
 // 注册event事件监听
 func (c *Client) ListenEvent(eventType int, callback EventCallback) error {
-	url := c.Server + "/api/v1/pluginapi/listener"
-	r, err := httputils.Put(url, nil)
+	url := c.Server + "/api/v1/pluginapi/listener?eventType=" + strconv.Itoa(eventType)
+
+	r, err := httputils.Put(url, &httputils.Params{
+		Body: c.PluginInfo,
+	})
 	if err != nil {
 		return err
 	}
 
-	resp := &struct {
-		Status string
-		Error  string
-	}{}
+	resp := &common.RespResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return err
 	}
-	if resp.Status != "ok" {
-		return errors.New(resp.Error)
+	if r.StatusCode != http.StatusOK || resp.Code != http.StatusOK {
+		return errors.New(resp.Msg)
 	}
 
 	c.registerEventCallback(eventType, callback)
@@ -36,21 +38,20 @@ func (c *Client) ListenEvent(eventType int, callback EventCallback) error {
 
 // 取消注册event事件监听
 func (c *Client) UnListenEvent(eventType int) error {
-	url := c.Server + "/api/v1/pluginapi/listener"
-	r, err := httputils.Delete(url, nil)
+	url := c.Server + "/api/v1/pluginapi/listener?eventType=" + strconv.Itoa(eventType)
+	r, err := httputils.Delete(url, &httputils.Params{
+		Body: c.PluginInfo,
+	})
 	if err != nil {
 		return err
 	}
 
-	resp := &struct {
-		Status string
-		Error  string
-	}{}
+	resp := &common.RespResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return err
 	}
-	if resp.Status != "ok" {
-		return errors.New(resp.Error)
+	if r.StatusCode != http.StatusOK || resp.Code != http.StatusOK {
+		return errors.New(resp.Msg)
 	}
 
 	// TODO: unregister event handler here
@@ -68,16 +69,14 @@ func (c *Client) PublishEvent(msg common.EventMessage) error {
 		return err
 	}
 
-	resp := &struct {
-		Status string
-		Error  string
-	}{}
+	resp := &common.RespResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
 		return err
 	}
-	if resp.Status != "ok" {
-		return errors.New(resp.Error)
+	if r.StatusCode != http.StatusOK || resp.Code != http.StatusOK {
+		return errors.New(resp.Msg)
 	}
+
 	return nil
 }
 
@@ -94,13 +93,16 @@ func (c *Client) ProcessEvent(event *common.EventMessage) {
 }
 
 func (c *Client) startEventProcessor() {
-	for {
-		e := <-c.eventChan
+	go func() {
+		for {
+			e := <-c.eventChan
 
-		// TODO: process event message
-		cb, ok := c.eventCallbackMap[e.MessageType]
-		if ok {
-			cb(e)
+			// TODO: process event message
+			cb, ok := c.eventCallbackMap[e.MessageType]
+			if ok {
+				cb(e)
+			}
 		}
-	}
+	}()
+
 }
