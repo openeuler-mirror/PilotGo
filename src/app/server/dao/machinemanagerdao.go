@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/openeuler/PilotGo/global"
 	"gorm.io/gorm"
 )
 
@@ -45,7 +44,6 @@ type Res struct {
 
 func (m *MachineNode) ReturnMachine(departid int) (list *[]Res, tx *gorm.DB, res []Res) {
 	list = &[]Res{}
-	// tx := mysqlmanager.DB.Where("depart_id=?", departid).Find(&list)
 	tx = mysqlmanager.MySQL().Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
 		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
@@ -78,30 +76,16 @@ func MachineIdToUUID(id int) (string, error) {
 	return Machine.MachineUUID, err
 }
 
-// agent机器断开
-func MachineStatusToOffline(uuid string) error {
-	var Machine MachineNode
-	Ma := MachineNode{
-		State: global.OffLine,
-	}
-	return mysqlmanager.MySQL().Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
+// 更新机器状态
+func UpdateMachineState(uuid string, state int) error {
+	return mysqlmanager.MySQL().Model(&MachineNode{}).Where("machine_uuid=?", uuid).UpdateColumn("state", state).Error
 }
 
-// agent机器未分配
-func MachineStatusToFree(uuid, ip string) error {
+// 更新机器IP及状态
+func UpdateMachineIPState(uuid, ip string, state int) error {
 	var Machine MachineNode
 	Ma := MachineNode{
-		State: global.Free,
-		IP:    ip,
-	}
-	return mysqlmanager.MySQL().Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
-}
-
-// agent机器连接正常
-func MachineStatusToNormal(uuid, ip string) error {
-	var Machine MachineNode
-	Ma := MachineNode{
-		State: global.Normal,
+		State: state,
 		IP:    ip,
 	}
 	return mysqlmanager.MySQL().Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
@@ -137,37 +121,19 @@ func MachineStore(departid int) ([]MachineNode, error) {
 	return Machineinfo, err
 }
 
-func ModifyMachineDepart(MadId int, DeptId int) error {
-	var Machine MachineNode
-	err := mysqlmanager.MySQL().Where("id=?", MadId).Find(&Machine).Error
-	if err != nil {
-		return err
+func MachineInfo(id int) (*MachineNode, error) {
+	var machine *MachineNode
+	if err := mysqlmanager.MySQL().Where("id=?", id).Find(machine).Error; err != nil {
+		return nil, err
 	}
-	var Ma MachineNode
-	if Machine.State == global.Free {
-		Ma = MachineNode{
-			DepartId: DeptId,
-			State:    global.Normal,
-		}
-	} else {
-		if DeptId == global.UncateloguedDepartId {
-			Ma = MachineNode{
-				DepartId: DeptId,
-				State:    global.Free,
-			}
-		} else {
-			Ma = MachineNode{
-				DepartId: DeptId,
-			}
-		}
-	}
-	return mysqlmanager.MySQL().Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
+	return machine, nil
 }
-func ModifyMachineDepart2(MadId int, DeptId int) error {
+
+func UpdateMachineDepartState(MadId int, DeptId int, state int) error {
 	var Machine MachineNode
 	Ma := MachineNode{
 		DepartId: DeptId,
-		State:    global.Free,
+		State:    state,
 	}
 	return mysqlmanager.MySQL().Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
 }

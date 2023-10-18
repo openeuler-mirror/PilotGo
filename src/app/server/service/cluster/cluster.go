@@ -17,9 +17,9 @@ package cluster
 import (
 	"errors"
 
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
@@ -44,11 +44,11 @@ func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
 	for _, agent := range machines {
 		state := agent.State
 		switch state {
-		case global.Free:
+		case agentmanager.Free:
 			free++
-		case global.OffLine:
+		case agentmanager.OffLine:
 			Offline++
-		case global.Normal:
+		case agentmanager.Normal:
 			normal++
 		default:
 			continue

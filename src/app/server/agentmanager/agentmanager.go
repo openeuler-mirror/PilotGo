@@ -23,6 +23,16 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
+// 机器运行状态
+const (
+	// 机器运行
+	Normal = 1
+	// 脱机
+	OffLine = 2
+	// 空闲
+	Free = 3
+)
+
 // 用于管理server连接的agent
 type AgentManager struct {
 	agentMap sync.Map
@@ -130,13 +140,13 @@ func AddAgents2DB(a *Agent) {
 			return
 		}
 		if departId != global.UncateloguedDepartId {
-			err := dao.MachineStatusToNormal(a.UUID, agent_os.IP)
+			err := dao.UpdateMachineIPState(a.UUID, agent_os.IP, Normal)
 			if err != nil {
 				logger.Error(err.Error())
 				return
 			}
 		} else {
-			err := dao.MachineStatusToFree(a.UUID, agent_os.IP)
+			err := dao.UpdateMachineIPState(a.UUID, agent_os.IP, Free)
 			if err != nil {
 				logger.Error(err.Error())
 				return
@@ -151,7 +161,7 @@ func AddAgents2DB(a *Agent) {
 		DepartId:    global.UncateloguedDepartId,
 		Systeminfo:  agent_os.Platform + " " + agent_os.PlatformVersion,
 		CPU:         agent_os.ModelName,
-		State:       global.Free,
+		State:       Free,
 	}
 	err = dao.AddNewMachine(agent_list)
 	if err != nil {
