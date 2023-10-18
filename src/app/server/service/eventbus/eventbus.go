@@ -2,6 +2,8 @@ package eventbus
 
 import (
 	"encoding/json"
+	"net/http"
+	"strconv"
 	"sync"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -117,15 +119,24 @@ func (e *EventBus) broadcast() {
 			if err != nil {
 				logger.Error(listener.Name + " plugin request error:" + err.Error())
 			}
-			resp := &struct {
-				Status string
-				Error  string
-			}{}
-			if err := json.Unmarshal(r.Body, resp); err != nil {
-				logger.Error(listener.Name + " plugin response error:" + err.Error())
+			if r.StatusCode != http.StatusOK {
+				logger.Error("server process error:" + strconv.Itoa(r.StatusCode))
 			}
-			if resp.Status != "ok" {
-				logger.Error(listener.Name + " plugin response status:" + resp.Error)
+
+			resp := &common.CommonResult{}
+			if err := json.Unmarshal(r.Body, resp); err != nil {
+				logger.Error(listener.Name + " plugin request error:" + err.Error())
+			}
+			if resp.Code != http.StatusOK {
+				logger.Error(resp.Message)
+			}
+
+			data := &struct {
+				Status string `json:"status"`
+				Error  string `json:"error"`
+			}{}
+			if err := resp.ParseData(data); err != nil {
+				logger.Error(listener.Name + " plugin request error:" + err.Error())
 			}
 		}
 	}
@@ -135,7 +146,9 @@ var globalEventBus *EventBus
 
 func Init() {
 	eventTypeMap = make(map[int][]Listener)
-	globalEventBus = &EventBus{}
+	globalEventBus = &EventBus{
+		event: make(chan *common.EventMessage, 20),
+	}
 	globalEventBus.Run()
 }
 
