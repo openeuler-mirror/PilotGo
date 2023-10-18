@@ -4,6 +4,7 @@ package pluginapi
 
 import (
 	"strconv"
+	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -14,7 +15,7 @@ import (
 
 func RegisterListenerHandler(c *gin.Context) {
 	p := client.PluginInfo{}
-	if err := c.ShouldBindQuery(&p); err != nil {
+	if err := c.ShouldBind(&p); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
@@ -24,18 +25,21 @@ func RegisterListenerHandler(c *gin.Context) {
 	}
 	eventbus.AddListener(l)
 
-	eventtype, err := strconv.Atoi(c.Query("eventType"))
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
+	eventtypes := strings.Split(c.Query("eventTypes"), ",")
+	for _, v := range eventtypes {
+		eventtype, err := strconv.Atoi(v)
+		if err != nil {
+			response.Fail(c, gin.H{"status": false}, err.Error())
+			return
+		}
+		eventbus.AddEventMap(eventtype, l)
 	}
-	eventbus.AddEventMap(eventtype, l)
 	response.Success(c, gin.H{"status": "ok"}, "")
 }
 
 func UnregisterListenerHandler(c *gin.Context) {
 	p := client.PluginInfo{}
-	if err := c.ShouldBindQuery(&p); err != nil {
+	if err := c.ShouldBind(&p); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
@@ -44,12 +48,15 @@ func UnregisterListenerHandler(c *gin.Context) {
 		URL:  p.Url,
 	}
 
-	eventtype, err := strconv.Atoi(c.Query("eventType"))
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
+	eventtypes := strings.Split(c.Query("eventTypes"), ",")
+	for _, v := range eventtypes {
+		eventtype, err := strconv.Atoi(v)
+		if err != nil {
+			response.Fail(c, gin.H{"status": false}, err.Error())
+			return
+		}
+		eventbus.RemoveEventMap(eventtype, l)
 	}
-	eventbus.RemoveEventMap(eventtype, l)
 
 	if !eventbus.IsExitEventMap(l) {
 		eventbus.RemoveListener(l)
