@@ -15,7 +15,7 @@ type Client struct {
 
 	// 用于异步command及script执行结果处理机
 	asyncCmdResultChan      chan *common.AsyncCmdResult
-	cmdProcessorCallbackMap map[string]RunCommandCallback
+	cmdProcessorCallbackMap map[string]CallbackHandler
 }
 
 var global_client *Client
@@ -29,7 +29,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 
 		eventChan:               make(chan *common.EventMessage, 20),
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
-		cmdProcessorCallbackMap: make(map[string]RunCommandCallback),
+		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
 	}
 
 	return global_client

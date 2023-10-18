@@ -598,6 +598,10 @@ gitee.com/openeuler/PilotGo/sdk v0.0.0-20231013061050-121e72c3da2f h1:99uhCxRamm
 gitee.com/openeuler/PilotGo/sdk v0.0.0-20231013061050-121e72c3da2f/go.mod h1:+wWAkG+wOHewMRyRZh84tgFrIvR5hep06bEpo/ppkqQ=
 gitee.com/openeuler/PilotGo/sdk v0.0.0-20231016073904-97bbbc233e48 h1:fDVQqttlYdukvSarEl/ihxYZFvnNg/JtoaLzHUwuxik=
 gitee.com/openeuler/PilotGo/sdk v0.0.0-20231016073904-97bbbc233e48/go.mod h1:+wWAkG+wOHewMRyRZh84tgFrIvR5hep06bEpo/ppkqQ=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231017053937-095de8e0b8bb h1:ZOlTbYUZZUf8Ia4615jg1nr27YwPMBwSI3AY/t6/9vY=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231017053937-095de8e0b8bb/go.mod h1:+wWAkG+wOHewMRyRZh84tgFrIvR5hep06bEpo/ppkqQ=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231017091904-4321a885c98b h1:uQUmAth9ExwujKZRpXNK5FSChcLbsWn3cb0C3L8+Ga0=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231017091904-4321a885c98b/go.mod h1:+wWAkG+wOHewMRyRZh84tgFrIvR5hep06bEpo/ppkqQ=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.0.0/go.mod h1:uGG2W01BaETf0Ozp+QxxKJdMBNRWPdstHG0Fmdwn1/U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.2/go.mod h1:uGG2W01BaETf0Ozp+QxxKJdMBNRWPdstHG0Fmdwn1/U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.0/go.mod h1:bjGvMhVMb+EEm3VRNQawDMUyMMjo+S5ewNjflkep/0Q=
