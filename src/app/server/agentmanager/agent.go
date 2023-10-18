@@ -88,7 +88,7 @@ func (a *Agent) startListen() {
 		buff := make([]byte, 1024)
 		n, err := a.conn.Read(buff)
 		if err != nil {
-			err := dao.MachineStatusToOffline(a.UUID)
+			err := dao.UpdateMachineState(a.UUID, OffLine)
 			if err != nil {
 				logger.Error("update machine status failed: %s", err.Error())
 			}

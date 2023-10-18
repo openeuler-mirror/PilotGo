@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 
+	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
@@ -244,7 +245,7 @@ func DeleteDepartData(DelDept *dao.DeleteDepart) error {
 		return err
 	}
 	for _, mac := range macli {
-		err := dao.ModifyMachineDepart2(mac.ID, global.UncateloguedDepartId)
+		err := dao.UpdateMachineDepartState(mac.ID, global.UncateloguedDepartId, agentmanager.Free)
 		if err != nil {
 			return err
 		}
@@ -259,7 +260,7 @@ func DeleteDepartData(DelDept *dao.DeleteDepart) error {
 			return err
 		}
 		for _, m := range machine {
-			err := dao.ModifyMachineDepart2(m.ID, global.UncateloguedDepartId)
+			err := dao.UpdateMachineDepartState(m.ID, global.UncateloguedDepartId, agentmanager.Free)
 			if err != nil {
 				return err
 			}
@@ -294,10 +295,22 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 		ResIds[index], _ = strconv.Atoi(val)
 	}
 	for _, id := range ResIds {
-		err := dao.ModifyMachineDepart(id, DepartID)
+		machine, err := dao.MachineInfo(id)
 		if err != nil {
 			return err
 		}
+
+		// TODO: update machine state logic
+		state := agentmanager.Normal
+		if machine.State == agentmanager.Free {
+			state = agentmanager.Normal
+		} else {
+			if DepartID == global.UncateloguedDepartId {
+				state = agentmanager.Free
+			}
+		}
+		dao.UpdateMachineDepartState(id, DepartID, state)
+
 	}
 	return nil
 }
