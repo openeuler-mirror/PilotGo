@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/shirou/gopsutil/v3/host"
 )
@@ -40,9 +39,11 @@ type RepoSource struct {
 	Baseurl string
 }
 
+const RepoPath = "/etc/yum.repos.d"
+
 // TODO: yum源文件在agent端打开的情况下调用该接口匹配内容出错
 func GetRepoSource() ([]RepoSource, error) {
-	repos, err := utils.GetFiles(global.RepoPath)
+	repos, err := utils.GetFiles(RepoPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get repo source file: %s", err)
 	}
@@ -69,7 +70,7 @@ func GetRepoSource() ([]RepoSource, error) {
 		}
 	}
 
-	text, err := utils.FileReadString(global.RepoPath + "/" + repo)
+	text, err := utils.FileReadString(RepoPath + "/" + repo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read repo source data: %s", err)
 	}

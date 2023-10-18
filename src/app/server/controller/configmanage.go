@@ -20,7 +20,6 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	config "gitee.com/openeuler/PilotGo/app/server/service/configmanage"
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
@@ -86,7 +85,7 @@ func AllConfigFiles(c *gin.Context) {
 	}
 
 	var filetype []string
-	filetype = append(filetype, global.ConfigRepo)
+	filetype = append(filetype, "repo配置")
 
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code":  http.StatusOK,
