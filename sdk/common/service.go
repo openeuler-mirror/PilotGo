@@ -1,5 +1,7 @@
 package common
 
+import "encoding/json"
+
 const (
 	ServiceActiveStatusRunning  = "running"
 	ServiceActiveStatusExited   = "exited"
@@ -57,11 +59,12 @@ type Result struct {
 	Data    []*ServiceResult `json:"data"`
 }
 
-type RespResult struct {
-	Code int `json:"code"`
-	Data struct {
-		Status string `json:"status"`
-		Error  string `json:"error"`
-	} `json:"data"`
-	Msg string `json:"msg"`
+type CommonResult struct {
+	Code    int             `json:"code"`
+	Message string          `json:"msg"`
+	Data    json.RawMessage `json:"data"`
+}
+
+func (r *CommonResult) ParseData(d interface{}) error {
+	return json.Unmarshal(r.Data, d)
 }
