@@ -23,12 +23,14 @@ import (
 	"strings"
 
 	aconfig "gitee.com/openeuler/PilotGo/app/agent/config"
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
 	gnet "github.com/shirou/gopsutil/v3/net"
 )
+
+// 网络配置
+const NetWorkPath = "/etc/sysconfig/network-scripts"
 
 // 获取当前TCP网络连接信息
 func (b *BaseOS) GetTCP() ([]common.NetConnect, error) {
@@ -127,7 +129,7 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 
 // 配置网络连接
 func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
-	network, err := utils.GetFiles(global.NetWorkPath)
+	network, err := utils.GetFiles(NetWorkPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network configuration file: %s", err)
 	}
@@ -139,7 +141,7 @@ func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
 		filename = n
 	}
 
-	exitc, text, stde, err := utils.RunCommand("cat " + global.NetWorkPath + "/" + filename)
+	exitc, text, stde, err := utils.RunCommand("cat " + NetWorkPath + "/" + filename)
 	if exitc == 0 && text != "" && stde == "" && err == nil {
 		var oldnet []map[string]string
 		lines := strings.Split(text, "\n")

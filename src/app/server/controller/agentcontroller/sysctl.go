@@ -20,7 +20,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service"
-	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -72,7 +72,7 @@ func SysctlChangeHandler(c *gin.Context) {
 		}
 		response.Fail(c, nil, "获取uuid失败")
 
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -92,7 +92,7 @@ func SysctlChangeHandler(c *gin.Context) {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -108,7 +108,7 @@ func SysctlChangeHandler(c *gin.Context) {
 	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
-	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
+	if dao.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
 		logger.Error(err.Error())
 	}
 	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")

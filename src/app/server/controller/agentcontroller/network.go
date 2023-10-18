@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gitee.com/openeuler/PilotGo/utils/os/baseos"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
@@ -176,10 +175,14 @@ func ConfigNetworkConnect(c *gin.Context) {
 		*oldnet,
 	}
 
+	// TODO: move to util/os package
+	// 网络配置
+	const NetWorkPath = "/etc/sysconfig/network-scripts"
+
 	switch ip_assignment {
 	case "static":
 		text := baseos.NetworkStatic(oldnets3, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
-		_, Err, err := agent.UpdateConfigFile(global.NetWorkPath, nic_name, text)
+		_, Err, err := agent.UpdateConfigFile(NetWorkPath, nic_name, text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
 			return
@@ -193,7 +196,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 
 	case "dhcp":
 		text := baseos.NetworkDHCP(oldnets3)
-		_, Err, err := agent.UpdateConfigFile(global.NetWorkPath, nic_name, text)
+		_, Err, err := agent.UpdateConfigFile(NetWorkPath, nic_name, text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
 			return

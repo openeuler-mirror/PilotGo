@@ -14,31 +14,6 @@
  ******************************************************************************/
 package global
 
-// 用户、角色
-const (
-	// 超级用户
-	SuperUser = "admin@123.com"
-)
-
-// 单机操作成功状态:是否成功，机器数量，比率
-const (
-	ActionOK    = "1,1,1.00"
-	ActionFalse = "0,1,0.00"
-)
-
-// 配置文件类型
-const (
-	ConfigRepo = "repo配置"
-)
-
-// 配置文件源路径
-const (
-	// repo路径
-	RepoPath = "/etc/yum.repos.d"
-	// 网络配置
-	NetWorkPath = "/etc/sysconfig/network-scripts"
-)
-
 // 机器运行状态
 const (
 	// 机器运行

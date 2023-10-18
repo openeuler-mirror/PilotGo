@@ -20,7 +20,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service"
-	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -94,7 +94,7 @@ func ServiceStartHandler(c *gin.Context) {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, nil, "获取uuid失败")
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -116,7 +116,7 @@ func ServiceStartHandler(c *gin.Context) {
 		}
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -133,7 +133,7 @@ func ServiceStartHandler(c *gin.Context) {
 	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
-	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
+	if dao.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
 		logger.Error(err.Error())
 	}
 
@@ -168,7 +168,7 @@ func ServiceStopHandler(c *gin.Context) {
 		}
 		response.Fail(c, nil, "获取uuid失败")
 
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -189,7 +189,7 @@ func ServiceStopHandler(c *gin.Context) {
 		}
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -206,7 +206,7 @@ func ServiceStopHandler(c *gin.Context) {
 	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
-	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
+	if dao.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
 		logger.Error(err.Error())
 	}
 
@@ -240,7 +240,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		}
 		response.Fail(c, nil, "获取uuid失败")
 
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -262,7 +262,7 @@ func ServiceRestartHandler(c *gin.Context) {
 		}
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 
-		if dao.UpdateParentAgentLog(logParentId, global.ActionFalse) != nil {
+		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -279,7 +279,7 @@ func ServiceRestartHandler(c *gin.Context) {
 	if dao.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
-	if dao.UpdateParentAgentLog(logParentId, global.ActionOK) != nil {
+	if dao.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
 		logger.Error(err.Error())
 	}
 

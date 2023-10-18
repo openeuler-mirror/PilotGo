@@ -21,12 +21,17 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/agent/localstorage"
 	"gitee.com/openeuler/PilotGo/app/agent/network"
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 	"github.com/fsnotify/fsnotify"
 	"github.com/google/uuid"
 )
+
+// repo路径
+const RepoPath = "/etc/yum.repos.d"
+
+// 网络配置
+const NetWorkPath = "/etc/sysconfig/network-scripts"
 
 var RESP_MSG = make(chan interface{})
 
@@ -42,13 +47,13 @@ func FileMonitorInit() error {
 	defer watcher.Close()
 
 	// 2、使用 watcher 的 Add 方法增加需要监听的文件或目录到监听队列中
-	err = watcher.Add(global.RepoPath)
+	err = watcher.Add(RepoPath)
 	if err != nil {
 		logger.Debug("failed to monitor repo")
 	}
 	logger.Info("start to monitor repo")
 
-	err = watcher.Add(global.NetWorkPath)
+	err = watcher.Add(NetWorkPath)
 	if err != nil {
 		logger.Debug("failed to monitor network")
 	}

@@ -150,6 +150,9 @@ func UpdateRolePermission(permission *Frontdata) (UserRole, error) {
 	return userRole, err
 }
 
+const SuperUser = "admin@123.com"
+const SuperUserPasswd = "admin"
+
 // 创建管理员账户
 func CreateAdministratorUser() error {
 	var role UserRole
@@ -160,7 +163,7 @@ func CreateAdministratorUser() error {
 			Description: "超级管理员",
 		}
 		mysqlmanager.MySQL().Create(&role)
-		bs, err := utils.CryptoPassword(strings.Split(global.SuperUser, "@")[0])
+		bs, err := utils.CryptoPassword(SuperUserPasswd)
 		if err != nil {
 			return err
 		}
@@ -170,9 +173,9 @@ func CreateAdministratorUser() error {
 			DepartFirst:  global.Departroot,
 			DepartSecond: global.UncateloguedDepartId,
 			DepartName:   "超级用户",
-			Username:     strings.Split(global.SuperUser, "@")[0],
+			Username:     strings.Split(SuperUser, "@")[0],
 			Password:     string(bs),
-			Email:        global.SuperUser,
+			Email:        SuperUser,
 			RoleID:       strconv.Itoa(role.ID),
 		}
 		mysqlmanager.MySQL().Create(&user)
