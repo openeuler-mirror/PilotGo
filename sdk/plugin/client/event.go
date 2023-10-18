@@ -95,7 +95,7 @@ func (c *Client) UnListenEvent(eventTypes []int) error {
 // 发布event事件
 func (c *Client) PublishEvent(msg common.EventMessage) error {
 	url := c.Server + "/api/v1/pluginapi/publish_event"
-	r, err := httputils.Post(url, &httputils.Params{
+	r, err := httputils.Put(url, &httputils.Params{
 		Body: &msg,
 	})
 	if err != nil {
@@ -113,6 +113,13 @@ func (c *Client) PublishEvent(msg common.EventMessage) error {
 		return errors.New(resp.Message)
 	}
 
+	data := &struct {
+		Status string `json:"status"`
+		Error  string `json:"error"`
+	}{}
+	if err := resp.ParseData(data); err != nil {
+		return err
+	}
 	return nil
 }
 

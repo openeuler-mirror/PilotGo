@@ -34,7 +34,7 @@ func RegisterListenerHandler(c *gin.Context) {
 		}
 		eventbus.AddEventMap(eventtype, l)
 	}
-	response.Success(c, gin.H{"status": "ok"}, "")
+	response.Success(c, gin.H{"status": "ok"}, "注册eventType成功")
 }
 
 func UnregisterListenerHandler(c *gin.Context) {
@@ -61,14 +61,15 @@ func UnregisterListenerHandler(c *gin.Context) {
 	if !eventbus.IsExitEventMap(l) {
 		eventbus.RemoveListener(l)
 	}
-	response.Success(c, gin.H{"status": "ok"}, "")
+	response.Success(c, gin.H{"status": "ok"}, "删除eventType成功")
 }
 
 func PublishEventHandler(c *gin.Context) {
 	msg := &common.EventMessage{}
-	if err := c.ShouldBindQuery(msg); err != nil {
+	if err := c.ShouldBind(&msg); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 	eventbus.PublishEvent(msg)
+	response.Success(c, gin.H{"status": "ok"}, "publishEvent成功")
 }
