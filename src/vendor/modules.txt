@@ -1,4 +1,4 @@
-# gitee.com/openeuler/PilotGo/sdk v0.0.0-20231017091904-4321a885c98b
+# gitee.com/openeuler/PilotGo/sdk v0.0.0-20231018100003-1e390d1a88f7
 ## explicit; go 1.17
 gitee.com/openeuler/PilotGo/sdk/common
 gitee.com/openeuler/PilotGo/sdk/logger

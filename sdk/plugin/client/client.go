@@ -52,7 +52,7 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
-		api.PUT("/event", func(c *gin.Context) {
+		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
 		}, EventHandler)
 
