@@ -27,7 +27,9 @@ func DefaultClient(desc *PluginInfo) *Client {
 	global_client = &Client{
 		PluginInfo: desc,
 
-		eventChan:               make(chan *common.EventMessage, 20),
+		eventChan:        make(chan *common.EventMessage, 20),
+		eventCallbackMap: make(map[int]EventCallback),
+
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
 	}

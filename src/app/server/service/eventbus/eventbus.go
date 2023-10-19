@@ -1,7 +1,6 @@
 package eventbus
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"sync"
@@ -90,8 +89,8 @@ func (e *EventBus) Run() {
 				logger.Info("event bus exit")
 				e.wait.Done()
 				break
-			case <-e.event:
-				e.broadcast()
+			case m := <-e.event:
+				e.broadcast(m)
 			}
 		}
 	}(e)
@@ -107,36 +106,18 @@ func (e *EventBus) publish(m *common.EventMessage) {
 	e.event <- m
 }
 
-func (e *EventBus) broadcast() {
-	// TODO：将event message发送给监听的listener
-	mes := <-e.event
-	listeners, ok := eventTypeMap[mes.MessageType]
+func (e *EventBus) broadcast(msg *common.EventMessage) {
+	listeners, ok := eventTypeMap[msg.MessageType]
 	if ok {
 		for _, listener := range listeners {
 			r, err := httputils.Post(listener.URL+"/plugin_manage/api/v1/event", &httputils.Params{
-				Body: mes,
+				Body: msg,
 			})
 			if err != nil {
-				logger.Error(listener.Name + " plugin request error:" + err.Error())
+				logger.Error(listener.Name + "plugin process error:" + err.Error())
 			}
 			if r.StatusCode != http.StatusOK {
-				logger.Error("server process error:" + strconv.Itoa(r.StatusCode))
-			}
-
-			resp := &common.CommonResult{}
-			if err := json.Unmarshal(r.Body, resp); err != nil {
-				logger.Error(listener.Name + " plugin request error:" + err.Error())
-			}
-			if resp.Code != http.StatusOK {
-				logger.Error(resp.Message)
-			}
-
-			data := &struct {
-				Status string `json:"status"`
-				Error  string `json:"error"`
-			}{}
-			if err := resp.ParseData(data); err != nil {
-				logger.Error(listener.Name + " plugin request error:" + err.Error())
+				logger.Error(listener.Name + "plugin process error:" + strconv.Itoa(r.StatusCode))
 			}
 		}
 	}
