@@ -12,7 +12,7 @@
  * LastEditTime: 2022-04-06 14:22:15
  * Description: provide configure yaml functions.
  ******************************************************************************/
-package utils
+package config
 
 import (
 	"fmt"

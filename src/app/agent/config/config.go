@@ -19,7 +19,7 @@ import (
 	"flag"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/sdk/utils/config"
 )
 
 type Server struct {
@@ -38,7 +38,7 @@ var global_config AgentConfig
 func Init() error {
 	flag.StringVar(&Config_file, "conf", "./config_agent.yaml", "pilotgo-agent configuration file")
 	flag.Parse()
-	return utils.Load(Config_file, &global_config)
+	return config.Load(Config_file, &global_config)
 }
 
 func Config() *AgentConfig {

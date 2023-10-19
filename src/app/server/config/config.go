@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/utils"
+	"gitee.com/openeuler/PilotGo/sdk/utils/config"
 )
 
 type HttpServer struct {
@@ -67,7 +67,7 @@ type ServerConfig struct {
 var global_config ServerConfig
 
 func Init(path string) error {
-	return utils.Load(path, &global_config)
+	return config.Load(path, &global_config)
 }
 
 func Config() *ServerConfig {
