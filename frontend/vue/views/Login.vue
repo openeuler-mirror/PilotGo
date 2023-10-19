@@ -8,40 +8,19 @@
           <span>账户登录</span>
         </div>
 
-        <el-form
-          :model="loginForm"
-          status-icon
-          :rules="rules"
-          ref="loginForm"
-          class="form"
-          v-loading="loading"
-        >
+        <el-form :model="loginForm" status-icon :rules="rules" ref="loginForm" class="form" v-loading="loading">
           <el-form-item class="form_item" prop="email" label="邮箱">
-            <el-input
-              type="text"
-              v-model="loginForm.email"
-              class="form_item__input"
-              placeholder="请输入邮箱"
-            >
+            <el-input type="text" v-model="loginForm.email" class="form_item__input" placeholder="请输入邮箱">
             </el-input>
           </el-form-item>
           <el-form-item class="form_item" prop="password" label="输入密码">
-            <el-input
-              type="password"
-              v-model="loginForm.password"
-              class="form_item__input"
-              placeholder="请输入密码"
-              @keyup.enter.native="submitLogin"
-            >
+            <el-input type="password" v-model="loginForm.password" class="form_item__input" placeholder="请输入密码"
+              @keyup.enter.native="submitLogin">
             </el-input>
           </el-form-item>
         </el-form>
         <el-row class="form-btn">
-          <el-button
-            class="btn"
-            type="primary"
-            @click="submitLogin"
-          >
+          <el-button class="btn" type="primary" @click="submitLogin">
             登 录
           </el-button>
         </el-row>
@@ -63,10 +42,10 @@ export default {
       },
       rules: {
         email: [
-          { 
-            required: true, 
-            message: "请输入邮箱", 
-            trigger: "blur" 
+          {
+            required: true,
+            message: "请输入邮箱",
+            trigger: "blur"
           },
           {
             validator: checkEmail,
@@ -75,10 +54,10 @@ export default {
           }
         ],
         password: [
-          { 
-            required: true, 
-            message: "请输入密码", 
-            trigger: "blur" 
+          {
+            required: true,
+            message: "请输入密码",
+            trigger: "blur"
           }
         ],
       },
@@ -88,27 +67,27 @@ export default {
     submitLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
-            this.loading = true;
-            let data = {
-                username: this.loginForm.email,
-                password: this.loginForm.password
-            }
-            this.$store.dispatch("loginByEmail", data).then((res) => {
-                this.loading = false;
-                this.$router.push({
-                    path: '/',
-                    query: {
-                        page: 1,
-                        per_page: 20
-                    }
-                })
-            }).catch(error => {
-                this.loading = false;
-                this.$message({
-                    type: 'error',
-                    message: error.msg,
-                })
+          this.loading = true;
+          let data = {
+            username: this.loginForm.email,
+            password: this.loginForm.password
+          }
+          this.$store.dispatch("loginByEmail", data).then((res) => {
+            this.loading = false;
+            this.$router.push({
+              path: '/',
+              query: {
+                page: 1,
+                per_page: 20
+              }
             })
+          }).catch(error => {
+            this.loading = false;
+            this.$message({
+              type: 'error',
+              message: "failed to login" + error.msg,
+            })
+          })
         }
       });
     },
@@ -117,7 +96,6 @@ export default {
 </script>
 
 <style lang="scss">
-
 .login-page {
   height: 100%;
   background: url(~@/assets/bg.png);
@@ -143,6 +121,7 @@ export default {
       margin-top: 70px;
       margin-left: 60px;
     }
+
     .login-form {
       position: absolute;
       top: 0;
@@ -155,10 +134,12 @@ export default {
       .login-form_text {
         margin: 20px auto;
         width: 260px;
+
         p {
           font-size: 30px;
           margin: 10px auto;
         }
+
         span {
           font-size: 24px;
         }
@@ -186,12 +167,14 @@ export default {
         color: #fff;
         width: 150px;
         margin: 0 auto 5px auto;
+
         .btn {
           width: 150px;
           border-radius: 40px;
           margin-top: 26px;
         }
       }
+
       .form-register {
         color: #867d7d;
         font-size: 14px;
@@ -201,6 +184,4 @@ export default {
     }
   }
 }
-
-
 </style>

@@ -13,7 +13,7 @@
   Description: provide agent log manager of pilotgo
  -->
 <template>
-  <div style="width:calc(100%);height:calc(100%)">
+  <div style="width:calc(100%);height:calc(100% - 20px)">
     <el-container>
       <el-aside style="width: 8%">
         <div class="logo">
@@ -76,6 +76,9 @@
         </el-main>
       </el-container>
     </el-container>
+    <div class="foot">
+      <p> <a href="https://gitee.com/openeuler/PilotGo" target="_blank">PilotGo</a> version: {{ version.commit?version.version+"-"+version.commit:version.version }}, build time: {{ version.build_time }} All right reserved</p>
+    </div>
   </div>
 </template>
 
@@ -84,6 +87,7 @@ import SidebarItem from "./components/SidebarItem";
 import BreadCrumb from "./components/BreadCrumb";
 import TagsView from "./components/TagsView";
 import { updatePwd } from "@/request/user";
+import { getVersion } from "@/request/api";
 export default {
   name: "Home",
   components: {
@@ -132,11 +136,14 @@ export default {
           { validator: validatePass2, trigger: 'blur' }
         ]
       },
-
+      version: {},
     }
   },
   mounted() {
     this.initSocket();
+    getVersion().then((resp)=>{
+      this.version = resp.data.data
+    })
   },
   computed: {
     cachedViews() {
@@ -294,6 +301,16 @@ export default {
 </script>
 
 <style lang="scss" scope>
+.foot {
+  height: 20px;
+  width: 100%;
+  line-height: 20px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .el-container {
   height: calc(100%);
   width: calc(100%);

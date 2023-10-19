@@ -107,6 +107,8 @@ func setupRouter() *gin.Engine {
 func registerAPIs(router *gin.Engine) {
 	noAuthenApis := router.Group("/api/v1")
 	{
+		noAuthenApis.GET("/version", controller.VersionHandler)
+
 		noAuthenApis.POST("/user/login", controller.LoginHandler)
 		noAuthenApis.GET("/user/logout", controller.Logout)
 		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)

@@ -29,3 +29,11 @@ export function getChart(url) {
     method: 'get',
   })
 }
+
+// 平台版本
+export function getVersion() {
+  return request({
+    url: '/version',
+    method: 'get'
+  })
+}
