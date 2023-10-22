@@ -21,7 +21,7 @@
         </el-table-column>
         <el-table-column prop="enabled" label="状态" width="150">
           <template slot-scope="scope">
-            <span>{{ scope.row.enabled === 0 ? '禁用' : '启用' }}</span>
+            <span>{{ scope.row.enabled === 0 ? '已禁用' : '已启用' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right">
@@ -95,14 +95,19 @@ export default {
     },
     // 启用/停用插件
     handlePluginState(item) {
-      unLoadPlugin({ uuid: item.uuid, enable: item.enabled }).then(res => {
+      let targetEnabled = item.enabled === 1?0:1
+      unLoadPlugin({ uuid: item.uuid, enable: targetEnabled }).then(res => {
         if (res.data.code === 200) {
           this.refresh();
           this.$store.dispatch('SetDynamicRouters', []).then(() => {
-            this.$store.dispatch('GenerateRoutes');
+            this.$store.dispatch('GenerateRoutes').catch((err)=>{
+            console.log("generate router error: ", err)
+          })
+          }).catch((err)=>{
+            console.log("update dynamic router error: ", err)
           })
           this.$message.success(res.data.msg);
-          if (item.enabled === 1) {
+          if (targetEnabled === 0) {
             // 禁用插件，删除tag标签
             this.del_plugin_tag(item.name);
           }
@@ -116,7 +121,9 @@ export default {
     del_plugin_tag(tagName) {
       let openTags = this.$store.getters.visitedViews;
       let tagArr = openTags.filter(tag => tag.title === tagName);
-      this.$store.dispatch('tagsView/delView', tagArr[0]).then()
+      if (tagArr.length > 0) {
+        this.$store.dispatch('tagsView/delView', tagArr[0]).then()
+      }
     }
   },
 };

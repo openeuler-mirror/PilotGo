@@ -26,7 +26,6 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
-	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -74,12 +73,6 @@ func main() {
 	err = network.HttpServerInit(&config.Config().HttpServer)
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
-		os.Exit(-1)
-	}
-
-	// 初始化插件组件
-	if err = plugin.ServiceInit(); err != nil {
-		logger.Error("plugin service init failed, error:%v", err)
 		os.Exit(-1)
 	}
 

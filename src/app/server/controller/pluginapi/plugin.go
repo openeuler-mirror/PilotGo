@@ -7,8 +7,10 @@ import (
 )
 
 func PluginList(c *gin.Context) {
-	data := plugin.GetPlugins()
-
-	response.Success(c, data, "")
-
+	plugins, err := plugin.GetPlugins()
+	if err != nil {
+		response.Fail(c, nil, "查询插件错误："+err.Error())
+		return
+	}
+	response.Success(c, plugins, "插件查询成功")
 }

@@ -18,15 +18,15 @@ import "gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 
 type PluginModel struct {
 	ID          int    `gorm:"type:int"`
-	UUID        string `gorm:"type:varchar(50)"`
-	Name        string `gorm:"type:varchar(100)"`
-	Version     string `gorm:"type:varchar(50)"`
-	Description string `gorm:"type:text"`
-	Author      string `gorm:"type:varchar(50)"`
-	Email       string `gorm:"type:varchar(100)"`
-	Url         string `gorm:"type:varchar(200)"`
-	PluginType  string `gorm:"type:varchar(50)"`
-	Enabled     int    `gorm:"type:int"`
+	UUID        string `gorm:"type:varchar(50)" json:"uuid"`
+	Name        string `gorm:"type:varchar(100)" json:"name"`
+	Version     string `gorm:"type:varchar(50)" json:"version"`
+	Description string `gorm:"type:text" json:"description"`
+	Author      string `gorm:"type:varchar(50)" json:"author"`
+	Email       string `gorm:"type:varchar(100)" json:"email"`
+	Url         string `gorm:"type:varchar(200)" json:"url"`
+	PluginType  string `gorm:"type:varchar(50)" json:"plugin_type"`
+	Enabled     int    `gorm:"type:int" json:"enabled"`
 }
 
 func (m *PluginModel) TableName() string {
@@ -42,6 +42,15 @@ func RecordPlugin(plugin *PluginModel) error {
 func QueryPlugins() ([]*PluginModel, error) {
 	var plugins []*PluginModel
 	if err := mysqlmanager.MySQL().Find(&plugins).Error; err != nil {
+		return nil, err
+	}
+	return plugins, nil
+}
+
+// 查询单个插件信息
+func QueryPlugin(name string) (*PluginModel, error) {
+	var plugins *PluginModel
+	if err := mysqlmanager.MySQL().Where("name=?", name).Find(&plugins).Error; err != nil {
 		return nil, err
 	}
 	return plugins, nil
