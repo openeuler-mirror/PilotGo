@@ -89,8 +89,7 @@ const permission = {
         commit("SET_MENUS", menus)
 
         router.updateRoutes(state.dynamicRoutes);
-        let routers = filterAsyncRouter(JSON.parse(JSON.stringify(routes)), menus)
-        commit('SET_ROUTERS', routers)
+        commit('SET_ROUTERS', routes)
         resolve()
       })
     },
@@ -136,7 +135,6 @@ const permission = {
             this.$message.error("查询插件列表错误：", res.data.msg);
           }
         })
-
       })
       // } else {
       //   return new Promise(resolve => {

@@ -14,7 +14,11 @@ import (
 
 // 查询插件清单
 func GetPluginsHandler(c *gin.Context) {
-	plugins := plugin.GetPlugins()
+	plugins, err := plugin.GetPlugins()
+	if err != nil {
+		response.Fail(c, nil, "查询插件错误："+err.Error())
+		return
+	}
 
 	logger.Info("find %d plugins", len(plugins))
 	response.Success(c, plugins, "插件查询成功")

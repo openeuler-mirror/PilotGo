@@ -2,14 +2,11 @@ package plugin
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
-	"sync"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/dao"
-	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -21,211 +18,7 @@ const (
 	PluginDisabled = 0
 )
 
-type Plugin struct {
-	UUID        string `json:"uuid"`
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-	Author      string `json:"author"`
-	Email       string `json:"email"`
-	Url         string `json:"url"`
-	PluginType  string `json:"plugin_type"`
-	Enabled     int    `json:"enabled"`
-	Status      string `json:"status"`
-}
-
-// 初始化插件服务
-func ServiceInit() error {
-	return globalManager.RestorePluginInfo()
-}
-
-// TODO： 替换成concurrent hashmap
-type PluginManager struct {
-	loadedPlugin map[string]*Plugin
-	lock         sync.RWMutex
-}
-
-var globalManager = &PluginManager{
-	loadedPlugin: map[string]*Plugin{},
-	lock:         sync.RWMutex{},
-}
-
-// 从db中恢复插件信息
-func (pm *PluginManager) RestorePluginInfo() error {
-	plugins, err := dao.QueryPlugins()
-	if err != nil {
-		logger.Error("failed to read plugin info from db:%s", err.Error())
-		return err
-	}
-
-	pm.lock.Lock()
-	defer pm.lock.Unlock()
-	for _, p := range plugins {
-		np := &Plugin{
-			UUID:        p.UUID,
-			Name:        p.Name,
-			Version:     p.Version,
-			Description: p.Description,
-			Author:      p.Author,
-			Email:       p.Email,
-			Url:         p.Url,
-			PluginType:  p.PluginType,
-			Enabled:     p.Enabled,
-			Status:      common.StatusOffline,
-		}
-
-		pm.loadedPlugin[np.Name] = np
-	}
-
-	return nil
-}
-
-// 添加一个插件
-func (pm *PluginManager) Add(p *Plugin) error {
-	if p.Url == "" || p.Name == "" || p.PluginType == "" {
-		return errors.New("invalid plugin parameter")
-	}
-
-	pm.lock.Lock()
-	defer pm.lock.Unlock()
-	if _, ok := pm.loadedPlugin[p.Name]; ok {
-		return errors.New("plugin already registered")
-	}
-
-	// 记录到DB当中
-	err := dao.RecordPlugin(&dao.PluginModel{
-		UUID:        p.UUID,
-		Name:        p.Name,
-		Version:     p.Version,
-		Description: p.Description,
-		Author:      p.Author,
-		Email:       p.Email,
-		Url:         p.Url,
-		PluginType:  p.PluginType,
-		Enabled:     PluginDisabled,
-	})
-	if err != nil {
-		return err
-	}
-
-	// 记录db无报错之后才更新缓存数据
-	pm.loadedPlugin[p.Name] = p
-
-	return nil
-}
-
-// 移除注册的插件
-func (pm *PluginManager) Remove(uuid string) error {
-	if err := dao.DeletePlugin(uuid); err != nil {
-		// TODO: 细化db删除错误处理
-		logger.Error("failed to delete plugin info:%s", err.Error())
-	}
-
-	pm.lock.Lock()
-	defer pm.lock.Unlock()
-	name := ""
-	for _, p := range pm.loadedPlugin {
-		if p.UUID == uuid {
-			name = p.Name
-			break
-		}
-	}
-	delete(pm.loadedPlugin, name)
-
-	return errors.New("plugin not found")
-}
-
-// 获取注册的插件
-func (pm *PluginManager) Get(name string) (*Plugin, error) {
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
-
-	if p, ok := pm.loadedPlugin[name]; ok {
-		return p, nil
-	}
-
-	return nil, errors.New("plugin not found")
-}
-
-// 获取所有的插件
-func (pm *PluginManager) GetAll() []*Plugin {
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
-
-	plugins := []*Plugin{}
-	for _, value := range pm.loadedPlugin {
-		p := &Plugin{
-			UUID:        value.UUID,
-			Name:        value.Name,
-			Version:     value.Version,
-			Description: value.Description,
-			Author:      value.Author,
-			Email:       value.Email,
-			Url:         value.Url,
-			PluginType:  value.PluginType,
-			Enabled:     value.Enabled,
-		}
-
-		plugins = append(plugins, p)
-	}
-
-	return plugins
-}
-
-// 检查插件是否注册
-func (pm *PluginManager) Check(name string) bool {
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
-
-	_, ok := pm.loadedPlugin[name]
-	return ok
-}
-
-// 更新插件使能状态
-func (pm *PluginManager) UpdatePlugin(uuid string, enable int) error {
-	var status int
-	if enable == PluginEnabled {
-		status = PluginDisabled
-	} else {
-		status = PluginEnabled
-	}
-	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
-		UUID:    uuid,
-		Enabled: status,
-	}); err != nil {
-		return err
-	}
-
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
-	for _, p := range pm.loadedPlugin {
-		if p.UUID == uuid {
-			p.Enabled = status
-		}
-		return nil
-	}
-
-	return nil
-}
-
-// 检查插件是否使能
-func (pm *PluginManager) IsPluginEnabled(uuid string) (int, error) {
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
-
-	pm.lock.RLock()
-	defer pm.lock.RUnlock()
-	for _, p := range pm.loadedPlugin {
-		if p.UUID == uuid {
-			return p.Enabled, nil
-		}
-	}
-	return PluginDisabled, errors.New("plugin not found")
-}
-
-func GetManager() *PluginManager {
-	return globalManager
-}
+type Plugin = dao.PluginModel
 
 // 与plugin进行握手，交换必要信息
 func Handshake(url string) (*Plugin, error) {
@@ -243,7 +36,7 @@ func Handshake(url string) (*Plugin, error) {
 		Email:       info.Email,
 		Url:         info.Url,
 		PluginType:  info.PluginType,
-		Status:      common.StatusLoaded,
+		// Status:      common.StatusLoaded,
 	}
 
 	return plugin, nil
@@ -269,12 +62,23 @@ func requestPluginInfo(url string) (*client.PluginInfo, error) {
 }
 
 // 获取plugin清单
-func GetPlugins() []*Plugin {
-	return globalManager.GetAll()
+func GetPlugins() ([]*Plugin, error) {
+	plugins, err := dao.QueryPlugins()
+	if err != nil {
+		logger.Error("failed to read plugin info from db:%s", err.Error())
+		return nil, err
+	}
+
+	return plugins, nil
 }
 
 func GetPlugin(name string) (*Plugin, error) {
-	return globalManager.Get(name)
+	plugin, err := dao.QueryPlugin(name)
+	if err != nil {
+		logger.Error("failed to read plugin info from db:%s", err.Error())
+		return nil, err
+	}
+	return plugin, nil
 }
 
 type AddPluginParam struct {
@@ -295,7 +99,7 @@ func AddPlugin(param *AddPluginParam) error {
 	plugin.UUID = uuid.New().String()
 	plugin.PluginType = param.Type
 
-	if err := globalManager.Add(plugin); err != nil {
+	if err := dao.RecordPlugin(plugin); err != nil {
 		return err
 	}
 	return nil
@@ -304,8 +108,8 @@ func AddPlugin(param *AddPluginParam) error {
 func DeletePlugin(uuid string) error {
 	logger.Debug("delete plugin: %s", uuid)
 
-	if err := globalManager.Remove(uuid); err != nil {
-		return err
+	if err := dao.DeletePlugin(uuid); err != nil {
+		logger.Error("failed to delete plugin info:%s", err.Error())
 	}
 	return nil
 }
@@ -313,7 +117,10 @@ func DeletePlugin(uuid string) error {
 func TogglePlugin(uuid string, enable int) error {
 	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
 
-	if err := globalManager.UpdatePlugin(uuid, enable); err != nil {
+	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
+		UUID:    uuid,
+		Enabled: enable,
+	}); err != nil {
 		return err
 	}
 	return nil
