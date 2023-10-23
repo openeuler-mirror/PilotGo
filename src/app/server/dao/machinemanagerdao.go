@@ -83,12 +83,11 @@ func UpdateMachineState(uuid string, state int) error {
 
 // 更新机器IP及状态
 func UpdateMachineIPState(uuid, ip string, state int) error {
-	var Machine MachineNode
-	Ma := MachineNode{
+	Ma := &MachineNode{
 		State: state,
 		IP:    ip,
 	}
-	return mysqlmanager.MySQL().Model(&Machine).Where("machine_uuid=?", uuid).Updates(&Ma).Error
+	return mysqlmanager.MySQL().Model(&MachineNode{}).Where("machine_uuid=?", uuid).Updates(Ma).Error
 }
 
 // 新增agent机器
@@ -122,7 +121,7 @@ func MachineStore(departid int) ([]MachineNode, error) {
 }
 
 func MachineInfo(id int) (*MachineNode, error) {
-	var machine *MachineNode
+	var machine = &MachineNode{}
 	if err := mysqlmanager.MySQL().Where("id=?", id).Find(machine).Error; err != nil {
 		return nil, err
 	}
@@ -130,12 +129,11 @@ func MachineInfo(id int) (*MachineNode, error) {
 }
 
 func UpdateMachineDepartState(MadId int, DeptId int, state int) error {
-	var Machine MachineNode
-	Ma := MachineNode{
+	Ma := &MachineNode{
 		DepartId: DeptId,
 		State:    state,
 	}
-	return mysqlmanager.MySQL().Model(&Machine).Where("id=?", MadId).Updates(&Ma).Error
+	return mysqlmanager.MySQL().Model(&MachineNode{}).Where("id=?", MadId).Updates(Ma).Error
 }
 
 // 根据机器id获取机器信息
