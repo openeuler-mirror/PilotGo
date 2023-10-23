@@ -85,7 +85,7 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(middleware.LoggerDebug())
+	router.Use(logger.RequestLogger())
 	router.Use(middleware.Recover)
 
 	// 绑定 http api handler

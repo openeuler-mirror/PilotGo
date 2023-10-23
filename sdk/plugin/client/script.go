@@ -81,7 +81,7 @@ func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCo
 
 	p := &common.CmdStruct{
 		Batch:   batch,
-		Command: cmd,
+		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
 	}
 
 	r, err := httputils.Post(url, &httputils.Params{
