@@ -1,11 +1,8 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
-	"strings"
 
-	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
@@ -33,8 +30,7 @@ func CreateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
-	log := auditlog.NewByUser(auditlog.LogTypeBatch, "创建批次", "", user)
+	log := auditlog.New(auditlog.LogTypeBatch, "创建批次", user.ID)
 	auditlog.Add(log)
 
 	batchinfo := &batch.CreateBatchParam{
@@ -47,15 +43,11 @@ func CreateBatchHandler(c *gin.Context) {
 	}
 
 	if err := batch.CreateBatch(batchinfo); err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Name, http.StatusBadRequest)
-		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Name, http.StatusOK)
-	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次入库成功")
 }
@@ -97,7 +89,7 @@ func DeleteBatchHandler(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.NewByUser(auditlog.LogTypeBatch, "删除批次", "", user)
+	log := auditlog.New(auditlog.LogTypeBatch, "删除批次", user.ID)
 	auditlog.Add(log)
 
 	batchesname := []string{}
@@ -106,15 +98,10 @@ func DeleteBatchHandler(c *gin.Context) {
 	}
 
 	if err := batch.DeleteBatch(batchdel.BatchID); err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, strings.Join(batchesname, "/"), http.StatusBadRequest)
-		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, strings.Join(batchesname, "/"), http.StatusOK)
-	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次删除成功")
 }
@@ -136,20 +123,16 @@ func UpdateBatchHandler(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.NewByUser(auditlog.LogTypeBatch, "编辑批次", "", user)
+	log := auditlog.New(auditlog.LogTypeBatch, "编辑批次", user.ID)
 	auditlog.Add(log)
 
 	err = batch.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, batchinfo.BatchName, http.StatusBadRequest)
-		auditlog.Add(log_s)
 		auditlog.UpdateStatus(log, auditlog.ActionFalse)
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, batchinfo.BatchName, http.StatusOK)
-	auditlog.Add(log_s)
 	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次修改成功")
 }
