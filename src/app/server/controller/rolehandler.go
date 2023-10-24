@@ -15,10 +15,6 @@
 package controller
 
 import (
-	"net/http"
-	"strings"
-
-	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	roleservice "gitee.com/openeuler/PilotGo/app/server/service/role"
@@ -67,7 +63,7 @@ func AddRoleHandler(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.NewByUser(auditlog.LogTypePermission, "添加角色", "", user)
+	log := auditlog.New(auditlog.LogTypePermission, "添加角色", user.ID)
 	auditlog.Add(log)
 
 	userRole := &roleservice.UserRole{
@@ -77,16 +73,12 @@ func AddRoleHandler(c *gin.Context) {
 
 	err = roleservice.AddRole(userRole)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
-		auditlog.Add(log_s)
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "新增角色成功", log.Module, params.Role, http.StatusOK)
-	auditlog.Add(log_s)
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "新增角色成功")
 }
 
@@ -105,21 +97,17 @@ func DeleteRoleHandler(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.NewByUser(auditlog.LogTypePermission, "删除角色", "", user)
+	log := auditlog.New(auditlog.LogTypePermission, "删除角色", user.ID)
 	auditlog.Add(log)
 
 	err = roleservice.DeleteRole(params.Role)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
-		auditlog.Add(log_s)
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
-	auditlog.Add(log_s)
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "角色删除成功")
 }
 
@@ -139,21 +127,17 @@ func UpdateRoleInfoHandler(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.NewByUser(auditlog.LogTypePermission, "修改角色信息", "", user)
+	log := auditlog.New(auditlog.LogTypePermission, "修改角色信息", user.ID)
 	auditlog.Add(log)
 
 	err = roleservice.UpdateRoleInfo(params.Role, params.Description)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
-		auditlog.Add(log_s)
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
-	auditlog.Add(log_s)
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "角色信息修改成功")
 }
 
@@ -174,21 +158,17 @@ func RolePermissionChangeHandler(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.NewByUser(auditlog.LogTypePermission, "修改角色权限", "", user)
+	log := auditlog.New(auditlog.LogTypePermission, "修改角色权限", user.ID)
 	auditlog.Add(log)
 
 	err = roleservice.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus)
 	if err != nil {
-		log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, err.Error(), log.Module, params.Role, http.StatusBadRequest)
-		auditlog.Add(log_s)
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	log_s := auditlog.New_sub(log.LogUUID, strings.Split(config.Config().HttpServer.Addr, ":")[0], log.Action, "", log.Module, params.Role, http.StatusOK)
-	auditlog.Add(log_s)
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 
 	response.Success(c, nil, "角色权限变更成功")
 }
