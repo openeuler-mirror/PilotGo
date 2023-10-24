@@ -195,34 +195,12 @@ func AgentOSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 	cpu, errcpu := uos.OS().GetCPUInfo()
 	systemAndCPUInfo := common.SystemAndCPUInfo{}
 
-	if erros != nil && errcpu != nil {
+	if erros != nil || errcpu != nil {
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: -1,
 			Error:  erros.Error(),
-			Data:   systemAndCPUInfo,
-		}
-		return c.Send(resp_msg)
-	} else if erros != nil && errcpu == nil {
-		systemAndCPUInfo.ModelName = cpu.ModelName
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: -1,
-			Error:  erros.Error(),
-			Data:   systemAndCPUInfo,
-		}
-		return c.Send(resp_msg)
-	} else if erros == nil && errcpu != nil {
-		systemAndCPUInfo.IP = os.IP
-		systemAndCPUInfo.Platform = os.Platform
-		systemAndCPUInfo.PlatformVersion = os.PlatformVersion
-		resp_msg := &protocol.Message{
-			UUID:   msg.UUID,
-			Type:   msg.Type,
-			Status: -1,
-			Error:  errcpu.Error(),
 			Data:   systemAndCPUInfo,
 		}
 		return c.Send(resp_msg)
@@ -231,6 +209,7 @@ func AgentOSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 		IP:              os.IP,
 		Platform:        os.Platform,
 		PlatformVersion: os.PlatformVersion,
+		PrettyName:      os.PrettyName,
 		ModelName:       cpu.ModelName,
 	}
 	resp_msg := &protocol.Message{

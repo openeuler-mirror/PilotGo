@@ -1,14 +1,16 @@
 package baseos
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strings"
+	"time"
 
 	aconfig "gitee.com/openeuler/PilotGo/app/agent/config"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/utils"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
+	"github.com/duke-git/lancet/datetime"
+	"github.com/duke-git/lancet/fileutil"
 	"github.com/shirou/gopsutil/v3/host"
 )
 
@@ -20,21 +22,65 @@ func (b *BaseOS) GetHostInfo() (*common.SystemInfo, error) {
 	}
 	defer conn.Close()
 	IP := strings.Split(conn.LocalAddr().String(), ":")[0]
-	SysInfo, _ := host.Info()
-	exitc, uptime, stde, err := utils.RunCommand(fmt.Sprintf("date -d '%v second ago'", SysInfo.Uptime))
-	if exitc == 0 && uptime != "" && stde == "" && err == nil {
-		uptime = strings.Replace(uptime, "\n", "", -1)
-		sysinfo := &common.SystemInfo{
-			IP:              IP,
-			Platform:        SysInfo.Platform,
-			PlatformVersion: SysInfo.PlatformVersion,
-			KernelVersion:   SysInfo.KernelVersion,
-			KernelArch:      SysInfo.KernelArch,
-			HostId:          SysInfo.HostID,
-			Uptime:          uptime,
-		}
-		return sysinfo, nil
+	hostInfo, err := host.Info()
+	if err != nil {
+		return nil, errors.New("get host info failed:" + err.Error())
 	}
-	logger.Error("failed to get host info: %d, %s, %s, %v", exitc, uptime, stde, err)
-	return nil, fmt.Errorf("failed to get host info: %d, %s, %s, %v", exitc, uptime, stde, err)
+
+	osReleaseInfo, err := b.OSReleaseInfo()
+	if err != nil {
+		return nil, errors.New("get os-release failed:" + err.Error())
+	}
+
+	bootTime := time.Unix(int64(hostInfo.BootTime), 0)
+	bootTimeStr := datetime.FormatTimeToStr(bootTime, "yyyy-mm-dd hh:mm:ss")
+	sysinfo := &common.SystemInfo{
+		IP:              IP,
+		Platform:        hostInfo.Platform,
+		PlatformVersion: hostInfo.PlatformVersion,
+		PrettyName:      osReleaseInfo.PrettyName,
+		KernelVersion:   hostInfo.KernelVersion,
+		KernelArch:      hostInfo.KernelArch,
+		HostId:          hostInfo.HostID,
+		Uptime:          bootTimeStr,
+	}
+	return sysinfo, nil
+}
+
+// 读取os-release文件信息
+func (b *BaseOS) OSReleaseInfo() (*common.OSReleaseInfo, error) {
+	lines, err := fileutil.ReadFileByLine("/etc/os-release")
+	if err != nil {
+		return nil, err
+	}
+
+	info := &common.OSReleaseInfo{}
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+
+		words := strings.Split(line, "=")
+		if len(words) == 2 {
+			k := words[0]
+			v := strings.Trim(words[1], "\"")
+
+			switch k {
+			case "NAME":
+				info.Name = v
+			case "VERSION":
+				info.Version = v
+			case "ID":
+				info.ID = v
+			case "VERSION_ID":
+				info.VersionID = v
+			case "PRETTY_NAME":
+				info.PrettyName = v
+			}
+		} else {
+			return nil, errors.New("invalid os-release format:" + line)
+		}
+	}
+
+	return info, nil
 }

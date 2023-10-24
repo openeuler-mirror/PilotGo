@@ -159,7 +159,7 @@ func AddAgents2DB(a *Agent) {
 		IP:          agent_os.IP,
 		MachineUUID: a.UUID,
 		DepartId:    global.UncateloguedDepartId,
-		Systeminfo:  agent_os.Platform + " " + agent_os.PlatformVersion,
+		Systeminfo:  agent_os.PrettyName,
 		CPU:         agent_os.ModelName,
 		State:       Free,
 	}

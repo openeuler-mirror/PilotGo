@@ -7,6 +7,7 @@ require (
 	github.com/casbin/casbin/v2 v2.69.1
 	github.com/casbin/gorm-adapter/v3 v3.18.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/duke-git/lancet v1.4.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
