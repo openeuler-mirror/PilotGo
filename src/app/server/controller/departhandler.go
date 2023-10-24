@@ -19,7 +19,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
-	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
+	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
@@ -75,12 +75,15 @@ func AddDepartHandler(c *gin.Context) {
 		return
 	}
 
-	//TODO:
-	fd := &userservice.Frontdata{}
-	log := auditlog.New(auditlog.LogTypeOrganize, "添加部门信息", "", fd)
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypeOrganize, "添加部门信息", user.ID)
 	auditlog.Add(log)
 
-	err := depart.AddDepartMethod(&newDepart)
+	err = depart.AddDepartMethod(&newDepart)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -98,12 +101,15 @@ func DeleteDepartDataHandler(c *gin.Context) {
 		return
 	}
 
-	//TODO:
-	fd := &userservice.Frontdata{}
-	log := auditlog.New(auditlog.LogTypeOrganize, "删除部门信息", "", fd)
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypeOrganize, "删除部门信息", user.ID)
 	auditlog.Add(log)
 
-	err := depart.DeleteDepartData(&DelDept)
+	err = depart.DeleteDepartData(&DelDept)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -120,12 +126,16 @@ func UpdateDepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	//TODO:
-	fd := &userservice.Frontdata{}
-	log := auditlog.New(auditlog.LogTypeOrganize, "修改部门信息", "", fd)
+
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypeOrganize, "修改部门信息", user.ID)
 	auditlog.Add(log)
 
-	err := depart.UpdateDepart(new.DepartID, new.DepartName)
+	err = depart.UpdateDepart(new.DepartID, new.DepartName)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
