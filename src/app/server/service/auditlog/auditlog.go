@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/app/server/dao"
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -56,44 +55,25 @@ func BatchActionStatus(StatusCodes []string) (status string) {
 }
 
 // deprecated
-func New(module, action, msg string, f *dao.Frontdata) *AuditLog {
-	return &AuditLog{
-		LogUUID:    uuid.New().String(),
-		Module:     module,
-		Status:     "",
-		UserName:   f.Username_creaate,
-		DepartName: f.Departname_create,
-		Email:      f.Email,
-		Action:     action,
-		Message:    msg,
-		// OperatorID: u.ID,
+func New(module, action string, userid uint) *dao.AuditLog {
+	return &dao.AuditLog{
+		LogUUID: uuid.New().String(),
+		Module:  module,
+		Status:  "",
+		UserID:  userid,
+		Action:  action,
 	}
 }
 
-func NewByUser(module, action, msg string, user *common.User) *AuditLog {
-	return &AuditLog{
-		LogUUID:    uuid.New().String(),
-		Module:     module,
-		Status:     "",
-		UserName:   user.Username,
-		DepartName: user.DepartName,
-		Email:      user.Email,
-		Action:     action,
-		Message:    msg,
-		// OperatorID: u.ID,
-	}
-}
-
-func New_sub(puuid, ip, action, message, obj, target string, statuscode int) *AuditLog {
-	return &AuditLog{
-		LogUUID:         uuid.New().String(),
-		ParentLogUUID:   puuid,
-		IP:              ip,
-		OperationObject: obj,
-		Action:          action,
-		Message:         message,
-		StatusCode:      statuscode,
-		Target:          target,
+func New_sub(module, action, agentUUID, message, status string, userid uint) *dao.AuditLog {
+	return &dao.AuditLog{
+		LogUUID:   uuid.New().String(),
+		AgentUUID: agentUUID,
+		Module:    module,
+		Status:    status,
+		UserID:    userid,
+		Action:    action,
+		Message:   message,
 	}
 }
 
@@ -109,11 +89,6 @@ func UpdateStatus(log *dao.AuditLog, status string) error {
 // 查询所有日志
 func Get() (*[]dao.AuditLog, *gorm.DB, error) {
 	return dao.GetAuditLog()
-}
-
-// 根据父UUid查询日志
-func GetByParentId(parentUUId string) (*[]dao.AuditLog, *gorm.DB, error) {
-	return dao.GetAuditLogByParentId(parentUUId)
 }
 
 // 查询单条日志
