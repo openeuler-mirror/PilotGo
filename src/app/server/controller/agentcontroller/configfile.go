@@ -89,7 +89,12 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 		return
 	}
 
-	log := auditlog.New(auditlog.LogTypeBroadcast, "配置文件下发", "", fd)
+	u, err := dao.UserInfo(fd.Username)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypeBroadcast, "配置文件下发", u.ID)
 	auditlog.Add(log)
 
 	statuscodes := []string{}
@@ -97,7 +102,8 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 	for _, uuid := range UUIDs {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, "获取uuid失败", log.Module, path+"/"+filename, http.StatusBadRequest)
+			message := "获取uuid失败" + path + "/" + filename + string(http.StatusBadRequest)
+			log_s := auditlog.New_sub(auditlog.LogTypeBroadcast, "配置文件下发", uuid, message, auditlog.StatusSuccess, u.ID)
 			auditlog.Add(log_s)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
@@ -105,12 +111,14 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 
 		_, Err, err := agent.UpdateConfigFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
-			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, Err, log.Module, path+"/"+filename, http.StatusBadRequest)
+			message := Err + path + "/" + filename + string(http.StatusBadRequest)
+			log_s := auditlog.New_sub(auditlog.LogTypeBroadcast, "配置文件下发", uuid, message, auditlog.StatusSuccess, u.ID)
 			auditlog.Add(log_s)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			log_s := auditlog.New_sub(log.LogUUID, agentmanager.GetAgent(uuid).IP, log.Action, "配置文件下发成功", log.Module, path+"/"+filename, http.StatusOK)
+			message := "配置文件下发成功" + path + "/" + filename + string(http.StatusOK)
+			log_s := auditlog.New_sub(auditlog.LogTypeBroadcast, "配置文件下发", uuid, message, auditlog.StatusSuccess, u.ID)
 			auditlog.Add(log_s)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 		}
