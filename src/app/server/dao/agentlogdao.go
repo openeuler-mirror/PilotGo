@@ -52,24 +52,15 @@ type Frontdata struct {
 }
 
 type AuditLog struct {
-	ID              uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	LogUUID         string `gorm:"not null;unique" json:"log_uuid"`
-	ParentLogUUID   string `json:"parent_log_uuid"`
-	AgentUUID       string `json:"agent_uuid"`
-	Module          string `gorm:"type:varchar(30);not null" json:"module"`
-	Status          string `gorm:"type:varchar(30);not null" json:"status"`
-	UserName        string `gorm:"not null" json:"userName"`
-	DepartName      string `gorm:"not null" json:"departName"`
-	Email           string `gorm:"not null" json:"email"`
-	Action          string `gorm:"not null" json:"action"`
-	Message         string `json:"message"`
-	IP              string `json:"ip"`
-	StatusCode      int    `json:"code"`
-	OperationObject string `json:"object"`
-	Target          string `json:"target"`
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	// OperatorID    uint   `gorm:"not null" json:"operator_id"`
+	ID        uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	LogUUID   string `gorm:"not null;unique" json:"log_uuid"`
+	AgentUUID string `json:"agent_uuid"`
+	Module    string `gorm:"type:varchar(30);not null" json:"module"`
+	Status    string `gorm:"type:varchar(30);not null" json:"status"`
+	UserID    uint   `gorm:"not null" json:"user_id"`
+	Action    string `gorm:"not null" json:"action"`
+	Message   string `gorm:"type:varchar(60)" json:"message"`
+	CreatedAt time.Time
 }
 
 // 存储日志
@@ -83,23 +74,15 @@ func (p *AuditLog) UpdateStatus(status string) error {
 	return mysqlmanager.MySQL().Model(&p).Where("log_uuid=?", p.LogUUID).Update("status", status).Error
 }
 
-// 查询所有父日志
+// 查询所有日志
 func GetAuditLog() (list *[]AuditLog, tx *gorm.DB, err error) {
 	list = &[]AuditLog{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_log_uuid=?", "").Find(&list)
+	tx = mysqlmanager.MySQL().Order("created_at desc").Where("log_uuid=?", "").Find(&list)
 	err = tx.Error
 	return
 }
 
-// 根据父UUid查询日志
-func GetAuditLogByParentId(parentUUId string) (list *[]AuditLog, tx *gorm.DB, err error) {
-	list = &[]AuditLog{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_log_uuid=?", parentUUId).Find(&list)
-	err = tx.Error
-	return
-}
-
-// 查询子日志
+// 查询日志
 func GetAuditLogById(logUUId string) (AuditLog, error) {
 	var Log AuditLog
 	err := mysqlmanager.MySQL().Where("log_uuid = ?", logUUId).Find(&Log).Error

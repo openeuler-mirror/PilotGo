@@ -70,22 +70,3 @@ func LogAllHandler(c *gin.Context) {
 	// 返回数据开始拼装分页的json
 	common.JsonPagination(c, list, total, query)
 }
-
-// 查询所有子日志
-func AgentLogsHandler(c *gin.Context) {
-	ParentId := c.Query("id")
-	// parentId, err := strconv.Atoi(ParentId)
-	// if err != nil {
-	// 	response.Fail(c, nil, "父日志ID输入格式有误")
-	// 	return
-	// }
-
-	// agentlog, err := service.AgentLogs(parentId)
-	agentlog, _, err := auditlog.GetByParentId(ParentId)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, "获取子日志失败: "+err.Error())
-		return
-	}
-
-	response.Success(c, agentlog, "子日志查询成功!")
-}
