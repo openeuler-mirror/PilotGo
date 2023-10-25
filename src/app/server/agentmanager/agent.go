@@ -153,8 +153,6 @@ func (a *Agent) Init() error {
 }
 
 func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Duration) (*protocol.Message, error) {
-	logger.Debug("send message:%s", msg.String())
-
 	if msg.UUID == "" {
 		msg.UUID = uuid.New().String()
 	}
