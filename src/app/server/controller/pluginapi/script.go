@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
+	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -42,13 +44,22 @@ func RunCommandHandler(c *gin.Context) {
 		return
 	}
 
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
 	logger.Debug("run command on agents :%v", d.Batch.MachineUUIDs)
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
+			log_s := auditlog.New_sub(auditlog.LogTypePlugin, "run command", uuid, "", auditlog.StatusSuccess, user.ID)
+			auditlog.Add(log_s)
 			data, err := agent.RunCommand(d.Command)
 			if err != nil {
+				auditlog.UpdateMessage(log_s, err.Error())
+				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
 				logger.Error("run command error, agent:%s, command:%s", uuid, d.Command)
 			}
 			logger.Debug("run command on agent result:%v", data)
@@ -78,13 +89,23 @@ func RunScriptHandler(c *gin.Context) {
 		return
 	}
 
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
+			log_s := auditlog.New_sub(auditlog.LogTypePlugin, "run script", uuid, "", auditlog.StatusSuccess, user.ID)
+			auditlog.Add(log_s)
 			data, err := agent.RunScript(d.Script, d.Params)
 			if err != nil {
+				auditlog.UpdateMessage(log_s, err.Error())
+				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
 				logger.Error("run script error, agent:%s, command:%s", uuid, d.Script)
 			}
 			logger.Debug("run script on agent result:%v", data)
@@ -111,6 +132,12 @@ func RunCommandAsyncHandler(c *gin.Context) {
 		return
 	}
 
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
 	// 获取插件地址和回调url
 	name := c.Query("plugin_name")
 	p, err := plugin.GetPlugin(name)
@@ -130,6 +157,8 @@ func RunCommandAsyncHandler(c *gin.Context) {
 	macuuids := batch.GetMachineUUIDS(d.Batch)
 	for _, macuuid := range macuuids {
 		uuid := macuuid
+		log_s := auditlog.New_sub(auditlog.LogTypePlugin, "Run Command Async", uuid, "", auditlog.StatusSuccess, user.ID)
+		auditlog.Add(log_s)
 		go asyncCommandRunner(uuid, d.Command, taskId, caller)
 	}
 

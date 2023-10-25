@@ -86,6 +86,11 @@ func UpdateStatus(log *dao.AuditLog, status string) error {
 	return log.UpdateStatus(status)
 }
 
+// 添加message信息
+func UpdateMessage(log *dao.AuditLog, message string) error {
+	return log.UpdateMessage(message)
+}
+
 // 查询所有日志
 func Get() (*[]dao.AuditLog, *gorm.DB, error) {
 	return dao.GetAuditLog()
