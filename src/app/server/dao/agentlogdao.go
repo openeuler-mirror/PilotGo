@@ -74,6 +74,10 @@ func (p *AuditLog) UpdateStatus(status string) error {
 	return mysqlmanager.MySQL().Model(&p).Where("log_uuid=?", p.LogUUID).Update("status", status).Error
 }
 
+func (p *AuditLog) UpdateMessage(message string) error {
+	return mysqlmanager.MySQL().Model(&p).Where("log_uuid=?", p.LogUUID).Update("message", message).Error
+}
+
 // 查询所有日志
 func GetAuditLog() (list *[]AuditLog, tx *gorm.DB, err error) {
 	list = &[]AuditLog{}
@@ -92,7 +96,7 @@ func GetAuditLogById(logUUId string) (AuditLog, error) {
 // 根据模块名字查询日志
 func GetAuditLogByModule(name string) ([]AuditLog, error) {
 	var Log []AuditLog
-	err := mysqlmanager.MySQL().Where("modulename = ?", name).Find(&Log).Error
+	err := mysqlmanager.MySQL().Where("module = ?", name).Find(&Log).Error
 	return Log, err
 }
 

@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -27,17 +29,25 @@ func GetPluginsHandler(c *gin.Context) {
 // 添加插件
 func AddPluginHandler(c *gin.Context) {
 	param := &plugin.AddPluginParam{}
-
 	if err := c.BindJSON(&param); err != nil {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
 
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypePlugin, "Add Plugin", user.ID)
+	auditlog.Add(log)
+
 	if err := plugin.AddPlugin(param); err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, "add plugin failed:"+err.Error())
 		return
 	}
-
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "插件添加成功")
 }
 
@@ -53,8 +63,17 @@ func TogglePluginHandler(c *gin.Context) {
 		return
 	}
 
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypePlugin, "Toggle Plugin", user.ID)
+	auditlog.Add(log)
+
 	logger.Info("toggle plugin:%s to enable %d", param.UUID, param.Enable)
 	plugin.TogglePlugin(param.UUID, param.Enable)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "插件信息更新成功")
 }
 
@@ -65,10 +84,17 @@ func UnloadPluginHandler(c *gin.Context) {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypePlugin, "Unload Plugin", user.ID)
+	auditlog.Add(log)
 
 	logger.Info("unload plugin:%s", uuid)
 	plugin.DeletePlugin(uuid)
-
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "插件信息更新成功")
 }
 
@@ -81,6 +107,14 @@ func PluginGatewayHandler(c *gin.Context) {
 		return
 	}
 
+	user, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	log := auditlog.New(auditlog.LogTypePlugin, "parse plugin", user.ID)
+	auditlog.Add(log)
+
 	s := strings.Replace(p.Url, "/plugin/"+name, "", 1)
 	target, err := url.Parse(s)
 	if err != nil {
@@ -91,5 +125,6 @@ func PluginGatewayHandler(c *gin.Context) {
 	c.Request.Host = target.Host
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
+	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
