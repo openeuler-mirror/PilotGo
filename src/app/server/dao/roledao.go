@@ -150,7 +150,7 @@ func UpdateRolePermission(permission *Frontdata) (UserRole, error) {
 	return userRole, err
 }
 
-const SuperUser = "admin@123.com"
+const SuperUser = "admin"
 const SuperUserPasswd = "admin"
 
 // 创建管理员账户
