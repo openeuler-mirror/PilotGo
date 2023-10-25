@@ -68,3 +68,51 @@ func TestInstallAndRemoveRpm(t *testing.T) {
 		t.Errorf("[TestInstallAndRemoveRpm]other error: %d, %s, %s, %v\n", exitc, stdo, stde, err)
 	}
 }
+
+func TestYumsource(t *testing.T) {
+	var osobj BaseOS
+	tmp, err := osobj.GetRepoSource()
+	assert.Nil(t, err)
+	assert.NotNil(t, tmp)
+}
+
+func TestParseRepoContent(t *testing.T) {
+	s1 := `[OS]
+	name=OS
+	baseurl=http://repo.openeuler.org/openEuler-22.03-LTS-SP2/OS/$basearch/
+	metalink=https://mirrors.openeuler.org/metalink?repo=$releasever/OS&arch=$basearch
+	metadata_expire=1h
+	enabled=1
+	gpgcheck=1
+	gpgkey=http://repo.openeuler.org/openEuler-22.03-LTS-SP2/OS/$basearch/RPM-GPG-KEY-openEuler
+
+	[baseos]
+	name=CentOS Stream $releasever - BaseOS
+	mirrorlist=http://mirrorlist.centos.org/?release=$stream&arch=$basearch&repo=BaseOS&infra=$infra
+	#baseurl=http://mirror.centos.org/$contentdir/$stream/BaseOS/$basearch/os/
+	gpgcheck=1
+	enabled=1
+	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial`
+
+	repos, err := parseRepoContent(s1)
+	assert.NoError(t, err)
+	assert.Len(t, repos, 2)
+
+	assert.NotEmpty(t, repos[0].Name)
+	assert.NotEmpty(t, repos[0].BaseURL)
+	assert.NotEmpty(t, repos[0].MetaLink)
+	assert.NotEmpty(t, repos[0].MetadataExpire)
+	assert.NotEmpty(t, repos[0].Enabled)
+	assert.NotEmpty(t, repos[0].GPGCheck)
+	assert.NotEmpty(t, repos[0].GPGKey)
+	assert.Empty(t, repos[0].MirrorList)
+
+	assert.NotEmpty(t, repos[1].Name)
+	assert.NotEmpty(t, repos[1].MirrorList)
+	assert.NotEmpty(t, repos[1].GPGCheck)
+	assert.NotEmpty(t, repos[1].Enabled)
+	assert.NotEmpty(t, repos[1].GPGKey)
+	assert.Empty(t, repos[1].MetadataExpire)
+	assert.Empty(t, repos[1].MetaLink)
+	assert.Empty(t, repos[1].BaseURL)
+}

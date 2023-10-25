@@ -16,13 +16,16 @@ package baseos
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
+	"github.com/duke-git/lancet/fileutil"
 )
 
 // 获取全部安装的rpm包列表
@@ -315,4 +318,98 @@ func (b *BaseOS) RemoveRpm(rpm string) error {
 	logger.Error("failed to run RPM package uninstallation command: %d, %s, %s, %v", exitc, result, stde, err)
 	return fmt.Errorf("failed to execute RPM package uninstallation command: %d, %s, %s, %v", exitc, result, stde, err)
 
+}
+
+const RepoPath = "/etc/yum.repos.d"
+
+// TODO: yum源文件在agent端打开的情况下调用该接口匹配内容出错
+func (b *BaseOS) GetRepoSource() ([]*common.RepoSource, error) {
+	files, err := utils.GetFiles(RepoPath, false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get repo source file: %s", err)
+	}
+
+	var result []*common.RepoSource
+	for _, path := range files {
+		if strings.HasSuffix(path, ".repo") {
+			content, err := fileutil.ReadFileToString(filepath.Join(RepoPath, path))
+			if err != nil {
+				return nil, err
+			}
+			repos, err := parseRepoContent(content)
+			if err == nil {
+				for index := range repos {
+					repos[index].File = filepath.Base(path)
+				}
+				result = append(result, repos...)
+			} else {
+				return nil, err
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func parseRepoContent(content string) ([]*common.RepoSource, error) {
+	lines := strings.Split(content, "\n")
+
+	var result []*common.RepoSource
+	var currentRepo *common.RepoSource
+	for index := range lines {
+		line := strings.TrimSpace(lines[index])
+		if line == "" || strings.HasPrefix(line, "#") {
+			// 空行或者注释
+			continue
+		}
+
+		if strings.HasPrefix(line, "[") {
+			if strings.HasSuffix(line, "]") {
+				// 找到一个新的repo
+				if currentRepo != nil {
+					result = append(result, currentRepo)
+				}
+
+				currentRepo = &common.RepoSource{
+					ID: strings.Trim(line, "[]"),
+				}
+				continue
+			} else {
+				return nil, errors.New("invalid repo content: " + line)
+			}
+		}
+
+		words := strings.SplitN(line, "=", 2)
+		if len(words) == 2 {
+			switch words[0] {
+			case "name":
+				currentRepo.Name = words[1]
+			case "baseurl":
+				currentRepo.BaseURL = words[1]
+			case "mirrorlist":
+				currentRepo.MirrorList = words[1]
+			case "metalink":
+				currentRepo.MetaLink = words[1]
+			case "metadata_expire":
+				currentRepo.MetadataExpire = words[1]
+			case "enabled":
+				if strings.TrimSpace(words[1]) == "1" {
+					currentRepo.Enabled = 1
+				} else {
+					currentRepo.Enabled = 0
+				}
+			case "gpgcheck":
+				if strings.TrimSpace(words[1]) == "1" {
+					currentRepo.GPGCheck = 1
+				} else {
+					currentRepo.GPGCheck = 0
+				}
+			case "gpgkey":
+				currentRepo.GPGKey = words[1]
+			}
+		}
+	}
+	result = append(result, currentRepo)
+
+	return result, nil
 }

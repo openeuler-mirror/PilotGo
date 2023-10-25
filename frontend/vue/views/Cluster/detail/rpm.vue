@@ -16,8 +16,10 @@
     <div class="repo">
       <small-table class="tab" ref="stable" :data="totalRepo">
         <template v-slot:content>
-          <el-table-column prop="Name" label="repo名称"></el-table-column>
-          <el-table-column prop="Baseurl" label="repo地址"></el-table-column>
+          <el-table-column prop="File" label="文件"></el-table-column>
+          <!-- <el-table-column prop="ID" label="ID"></el-table-column> -->
+          <el-table-column prop="Enabled" label="enabled"></el-table-column>
+          <el-table-column prop="URL" label="repo地址"></el-table-column>
         </template>
       </small-table>
     </div>
@@ -90,7 +92,21 @@ export default {
       this.getAllRpm();
       repoAll(this.params).then(res => {
         if (res.data.code === 200) {
-          this.totalRepo = res.data.data && res.data.data;
+          this.totalRepo = [];
+          let data = res.data.data && res.data.data;
+          for  (let i = 0; i < data.length; i++) {
+            // if( data[i].Enabled === 1 ){
+              let url = ""
+              if (data[i].BaseURL !== "" ){
+                url = data[i].BaseURL
+              } else if (data[i].MirrorList !== "") {
+                url = data[i].MirrorList
+              } else if (data[i].MetaLink !== "") {
+                url = data[i].MetaLink
+              }
+              this.totalRepo.push({ File:data[i].File, ID: data[i].Name, URL: url, Enabled:data[i].Enabled?"是":"否"});
+            // }
+          }
         } else {
           console.log(res.data.msg)
         }
@@ -187,18 +203,18 @@ export default {
 <style scoped lang="scss">
 .content {
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
+  overflow-y:auto;
 
   .repo {
-    width: 98%;
+    width: 100%;
   }
 
   .packages {
-    width: 98%;
+    width: 100%;
     display: flex;
     align-items: center;
     margin-top: 5px;
@@ -206,13 +222,13 @@ export default {
   }
 
   .info {
-    width: 98%;
+    width: 100%;
+    min-height: 200px;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
 
     .detail {
       width: 100%;
-      height: 100%;
 
       .title {
         width: 30%;
@@ -222,7 +238,6 @@ export default {
 
     .result {
       width: 100%;
-      height: 100%;
 
       .title {
         width: 30%;

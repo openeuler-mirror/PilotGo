@@ -129,7 +129,7 @@ func (b *BaseOS) GetNICConfig() ([]common.NetInterfaceCard, error) {
 
 // 配置网络连接
 func (b *BaseOS) ConfigNetworkConnect() ([]map[string]string, error) {
-	network, err := utils.GetFiles(NetWorkPath)
+	network, err := utils.GetFiles(NetWorkPath, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get network configuration file: %s", err)
 	}

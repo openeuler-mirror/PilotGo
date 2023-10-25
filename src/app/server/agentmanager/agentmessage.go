@@ -471,7 +471,7 @@ func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
 }
 
 // 远程获取agent端的repo文件
-func (a *Agent) GetRepoSource() ([]*common.RepoSource, string, error) {
+func (a *Agent) GetRepoSource() ([]*common.RepoSource, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
 		Type: protocol.GetRepoSource,
@@ -481,21 +481,22 @@ func (a *Agent) GetRepoSource() ([]*common.RepoSource, string, error) {
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return nil, "", err
+		return nil, err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
+		return nil, fmt.Errorf(resp_message.Error)
 	}
 
 	info := &[]*common.RepoSource{}
+	// must pass a pointer
 	err = resp_message.BindData(info)
 	if err != nil {
 		logger.Error("bind data error: %v", err)
-		return nil, resp_message.Error, err
+		return nil, err
 	}
-	return *info, resp_message.Error, nil
+	return *info, nil
 }
 
 // 远程获取agent端的时间信息

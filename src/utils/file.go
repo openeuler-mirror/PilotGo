@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 // 将string写入到指定文件
@@ -86,16 +87,16 @@ func IsFileExist(filePath string) (bool, bool) {
 	return true, false
 }
 
-func GetFiles(filePath string) (fs []string, err error) {
+func GetFiles(filePath string, scanSub bool) (fs []string, err error) {
 	files, err := os.ReadDir(filePath)
 	if err != nil {
-		return fs, err
+		return nil, err
 	}
 	for _, file := range files {
-		if file.IsDir() {
-			tmp, err := GetFiles(filePath + "/" + file.Name())
+		if file.IsDir() && scanSub {
+			tmp, err := GetFiles(filepath.Join(filePath, file.Name()), scanSub)
 			if err != nil {
-				return fs, err
+				return nil, err
 			}
 			fs = append(fs, tmp...)
 		} else {
