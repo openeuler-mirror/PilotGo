@@ -5,7 +5,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 	uos "gitee.com/openeuler/PilotGo/utils/os"
-	"gitee.com/openeuler/PilotGo/utils/os/common"
 )
 
 func AllRpmHandler(c *network.SocketClient, msg *protocol.Message) error {
@@ -128,7 +127,7 @@ func RemoveRpmHandler(c *network.SocketClient, msg *protocol.Message) error {
 func GetRepoSourceHandler(c *network.SocketClient, msg *protocol.Message) error {
 	logger.Debug("process agent info command:%s", msg.String())
 
-	repo, err := common.GetRepoSource()
+	repo, err := uos.OS().GetRepoSource()
 
 	if err != nil {
 		resp_msg := &protocol.Message{

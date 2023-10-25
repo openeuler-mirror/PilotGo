@@ -54,9 +54,9 @@ func GetAgentRepo(c *gin.Context) {
 		return
 	}
 
-	repos, Err, err := agent.GetRepoSource()
-	if len(Err) != 0 || err != nil {
-		response.Fail(c, nil, Err)
+	repos, err := agent.GetRepoSource()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	response.Success(c, repos, "获取到repo源")

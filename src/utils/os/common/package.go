@@ -1,14 +1,5 @@
 package common
 
-import (
-	"fmt"
-	"regexp"
-	"strings"
-
-	"gitee.com/openeuler/PilotGo/utils"
-	"github.com/shirou/gopsutil/v3/host"
-)
-
 // 形如	openssl-1:1.1.1f-4.oe1.x86_64
 //
 //	OS
@@ -35,66 +26,14 @@ type RpmInfo struct {
 }
 
 type RepoSource struct {
-	Name    string
-	Baseurl string
-}
-
-const RepoPath = "/etc/yum.repos.d"
-
-// TODO: yum源文件在agent端打开的情况下调用该接口匹配内容出错
-func GetRepoSource() ([]RepoSource, error) {
-	repos, err := utils.GetFiles(RepoPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get repo source file: %s", err)
-	}
-
-	SysInfo, err := host.Info()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get system's native repo: %s", err)
-	}
-	SysPlatform := SysInfo.Platform
-
-	var repo string
-	for _, repo = range repos {
-		if SysPlatform == "centos" {
-			reg := regexp.MustCompile(`(?i)(` + SysPlatform + "-base" + `)`)
-			ok := reg.MatchString(repo)
-			if ok {
-				break
-			}
-		}
-		reg := regexp.MustCompile(`(?i)(` + SysPlatform + `)`)
-		ok := reg.MatchString(repo)
-		if ok {
-			break
-		}
-	}
-
-	text, err := utils.FileReadString(RepoPath + "/" + repo)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read repo source data: %s", err)
-	}
-
-	reg1 := regexp.MustCompile(`\[.*]`)
-	textType := reg1.FindAllString(text, -1)
-
-	var reg2 *regexp.Regexp
-	var BaseURL []string
-	reg2 = regexp.MustCompile(`mirrorlist=http.*`)
-	BaseURL = reg2.FindAllString(text, -1)
-	if len(BaseURL) == 0 {
-		reg2 = regexp.MustCompile(`baseurl.*`)
-		BaseURL = reg2.FindAllString(text, -1)
-	}
-
-	datas := make([]RepoSource, 0)
-	for i := 0; i < len(textType); i++ {
-		data := RepoSource{
-			Name:    textType[i][1 : len(textType[i])-1],
-			Baseurl: "http" + strings.Split(BaseURL[i], "http")[1],
-		}
-		datas = append(datas, data)
-	}
-
-	return datas, nil
+	File           string
+	ID             string
+	Name           string
+	MirrorList     string
+	BaseURL        string
+	MetaLink       string
+	MetadataExpire string
+	GPGCheck       int
+	GPGKey         string
+	Enabled        int
 }

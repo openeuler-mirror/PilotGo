@@ -92,4 +92,5 @@ type PackageOperator interface {
 	GetAllRpm() ([]string, error)
 	GetRpmSource(string) ([]RpmSrc, error)
 	GetRpmInfo(string) (*RpmInfo, error)
+	GetRepoSource() ([]*RepoSource, error)
 }

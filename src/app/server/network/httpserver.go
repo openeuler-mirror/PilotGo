@@ -186,6 +186,7 @@ func registerAPIs(router *gin.Engine) {
 		macDetails.GET("/service_status", agentcontroller.ServiceStatusHandler)
 		macDetails.GET("/rpm_all", agentcontroller.AllRpmHandler)
 		macDetails.GET("/rpm_source", agentcontroller.RpmSourceHandler)
+		macDetails.GET("/repos", agentcontroller.GetAgentRepo)
 		macDetails.GET("/rpm_info", agentcontroller.RpmInfoHandler)
 		macDetails.GET("/disk_use", agentcontroller.DiskUsageHandler)
 		macDetails.GET("/disk_info", agentcontroller.DiskInfoHandler)
@@ -198,7 +199,6 @@ func registerAPIs(router *gin.Engine) {
 		macDetails.GET("/os_basic", agentcontroller.OsBasic)
 		macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
 		macDetails.GET("/firewall_zone", agentcontroller.FirewalldZoneConfig)
-		macDetails.GET("/repos", agentcontroller.GetAgentRepo)
 		macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
 	}
 
