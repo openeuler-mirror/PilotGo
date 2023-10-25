@@ -409,7 +409,7 @@ func parseRepoContent(content string) ([]*common.RepoSource, error) {
 			}
 		}
 	}
-	if currentRepo.ID != "" {
+	if currentRepo != nil {
 		result = append(result, currentRepo)
 	}
 
