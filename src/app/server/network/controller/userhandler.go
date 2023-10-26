@@ -83,7 +83,14 @@ func LoginHandler(c *gin.Context) {
 	log := auditlog.New(auditlog.LogTypeUser, "用户登录", u.ID)
 	auditlog.Add(log)
 
-	token, departName, departId, roleId, err := userservice.Login(*user)
+	departName, departId, roleId, err := userservice.Login(user)
+	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	token, err := jwt.ReleaseToken(*user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -119,7 +126,7 @@ func Info(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
 		// TODO: fix type assertion
-		"data": gin.H{"user": dao.ToUserDto(user.(common.User))},
+		"data": gin.H{"user": dao.ToUserDto(user.(userservice.User))},
 	})
 }
 
@@ -147,7 +154,7 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user common.User
+	var user userservice.User
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
