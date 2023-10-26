@@ -17,9 +17,9 @@ package controller
 import (
 	"strconv"
 
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
-	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )

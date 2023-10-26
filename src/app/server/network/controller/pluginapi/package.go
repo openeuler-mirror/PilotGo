@@ -2,9 +2,9 @@ package pluginapi
 
 import (
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
-	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"

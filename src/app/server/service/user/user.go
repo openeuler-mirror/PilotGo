@@ -22,8 +22,8 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
-	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/tealeg/xlsx"
 )
