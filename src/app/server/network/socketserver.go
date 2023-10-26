@@ -37,7 +37,9 @@ func SocketServerInit(conf *sconfig.SocketServer) error {
 	}
 
 	go func() {
-		server.Run(conf.Addr)
+		if err := server.Run(conf.Addr); err != nil {
+			logger.Error("socket server init failed: %s", err.Error())
+		}
 	}()
 	return nil
 }
@@ -47,8 +49,8 @@ func (s *SocketServer) Run(addr string) error {
 	if err != nil {
 		return err
 	}
-	logger.Debug("Waiting for agents")
 
+	logger.Debug("Waiting for agents")
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
