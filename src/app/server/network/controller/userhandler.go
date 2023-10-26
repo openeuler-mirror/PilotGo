@@ -20,10 +20,10 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
-	"gitee.com/openeuler/PilotGo/app/server/service/jwt"
 	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
