@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/dao"
-	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/tealeg/xlsx"
@@ -175,33 +174,28 @@ func UserAll() ([]dao.ReturnUser, int, error) {
 	return users, total, nil
 }
 
-func Login(user dao.User) (string, string, int, string, error) {
+func Login(user *dao.User) (string, int, string, error) {
 	email := user.Email
 	pwd := user.Password
 	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
-		return "", "", 0, "", err
+		return "", 0, "", err
 	}
 	if !EmailBool {
-		return "", "", 0, "", errors.New("用户不存在")
+		return "", 0, "", errors.New("用户不存在")
 	}
 
 	u, err := dao.UserInfo(email)
 	if err != nil {
-		return "", "", 0, "", errors.New("查询邮箱密码错误")
+		return "", 0, "", errors.New("查询邮箱密码错误")
 	}
 
 	err = utils.ComparePassword(u.Password, pwd)
 	if err != nil {
-		return "", "", 0, "", errors.New("密码错误")
+		return "", 0, "", errors.New("密码错误")
 	}
 
-	// Issue token
-	token, err := jwt.ReleaseToken(u)
-	if err != nil {
-		return "", "", 0, "", err
-	}
-	return token, u.DepartName, u.DepartSecond, u.RoleID, nil
+	return u.DepartName, u.DepartSecond, u.RoleID, nil
 }
 
 func Register(user *dao.User) error {

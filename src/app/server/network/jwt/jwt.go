@@ -24,7 +24,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/dao"
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/user"
 )
 
 var Issue = "PilotGo"
@@ -64,7 +64,7 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 	return token, err
 }
 
-func ParseUser(c *gin.Context) (*common.User, error) {
+func ParseUser(c *gin.Context) (*user.User, error) {
 	claims, err := ParseMyClaims(c)
 	if err != nil {
 		return nil, err

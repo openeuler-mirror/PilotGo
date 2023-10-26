@@ -117,15 +117,3 @@ func JsonPagination(c *gin.Context, list interface{}, total int64, query *Pagina
 		"page":  query.CurrentPageNum,
 		"size":  query.Size})
 }
-
-// interface to []interface
-func InterfaceToSlice(list interface{}) (datas []interface{}) {
-	if reflect.TypeOf(list).Kind() == reflect.Slice {
-		s := reflect.ValueOf(list)
-		for i := 0; i < s.Len(); i++ {
-			ele := s.Index(i)
-			datas = append(datas, ele.Interface())
-		}
-	}
-	return
-}
