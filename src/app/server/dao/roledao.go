@@ -135,21 +135,6 @@ func UpdateRoleDescription(role, desc string) error {
 	return mysqlmanager.MySQL().Model(&UserRole).Where("role = ?", role).Update("description", desc).Error
 }
 
-// 变更用户角色权限
-func UpdateRolePermission(permission *Frontdata) (UserRole, error) {
-	var userRole UserRole
-	// 数组切片转为string
-	menus := strings.Replace(strings.Trim(fmt.Sprint(permission.Menus), "[]"), " ", ",", -1)
-	buttonId := strings.Replace(strings.Trim(fmt.Sprint(permission.ButtonId), "[]"), " ", ",", -1)
-
-	r := UserRole{
-		Menus:    menus,
-		ButtonID: buttonId,
-	}
-	err := mysqlmanager.MySQL().Model(&userRole).Where("id = ?", permission.Role_roleid).Updates(&r).Error
-	return userRole, err
-}
-
 const SuperUser = "admin"
 const SuperUserPasswd = "admin"
 

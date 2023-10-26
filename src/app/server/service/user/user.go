@@ -29,7 +29,6 @@ import (
 )
 
 type User = dao.User
-type Frontdata = dao.Frontdata
 
 // 随机产生用户名字
 func RandomString(n int) string {
@@ -101,12 +100,12 @@ func DeleteUser(Email string) error {
 }
 
 // 修改用户信息
-func UpdateUser(user dao.Frontdata) (dao.User, error) {
+func UpdateUser(user dao.User) (dao.User, error) {
 	email := user.Email
 	phone := user.Phone
 	Pid := user.DepartFirst
 	id := user.DepartSecond
-	departName := user.Departname
+	departName := user.DepartName
 	u, err := dao.UserInfo(email)
 	if err != nil {
 		return u, err
@@ -176,7 +175,7 @@ func UserAll() ([]dao.ReturnUser, int, error) {
 	return users, total, nil
 }
 
-func Login(user dao.Frontdata) (string, string, int, string, error) {
+func Login(user dao.User) (string, string, int, string, error) {
 	email := user.Email
 	pwd := user.Password
 	EmailBool, err := dao.IsEmailExist(email)
@@ -205,15 +204,15 @@ func Login(user dao.Frontdata) (string, string, int, string, error) {
 	return token, u.DepartName, u.DepartSecond, u.RoleID, nil
 }
 
-func Register(fd *dao.Frontdata) error {
-	username := fd.Username
-	password := fd.Password
-	email := fd.Email
-	phone := fd.Phone
-	depart := fd.Departname
-	departId := fd.DepartSecond
-	departPid := fd.DepartFirst
-	roleId := fd.RoleID
+func Register(user *dao.User) error {
+	username := user.Username
+	password := user.Password
+	email := user.Email
+	phone := user.Phone
+	depart := user.DepartName
+	departId := user.DepartSecond
+	departPid := user.DepartFirst
+	roleId := user.RoleID
 
 	if len(username) == 0 { //Data verification
 		username = RandomString(5)
@@ -237,7 +236,7 @@ func Register(fd *dao.Frontdata) error {
 		return errors.New("数据加密错误")
 	}
 
-	user := &dao.User{ //Create user
+	u := &dao.User{ //Create user
 		Username:     username,
 		Password:     string(bs),
 		Phone:        phone,
@@ -247,7 +246,7 @@ func Register(fd *dao.Frontdata) error {
 		DepartSecond: departId,
 		RoleID:       roleId,
 	}
-	err = dao.AddUser(user)
+	err = dao.AddUser(u)
 	if err != nil {
 		return err
 	}

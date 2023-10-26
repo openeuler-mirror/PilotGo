@@ -41,20 +41,21 @@ func GetRoleListHandler(c *gin.Context) {
 }
 
 func RegisterHandler(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
+	user := &userservice.User{}
+	if err := c.Bind(user); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	user, err := jwt.ParseUser(c)
+
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := auditlog.New(auditlog.LogTypeUser, "添加用户", user.ID)
+	log := auditlog.New(auditlog.LogTypeUser, "添加用户", u.ID)
 	auditlog.Add(log)
 
-	err = userservice.Register(fd)
+	err = userservice.Register(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -66,24 +67,23 @@ func RegisterHandler(c *gin.Context) {
 }
 
 func LoginHandler(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if c.Bind(fd) != nil {
+	user := &userservice.User{}
+	if c.Bind(user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	u, err := dao.UserInfo(fd.Email)
+	u, err := dao.UserInfo(user.Email)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	fd.Username_creaate = u.Email
-	fd.Departname_create = u.DepartName
+	user.DepartName = u.DepartName
 	log := auditlog.New(auditlog.LogTypeUser, "用户登录", u.ID)
 	auditlog.Add(log)
 
-	token, departName, departId, roleId, err := userservice.Login(*fd)
+	token, departName, departId, roleId, err := userservice.Login(*user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -96,8 +96,8 @@ func LoginHandler(c *gin.Context) {
 
 // 退出
 func Logout(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
+	user := &userservice.User{}
+	if err := c.Bind(user); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
@@ -226,8 +226,10 @@ func ResetPasswordHandler(c *gin.Context) {
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
 	statuscodes := []string{}
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
+	fd := struct {
+		Deldatas []string `json:"delDatas,omitempty"`
+	}{}
+	if err := c.Bind(&fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
@@ -268,8 +270,8 @@ func DeleteUserHandler(c *gin.Context) {
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	fd := &userservice.Frontdata{}
-	if c.Bind(fd) != nil {
+	user := userservice.User{}
+	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
@@ -281,7 +283,7 @@ func UpdateUserHandler(c *gin.Context) {
 	log := auditlog.New(auditlog.LogTypeUser, "修改用户信息", u.ID)
 	auditlog.Add(log)
 
-	user, err := userservice.UpdateUser(*fd)
+	user, err = userservice.UpdateUser(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -304,8 +306,8 @@ func ImportUser(c *gin.Context) {
 	UserExit := make([]string, 0)
 
 	// TODO:
-	fd := &userservice.Frontdata{}
-	if err := c.Bind(fd); err != nil {
+	user := &userservice.User{}
+	if err := c.Bind(user); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}

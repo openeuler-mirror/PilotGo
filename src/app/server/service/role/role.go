@@ -122,15 +122,6 @@ func getRoleMenuButtons(role string) (string, []string) {
 	return menu, buttons
 }
 
-// TODO:
-func ChangeRolePermission(roleChange *dao.Frontdata) (*dao.UserRole, error) {
-	userRole, err := dao.UpdateRolePermission(roleChange)
-	if err != nil {
-		return &userRole, err
-	}
-	return &userRole, nil
-}
-
 func AddRole(userRole *UserRole) error {
 	err := dao.AddRole(userRole)
 	if err != nil {
