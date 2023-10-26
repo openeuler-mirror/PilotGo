@@ -63,7 +63,14 @@ func GetAgentRepo(c *gin.Context) {
 }
 
 func ConfigFileBroadcastToAgents(c *gin.Context) {
-	fd := &dao.Frontdata{}
+	fd := &struct {
+		Username string `json:"userName,omitempty"`
+
+		FileBroadcast_BatchId  []int  `json:"filebroadcast_batches"`
+		FileBroadcast_Path     string `json:"filebroadcast_path"`
+		FileBroadcast_FileName string `json:"filebroadcast_name"`
+		FileBroadcast_Text     string `json:"filebroadcast_file"`
+	}{}
 	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

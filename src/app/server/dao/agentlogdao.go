@@ -22,35 +22,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type Frontdata struct {
-	ID                uint   `json:"id,omitempty"`
-	Username_creaate  string `json:"userName_create,omitempty"`
-	Departname_create string `json:"departName_create,omitempty"`
-
-	Deldatas     []string `json:"delDatas,omitempty"`
-	Username     string   `json:"userName,omitempty"`
-	Departname   string   `json:"departName,omitempty"`
-	Email        string   `json:"email,omitempty"`
-	DepartFirst  int      `json:"departPid,omitempty"`
-	DepartSecond int      `json:"departId,omitempty"`
-	Password     string   `json:"password,omitempty"`
-	Phone        string   `json:"phone,omitempty"`
-	// UserType     int      `json:"userType,omitempty"`
-	RoleID string `json:"roleid,omitempty"`
-
-	Menus            []string `json:"menus,omitempty"`
-	ButtonId         []string `json:"buttonId,omitempty"`
-	Role_roleid      int      `json:"role_roleid,omitempty"`
-	Role             string   `json:"role,omitempty"` // 超管和部门等级
-	Role_Description string   `json:"role_description,omitempty"`
-	Role_type        int      `json:"role_type,omitempty"`
-
-	FileBroadcast_BatchId  []int  `json:"filebroadcast_batches"`
-	FileBroadcast_Path     string `json:"filebroadcast_path"`
-	FileBroadcast_FileName string `json:"filebroadcast_name"`
-	FileBroadcast_Text     string `json:"filebroadcast_file"`
-}
-
 type AuditLog struct {
 	ID        uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	LogUUID   string `gorm:"not null;unique" json:"log_uuid"`

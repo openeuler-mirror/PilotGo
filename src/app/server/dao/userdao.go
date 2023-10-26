@@ -34,7 +34,7 @@ type User struct {
 	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
 	Phone        string `gorm:"size:11" json:"phone,omitempty"`
 	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
-	RoleID       string `json:"role,omitempty"`
+	RoleID       string `json:"roleid,omitempty"`
 	// deprecated
 	// UserType int    `json:"userType,omitempty"`
 }
