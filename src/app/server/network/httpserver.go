@@ -19,9 +19,9 @@ import (
 	"strings"
 
 	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
-	"gitee.com/openeuler/PilotGo/app/server/controller"
-	"gitee.com/openeuler/PilotGo/app/server/controller/agentcontroller"
-	"gitee.com/openeuler/PilotGo/app/server/controller/pluginapi"
+	"gitee.com/openeuler/PilotGo/app/server/network/controller"
+	"gitee.com/openeuler/PilotGo/app/server/network/controller/agentcontroller"
+	"gitee.com/openeuler/PilotGo/app/server/network/controller/pluginapi"
 	"gitee.com/openeuler/PilotGo/app/server/network/middleware"
 	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
 	"gitee.com/openeuler/PilotGo/app/server/resource"
