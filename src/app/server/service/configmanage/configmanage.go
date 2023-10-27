@@ -16,13 +16,21 @@ package configmanage
 
 import (
 	"errors"
-	"fmt"
 	"strings"
-	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
+
+type Config interface {
+	// 配置存储
+	Record() error
+	// 配置加载
+	Load() error
+
+	// 依据agent uuid进行配置下发
+	Apply(string) error
+}
 
 type ConfigFiles = dao.ConfigFiles
 type SearchConfigFile = dao.SearchConfigFile
@@ -46,19 +54,6 @@ type ConfigFileBroadcast struct {
 	User     string `json:"user"`
 	UserDept string `json:"userDept"`
 	Text     string `json:"file"`
-}
-
-// 获取时间的日期函数 => 20200426-17:36:04
-func NowTime() string {
-	time := time.Now()
-	year := time.Year()
-	month := time.Month()
-	day := time.Day()
-	hour := time.Hour()
-	minute := time.Minute()
-	second := time.Second()
-	nowtime := fmt.Sprintf("%d%02d%02d-%02d:%02d:%02d", year, month, day, hour, minute, second)
-	return nowtime
 }
 
 func SaveToDatabase(file *ConfigFiles) error {
