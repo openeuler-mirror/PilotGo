@@ -21,8 +21,8 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/tealeg/xlsx"
 )
@@ -262,7 +262,6 @@ func GetUserRoles(username string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	// 查找角色
 	roleids := user.RoleID
 	roleId := strings.Split(roleids, ",")
@@ -280,4 +279,27 @@ func GetUserRoles(username string) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func QueryUserByID(userID int) (*User, error) {
+	return dao.QueryUserByID(userID)
+}
+
+// 查询某用户信息
+func UserInfo(email string) (User, error) {
+	return dao.UserInfo(email)
+}
+
+func ToUserDto(user User) dao.UserDto {
+	return dao.UserDto{
+		Name:     user.Username,
+		Password: user.Password,
+		Phone:    user.Phone,
+		Email:    user.Email,
+	}
+}
+
+// 创建管理员账户
+func CreateAdministratorUser() error {
+	return dao.CreateAdministratorUser()
 }

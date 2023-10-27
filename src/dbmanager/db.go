@@ -2,7 +2,18 @@ package dbmanager
 
 import (
 	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service"
+	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	"gitee.com/openeuler/PilotGo/app/server/service/batch"
+	"gitee.com/openeuler/PilotGo/app/server/service/configfile"
+	"gitee.com/openeuler/PilotGo/app/server/service/configmanage"
+	"gitee.com/openeuler/PilotGo/app/server/service/cron"
+	"gitee.com/openeuler/PilotGo/app/server/service/depart"
+	"gitee.com/openeuler/PilotGo/app/server/service/machine"
+	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
+	"gitee.com/openeuler/PilotGo/app/server/service/role"
+	"gitee.com/openeuler/PilotGo/app/server/service/script"
+	"gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 )
@@ -31,28 +42,28 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 		return err
 	}
 
-	mysqlmanager.MySQL().AutoMigrate(&dao.CrontabList{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.MachineNode{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.Batch{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.AgentLogParent{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.AgentLog{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.AuditLog{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.ConfigFiles{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.HistoryConfigFiles{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.Script{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.ConfigFile{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.User{})
-	mysqlmanager.MySQL().AutoMigrate(&dao.UserRole{})
+	mysqlmanager.MySQL().AutoMigrate(&cron.CrontabList{})
+	mysqlmanager.MySQL().AutoMigrate(&machine.MachineNode{})
+	mysqlmanager.MySQL().AutoMigrate(&batch.Batch{})
+	mysqlmanager.MySQL().AutoMigrate(&service.AgentLogParent{})
+	mysqlmanager.MySQL().AutoMigrate(&service.AgentLog{})
+	mysqlmanager.MySQL().AutoMigrate(&auditlog.AuditLog{})
+	mysqlmanager.MySQL().AutoMigrate(&configmanage.ConfigFiles{})
+	mysqlmanager.MySQL().AutoMigrate(&configmanage.HistoryConfigFiles{})
+	mysqlmanager.MySQL().AutoMigrate(&script.Script{})
+	mysqlmanager.MySQL().AutoMigrate(&configfile.ConfigFile{})
+	mysqlmanager.MySQL().AutoMigrate(&plugin.Plugin{})
+	mysqlmanager.MySQL().AutoMigrate(&user.User{})
+	mysqlmanager.MySQL().AutoMigrate(&role.UserRole{})
 
 	// 创建超级管理员账户
-	err = dao.CreateAdministratorUser()
+	err = user.CreateAdministratorUser()
 	if err != nil {
 		return err
 	}
 
 	// 创建公司组织
-	mysqlmanager.MySQL().AutoMigrate(&dao.DepartNode{})
+	mysqlmanager.MySQL().AutoMigrate(&depart.DepartNode{})
 
-	return dao.CreateOrganization()
+	return depart.CreateOrganization()
 }

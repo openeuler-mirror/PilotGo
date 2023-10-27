@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -31,6 +31,7 @@ import (
 type AddDepart = dao.AddDepart
 type NewDepart = dao.NewDepart
 type DeleteDepart = dao.DeleteDepart
+type DepartNode = dao.DepartNode
 
 type MachineModifyDepart struct {
 	MachineID string `json:"machineid"`
@@ -313,4 +314,9 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 
 	}
 	return nil
+}
+
+// 创建公司组织
+func CreateOrganization() error {
+	return dao.CreateOrganization()
 }

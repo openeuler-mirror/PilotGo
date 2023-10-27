@@ -23,8 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
-	"gitee.com/openeuler/PilotGo/app/server/service/user"
+	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 )
 
 var Issue = "PilotGo"
@@ -36,7 +35,7 @@ type MyClaims struct {
 	UserName string
 }
 
-func ReleaseToken(user dao.User) (string, error) {
+func ReleaseToken(user userservice.User) (string, error) {
 	expirationTime := time.Now().Add(6 * 60 * time.Minute) //到期时间
 	claims := &MyClaims{
 		UserId:   user.ID,
@@ -64,13 +63,13 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 	return token, err
 }
 
-func ParseUser(c *gin.Context) (*user.User, error) {
+func ParseUser(c *gin.Context) (*userservice.User, error) {
 	claims, err := ParseMyClaims(c)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := dao.QueryUserByID(int(claims.UserId))
+	user, err := userservice.QueryUserByID(int(claims.UserId))
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +89,7 @@ func ParseMyClaims(c *gin.Context) (*MyClaims, error) {
 	if err != nil {
 		goto OnError
 	}
+
 	tokenString = cookie.Value
 	if tokenString == "" {
 		err = fmt.Errorf("token is empty")

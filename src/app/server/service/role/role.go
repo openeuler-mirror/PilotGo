@@ -15,8 +15,8 @@
 package role
 
 import (
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
 
 type UserRole = dao.UserRole

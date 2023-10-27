@@ -1,8 +1,8 @@
 package machine
 
 import (
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
 
 type MachineNode = dao.MachineNode
@@ -59,4 +59,31 @@ func DeleteMachine(Deluuid []string) map[string]string {
 		}
 	}
 	return machinelist
+}
+
+func MachineBasic(uuid string) (ip string, state int, dept string, err error) {
+	return dao.MachineBasic(uuid)
+}
+
+func UpdateMachineState(uuid string, state int) error {
+	return dao.UpdateMachineState(uuid, state)
+}
+
+func IsUUIDExist(uuid string) (bool, error) {
+	return dao.IsUUIDExist(uuid)
+}
+
+// 根据uuid获取部门id
+func UUIDForDepartId(uuid string) (int, error) {
+	return dao.UUIDForDepartId(uuid)
+}
+
+// 更新机器IP及状态
+func UpdateMachineIPState(uuid, ip string, state int) error {
+	return dao.UpdateMachineIPState(uuid, ip, state)
+}
+
+// 新增agent机器
+func AddNewMachine(Machine MachineNode) error {
+	return dao.AddNewMachine(Machine)
 }

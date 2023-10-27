@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

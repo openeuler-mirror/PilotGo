@@ -18,7 +18,12 @@ import (
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
+
+type CrontabUpdate = dao.CrontabUpdate
+type CrontabList = dao.CrontabList
+type DelCrons = dao.DelCrons
 
 // 开启任务
 func CronStart(uuid string, id int, spec string, command string) (interface{}, error) {
@@ -44,4 +49,39 @@ func StopAndDel(uuid string, id int) (interface{}, error) {
 		return nil, fmt.Errorf("任务暂停失败:%s", err)
 	}
 	return cron_stop, nil
+}
+
+// 任务名称是否存在
+func IsTaskNameExist(name string) (bool, error) {
+	return dao.IsTaskNameExist(name)
+}
+
+// 新建定时任务
+func NewCron(c CrontabList) (int, error) {
+	return dao.NewCron(c)
+}
+
+// 根据任务id获取spec和command
+func Id2CronInfo(id int) (spec, command string, err error) {
+	return dao.Id2CronInfo(id)
+}
+
+// 删除任务
+func DeleteTask(id int) error {
+	return dao.DeleteTask(id)
+}
+
+// 更新任务
+func UpdateTask(id int, c CrontabList) error {
+	return dao.UpdateTask(id, c)
+}
+
+// 判断任务状态
+func IsTaskStatus(id int, status bool) (bool, error) {
+	return dao.IsTaskStatus(id, status)
+}
+
+// 任务状态更新
+func CronTaskStatus(id int, status bool) error {
+	return dao.CronTaskStatus(id, status)
 }

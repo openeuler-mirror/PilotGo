@@ -21,7 +21,8 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/agent/global"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
+	configservice "gitee.com/openeuler/PilotGo/app/server/service/configfile"
+	machineservice "gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	pnet "gitee.com/openeuler/PilotGo/utils/message/net"
 	"gitee.com/openeuler/PilotGo/utils/message/protocol"
@@ -88,7 +89,7 @@ func (a *Agent) startListen() {
 		buff := make([]byte, 1024)
 		n, err := a.conn.Read(buff)
 		if err != nil {
-			err := dao.UpdateMachineState(a.UUID, OffLine)
+			err := machineservice.UpdateMachineState(a.UUID, OffLine)
 			if err != nil {
 				logger.Error("update machine status failed: %s", err.Error())
 			}
@@ -264,13 +265,13 @@ func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 func ConfigMessageInfo(Data interface{}) {
 	p, ok := Data.(map[string]interface{})
 	if ok {
-		cf := dao.ConfigFile{
+		cf := configservice.ConfigFile{
 			MachineUUID: p["Machine_uuid"].(string),
 			Content:     p["ConfigContent"].(string),
 			Path:        p["ConfigName"].(string),
 			UpdatedAt:   time.Time{},
 		}
-		err := dao.AddConfigFile(cf)
+		err := configservice.AddConfigFile(cf)
 		if err != nil {
 			logger.Error("配置文件添加失败" + err.Error())
 		}

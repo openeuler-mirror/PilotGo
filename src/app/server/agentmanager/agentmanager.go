@@ -18,7 +18,7 @@ import (
 	"net"
 	"sync"
 
-	"gitee.com/openeuler/PilotGo/app/server/dao"
+	machineservice "gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
@@ -127,26 +127,26 @@ func AddAgents2DB(a *Agent) {
 		logger.Error("初始化系统信息失败: %s", err.Error())
 		return
 	}
-	UUIDExistbool, err := dao.IsUUIDExist(a.UUID)
+	UUIDExistbool, err := machineservice.IsUUIDExist(a.UUID)
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
 	if UUIDExistbool {
 		logger.Warn("机器%s已经存在!", agent_os.IP)
-		departId, err := dao.UUIDForDepartId(a.UUID)
+		departId, err := machineservice.UUIDForDepartId(a.UUID)
 		if err != nil {
 			logger.Error(err.Error())
 			return
 		}
 		if departId != global.UncateloguedDepartId {
-			err := dao.UpdateMachineIPState(a.UUID, agent_os.IP, Normal)
+			err := machineservice.UpdateMachineIPState(a.UUID, agent_os.IP, Normal)
 			if err != nil {
 				logger.Error(err.Error())
 				return
 			}
 		} else {
-			err := dao.UpdateMachineIPState(a.UUID, agent_os.IP, Free)
+			err := machineservice.UpdateMachineIPState(a.UUID, agent_os.IP, Free)
 			if err != nil {
 				logger.Error(err.Error())
 				return
@@ -155,7 +155,7 @@ func AddAgents2DB(a *Agent) {
 		return
 	}
 
-	agent_list := dao.MachineNode{
+	agent_list := machineservice.MachineNode{
 		IP:          agent_os.IP,
 		MachineUUID: a.UUID,
 		DepartId:    global.UncateloguedDepartId,
@@ -163,7 +163,7 @@ func AddAgents2DB(a *Agent) {
 		CPU:         agent_os.ModelName,
 		State:       Free,
 	}
-	err = dao.AddNewMachine(agent_list)
+	err = machineservice.AddNewMachine(agent_list)
 	if err != nil {
 		logger.Error(err.Error())
 		return
