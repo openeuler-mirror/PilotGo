@@ -21,9 +21,10 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	batchservice "gitee.com/openeuler/PilotGo/app/server/service/batch"
+	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -77,7 +78,7 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 	}
 
 	batchIds := fd.FileBroadcast_BatchId
-	UUIDs := dao.BatchIds2UUIDs(batchIds)
+	UUIDs := batchservice.BatchIds2UUIDs(batchIds)
 
 	path := fd.FileBroadcast_Path
 	filename := fd.FileBroadcast_FileName
@@ -96,7 +97,7 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 		return
 	}
 
-	u, err := dao.UserInfo(fd.Username)
+	u, err := userservice.UserInfo(fd.Username)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return

@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -48,18 +47,18 @@ func SysctlChangeHandler(c *gin.Context) {
 	username := c.Query("userName")
 	userDeptName := c.Query("userDept")
 
-	logParent := dao.AgentLogParent{
+	logParent := service.AgentLogParent{
 		UserName:   username,
 		DepartName: userDeptName,
 		Type:       service.LogTypeSysctl,
 	}
-	logParentId, err := dao.ParentAgentLog(logParent)
+	logParentId, err := service.ParentAgentLog(logParent)
 	if err != nil {
 		logger.Error(err.Error())
 	}
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		log := dao.AgentLog{
+		log := service.AgentLog{
 			LogParentID:     logParentId,
 			IP:              "", // TODO
 			OperationObject: args,
@@ -67,12 +66,12 @@ func SysctlChangeHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         "获取uuid失败",
 		}
-		if dao.AgentLogMessage(log) != nil {
+		if service.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, nil, "获取uuid失败")
 
-		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
+		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
@@ -80,7 +79,7 @@ func SysctlChangeHandler(c *gin.Context) {
 
 	sysctl_change, err := agent.ChangeSysctl(args)
 	if err != nil {
-		log := dao.AgentLog{
+		log := service.AgentLog{
 			LogParentID:     logParentId,
 			IP:              agent.IP,
 			OperationObject: args,
@@ -88,16 +87,16 @@ func SysctlChangeHandler(c *gin.Context) {
 			StatusCode:      http.StatusBadRequest,
 			Message:         err.Error(),
 		}
-		if dao.AgentLogMessage(log) != nil {
+		if service.AgentLogMessage(log) != nil {
 			logger.Error(err.Error())
 		}
 		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
-		if dao.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
+		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
 			logger.Error(err.Error())
 		}
 		return
 	}
-	log := dao.AgentLog{
+	log := service.AgentLog{
 		LogParentID:     logParentId,
 		IP:              agent.IP,
 		OperationObject: args,
@@ -105,10 +104,10 @@ func SysctlChangeHandler(c *gin.Context) {
 		StatusCode:      http.StatusOK,
 		Message:         "修改成功",
 	}
-	if dao.AgentLogMessage(log) != nil {
+	if service.AgentLogMessage(log) != nil {
 		logger.Error(err.Error())
 	}
-	if dao.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
+	if service.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
 		logger.Error(err.Error())
 	}
 	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")

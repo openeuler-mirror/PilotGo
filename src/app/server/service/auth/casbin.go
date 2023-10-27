@@ -209,7 +209,6 @@ func CheckAuth(user, resource, action string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
 	for _, role := range roles {
 		ok, err := G_Enfocer.Enforce(role, resource, action)
 		logger.Debug("check %s auth: %s %s %s, result: %t", user, role, resource, action, ok)

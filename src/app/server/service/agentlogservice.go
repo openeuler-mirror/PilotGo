@@ -19,8 +19,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
+
+type AgentLogParent = dao.AgentLogParent
+type AgentLog = dao.AgentLog
 
 // 日志执行操作动作
 const (
@@ -70,4 +73,19 @@ func ActionStatus(StatusCodes []string) (ok bool) {
 // 查询所有子日志
 func AgentLogs(ids int) ([]dao.AgentLog, error) {
 	return dao.Id2AgentLog(ids)
+}
+
+// 存储父日志
+func ParentAgentLog(PLog AgentLogParent) (int, error) {
+	return dao.ParentAgentLog(PLog)
+}
+
+// 存储子日志
+func AgentLogMessage(Log AgentLog) error {
+	return dao.AgentLogMessage(Log)
+}
+
+// 修改父日志的操作状态
+func UpdateParentAgentLog(PLogId int, status string) error {
+	return dao.UpdateParentAgentLog(PLogId, status)
 }

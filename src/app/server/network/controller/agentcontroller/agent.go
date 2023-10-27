@@ -18,7 +18,7 @@ import (
 	"net/http"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func AgentOverviewHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 	}
 
-	ip, state, dept, err := dao.MachineBasic(uuid)
+	ip, state, dept, err := machine.MachineBasic(uuid)
 	if err != nil {
 		response.Fail(c, gin.H{"IP": ip, "state": state, "depart": dept}, err.Error())
 	}
@@ -99,7 +99,7 @@ func AgentListHandler(c *gin.Context) {
 
 func OsBasic(c *gin.Context) {
 	uuid := c.Query("uuid")
-	ip, state, dept, err := dao.MachineBasic(uuid)
+	ip, state, dept, err := machine.MachineBasic(uuid)
 	if err != nil {
 		response.Fail(c, gin.H{"IP": ip, "state": state, "depart": dept}, err.Error())
 	}

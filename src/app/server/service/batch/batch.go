@@ -20,14 +20,15 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	scommon "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/pkg/errors"
 )
 
+type Batch = dao.Batch
 type CreateBatchParam struct {
 	Name        string   `json:"Name"`
 	Description string   `json:"Description"`
@@ -228,4 +229,8 @@ func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []
 	}
 
 	return result
+}
+
+func BatchIds2UUIDs(batchIds []int) (uuids []string) {
+	return dao.BatchIds2UUIDs(batchIds)
 }

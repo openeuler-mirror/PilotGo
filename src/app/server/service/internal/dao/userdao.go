@@ -57,15 +57,6 @@ type UserDto struct {
 	Email    string `json:"email"`
 }
 
-func ToUserDto(user User) UserDto {
-	return UserDto{
-		Name:     user.Username,
-		Password: user.Password,
-		Phone:    user.Phone,
-		Email:    user.Email,
-	}
-}
-
 // 获取所有的用户角色
 func AllUserRole() ([]UserRole, error) {
 	var role []UserRole

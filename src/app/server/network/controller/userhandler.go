@@ -19,7 +19,6 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/openeuler/PilotGo/app/server/dao"
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
@@ -46,7 +45,6 @@ func RegisterHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-
 	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
@@ -73,7 +71,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := dao.UserInfo(user.Email)
+	u, err := userservice.UserInfo(user.Email)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -90,7 +88,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.ReleaseToken(*user)
+	token, err := jwt.ReleaseToken(u)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFail)
 		response.Fail(c, nil, err.Error())
@@ -126,7 +124,7 @@ func Info(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
 		// TODO: fix type assertion
-		"data": gin.H{"user": dao.ToUserDto(user.(userservice.User))},
+		"data": gin.H{"user": userservice.ToUserDto(user.(userservice.User))},
 	})
 }
 
