@@ -21,13 +21,13 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/service"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	batchservice "gitee.com/openeuler/PilotGo/app/server/service/batch"
 	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	uuidservice "github.com/google/uuid"
 )
 
 func ReadConfigFile(c *gin.Context) {
@@ -102,17 +102,34 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	log := auditlog.New(auditlog.LogTypeBroadcast, "配置文件下发", u.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleMachine,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "配置文件下发",
+	}
 	auditlog.Add(log)
 
 	statuscodes := []string{}
-
 	for _, uuid := range UUIDs {
+		log_s := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: log.LogUUID,
+			Module:     auditlog.ModuleMachine,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "rpm软件包卸载",
+			Message:    "agentuuid:" + uuid,
+		}
+		auditlog.Add(log_s)
+
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
 			message := "获取uuid失败" + path + "/" + filename + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeBroadcast, "配置文件下发", uuid, message, auditlog.StatusSuccess, u.ID)
-			auditlog.Add(log_s)
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -120,19 +137,18 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 		_, Err, err := agent.UpdateConfigFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
 			message := Err + path + "/" + filename + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeBroadcast, "配置文件下发", uuid, message, auditlog.StatusSuccess, u.ID)
-			auditlog.Add(log_s)
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
 			message := "配置文件下发成功" + path + "/" + filename + string(http.StatusOK)
-			log_s := auditlog.New_sub(auditlog.LogTypeBroadcast, "配置文件下发", uuid, message, auditlog.StatusSuccess, u.ID)
-			auditlog.Add(log_s)
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 
-	status := service.BatchActionStatus(statuscodes)
+	status := auditlog.BatchActionStatus(statuscodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
 		logger.Error("failed to update father log status: %s", err.Error())
 	}

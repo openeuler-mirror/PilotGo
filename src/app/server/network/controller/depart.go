@@ -22,6 +22,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // 获取部门下所有机器列表
@@ -75,22 +76,27 @@ func AddDepartHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := auditlog.New(auditlog.LogTypeOrganize, "添加部门信息", user.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleDepart,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "添加部门信息",
+	}
 	auditlog.Add(log)
 
 	err = depart.AddDepartMethod(&newDepart)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "部门信息入库成功")
 }
 
@@ -101,22 +107,27 @@ func DeleteDepartDataHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := auditlog.New(auditlog.LogTypeOrganize, "删除部门信息", user.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleDepart,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "删除部门信息",
+	}
 	auditlog.Add(log)
 
 	err = depart.DeleteDepartData(&DelDept)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "部门删除成功")
 }
 
@@ -127,22 +138,27 @@ func UpdateDepartHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := auditlog.New(auditlog.LogTypeOrganize, "修改部门信息", user.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleDepart,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "修改部门信息",
+	}
 	auditlog.Add(log)
 
 	err = depart.UpdateDepart(new.DepartID, new.DepartName)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFail)
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-
-	auditlog.UpdateStatus(log, auditlog.StatusSuccess)
 	response.Success(c, nil, "部门更新成功")
 }
 

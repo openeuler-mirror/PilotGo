@@ -18,6 +18,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/gin-gonic/gin"
+	uuidservice "github.com/google/uuid"
 )
 
 // 检查plugin接口调用权限
@@ -44,22 +45,39 @@ func RunCommandHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "run command",
+	}
+	auditlog.Add(log)
 	logger.Debug("run command on agents :%v", d.Batch.MachineUUIDs)
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			log_s := auditlog.New_sub(auditlog.LogTypePlugin, "run command", uuid, "", auditlog.StatusSuccess, user.ID)
+			log_s := &auditlog.AuditLog{
+				LogUUID:    uuidservice.New().String(),
+				ParentUUID: log.LogUUID,
+				Module:     auditlog.ModulePlugin,
+				Status:     auditlog.StatusOK,
+				UserID:     u.ID,
+				Action:     "run command",
+				Message:    "agentuuid:" + uuid,
+			}
 			auditlog.Add(log_s)
 			data, err := agent.RunCommand(d.Command)
 			if err != nil {
-				auditlog.UpdateMessage(log_s, err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
+				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("run command error, agent:%s, command:%s", uuid, d.Command)
 			}
 			logger.Debug("run command on agent result:%v", data)
@@ -89,23 +107,39 @@ func RunScriptHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "run script",
+	}
+	auditlog.Add(log)
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			log_s := auditlog.New_sub(auditlog.LogTypePlugin, "run script", uuid, "", auditlog.StatusSuccess, user.ID)
+			log_s := &auditlog.AuditLog{
+				LogUUID:    uuidservice.New().String(),
+				ParentUUID: log.LogUUID,
+				Module:     auditlog.ModulePlugin,
+				Status:     auditlog.StatusOK,
+				UserID:     u.ID,
+				Action:     "run script",
+				Message:    "agentuuid:" + uuid,
+			}
 			auditlog.Add(log_s)
 			data, err := agent.RunScript(d.Script, d.Params)
 			if err != nil {
-				auditlog.UpdateMessage(log_s, err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
+				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("run script error, agent:%s, command:%s", uuid, d.Script)
 			}
 			logger.Debug("run script on agent result:%v", data)
@@ -132,11 +166,20 @@ func RunCommandAsyncHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "Run Command Async",
+	}
+	auditlog.Add(log)
 
 	// 获取插件地址和回调url
 	name := c.Query("plugin_name")
@@ -155,9 +198,16 @@ func RunCommandAsyncHandler(c *gin.Context) {
 
 	taskId := time.Now().Format("20060102150405")
 	macuuids := batch.GetMachineUUIDS(d.Batch)
-	for _, macuuid := range macuuids {
-		uuid := macuuid
-		log_s := auditlog.New_sub(auditlog.LogTypePlugin, "Run Command Async", uuid, "", auditlog.StatusSuccess, user.ID)
+	for _, uuid := range macuuids {
+		log_s := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: log.LogUUID,
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "Run Command Async",
+			Message:    "agentuuid:" + uuid,
+		}
 		auditlog.Add(log_s)
 		go asyncCommandRunner(uuid, d.Command, taskId, caller)
 	}

@@ -6,30 +6,27 @@ import (
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 // 日志执行操作状态
 const (
-	StatusSuccess     = "成功"
-	StatusPartSuccess = "部分成功"
-	StatusRunning     = "运行中"
-	StatusFail        = "失败"
+	StatusOK     = "OK"
+	StatusFailed = "failed"
 )
 
 // 日志记录归属模块
 const (
-	LogTypeUser       = "用户" // 登录 注销(父日志没有创建者和部门信息) 添加 删除 修改密码 重置密码 修改用户信息
-	LogTypePermission = "权限" // 角色权限 编辑角色 删除角色 添加角色
-	LogTypePlugin     = "插件" // null
-	LogTypeBatch      = "批次" // 添加批次 删除批次 编辑批次
-	LogTypeOrganize   = "组织"
-	LogTypeMachine    = "机器"       // null
-	LogTypeRPM        = "软件包安装/卸载" // rpm安装 rpm卸载
-	LogTypeService    = "运行服务"     // null
-	LogTypeSysctl     = "配置内核参数"   // null
-	LogTypeBroadcast  = "配置文件下发"   // 配置文件下发
+	ModuleUser    = "user"    // 登录 注销(父日志没有创建者和部门信息) 添加 删除 修改密码 重置密码 修改用户信息
+	ModuleRole    = "role"    // 角色权限 编辑角色 删除角色 添加角色
+	ModulePlugin  = "plugin"  // null
+	ModuleBatch   = "batch"   // 添加批次 删除批次 编辑批次
+	ModuleMachine = "machine" // null
+	ModuleDepart  = "depart"
+	//LogTypeRPM       = "软件包安装/卸载" // rpm安装 rpm卸载
+	//LogTypeService   = "运行服务"     // null
+	//LogTypeSysctl    = "配置内核参数"   // null
+	//LogTypeBroadcast = "配置文件下发"   // 配置文件下发
 )
 
 type AuditLog = dao.AuditLog
@@ -54,27 +51,16 @@ func BatchActionStatus(StatusCodes []string) (status string) {
 	return
 }
 
-// deprecated
-func New(module, action string, userid uint) *dao.AuditLog {
-	return &dao.AuditLog{
-		LogUUID: uuid.New().String(),
-		Module:  module,
-		Status:  "",
-		UserID:  userid,
-		Action:  action,
+// 计算json返回状态
+func ActionStatus(StatusCodes []string) (ok bool) {
+	for _, code := range StatusCodes {
+		if code == strconv.Itoa(http.StatusBadRequest) {
+			return false
+		} else {
+			continue
+		}
 	}
-}
-
-func New_sub(module, action, agentUUID, message, status string, userid uint) *dao.AuditLog {
-	return &dao.AuditLog{
-		LogUUID:   uuid.New().String(),
-		AgentUUID: agentUUID,
-		Module:    module,
-		Status:    status,
-		UserID:    userid,
-		Action:    action,
-		Message:   message,
-	}
+	return true
 }
 
 func Add(log *dao.AuditLog) error {
@@ -96,9 +82,14 @@ func Get() (*[]dao.AuditLog, *gorm.DB, error) {
 	return dao.GetAuditLog()
 }
 
-// 查询单条日志
-func GetById(logUUId string) (dao.AuditLog, error) {
+// 查询子日志
+func GetAuditLogById(logUUId string) (*[]dao.AuditLog, *gorm.DB, error) {
 	return dao.GetAuditLogById(logUUId)
+}
+
+// 查询父日志为空的记录
+func GetParentLog() (*[]AuditLog, *gorm.DB, error) {
+	return dao.GetParentLog()
 }
 
 func GetByModule(name string) ([]dao.AuditLog, error) {

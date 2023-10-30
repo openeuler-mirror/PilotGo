@@ -13,6 +13,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func RegisterListenerHandler(c *gin.Context) {
@@ -27,25 +28,40 @@ func RegisterListenerHandler(c *gin.Context) {
 		URL:  p.Url,
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
-	log_s := auditlog.New_sub(auditlog.LogTypePlugin, " Register Listener", "", "", auditlog.StatusSuccess, user.ID)
-	auditlog.Add(log_s)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "Register Listener",
+	}
+	auditlog.Add(log)
 	eventbus.AddListener(l)
 
 	eventtypes := strings.Split(c.Query("eventTypes"), ",")
 	for _, v := range eventtypes {
+		log_s := &auditlog.AuditLog{
+			LogUUID:    uuid.New().String(),
+			ParentUUID: log.LogUUID,
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "Register Listener",
+		}
+		auditlog.Add(log_s)
+
 		eventtype, err := strconv.Atoi(v)
 		if err != nil {
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			response.Fail(c, gin.H{"status": false}, err.Error())
 			return
 		}
-		log_s := auditlog.New_sub(auditlog.LogTypePlugin, " Register eventType", "", "", auditlog.StatusSuccess, user.ID)
-		auditlog.Add(log_s)
 		eventbus.AddEventMap(eventtype, l)
 	}
 	response.Success(c, gin.H{"status": "ok"}, "注册eventType成功")
@@ -62,7 +78,7 @@ func UnregisterListenerHandler(c *gin.Context) {
 		URL:  p.Url,
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
@@ -70,19 +86,35 @@ func UnregisterListenerHandler(c *gin.Context) {
 
 	eventtypes := strings.Split(c.Query("eventTypes"), ",")
 	for _, v := range eventtypes {
+		log_s := &auditlog.AuditLog{
+			LogUUID:    uuid.New().String(),
+			ParentUUID: "",
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "delete eventType",
+		}
+		auditlog.Add(log_s)
+
 		eventtype, err := strconv.Atoi(v)
 		if err != nil {
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			response.Fail(c, gin.H{"status": false}, err.Error())
 			return
 		}
-		log_s := auditlog.New_sub(auditlog.LogTypePlugin, "delete eventType", "", "", auditlog.StatusSuccess, user.ID)
-		auditlog.Add(log_s)
 		eventbus.RemoveEventMap(eventtype, l)
 	}
 
 	if !eventbus.IsExitEventMap(l) {
-		log_s := auditlog.New_sub(auditlog.LogTypePlugin, "delete Listener", "", "", auditlog.StatusSuccess, user.ID)
-		auditlog.Add(log_s)
+		log := &auditlog.AuditLog{
+			LogUUID:    uuid.New().String(),
+			ParentUUID: "",
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "delete Listener",
+		}
+		auditlog.Add(log)
 		eventbus.RemoveListener(l)
 	}
 	response.Success(c, gin.H{"status": "ok"}, "删除eventType成功")
@@ -95,13 +127,20 @@ func PublishEventHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log_s := auditlog.New_sub(auditlog.LogTypePlugin, "publishEvent", "", "", auditlog.StatusSuccess, user.ID)
-	auditlog.Add(log_s)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "publish Event",
+	}
+	auditlog.Add(log)
 
 	eventbus.PublishEvent(msg)
 	response.Success(c, gin.H{"status": "ok"}, "publishEvent成功")

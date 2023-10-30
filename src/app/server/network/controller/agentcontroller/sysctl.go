@@ -15,14 +15,12 @@
 package agentcontroller
 
 import (
-	"net/http"
-
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/service"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	uuidservice "github.com/google/uuid"
 )
 
 func SysInfoHandler(c *gin.Context) {
@@ -41,77 +39,46 @@ func SysInfoHandler(c *gin.Context) {
 	}
 	response.Success(c, gin.H{"sysctl_info": sysctl_info}, "Success")
 }
+
 func SysctlChangeHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 	args := c.Query("args")
-	username := c.Query("userName")
-	userDeptName := c.Query("userDept")
+	//username := c.Query("userName")
+	//userDeptName := c.Query("userDept")
 
-	logParent := service.AgentLogParent{
-		UserName:   username,
-		DepartName: userDeptName,
-		Type:       service.LogTypeSysctl,
-	}
-	logParentId, err := service.ParentAgentLog(logParent)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
-		logger.Error(err.Error())
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID: uuidservice.New().String(),
+		Module:  auditlog.ModuleMachine,
+		Status:  auditlog.StatusOK,
+		UserID:  u.ID,
+		Action:  "SysctlChange",
+		Message: "agentuuid:" + uuid,
+	}
+	auditlog.Add(log)
+
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              "", // TODO
-			OperationObject: args,
-			Action:          service.SysctlChange,
-			StatusCode:      http.StatusBadRequest,
-			Message:         "获取uuid失败",
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+uuid+"获取uuid失败")
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
-
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
 		return
 	}
 
 	sysctl_change, err := agent.ChangeSysctl(args)
 	if err != nil {
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              agent.IP,
-			OperationObject: args,
-			Action:          service.SysctlChange,
-			StatusCode:      http.StatusBadRequest,
-			Message:         err.Error(),
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+uuid+"修改内核运行时参数失败")
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"error": err}, "修改内核运行时参数失败!")
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
 		return
-	}
-	log := service.AgentLog{
-		LogParentID:     logParentId,
-		IP:              agent.IP,
-		OperationObject: args,
-		Action:          service.SysctlChange,
-		StatusCode:      http.StatusOK,
-		Message:         "修改成功",
-	}
-	if service.AgentLogMessage(log) != nil {
-		logger.Error(err.Error())
-	}
-	if service.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
-		logger.Error(err.Error())
 	}
 	response.Success(c, gin.H{"sysctl_change": sysctl_change}, "Success")
 }
+
 func SysctlViewHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 	args := c.Query("args")
