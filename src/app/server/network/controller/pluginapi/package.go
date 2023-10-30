@@ -9,6 +9,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	uuidservice "github.com/google/uuid"
 )
 
 type PackageStruct struct {
@@ -23,27 +24,45 @@ func InstallPackage(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "Install Package",
+	}
+	auditlog.Add(log)
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 
 		if agent != nil {
-			log_s := auditlog.New_sub(auditlog.LogTypePlugin, "Install Package", uuid, "", auditlog.StatusSuccess, user.ID)
+			log_s := &auditlog.AuditLog{
+				LogUUID:    uuidservice.New().String(),
+				ParentUUID: log.LogUUID,
+				Module:     auditlog.ModulePlugin,
+				Status:     auditlog.StatusOK,
+				UserID:     u.ID,
+				Action:     "Install Package",
+				Message:    "agentuuid:" + uuid,
+			}
 			auditlog.Add(log_s)
+
 			data, resp_message_err, err := agent.InstallRpm(param.Package)
 			if resp_message_err != "" {
-				auditlog.UpdateMessage(log_s, resp_message_err)
-				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
+				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+resp_message_err)
+				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error(resp_message_err)
 			}
 			if err != nil {
-				auditlog.UpdateMessage(log_s, err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
+				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("agent %s install package %s failed: %s", uuid, param.Package, err)
 			}
 			logger.Debug("install package on agent result:%v", data)
@@ -63,27 +82,44 @@ func UninstallPackage(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModulePlugin,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "Uninstall Package",
+	}
+	auditlog.Add(log)
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 
 		if agent != nil {
-			log_s := auditlog.New_sub(auditlog.LogTypePlugin, "Uninstall Package", uuid, "", auditlog.StatusSuccess, user.ID)
+			log_s := &auditlog.AuditLog{
+				LogUUID:    uuidservice.New().String(),
+				ParentUUID: log.LogUUID,
+				Module:     auditlog.ModulePlugin,
+				Status:     auditlog.StatusOK,
+				UserID:     u.ID,
+				Action:     "Uninstall Package",
+				Message:    "agentuuid:" + uuid,
+			}
 			auditlog.Add(log_s)
 			data, resp_message_err, err := agent.RemoveRpm(param.Package)
 			if resp_message_err != "" {
-				auditlog.UpdateMessage(log_s, resp_message_err)
-				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
+				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+resp_message_err)
+				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error(resp_message_err)
 			}
 			if err != nil {
-				auditlog.UpdateMessage(log_s, err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFail)
+				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("agent %s uninstall package %s failed: %s", uuid, param.Package, err)
 			}
 			logger.Debug("uninstall package on agent result:%v", data)

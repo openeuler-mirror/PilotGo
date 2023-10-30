@@ -9,6 +9,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CreateBatchHandler(c *gin.Context) {
@@ -25,12 +26,19 @@ func CreateBatchHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := auditlog.New(auditlog.LogTypeBatch, "创建批次", user.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleBatch,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "创建批次",
+	}
 	auditlog.Add(log)
 
 	batchinfo := &batch.CreateBatchParam{
@@ -43,12 +51,10 @@ func CreateBatchHandler(c *gin.Context) {
 	}
 
 	if err := batch.CreateBatch(batchinfo); err != nil {
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次入库成功")
 }
 
@@ -83,13 +89,19 @@ func DeleteBatchHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
-	log := auditlog.New(auditlog.LogTypeBatch, "删除批次", user.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleBatch,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "删除批次",
+	}
 	auditlog.Add(log)
 
 	batchesname := []string{}
@@ -98,11 +110,10 @@ func DeleteBatchHandler(c *gin.Context) {
 	}
 
 	if err := batch.DeleteBatch(batchdel.BatchID); err != nil {
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次删除成功")
 }
 
@@ -117,23 +128,27 @@ func UpdateBatchHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
-	log := auditlog.New(auditlog.LogTypeBatch, "编辑批次", user.ID)
+	log := &auditlog.AuditLog{
+		LogUUID:    uuid.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleBatch,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "编辑批次",
+	}
 	auditlog.Add(log)
 
 	err = batch.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.ActionFalse)
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
-
-	auditlog.UpdateStatus(log, auditlog.ActionOK)
 	response.Success(c, nil, "批次修改成功")
 }
 

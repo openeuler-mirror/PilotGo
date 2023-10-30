@@ -21,11 +21,11 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
-	"gitee.com/openeuler/PilotGo/app/server/service"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	uuidservice "github.com/google/uuid"
 )
 
 type RPMS struct {
@@ -90,48 +90,62 @@ func RpmInfoHandler(c *gin.Context) {
 
 func InstallRpmHandler(c *gin.Context) {
 	var rpm RPMS
-	c.Bind(&rpm)
+	if err := c.Bind(&rpm); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 	if len(rpm.UUIDs) == 0 {
 		response.Fail(c, nil, "机器uuid不能为空")
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
-	log := auditlog.New(auditlog.LogTypeRPM, "rpm软件包安装", user.ID)
-	if err := auditlog.Add(log); err != nil {
-		logger.Error(err.Error())
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleMachine,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "rpm软件包安装",
 	}
+	auditlog.Add(log)
 
 	StatusCodes := make([]string, 0)
 
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
+		log_s := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: log.LogUUID,
+			Module:     auditlog.ModuleMachine,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "rpm软件包安装",
+			Message:    "agentuuid:" + uuid,
+		}
+		auditlog.Add(log_s)
 		if agent == nil {
 			message := "获取uuid失败" + rpm.RPM + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包安装", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
 		info, err := agent.AgentOverview()
 		if err != nil {
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			logger.Error(err.Error())
 		}
 		if info.SysInfo.Platform == "NestOS For Container" {
 			logger.Error("Install rpm is not supported on NestOS For Container")
 			message := "Install rpm is not supported on NestOS For Container" + rpm.RPM + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包安装", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -139,22 +153,17 @@ func InstallRpmHandler(c *gin.Context) {
 		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
 			message := Err + rpm.RPM + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包安装", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
 			message := rpm.RPM + string(http.StatusOK)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包安装", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
-	status := service.BatchActionStatus(StatusCodes)
+	status := auditlog.BatchActionStatus(StatusCodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
 		logger.Error(err.Error())
 	}
@@ -172,48 +181,63 @@ func InstallRpmHandler(c *gin.Context) {
 
 func RemoveRpmHandler(c *gin.Context) {
 	var rpm RPMS
-	c.Bind(&rpm)
+	if err := c.Bind(&rpm); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 
 	if len(rpm.UUIDs) == 0 {
 		response.Fail(c, nil, "机器uuid不能为空")
 		return
 	}
 
-	user, err := jwt.ParseUser(c)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-
-	log := auditlog.New(auditlog.LogTypeRPM, "rpm软件包卸载", user.ID)
-	if err := auditlog.Add(log); err != nil {
-		logger.Error(err.Error())
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleMachine,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "rpm软件包卸载",
 	}
+	auditlog.Add(log)
 
 	StatusCodes := make([]string, 0)
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
+		log_s := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: log.LogUUID,
+			Module:     auditlog.ModuleMachine,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "rpm软件包卸载",
+			Message:    "agentuuid:" + uuid,
+		}
+		auditlog.Add(log_s)
+
 		if agent == nil {
 			message := "获取uuid失败" + rpm.RPM + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包卸载", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
 
 		info, err := agent.AgentOverview()
 		if err != nil {
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			logger.Error(err.Error())
 		}
 		if info.SysInfo.Platform == "NestOS For Container" {
 			logger.Error("Remove rpm is not supported on NestOS For Container")
 			message := "Remove rpm is not supported on NestOS For Container" + rpm.RPM + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包卸载", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -221,23 +245,18 @@ func RemoveRpmHandler(c *gin.Context) {
 		_, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
 			message := Err + rpm.RPM + string(http.StatusBadRequest)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包卸载", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
+			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
 			message := rpm.RPM + string(http.StatusOK)
-			log_s := auditlog.New_sub(auditlog.LogTypeRPM, "rpm软件包卸载", uuid, message, auditlog.StatusSuccess, user.ID)
-			if err := auditlog.Add(log_s); err != nil {
-				logger.Error(err.Error())
-			}
+			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
 		}
 	}
 
-	status := service.BatchActionStatus(StatusCodes)
+	status := auditlog.BatchActionStatus(StatusCodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
 		logger.Error(err.Error())
 	}

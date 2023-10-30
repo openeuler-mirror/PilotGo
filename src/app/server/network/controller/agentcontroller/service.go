@@ -15,14 +15,12 @@
 package agentcontroller
 
 import (
-	"net/http"
-
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/service"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	uuidservice "github.com/google/uuid"
 )
 
 type AgentService struct {
@@ -48,6 +46,7 @@ func ServiceListHandler(c *gin.Context) {
 	}
 	response.Success(c, gin.H{"service_list": service_list}, "Success")
 }
+
 func ServiceStatusHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
 	service := c.Query("service")
@@ -68,219 +67,119 @@ func ServiceStatusHandler(c *gin.Context) {
 
 func ServiceStartHandler(c *gin.Context) {
 	var agentservice AgentService
-	c.Bind(&agentservice)
+	if err := c.Bind(&agentservice); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
 
-	logParent := service.AgentLogParent{
-		UserName:   agentservice.UserName,
-		DepartName: agentservice.UserDeptName,
-		Type:       service.LogTypeService,
-	}
-	logParentId, err := service.ParentAgentLog(logParent)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
-		logger.Error(err.Error())
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleMachine,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "ServiceStart",
+	}
+	auditlog.Add(log)
+
 	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              "", // TODO
-			OperationObject: agentservice.Service,
-			Action:          service.ServiceStart,
-			StatusCode:      http.StatusBadRequest,
-			Message:         "获取uuid失败",
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+"获取uuid失败")
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
 		return
 	}
 
 	service_start, Err, err := agent.ServiceStart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              agent.IP,
-			OperationObject: agentservice.Service,
-			Action:          service.ServiceStart,
-			StatusCode:      http.StatusBadRequest,
-			Message:         Err,
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+err.Error())
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
+		return
+	}
+	response.Success(c, gin.H{"service_start": service_start}, "Success")
+}
 
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
+func ServiceStopHandler(c *gin.Context) {
+	var agentservice AgentService
+	if err := c.Bind(&agentservice); err != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	log := service.AgentLog{
-		LogParentID:     logParentId,
-		IP:              agent.IP,
-		OperationObject: agentservice.Service,
-		Action:          service.ServiceStart,
-		StatusCode:      http.StatusOK,
-		Message:         "启动服务成功",
-	}
-	if service.AgentLogMessage(log) != nil {
-		logger.Error(err.Error())
-	}
-	if service.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
-		logger.Error(err.Error())
-	}
-
-	response.Success(c, gin.H{"service_start": service_start}, "Success")
-}
-func ServiceStopHandler(c *gin.Context) {
-	var agentservice AgentService
-	c.Bind(&agentservice)
-
-	logParent := service.AgentLogParent{
-		UserName:   agentservice.UserName,
-		DepartName: agentservice.UserDeptName,
-		Type:       service.LogTypeService,
-	}
-	logParentId, err := service.ParentAgentLog(logParent)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
-		logger.Error(err.Error())
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleMachine,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "ServiceStop",
+	}
+	auditlog.Add(log)
+
 	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              "", // TODO
-			OperationObject: agentservice.Service,
-			Action:          service.ServiceStop,
-			StatusCode:      http.StatusBadRequest,
-			Message:         "获取uuid失败",
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+"获取uuid失败")
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
-
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
 		return
 	}
 
 	service_stop, Err, err := agent.ServiceStop(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              agent.IP,
-			OperationObject: agentservice.Service,
-			Action:          service.ServiceStop,
-			StatusCode:      http.StatusBadRequest,
-			Message:         Err,
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
-		response.Fail(c, gin.H{"error": Err}, "Failed!")
+		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+err.Error())
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		return
+	}
+	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
+}
 
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
+func ServiceRestartHandler(c *gin.Context) {
+	var agentservice AgentService
+	if err := c.Bind(&agentservice); err != nil {
+		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	log := service.AgentLog{
-		LogParentID:     logParentId,
-		IP:              agent.IP,
-		OperationObject: agentservice.Service,
-		Action:          service.ServiceStop,
-		StatusCode:      http.StatusOK,
-		Message:         "关闭服务成功",
-	}
-	if service.AgentLogMessage(log) != nil {
-		logger.Error(err.Error())
-	}
-	if service.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
-		logger.Error(err.Error())
-	}
-
-	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
-}
-func ServiceRestartHandler(c *gin.Context) {
-	var agentservice AgentService
-	c.Bind(&agentservice)
-
-	logParent := service.AgentLogParent{
-		UserName:   agentservice.UserName,
-		DepartName: agentservice.UserDeptName,
-		Type:       service.LogTypeService,
-	}
-	logParentId, err := service.ParentAgentLog(logParent)
+	u, err := jwt.ParseUser(c)
 	if err != nil {
-		logger.Error(err.Error())
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
 	}
+	log := &auditlog.AuditLog{
+		LogUUID:    uuidservice.New().String(),
+		ParentUUID: "",
+		Module:     auditlog.ModuleMachine,
+		Status:     auditlog.StatusOK,
+		UserID:     u.ID,
+		Action:     "ServiceRestart",
+	}
+	auditlog.Add(log)
+
 	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              "", // TODO
-			OperationObject: agentservice.Service,
-			Action:          service.ServiceRestart,
-			StatusCode:      http.StatusBadRequest,
-			Message:         "获取uuid失败",
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+"获取uuid失败")
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
-
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
 		return
 	}
 
 	service_restart, Err, err := agent.ServiceRestart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-
-		log := service.AgentLog{
-			LogParentID:     logParentId,
-			IP:              agent.IP,
-			OperationObject: agentservice.Service,
-			Action:          service.ServiceRestart,
-			StatusCode:      http.StatusBadRequest,
-			Message:         Err,
-		}
-		if service.AgentLogMessage(log) != nil {
-			logger.Error(err.Error())
-		}
+		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+err.Error())
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
-
-		if service.UpdateParentAgentLog(logParentId, auditlog.ActionFalse) != nil {
-			logger.Error(err.Error())
-		}
 		return
 	}
-
-	log := service.AgentLog{
-		LogParentID:     logParentId,
-		IP:              agent.IP,
-		OperationObject: agentservice.Service,
-		Action:          service.ServiceRestart,
-		StatusCode:      http.StatusOK,
-		Message:         "重启服务成功",
-	}
-	if service.AgentLogMessage(log) != nil {
-		logger.Error(err.Error())
-	}
-	if service.UpdateParentAgentLog(logParentId, auditlog.ActionOK) != nil {
-		logger.Error(err.Error())
-	}
-
 	response.Success(c, gin.H{"service_restart": service_restart}, "Success")
 }
