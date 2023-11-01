@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
-	"gorm.io/gorm"
 )
 
 type CrontabList struct {
@@ -49,10 +48,11 @@ type DelCrons struct {
 }
 
 // 根据uuid获取所有机器
-func (c *CrontabList) CronList(uuid string) (list *[]CrontabList, tx *gorm.DB) {
-	list = &[]CrontabList{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("machine_uuid = ?", uuid).Find(&list)
-	return list, tx
+func CronListPaged(uuid string, offset, size int) (int64, []CrontabList, error) {
+	var crontabLists []CrontabList
+	var count int64
+	err := mysqlmanager.MySQL().Model(CrontabList{}).Order("id desc").Where("machine_uuid = ?", uuid).Offset(offset).Limit(size).Find(&crontabLists).Offset(-1).Limit(-1).Count(&count).Error
+	return count, crontabLists, err
 }
 
 // 任务名称是否存在

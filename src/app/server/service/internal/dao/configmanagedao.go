@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
-	"gorm.io/gorm"
 )
 
 type ConfigFiles struct {
@@ -59,19 +58,18 @@ func GetConfigFilesPaged(offset, size int) (int64, []ConfigFiles, error) {
 	return count, configFiles, err
 }
 
-func (f *SearchConfigFile) ConfigFileSearch(search string) (list *[]ConfigFiles, tx *gorm.DB) {
-	list = &[]ConfigFiles{}
-	tx = mysqlmanager.MySQL().Order("id desc").Where("type LIKE ?", "%"+search+"%").Find(&list)
-	if len(*list) == 0 {
-		tx = mysqlmanager.MySQL().Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Find(&list)
-	}
-	return
+func (f *SearchConfigFile) ConfigFileSearchPaged(search string, offset, size int) (int64, []ConfigFiles, error) {
+	var count int64
+	var configFiles []ConfigFiles
+	err := mysqlmanager.MySQL().Model(ConfigFiles{}).Order("id desc").Where("file_name LIKE ?", "%"+search+"%").Offset(offset).Limit(size).Find(&configFiles).Offset(-1).Limit(-1).Count(&count).Error
+	return count, configFiles, err
 }
 
-func (f *HistoryConfigFiles) HistoryConfigFiles(fileId int) (list *[]HistoryConfigFiles, tx *gorm.DB) {
-	list = &[]HistoryConfigFiles{}
-	tx = mysqlmanager.MySQL().Order("id desc").Where("file_id=?", fileId).Find(&list)
-	return
+func (f *HistoryConfigFiles) HistoryConfigFilesPaged(fileId, offset, size int) (int64, []HistoryConfigFiles, error) {
+	var count int64
+	var historyConfigFiles []HistoryConfigFiles
+	err := mysqlmanager.MySQL().Model(HistoryConfigFiles{}).Order("id desc").Where("file_id=?", fileId).Offset(offset).Limit(size).Find(&historyConfigFiles).Offset(-1).Limit(-1).Count(&count).Error
+	return count, historyConfigFiles, err
 }
 
 func IsExistId(id int) (bool, error) {

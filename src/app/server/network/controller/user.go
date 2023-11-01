@@ -168,20 +168,19 @@ func UserSearchHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	var email = user.Email
 	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	data, total, err := userservice.UserSearch(email, query)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := userservice.UserSearchPaged(user.Email, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, int64(total), query)
+	common.JsonPagination(c, data, total, query)
 }
 
 // 修改密码

@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
-	"gorm.io/gorm"
 )
 
 type MachineNode struct {
@@ -42,18 +41,19 @@ type Res struct {
 	Systeminfo string `json:"systeminfo"`
 }
 
-func (m *MachineNode) ReturnMachine(departid int) (list *[]Res, tx *gorm.DB, res []Res) {
-	list = &[]Res{}
-	tx = mysqlmanager.MySQL().Table("machine_node").Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
+func ReturnMachinePaged(departid, offset, size int) (int64, []Res, error) {
+	var count int64
+	var machinelist []Res
+	list := &[]Res{}
+	err := mysqlmanager.MySQL().Model(MachineNode{}).Where("depart_id=?", departid).Select("machine_node.id as id,machine_node.depart_id as departid," +
 		"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid, " +
-		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list)
-	res = make([]Res, 0)
-	for _, value := range *list {
-		if value.Departid == departid {
-			res = append(res, value)
+		"machine_node.cpu as cpu,machine_node.state as state, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Offset(offset).Limit(size).Find(&list).Offset(-1).Limit(-1).Count(&count).Error
+	for _, value1 := range *list {
+		if value1.Departid == departid {
+			machinelist = append(machinelist, value1)
 		}
 	}
-	return
+	return count, machinelist, err
 }
 
 func IsUUIDExist(uuid string) (bool, error) {
@@ -93,6 +93,20 @@ func UpdateMachineIPState(uuid, ip string, state int) error {
 // 新增agent机器
 func AddNewMachine(Machine MachineNode) error {
 	return mysqlmanager.MySQL().Save(&Machine).Error
+}
+
+// 分页获取该部门下的所有机器
+func GetMachinePaged(departId []int, offset, size int) (int64, []Res, error) {
+	var count int64 = 0
+	var machinelist []Res
+	var err error
+	for _, value := range departId {
+		num, data, errtemp := ReturnMachinePaged(value, offset, size)
+		count = count + num
+		machinelist = append(machinelist, data...)
+		err = errtemp
+	}
+	return count, machinelist, err
 }
 
 // 获取该部门下的所有机器

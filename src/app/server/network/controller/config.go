@@ -89,7 +89,6 @@ func ConfigFileSearchHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	search := file.Search
 
 	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
@@ -97,15 +96,13 @@ func ConfigFileSearchHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	list, tx := file.ConfigFileSearch(search)
-
-	total, err := common.CrudAll(query, tx, list)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := file.ConfigFileSearchPaged(file.Search, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, data, total, query)
 }
 
 func HistoryConfigFilesHandler(c *gin.Context) {
@@ -124,14 +121,13 @@ func HistoryConfigFilesHandler(c *gin.Context) {
 	}
 
 	files := config.HistoryConfigFiles{}
-	list, tx := files.HistoryConfigFiles(FileId)
-
-	total, err := common.CrudAll(query, tx, list)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := files.HistoryConfigFilesPaged(FileId, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, data, total, query)
 }
 
 func LastConfigFileRollBackHandler(c *gin.Context) {

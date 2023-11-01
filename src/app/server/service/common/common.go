@@ -15,14 +15,11 @@
 package common
 
 import (
-	"fmt"
 	"net/http"
-	"reflect"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type PaginationQ struct {
@@ -31,28 +28,6 @@ type PaginationQ struct {
 	CurrentPageNum int         `form:"page" json:"page"`
 	Data           interface{} `json:"data" comment:"muster be a pointer of slice gorm.Model"` // save pagination list
 	TotalPage      int         `json:"total"`
-}
-
-// gorm分页查询方法
-func CrudAll(p *PaginationQ, queryTx *gorm.DB, list interface{}) (int64, error) {
-	if p.Size < 1 {
-		p.Size = 10
-	}
-	if p.CurrentPageNum < 1 {
-		p.CurrentPageNum = 1
-	}
-
-	var total int64
-	err := queryTx.Count(&total).Error
-	if err != nil {
-		return 0, err
-	}
-	offset := p.Size * (p.CurrentPageNum - 1)
-	err = queryTx.Limit(p.Size).Offset(offset).Find(list).Error
-	if err != nil {
-		return 0, err
-	}
-	return total, err
 }
 
 // 返回所有子部门id
@@ -67,43 +42,6 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 	for _, value := range temp {
 		*res = append(*res, value)
 		ReturnSpecifiedDepart(value, res)
-	}
-}
-
-// 结构体分页查询方法
-func DataPaging(p *PaginationQ, list interface{}, total int) (interface{}, error) {
-	data := make([]interface{}, 0)
-	if reflect.TypeOf(list).Kind() == reflect.Slice {
-		s := reflect.ValueOf(list)
-		for i := 0; i < s.Len(); i++ {
-			ele := s.Index(i)
-			data = append(data, ele.Interface())
-		}
-	}
-	if p.Size < 1 {
-		p.Size = 10
-	}
-	if p.CurrentPageNum < 1 {
-		p.CurrentPageNum = 1
-	}
-	if total == 0 {
-		p.TotalPage = 1
-	}
-	num := p.Size * (p.CurrentPageNum - 1)
-	if num > total {
-		return nil, fmt.Errorf("页码超出")
-	}
-	if p.Size*p.CurrentPageNum > total {
-		return data[num:], nil
-	} else {
-		if p.Size*p.CurrentPageNum < num {
-			return nil, fmt.Errorf("读取错误")
-		}
-		if p.Size*p.CurrentPageNum == 0 {
-			return data, nil
-		} else {
-			return data[num : p.CurrentPageNum*p.Size], nil
-		}
 	}
 }
 

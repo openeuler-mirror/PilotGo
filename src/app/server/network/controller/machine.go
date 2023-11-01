@@ -16,6 +16,7 @@ package controller
 
 import (
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/machine"
 	machineservice "gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -35,34 +36,30 @@ func MachineInfoHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-
-	data, lens, err := machineservice.MachineInfo(depart, query)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := machineservice.MachineInfo(depart, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, int64(lens), query)
+	common.JsonPagination(c, data, total, query)
 }
 
 // 资源池返回接口
 func FreeMachineSource(c *gin.Context) {
-	machine := machineservice.MachineNode{}
 	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	list, tx, res := machine.ReturnMachine(global.UncateloguedDepartId)
-	total, err := common.CrudAll(query, tx, &res)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := machine.ReturnMachinePaged(global.UncateloguedDepartId, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	// 返回数据开始拼装分页的json
-	common.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, data, total, query)
 }
 
 func MachineAllDataHandler(c *gin.Context) {
