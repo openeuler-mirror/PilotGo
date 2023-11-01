@@ -171,15 +171,14 @@ func UserAll() ([]ReturnUser, int, error) {
 }
 
 // 根据用户邮箱模糊查询
-func UserSearch(email string) ([]ReturnUser, int, error) {
+func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error) {
 	var users []User
 	var redisUser []ReturnUser
-
-	err := mysqlmanager.MySQL().Order("id desc").Where("email LIKE ?", "%"+email+"%").Find(&users).Error
+	var count int64
+	err := mysqlmanager.MySQL().Order("id desc").Where("email LIKE ?", "%"+email+"%").Offset(offset).Limit(size).Find(&users).Offset(-1).Limit(-1).Count(&count).Error
 	if err != nil {
-		return redisUser, 0, err
+		return 0, redisUser, err
 	}
-	totals := len(users)
 	for _, user := range users {
 		var roles []string
 		// 查找角色
@@ -190,7 +189,7 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 			i, _ := strconv.Atoi(id)
 			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
-				return redisUser, totals, err
+				return count, redisUser, err
 			}
 			role := userRole.Role
 			roles = append(roles, role)
@@ -207,7 +206,7 @@ func UserSearch(email string) ([]ReturnUser, int, error) {
 		}
 		redisUser = append(redisUser, u)
 	}
-	return redisUser, totals, nil
+	return count, redisUser, nil
 }
 
 // 修改密码

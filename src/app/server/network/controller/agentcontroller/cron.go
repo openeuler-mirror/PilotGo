@@ -212,18 +212,11 @@ func CronTaskList(c *gin.Context) {
 		return
 	}
 
-	cronlist := &cronservice.CrontabList{}
-	list, tx := cronlist.CronList(uuid)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := cron.CronListPaged(uuid, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	total, err := common.CrudAll(query, tx, list)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	// 返回数据开始拼装分页的json
-	common.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, data, total, query)
 }

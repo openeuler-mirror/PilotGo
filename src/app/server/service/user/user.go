@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/tealeg/xlsx"
@@ -155,16 +154,8 @@ func ResetPassword(email string) (dao.User, error) {
 	return u, nil
 }
 
-func UserSearch(email string, query *common.PaginationQ) (interface{}, int, error) {
-	users, total, err := dao.UserSearch(email)
-	if err != nil {
-		return nil, 0, err
-	}
-	data, err := common.DataPaging(query, users, total)
-	if err != nil {
-		return nil, 0, err
-	}
-	return data, total, nil
+func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error) {
+	return dao.UserSearchPaged(email, offset, size)
 }
 
 func UserAll() ([]dao.ReturnUser, int, error) {

@@ -85,3 +85,8 @@ func IsTaskStatus(id int, status bool) (bool, error) {
 func CronTaskStatus(id int, status bool) error {
 	return dao.CronTaskStatus(id, status)
 }
+
+// 根据uuid获取所有机器
+func CronListPaged(uuid string, offset, size int) (int64, []CrontabList, error) {
+	return dao.CronListPaged(uuid, offset, size)
+}

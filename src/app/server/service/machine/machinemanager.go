@@ -14,21 +14,16 @@ type DeleteUUID struct {
 	Deluuid []string `json:"deluuid"`
 }
 
-func MachineInfo(depart *Depart, query *common.PaginationQ) (interface{}, int, error) {
+func MachineInfo(depart *Depart, offset, size int) (int64, []dao.Res, error) {
 
 	var TheDeptAndSubDeptIds []int
 	common.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
-	machinelist, err := dao.MachineList(TheDeptAndSubDeptIds)
-	if err != nil {
-		return nil, 0, err
-	}
-	lens := len(machinelist)
-	data, err := common.DataPaging(query, machinelist, lens)
-	if err != nil {
-		return nil, 0, err
-	}
-	return data, lens, nil
+	return dao.GetMachinePaged(TheDeptAndSubDeptIds, offset, size)
+}
+
+func ReturnMachinePaged(departid, offset, size int) (int64, []dao.Res, error) {
+	return dao.ReturnMachinePaged(departid, offset, size)
 }
 
 func MachineAllData() ([]map[string]string, error) {
