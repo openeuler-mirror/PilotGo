@@ -28,6 +28,7 @@ import (
 )
 
 type User = dao.User
+type ReturnUser = dao.ReturnUser
 
 // 随机产生用户名字
 func RandomString(n int) string {
@@ -302,4 +303,9 @@ func ToUserDto(user User) dao.UserDto {
 // 创建管理员账户
 func CreateAdministratorUser() error {
 	return dao.CreateAdministratorUser()
+}
+
+// 分页查询所有用户
+func GetUserPaged(offset, size int) (int64, []dao.ReturnUser, error) {
+	return dao.GetUserPaged(offset, size)
 }

@@ -91,6 +91,45 @@ func QueryUserByName(name string) (*User, error) {
 	return user, err
 }
 
+// 分页查询所有用户
+func GetUserPaged(offset, size int) (int64, []ReturnUser, error) {
+	var users []User
+	var returnUsers []ReturnUser
+	var count int64
+	err := mysqlmanager.MySQL().Model(User{}).Order("id desc").Offset(offset).Limit(size).Find(&users).Offset(-1).Limit(-1).Count(&count).Error
+	if err != nil {
+		return count, returnUsers, err
+	}
+	for _, user := range users {
+		var roles []string
+		// 查找角色
+		roleids := user.RoleID
+		roleId := strings.Split(roleids, ",")
+		for _, id := range roleId {
+			userRole := UserRole{}
+			i, _ := strconv.Atoi(id)
+			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
+			if err != nil {
+				return count, returnUsers, err
+			}
+			role := userRole.Role
+			roles = append(roles, role)
+		}
+		u := ReturnUser{
+			ID:           user.ID,
+			DepartFirst:  user.DepartFirst,
+			DepartSecond: user.DepartSecond,
+			DepartName:   user.DepartName,
+			Username:     user.Username,
+			Phone:        user.Phone,
+			Email:        user.Email,
+			Roles:        roles,
+		}
+		returnUsers = append(returnUsers, u)
+	}
+	return count, returnUsers, err
+}
+
 // 查询所有的用户
 func UserAll() ([]ReturnUser, int, error) {
 	var users []User

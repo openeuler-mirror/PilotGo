@@ -82,6 +82,14 @@ func PermissionButtons(button string) ([]string, error) {
 	return buttons, nil
 }
 
+// 分页查询
+func GetRolePaged(offset, size int) (int64, []UserRole, error) {
+	var count int64
+	var userRoles []UserRole
+	err := mysqlmanager.MySQL().Model(UserRole{}).Order("id desc").Offset(offset).Limit(size).Find(&userRoles).Offset(-1).Limit(-1).Count(&count).Error
+	return count, userRoles, err
+}
+
 // 获取所有的用户角色
 func GetRoleList() ([]UserRole, error) {
 	var roles []UserRole

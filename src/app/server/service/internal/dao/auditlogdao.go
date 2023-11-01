@@ -47,12 +47,12 @@ func (p *AuditLog) UpdateMessage(message string) error {
 	return mysqlmanager.MySQL().Model(&p).Where("log_uuid=?", p.LogUUID).Update("message", message).Error
 }
 
-// 查询所有日志
-func GetAuditLog() (list *[]AuditLog, tx *gorm.DB, err error) {
-	list = &[]AuditLog{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("log_uuid=?", "").Find(&list)
-	err = tx.Error
-	return
+// 分页查询
+func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
+	var count int64
+	var auditlogs []AuditLog
+	err := mysqlmanager.MySQL().Model(AuditLog{}).Order("id desc").Offset(offset).Limit(size).Find(&auditlogs).Offset(-1).Limit(-1).Count(&count).Error
+	return count, auditlogs, err
 }
 
 // 查询子日志
@@ -64,11 +64,11 @@ func GetAuditLogById(logUUId string) (list *[]AuditLog, tx *gorm.DB, err error) 
 }
 
 // 查询父日志为空的记录
-func GetParentLog() (list *[]AuditLog, tx *gorm.DB, err error) {
-	list = &[]AuditLog{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_uuid=?", "").Find(&list)
-	err = tx.Error
-	return
+func GetParentLog(offset, size int) (int64, []AuditLog, error) {
+	var count int64
+	var auditlogs []AuditLog
+	err := mysqlmanager.MySQL().Model(AuditLog{}).Order("id desc").Where("parent_uuid=?", "").Offset(offset).Limit(size).Find(&auditlogs).Offset(-1).Limit(-1).Count(&count).Error
+	return count, auditlogs, err
 }
 
 // 根据模块名字查询日志

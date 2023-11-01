@@ -77,9 +77,9 @@ func UpdateMessage(log *dao.AuditLog, message string) error {
 	return log.UpdateMessage(message)
 }
 
-// 查询所有日志
-func Get() (*[]dao.AuditLog, *gorm.DB, error) {
-	return dao.GetAuditLog()
+// 分页查询
+func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
+	return dao.GetAuditLogPaged(offset, size)
 }
 
 // 查询子日志
@@ -88,8 +88,8 @@ func GetAuditLogById(logUUId string) (*[]dao.AuditLog, *gorm.DB, error) {
 }
 
 // 查询父日志为空的记录
-func GetParentLog() (*[]AuditLog, *gorm.DB, error) {
-	return dao.GetParentLog()
+func GetParentLog(offset, size int) (int64, []AuditLog, error) {
+	return dao.GetParentLog(offset, size)
 }
 
 func GetByModule(name string) ([]dao.AuditLog, error) {

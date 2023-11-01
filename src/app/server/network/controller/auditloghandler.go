@@ -23,12 +23,20 @@ import (
 
 // 查询所有审计日志
 func AuditLogAllHandler(c *gin.Context) {
-	loglist, _, err := auditlog.Get()
+	query := &common.PaginationQ{}
+	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	response.Success(c, loglist, "审计日志查询成功!")
+
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := auditlog.GetAuditLogPaged(num, query.Size)
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+	common.JsonPagination(c, data, total, query)
 }
 
 func ModuleLogHandler(c *gin.Context) {
@@ -54,17 +62,11 @@ func LogAllHandler(c *gin.Context) {
 		return
 	}
 
-	list, tx, err := auditlog.GetParentLog()
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := auditlog.GetParentLog(num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	total, err := common.CrudAll(query, tx, list)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	// 返回数据开始拼装分页的json
-	common.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, data, total, query)
 }

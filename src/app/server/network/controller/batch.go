@@ -59,21 +59,20 @@ func CreateBatchHandler(c *gin.Context) {
 }
 
 func BatchInfoHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
-	err := c.ShouldBindQuery(query)
+	p := &common.PaginationQ{}
+	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	list, total, err := batch.GetBatches(query)
+	num := p.Size * (p.CurrentPageNum - 1)
+	total, data, err := batch.GetBatchPaged(num, p.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	// 返回数据开始拼装分页的json
-	common.JsonPagination(c, list, total, query)
+	common.JsonPagination(c, data, total, p)
 }
 
 func DeleteBatchHandler(c *gin.Context) {
@@ -153,8 +152,8 @@ func UpdateBatchHandler(c *gin.Context) {
 }
 
 func BatchMachineInfoHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
-	err := c.ShouldBindQuery(query)
+	p := &common.PaginationQ{}
+	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
@@ -167,19 +166,13 @@ func BatchMachineInfoHandler(c *gin.Context) {
 		return
 	}
 
-	machinesInfo, err := batch.GetBatchMachines(batchid)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, "get batch machines failed: "+err.Error())
-		return
-	}
-
-	// 分页
-	data, err := common.DataPaging(query, machinesInfo, len(machinesInfo))
+	num := p.Size * (p.CurrentPageNum - 1)
+	total, data, err := batch.GetBatchMachines(num, p.Size, batchid)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, int64(len(machinesInfo)), query)
+	common.JsonPagination(c, data, total, p)
 }
 
 func SelectBatchHandler(c *gin.Context) {

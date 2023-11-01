@@ -189,3 +189,7 @@ func LastConfigFileRollBack(file *RollBackConfigFiles) error {
 	}
 	return dao.UpdateConfigFile(fileId, fd)
 }
+
+func GetConfigFilesPaged(offset, size int) (int64, []ConfigFiles, error) {
+	return dao.GetConfigFilesPaged(offset, size)
+}
