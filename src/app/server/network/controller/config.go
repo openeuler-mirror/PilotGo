@@ -15,7 +15,6 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
@@ -75,26 +74,13 @@ func AllConfigFiles(c *gin.Context) {
 		return
 	}
 
-	files := config.ConfigFiles{}
-	list, tx := files.AllConfigFiles()
-
-	total, err := common.CrudAll(query, tx, list)
+	num := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := config.GetConfigFilesPaged(num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
-	var filetype []string
-	filetype = append(filetype, "repo配置")
-
-	c.AbortWithStatusJSON(http.StatusOK, gin.H{
-		"code":  http.StatusOK,
-		"ok":    true,
-		"data":  list,
-		"total": total,
-		"page":  query.CurrentPageNum,
-		"size":  query.Size,
-		"type":  filetype})
+	common.JsonPagination(c, data, total, query)
 }
 
 func ConfigFileSearchHandler(c *gin.Context) {

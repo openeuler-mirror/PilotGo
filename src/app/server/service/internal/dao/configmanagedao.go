@@ -51,10 +51,12 @@ type SearchConfigFile struct {
 	Search string `json:"search"`
 }
 
-func (f *ConfigFiles) AllConfigFiles() (list *[]ConfigFiles, tx *gorm.DB) {
-	list = &[]ConfigFiles{}
-	tx = mysqlmanager.MySQL().Order("id desc").Find(&list)
-	return
+// 分页查询
+func GetConfigFilesPaged(offset, size int) (int64, []ConfigFiles, error) {
+	var count int64
+	var configFiles []ConfigFiles
+	err := mysqlmanager.MySQL().Model(ConfigFiles{}).Order("id desc").Offset(offset).Limit(size).Find(&configFiles).Offset(-1).Limit(-1).Count(&count).Error
+	return count, configFiles, err
 }
 
 func (f *SearchConfigFile) ConfigFileSearch(search string) (list *[]ConfigFiles, tx *gorm.DB) {

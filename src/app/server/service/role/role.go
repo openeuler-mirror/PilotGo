@@ -149,3 +149,8 @@ func UpdateRoleInfo(role, description string) error {
 func UpdateRolePermissions(role string, buttons, menus []string) error {
 	return auth.UpdateRolePermissions(role, buttons, menus)
 }
+
+// 分页查询
+func GetRolePaged(offset, size int) (int64, []UserRole, error) {
+	return dao.GetRolePaged(offset, size)
+}

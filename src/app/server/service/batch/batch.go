@@ -129,18 +129,9 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	return nil
 }
 
-// TODO: *[]model.Batch 应该定义为指针数组
-func GetBatches(query *common.PaginationQ) (*[]dao.Batch, int64, error) {
-
-	batch := dao.Batch{}
-	list, tx := batch.ReturnBatch()
-
-	total, err := common.CrudAll(query, tx, list)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return list, total, nil
+// 分页查询所有用户
+func GetBatchPaged(offset, size int) (int64, []Batch, error) {
+	return dao.GetBatchrPaged(offset, size)
 }
 
 func DeleteBatch(ids []int) error {
@@ -166,10 +157,10 @@ func UpdateBatch(batchid int, name, description string) error {
 	return err
 }
 
-func GetBatchMachines(batchid int) ([]dao.MachineNode, error) {
+func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, error) {
 	machinelist, err := dao.GetMachineID(batchid)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
 
@@ -178,16 +169,12 @@ func GetBatchMachines(batchid int) ([]dao.MachineNode, error) {
 	for _, macId := range machineIdlist {
 		MacInfo, err := dao.MachineData(macId)
 		if err != nil {
-			return machinesInfo, err
+			return int64(len(machineIdlist)), machinesInfo[offset : offset+size], err
 		}
 		machinesInfo = append(machinesInfo, MacInfo)
 	}
 
-	return machinesInfo, nil
-}
-
-func SelectBatch() ([]dao.Batch, error) {
-	return dao.GetBatch()
+	return int64(len(machineIdlist)), machinesInfo[offset : offset+size], nil
 }
 
 // from batch get all machines
@@ -233,4 +220,8 @@ func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []
 
 func BatchIds2UUIDs(batchIds []int) (uuids []string) {
 	return dao.BatchIds2UUIDs(batchIds)
+}
+
+func SelectBatch() ([]dao.Batch, error) {
+	return dao.GetBatch()
 }

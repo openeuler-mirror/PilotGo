@@ -72,6 +72,11 @@ func GetPlugins() ([]*Plugin, error) {
 	return plugins, nil
 }
 
+// 分页查询
+func GetPluginPaged(offset, size int) (int64, []Plugin, error) {
+	return dao.GetPluginPaged(offset, size)
+}
+
 func GetPlugin(name string) (*Plugin, error) {
 	plugin, err := dao.QueryPlugin(name)
 	if err != nil {

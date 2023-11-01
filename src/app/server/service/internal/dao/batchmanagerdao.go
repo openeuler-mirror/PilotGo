@@ -103,3 +103,11 @@ func GetBatch() ([]Batch, error) {
 	err := mysqlmanager.MySQL().Find(&batch).Error
 	return batch, err
 }
+
+// 分页查询所有用户
+func GetBatchrPaged(offset, size int) (int64, []Batch, error) {
+	var batchs []Batch
+	var count int64
+	err := mysqlmanager.MySQL().Model(Batch{}).Order("id desc").Offset(offset).Limit(size).Find(&batchs).Offset(-1).Limit(-1).Count(&count).Error
+	return count, batchs, err
+}

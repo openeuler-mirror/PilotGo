@@ -22,6 +22,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/user"
 	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -144,24 +145,20 @@ func Info(c *gin.Context) {
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	query := &common.PaginationQ{}
-	err := c.ShouldBindQuery(query)
+	p := &common.PaginationQ{}
+	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	users, total, err := userservice.UserAll()
+	num := p.Size * (p.CurrentPageNum - 1)
+	total, data, err := user.GetUserPaged(num, p.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	data, err := common.DataPaging(query, users, total)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	common.JsonPagination(c, data, int64(total), query)
+	common.JsonPagination(c, data, total, p)
 }
 
 // 高级搜索

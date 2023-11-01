@@ -17,6 +17,7 @@ package controller
 import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
+	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	roleservice "gitee.com/openeuler/PilotGo/app/server/service/role"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -39,13 +40,20 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 }
 
 func GetRolesHandler(c *gin.Context) {
-	data, err := roleservice.GetRoles()
+	p := &common.PaginationQ{}
+	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	response.Success(c, data, "角色权限列表")
+	num := p.Size * (p.CurrentPageNum - 1)
+	total, data, err := roleservice.GetRolePaged(num, p.Size)
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+	common.JsonPagination(c, data, total, p)
 }
 
 func AddRoleHandler(c *gin.Context) {

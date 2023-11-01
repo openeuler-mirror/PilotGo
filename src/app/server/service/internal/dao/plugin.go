@@ -47,6 +47,14 @@ func QueryPlugins() ([]*PluginModel, error) {
 	return plugins, nil
 }
 
+// 分页查询
+func GetPluginPaged(offset, size int) (int64, []PluginModel, error) {
+	var count int64
+	var pluginModels []PluginModel
+	err := mysqlmanager.MySQL().Model(PluginModel{}).Order("id desc").Offset(offset).Limit(size).Find(&pluginModels).Offset(-1).Limit(-1).Count(&count).Error
+	return count, pluginModels, err
+}
+
 // 查询单个插件信息
 func QueryPlugin(name string) (*PluginModel, error) {
 	var plugins *PluginModel
