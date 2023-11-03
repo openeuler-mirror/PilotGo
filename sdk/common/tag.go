@@ -6,7 +6,7 @@ const (
 	TypeError = "error"
 )
 
-type TageMessage struct {
+type Tag struct {
 	UUID string `json:"machineuuid"`
 	Type string `json:"type"`
 	Data string `json:"data"`
