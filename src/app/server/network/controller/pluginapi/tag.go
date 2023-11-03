@@ -11,8 +11,8 @@ import (
 
 // 插件返回tag数据
 func GetTagHandler(c *gin.Context) {
-	msg := &tag.TageMessage{}
-	if err := c.ShouldBind(msg); err != nil {
+	var UUIDList []string
+	if err := c.ShouldBind(&UUIDList); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
@@ -31,6 +31,14 @@ func GetTagHandler(c *gin.Context) {
 		Action:     "get tag",
 	}
 	auditlog.Add(log)
+
 	//TODO:获取到了tag数据开始使用
-	response.Success(c, gin.H{"data": msg}, "get tag成功")
+	data, err := tag.RequestTag(UUIDList)
+	if err != nil {
+		auditlog.UpdateMessage(log, "get tag error"+err.Error())
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+	response.Success(c, gin.H{"data": data}, "get tag成功")
 }

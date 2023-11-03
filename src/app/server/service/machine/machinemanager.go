@@ -3,7 +3,6 @@ package machine
 import (
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
-	"gitee.com/openeuler/PilotGo/app/server/service/tag"
 )
 
 type MachineNode = dao.MachineNode
@@ -21,16 +20,7 @@ func MachineInfo(depart *Depart, offset, size int) (int64, []dao.Res, error) {
 	common.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
 	total, data, err := dao.GetMachinePaged(TheDeptAndSubDeptIds, offset, size)
-	tag.RequestTag(GetUUID(data))
 	return total, data, err
-}
-
-func GetUUID(data []dao.Res) []string {
-	var UUIDList []string
-	for _, v := range data {
-		UUIDList = append(UUIDList, v.UUID)
-	}
-	return UUIDList
 }
 
 func ReturnMachinePaged(departid, offset, size int) (int64, []dao.Res, error) {
