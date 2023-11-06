@@ -238,9 +238,9 @@ export const routes = [
         name: 'Log',
         component: _import('Log/Log'),
         meta: {
-          title: 'log', header_title: "日志管理", panel: "log", icon_class: 'el-icon-s-order',
+          title: 'log', header_title: "审计日志", panel: "log", icon_class: 'el-icon-s-order',
           breadcrumb: [
-            { name: '日志管理' },
+            { name: '审计日志' },
           ],
         }
       },

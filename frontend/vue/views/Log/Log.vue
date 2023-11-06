@@ -23,16 +23,14 @@
       <template v-slot:table>
         <el-table-column prop="action" label="日志名称">
         </el-table-column>
-        <el-table-column prop="userName" label="创建者">
-        </el-table-column>
-        <el-table-column prop="departName" label="部门">
+        <el-table-column prop="user_id" label="创建者">
         </el-table-column>
         <el-table-column label="进度">
           <template slot-scope="scope">
             <el-progress style="width: 100%" type="line" text-inside :stroke-width="strokeW" :format="format"
-              :percentage="(scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 || 0"
-              :status="scope.row.status.split(',')[2] === '0.00' ? 'exception' :
-                scope.row.status.split(',')[2] === '1.00' ? 'success' : 'warning'">
+              :percentage="scope.row.parent_uuid === '' ? 100 : ((scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00') ? 100 : scope.row.status.split(',')[2] * 100 || 0 )"
+              :status="scope.row.status === 'OK' ? 'success': 'exception'"
+            >
             </el-progress>
           </template>
         </el-table-column>
@@ -47,6 +45,8 @@
               查看
             </el-button>
           </template>
+        </el-table-column>
+        <el-table-column prop="message" label="日志">
         </el-table-column>
       </template>
     </ky-table>
