@@ -20,6 +20,15 @@ export function getRoles() {
   })
 }
 
+// 获取角色列表
+export function getRolesPaged(data) {
+  return request({
+    url: '/user/roles_paged',
+    method: 'get',
+    params: data
+  })
+}
+
 // 获取角色菜单
 export function getMenu(data) {
   return request({
