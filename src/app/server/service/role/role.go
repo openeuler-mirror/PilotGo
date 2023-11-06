@@ -63,7 +63,7 @@ type ReturnRole struct {
 
 func GetRoles() ([]*ReturnRole, error) {
 	result := []*ReturnRole{}
-	roles, err := dao.GetRoleList()
+	roles, err := dao.GetRoles()
 	if err != nil {
 		return nil, err
 	}
