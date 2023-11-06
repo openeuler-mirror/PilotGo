@@ -113,7 +113,7 @@ func registerAPIs(router *gin.Engine) {
 		noAuthenApis.GET("/user/logout", controller.Logout)
 		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
 		noAuthenApis.GET("/plugins", controller.GetPluginsHandler)
-		noAuthenApis.GET("/plugin_paged", controller.GetPluginsPagedHandler)
+		noAuthenApis.GET("/plugins_paged", controller.GetPluginsPagedHandler)
 	}
 
 	authenApi := router.Group("/api/v1")
