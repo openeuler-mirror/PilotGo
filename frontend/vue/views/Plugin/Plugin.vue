@@ -1,6 +1,6 @@
 <template>
   <div class="plugin" style="width:100%;height:100%;">
-    <ky-table ref="table" :getData="getPlugins">
+    <ky-table ref="table" :getData="getPluginsPaged">
       <template v-slot:table_search>
         <div>插件列表</div>
       </template>
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { getPlugins, deletePlugins, unLoadPlugin } from "@/request/plugin";
+import { getPluginsPaged, deletePlugins, unLoadPlugin } from "@/request/plugin";
 import AddForm from "./form/addForm.vue"
 import _import from '../../router/_import';
 export default {
@@ -60,7 +60,7 @@ export default {
   },
 
   methods: {
-    getPlugins,
+    getPluginsPaged,
     handleClose(type) {
       this.display = false;
       this.title = "";
