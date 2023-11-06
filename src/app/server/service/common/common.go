@@ -47,7 +47,7 @@ func ReturnSpecifiedDepart(id int, res *[]int) {
 
 // 拼装json 分页数据
 func JsonPagination(c *gin.Context, list interface{}, total int64, query *PaginationQ) {
-	c.AbortWithStatusJSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"code":  http.StatusOK,
 		"ok":    true,
 		"data":  list,
