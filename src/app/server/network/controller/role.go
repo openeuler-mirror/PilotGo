@@ -40,6 +40,16 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 }
 
 func GetRolesHandler(c *gin.Context) {
+	data, err := roleservice.GetRoles()
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+
+	response.Success(c, data, "角色权限列表")
+}
+
+func GetRolesPagedHandler(c *gin.Context) {
 	p := &common.PaginationQ{}
 	err := c.ShouldBindQuery(p)
 	if err != nil {
