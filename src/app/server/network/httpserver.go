@@ -113,6 +113,7 @@ func registerAPIs(router *gin.Engine) {
 		noAuthenApis.GET("/user/logout", controller.Logout)
 		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
 		noAuthenApis.GET("/plugins", controller.GetPluginsHandler)
+		noAuthenApis.GET("/plugin_paged", controller.GetPluginsPagedHandler)
 	}
 
 	authenApi := router.Group("/api/v1")
@@ -247,6 +248,7 @@ func registerAPIs(router *gin.Engine) {
 		user.GET("/info", controller.Info)
 		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
+		user.GET("/role_paged", controller.GetRolesPagedHandler)
 	}
 
 	configmanager := api.Group("config") // 配置管理
