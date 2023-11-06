@@ -31,15 +31,6 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
-func GetRoleListHandler(c *gin.Context) {
-	roles, err := userservice.GetUserRole()
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
-	response.Success(c, gin.H{"role": roles}, "获取用户角色")
-}
-
 func RegisterHandler(c *gin.Context) {
 	user := &userservice.User{}
 	if err := c.Bind(user); err != nil {

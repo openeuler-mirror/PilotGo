@@ -86,7 +86,7 @@
 <script>
 import kyTree from "@/components/KyTree";
 import { addUser } from "@/request/user";
-import { getRoleList } from "@/request/role";
+import { getRoles } from "@/request/role";
 import { getChildNode } from "@/request/cluster";
 import { checkEmail, checkPhone } from "@/rules/check"
 export default {
@@ -163,7 +163,7 @@ export default {
     };
   },
   mounted() {
-    getRoleList({paged: false}).then(res => {
+    getRoles().then(res => {
       this.roles = [];
       if(res.data.code === 200) {
         this.roles = res.data.data.role;

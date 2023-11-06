@@ -91,9 +91,9 @@ func GetRolePaged(offset, size int) (int64, []UserRole, error) {
 }
 
 // 获取所有的用户角色
-func GetRoleList() ([]UserRole, error) {
+func GetRoles() ([]UserRole, error) {
 	var roles []UserRole
-	err := mysqlmanager.MySQL().Order("id desc").Find(&roles).Error
+	err := mysqlmanager.MySQL().Order("id").Find(&roles).Error
 	if err != nil {
 		return nil, err
 	}

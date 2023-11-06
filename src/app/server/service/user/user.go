@@ -239,14 +239,6 @@ func Register(user *dao.User) error {
 	return nil
 }
 
-func GetUserRole() ([]dao.UserRole, error) {
-	roles, err := dao.AllUserRole()
-	if err != nil {
-		return roles, err
-	}
-	return roles, nil
-}
-
 func GetUserRoles(username string) ([]string, error) {
 	result := []string{}
 
