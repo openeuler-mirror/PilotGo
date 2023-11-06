@@ -248,7 +248,7 @@ func registerAPIs(router *gin.Engine) {
 		user.GET("/info", controller.Info)
 		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
-		user.GET("/role_paged", controller.GetRolesPagedHandler)
+		user.GET("/roles_paged", controller.GetRolesPagedHandler)
 	}
 
 	configmanager := api.Group("config") // 配置管理

@@ -14,7 +14,7 @@
 <template>
   <div style="width: 100%; height: 100%" class="panel">
     <ky-table
-      :getData="getRoles"
+      :getData="getRolesPaged"
       :showSelect="showSelect"
       ref="table"
     >
@@ -25,7 +25,7 @@
         <auth-button name="role_add"  @click="handleCreate"> 添加 </auth-button>
       </template>
       <template v-slot:table>
-        <el-table-column prop="id" label="角色ID" sortable>
+        <el-table-column prop="ID" label="角色ID" sortable>
         </el-table-column>
         <el-table-column  prop="role" label="角色名">
         </el-table-column>
@@ -84,7 +84,7 @@
 import RoleDetail from "./detail/detail.vue";
 import AddForm from "./form/addForm.vue";
 import UpdateForm from "./form/updateForm.vue";
-import { getRoles, delRole } from "@/request/role"
+import { getRolesPaged, delRole } from "@/request/role"
 export default {
   components: {
     AddForm,
@@ -106,7 +106,7 @@ export default {
     }
   },
   methods: {
-    getRoles,
+    getRolesPaged,
     handleClose() {
       this.display = false;
       this.title = "";
