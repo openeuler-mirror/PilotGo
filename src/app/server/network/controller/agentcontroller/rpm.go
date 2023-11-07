@@ -141,6 +141,8 @@ func InstallRpmHandler(c *gin.Context) {
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			logger.Error(err.Error())
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			continue
 		}
 		if info.SysInfo.Platform == "NestOS For Container" {
 			logger.Error("Install rpm is not supported on NestOS For Container")
@@ -233,6 +235,8 @@ func RemoveRpmHandler(c *gin.Context) {
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			logger.Error(err.Error())
+			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			continue
 		}
 		if info.SysInfo.Platform == "NestOS For Container" {
 			logger.Error("Remove rpm is not supported on NestOS For Container")
