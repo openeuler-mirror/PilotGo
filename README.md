@@ -2,108 +2,89 @@
 
 #### 介绍
 
-PilotGo是一个openEuler社区原生的运维管理平台。
+PilotGo 是 openEuler 社区原生孵化的运维管理平台，采用插件式架构设计，功能模块轻量化组合、独立迭代演进，同时保证核心功能稳定；同时使用插件来增强平台功能、并打通不同运维组件之间的壁垒，实现了全局的状态感知及自动化流程。
 
-#### 软件架构
-开发工具：golang 1.15
+#### 功能描述
 
-系统支持：openEuler、麒麟操作系统
+PilotGo 核心功能模块包括：
 
-PilotGo项目后端采用golang语言开发，使用到以下开源库：
+* 用户管理：支持按照组织结构分组管理，支持导入已有平台账号，迁移方便；
 
-​        web框架：https://github.com/gin-gonic/gin
+* 权限管理：支持基于RBAC的权限管理，灵活可靠；
+  
+* 主机管理：状态前端可视化、直接执行软件包管理、服务管理、内核参数调优、简单易操作；
+  
+* 批次管理：支持运维操作并发执行，稳定高效；
+ 
+* 日志审计：跟踪记录用户及插件的变更操作，方便问题回溯及安全审计；
 
-​        websocket：https://github.com/gorilla/websocket
+* 告警管理：平台异常实时感知；
 
-​        日志框架：https://github.com/sirupsen/logrus
+* 插件功能：支持扩展平台功能，插件联动，自动化能力倍增，减少人工干预。
 
-​        文件监控：https://github.com/fsnotify/fsnotify
+![Alt text](./docs/images/functional%20modules.png)
 
-​        配置解析：https://github.com/spf13/viper
 
-​        mock测试：https://github.com/golang/mock
+当前OS发布版本还集成了以下插件：
 
-以及系统自带库：
+* Prometheus：托管Prometheus监控组件，自动化下发及配置node-exporter监控数据采集，对接平台告警功能；![Alt text](./docs/images/prometheus%20plugin.png)
 
-​        net/http
+* Grafana：集成Grafana可视化平台，提供美观易用的指标监控面板功能。
+![Alt text](./docs/images/grafana%20plugin.png)
 
-​        os
+#### 应用场景
 
-​        time 等
-
-前端代码主要使用到以下技术：
-
-​        JavaScript技术：https://www.javascript.com
-
-​        vue框架：https://cn.vuejs.org
-
-​        element组件：https://element.eleme.cn
-
-可在该网站方便查询第三方库及系统库的API文档：
-
-​        https://pkg.go.dev/
-
-​        https://pkg.go.dev/std
+PiotGo可用于典型的服务器集群管理场景，支持大批量的服务器集群基本管理及监控；通过集成对应的业务功能插件，还可实现业务集群的统一平台管理，例如Mysql数据库集群、redis数据缓存集群、nginx网关集群等。
 
 #### 安装、启动教程
 
-源码编译部署安装
-```bash
-# Download pilotgo source code：
-    git clone https://gitee.com/openeuler/PilotGo.git
-# Quick build:
-    cd PilotGo
-    chmod +x build.sh
-    ./build.sh
-# Quick install:
-    cd /root
-    tar -xzvf pilotgo-xxx.tar.gz
-    cd pilotgo-xxx
-    chmod +x install.sh
-    ./install.sh
-# Go into /opt/PilotGo
-    cd /opt/PilotGo
-# Modify configuration file：
-   vim config_server.yaml
-   vim config_agent.yaml
-# Warn: There are two options for log-driver in config_server.yaml or config_agent.yaml.
-    stdout: Terminal console output log
-    file: Output log to specified file
-# Start-up
-    server:
-       nohup ./server &
-    agent:
-       nohup ./agent &
-```
+PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭防火墙。
+1.  安装mysql、redis，并设置密码；
+2.  安装PilotGo-server，并修改配置文件:
+   >dnf install -y PilotGo-server
 
-二次开发部署
-```bash
-# Required before Pilotgo application deployment：
-go >=1.17;  nodejs >=14
+   >vim /opt/PilotGo/server/config_server.yaml
 
-# Front end deployment：
-1. Set NPM source address to Taobao source
-    npm install -g cnpm --registry=https://registry.npm.taobao.org
-2. Download npm dependency packages
-    cnpm install
-3. Modify the basepath to the server address and port under config/index.js, and run it directly：
-    npm run dev
+   http_server：addr为安装PilotGo-server地址；
 
-# Server deployment：
-1. Rename the config_server.yaml.templete to config_server.yaml, and configuration
-2. Rename the config_agent.yaml.templete to config_agent.yaml, and configuration
-3. PilotGo server with hot reload at localhost:8888
-    go run pkg/app/server/main.go
-4. PilotGo agent with hot reload at localhost:8879
-    go run pkg/app/agent/main.go
-```
-登录首页
-```bash
-# web页面访问  ip:8888
-初始用户：admin@123.com
-密码：123456
-```
-![](./docs/images/login.png)
+   socket_server：addr为安装PilotGo-server地址；
+
+   mysql：host_name为安装mysql地址；user_name为DB的登录用户；password为DB访问密码；
+
+   redis：redis_conn为安装redis服务地址；redis_pwd为redis密码；
+
+   启动服务
+   >systemctl start PilotGo-server
+
+   停止服务
+   >ystemctl stop PilotGo-server
+
+   服务状态
+   >systemctl status PilotGo-server
+3.  安装PilotGo-agent：
+   >dnf install -y PilotGo-agent
+   
+   >vim /opt/PilotGo/agent/config_agent.yaml
+   
+   server：addr为安装PilotGo-server地址；
+   
+   启动服务
+   >systemctl start PilotGo-agent
+
+   停止服务
+   >systemctl stop PilotGo-agent
+
+   服务状态
+   >systemctl status PilotGo-agent
+4.  插件安装：
+   [PilotGo-plugin-grafana插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-grafana)  
+   [PilotGo-plugin-prometheus插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-prometheus)
+
+#### 补充连接
+
+1.  [PilotGo使用手册](https://gitee.com/openeuler/docs/tree/master/docs/zh/docs/PilotGo/使用手册.md)
+2.  PilotGo[软件包仓](https://gitee.com/src-openeuler/PilotGo)
+
 
 #### 参与贡献
 
