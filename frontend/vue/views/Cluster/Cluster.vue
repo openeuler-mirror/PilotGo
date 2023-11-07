@@ -31,10 +31,23 @@
             <div>{{ departName }}</div>
           </template>
           <template v-slot:table_action>
-            <auth-button name="dept_change" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"
-              @click="handleChange"> 变更部门 </auth-button>
-            <auth-button name="dept_change" :disabled="$refs.table && $refs.table.selectRow.rows.length == 0"
-              @click="handleDelete"> 删除 </auth-button>
+            <el-dropdown>
+              <el-button type="primary">
+                操作<i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>
+                  <auth-button style="width: 100%; margin: 0px;" name="dept_change"
+                    :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" @click="handleChange"> 变更部门
+                  </auth-button>
+                </el-dropdown-item>
+                <el-dropdown-item>
+                  <auth-button style="width: 100%; margin: 0px;" name="dept_change"
+                    :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" @click="handleDelete"> 删除
+                  </auth-button>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </template>
           <template v-slot:table>
             <el-table-column label="ip">
@@ -55,7 +68,9 @@
             </el-table-column>
             <el-table-column label="标签">
               <template slot-scope="scope">
-                 <em class="el-icon-circle-check" style="color: rgb(82, 196, 26);">{{ scope.row.state }}</em>
+                <em class="el-icon-circle-check" style="color: rgb(82, 196, 26);">{{ scope.row.state }}</em>
+                <em class="el-icon-warning-outline" style="color: rgb(255, 191, 0);;">{{ scope.row.state }}</em>
+                <em class="el-icon-circle-close" style="color: rgb(255, 0, 0);">{{ scope.row.state }}</em>
               </template>
             </el-table-column>
             <el-table-column prop="systeminfo" label="系统">
