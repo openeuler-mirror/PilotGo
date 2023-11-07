@@ -19,7 +19,11 @@ type Client struct {
 	asyncCmdResultChan      chan *common.AsyncCmdResult
 	cmdProcessorCallbackMap map[string]CallbackHandler
 
+	// 用于处理主机标签
 	getTagsCallback GetTagsCallback
+
+	// 用于平台扩展点功能
+	extentions []*common.Extention
 }
 
 var global_client *Client
@@ -56,6 +60,10 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
+		api.GET("/extentions", func(c *gin.Context) {
+			c.Set("__internal__client_instance", client)
+		}, ExtentionsHandler)
+
 		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
 		}, EventHandler)
