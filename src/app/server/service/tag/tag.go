@@ -19,6 +19,7 @@ type Tag struct {
 
 // 向所有插件发送uuidlist
 func RequestTag(UUIDList []string) ([]Tag, error) {
+	//TODO：获取在线插件列表
 	plugins, err := plugin.GetPlugins()
 	if err != nil {
 		return nil, err
@@ -28,8 +29,13 @@ func RequestTag(UUIDList []string) ([]Tag, error) {
 	for _, v := range plugins {
 		//TODO:规定插件接收请求的api
 		url := v.Url + "/gettags"
+		uuidTags := &struct {
+			UUIDS []string `json:"uuids"`
+		}{
+			UUIDS: UUIDList,
+		}
 		r, err := httputils.Get(url, &httputils.Params{
-			Body: UUIDList,
+			Body: uuidTags,
 		})
 		if err != nil {
 			logger.Error(err.Error())
@@ -42,18 +48,18 @@ func RequestTag(UUIDList []string) ([]Tag, error) {
 
 		resp := &common.CommonResult{}
 		if err := json.Unmarshal(r.Body, resp); err != nil {
-			logger.Error(err.Error())
+			logger.Error("解析结果出错%v", err.Error())
 			continue
 		}
 		if resp.Code != http.StatusOK {
 			logger.Error(resp.Message)
 			continue
 		}
-
-		data := []Tag{}
-		if err := resp.ParseData(data); err != nil {
+		var tags []Tag
+		if err := resp.ParseData(&tags); err != nil {
 			logger.Error(err.Error())
 		}
+		msg = append(msg, tags...)
 	}
 	return msg, err
 }

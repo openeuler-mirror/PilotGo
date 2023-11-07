@@ -310,6 +310,8 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.PUT("/publish_event", pluginapi.PublishEventHandler)
 		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
 
+		pluginAPI.GET("/gettags", pluginapi.GetTagHandler)
+
 		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
 		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
 
