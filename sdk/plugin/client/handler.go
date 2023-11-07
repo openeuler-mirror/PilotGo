@@ -60,6 +60,23 @@ func EventHandler(c *gin.Context) {
 	client.ProcessEvent(&msg)
 }
 
+func ExtentionsHandler(c *gin.Context) {
+	v, ok := c.Get("__internal__client_instance")
+	if !ok {
+		return
+	}
+	client, ok := v.(*Client)
+	if !ok {
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "",
+		"data":    client.extentions,
+	})
+}
+
 func CommandResultHandler(c *gin.Context) {
 	j, err := io.ReadAll(c.Request.Body) // 接收数据
 	if err != nil {
