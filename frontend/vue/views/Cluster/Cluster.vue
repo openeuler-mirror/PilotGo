@@ -53,6 +53,11 @@
                 <state-dot :state="scope.row.state"></state-dot>
               </template>
             </el-table-column>
+            <el-table-column label="标签">
+              <template slot-scope="scope">
+                 <em class="el-icon-circle-check" style="color: rgb(82, 196, 26);">{{ scope.row.state }}</em>
+              </template>
+            </el-table-column>
             <el-table-column prop="systeminfo" label="系统">
             </el-table-column>
           </template>
