@@ -69,8 +69,8 @@ export function getClusters(data) {
 export function getTags(data) {
   return request({
     url: 'macList/gettags',
-    method: 'get',
-    params: data
+    method: 'post',
+    data
   })
 }
 
