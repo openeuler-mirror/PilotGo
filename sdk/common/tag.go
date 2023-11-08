@@ -7,7 +7,8 @@ const (
 )
 
 type Tag struct {
-	UUID string `json:"machineuuid"`
-	Type string `json:"type"`
-	Data string `json:"data"`
+	UUID       string `json:"machineuuid"`
+	PluginName string `json:"plugin_name"`
+	Type       string `json:"type"`
+	Data       string `json:"data"`
 }

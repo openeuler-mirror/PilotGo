@@ -12,9 +12,10 @@ import (
 )
 
 type Tag struct {
-	UUID string `json:"machineuuid"`
-	Type string `json:"type"`
-	Data string `json:"data"`
+	UUID       string `json:"machineuuid"`
+	PluginName string `json:"plugin_name"`
+	Type       string `json:"type"`
+	Data       string `json:"data"`
 }
 
 // 向所有插件发送uuidlist
@@ -58,6 +59,9 @@ func RequestTag(UUIDList []string) ([]Tag, error) {
 		var tags []Tag
 		if err := resp.ParseData(&tags); err != nil {
 			logger.Error(err.Error())
+		}
+		for _, vt := range tags {
+			vt.PluginName = v.Name
 		}
 		msg = append(msg, tags...)
 	}
