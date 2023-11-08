@@ -28,7 +28,7 @@ func RequestTag(UUIDList []string) ([]Tag, error) {
 	//向url发送请求
 	for _, v := range plugins {
 		//TODO:规定插件接收请求的api
-		url := v.Url + "/gettags"
+		url := v.Url + "/plugin_manage/api/v1/gettags"
 		uuidTags := &struct {
 			UUIDS []string `json:"uuids"`
 		}{

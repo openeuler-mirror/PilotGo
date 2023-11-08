@@ -64,6 +64,10 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 			c.Set("__internal__client_instance", client)
 		}, ExtentionsHandler)
 
+		api.GET("/gettags", func(c *gin.Context) {
+			c.Set("__internal__client_instance", client)
+		}, TagsHandler)
+
 		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
 		}, EventHandler)
