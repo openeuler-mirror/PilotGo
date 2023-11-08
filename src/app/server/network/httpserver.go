@@ -171,6 +171,7 @@ func registerAPIs(router *gin.Engine) {
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
 		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
+		macList.GET("/gettags", pluginapi.GetTagHandler)
 	}
 
 	macDetails := api.Group("/api") // 机器详情
@@ -309,8 +310,6 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
 		pluginAPI.PUT("/publish_event", pluginapi.PublishEventHandler)
 		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
-
-		pluginAPI.GET("/gettags", pluginapi.GetTagHandler)
 
 		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
 		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
