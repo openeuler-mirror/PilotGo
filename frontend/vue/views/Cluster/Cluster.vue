@@ -25,8 +25,8 @@
         <span class="sourceBtn" @click="getSourcePool">未分配资源池</span>
       </div>
       <div class="info panel">
-        <ky-table class="cluster-table" ref="table" :isSource="isSource" :showSelect="showSelect" :getData="getClusters"
-          :getSourceData="getSourceMac" :searchData="searchData" :treeNodes="checkedNode">
+        <ky-table class="cluster-table" ref="table" :isSource="isSource" :showSelect="showSelect"
+          :getData="getMachinesInfo" :getSourceData="getSourceMac" :searchData="searchData" :treeNodes="checkedNode">
           <template v-slot:table_search>
             <div>{{ departName }}</div>
           </template>
@@ -68,9 +68,9 @@
             </el-table-column>
             <el-table-column label="标签">
               <template slot-scope="scope">
-                <em class="el-icon-circle-check" style="color: rgb(82, 196, 26);">{{ scope.row.state }}</em>
-                <em class="el-icon-warning-outline" style="color: rgb(255, 191, 0);;">{{ scope.row.state }}</em>
-                <em class="el-icon-circle-close" style="color: rgb(255, 0, 0);">{{ scope.row.state }}</em>
+                <em v-for="item in scope.row.tags" v-if="item.type === 'ok' " class="el-icon-circle-check" style="color: rgb(82, 196, 26); ">{{ item.data }}</em>
+                <em v-for="item in scope.row.tags" v-if="item.type === 'warn' " class="el-icon-warning-outline" style="color: rgb(255, 191, 0); ">{{ item.data }}</em>
+                <em v-for="item in scope.row.tags" v-if="item.type === 'error' " class="el-icon-circle-close" style="color: rgb(255, 0, 0); ">{{ item.data }}</em>
               </template>
             </el-table-column>
             <el-table-column prop="systeminfo" label="系统">
@@ -95,7 +95,7 @@ import StateDot from "@/components/StateDot";
 import UpdateForm from "./form/updateForm";
 import ChangeForm from "./form/changeForm";
 import RpmIssue from "./form/rpmIssue";
-import { getClusters, deleteIp, getChildNode, getSourceMac } from "@/request/cluster";
+import { getClusters, getTags, deleteIp, getChildNode, getSourceMac } from "@/request/cluster";
 export default {
   name: "Cluster",
   components: {
@@ -233,6 +233,44 @@ export default {
       this.$router.push({
         name: 'Prometheus',
         query: { ip: ip }
+      })
+    },
+    getMachinesInfo(params) {
+      return new Promise((resolve, reject) => {
+        getClusters(params).then((resp)=>{
+          if (resp.data.code != 200) {
+            reject(resp)
+          }
+
+          let uuids = []
+          for (let i in resp.data.data) {
+            uuids.push(resp.data.data[i].uuid)
+          }
+
+          let result = resp
+          getTags({"uuids":uuids}).then((resp) => {
+            if(resp.data.code != 200) {
+              reject(resp)
+            }
+
+            for(let n in resp.data.data) {
+              for (let i in result.data.data) {
+                if ( resp.data.data[n].machineuuid === result.data.data[i].uuid ) {
+                  if( !result.data.data[i].tags) {
+                    result.data.data[i].tags = [resp.data.data[n]]
+                  } else {
+                    result.data.data[i].tags.push(resp.data.data[n])
+                  }
+                }
+              }
+            }
+            resolve(result)
+          }).catch((err)=>{
+            reject(err)
+          })
+        }).catch((err) => {
+          reject(err)
+        })
       })
     }
   },

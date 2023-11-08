@@ -24,40 +24,19 @@
         </div>
       </div>
     </div>
-    <div class="content" v-loading="loading" element-loading-text="数据加载中" 
-      element-loading-spinner="el-icon-loading">
-      <el-table
-        height="100%"
-        :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
-        :cell-style="{ color: 'black' }"
-        ref="multipleTable"
-        :data="tableData"
-        tooltip-effect="dark"
-        :row-class-name="tableRowClassName"
-        @select="handleSelectionChange"
-        @select-all="handleSelectAll"
-      >
-        <el-table-column
-          type="selection"
-          v-if="showSelect"
-          width="55"
-          align="center"
-          :selectable="checkSelectTable"
-        >
+    <div class="content" v-loading="loading" element-loading-text="数据加载中" element-loading-spinner="el-icon-loading">
+      <el-table height="100%" :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
+        :cell-style="{ color: 'black' }" ref="multipleTable" :data="tableData" tooltip-effect="dark"
+        :row-class-name="tableRowClassName" @select="handleSelectionChange" @select-all="handleSelectAll">
+        <el-table-column type="selection" v-if="showSelect" width="55" align="center" :selectable="checkSelectTable">
         </el-table-column>
         <slot name="table"></slot>
       </el-table>
     </div>
     <div class="pagination">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="objSearch.page"
-        :page-sizes="[10, 20, 25, 50, 75, 100]"
-        :page-size="objSearch.size"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-      >
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="objSearch.page"
+        :page-sizes="[10, 20, 25, 50, 75, 100]" :page-size="objSearch.size"
+        layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
   </div>
@@ -68,13 +47,13 @@ export default {
   props: {
     isLoadTable: {
       type: Boolean,
-      default: function() {
+      default: function () {
         return true;
       }
     },
     isSource: {
       type: Number,
-      default: function() {
+      default: function () {
         return 1;
       }
     },
@@ -86,27 +65,27 @@ export default {
     },
     showSelect: {
       type: Boolean,
-      default: function() {
+      default: function () {
         return true;
       }
     },
     searchData: {
       type: Object,
-      default: function() {
+      default: function () {
         return {
-          
+
         };
       }
     },
     treeNodes: {
       type: Array,
-      default: function() {
+      default: function () {
         return []
       }
     },
     isRowClick: {
       type: Boolean,
-      default: function() {
+      default: function () {
         return false
       }
     }
@@ -121,7 +100,7 @@ export default {
       checked: false,
       displayTip: false,
       total: 0,
-      loading: false, 
+      loading: false,
       tableData: [],
       display: false,
       objSearch: {
@@ -131,13 +110,13 @@ export default {
     };
   },
   mounted() {
-      this.loadData({ ...this.objSearch });
+    this.loadData({ ...this.objSearch });
   },
   watch: {
-    isSource: function(newV,oldV){
-      this.$nextTick(() => {  
-        if(newV) {
-          this.getSData({...this.objSearch, page: 1})
+    isSource: function (newV, oldV) {
+      this.$nextTick(() => {
+        if (newV) {
+          this.getSData({ ...this.objSearch, page: 1 })
         }
       })
     },
@@ -146,7 +125,7 @@ export default {
     loadData(pageParams) {
       this.tableData = [];
       this.loading = true;
-      this.getData({...pageParams,...this.searchData}).then((response) => {
+      this.getData({ ...pageParams, ...this.searchData }).then((response) => {
         const res = response.data;
         if (res.code === 200) {
           this.loading = false;
@@ -161,8 +140,9 @@ export default {
           }); */
           this.loading = false;
         }
-      });
-
+      }).catch((err) => {
+        console.log("get data error:", err)
+      })
     },
     getSData(data) {
       this.tableData = [];
@@ -190,9 +170,9 @@ export default {
       this.$refs.multipleTable.clearSelection();
       this.selectRow.ids = [];
       this.selectRow.rows = [];
-      this.loadData({...this.objSearch, page: 1});
+      this.loadData({ ...this.objSearch, page: 1 });
     },
-    changeExpandRow(row){
+    changeExpandRow(row) {
       this.$refs.multipleTable.toggleRowExpansion(row);
     },
     expandSelect(row, expandedRows) {
@@ -215,19 +195,19 @@ export default {
       this.loadData(this.objSearch);
     },
     handleSelectionChange(selection, row) {
-        // 1.判断是否已经存在已选中行
-        const index = this.selectRow.ids.indexOf(row.ID || row.machineuuid);
-        // 2.若是不在就放入选中数组中，在就删掉
-        if (index < 0) {
-          this.selectRow.ids.push(row.ID || row.machineuuid || row.id);
-          this.selectRow.rows.push(row);
-        } else {
-          this.selectRow.ids.splice(index, 1);
-          this.selectRow.rows.splice(index, 1);
-        }
+      // 1.判断是否已经存在已选中行
+      const index = this.selectRow.ids.indexOf(row.ID || row.machineuuid);
+      // 2.若是不在就放入选中数组中，在就删掉
+      if (index < 0) {
+        this.selectRow.ids.push(row.ID || row.machineuuid || row.id);
+        this.selectRow.rows.push(row);
+      } else {
+        this.selectRow.ids.splice(index, 1);
+        this.selectRow.rows.splice(index, 1);
+      }
     },
     handleSelectAll(selection) {
-      if(selection.length === 0) {
+      if (selection.length === 0) {
         this.selectRow.ids = [];
         this.selectRow.rows = [];
       } else {
@@ -242,14 +222,14 @@ export default {
       this.$refs.multipleTable.clearSelection();
       this.selectRow.ids = [];
       this.selectRow.rows = [];
-      this.loadData({ ...this.objSearch});
+      this.loadData({ ...this.objSearch });
     },
     tableRowClassName({ row, rowIndex }) {
       // rowIndex备用，隔行显示颜色不同的时候用
-      if(this.isRowClick) {
+      if (this.isRowClick) {
         return ['row-expand'];
-      } 
-  
+      }
+
     },
     handleClose() {
       this.display = false;
@@ -264,11 +244,13 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
 .ky-table {
   height: 96%;
+
   .header {
     width: 100%;
     height: 6%;
     border-radius: 6px 6px 0 0;
-    background: linear-gradient(to right,rgb(11, 35, 117) 0%, rgb(96, 122, 207) 100%,);
+    background: linear-gradient(to right, rgb(11, 35, 117) 0%, rgb(96, 122, 207) 100%, );
+
     .header_content {
       height: 100%;
       margin: 0 10px;
@@ -276,29 +258,36 @@ export default {
       justify-content: space-between;
       align-items: center;
       color: #fff;
+
       .el-button {
         font-size: 12px;
         padding: 10px;
       }
     }
   }
+
   .content {
     height: 92%;
     overflow-y: auto;
   }
+
   .el-table {
     .line-color {
       background-color: #fff;
     }
-    th, td {
+
+    th,
+    td {
       text-align: center;
     }
-    .el-checkbox__input.is-checked .el-checkbox__inner, 
+
+    .el-checkbox__input.is-checked .el-checkbox__inner,
     .el-checkbox__input.is-indeterminate .el-checkbox__inner {
       background-color: rgb(82, 108, 193);
       border-color: rgb(82, 108, 193)
     }
   }
+
   .pagination {
     .el-pagination {
       text-align: right;
@@ -307,6 +296,7 @@ export default {
       padding-top: 5px;
       padding-bottom: 5px;
       border-top: 0px;
+
       .el-pagination__sizes,
       .el-pagination__total {
         float: left;
