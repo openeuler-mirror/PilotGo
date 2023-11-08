@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/service/extention"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -119,14 +121,14 @@ func DeletePlugin(uuid string) error {
 	return nil
 }
 
-func TogglePlugin(uuid string, enable int) error {
+func TogglePlugin(uuid string, enable int) ([]common.Extention, error) {
 	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
-
-	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
+	plugin := &dao.PluginModel{
 		UUID:    uuid,
 		Enabled: enable,
-	}); err != nil {
-		return err
 	}
-	return nil
+	if err := dao.UpdatePluginEnabled(plugin); err != nil {
+		return nil, err
+	}
+	return extention.RequestExtention(*plugin)
 }

@@ -8,6 +8,8 @@ const (
 )
 
 type Extention struct {
-	Type string
-	URL  string
+	PluginName string `json:"plugin_name"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	URL        string `json:"url"`
 }

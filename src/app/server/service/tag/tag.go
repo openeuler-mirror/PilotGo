@@ -11,21 +11,14 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-type Tag struct {
-	UUID       string `json:"machineuuid"`
-	PluginName string `json:"plugin_name"`
-	Type       string `json:"type"`
-	Data       string `json:"data"`
-}
-
 // 向所有插件发送uuidlist
-func RequestTag(UUIDList []string) ([]Tag, error) {
+func RequestTag(UUIDList []string) ([]common.Tag, error) {
 	//TODO：获取在线插件列表
 	plugins, err := plugin.GetPlugins()
 	if err != nil {
 		return nil, err
 	}
-	msg := []Tag{}
+	msg := []common.Tag{}
 	//向url发送请求
 	for _, v := range plugins {
 		//TODO:规定插件接收请求的api
@@ -56,7 +49,7 @@ func RequestTag(UUIDList []string) ([]Tag, error) {
 			logger.Error(resp.Message)
 			continue
 		}
-		var tags []Tag
+		var tags []common.Tag
 		if err := resp.ParseData(&tags); err != nil {
 			logger.Error(err.Error())
 		}
