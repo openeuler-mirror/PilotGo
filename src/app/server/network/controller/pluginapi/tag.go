@@ -1,12 +1,9 @@
 package pluginapi
 
 import (
-	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
-	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/tag"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 插件返回tag数据
@@ -18,26 +15,10 @@ func GetTagHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "get tag",
-	}
-	auditlog.Add(log)
 
 	//TODO:获取到了tag数据开始使用
 	data, err := tag.RequestTag(uuidTags.UUIDS)
 	if err != nil {
-		auditlog.UpdateMessage(log, "get tag error"+err.Error())
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
