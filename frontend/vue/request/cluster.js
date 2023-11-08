@@ -65,6 +65,15 @@ export function getClusters(data) {
   })
 }
 
+// 获取给定主机列表的tag标签
+export function getTags(data) {
+  return request({
+    url: 'macList/gettags',
+    method: 'get',
+    params: data
+  })
+}
+
 // 获取资源池列表接口
 export function getSourceMac(data) {
   return request({
