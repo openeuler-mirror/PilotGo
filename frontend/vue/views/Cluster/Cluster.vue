@@ -36,12 +36,12 @@
                 操作<i class="el-icon-arrow-down el-icon--right"></i>
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>
+                <el-dropdown-item class="dropdown-item">
                   <auth-button style="width: 100%; margin: 0px;" name="dept_change"
                     :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" @click="handleChange"> 变更部门
                   </auth-button>
                 </el-dropdown-item>
-                <el-dropdown-item>
+                <el-dropdown-item class="dropdown-item">
                   <auth-button style="width: 100%; margin: 0px;" name="dept_change"
                     :disabled="$refs.table && $refs.table.selectRow.rows.length == 0" @click="handleDelete"> 删除
                   </auth-button>
@@ -68,9 +68,12 @@
             </el-table-column>
             <el-table-column label="标签">
               <template slot-scope="scope">
-                <em v-for="item in scope.row.tags" v-if="item.type === 'ok' " class="el-icon-circle-check" style="color: rgb(82, 196, 26); ">{{ item.data }}</em>
-                <em v-for="item in scope.row.tags" v-if="item.type === 'warn' " class="el-icon-warning-outline" style="color: rgb(255, 191, 0); ">{{ item.data }}</em>
-                <em v-for="item in scope.row.tags" v-if="item.type === 'error' " class="el-icon-circle-close" style="color: rgb(255, 0, 0); ">{{ item.data }}</em>
+                <em v-for="item in scope.row.tags" v-if="item.type === 'ok'" class="el-icon-circle-check"
+                  style="color: rgb(82, 196, 26); ">{{ item.data }}</em>
+                <em v-for="item in scope.row.tags" v-if="item.type === 'warn'" class="el-icon-warning-outline"
+                  style="color: rgb(255, 191, 0); ">{{ item.data }}</em>
+                <em v-for="item in scope.row.tags" v-if="item.type === 'error'" class="el-icon-circle-close"
+                  style="color: rgb(255, 0, 0); ">{{ item.data }}</em>
               </template>
             </el-table-column>
             <el-table-column prop="systeminfo" label="系统">
@@ -237,7 +240,7 @@ export default {
     },
     getMachinesInfo(params) {
       return new Promise((resolve, reject) => {
-        getClusters(params).then((resp)=>{
+        getClusters(params).then((resp) => {
           if (resp.data.code != 200) {
             reject(resp)
           }
@@ -248,15 +251,15 @@ export default {
           }
 
           let result = resp
-          getTags({"uuids":uuids}).then((resp) => {
-            if(resp.data.code != 200) {
+          getTags({ "uuids": uuids }).then((resp) => {
+            if (resp.data.code != 200) {
               reject(resp)
             }
 
-            for(let n in resp.data.data) {
+            for (let n in resp.data.data) {
               for (let i in result.data.data) {
-                if ( resp.data.data[n].machineuuid === result.data.data[i].uuid ) {
-                  if( !result.data.data[i].tags) {
+                if (resp.data.data[n].machineuuid === result.data.data[i].uuid) {
+                  if (!result.data.data[i].tags) {
                     result.data.data[i].tags = [resp.data.data[n]]
                   } else {
                     result.data.data[i].tags.push(resp.data.data[n])
@@ -265,7 +268,7 @@ export default {
               }
             }
             resolve(result)
-          }).catch((err)=>{
+          }).catch((err) => {
             reject(err)
           })
         }).catch((err) => {
@@ -367,5 +370,10 @@ export default {
       font-size: 18px;
     }
   }
+}
+
+.dropdown-item {
+  padding: 3px;
+  width: 100%;
 }
 </style>
