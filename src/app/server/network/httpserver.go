@@ -36,6 +36,11 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 
 	go func() {
 		r := setupRouter()
+
+		// 启动websocket服务
+		go websocket.CliManager.Start()
+
+		// 启动http server服务
 		if conf.UseHttps {
 			if conf.CertFile == "" || conf.KeyFile == "" {
 				logger.Error("https cert or key not configd")
@@ -296,7 +301,6 @@ func registerAPIs(router *gin.Engine) {
 		// 健康监测
 		other.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 	}
-	go websocket.CliManager.Start()
 }
 
 func registerPluginApi(router *gin.Engine) {
