@@ -64,18 +64,16 @@ func EventHandler(c *gin.Context) {
 func ExtentionsHandler(c *gin.Context) {
 	v, ok := c.Get("__internal__client_instance")
 	if !ok {
+		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
 		return
 	}
 	client, ok := v.(*Client)
 	if !ok {
+		response.Fail(c, gin.H{"status": false}, "client获取失败")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "",
-		"data":    client.extentions,
-	})
+	response.Success(c, client.extentions, "")
 }
 
 func CommandResultHandler(c *gin.Context) {
