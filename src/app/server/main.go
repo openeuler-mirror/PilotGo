@@ -26,6 +26,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
+	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -62,6 +63,9 @@ func main() {
 
 	// 鉴权模块初始化
 	auth.Casbin(&config.Config().MysqlDBinfo)
+
+	// 初始化plugin服务
+	plugin.Init()
 
 	// 启动agent socket server
 	if err := network.SocketServerInit(&config.Config().SocketServer); err != nil {

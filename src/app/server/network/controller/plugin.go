@@ -105,11 +105,10 @@ func TogglePluginHandler(c *gin.Context) {
 	auditlog.Add(log)
 
 	logger.Info("toggle plugin:%s to enable %d", param.UUID, param.Enable)
-	extentions, err := plugin.TogglePlugin(param.UUID, param.Enable)
-	if err != nil {
-		response.Fail(c, nil, "插件信息更新失败")
+	if err = plugin.TogglePlugin(param.UUID, param.Enable); err != nil {
+		response.Fail(c, nil, "toggle plugin error:"+err.Error())
 	}
-	response.Success(c, extentions, "插件信息更新成功")
+	response.Success(c, nil, "插件信息更新成功")
 }
 
 // 卸载插件
