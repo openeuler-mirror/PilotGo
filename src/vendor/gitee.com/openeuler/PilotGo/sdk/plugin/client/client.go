@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type GetTagsCallback func([]string) []common.Tag
+
 type Client struct {
 	Server     string
 	PluginInfo *PluginInfo
@@ -16,6 +18,12 @@ type Client struct {
 	// 用于异步command及script执行结果处理机
 	asyncCmdResultChan      chan *common.AsyncCmdResult
 	cmdProcessorCallbackMap map[string]CallbackHandler
+
+	// 用于处理主机标签
+	getTagsCallback GetTagsCallback
+
+	// 用于平台扩展点功能
+	extentions []*common.Extention
 }
 
 var global_client *Client
@@ -52,6 +60,14 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
+		api.GET("/extentions", func(c *gin.Context) {
+			c.Set("__internal__client_instance", client)
+		}, ExtentionsHandler)
+
+		api.GET("/gettags", func(c *gin.Context) {
+			c.Set("__internal__client_instance", client)
+		}, TagsHandler)
+
 		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
 		}, EventHandler)
@@ -72,4 +88,8 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 	// TODO: start command result process service
 	client.startEventProcessor()
 	client.startCommandResultProcessor()
+}
+
+func (client *Client) OnGetTags(callback GetTagsCallback) {
+	client.getTagsCallback = callback
 }
