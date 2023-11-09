@@ -19,6 +19,13 @@ type Batch struct {
 	DepartName  string `gorm:"type:varchar(100)"`
 }
 
+type Batch2Machine struct {
+	Batch         Batch `gorm:"Foreignkey:BatchID"`
+	BatchID       uint
+	MachineNode   MachineNode `gorm:"Foreignkey:MachineNodeID"`
+	MachineNodeID uint
+}
+
 func (b *Batch) ReturnBatch() (list *[]Batch, tx *gorm.DB) {
 	list = &[]Batch{}
 	tx = mysqlmanager.MySQL().Order("created_at desc").Find(&list)
@@ -71,7 +78,7 @@ func GetMachineID(BatchID int) ([]string, error) {
 }
 
 // 创建批次
-func CreateBatchMessage(batch Batch) error {
+func CreateBatchMessage(batch *Batch) error {
 	return mysqlmanager.MySQL().Create(&batch).Error
 }
 
@@ -110,4 +117,9 @@ func GetBatchrPaged(offset, size int) (int64, []Batch, error) {
 	var count int64
 	err := mysqlmanager.MySQL().Model(Batch{}).Order("id desc").Offset(offset).Limit(size).Find(&batchs).Offset(-1).Limit(-1).Count(&count).Error
 	return count, batchs, err
+}
+
+// 添加机器批次数据
+func AddBatch2Machine(b2m Batch2Machine) error {
+	return mysqlmanager.MySQL().Create(&b2m).Error
 }

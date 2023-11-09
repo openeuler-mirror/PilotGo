@@ -29,9 +29,10 @@ import (
 )
 
 type Batch = dao.Batch
+type Batch2Machine = dao.Batch2Machine
 type CreateBatchParam struct {
 	Name        string   `json:"Name"`
-	Description string   `json:"Description"`
+	Description string   `json:"Descrip"`
 	Manager     string   `json:"Manager"`
 	DepartName  []string `json:"DepartName"`
 	DepartID    []int    `json:"DepartID"`
@@ -78,6 +79,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		if len(machineids) == 0 {
 			return errors.New("该部门下没有机器，请重新确认")
 		}
+		batchinfo.Machines = machineids
 		for _, id := range machineids {
 			machinelist = machinelist + "," + strconv.Itoa(id)
 			machinelist = strings.Trim(machinelist, ",")
@@ -114,7 +116,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		departNamelist = strings.Join(List, ",")
 	}
 
-	Batch := dao.Batch{
+	Batch := &dao.Batch{
 		Name:        batchinfo.Name,
 		Description: batchinfo.Description,
 		Manager:     batchinfo.Manager,
@@ -125,6 +127,17 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	err = dao.CreateBatchMessage(Batch)
 	if err != nil {
 		return err
+	}
+
+	//添加数据到Batch2Machine
+	for _, id := range batchinfo.Machines {
+		err := dao.AddBatch2Machine(dao.Batch2Machine{
+			BatchID:       Batch.ID,
+			MachineNodeID: uint(id),
+		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
