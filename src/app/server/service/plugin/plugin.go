@@ -123,11 +123,14 @@ func DeletePlugin(uuid string) error {
 
 func TogglePlugin(uuid string, enable int) ([]common.Extention, error) {
 	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
-	plugin := &dao.PluginModel{
+	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
 		UUID:    uuid,
 		Enabled: enable,
+	}); err != nil {
+		return nil, err
 	}
-	if err := dao.UpdatePluginEnabled(plugin); err != nil {
+	plugin, err := dao.QueryPluginById(uuid)
+	if err != nil {
 		return nil, err
 	}
 	return extention.RequestExtention(*plugin)

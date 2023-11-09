@@ -169,12 +169,19 @@ func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, erro
 	for _, macId := range machineIdlist {
 		MacInfo, err := dao.MachineData(macId)
 		if err != nil {
-			return int64(len(machineIdlist)), machinesInfo[offset : offset+size], err
+			return int64(len(machineIdlist)), machinesInfo[offset:Min(offset+size, len(machineIdlist))], err
 		}
 		machinesInfo = append(machinesInfo, MacInfo)
 	}
 
-	return int64(len(machineIdlist)), machinesInfo[offset : offset+size], nil
+	return int64(len(machineIdlist)), machinesInfo[offset:Min(offset+size, len(machineIdlist))], nil
+}
+
+func Min(a, b int) int {
+	if a > b {
+		return b
+	}
+	return a
 }
 
 // from batch get all machines
