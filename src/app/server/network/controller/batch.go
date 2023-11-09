@@ -87,11 +87,6 @@ func DeleteBatchHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	batchesname := []string{}
-	for _, batchid := range batchdel.BatchID {
-		batchesname = append(batchesname, strconv.Itoa(batchid))
-	}
-
 	if err := batch.DeleteBatch(batchdel.BatchID); err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"status": false}, err.Error())

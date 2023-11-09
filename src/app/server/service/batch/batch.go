@@ -24,7 +24,6 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	scommon "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/pkg/errors"
 )
 
@@ -122,7 +121,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		Manager:     batchinfo.Manager,
 		Depart:      departIdlist,
 		DepartName:  departNamelist,
-		Machinelist: machinelist,
+		//Machinelist: machinelist,
 	}
 	err = dao.CreateBatchMessage(Batch)
 	if err != nil {
@@ -142,7 +141,11 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	return nil
 }
 
-// 分页查询所有用户
+func SelectBatch() ([]dao.Batch, error) {
+	return dao.GetBatch()
+}
+
+// 分页查询所有批次
 func GetBatchPaged(offset, size int) (int64, []Batch, error) {
 	return dao.GetBatchrPaged(offset, size)
 }
@@ -170,65 +173,56 @@ func UpdateBatch(batchid int, name, description string) error {
 	return err
 }
 
+// 分页获取某批次的机器信息
 func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, error) {
-	machinelist, err := dao.GetMachineID(batchid)
+	count, machineIdlist, err := dao.GetMachineIDPaged(offset, size, batchid)
 	if err != nil {
 		return 0, nil, err
 	}
-	machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
-
 	// 获取机器的所有信息
 	machinesInfo := make([]dao.MachineNode, 0)
 	for _, macId := range machineIdlist {
-		MacInfo, err := dao.MachineData(macId)
+		MacInfo, err := dao.MachineData(int(macId.MachineNodeID))
 		if err != nil {
-			return int64(len(machineIdlist)), machinesInfo[offset:Min(offset+size, len(machineIdlist))], err
+			logger.Error(err.Error())
 		}
 		machinesInfo = append(machinesInfo, MacInfo)
 	}
 
-	return int64(len(machineIdlist)), machinesInfo[offset:Min(offset+size, len(machineIdlist))], nil
-}
-
-func Min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
+	return count, machinesInfo, nil
 }
 
 // from batch get all machines
-func GetMachineUUIDS(b *scommon.Batch) []string {
-	if b.BatchId != 0 {
-		machinelist, err := dao.GetMachineID(b.BatchId)
+func GetMachineUUIDS(batchid int) []string {
+	if batchid != 0 {
+		machineIdlist, err := dao.GetMachineID(batchid)
 		if err != nil {
 			return nil
 		}
-		machineIdlist := utils.String2Int(machinelist) // 获取批次里所有机器的id
 
 		// 获取机器的所有信息
 		uuids := make([]string, 0)
 		for _, macId := range machineIdlist {
-			macuuid, err := dao.MachineIdToUUID(macId)
+			macuuid, err := dao.MachineIdToUUID(int(macId))
 			if err != nil {
-				return nil
+				logger.Error(err.Error())
 			}
 			uuids = append(uuids, macuuid)
 		}
 		return uuids
 	}
-
-	if b.MachineUUIDs != nil {
-		return b.MachineUUIDs
-	}
-	return []string{}
+	return nil
 }
 
 type R interface{}
 
 func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []R {
-	uuids := GetMachineUUIDS(b)
-
+	var uuids []string
+	if b.MachineUUIDs != nil {
+		uuids = b.MachineUUIDs
+	} else {
+		uuids = GetMachineUUIDS(b.BatchId)
+	}
 	result := []R{}
 	for _, uuid := range uuids {
 		r := f(uuid)
@@ -240,8 +234,4 @@ func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []
 
 func BatchIds2UUIDs(batchIds []int) (uuids []string) {
 	return dao.BatchIds2UUIDs(batchIds)
-}
-
-func SelectBatch() ([]dao.Batch, error) {
-	return dao.GetBatch()
 }

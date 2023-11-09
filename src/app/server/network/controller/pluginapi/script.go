@@ -197,7 +197,7 @@ func RunCommandAsyncHandler(c *gin.Context) {
 	caller := "http://" + parsedURL.Host + "/plugin_manage/api/v1/command_result"
 
 	taskId := time.Now().Format("20060102150405")
-	macuuids := batch.GetMachineUUIDS(d.Batch)
+	macuuids := batch.GetMachineUUIDS(d.Batch.BatchId)
 	for _, uuid := range macuuids {
 		log_s := &auditlog.AuditLog{
 			LogUUID:    uuidservice.New().String(),
