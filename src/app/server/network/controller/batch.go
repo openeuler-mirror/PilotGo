@@ -13,14 +13,7 @@ import (
 )
 
 func CreateBatchHandler(c *gin.Context) {
-	params := &struct {
-		Name        string   `json:"Name"`
-		Description string   `json:"Descrip"`
-		Manager     string   `json:"Manager"`
-		DepartName  []string `json:"DepartName"`
-		DepartID    []int    `json:"DepartID"`
-		Machines    []int    `json:"Machines"`
-	}{}
+	params := &batch.CreateBatchParam{}
 	if err := c.Bind(params); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -41,16 +34,7 @@ func CreateBatchHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	batchinfo := &batch.CreateBatchParam{
-		Name:        params.Name,
-		Description: params.Description,
-		Manager:     params.Manager,
-		DepartName:  params.DepartName,
-		DepartID:    params.DepartID,
-		Machines:    params.Machines,
-	}
-
-	if err := batch.CreateBatch(batchinfo); err != nil {
+	if err := batch.CreateBatch(params); err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return

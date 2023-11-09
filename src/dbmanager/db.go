@@ -43,6 +43,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	mysqlmanager.MySQL().AutoMigrate(&cron.CrontabList{})
 	mysqlmanager.MySQL().AutoMigrate(&machine.MachineNode{})
 	mysqlmanager.MySQL().AutoMigrate(&batch.Batch{})
+	mysqlmanager.MySQL().AutoMigrate(&batch.Batch2Machine{})
 	mysqlmanager.MySQL().AutoMigrate(&auditlog.AuditLog{})
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.ConfigFiles{})
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.HistoryConfigFiles{})
