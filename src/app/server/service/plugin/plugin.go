@@ -8,6 +8,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/extention"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
+	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
@@ -20,7 +21,70 @@ const (
 	PluginDisabled = 0
 )
 
-type Plugin = dao.PluginModel
+// type Plugin = dao.PluginModel
+func Init() {
+	mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{})
+}
+
+type Plugin struct {
+	UUID        string `json:"uuid"`
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+	Author      string `json:"author"`
+	Email       string `json:"email"`
+	Url         string `json:"url"`
+	PluginType  string `json:"plugin_type"`
+	Enabled     int    `json:"enabled"`
+	Extention   []*common.Extention
+}
+
+func toPluginDao(p *Plugin) *dao.PluginModel {
+	return &dao.PluginModel{
+		UUID:        p.UUID,
+		Name:        p.Name,
+		Version:     p.Version,
+		Description: p.Description,
+		Author:      p.Author,
+		Email:       p.Email,
+		Url:         p.Url,
+		PluginType:  p.PluginType,
+		Enabled:     p.Enabled,
+	}
+}
+
+func toPlugin(d *dao.PluginModel) *Plugin {
+	return &Plugin{
+		UUID:        d.UUID,
+		Name:        d.Name,
+		Version:     d.Version,
+		Description: d.Description,
+		Author:      d.Author,
+		Email:       d.Email,
+		Url:         d.Url,
+		PluginType:  d.PluginType,
+		Enabled:     d.Enabled,
+	}
+}
+
+func toPlugins(ds []*dao.PluginModel) []*Plugin {
+	result := []*Plugin{}
+	for _, d := range ds {
+		result = append(result, &Plugin{
+			UUID:        d.UUID,
+			Name:        d.Name,
+			Version:     d.Version,
+			Description: d.Description,
+			Author:      d.Author,
+			Email:       d.Email,
+			Url:         d.Url,
+			PluginType:  d.PluginType,
+			Enabled:     d.Enabled,
+		})
+	}
+
+	return result
+}
 
 // 与plugin进行握手，交换必要信息
 func Handshake(url string) (*Plugin, error) {
@@ -63,7 +127,7 @@ func requestPluginInfo(url string) (*client.PluginInfo, error) {
 	return info, nil
 }
 
-// 获取plugin清单
+// 获取所有的plugin
 func GetPlugins() ([]*Plugin, error) {
 	plugins, err := dao.QueryPlugins()
 	if err != nil {
@@ -71,12 +135,14 @@ func GetPlugins() ([]*Plugin, error) {
 		return nil, err
 	}
 
-	return plugins, nil
+	return toPlugins(plugins), nil
 }
 
 // 分页查询
-func GetPluginPaged(offset, size int) (int64, []Plugin, error) {
-	return dao.GetPluginPaged(offset, size)
+func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
+	total, plugins, error := dao.GetPluginPaged(offset, size)
+
+	return total, toPlugins(plugins), error
 }
 
 func GetPlugin(name string) (*Plugin, error) {
@@ -85,7 +151,7 @@ func GetPlugin(name string) (*Plugin, error) {
 		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return nil, err
 	}
-	return plugin, nil
+	return toPlugin(plugin), nil
 }
 
 type AddPluginParam struct {
@@ -106,7 +172,7 @@ func AddPlugin(param *AddPluginParam) error {
 	plugin.UUID = uuid.New().String()
 	plugin.PluginType = param.Type
 
-	if err := dao.RecordPlugin(plugin); err != nil {
+	if err := dao.RecordPlugin(toPluginDao(plugin)); err != nil {
 		return err
 	}
 	return nil
@@ -121,17 +187,18 @@ func DeletePlugin(uuid string) error {
 	return nil
 }
 
-func TogglePlugin(uuid string, enable int) ([]common.Extention, error) {
+func TogglePlugin(uuid string, enable int) error {
 	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
 	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
 		UUID:    uuid,
 		Enabled: enable,
 	}); err != nil {
-		return nil, err
+		return err
 	}
 	plugin, err := dao.QueryPluginById(uuid)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return extention.RequestExtention(*plugin)
+	extention.RequestExtention(*plugin)
+	return nil
 }

@@ -282,8 +282,11 @@ func registerAPIs(router *gin.Engine) {
 
 	plugin := api.Group("plugins") // 插件
 	{
+		// 添加插件
 		plugin.PUT("", controller.AddPluginHandler)
+		// 启用/停用plugin
 		plugin.POST("/:uuid", controller.TogglePluginHandler)
+		// 删除插件
 		plugin.DELETE("/:uuid", controller.UnloadPluginHandler)
 	}
 

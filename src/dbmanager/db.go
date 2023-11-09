@@ -9,7 +9,6 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/cron"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/app/server/service/machine"
-	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/app/server/service/role"
 	"gitee.com/openeuler/PilotGo/app/server/service/script"
 	"gitee.com/openeuler/PilotGo/app/server/service/user"
@@ -49,7 +48,6 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.HistoryConfigFiles{})
 	mysqlmanager.MySQL().AutoMigrate(&script.Script{})
 	mysqlmanager.MySQL().AutoMigrate(&configfile.ConfigFile{})
-	mysqlmanager.MySQL().AutoMigrate(&plugin.Plugin{})
 	mysqlmanager.MySQL().AutoMigrate(&user.User{})
 	mysqlmanager.MySQL().AutoMigrate(&role.UserRole{})
 

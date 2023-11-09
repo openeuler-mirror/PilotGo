@@ -25,8 +25,9 @@ type PluginModel struct {
 	Author      string `gorm:"type:varchar(50)" json:"author"`
 	Email       string `gorm:"type:varchar(100)" json:"email"`
 	Url         string `gorm:"type:varchar(200)" json:"url"`
-	PluginType  string `gorm:"type:varchar(50)" json:"plugin_type"`
-	Enabled     int    `gorm:"type:int" json:"enabled"`
+	// 插件类型，iframe/microapp
+	PluginType string `gorm:"type:varchar(50)" json:"plugin_type"`
+	Enabled    int    `gorm:"type:int" json:"enabled"`
 }
 
 func (m *PluginModel) TableName() string {
@@ -48,9 +49,9 @@ func QueryPlugins() ([]*PluginModel, error) {
 }
 
 // 分页查询
-func GetPluginPaged(offset, size int) (int64, []PluginModel, error) {
+func GetPluginPaged(offset, size int) (int64, []*PluginModel, error) {
 	var count int64
-	var pluginModels []PluginModel
+	var pluginModels []*PluginModel
 	err := mysqlmanager.MySQL().Model(PluginModel{}).Order("id desc").Offset(offset).Limit(size).Find(&pluginModels).Offset(-1).Limit(-1).Count(&count).Error
 	return count, pluginModels, err
 }
