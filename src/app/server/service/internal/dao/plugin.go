@@ -76,3 +76,12 @@ func DeletePlugin(uuid string) error {
 	err := mysqlmanager.MySQL().Where("uuid=?", uuid).Delete(&PluginModel{}).Error
 	return err
 }
+
+// 查询单个插件信息
+func QueryPluginById(uuid string) (*PluginModel, error) {
+	var plugins *PluginModel
+	if err := mysqlmanager.MySQL().Where("uuid=?", uuid).Find(&plugins).Error; err != nil {
+		return nil, err
+	}
+	return plugins, nil
+}
