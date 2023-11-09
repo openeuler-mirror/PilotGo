@@ -20,8 +20,19 @@
         <div>机器列表</div>
       </template>
       <template v-slot:table_action>
-        <auth-button name="rpm_install" @click="handleIssue()"> rpm下发 </auth-button>
-        <auth-button name="rpm_uninstall" @click="handleUnInstall()"> rpm卸载</auth-button>
+        <el-dropdown>
+          <el-button type="primary">
+            操作<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item class="dropdown-item">
+              <auth-button name="rpm_install" @click="handleIssue()"> rpm下发 </auth-button>
+            </el-dropdown-item>
+            <el-dropdown-item class="dropdown-item">
+              <auth-button name="rpm_uninstall" @click="handleUnInstall()"> rpm卸载</auth-button>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </template>
       <template v-slot:table>
         <el-table-column prop="ip" label="IP">
@@ -92,4 +103,9 @@ export default {
   }
 }
 </script>
-<style scoped></style>
+<style scoped>
+.dropdown-item {
+  padding: 3px;
+  width: 100%;
+}
+</style>
