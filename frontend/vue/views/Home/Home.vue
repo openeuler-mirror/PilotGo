@@ -18,7 +18,6 @@
       <el-aside style="width: 8%">
         <div class="logo">
           <img src="../../assets/logo.png" alt="">
-          <!-- <span>PilotGo</span> -->
         </div>
         <el-menu id="el-menu" :collapse="isCollapse" :unique-opened="true" @select="handleSelect"
           class="el-menu-vertical-demo" background-color="#fff" :default-active="activePanel">
