@@ -80,7 +80,7 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
    [PilotGo-plugin-grafana插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-grafana)  
    [PilotGo-plugin-prometheus插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-prometheus)
 
-#### 补充连接
+#### 补充链接
 
 1.  [PilotGo使用手册](https://gitee.com/openeuler/docs/tree/master/docs/zh/docs/PilotGo/使用手册.md)
 2.  PilotGo[软件包仓](https://gitee.com/src-openeuler/PilotGo)

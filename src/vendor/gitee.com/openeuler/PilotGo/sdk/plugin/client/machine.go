@@ -8,15 +8,18 @@ import (
 )
 
 func (c *Client) MachineList() ([]*common.MachineNode, error) {
-	url := c.Server + "/api/v1/pluginapi/machine_list"
+	url := "http://" + c.Server + "/api/v1/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	result := []*common.MachineNode{}
+	result := struct {
+		Code int                   `json:"code"`
+		Data []*common.MachineNode `json:"data"`
+	}{}
 	if err := json.Unmarshal(r.Body, &result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return result.Data, nil
 }
