@@ -3,9 +3,11 @@ package client
 import (
 	"encoding/json"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
+// 用于初始化Client
 type PluginInfo struct {
 	Name        string `json:"name"`
 	Version     string `json:"version"`
@@ -15,6 +17,12 @@ type PluginInfo struct {
 	Url         string `json:"url"`
 	PluginType  string `json:"plugin_type"`
 	ReverseDest string `json:"reverse_dest"`
+}
+
+// 用于插件与PilotGo server通讯
+type PluginFullInfo struct {
+	PluginInfo
+	Extentions []*common.Extention
 }
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
