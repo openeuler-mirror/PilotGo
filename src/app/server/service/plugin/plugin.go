@@ -51,6 +51,22 @@ var globalPluginManager = &PluginManager{
 	Plugins: []*Plugin{},
 }
 
+func (m *PluginManager) AddPlugin(p *Plugin) error {
+	if p.UUID == "" {
+		p.UUID = uuid.New().String()
+	}
+
+	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
+		return err
+	}
+
+	m.Lock()
+	m.Plugins = append(m.Plugins, p)
+	m.Unlock()
+
+	return nil
+}
+
 func toPluginDao(p *Plugin) *dao.PluginModel {
 	return &dao.PluginModel{
 		UUID:        p.UUID,
@@ -182,10 +198,8 @@ func AddPlugin(param *AddPluginParam) error {
 	if err != nil {
 		return err
 	}
-	plugin.UUID = uuid.New().String()
-	plugin.PluginType = param.Type
 
-	if err := dao.RecordPlugin(toPluginDao(plugin)); err != nil {
+	if err = globalPluginManager.AddPlugin(plugin); err != nil {
 		return err
 	}
 	return nil
