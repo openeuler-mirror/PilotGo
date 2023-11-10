@@ -182,6 +182,19 @@ func (m *PluginManager) GetPlugin(name string) (*Plugin, error) {
 	return result, nil
 }
 
+// 获取所有插件
+func (m *PluginManager) GetPlugins() ([]*Plugin, error) {
+	result := []*Plugin{}
+	m.Lock()
+	for _, v := range m.Plugins {
+		// 使用深拷贝避免指针泄露
+		result = append(result, v.Clone())
+	}
+	m.Unlock()
+
+	return result, nil
+}
+
 func toPluginDao(p *Plugin) *dao.PluginModel {
 	return &dao.PluginModel{
 		UUID:        p.UUID,
@@ -193,20 +206,6 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 		Url:         p.Url,
 		PluginType:  p.PluginType,
 		Enabled:     p.Enabled,
-	}
-}
-
-func toPlugin(d *dao.PluginModel) *Plugin {
-	return &Plugin{
-		UUID:        d.UUID,
-		Name:        d.Name,
-		Version:     d.Version,
-		Description: d.Description,
-		Author:      d.Author,
-		Email:       d.Email,
-		Url:         d.Url,
-		PluginType:  d.PluginType,
-		Enabled:     d.Enabled,
 	}
 }
 
@@ -283,13 +282,13 @@ func GetPlugin(name string) (*Plugin, error) {
 
 // 获取所有的plugin
 func GetPlugins() ([]*Plugin, error) {
-	plugins, err := dao.QueryPlugins()
+	plugins, err := globalPluginManager.GetPlugins()
 	if err != nil {
 		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return nil, err
 	}
 
-	return toPlugins(plugins), nil
+	return plugins, nil
 }
 
 // 分页查询
