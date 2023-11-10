@@ -45,15 +45,12 @@ func InfoHandler(c *gin.Context) {
 		return
 	}
 
-	pluginFullInfo := struct {
-		PluginInfo
-		Extentions []*common.Extention
-	}{
+	info := &PluginFullInfo{
 		PluginInfo: *client.PluginInfo,
 		Extentions: client.extentions,
 	}
 
-	c.JSON(http.StatusOK, pluginFullInfo)
+	c.JSON(http.StatusOK, info)
 }
 
 func EventHandler(c *gin.Context) {

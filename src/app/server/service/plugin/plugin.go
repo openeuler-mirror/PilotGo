@@ -102,6 +102,7 @@ func Handshake(url string) (*Plugin, error) {
 		Email:       info.Email,
 		Url:         info.Url,
 		PluginType:  info.PluginType,
+		Extention:   info.Extentions,
 		// Status:      common.StatusLoaded,
 	}
 
@@ -109,7 +110,7 @@ func Handshake(url string) (*Plugin, error) {
 }
 
 // 发起http请求，提供server地址，同时获取到插件的基本信息
-func requestPluginInfo(url string) (*client.PluginInfo, error) {
+func requestPluginInfo(url string) (*client.PluginFullInfo, error) {
 	conf := config.Config().HttpServer
 	url = url + fmt.Sprintf("?server=%s", conf.Addr)
 	resp, err := httputils.Get(url, nil)
@@ -118,7 +119,7 @@ func requestPluginInfo(url string) (*client.PluginInfo, error) {
 		return nil, err
 	}
 
-	info := &client.PluginInfo{}
+	info := &client.PluginFullInfo{}
 	err = json.Unmarshal(resp.Body, info)
 	if err != nil {
 		logger.Debug("unmarshal request plugin info error:%s", err.Error())
