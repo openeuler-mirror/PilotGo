@@ -27,11 +27,8 @@ type Client struct {
 }
 
 var global_client *Client
-var BaseInfo *PluginInfo
 
 func DefaultClient(desc *PluginInfo) *Client {
-	BaseInfo = desc
-
 	global_client = &Client{
 		PluginInfo: desc,
 
@@ -53,7 +50,9 @@ func GetClient() *Client {
 // GET /plugin_manage/info
 func (client *Client) RegisterHandlers(router *gin.Engine) {
 	// 提供插件基本信息
-	mg := router.Group("/plugin_manage/")
+	mg := router.Group("/plugin_manage/", func(c *gin.Context) {
+		c.Set("__internal__client_instance", client)
+	})
 	{
 		mg.GET("/info", InfoHandler)
 	}
