@@ -61,11 +61,11 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// 鉴权模块初始化
-	auth.Casbin(&config.Config().MysqlDBinfo)
-
-	// 初始化plugin服务
-	plugin.Init()
+	// 启动所有功能模块服务
+	if err := startServices(); err != nil {
+		logger.Error("start services error: %s", err)
+		os.Exit(-1)
+	}
 
 	// 启动agent socket server
 	if err := network.SocketServerInit(&config.Config().SocketServer); err != nil {
@@ -80,13 +80,10 @@ func main() {
 		os.Exit(-1)
 	}
 
-	//初始化eventbus
-	eventbus.Init()
-
-	logger.Info("start to serve.")
-
 	// 前端推送告警
 	go websocket.SendWarnMsgToWeb()
+
+	logger.Info("start to serve.")
 
 	// 信号监听
 	c := make(chan os.Signal, 1)
@@ -108,4 +105,17 @@ func main() {
 
 EXIT:
 	logger.Info("exit system, bye~")
+}
+
+func startServices() error {
+	// 鉴权模块初始化
+	auth.Casbin(&config.Config().MysqlDBinfo)
+
+	// 初始化plugin服务
+	plugin.Init()
+
+	//初始化eventbus
+	eventbus.Init()
+
+	return nil
 }
