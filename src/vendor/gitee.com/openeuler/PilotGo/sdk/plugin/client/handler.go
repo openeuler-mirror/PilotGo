@@ -34,7 +34,26 @@ func ReverseProxyHandler(c *gin.Context) {
 }
 
 func InfoHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, BaseInfo)
+	v, ok := c.Get("__internal__client_instance")
+	if !ok {
+		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
+		return
+	}
+	client, ok := v.(*Client)
+	if !ok {
+		response.Fail(c, gin.H{"status": false}, "client信息错误")
+		return
+	}
+
+	pluginFullInfo := struct {
+		PluginInfo
+		Extentions []*common.Extention
+	}{
+		PluginInfo: *client.PluginInfo,
+		Extentions: client.extentions,
+	}
+
+	c.JSON(http.StatusOK, pluginFullInfo)
 }
 
 func EventHandler(c *gin.Context) {
@@ -69,7 +88,7 @@ func ExtentionsHandler(c *gin.Context) {
 	}
 	client, ok := v.(*Client)
 	if !ok {
-		response.Fail(c, gin.H{"status": false}, "client获取失败")
+		response.Fail(c, gin.H{"status": false}, "client信息错误")
 		return
 	}
 
