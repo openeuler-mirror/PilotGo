@@ -15,14 +15,12 @@
 package dao
 
 import (
-	"time"
-
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gorm.io/gorm"
 )
 
 type AuditLog struct {
-	ID         uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	gorm.Model
 	LogUUID    string `gorm:"not null;unique" json:"log_uuid"`
 	ParentUUID string `gorm:"type:varchar(60)" json:"parent_uuid"`
 	Module     string `gorm:"type:varchar(30);not null" json:"module"`
@@ -30,7 +28,6 @@ type AuditLog struct {
 	UserID     uint   `gorm:"not null" json:"user_id"`
 	Action     string `gorm:"not null" json:"action"`
 	Message    string `gorm:"type:text" json:"message"`
-	CreatedAt  time.Time
 }
 
 // 存储日志

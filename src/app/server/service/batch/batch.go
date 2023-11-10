@@ -121,7 +121,6 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		Manager:     batchinfo.Manager,
 		Depart:      departIdlist,
 		DepartName:  departNamelist,
-		//Machinelist: machinelist,
 	}
 	err = dao.CreateBatchMessage(Batch)
 	if err != nil {
