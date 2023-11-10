@@ -67,6 +67,32 @@ func (m *PluginManager) AddPlugin(p *Plugin) error {
 	return nil
 }
 
+func (m *PluginManager) DeletePlugin(uuid string) error {
+	if err := dao.DeletePlugin(uuid); err != nil {
+		logger.Error("failed to delete plugin info:%s", err.Error())
+		return err
+	}
+
+	m.Lock()
+	index := 0
+	for i, v := range m.Plugins {
+		if v.UUID == uuid {
+			index = i
+			break
+		}
+	}
+
+	if index == 0 {
+		m.Plugins = m.Plugins[1:]
+	} else if index == len(m.Plugins)-1 {
+		m.Plugins = m.Plugins[:index]
+	} else {
+		m.Plugins = append(m.Plugins[:index], m.Plugins[index+1:]...)
+	}
+	m.Unlock()
+	return nil
+}
+
 func toPluginDao(p *Plugin) *dao.PluginModel {
 	return &dao.PluginModel{
 		UUID:        p.UUID,
@@ -208,7 +234,7 @@ func AddPlugin(param *AddPluginParam) error {
 func DeletePlugin(uuid string) error {
 	logger.Debug("delete plugin: %s", uuid)
 
-	if err := dao.DeletePlugin(uuid); err != nil {
+	if err := globalPluginManager.DeletePlugin(uuid); err != nil {
 		logger.Error("failed to delete plugin info:%s", err.Error())
 	}
 	return nil
