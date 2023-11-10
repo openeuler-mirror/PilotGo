@@ -39,6 +39,31 @@ type Plugin struct {
 	Extention   []*common.Extention
 }
 
+func (p *Plugin) Clone() *Plugin {
+	result := &Plugin{
+		UUID:        p.UUID,
+		Name:        p.Name,
+		Version:     p.Version,
+		Description: p.Description,
+		Author:      p.Author,
+		Email:       p.Email,
+		Url:         p.Url,
+		PluginType:  p.PluginType,
+		Enabled:     p.Enabled,
+		Extention:   []*common.Extention{},
+	}
+	for _, e := range p.Extention {
+		result.Extention = append(result.Extention, &common.Extention{
+			PluginName: e.PluginName,
+			Name:       e.Name,
+			Type:       e.Type,
+			URL:        e.URL,
+		})
+	}
+
+	return result
+}
+
 type PluginManager struct {
 	sync.Mutex
 
@@ -136,6 +161,27 @@ func (m *PluginManager) TogglePlugin(uuid string, enable int) error {
 	return nil
 }
 
+func (m *PluginManager) GetPlugin(name string) (*Plugin, error) {
+	var result *Plugin
+	found := false
+	m.Lock()
+	for _, v := range m.Plugins {
+		if v.Name == name {
+			// 使用深拷贝避免指针泄露
+			result = v.Clone()
+			found = true
+			break
+		}
+	}
+	m.Unlock()
+
+	if !found {
+		return nil, fmt.Errorf("plugin %s not found", name)
+	}
+
+	return result, nil
+}
+
 func toPluginDao(p *Plugin) *dao.PluginModel {
 	return &dao.PluginModel{
 		UUID:        p.UUID,
@@ -225,6 +271,16 @@ func requestPluginInfo(url string) (*client.PluginFullInfo, error) {
 	return info, nil
 }
 
+// 获取单个plugin
+func GetPlugin(name string) (*Plugin, error) {
+	plugin, err := globalPluginManager.GetPlugin(name)
+	if err != nil {
+		logger.Error("failed to read plugin info from db:%s", err.Error())
+		return nil, err
+	}
+	return plugin, nil
+}
+
 // 获取所有的plugin
 func GetPlugins() ([]*Plugin, error) {
 	plugins, err := dao.QueryPlugins()
@@ -241,15 +297,6 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 	total, plugins, error := dao.GetPluginPaged(offset, size)
 
 	return total, toPlugins(plugins), error
-}
-
-func GetPlugin(name string) (*Plugin, error) {
-	plugin, err := dao.QueryPlugin(name)
-	if err != nil {
-		logger.Error("failed to read plugin info from db:%s", err.Error())
-		return nil, err
-	}
-	return toPlugin(plugin), nil
 }
 
 type AddPluginParam struct {
