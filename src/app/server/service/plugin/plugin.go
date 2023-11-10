@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
-	"gitee.com/openeuler/PilotGo/app/server/service/extention"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -90,6 +89,50 @@ func (m *PluginManager) DeletePlugin(uuid string) error {
 		m.Plugins = append(m.Plugins[:index], m.Plugins[index+1:]...)
 	}
 	m.Unlock()
+	return nil
+}
+
+func (m *PluginManager) TogglePlugin(uuid string, enable int) error {
+	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
+		UUID:    uuid,
+		Enabled: enable,
+	}); err != nil {
+		return err
+	}
+
+	url := ""
+	m.Lock()
+	for _, v := range m.Plugins {
+		if v.UUID == uuid {
+			v.Enabled = enable
+			url = v.Url
+			break
+		}
+	}
+	m.Unlock()
+
+	// 更新最新的插件信息
+	info, err := requestPluginInfo(url)
+	if err != nil {
+		logger.Error("failed to request plugin info:%s", err.Error())
+		return err
+	}
+	m.Lock()
+	for _, v := range m.Plugins {
+		if v.UUID == uuid {
+			v.Name = info.Name
+			v.Version = info.Version
+			v.Description = info.Description
+			v.Author = info.Author
+			v.Email = info.Email
+			v.Url = info.Url
+			v.PluginType = info.PluginType
+			v.Extention = info.Extentions
+			break
+		}
+	}
+	m.Unlock()
+
 	return nil
 }
 
@@ -242,16 +285,9 @@ func DeletePlugin(uuid string) error {
 
 func TogglePlugin(uuid string, enable int) error {
 	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
-	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
-		UUID:    uuid,
-		Enabled: enable,
-	}); err != nil {
+	if err := globalPluginManager.TogglePlugin(uuid, enable); err != nil {
 		return err
 	}
-	plugin, err := dao.QueryPluginById(uuid)
-	if err != nil {
-		return err
-	}
-	extention.RequestExtention(*plugin)
+
 	return nil
 }
