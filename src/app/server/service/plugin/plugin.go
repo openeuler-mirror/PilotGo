@@ -22,8 +22,15 @@ const (
 )
 
 // type Plugin = dao.PluginModel
-func Init() {
-	mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{})
+func Init() error {
+	if err := mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{}); err != nil {
+		return err
+	}
+
+	if err := globalPluginManager.recovery(); err != nil {
+		return err
+	}
+	return nil
 }
 
 type Plugin struct {
@@ -75,7 +82,62 @@ var globalPluginManager = &PluginManager{
 	Plugins: []*Plugin{},
 }
 
-func (m *PluginManager) AddPlugin(p *Plugin) error {
+// 从DB中恢复插件信息
+func (m *PluginManager) recovery() error {
+	plugins, err := dao.QueryPlugins()
+	if err != nil {
+		logger.Error("failed to recovery plugin info from db")
+		return nil
+	}
+
+	for _, p := range plugins {
+		logger.Debug("recovery plugin:%s %s %d", p.UUID, p.Url, p.Enabled)
+		err := m.updatePlugin(p.UUID, p.Url, p.Enabled)
+		if err != nil {
+			logger.Error("failed to update plugin %s info", p.Name)
+			// 继续恢复下一个plugin
+		}
+	}
+
+	logger.Debug("finish recovery")
+	return nil
+}
+
+// 根据url查询最新的plugin信息，并更新到指定的uuid记录当中
+func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
+	// 查询最新的插件信息
+	logger.Debug("update plugin")
+	info, err := requestPluginInfo(url)
+	if err != nil {
+		logger.Error("failed to request plugin info:%s", err.Error())
+		return err
+	}
+
+	p := &Plugin{
+		UUID:        uuid,
+		Name:        info.Name,
+		Version:     info.Version,
+		Description: info.Description,
+		Author:      info.Author,
+		Email:       info.Email,
+		Url:         info.Url,
+		PluginType:  info.PluginType,
+		Enabled:     enabled,
+		Extention:   info.Extentions,
+	}
+
+	if err := dao.UpdatePluginInfo(toPluginDao(p)); err != nil {
+		return err
+	}
+
+	m.Lock()
+	m.Plugins = append(m.Plugins, p)
+	m.Unlock()
+
+	return nil
+}
+
+func (m *PluginManager) addPlugin(p *Plugin) error {
 	if p.UUID == "" {
 		p.UUID = uuid.New().String()
 	}
@@ -91,7 +153,7 @@ func (m *PluginManager) AddPlugin(p *Plugin) error {
 	return nil
 }
 
-func (m *PluginManager) DeletePlugin(uuid string) error {
+func (m *PluginManager) deletePlugin(uuid string) error {
 	if err := dao.DeletePlugin(uuid); err != nil {
 		logger.Error("failed to delete plugin info:%s", err.Error())
 		return err
@@ -117,7 +179,7 @@ func (m *PluginManager) DeletePlugin(uuid string) error {
 	return nil
 }
 
-func (m *PluginManager) TogglePlugin(uuid string, enable int) error {
+func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 	if err := dao.UpdatePluginEnabled(&dao.PluginModel{
 		UUID:    uuid,
 		Enabled: enable,
@@ -161,7 +223,7 @@ func (m *PluginManager) TogglePlugin(uuid string, enable int) error {
 	return nil
 }
 
-func (m *PluginManager) GetPlugin(name string) (*Plugin, error) {
+func (m *PluginManager) getPlugin(name string) (*Plugin, error) {
 	var result *Plugin
 	found := false
 	m.Lock()
@@ -183,7 +245,7 @@ func (m *PluginManager) GetPlugin(name string) (*Plugin, error) {
 }
 
 // 获取所有插件
-func (m *PluginManager) GetPlugins() ([]*Plugin, error) {
+func (m *PluginManager) getPlugins() ([]*Plugin, error) {
 	result := []*Plugin{}
 	m.Lock()
 	for _, v := range m.Plugins {
@@ -211,9 +273,10 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 
 // 与plugin进行握手，交换必要信息
 func Handshake(url string) (*Plugin, error) {
+	logger.Debug("handshake")
 	info, err := requestPluginInfo(url)
 	if err != nil {
-		logger.Debug("")
+		logger.Error("hand shake with plugin failed, url:%s, err:%s", url, err.Error())
 		return nil, err
 	}
 
@@ -234,6 +297,13 @@ func Handshake(url string) (*Plugin, error) {
 
 // 发起http请求，提供server地址，同时获取到插件的基本信息
 func requestPluginInfo(url string) (*client.PluginFullInfo, error) {
+	index := strings.Index(url, "plugin")
+	if index > 0 {
+		url = url[:index]
+	}
+	url = strings.TrimRight(url, "/") + "/plugin_manage/info"
+	logger.Debug("url is:%s", url)
+
 	conf := config.Config().HttpServer
 	url = url + fmt.Sprintf("?server=%s", conf.Addr)
 	resp, err := httputils.Get(url, nil)
@@ -253,7 +323,7 @@ func requestPluginInfo(url string) (*client.PluginFullInfo, error) {
 
 // 获取单个plugin
 func GetPlugin(name string) (*Plugin, error) {
-	plugin, err := globalPluginManager.GetPlugin(name)
+	plugin, err := globalPluginManager.getPlugin(name)
 	if err != nil {
 		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return nil, err
@@ -263,7 +333,7 @@ func GetPlugin(name string) (*Plugin, error) {
 
 // 获取所有的plugin
 func GetPlugins() ([]*Plugin, error) {
-	plugins, err := globalPluginManager.GetPlugins()
+	plugins, err := globalPluginManager.getPlugins()
 	if err != nil {
 		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return nil, err
@@ -279,7 +349,7 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 
 	result := []*Plugin{}
 	for _, p := range plugins {
-		plugin, err := globalPluginManager.GetPlugin(p.Name)
+		plugin, err := globalPluginManager.getPlugin(p.Name)
 		if err != nil {
 			return 0, nil, err
 		}
@@ -298,14 +368,13 @@ type AddPluginParam struct {
 func AddPlugin(param *AddPluginParam) error {
 	url := param.Url
 	logger.Debug("add plugin from %s", url)
-	url = strings.TrimRight(url, "/")
 
-	plugin, err := Handshake(url + "/plugin_manage/info")
+	plugin, err := Handshake(url)
 	if err != nil {
 		return err
 	}
 
-	if err = globalPluginManager.AddPlugin(plugin); err != nil {
+	if err = globalPluginManager.addPlugin(plugin); err != nil {
 		return err
 	}
 	return nil
@@ -314,7 +383,7 @@ func AddPlugin(param *AddPluginParam) error {
 func DeletePlugin(uuid string) error {
 	logger.Debug("delete plugin: %s", uuid)
 
-	if err := globalPluginManager.DeletePlugin(uuid); err != nil {
+	if err := globalPluginManager.deletePlugin(uuid); err != nil {
 		logger.Error("failed to delete plugin info:%s", err.Error())
 	}
 	return nil
@@ -322,7 +391,7 @@ func DeletePlugin(uuid string) error {
 
 func TogglePlugin(uuid string, enable int) error {
 	logger.Debug("toggle plugin: %s to enable %d ", uuid, enable)
-	if err := globalPluginManager.TogglePlugin(uuid, enable); err != nil {
+	if err := globalPluginManager.togglePlugin(uuid, enable); err != nil {
 		return err
 	}
 

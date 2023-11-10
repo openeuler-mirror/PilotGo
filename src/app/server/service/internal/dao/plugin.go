@@ -72,6 +72,13 @@ func UpdatePluginEnabled(plugin *PluginModel) error {
 	return err
 }
 
+// 更新插件信息
+func UpdatePluginInfo(plugin *PluginModel) error {
+	var p PluginModel
+	err := mysqlmanager.MySQL().Model(&p).Where("uuid = ?", plugin.UUID).Updates(plugin).Error
+	return err
+}
+
 // 删除插件
 func DeletePlugin(uuid string) error {
 	err := mysqlmanager.MySQL().Where("uuid=?", uuid).Delete(&PluginModel{}).Error
