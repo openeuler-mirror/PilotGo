@@ -209,25 +209,6 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 	}
 }
 
-func toPlugins(ds []*dao.PluginModel) []*Plugin {
-	result := []*Plugin{}
-	for _, d := range ds {
-		result = append(result, &Plugin{
-			UUID:        d.UUID,
-			Name:        d.Name,
-			Version:     d.Version,
-			Description: d.Description,
-			Author:      d.Author,
-			Email:       d.Email,
-			Url:         d.Url,
-			PluginType:  d.PluginType,
-			Enabled:     d.Enabled,
-		})
-	}
-
-	return result
-}
-
 // 与plugin进行握手，交换必要信息
 func Handshake(url string) (*Plugin, error) {
 	info, err := requestPluginInfo(url)
@@ -293,9 +274,19 @@ func GetPlugins() ([]*Plugin, error) {
 
 // 分页查询
 func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
+	// 借助db的分页功能实现分页查询
 	total, plugins, error := dao.GetPluginPaged(offset, size)
 
-	return total, toPlugins(plugins), error
+	result := []*Plugin{}
+	for _, p := range plugins {
+		plugin, err := globalPluginManager.GetPlugin(p.Name)
+		if err != nil {
+			return 0, nil, err
+		}
+		result = append(result, plugin)
+	}
+
+	return total, result, error
 }
 
 type AddPluginParam struct {
