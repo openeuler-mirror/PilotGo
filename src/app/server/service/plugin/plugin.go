@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/extention"
@@ -37,6 +38,17 @@ type Plugin struct {
 	PluginType  string `json:"plugin_type"`
 	Enabled     int    `json:"enabled"`
 	Extention   []*common.Extention
+}
+
+type PluginManager struct {
+	sync.Mutex
+
+	Plugins []*Plugin
+}
+
+var globalPluginManager = &PluginManager{
+	Mutex:   sync.Mutex{},
+	Plugins: []*Plugin{},
 }
 
 func toPluginDao(p *Plugin) *dao.PluginModel {
