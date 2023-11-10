@@ -127,7 +127,7 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			message := "获取uuid失败" + path + "/" + filename + string(http.StatusBadRequest)
+			message := "获取uuid失败" + path + "/" + filename + strconv.Itoa(http.StatusBadRequest)
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
@@ -136,13 +136,13 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 
 		_, Err, err := agent.UpdateConfigFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
-			message := Err + path + "/" + filename + string(http.StatusBadRequest)
+			message := Err + path + "/" + filename + strconv.Itoa(http.StatusBadRequest)
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		} else {
-			message := "配置文件下发成功" + path + "/" + filename + string(http.StatusOK)
+			message := "配置文件下发成功" + path + "/" + filename + strconv.Itoa(http.StatusOK)
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 		}
