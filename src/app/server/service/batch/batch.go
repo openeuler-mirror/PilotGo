@@ -28,7 +28,7 @@ import (
 )
 
 type Batch = dao.Batch
-type Batch2Machine = dao.Batch2Machine
+type BatchMachines = dao.BatchMachines
 type CreateBatchParam struct {
 	Name        string   `json:"Name"`
 	Description string   `json:"Descrip"`
@@ -130,7 +130,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 
 	//添加数据到Batch2Machine
 	for _, id := range batchinfo.Machines {
-		err := dao.AddBatch2Machine(dao.Batch2Machine{
+		err := dao.AddBatch2Machine(dao.BatchMachines{
 			BatchID:       Batch.ID,
 			MachineNodeID: uint(id),
 		})

@@ -15,7 +15,7 @@ type Batch struct {
 	DepartName  string `gorm:"type:varchar(100)"`
 }
 
-type Batch2Machine struct {
+type BatchMachines struct {
 	Batch         Batch `gorm:"Foreignkey:BatchID"`
 	BatchID       uint
 	MachineNode   MachineNode `gorm:"Foreignkey:MachineNodeID"`
@@ -67,8 +67,7 @@ func GetBatchName(id int) (string, error) {
 
 func DeleteBatch(departid int) error {
 	var batch Batch
-	batch.ID = uint(departid)
-	return mysqlmanager.MySQL().Select("Batch2Machine").Delete(&batch).Error
+	return mysqlmanager.MySQL().Where("id=?", departid).Delete(&batch).Error
 }
 
 func UpdateBatch(BatchID int, BatchName string, Descrip string) error {
@@ -81,21 +80,21 @@ func UpdateBatch(BatchID int, BatchName string, Descrip string) error {
 }
 
 // 添加批次-机器数据
-func AddBatch2Machine(b2m Batch2Machine) error {
+func AddBatch2Machine(b2m BatchMachines) error {
 	return mysqlmanager.MySQL().Create(&b2m).Error
 }
 
 // 分页查询机器id
-func GetMachineIDPaged(offset, size, batchid int) (int64, []Batch2Machine, error) {
-	var machineids []Batch2Machine
+func GetMachineIDPaged(offset, size, batchid int) (int64, []BatchMachines, error) {
+	var machineids []BatchMachines
 	var count int64
-	err := mysqlmanager.MySQL().Model(Batch2Machine{}).Order("machine_node_id desc").Where("batch_id=?", batchid).Offset(offset).Limit(size).Find(&machineids).Offset(-1).Limit(-1).Count(&count).Error
+	err := mysqlmanager.MySQL().Model(BatchMachines{}).Order("machine_node_id desc").Where("batch_id=?", batchid).Offset(offset).Limit(size).Find(&machineids).Offset(-1).Limit(-1).Count(&count).Error
 	return count, machineids, err
 }
 
 func GetMachineID(BatchID int) ([]uint, error) {
 	var machineids []uint
-	err := mysqlmanager.MySQL().Model(Batch2Machine{}).Select("machine_node_id").Where("batch_id=?", BatchID).Find(&machineids).Error
+	err := mysqlmanager.MySQL().Model(BatchMachines{}).Select("machine_node_id").Where("batch_id=?", BatchID).Find(&machineids).Error
 	return machineids, err
 }
 
