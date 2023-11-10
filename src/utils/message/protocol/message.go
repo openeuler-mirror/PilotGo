@@ -206,7 +206,7 @@ func (m *Message) Encode() []byte {
 func (m *Message) String() string {
 	bytes, err := json.Marshal(m)
 	if err != nil {
-		logger.Error("marshal message to json failed, message is:%v", m)
+		logger.Error("marshal message to json failed, message is:%v", m.String())
 	}
 
 	return string(bytes)
