@@ -22,10 +22,10 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
-	"gitee.com/openeuler/PilotGo/app/server/service/user"
 	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/utils/message/net"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/tealeg/xlsx"
@@ -63,9 +63,9 @@ func RegisterHandler(c *gin.Context) {
 }
 
 func LoginHandler(c *gin.Context) {
-	user := &userservice.User{}
-	if c.Bind(user) != nil {
-		response.Fail(c, nil, "parameter error")
+	user := userservice.User{}
+	if err := c.Bind(&user); err != nil {
+		response.Fail(c, nil, net.GetValidMsg(err, &user))
 		return
 	}
 
@@ -84,7 +84,7 @@ func LoginHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	departName, departId, roleId, err := userservice.Login(user)
+	departName, departId, roleId, err := userservice.Login(&user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -102,12 +102,6 @@ func LoginHandler(c *gin.Context) {
 
 // 退出
 func Logout(c *gin.Context) {
-	user := &userservice.User{}
-	if err := c.Bind(user); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-
 	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
@@ -144,7 +138,7 @@ func UserAll(c *gin.Context) {
 	}
 
 	num := p.Size * (p.CurrentPageNum - 1)
-	total, data, err := user.GetUserPaged(num, p.Size)
+	total, data, err := userservice.GetUserPaged(num, p.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
