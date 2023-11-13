@@ -351,7 +351,8 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 	for _, p := range plugins {
 		plugin, err := globalPluginManager.getPlugin(p.Name)
 		if err != nil {
-			return 0, nil, err
+			logger.Error("manager get plugin %s", err)
+			continue
 		}
 		result = append(result, plugin)
 	}

@@ -16,6 +16,9 @@ package net
 
 import (
 	"net"
+	"reflect"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func SendBytes(conn net.Conn, data []byte) error {
@@ -32,4 +35,16 @@ func SendBytes(conn net.Conn, data []byte) error {
 		}
 	}
 	return nil
+}
+
+func GetValidMsg(err error, obj interface{}) string {
+	getObj := reflect.TypeOf(obj)
+	if errs, ok := err.(validator.ValidationErrors); ok {
+		for _, e := range errs {
+			if f, exist := getObj.Elem().FieldByName((e.Field())); exist {
+				return f.Tag.Get("msg")
+			}
+		}
+	}
+	return err.Error()
 }

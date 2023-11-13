@@ -199,16 +199,6 @@ func Register(user *dao.User) error {
 	departId := user.DepartSecond
 	departPid := user.DepartFirst
 	roleId := user.RoleID
-
-	if len(username) == 0 { //Data verification
-		username = RandomString(5)
-	}
-	if len(password) == 0 {
-		return errors.New("密码不能为空")
-	}
-	if len(email) == 0 {
-		return errors.New("邮箱不能为空")
-	}
 	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
 		return err

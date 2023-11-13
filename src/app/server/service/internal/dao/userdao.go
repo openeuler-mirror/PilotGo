@@ -30,10 +30,10 @@ type User struct {
 	DepartFirst  int    `gorm:"size:25" json:"departPid,omitempty"`
 	DepartSecond int    `gorm:"size:25" json:"departId,omitempty"`
 	DepartName   string `gorm:"size:25" json:"departName,omitempty"`
-	Username     string `json:"username,omitempty"`
-	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
+	Username     string `json:"username,omitempty" `
+	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty" binding:"required" msg:"密码不能为空"`
 	Phone        string `gorm:"size:11" json:"phone,omitempty"`
-	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty"`
+	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty" binding:"required" msg:"邮箱不能为空"`
 	RoleID       string `json:"roleid,omitempty"`
 	// deprecated
 	// UserType int    `json:"userType,omitempty"`
