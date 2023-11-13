@@ -8,9 +8,9 @@ import (
 
 type Batch struct {
 	gorm.Model
-	Name        string `gorm:"type:varchar(100);not null" json:"name"`
+	Name        string `gorm:"type:varchar(100);not null" json:"name" binding:"required" msg:"批次名不能为空"`
 	Description string `gorm:"type:varchar(100)" json:"description"`
-	Manager     string `gorm:"type:varchar(100)" json:"manager"`
+	Manager     string `gorm:"type:varchar(100)" json:"manager" binding:"required" msg:"创建人不能为空"`
 	Depart      string `gorm:"type:varchar(100)"`
 	DepartName  string `gorm:"type:varchar(100)"`
 }

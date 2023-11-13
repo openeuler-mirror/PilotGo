@@ -16,7 +16,6 @@ package controller
 
 import (
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
-	"gitee.com/openeuler/PilotGo/app/server/service/machine"
 	machineservice "gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -54,7 +53,7 @@ func FreeMachineSource(c *gin.Context) {
 		return
 	}
 	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := machine.ReturnMachinePaged(global.UncateloguedDepartId, num, query.Size)
+	total, data, err := machineservice.ReturnMachinePaged(global.UncateloguedDepartId, num, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return

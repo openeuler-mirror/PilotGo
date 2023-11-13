@@ -48,7 +48,7 @@ func GetPluginsPagedHandler(c *gin.Context) {
 
 // 添加插件
 func AddPluginHandler(c *gin.Context) {
-	param := &plugin.AddPluginParam{}
+	param := plugin.AddPluginParam{}
 	if err := c.BindJSON(&param); err != nil {
 		response.Fail(c, nil, "参数错误")
 		return
@@ -69,7 +69,7 @@ func AddPluginHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	if err := plugin.AddPlugin(param); err != nil {
+	if err := plugin.AddPlugin(&param); err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "add plugin failed:"+err.Error())
 		return

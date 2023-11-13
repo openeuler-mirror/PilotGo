@@ -40,18 +40,12 @@ type CreateBatchParam struct {
 }
 
 func CreateBatch(batchinfo *CreateBatchParam) error {
-	if len(batchinfo.Name) == 0 {
-		return errors.New("请输入批次名称")
-	}
 	ExistNameBool, err := dao.IsExistName(batchinfo.Name)
 	if err != nil {
 		return err
 	}
 	if ExistNameBool {
 		return errors.New("已存在该名称批次")
-	}
-	if len(batchinfo.Manager) == 0 {
-		return errors.New("创建人未输入")
 	}
 
 	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartIDs) == 0 {
