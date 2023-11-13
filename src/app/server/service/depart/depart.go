@@ -209,9 +209,7 @@ func AddDepartMethod(newDepart *dao.AddDepart) error {
 	if len(parentDepart) != 0 && !ParentDepartExistBool {
 		return errors.New("该部门上级部门不存在")
 	}
-	if len(depart) == 0 {
-		return errors.New("部门节点不能为空")
-	} else if len(parentDepart) == 0 {
+	if len(parentDepart) == 0 {
 		temp, err := dao.IsRootExist()
 		if err != nil {
 			return err
