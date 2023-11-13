@@ -21,6 +21,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/utils/message/net"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -72,7 +73,7 @@ func DepartInfoHandler(c *gin.Context) {
 func AddDepartHandler(c *gin.Context) {
 	newDepart := depart.AddDepart{}
 	if err := c.Bind(&newDepart); err != nil {
-		response.Fail(c, nil, "parameter error")
+		response.Fail(c, nil, net.GetValidMsg(err, &newDepart))
 		return
 	}
 
@@ -134,7 +135,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 func UpdateDepartHandler(c *gin.Context) {
 	var new depart.NewDepart
 	if err := c.Bind(&new); err != nil {
-		response.Fail(c, nil, "parameter error")
+		response.Fail(c, nil, net.GetValidMsg(err, &new))
 		return
 	}
 

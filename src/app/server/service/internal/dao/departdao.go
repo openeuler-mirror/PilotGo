@@ -38,8 +38,8 @@ type DepartTreeNode struct {
 }
 
 type NewDepart struct {
-	DepartID   int    `json:"DepartID"`
-	DepartName string `json:"DepartName"`
+	DepartID   int    `json:"DepartID" binding:"required" msg:"部门id不能为空"`
+	DepartName string `json:"DepartName" binding:"required" msg:"部门名称不能为空"`
 }
 
 type DeleteDepart struct {
@@ -48,7 +48,7 @@ type DeleteDepart struct {
 type AddDepart struct {
 	ParentID     int    `json:"PID"`
 	ParentDepart string `json:"ParentDepart"`
-	DepartName   string `json:"Depart"`
+	DepartName   string `json:"Depart" binding:"required" msg:"部门名称不能为空"`
 }
 
 func IsParentDepartExist(parent string) (bool, error) {
