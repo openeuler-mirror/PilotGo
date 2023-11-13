@@ -8,6 +8,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/utils/message/net"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -15,7 +16,7 @@ import (
 func CreateBatchHandler(c *gin.Context) {
 	params := &batch.CreateBatchParam{}
 	if err := c.Bind(params); err != nil {
-		response.Fail(c, nil, "parameter error")
+		response.Fail(c, nil, net.GetValidMsg(err, params))
 		return
 	}
 

@@ -26,10 +26,8 @@ import (
 )
 
 type UserRole struct {
-	ID   int    `gorm:"primary_key;AUTO_INCREMENT"`
-	Role string `json:"role"` // 超管和部门等级
-	// deprecated
-	// Type        int    `json:"type"`
+	ID          int    `gorm:"primary_key;AUTO_INCREMENT"`
+	Role        string `json:"role"` // 超管和部门等级
 	Description string `json:"description"`
 	Menus       string `json:"menus"`
 	ButtonID    string `json:"buttonId"`
