@@ -61,7 +61,8 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 	})
 	{
 		mg.GET("/info", InfoHandler)
-		mg.GET("/handshake", HandshakeHandler)
+		// 绑定PilotGo server
+		mg.PUT("/bind", BindHandler)
 	}
 
 	api := router.Group("/plugin_manage/api/v1/")

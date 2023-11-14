@@ -53,7 +53,7 @@ func InfoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, info)
 }
 
-func HandshakeHandler(c *gin.Context) {
+func BindHandler(c *gin.Context) {
 	v, ok := c.Get("__internal__client_instance")
 	if !ok {
 		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
