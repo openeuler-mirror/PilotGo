@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*common.ServiceResult, error) {
-	url := c.Server + "/api/v1/pluginapi/service/:name"
+	url := c.Server() + "/api/v1/pluginapi/service/:name"
 
 	p := &common.ServiceStruct{
 		Batch:       batch,
@@ -31,7 +31,7 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*comm
 }
 
 func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
-	url := c.Server + "/api/v1/pluginapi/start_service"
+	url := c.Server() + "/api/v1/pluginapi/start_service"
 
 	p := &common.ServiceStruct{
 		Batch:       batch,
@@ -54,7 +54,7 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*commo
 }
 
 func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
-	url := c.Server + "/api/v1/pluginapi/stop_service"
+	url := c.Server() + "/api/v1/pluginapi/stop_service"
 
 	p := &common.ServiceStruct{
 		Batch:       batch,
