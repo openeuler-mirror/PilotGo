@@ -61,6 +61,7 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 	})
 	{
 		mg.GET("/info", InfoHandler)
+		mg.GET("/handshake", HandshakeHandler)
 	}
 
 	api := router.Group("/plugin_manage/api/v1/")
