@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -95,8 +96,6 @@ func (m *PluginManager) recovery() error {
 		err := m.updatePlugin(p.UUID, p.Url, p.Enabled)
 		if err != nil {
 			logger.Error("failed to update plugin %s info", p.Name)
-			// 继续恢复下一个plugin
-		} else {
 			// 插件离线等异常状况
 			// 使用历史数据
 			m.Lock()
@@ -112,6 +111,8 @@ func (m *PluginManager) recovery() error {
 				Enabled:     p.Enabled,
 			})
 			m.Unlock()
+
+			// 继续恢复下一个plugin
 		}
 	}
 
@@ -223,7 +224,7 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 	info, err := requestPluginInfo(url)
 	if err != nil {
 		logger.Error("failed to request plugin info:%s", err.Error())
-		return err
+		return errors.New("plugin offline or unreachable")
 	}
 	m.Lock()
 	for _, v := range m.Plugins {
