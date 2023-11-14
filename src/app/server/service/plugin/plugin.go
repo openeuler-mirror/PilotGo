@@ -96,6 +96,22 @@ func (m *PluginManager) recovery() error {
 		if err != nil {
 			logger.Error("failed to update plugin %s info", p.Name)
 			// 继续恢复下一个plugin
+		} else {
+			// 插件离线等异常状况
+			// 使用历史数据
+			m.Lock()
+			m.Plugins = append(m.Plugins, &Plugin{
+				UUID:        p.UUID,
+				Name:        p.Name,
+				Version:     p.Version,
+				Description: p.Description,
+				Author:      p.Author,
+				Email:       p.Email,
+				Url:         p.Url,
+				PluginType:  p.PluginType,
+				Enabled:     p.Enabled,
+			})
+			m.Unlock()
 		}
 	}
 
@@ -137,7 +153,12 @@ func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 	return nil
 }
 
-func (m *PluginManager) addPlugin(p *Plugin) error {
+func (m *PluginManager) addPlugin(url string) error {
+	p, err := handshake(url)
+	if err != nil {
+		return err
+	}
+
 	if p.UUID == "" {
 		p.UUID = uuid.New().String()
 	}
@@ -272,7 +293,7 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 }
 
 // 与plugin进行握手，交换必要信息
-func Handshake(url string) (*Plugin, error) {
+func handshake(url string) (*Plugin, error) {
 	logger.Debug("handshake")
 	info, err := requestPluginInfo(url)
 	if err != nil {
@@ -370,12 +391,7 @@ func AddPlugin(param *AddPluginParam) error {
 	url := param.Url
 	logger.Debug("add plugin from %s", url)
 
-	plugin, err := Handshake(url)
-	if err != nil {
-		return err
-	}
-
-	if err = globalPluginManager.addPlugin(plugin); err != nil {
+	if err := globalPluginManager.addPlugin(url); err != nil {
 		return err
 	}
 	return nil
