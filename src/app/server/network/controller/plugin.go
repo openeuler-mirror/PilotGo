@@ -107,6 +107,7 @@ func TogglePluginHandler(c *gin.Context) {
 	logger.Info("toggle plugin:%s to enable %d", param.UUID, param.Enable)
 	if err = plugin.TogglePlugin(param.UUID, param.Enable); err != nil {
 		response.Fail(c, nil, "toggle plugin error:"+err.Error())
+		return
 	}
 	response.Success(c, nil, "插件信息更新成功")
 }
