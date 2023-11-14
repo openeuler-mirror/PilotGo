@@ -44,8 +44,6 @@ func InfoHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, "client信息错误")
 		return
 	}
-	// TODO: should set at handshake
-	client.server = c.Request.RemoteAddr
 
 	info := &PluginFullInfo{
 		PluginInfo: *client.PluginInfo,
@@ -53,6 +51,22 @@ func InfoHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, info)
+}
+
+func HandshakeHandler(c *gin.Context) {
+	v, ok := c.Get("__internal__client_instance")
+	if !ok {
+		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
+		return
+	}
+	client, ok := v.(*Client)
+	if !ok {
+		response.Fail(c, gin.H{"status": false}, "client信息错误")
+		return
+	}
+	client.server = c.Request.RemoteAddr
+
+	response.Success(c, nil, "bind server success")
 }
 
 func EventHandler(c *gin.Context) {
