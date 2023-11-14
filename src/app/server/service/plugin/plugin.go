@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"sync"
 
-	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -44,7 +44,7 @@ type Plugin struct {
 	Url         string `json:"url"`
 	PluginType  string `json:"plugin_type"`
 	Enabled     int    `json:"enabled"`
-	Extention   []*common.Extention
+	Extentions  []*common.Extention
 }
 
 func (p *Plugin) Clone() *Plugin {
@@ -58,10 +58,10 @@ func (p *Plugin) Clone() *Plugin {
 		Url:         p.Url,
 		PluginType:  p.PluginType,
 		Enabled:     p.Enabled,
-		Extention:   []*common.Extention{},
+		Extentions:  []*common.Extention{},
 	}
-	for _, e := range p.Extention {
-		result.Extention = append(result.Extention, &common.Extention{
+	for _, e := range p.Extentions {
+		result.Extentions = append(result.Extentions, &common.Extention{
 			PluginName: e.PluginName,
 			Name:       e.Name,
 			Type:       e.Type,
@@ -120,7 +120,7 @@ func (m *PluginManager) recovery() error {
 	return nil
 }
 
-// 根据url查询最新的plugin信息，并更新到指定的uuid记录当中
+// 根据url查询最新的plugin信息，更新到指定的uuid记录当中
 func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 	// 查询最新的插件信息
 	logger.Debug("update plugin")
@@ -140,22 +140,36 @@ func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 		Url:         info.Url,
 		PluginType:  info.PluginType,
 		Enabled:     enabled,
-		Extention:   info.Extentions,
+		Extentions:  info.Extentions,
 	}
 
 	if err := dao.UpdatePluginInfo(toPluginDao(p)); err != nil {
 		return err
 	}
 
+	found := false
 	m.Lock()
-	m.Plugins = append(m.Plugins, p)
+	for i, v := range m.Plugins {
+		if v.UUID == uuid {
+			m.Plugins[i] = p
+			break
+		}
+	}
+	if !found {
+		m.Plugins = append(m.Plugins, p)
+	}
 	m.Unlock()
 
 	return nil
 }
 
 func (m *PluginManager) addPlugin(url string) error {
-	p, err := handshake(url)
+	err := handshake(url)
+	if err != nil {
+		return err
+	}
+
+	p, err := requestPluginInfo(url)
 	if err != nil {
 		return err
 	}
@@ -236,7 +250,7 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 			v.Email = info.Email
 			v.Url = info.Url
 			v.PluginType = info.PluginType
-			v.Extention = info.Extentions
+			v.Extentions = info.Extentions
 			break
 		}
 	}
@@ -293,16 +307,61 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 	}
 }
 
-// 与plugin进行握手，交换必要信息
-func handshake(url string) (*Plugin, error) {
-	logger.Debug("handshake")
-	info, err := requestPluginInfo(url)
+// 与plugin进行握手，绑定PilotGo与server端
+func handshake(url string) error {
+	index := strings.Index(url, "plugin")
+	if index > 0 {
+		url = url[:index]
+	}
+	url = strings.TrimRight(url, "/") + "/plugin_manage/bind"
+	logger.Debug("plugin url is:%s", url)
+
+	resp, err := httputils.Put(url, nil)
 	if err != nil {
-		logger.Error("hand shake with plugin failed, url:%s, err:%s", url, err.Error())
+		logger.Debug("request plugin info error:%s", err.Error())
+		return err
+	}
+
+	d := &struct {
+		Code    int    `json:"code"`
+		Message string `json:"msg"`
+	}{}
+	err = json.Unmarshal(resp.Body, d)
+	if err != nil {
+		logger.Error("unmarshal request plugin info error:%s", err.Error())
+		return err
+	}
+	if d.Code != http.StatusOK {
+		return errors.New(d.Message)
+	}
+
+	return nil
+}
+
+// 获取到插件的基本信息
+func requestPluginInfo(url string) (*Plugin, error) {
+	index := strings.Index(url, "plugin")
+	if index > 0 {
+		url = url[:index]
+	}
+	url = strings.TrimRight(url, "/") + "/plugin_manage/info"
+	logger.Debug("plugin url is:%s", url)
+
+	resp, err := httputils.Get(url, nil)
+	if err != nil {
+		logger.Error("request plugin info error:%s", err.Error())
 		return nil, err
 	}
 
-	plugin := &Plugin{
+	info := &client.PluginFullInfo{}
+	err = json.Unmarshal(resp.Body, info)
+	if err != nil {
+		logger.Error("unmarshal request plugin info error:%s", err.Error())
+		return nil, err
+	}
+	// TODO: check info valid
+
+	return &Plugin{
 		Name:        info.Name,
 		Version:     info.Version,
 		Description: info.Description,
@@ -310,37 +369,9 @@ func handshake(url string) (*Plugin, error) {
 		Email:       info.Email,
 		Url:         info.Url,
 		PluginType:  info.PluginType,
-		Extention:   info.Extentions,
+		Extentions:  info.Extentions,
 		// Status:      common.StatusLoaded,
-	}
-
-	return plugin, nil
-}
-
-// 发起http请求，提供server地址，同时获取到插件的基本信息
-func requestPluginInfo(url string) (*client.PluginFullInfo, error) {
-	index := strings.Index(url, "plugin")
-	if index > 0 {
-		url = url[:index]
-	}
-	url = strings.TrimRight(url, "/") + "/plugin_manage/info"
-	logger.Debug("url is:%s", url)
-
-	conf := config.Config().HttpServer
-	url = url + fmt.Sprintf("?server=%s", conf.Addr)
-	resp, err := httputils.Get(url, nil)
-	if err != nil {
-		logger.Debug("request plugin info error:%s", err.Error())
-		return nil, err
-	}
-
-	info := &client.PluginFullInfo{}
-	err = json.Unmarshal(resp.Body, info)
-	if err != nil {
-		logger.Debug("unmarshal request plugin info error:%s", err.Error())
-	}
-	// TODO: check info valid
-	return info, nil
+	}, nil
 }
 
 // 获取单个plugin
