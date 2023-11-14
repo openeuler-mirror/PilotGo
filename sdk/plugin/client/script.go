@@ -16,7 +16,7 @@ type CallbackHandler struct {
 type RunCommandCallback func([]*common.RunResult)
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
-	url := "http://" + c.Server + "/api/v1/pluginapi/run_command"
+	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command"
 
 	p := &common.CmdStruct{
 		Batch:   batch,
@@ -49,7 +49,7 @@ type ScriptStruct struct {
 }
 
 func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
-	url := "http://" + c.Server + "/api/v1/pluginapi/run_script"
+	url := "http://" + c.Server() + "/api/v1/pluginapi/run_script"
 
 	p := &ScriptStruct{
 		Batch:  batch,
@@ -77,7 +77,7 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 }
 
 func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
-	url := "http://" + c.Server + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
+	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
 
 	p := &common.CmdStruct{
 		Batch:   batch,

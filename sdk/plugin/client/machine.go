@@ -8,7 +8,7 @@ import (
 )
 
 func (c *Client) MachineList() ([]*common.MachineNode, error) {
-	url := "http://" + c.Server + "/api/v1/pluginapi/machine_list"
+	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, err
