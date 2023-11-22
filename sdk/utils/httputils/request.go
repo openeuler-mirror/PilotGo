@@ -57,6 +57,7 @@ func request(method, url string, param *Params) (*Response, error) {
 	}
 
 	hc := &http.Client{Transport: &http.Transport{
+		DisableKeepAlives: true,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
