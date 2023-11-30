@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -313,7 +314,9 @@ func handshake(url string) error {
 	if index > 0 {
 		url = url[:index]
 	}
-	url = strings.TrimRight(url, "/") + "/plugin_manage/bind"
+	port := strings.Split(config.Config().HttpServer.Addr, ":")[1]
+
+	url = strings.TrimRight(url, "/") + "/plugin_manage/bind?port=" + port
 	logger.Debug("plugin url is:%s", url)
 
 	resp, err := httputils.Put(url, nil)
