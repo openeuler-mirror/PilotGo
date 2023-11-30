@@ -8,8 +8,10 @@ import (
 type GetTagsCallback func([]string) []common.Tag
 
 type Client struct {
-	Server     string
 	PluginInfo *PluginInfo
+
+	// 远程PilotGo server地址
+	server string
 
 	// 用于event消息处理
 	eventChan        chan *common.EventMessage
@@ -46,6 +48,10 @@ func GetClient() *Client {
 	return global_client
 }
 
+func (client *Client) Server() string {
+	return client.server
+}
+
 // RegisterHandlers 注册一些插件标准的API接口，清单如下：
 // GET /plugin_manage/info
 func (client *Client) RegisterHandlers(router *gin.Engine) {
@@ -55,6 +61,8 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 	})
 	{
 		mg.GET("/info", InfoHandler)
+		// 绑定PilotGo server
+		mg.PUT("/bind", BindHandler)
 	}
 
 	api := router.Group("/plugin_manage/api/v1/")

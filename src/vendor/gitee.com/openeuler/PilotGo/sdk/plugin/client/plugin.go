@@ -26,7 +26,7 @@ type PluginFullInfo struct {
 }
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
-	url := c.Server + "/api/v1/pluginapi/plugins"
+	url := c.Server() + "/api/v1/pluginapi/plugins"
 	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, err
