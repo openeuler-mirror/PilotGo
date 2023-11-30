@@ -20,7 +20,7 @@ func (c *Client) ListenEvent(eventTypes []int, callbacks []EventCallback) error 
 		eventtypes = append(eventtypes, strconv.Itoa(i))
 	}
 
-	url := c.Server + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
+	url := c.Server() + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: c.PluginInfo,
 	})
@@ -59,7 +59,7 @@ func (c *Client) UnListenEvent(eventTypes []int) error {
 		eventtypes = append(eventtypes, strconv.Itoa(i))
 	}
 
-	url := c.Server + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
+	url := c.Server() + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
 	r, err := httputils.Delete(url, &httputils.Params{
 		Body: c.PluginInfo,
 	})
@@ -94,7 +94,7 @@ func (c *Client) UnListenEvent(eventTypes []int) error {
 
 // 发布event事件
 func (c *Client) PublishEvent(msg common.EventMessage) error {
-	url := c.Server + "/api/v1/pluginapi/publish_event"
+	url := c.Server() + "/api/v1/pluginapi/publish_event"
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: &msg,
 	})

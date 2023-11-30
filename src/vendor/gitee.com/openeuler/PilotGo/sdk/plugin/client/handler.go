@@ -53,6 +53,22 @@ func InfoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, info)
 }
 
+func BindHandler(c *gin.Context) {
+	v, ok := c.Get("__internal__client_instance")
+	if !ok {
+		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
+		return
+	}
+	client, ok := v.(*Client)
+	if !ok {
+		response.Fail(c, gin.H{"status": false}, "client信息错误")
+		return
+	}
+	client.server = c.Request.RemoteAddr
+
+	response.Success(c, nil, "bind server success")
+}
+
 func EventHandler(c *gin.Context) {
 	j, err := io.ReadAll(c.Request.Body) // 接收数据
 	if err != nil {

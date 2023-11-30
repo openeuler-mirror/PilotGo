@@ -148,8 +148,10 @@ func UserAll(c *gin.Context) {
 
 // 高级搜索
 func UserSearchHandler(c *gin.Context) {
-	var user userservice.User
-	if c.Bind(&user) != nil {
+	user := &struct {
+		Email string `json:"email"`
+	}{}
+	if err := c.Bind(&user); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
