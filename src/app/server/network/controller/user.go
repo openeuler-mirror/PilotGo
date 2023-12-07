@@ -193,13 +193,13 @@ func UpdatePasswordHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	user, err = userservice.UpdatePassword(user.Email, user.Password)
+	_, err = userservice.UpdatePassword(user.Email, user.Password)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"data": user}, "密码修改成功!")
+	response.Success(c, nil, "密码修改成功!")
 }
 
 // 重置密码
@@ -225,13 +225,13 @@ func ResetPasswordHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	user, err = userservice.ResetPassword(user.Email)
+	_, err = userservice.ResetPassword(user.Email)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"data": user}, "密码重置成功!")
+	response.Success(c, nil, "密码重置成功!")
 }
 
 // 删除用户
@@ -320,13 +320,13 @@ func UpdateUserHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	user, err = userservice.UpdateUser(user)
+	_, err = userservice.UpdateUser(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"data": user}, "用户信息修改成功")
+	response.Success(c, nil, "用户信息修改成功")
 }
 
 // 一键导入用户数据
