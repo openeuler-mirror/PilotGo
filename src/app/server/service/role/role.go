@@ -151,6 +151,40 @@ func UpdateRolePermissions(role string, buttons, menus []string) error {
 }
 
 // 分页查询
-func GetRolePaged(offset, size int) (int64, []UserRole, error) {
-	return dao.GetRolePaged(offset, size)
+func GetRolePaged(offset, size int) (int64, []*ReturnRole, error) {
+	result := []*ReturnRole{}
+	total, data, err := dao.GetRolePaged(offset, size)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	for _, role := range data {
+		result = append(result, &ReturnRole{
+			ID:          role.ID,
+			Role:        role.Role,
+			Description: role.Description,
+			Menus:       "",
+			Buttons:     []string{},
+		})
+	}
+
+	policies := auth.GetAllPolicies()
+
+	for _, item := range result {
+		for _, p := range policies {
+			if item.Role == p.Role {
+				switch p.Action {
+				case "menu":
+					item.Menus = item.Menus + "," + p.Resource
+				case "button":
+					item.Buttons = append(item.Buttons, p.Resource)
+				}
+			}
+		}
+		if len(item.Menus) > 0 {
+			item.Menus = item.Menus[1:]
+		}
+	}
+
+	return total, result, err
 }
