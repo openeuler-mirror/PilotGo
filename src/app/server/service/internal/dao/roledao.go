@@ -49,6 +49,20 @@ func GetRoleId(role string) (roleId string, err error) {
 	return roleID, nil
 }
 
+// 根据角色id返回角色信息
+func GetRole(roleID int) (UserRole, error) {
+	var Role UserRole
+	err := mysqlmanager.MySQL().Where("id = ?", roleID).Find(&Role).Error
+	return Role, err
+}
+
+// 查看数据库是否有重复rolename
+func IsNameExist(name string) (bool, error) {
+	var role UserRole
+	err := mysqlmanager.MySQL().Where("role=?", name).Find(&role).Error
+	return role.ID != 0, err
+}
+
 // 根据id获取该角色的所有信息
 func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
 	var role UserRole
@@ -124,9 +138,9 @@ func IsUserBindingRole(roleId int) (bool, error) {
 }
 
 // 删除用户角色
-func DeleteRole(role string) error {
+func DeleteRole(roleId int) error {
 	var UserRole UserRole
-	return mysqlmanager.MySQL().Where("role = ?", role).Unscoped().Delete(UserRole).Error
+	return mysqlmanager.MySQL().Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
 }
 
 // 修改角色名称

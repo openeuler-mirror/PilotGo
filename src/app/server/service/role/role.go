@@ -15,6 +15,8 @@
 package role
 
 import (
+	"errors"
+
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
@@ -123,19 +125,31 @@ func getRoleMenuButtons(role string) (string, []string) {
 }
 
 func AddRole(userRole *UserRole) error {
-	err := dao.AddRole(userRole)
+	is, err := dao.IsNameExist(userRole.Role)
+	if err != nil {
+		return err
+	}
+	if is {
+		return errors.New("角色名重复")
+	}
+
+	err = dao.AddRole(userRole)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteRole(role string) error {
-	if err := auth.DeleteRole(role); err != nil {
+func DeleteRole(roleId int) error {
+	role, err := dao.GetRole(roleId)
+	if err != nil {
+		return err
+	}
+	if err := auth.DeleteRole(role.Role); err != nil {
 		return err
 	}
 
-	err := dao.DeleteRole(role)
+	err = dao.DeleteRole(roleId)
 	if err != nil {
 		return err
 	}
