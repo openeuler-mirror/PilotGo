@@ -166,7 +166,7 @@ export default {
     getRoles().then(res => {
       this.roles = [];
       if(res.data.code === 200) {
-        this.roles = res.data.data.role;
+        this.roles = res.data.data;
       }
     })
   },
