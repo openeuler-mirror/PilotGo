@@ -15,6 +15,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -291,6 +292,10 @@ func GetPermissionsOfUser(user string) ([]string, []string, error) {
 }
 
 func UpdateRolePermissions(role string, buttons, menus []string) error {
+	if role == "admin" {
+		return errors.New("admin角色权限不可修改")
+	}
+
 	if _, err := G_Enfocer.DeleteRole(role); err != nil {
 		return err
 	}
@@ -314,6 +319,9 @@ func UpdateRolePermissions(role string, buttons, menus []string) error {
 }
 
 func DeleteRole(role string) error {
+	if role == "admin" {
+		return errors.New("admin角色不可删除")
+	}
 	if _, err := G_Enfocer.DeleteRole(role); err != nil {
 		return err
 	}

@@ -82,7 +82,7 @@ export default {
                 this.$message.success(res.data.msg);
                 this.refresh();
               } else {
-                this.$message.error(res.data.error);
+                this.$message.error(res.data.msg);
               }
             })
             .catch((res) => {

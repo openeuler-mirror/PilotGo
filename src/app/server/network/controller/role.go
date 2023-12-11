@@ -99,7 +99,7 @@ func AddRoleHandler(c *gin.Context) {
 	err = roleservice.AddRole(userRole)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
-		response.Fail(c, gin.H{"error": err.Error()}, "角色添加失败")
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	response.Success(c, nil, "新增角色成功")
