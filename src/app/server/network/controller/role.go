@@ -107,7 +107,7 @@ func AddRoleHandler(c *gin.Context) {
 
 func DeleteRoleHandler(c *gin.Context) {
 	params := &struct {
-		Role string `json:"role"`
+		RoleId int `json:"roleId"`
 	}{}
 	if err := c.Bind(params); err != nil {
 		response.Fail(c, nil, "parameter error:"+err.Error())
@@ -129,7 +129,7 @@ func DeleteRoleHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	err = roleservice.DeleteRole(params.Role)
+	err = roleservice.DeleteRole(params.RoleId)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
