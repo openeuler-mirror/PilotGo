@@ -25,7 +25,7 @@
         <auth-button name="role_add"  @click="handleCreate"> 添加 </auth-button>
       </template>
       <template v-slot:table>
-        <el-table-column prop="ID" label="角色ID" sortable>
+        <el-table-column prop="id" label="角色ID" sortable>
         </el-table-column>
         <el-table-column  prop="role" label="角色名">
         </el-table-column>
