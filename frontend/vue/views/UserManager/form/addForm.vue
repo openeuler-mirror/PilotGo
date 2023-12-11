@@ -51,9 +51,9 @@
         <el-select v-model="form.role" multiple placeholder="请选择">
           <el-option
             v-for="item in roles"
-            :key="item.ID"
+            :key="item.id"
             :label="item.role"
-            :value="item.ID"
+            :value="item.id"
           >
           </el-option>
         </el-select>
