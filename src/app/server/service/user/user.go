@@ -100,41 +100,19 @@ func DeleteUser(Email string) error {
 
 // 修改用户信息
 func UpdateUser(user dao.User) (dao.User, error) {
-	email := user.Email
-	phone := user.Phone
-	Pid := user.DepartFirst
-	id := user.DepartSecond
-	departName := user.DepartName
-	u, err := dao.UserInfo(email)
+	new := dao.User{
+		DepartFirst:  user.DepartFirst,
+		DepartSecond: user.DepartSecond,
+		DepartName:   user.DepartName,
+		Username:     user.Username,
+		Phone:        user.Phone,
+		RoleID:       user.RoleID,
+	}
+	u, err := dao.UserInfo(user.Email)
 	if err != nil {
 		return u, err
 	}
-
-	if u.DepartName != departName && u.Phone != phone {
-		err := dao.UpdateUserDepart(email, departName, Pid, id)
-		if err != nil {
-			return u, err
-		}
-		err = dao.UpdateUserPhone(email, phone)
-		if err != nil {
-			return u, err
-		}
-		return u, nil
-	}
-	if u.DepartName == departName && u.Phone != phone {
-		err = dao.UpdateUserPhone(email, phone)
-		if err != nil {
-			return u, err
-		}
-		return u, nil
-	}
-	if u.DepartName != departName && u.Phone == phone {
-		err := dao.UpdateUserDepart(email, departName, Pid, id)
-		if err != nil {
-			return u, err
-		}
-	}
-	return u, nil
+	return u, dao.UpdateUser(user.Email, new)
 }
 
 func UpdatePassword(email, newPWD string) (dao.User, error) {

@@ -27,7 +27,7 @@ import (
 
 type UserRole struct {
 	ID          int    `gorm:"primary_key;AUTO_INCREMENT"`
-	Role        string `json:"role"` // 超管和部门等级
+	Role        string `gorm:"not null;unique" json:"role"` // 超管和部门等级
 	Description string `json:"description"`
 	Menus       string `json:"menus"`
 	ButtonID    string `json:"buttonId"`
@@ -54,13 +54,6 @@ func GetRole(roleID int) (UserRole, error) {
 	var Role UserRole
 	err := mysqlmanager.MySQL().Where("id = ?", roleID).Find(&Role).Error
 	return Role, err
-}
-
-// 查看数据库是否有重复rolename
-func IsNameExist(name string) (bool, error) {
-	var role UserRole
-	err := mysqlmanager.MySQL().Where("role=?", name).Find(&role).Error
-	return role.ID != 0, err
 }
 
 // 根据id获取该角色的所有信息
