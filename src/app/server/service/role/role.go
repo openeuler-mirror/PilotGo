@@ -15,8 +15,6 @@
 package role
 
 import (
-	"errors"
-
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
@@ -125,15 +123,7 @@ func getRoleMenuButtons(role string) (string, []string) {
 }
 
 func AddRole(userRole *UserRole) error {
-	is, err := dao.IsNameExist(userRole.Role)
-	if err != nil {
-		return err
-	}
-	if is {
-		return errors.New("角色名重复")
-	}
-
-	err = dao.AddRole(userRole)
+	err := dao.AddRole(userRole)
 	if err != nil {
 		return err
 	}

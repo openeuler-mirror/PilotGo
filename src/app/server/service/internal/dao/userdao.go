@@ -31,9 +31,9 @@ type User struct {
 	DepartSecond int    `gorm:"size:25" json:"departId,omitempty"`
 	DepartName   string `gorm:"size:25" json:"departName,omitempty"`
 	Username     string `json:"username,omitempty" `
-	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty" binding:"required" msg:"密码不能为空"`
+	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
 	Phone        string `gorm:"size:11" json:"phone,omitempty"`
-	Email        string `gorm:"type:varchar(30);not null" json:"email,omitempty" binding:"required" msg:"邮箱不能为空"`
+	Email        string `gorm:"type:varchar(30);not null;unique" json:"email,omitempty" binding:"required" msg:"邮箱不能为空"`
 	RoleID       string `json:"roleid,omitempty"`
 	// deprecated
 	// UserType int    `json:"userType,omitempty"`
@@ -265,6 +265,12 @@ func AddUser(u *User) error {
 func UpdateUserPhone(email, phone string) error {
 	var user User
 	return mysqlmanager.MySQL().Model(&user).Where("email=?", email).Update("phone", phone).Error
+}
+
+// 修改用户信息
+func UpdateUser(email string, u User) error {
+	var user User
+	return mysqlmanager.MySQL().Model(&user).Where("email=?", email).Updates(&u).Error
 }
 
 func DelUser(deptId int) error {
