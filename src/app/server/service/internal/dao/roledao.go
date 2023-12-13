@@ -39,25 +39,17 @@ type RoleButton struct {
 }
 
 // 根据角色名称返回角色id和用户类型
-func GetRoleId(name string) (roleId string, err error) {
+func GetRoleId(name string) (roleId int, err error) {
 	var role Role
 	err = mysqlmanager.MySQL().Where("name = ?", name).Find(&role).Error
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-	roleID := strconv.Itoa(role.ID)
-	return roleID, nil
-}
-
-// 根据角色id返回角色信息
-func GetRole(roleID int) (Role, error) {
-	var role Role
-	err := mysqlmanager.MySQL().Where("id = ?", roleID).Find(&role).Error
-	return role, err
+	return role.ID, nil
 }
 
 // 根据id获取该角色的所有信息
-func RoleIdToGetAllInfo(roleid int) (Role, error) {
+func GetRoleById(roleid int) (Role, error) {
 	var role Role
 	err := mysqlmanager.MySQL().Where("id=?", roleid).Find(&role).Error
 	return role, err
@@ -99,10 +91,7 @@ func GetRolePaged(offset, size int) (int64, []Role, error) {
 func GetRoles() ([]Role, error) {
 	var roles []Role
 	err := mysqlmanager.MySQL().Order("id").Find(&roles).Error
-	if err != nil {
-		return nil, err
-	}
-	return roles, nil
+	return roles, err
 }
 
 // 新增角色
@@ -112,22 +101,6 @@ func AddRole(r *Role) error {
 	}
 
 	return mysqlmanager.MySQL().Save(r).Error
-}
-
-// 是否有用户绑定某角色
-func IsUserBindingRole(roleId int) (bool, error) {
-	var users []User
-	err := mysqlmanager.MySQL().Find(&users).Error
-	if err != nil {
-		return false, err
-	}
-	for _, user := range users {
-		id := user.RoleID
-		if find := strings.Contains(id, strconv.Itoa(roleId)); find {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 // 删除用户角色
@@ -174,10 +147,28 @@ func CreateAdministratorUser() error {
 			Username:     strings.Split(SuperUser, "@")[0],
 			Password:     string(bs),
 			Email:        SuperUser,
-			RoleID:       strconv.Itoa(role.ID),
 		}
 		mysqlmanager.MySQL().Create(&user)
+
+		ur := UserRole{
+			UserID: user.ID,
+			RoleID: role.ID,
+		}
+		mysqlmanager.MySQL().Create(&ur)
+
 	}
 
 	return nil
+}
+
+func GetNamesByRoleIds(roleids []int) ([]string, error) {
+	var RoleNames []string
+	for _, v := range roleids {
+		role, err := GetRoleById(v)
+		if err != nil {
+			return nil, err
+		}
+		RoleNames = append(RoleNames, role.Name)
+	}
+	return RoleNames, nil
 }

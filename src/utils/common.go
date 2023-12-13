@@ -14,15 +14,28 @@
  ******************************************************************************/
 package utils
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 // string数组转为int数组
-func String2Int(strArr []string) []int {
-	res := make([]int, len(strArr))
+func String2Int(strArr string) []int {
+	strArrs := strings.Split(strArr, ",")
+	res := make([]int, len(strArrs))
 
-	for index, val := range strArr {
+	for index, val := range strArrs {
 		res[index], _ = strconv.Atoi(val)
 	}
 
 	return res
+}
+
+func Int2String(intSlice []int) string {
+	stringSlice := make([]string, len(intSlice))
+	for i, v := range intSlice {
+		stringSlice[i] = fmt.Sprint(v)
+	}
+	return strings.Join(stringSlice, ",")
 }

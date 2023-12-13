@@ -20,6 +20,7 @@ import (
 )
 
 type Role = dao.Role
+type UserRole = dao.UserRole
 
 type RoleID struct {
 	RoleId []int `json:"roleId"`
@@ -42,7 +43,7 @@ func RoleId(R RoleID) int {
 func GetLoginUserPermission(Roleid RoleID) (string, []string, error) {
 	// TODO: multi role case
 	roleId := RoleId(Roleid) //用户的最高权限
-	role, err := dao.RoleIdToGetAllInfo(roleId)
+	role, err := dao.GetRoleById(roleId)
 	if err != nil {
 		return "", nil, err
 	}
@@ -131,7 +132,7 @@ func AddRole(userRole *Role) error {
 }
 
 func DeleteRole(roleId int) error {
-	role, err := dao.GetRole(roleId)
+	role, err := dao.GetRoleById(roleId)
 	if err != nil {
 		return err
 	}

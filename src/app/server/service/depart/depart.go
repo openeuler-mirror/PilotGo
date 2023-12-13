@@ -271,7 +271,7 @@ func DeleteDepartData(DelDept *dao.DeleteDepart) error {
 		return err
 	}
 	DeleteDepartNode(DepartInfo, DelDept.DepartID)
-	err = dao.DelUser(DelDept.DepartID)
+	err = dao.DelUserByDeptId(DelDept.DepartID)
 	if err != nil {
 		return err
 	}
