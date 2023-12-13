@@ -91,8 +91,8 @@ func AddRoleHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	userRole := &roleservice.UserRole{
-		Role:        params.Role,
+	userRole := &roleservice.Role{
+		Name:        params.Role,
 		Description: params.Description,
 	}
 

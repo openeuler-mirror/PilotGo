@@ -99,13 +99,13 @@ func GetUserPaged(offset, size int) (int64, []ReturnUser, error) {
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := UserRole{}
+			userRole := Role{}
 			i, _ := strconv.Atoi(id)
 			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
 				return count, returnUsers, err
 			}
-			role := userRole.Role
+			role := userRole.Name
 			roles = append(roles, role)
 		}
 		u := ReturnUser{
@@ -139,13 +139,13 @@ func UserAll() ([]ReturnUser, int, error) {
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := UserRole{}
+			userRole := Role{}
 			i, _ := strconv.Atoi(id)
 			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
 				return redisUser, totals, err
 			}
-			role := userRole.Role
+			role := userRole.Name
 			roles = append(roles, role)
 		}
 		u := ReturnUser{
@@ -178,13 +178,13 @@ func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error
 		roleids := user.RoleID
 		roleId := strings.Split(roleids, ",")
 		for _, id := range roleId {
-			userRole := UserRole{}
+			userRole := Role{}
 			i, _ := strconv.Atoi(id)
 			err := mysqlmanager.MySQL().Where("id = ?", i).Find(&userRole).Error
 			if err != nil {
 				return count, redisUser, err
 			}
-			role := userRole.Role
+			role := userRole.Name
 			roles = append(roles, role)
 		}
 		u := ReturnUser{
