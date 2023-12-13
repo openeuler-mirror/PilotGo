@@ -32,7 +32,7 @@ import (
 )
 
 func RegisterHandler(c *gin.Context) {
-	user := &userservice.User{}
+	user := &userservice.UserInfo{}
 	if err := c.Bind(user); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -63,13 +63,13 @@ func RegisterHandler(c *gin.Context) {
 }
 
 func LoginHandler(c *gin.Context) {
-	user := userservice.User{}
+	user := userservice.UserInfo{}
 	if err := c.Bind(&user); err != nil {
 		response.Fail(c, nil, net.GetValidMsg(err, &user))
 		return
 	}
 
-	u, err := userservice.UserInfo(user.Email)
+	u, err := userservice.GetUserByEmail(user.Email)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -91,7 +91,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.ReleaseToken(u)
+	token, err := jwt.ReleaseToken(*u)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -172,7 +172,7 @@ func UserSearchHandler(c *gin.Context) {
 
 // 修改密码
 func UpdatePasswordHandler(c *gin.Context) {
-	var user userservice.User
+	var user userservice.UserInfo
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -193,7 +193,7 @@ func UpdatePasswordHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	_, err = userservice.UpdatePassword(user.Email, user.Password)
+	err = userservice.UpdatePassword(user.Email, user.Password)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -204,7 +204,7 @@ func UpdatePasswordHandler(c *gin.Context) {
 
 // 重置密码
 func ResetPasswordHandler(c *gin.Context) {
-	var user userservice.User
+	var user userservice.UserInfo
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -225,7 +225,7 @@ func ResetPasswordHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	_, err = userservice.ResetPassword(user.Email)
+	err = userservice.ResetPassword(user.Email)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -300,7 +300,7 @@ func DeleteUserHandler(c *gin.Context) {
 
 // 修改用户信息
 func UpdateUserHandler(c *gin.Context) {
-	user := userservice.User{}
+	user := userservice.UserInfo{}
 	if c.Bind(&user) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -320,7 +320,7 @@ func UpdateUserHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	_, err = userservice.UpdateUser(user)
+	err = userservice.UpdateUser(user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -340,7 +340,7 @@ func ImportUser(c *gin.Context) {
 	UserExit := make([]string, 0)
 
 	// TODO:
-	user := &userservice.User{}
+	user := &userservice.UserInfo{}
 	if err := c.Bind(user); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

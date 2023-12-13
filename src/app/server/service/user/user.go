@@ -16,28 +16,276 @@ package user
 
 import (
 	"errors"
-	"math/rand"
-	"strconv"
 	"strings"
-	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/tealeg/xlsx"
 )
 
 type User = dao.User
-type ReturnUser = dao.ReturnUser
 
-// 随机产生用户名字
-func RandomString(n int) string {
-	var letters = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	result := make([]byte, n)
-	rand.Seed(time.Now().Unix())
-	for k := range result {
-		result[k] = letters[rand.Intn(len(letters))]
+type UserInfo struct {
+	ID           uint   `json:"id"`
+	DepartFirst  int    `json:"departPid,omitempty"`
+	DepartSecond int    `json:"departId,omitempty"`
+	DepartName   string `json:"departName,omitempty"`
+	Username     string `json:"username,omitempty" `
+	Password     string `json:"password,omitempty"`
+	Phone        string `json:"phone,omitempty"`
+	Email        string `json:"email,omitempty" binding:"required" msg:"邮箱不能为空"`
+	RoleID       string `json:"roleId"`
+}
+
+type ReturnUser struct {
+	ID           uint     `json:"id"`
+	DepartFirst  int      `json:"departPid"`
+	DepartSecond int      `json:"departId"`
+	DepartName   string   `json:"departName"`
+	Username     string   `json:"username"`
+	Phone        string   `json:"phone"`
+	Email        string   `json:"email"`
+	Roles        []string `json:"role"`
+	//RoleID       string `json:"roleId"`
+}
+
+type UserDto struct {
+	Name     string `json:"username"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email"`
+}
+
+func Login(user *UserInfo) (string, int, string, error) {
+	email := user.Email
+	pwd := user.Password
+	EmailBool, err := dao.IsEmailExist(email)
+	if err != nil {
+		return "", 0, "", err
 	}
-	return string(result)
+	if !EmailBool {
+		return "", 0, "", errors.New("用户不存在")
+	}
+
+	u, err := dao.GetUserByEmail(email)
+	if err != nil {
+		return "", 0, "", errors.New("查询邮箱密码错误")
+	}
+
+	err = utils.ComparePassword(u.Password, pwd)
+	if err != nil {
+		return "", 0, "", errors.New("密码错误")
+	}
+	roleids, err := dao.GetRolesByUid(u.ID)
+	return u.DepartName, u.DepartSecond, utils.Int2String(roleids), err
+}
+
+func Register(user *UserInfo) error {
+	username := user.Username
+	password := user.Password
+	email := user.Email
+	phone := user.Phone
+	depart := user.DepartName
+	departId := user.DepartSecond
+	departPid := user.DepartFirst
+	roleId := user.RoleID
+	EmailBool, err := dao.IsEmailExist(email)
+	if err != nil {
+		return err
+	}
+	if EmailBool {
+		return errors.New("邮箱已存在")
+	}
+
+	bs, err := utils.CryptoPassword(password)
+	if err != nil {
+		return errors.New("数据加密错误")
+	}
+
+	u := &dao.User{ //Create user
+		Username:     username,
+		Password:     string(bs),
+		Phone:        phone,
+		Email:        email,
+		DepartName:   depart,
+		DepartFirst:  departPid,
+		DepartSecond: departId,
+	}
+	err = dao.AddUser(u)
+	if err != nil {
+		return err
+	}
+	roleIds := utils.String2Int(roleId)
+	return dao.UpdateU2R(u.ID, roleIds)
+}
+
+func DeleteUser(Email string) error {
+	//获取用户信息
+	u, err := dao.GetUserByEmail(Email)
+	if err != nil {
+		return err
+	}
+	//删除用户权限表的数据
+	err = dao.DeleteByUid(u.ID)
+	if err != nil {
+		return err
+	}
+	//删除用户
+	return dao.DeleteUser(Email)
+}
+
+// 修改用户信息
+func UpdateUser(user UserInfo) error {
+	new := dao.User{
+		DepartFirst:  user.DepartFirst,
+		DepartSecond: user.DepartSecond,
+		DepartName:   user.DepartName,
+		Username:     user.Username,
+		Phone:        user.Phone,
+	}
+	//获取用户信息
+	_, err := dao.GetUserByEmail(user.Email)
+	if err != nil {
+		return err
+	}
+	//修改user表
+	err = dao.UpdateUser(user.Email, new)
+	if err != nil {
+		return err
+	}
+
+	// TODO:
+	/*
+		//修改修改权限userrole表
+		roleIds := utils.String2Int(user.RoleID)
+		err = dao.UpdateU2R(u.ID, roleIds)*/
+	return err
+}
+
+func UpdatePassword(email, newPWD string) error {
+	return dao.UpdatePassword(email, newPWD)
+}
+
+func ResetPassword(email string) error {
+	return dao.ResetPassword(email)
+}
+
+func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error) {
+	count, users, err := dao.UserSearchPaged(email, offset, size)
+	if err != nil {
+		return 0, nil, err
+	}
+	var returnUsers []ReturnUser
+	for _, user := range users {
+		userinfo := ReturnUser{
+			ID:           user.ID,
+			DepartFirst:  user.DepartFirst,
+			DepartSecond: user.DepartSecond,
+			DepartName:   user.DepartName,
+			Username:     user.Username,
+			Phone:        user.Phone,
+			Email:        user.Email,
+		}
+		roleids, err := dao.GetRolesByUid(user.ID)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		userinfo.Roles, err = dao.GetNamesByRoleIds(roleids)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}
+	return count, returnUsers, err
+}
+
+func GetUserRoles(username string) ([]string, error) {
+	user, err := dao.GetUserByName(username)
+	if err != nil {
+		return nil, err
+	}
+	// 查找角色
+	roleids, err := dao.GetRolesByUid(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return dao.GetNamesByRoleIds(roleids)
+}
+
+func GetNamesByRoleIds(roleids []int) {
+	panic("unimplemented")
+}
+
+func QueryUserByID(userID int) (*User, error) {
+	return dao.GetUserByID(userID)
+}
+
+// 查询某用户信息
+func GetUserByEmail(email string) (*ReturnUser, error) {
+	user, err := dao.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	userinfo := &ReturnUser{
+		ID:           user.ID,
+		DepartFirst:  user.DepartFirst,
+		DepartSecond: user.DepartSecond,
+		DepartName:   user.DepartName,
+		Username:     user.Username,
+		Phone:        user.Phone,
+		Email:        user.Email,
+	}
+	roleids, err := dao.GetRolesByUid(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	userinfo.Roles, err = dao.GetNamesByRoleIds(roleids)
+
+	return userinfo, err
+}
+
+func ToUserDto(user User) UserDto {
+	return UserDto{
+		Name:     user.Username,
+		Password: user.Password,
+		Phone:    user.Phone,
+		Email:    user.Email,
+	}
+}
+
+// 创建管理员账户
+func CreateAdministratorUser() error {
+	return dao.CreateAdministratorUser()
+}
+
+// 分页查询所有用户
+func GetUserPaged(offset, size int) (int64, []ReturnUser, error) {
+	var returnUsers []ReturnUser
+	count, users, err := dao.GetUserPaged(offset, size)
+	if err != nil {
+		return 0, nil, err
+	}
+	for _, user := range users {
+		userinfo := ReturnUser{
+			ID:           user.ID,
+			DepartFirst:  user.DepartFirst,
+			DepartSecond: user.DepartSecond,
+			DepartName:   user.DepartName,
+			Username:     user.Username,
+			Phone:        user.Phone,
+			Email:        user.Email,
+		}
+		roleids, err := dao.GetRolesByUid(user.ID)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		userinfo.Roles, err = dao.GetNamesByRoleIds(roleids)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		returnUsers = append(returnUsers, userinfo)
+	}
+	return count, returnUsers, err
 }
 
 // 读取xlsx文件
@@ -79,184 +327,20 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				DepartName:   departName, //4：部门
 				DepartFirst:  pid,
 				DepartSecond: id,
-				RoleID:       roleId,
 			}
 			err = dao.AddUser(u)
+			if err != nil {
+				return UserExit, err
+			}
+			ur := &dao.UserRole{
+				UserID: u.ID,
+				RoleID: roleId,
+			}
+			err = ur.Add()
 			if err != nil {
 				return UserExit, err
 			}
 		}
 	}
 	return UserExit, nil
-}
-
-func DeleteUser(Email string) error {
-	if err := dao.DeleteUser(Email); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// 修改用户信息
-func UpdateUser(user dao.User) (dao.User, error) {
-	new := dao.User{
-		DepartFirst:  user.DepartFirst,
-		DepartSecond: user.DepartSecond,
-		DepartName:   user.DepartName,
-		Username:     user.Username,
-		Phone:        user.Phone,
-		RoleID:       user.RoleID,
-	}
-	u, err := dao.UserInfo(user.Email)
-	if err != nil {
-		return u, err
-	}
-	return u, dao.UpdateUser(user.Email, new)
-}
-
-func UpdatePassword(email, newPWD string) (dao.User, error) {
-
-	u, err := dao.UpdatePassword(email, newPWD)
-	if err != nil {
-		return u, err
-	}
-	return u, nil
-}
-
-func ResetPassword(email string) (dao.User, error) {
-	u, err := dao.ResetPassword(email)
-	if err != nil {
-		return u, err
-	}
-	return u, nil
-}
-
-func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error) {
-	return dao.UserSearchPaged(email, offset, size)
-}
-
-func UserAll() ([]dao.ReturnUser, int, error) {
-	users, total, err := dao.UserAll()
-	if err != nil {
-		return users, total, err
-	}
-	return users, total, nil
-}
-
-func Login(user *dao.User) (string, int, string, error) {
-	email := user.Email
-	pwd := user.Password
-	EmailBool, err := dao.IsEmailExist(email)
-	if err != nil {
-		return "", 0, "", err
-	}
-	if !EmailBool {
-		return "", 0, "", errors.New("用户不存在")
-	}
-
-	u, err := dao.UserInfo(email)
-	if err != nil {
-		return "", 0, "", errors.New("查询邮箱密码错误")
-	}
-
-	err = utils.ComparePassword(u.Password, pwd)
-	if err != nil {
-		return "", 0, "", errors.New("密码错误")
-	}
-
-	return u.DepartName, u.DepartSecond, u.RoleID, nil
-}
-
-func Register(user *dao.User) error {
-	username := user.Username
-	password := user.Password
-	email := user.Email
-	phone := user.Phone
-	depart := user.DepartName
-	departId := user.DepartSecond
-	departPid := user.DepartFirst
-	roleId := user.RoleID
-	EmailBool, err := dao.IsEmailExist(email)
-	if err != nil {
-		return err
-	}
-	if EmailBool {
-		return errors.New("邮箱已存在")
-	}
-
-	bs, err := utils.CryptoPassword(password)
-	if err != nil {
-		return errors.New("数据加密错误")
-	}
-
-	u := &dao.User{ //Create user
-		Username:     username,
-		Password:     string(bs),
-		Phone:        phone,
-		Email:        email,
-		DepartName:   depart,
-		DepartFirst:  departPid,
-		DepartSecond: departId,
-		RoleID:       roleId,
-	}
-	err = dao.AddUser(u)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetUserRoles(username string) ([]string, error) {
-	result := []string{}
-
-	user, err := dao.QueryUserByName(username)
-	if err != nil {
-		return nil, err
-	}
-	// 查找角色
-	roleids := user.RoleID
-	roleId := strings.Split(roleids, ",")
-	for _, id_str := range roleId {
-		id, err := strconv.Atoi(id_str)
-		if err != nil {
-			return nil, err
-		}
-		role, err := dao.RoleIdToGetAllInfo(id)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, role.Name)
-	}
-
-	return result, nil
-}
-
-func QueryUserByID(userID int) (*User, error) {
-	return dao.QueryUserByID(userID)
-}
-
-// 查询某用户信息
-func UserInfo(email string) (User, error) {
-	return dao.UserInfo(email)
-}
-
-func ToUserDto(user User) dao.UserDto {
-	return dao.UserDto{
-		Name:     user.Username,
-		Password: user.Password,
-		Phone:    user.Phone,
-		Email:    user.Email,
-	}
-}
-
-// 创建管理员账户
-func CreateAdministratorUser() error {
-	return dao.CreateAdministratorUser()
-}
-
-// 分页查询所有用户
-func GetUserPaged(offset, size int) (int64, []dao.ReturnUser, error) {
-	return dao.GetUserPaged(offset, size)
 }

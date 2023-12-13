@@ -97,7 +97,7 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 		return
 	}
 
-	u, err := userservice.UserInfo(fd.Username)
+	u, err := userservice.GetUserByEmail(fd.Username)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return

@@ -35,7 +35,7 @@ type MyClaims struct {
 	UserName string
 }
 
-func ReleaseToken(user userservice.User) (string, error) {
+func ReleaseToken(user userservice.ReturnUser) (string, error) {
 	expirationTime := time.Now().Add(6 * 60 * time.Minute) //到期时间
 	claims := &MyClaims{
 		UserId:   user.ID,
