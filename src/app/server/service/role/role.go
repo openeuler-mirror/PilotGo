@@ -19,7 +19,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
 
-type UserRole = dao.UserRole
+type Role = dao.Role
 
 type RoleID struct {
 	RoleId []int `json:"roleId"`
@@ -47,7 +47,7 @@ func GetLoginUserPermission(Roleid RoleID) (string, []string, error) {
 		return "", nil, err
 	}
 
-	menu, buttons := getRoleMenuButtons(role.Role)
+	menu, buttons := getRoleMenuButtons(role.Name)
 
 	return menu, buttons, nil
 }
@@ -71,7 +71,7 @@ func GetRoles() ([]*ReturnRole, error) {
 	for _, role := range roles {
 		result = append(result, &ReturnRole{
 			ID:          role.ID,
-			Role:        role.Role,
+			Role:        role.Name,
 			Description: role.Description,
 			Menus:       "",
 			Buttons:     []string{},
@@ -122,7 +122,7 @@ func getRoleMenuButtons(role string) (string, []string) {
 	return menu, buttons
 }
 
-func AddRole(userRole *UserRole) error {
+func AddRole(userRole *Role) error {
 	err := dao.AddRole(userRole)
 	if err != nil {
 		return err
@@ -135,7 +135,7 @@ func DeleteRole(roleId int) error {
 	if err != nil {
 		return err
 	}
-	if err := auth.DeleteRole(role.Role); err != nil {
+	if err := auth.DeleteRole(role.Name); err != nil {
 		return err
 	}
 
@@ -146,8 +146,8 @@ func DeleteRole(roleId int) error {
 	return nil
 }
 
-func UpdateRoleInfo(role, description string) error {
-	return dao.UpdateRoleDescription(role, description)
+func UpdateRoleInfo(name, description string) error {
+	return dao.UpdateRoleDescription(name, description)
 }
 
 func UpdateRolePermissions(role string, buttons, menus []string) error {
@@ -165,7 +165,7 @@ func GetRolePaged(offset, size int) (int64, []*ReturnRole, error) {
 	for _, role := range data {
 		result = append(result, &ReturnRole{
 			ID:          role.ID,
-			Role:        role.Role,
+			Role:        role.Name,
 			Description: role.Description,
 			Menus:       "",
 			Buttons:     []string{},

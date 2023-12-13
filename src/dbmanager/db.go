@@ -50,7 +50,7 @@ func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
 	mysqlmanager.MySQL().AutoMigrate(&script.Script{})
 	mysqlmanager.MySQL().AutoMigrate(&configfile.ConfigFile{})
 	mysqlmanager.MySQL().AutoMigrate(&user.User{})
-	mysqlmanager.MySQL().AutoMigrate(&role.UserRole{})
+	mysqlmanager.MySQL().AutoMigrate(&role.Role{})
 
 	// 创建超级管理员账户
 	err = user.CreateAdministratorUser()

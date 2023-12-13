@@ -25,9 +25,9 @@ import (
 	"gitee.com/openeuler/PilotGo/utils"
 )
 
-type UserRole struct {
+type Role struct {
 	ID          int    `gorm:"primary_key;AUTO_INCREMENT"`
-	Role        string `gorm:"not null;unique" json:"role"` // 超管和部门等级
+	Name        string `gorm:"not null;unique" json:"name"` // 超管和部门等级
 	Description string `json:"description"`
 	Menus       string `json:"menus"`
 	ButtonID    string `json:"buttonId"`
@@ -39,26 +39,26 @@ type RoleButton struct {
 }
 
 // 根据角色名称返回角色id和用户类型
-func GetRoleId(role string) (roleId string, err error) {
-	var Role UserRole
-	err = mysqlmanager.MySQL().Where("role = ?", role).Find(&Role).Error
+func GetRoleId(name string) (roleId string, err error) {
+	var role Role
+	err = mysqlmanager.MySQL().Where("name = ?", name).Find(&role).Error
 	if err != nil {
 		return "", err
 	}
-	roleID := strconv.Itoa(Role.ID)
+	roleID := strconv.Itoa(role.ID)
 	return roleID, nil
 }
 
 // 根据角色id返回角色信息
-func GetRole(roleID int) (UserRole, error) {
-	var Role UserRole
-	err := mysqlmanager.MySQL().Where("id = ?", roleID).Find(&Role).Error
-	return Role, err
+func GetRole(roleID int) (Role, error) {
+	var role Role
+	err := mysqlmanager.MySQL().Where("id = ?", roleID).Find(&role).Error
+	return role, err
 }
 
 // 根据id获取该角色的所有信息
-func RoleIdToGetAllInfo(roleid int) (UserRole, error) {
-	var role UserRole
+func RoleIdToGetAllInfo(roleid int) (Role, error) {
+	var role Role
 	err := mysqlmanager.MySQL().Where("id=?", roleid).Find(&role).Error
 	return role, err
 }
@@ -88,16 +88,16 @@ func PermissionButtons(button string) ([]string, error) {
 }
 
 // 分页查询
-func GetRolePaged(offset, size int) (int64, []UserRole, error) {
+func GetRolePaged(offset, size int) (int64, []Role, error) {
 	var count int64
-	var userRoles []UserRole
-	err := mysqlmanager.MySQL().Model(UserRole{}).Order("id desc").Offset(offset).Limit(size).Find(&userRoles).Offset(-1).Limit(-1).Count(&count).Error
+	var userRoles []Role
+	err := mysqlmanager.MySQL().Model(Role{}).Order("id desc").Offset(offset).Limit(size).Find(&userRoles).Offset(-1).Limit(-1).Count(&count).Error
 	return count, userRoles, err
 }
 
 // 获取所有的用户角色
-func GetRoles() ([]UserRole, error) {
-	var roles []UserRole
+func GetRoles() ([]Role, error) {
+	var roles []Role
 	err := mysqlmanager.MySQL().Order("id").Find(&roles).Error
 	if err != nil {
 		return nil, err
@@ -106,8 +106,8 @@ func GetRoles() ([]UserRole, error) {
 }
 
 // 新增角色
-func AddRole(r *UserRole) error {
-	if r.Role == "" {
+func AddRole(r *Role) error {
+	if r.Name == "" {
 		return fmt.Errorf("角色名不能为空")
 	}
 
@@ -132,20 +132,20 @@ func IsUserBindingRole(roleId int) (bool, error) {
 
 // 删除用户角色
 func DeleteRole(roleId int) error {
-	var UserRole UserRole
+	var UserRole Role
 	return mysqlmanager.MySQL().Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
 }
 
 // 修改角色名称
 func UpdateRoleName(roleId int, name string) error {
-	var UserRole UserRole
+	var UserRole Role
 	return mysqlmanager.MySQL().Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
 }
 
 // 修改角色描述
-func UpdateRoleDescription(role, desc string) error {
-	var UserRole UserRole
-	return mysqlmanager.MySQL().Model(&UserRole).Where("role = ?", role).Update("description", desc).Error
+func UpdateRoleDescription(name, desc string) error {
+	var UserRole Role
+	return mysqlmanager.MySQL().Model(&UserRole).Where("name = ?", name).Update("description", desc).Error
 }
 
 const SuperUser = "admin"
@@ -153,11 +153,11 @@ const SuperUserPasswd = "admin"
 
 // 创建管理员账户
 func CreateAdministratorUser() error {
-	var role UserRole
+	var role Role
 	mysqlmanager.MySQL().Where("role =?", "admin").Find(&role)
 	if role.ID == 0 {
-		role = UserRole{
-			Role:        "admin",
+		role = Role{
+			Name:        "admin",
 			Description: "超级管理员",
 		}
 		mysqlmanager.MySQL().Create(&role)

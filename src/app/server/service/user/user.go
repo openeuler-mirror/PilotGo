@@ -227,7 +227,7 @@ func GetUserRoles(username string) ([]string, error) {
 			return nil, err
 		}
 
-		result = append(result, role.Role)
+		result = append(result, role.Name)
 	}
 
 	return result, nil
