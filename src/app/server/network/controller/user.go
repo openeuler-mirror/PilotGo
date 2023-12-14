@@ -339,12 +339,6 @@ func ImportUser(c *gin.Context) {
 	}
 	UserExit := make([]string, 0)
 
-	// TODO:
-	user := &userservice.UserInfo{}
-	if err := c.Bind(user); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
 	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
