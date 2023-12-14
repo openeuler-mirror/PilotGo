@@ -30,27 +30,7 @@ type DepartNode struct {
 	//根节点为0,普通节点为1
 }
 
-type DepartTreeNode struct {
-	Label    string            `json:"label"`
-	Id       int               `json:"id"`
-	Pid      int               `json:"pid"`
-	Children []*DepartTreeNode `json:"children"`
-}
-
-type NewDepart struct {
-	DepartID   int    `json:"DepartID" binding:"required" msg:"部门id不能为空"`
-	DepartName string `json:"DepartName" binding:"required" msg:"部门名称不能为空"`
-}
-
-type DeleteDepart struct {
-	DepartID int `json:"DepartID"`
-}
-type AddDepart struct {
-	ParentID     int    `json:"PID"`
-	ParentDepart string `json:"ParentDepart"`
-	DepartName   string `json:"Depart" binding:"required" msg:"部门名称不能为空"`
-}
-
+// 调用此方法的位置设置为调用IsDepartIDExist
 func IsParentDepartExist(parent string) (bool, error) {
 	var Depart DepartNode
 	err := mysqlmanager.MySQL().Where("depart=? ", parent).Find(&Depart).Error
@@ -62,6 +42,8 @@ func IsDepartNodeExist(parent string, depart string) (bool, error) {
 	// mysqlmanager.MySQL().Where("", parent).Find(&Depart)
 	return Depart.ID != 0, err
 }
+
+// 修改成返回节点信息
 func IsDepartIDExist(ID int) (bool, error) {
 	var Depart DepartNode
 	err := mysqlmanager.MySQL().Where("id=?", ID).Find(&Depart).Error
@@ -74,6 +56,7 @@ func IsRootExist() (bool, error) {
 	return Depart.ID != 0, err
 }
 
+// 换一个通俗的名字
 func DepartStore() ([]DepartNode, error) {
 	var Depart []DepartNode
 	err := mysqlmanager.MySQL().Find(&Depart).Error
@@ -88,6 +71,7 @@ func UpdateDepart(DepartID int, DepartName string) error {
 	return mysqlmanager.MySQL().Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart).Error
 }
 
+// 删除
 func UpdateParentDepart(DepartID int, DepartName string) error {
 	var DepartInfo DepartNode
 	Depart := DepartNode{
@@ -102,6 +86,7 @@ func Pid2Depart(pid int) ([]DepartNode, error) {
 	return DepartInfo, err
 }
 
+// 未定
 func Deletedepartdata(needdelete []int) error {
 	var DepartInfo []DepartNode
 	return mysqlmanager.MySQL().Where("id=?", needdelete[0]).Delete(&DepartInfo).Error
@@ -118,26 +103,26 @@ func Insertdepartlist(needdelete []int, str string) ([]int, error) {
 	return needdelete, err
 }
 
-// 根据部门名字查询id和pid
+// 根据部门名字查询id和pid删除不要
 func GetPidAndId(depart string) (pid, id int, err error) {
 	var dep DepartNode
 	err = mysqlmanager.MySQL().Where("depart=?", depart).Find(&dep).Error
 	return dep.PID, dep.ID, err
 }
 
-// 添加部门
+// 添加部门，修改
 func AddDepartMessage(db *gorm.DB, depart *DepartNode) error {
 	return db.Create(depart).Error
 }
 
-// 根据部门id获取部门名称
+// 根据部门id获取部门名称，修改为返回结构体
 func DepartIdToGetDepartName(id int) (string, error) {
 	var departNames DepartNode
 	err := mysqlmanager.MySQL().Where("id =?", id).Find(&departNames).Error
 	return departNames.Depart, err
 }
 
-// 根据部门ids查询所属部门
+// 根据部门ids查询所属部门，待确定
 func DepartIdsToGetDepartNames(ids []int) (names []string) {
 	for _, id := range ids {
 		var depart DepartNode
