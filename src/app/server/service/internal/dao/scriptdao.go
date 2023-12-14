@@ -19,7 +19,6 @@ type Script struct {
 
 // 添加脚本文件
 func AddScript(s Script) error {
-	fmt.Println("jjinru daoceng")
 	version := s.Version
 	if len(version) == 0 {
 		return fmt.Errorf("版本号不能为空")
