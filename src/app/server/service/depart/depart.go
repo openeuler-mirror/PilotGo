@@ -31,10 +31,10 @@ type DepartNode = dao.DepartNode
 type DeleteDepart struct {
 	DepartID int `json:"DepartID"`
 }
+
 type AddDepart struct {
-	ParentID     int    `json:"PID"`
-	ParentDepart string `json:"ParentDepart"`
-	DepartName   string `json:"Depart" binding:"required" msg:"部门名称不能为空"`
+	ParentID   int    `json:"PID"`
+	DepartName string `json:"Depart" binding:"required" msg:"部门名称不能为空"`
 }
 
 type MachineModifyDepart struct {
@@ -196,36 +196,28 @@ func DepartInfo() (*DepartTreeNode, error) {
 
 func AddDepartMethod(newDepart *AddDepart) error {
 	pid := newDepart.ParentID
-	parentDepart := newDepart.ParentDepart
 	depart := newDepart.DepartName
-	temp, err := dao.IsDepartIDExist(pid)
+	parent, err := dao.GetDepartById(pid)
 	if err != nil {
 		return err
 	}
-	if !temp {
+	if parent.ID == 0 {
 		return errors.New("部门PID有误,数据库中不存在该部门PID")
 	}
 
 	departNode := dao.DepartNode{
-		PID:          pid,
-		ParentDepart: parentDepart,
-		Depart:       depart,
+		PID:    pid,
+		Depart: depart,
 	}
-	temp, err = dao.IsDepartNodeExist(parentDepart, depart)
+	temp, err := dao.IsDepartNodeExist(pid, depart)
 	if err != nil {
 		return err
 	}
 	if temp {
 		return errors.New("该部门节点已存在")
 	}
-	ParentDepartExistBool, err := dao.IsParentDepartExist(parentDepart)
-	if err != nil {
-		return err
-	}
-	if len(parentDepart) != 0 && !ParentDepartExistBool {
-		return errors.New("该部门上级部门不存在")
-	}
-	if len(parentDepart) == 0 {
+
+	if parent.ID == 1 && parent.PID == 0 {
 		temp, err := dao.IsRootExist()
 		if err != nil {
 			return err
