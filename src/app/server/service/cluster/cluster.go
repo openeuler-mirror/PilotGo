@@ -102,14 +102,14 @@ func DepartClusterInfo() []DepartMachineInfo {
 		if err != nil {
 			logger.Error(err.Error())
 		}
-		departName, err := dao.DepartIdToGetDepartName(depart_Id)
+		depart, err := dao.GetDepartById(depart_Id)
 		if err != nil {
 			logger.Error(err.Error())
 		}
 		normal, Offline, free := AgentStatusCounts(lists)
 
 		departInfo := DepartMachineInfo{}
-		departInfo.DepartName = departName
+		departInfo.DepartName = depart.Depart
 		departInfo.AgentStatus.Normal = normal
 		departInfo.AgentStatus.OffLine = Offline
 		departInfo.AgentStatus.Free = free

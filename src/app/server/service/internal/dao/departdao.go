@@ -36,9 +36,9 @@ func IsParentDepartExist(parent string) (bool, error) {
 	err := mysqlmanager.MySQL().Where("depart=? ", parent).Find(&Depart).Error
 	return Depart.ID != 0, err
 }
-func IsDepartNodeExist(parent string, depart string) (bool, error) {
+func IsDepartNodeExist(pid int, depart string) (bool, error) {
 	var Depart DepartNode
-	err := mysqlmanager.MySQL().Where("depart=? and parent_depart=?", depart, parent).Find(&Depart).Error
+	err := mysqlmanager.MySQL().Where("depart=? and p_id=?", depart, pid).Find(&Depart).Error
 	// mysqlmanager.MySQL().Where("", parent).Find(&Depart)
 	return Depart.ID != 0, err
 }
@@ -115,11 +115,11 @@ func AddDepartMessage(db *gorm.DB, depart *DepartNode) error {
 	return db.Create(depart).Error
 }
 
-// 根据部门id获取部门名称，修改为返回结构体
-func DepartIdToGetDepartName(id int) (string, error) {
-	var departNames DepartNode
-	err := mysqlmanager.MySQL().Where("id =?", id).Find(&departNames).Error
-	return departNames.Depart, err
+// 根据部门id获取部门名结构体
+func GetDepartById(id int) (DepartNode, error) {
+	var departName DepartNode
+	err := mysqlmanager.MySQL().Where("id =?", id).Find(&departName).Error
+	return departName, err
 }
 
 // 根据部门ids查询所属部门，待确定
@@ -147,7 +147,7 @@ func SubDepartId(id int) ([]int, error) {
 	return res, err
 }
 
-// 获取所有的一级部门id
+// 获取所有的一级部门id 待定
 func FirstDepartId() (departIds []int, err error) {
 	departs := []DepartNode{}
 	err = mysqlmanager.MySQL().Where("p_id = ?", global.UncateloguedDepartId).Find(&departs).Error
@@ -166,10 +166,10 @@ func CreateOrganization() error {
 	}
 	if Depart.ID == 0 {
 		Depart = DepartNode{
-			PID:          global.Departroot,
-			ParentDepart: "",
-			Depart:       "组织名",
-			NodeLocate:   global.Departroot,
+			PID: global.Departroot,
+			//ParentDepart: "",
+			Depart:     "组织名",
+			NodeLocate: global.Departroot,
 		}
 		return mysqlmanager.MySQL().Save(&Depart).Error
 	}
