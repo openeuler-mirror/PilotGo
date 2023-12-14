@@ -127,7 +127,7 @@ const SuperUserPasswd = "admin"
 // 创建管理员账户
 func CreateAdministratorUser() error {
 	var role Role
-	mysqlmanager.MySQL().Where("role =?", "admin").Find(&role)
+	mysqlmanager.MySQL().Where("name =?", "admin").Find(&role)
 	if role.ID == 0 {
 		role = Role{
 			Name:        "admin",
