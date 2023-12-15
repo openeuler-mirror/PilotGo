@@ -140,13 +140,12 @@ func CreateAdministratorUser() error {
 		}
 
 		user := User{
-			CreatedAt:    time.Time{},
-			DepartFirst:  global.Departroot,
-			DepartSecond: global.UncateloguedDepartId,
-			DepartName:   "超级用户",
-			Username:     strings.Split(SuperUser, "@")[0],
-			Password:     string(bs),
-			Email:        SuperUser,
+			CreatedAt: time.Time{},
+			DepartId:  global.UncateloguedDepartId,
+			//DepartName: "超级用户",
+			Username: strings.Split(SuperUser, "@")[0],
+			Password: string(bs),
+			Email:    SuperUser,
 		}
 		mysqlmanager.MySQL().Create(&user)
 
