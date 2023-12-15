@@ -21,11 +21,10 @@ import (
 )
 
 type DepartNode struct {
-	ID           int    `gorm:"primary_key;AUTO_INCREMENT"`
-	PID          int    `gorm:"type:int(100);not null" json:"pid"`
-	ParentDepart string `gorm:"type:varchar(100);not null" json:"parentdepart"`
-	Depart       string `gorm:"type:varchar(100);not null" json:"depart"`
-	NodeLocate   int    `gorm:"type:int(100);not null" json:"nodelocate"`
+	ID         int    `gorm:"primary_key;AUTO_INCREMENT"`
+	PID        int    `gorm:"type:int(100);not null" json:"pid"`
+	Depart     string `gorm:"type:varchar(100);not null" json:"depart"`
+	NodeLocate int    `gorm:"type:int(100);not null" json:"nodelocate"`
 	//根节点为0,普通节点为1
 }
 
@@ -80,7 +79,7 @@ func UpdateDepart(DepartID int, DepartName string) error {
 	return mysqlmanager.MySQL().Model(&DepartNode{}).Where("id=?", DepartID).Update("depart", DepartName).Error
 }
 
-// 未定
+// 删除节点
 func Deletedepartdata(needdelete []int) error {
 	var DepartInfo []DepartNode
 	return mysqlmanager.MySQL().Where("id=?", needdelete[0]).Delete(&DepartInfo).Error

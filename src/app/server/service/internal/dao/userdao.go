@@ -61,6 +61,12 @@ func GetUserByName(name string) (*User, error) {
 	return user, err
 }
 
+func GetUserBypid(pid int) ([]User, error) {
+	var users []User
+	err := mysqlmanager.MySQL().Where("depart_id=?", pid).Find(&users).Error
+	return users, err
+}
+
 // 分页查询所有用户
 func GetUserPaged(offset, size int) (int64, []User, error) {
 	var users []User

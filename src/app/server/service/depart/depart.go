@@ -196,27 +196,11 @@ func DepartInfo() (*DepartTreeNode, error) {
 func AddDepartMethod(newDepart *AddDepart) error {
 	pid := newDepart.ParentID
 	depart := newDepart.DepartName
-	parent, err := dao.GetDepartById(pid)
-	if err != nil {
-		return err
-	}
-	if parent.ID == 0 {
-		return errors.New("部门PID有误,数据库中不存在该部门PID")
-	}
-
 	departNode := dao.DepartNode{
 		PID:    pid,
 		Depart: depart,
 	}
-	temp, err := dao.IsDepartNodeExist(pid, depart)
-	if err != nil {
-		return err
-	}
-	if temp {
-		return errors.New("该部门节点已存在")
-	}
-
-	if parent.ID == 1 && parent.PID == 0 {
+	if pid == 0 {
 		temp, err := dao.IsRootExist()
 		if err != nil {
 			return err
@@ -230,6 +214,22 @@ func AddDepartMethod(newDepart *AddDepart) error {
 			}
 		}
 	} else {
+		parent, err := dao.GetDepartById(pid)
+		if err != nil {
+			return err
+		}
+		if parent.ID == 0 {
+			return errors.New("部门PID有误,数据库中不存在该部门PID")
+		}
+
+		temp, err := dao.IsDepartNodeExist(pid, depart)
+		if err != nil {
+			return err
+		}
+		if temp {
+			return errors.New("该部门节点已存在")
+		}
+
 		departNode.NodeLocate = global.DepartUnroot
 		if departNode.Add() != nil {
 			return errors.New("部门节点添加失败")
@@ -239,6 +239,7 @@ func AddDepartMethod(newDepart *AddDepart) error {
 }
 
 func DeleteDepartData(DelDept *DeleteDepart) error {
+	//查看该部门是否存在
 	temp, err := dao.GetDepartById(DelDept.DepartID)
 	if err != nil {
 		return err
@@ -246,38 +247,36 @@ func DeleteDepartData(DelDept *DeleteDepart) error {
 	if temp.ID == 0 {
 		return errors.New("不存在该部门")
 	}
-	macli, err := dao.MachineStore(DelDept.DepartID)
+	//先查询所有子部门，然后查询所有子部门机器和用户，若不为空则不可删除，若为空直接删除
+	//查询所有子节点
+	departs, err := dao.SubDepartId(DelDept.DepartID) //数组需要去重吗？
 	if err != nil {
 		return err
 	}
-	if len(macli) > 0 {
-		return errors.New("该部门有机器不允许删除")
-	}
-	departs, err := dao.SubDepartId(DelDept.DepartID)
-	if err != nil {
-		return err
-	}
+	//将要删除的节点添加到数组中
+	departs = append([]int{DelDept.DepartID}, departs...)
+	var node []dao.MachineNode
+	var users []dao.User
 	for _, depart := range departs {
 		machine, err := dao.MachineStore(depart)
 		if err != nil {
 			return err
 		}
-		for _, m := range machine {
-			err := dao.UpdateMachineDepartState(m.MachineUUID, global.UncateloguedDepartId)
-			if err != nil {
-				return err
-			}
+		node = append(node, machine...)
+		us, err := dao.GetUserBypid(depart)
+		if err != nil {
+			return err
 		}
+		users = append(users, us...)
 	}
-
-	DepartInfo, err := dao.Pid2Depart(DelDept.DepartID)
-	if err != nil {
-		return err
+	if len(node) > 0 {
+		return errors.New("该部门有机器不允许删除")
 	}
-	DeleteDepartNode(DepartInfo, DelDept.DepartID)
-	err = dao.DelUserByDeptId(DelDept.DepartID)
-	if err != nil {
-		return err
+	if len(users) > 0 {
+		return errors.New("该部门有用户不允许删除")
+	}
+	if len(node) == 0 && len(users) == 0 {
+		return dao.Deletedepartdata(departs)
 	}
 	return nil
 }
