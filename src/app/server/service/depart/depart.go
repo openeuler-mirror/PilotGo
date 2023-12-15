@@ -20,7 +20,6 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
-	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
@@ -163,7 +162,7 @@ func MachineList(DepId int) ([]dao.Res, error) {
 }
 
 func Dept(tmp int) (*DepartTreeNode, error) {
-	depart, err := dao.DepartStore()
+	depart, err := dao.GetAllDepart()
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +181,7 @@ func Dept(tmp int) (*DepartTreeNode, error) {
 }
 
 func DepartInfo() (*DepartTreeNode, error) {
-	depart, err := dao.DepartStore()
+	depart, err := dao.GetAllDepart()
 	if err != nil {
 		return nil, err
 	}
@@ -226,13 +225,13 @@ func AddDepartMethod(newDepart *AddDepart) error {
 			return errors.New("已存在根节点,即组织名称")
 		} else {
 			departNode.NodeLocate = global.Departroot
-			if dao.AddDepartMessage(mysqlmanager.MySQL(), &departNode) != nil {
+			if departNode.Add() != nil {
 				return errors.New("部门节点添加失败")
 			}
 		}
 	} else {
 		departNode.NodeLocate = global.DepartUnroot
-		if dao.AddDepartMessage(mysqlmanager.MySQL(), &departNode) != nil {
+		if departNode.Add() != nil {
 			return errors.New("部门节点添加失败")
 		}
 	}
@@ -240,11 +239,11 @@ func AddDepartMethod(newDepart *AddDepart) error {
 }
 
 func DeleteDepartData(DelDept *DeleteDepart) error {
-	temp, err := dao.IsDepartIDExist(DelDept.DepartID)
+	temp, err := dao.GetDepartById(DelDept.DepartID)
 	if err != nil {
 		return err
 	}
-	if !temp {
+	if temp.ID == 0 {
 		return errors.New("不存在该部门")
 	}
 	macli, err := dao.MachineStore(DelDept.DepartID)
@@ -284,21 +283,16 @@ func DeleteDepartData(DelDept *DeleteDepart) error {
 }
 
 func UpdateDepart(DepartID int, DepartName string) error {
-	err := dao.UpdateDepart(DepartID, DepartName)
-	if err != nil {
-		return err
-	}
-	err = dao.UpdateParentDepart(DepartID, DepartName)
-	return err
+	return dao.UpdateDepart(DepartID, DepartName)
 }
 
 func ModifyMachineDepart(MachineID string, DepartID int) error {
 	//查询部门节点是否存在
-	is, err := dao.IsDepartIDExist(DepartID)
+	depart, err := dao.GetDepartById(DepartID)
 	if err != nil {
 		return err
 	}
-	if !is {
+	if depart.ID == 0 {
 		return errors.New("此部门不存在")
 	}
 	ResIds := utils.String2Int(MachineID)

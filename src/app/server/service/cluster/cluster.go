@@ -89,7 +89,7 @@ func ClusterInfo() (ClusterInfoParam, error) {
 func DepartClusterInfo() []DepartMachineInfo {
 	var departs []DepartMachineInfo
 
-	FirstDepartIds, err := dao.FirstDepartId()
+	FirstDepartIds, err := dao.SubDepartId(1)
 	if err != nil {
 		logger.Error(err.Error())
 	}

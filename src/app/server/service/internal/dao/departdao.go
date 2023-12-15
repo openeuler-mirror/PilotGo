@@ -18,7 +18,6 @@ import (
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gorm.io/gorm"
 )
 
 type DepartNode struct {
@@ -30,23 +29,15 @@ type DepartNode struct {
 	//根节点为0,普通节点为1
 }
 
-// 调用此方法的位置设置为调用IsDepartIDExist
-func IsParentDepartExist(parent string) (bool, error) {
-	var Depart DepartNode
-	err := mysqlmanager.MySQL().Where("depart=? ", parent).Find(&Depart).Error
-	return Depart.ID != 0, err
+// 添加部门
+func (deport *DepartNode) Add() error {
+	return mysqlmanager.MySQL().Save(deport).Error
 }
+
+// 查询部门是否存在
 func IsDepartNodeExist(pid int, depart string) (bool, error) {
 	var Depart DepartNode
 	err := mysqlmanager.MySQL().Where("depart=? and p_id=?", depart, pid).Find(&Depart).Error
-	// mysqlmanager.MySQL().Where("", parent).Find(&Depart)
-	return Depart.ID != 0, err
-}
-
-// 修改成返回节点信息
-func IsDepartIDExist(ID int) (bool, error) {
-	var Depart DepartNode
-	err := mysqlmanager.MySQL().Where("id=?", ID).Find(&Depart).Error
 	return Depart.ID != 0, err
 }
 
@@ -56,34 +47,37 @@ func IsRootExist() (bool, error) {
 	return Depart.ID != 0, err
 }
 
-// 换一个通俗的名字
-func DepartStore() ([]DepartNode, error) {
+// 根据部门id获取部门名结构体
+func GetDepartById(id int) (DepartNode, error) {
+	var departName DepartNode
+	err := mysqlmanager.MySQL().Where("id =?", id).Find(&departName).Error
+	return departName, err
+}
+
+// 查询子部门
+func Pid2Depart(pid int) ([]DepartNode, error) {
+	var DepartInfo []DepartNode
+	err := mysqlmanager.MySQL().Where("p_id=?", pid).Find(&DepartInfo).Error
+	return DepartInfo, err
+}
+
+// 获取下级部门id
+func SubDepartId(pid int) ([]int, error) {
+	var departids []int
+	err := mysqlmanager.MySQL().Model(&DepartNode{}).Select("id").Where("p_id=?", pid).Find(&departids).Error
+	return departids, err
+}
+
+// 查询所有部门
+func GetAllDepart() ([]DepartNode, error) {
 	var Depart []DepartNode
 	err := mysqlmanager.MySQL().Find(&Depart).Error
 	return Depart, err
 }
 
+// 修改部门名字
 func UpdateDepart(DepartID int, DepartName string) error {
-	var DepartInfo DepartNode
-	Depart := DepartNode{
-		Depart: DepartName,
-	}
-	return mysqlmanager.MySQL().Model(&DepartInfo).Where("id=?", DepartID).Updates(&Depart).Error
-}
-
-// 删除
-func UpdateParentDepart(DepartID int, DepartName string) error {
-	var DepartInfo DepartNode
-	Depart := DepartNode{
-		ParentDepart: DepartName,
-	}
-	return mysqlmanager.MySQL().Model(&DepartInfo).Where("p_id=?", DepartID).Updates(&Depart).Error
-}
-
-func Pid2Depart(pid int) ([]DepartNode, error) {
-	var DepartInfo []DepartNode
-	err := mysqlmanager.MySQL().Where("p_id=?", pid).Find(&DepartInfo).Error
-	return DepartInfo, err
+	return mysqlmanager.MySQL().Model(&DepartNode{}).Where("id=?", DepartID).Update("depart", DepartName).Error
 }
 
 // 未定
@@ -103,23 +97,11 @@ func Insertdepartlist(needdelete []int, str string) ([]int, error) {
 	return needdelete, err
 }
 
-// 根据部门名字查询id和pid删除不要
+// 根据部门名字查询id和pid,批量操作需完善
 func GetPidAndId(depart string) (pid, id int, err error) {
 	var dep DepartNode
 	err = mysqlmanager.MySQL().Where("depart=?", depart).Find(&dep).Error
 	return dep.PID, dep.ID, err
-}
-
-// 添加部门，修改
-func AddDepartMessage(db *gorm.DB, depart *DepartNode) error {
-	return db.Create(depart).Error
-}
-
-// 根据部门id获取部门名结构体
-func GetDepartById(id int) (DepartNode, error) {
-	var departName DepartNode
-	err := mysqlmanager.MySQL().Where("id =?", id).Find(&departName).Error
-	return departName, err
 }
 
 // 根据部门ids查询所属部门，待确定
@@ -131,28 +113,6 @@ func DepartIdsToGetDepartNames(ids []int) (names []string) {
 			logger.Error(err.Error())
 		}
 		names = append(names, depart.Depart)
-	}
-	return
-}
-
-// 获取下级部门id
-func SubDepartId(id int) ([]int, error) {
-	var depart []DepartNode
-	err := mysqlmanager.MySQL().Where("p_id=?", id).Find(&depart).Error
-
-	res := make([]int, 0)
-	for _, value := range depart {
-		res = append(res, value.ID)
-	}
-	return res, err
-}
-
-// 获取所有的一级部门id 待定
-func FirstDepartId() (departIds []int, err error) {
-	departs := []DepartNode{}
-	err = mysqlmanager.MySQL().Where("p_id = ?", global.UncateloguedDepartId).Find(&departs).Error
-	for _, depart := range departs {
-		departIds = append(departIds, depart.ID)
 	}
 	return
 }
