@@ -27,27 +27,24 @@ import (
 type User = dao.User
 
 type UserInfo struct {
-	ID           uint   `json:"id"`
-	DepartFirst  int    `json:"departPid,omitempty"`
-	DepartSecond int    `json:"departId,omitempty"`
-	DepartName   string `json:"departName,omitempty"`
-	Username     string `json:"username,omitempty" `
-	Password     string `json:"password,omitempty"`
-	Phone        string `json:"phone,omitempty"`
-	Email        string `json:"email,omitempty" binding:"required" msg:"邮箱不能为空"`
-	RoleID       string `json:"roleId"`
+	ID         uint   `json:"id"`
+	DepartId   int    `json:"departId,omitempty"`
+	DepartName string `json:"departName,omitempty"`
+	Username   string `json:"username,omitempty" `
+	Password   string `json:"password,omitempty"`
+	Phone      string `json:"phone,omitempty"`
+	Email      string `json:"email,omitempty" binding:"required" msg:"邮箱不能为空"`
+	RoleID     string `json:"roleId"`
 }
 
 type ReturnUser struct {
-	ID           uint     `json:"id"`
-	DepartFirst  int      `json:"departPid"`
-	DepartSecond int      `json:"departId"`
-	DepartName   string   `json:"departName"`
-	Username     string   `json:"username"`
-	Phone        string   `json:"phone"`
-	Email        string   `json:"email"`
-	Roles        []string `json:"role"`
-	//RoleID       string `json:"roleId"`
+	ID         uint     `json:"id"`
+	DepartId   int      `json:"departId"`
+	DepartName string   `json:"departName"`
+	Username   string   `json:"username"`
+	Phone      string   `json:"phone"`
+	Email      string   `json:"email"`
+	Roles      []string `json:"role"`
 }
 
 type UserDto struct {
@@ -77,8 +74,12 @@ func Login(user *UserInfo) (string, int, string, error) {
 	if err != nil {
 		return "", 0, "", errors.New("密码错误")
 	}
+	depart, err := dao.GetDepartById(u.DepartId)
+	if err != nil {
+		return "", 0, "", errors.New("不存在此部门")
+	}
 	roleids, err := dao.GetRolesByUid(u.ID)
-	return u.DepartName, u.DepartSecond, utils.Int2String(roleids), err
+	return depart.Depart, u.DepartId, utils.Int2String(roleids), err
 }
 
 func Register(user *UserInfo) error {
@@ -86,9 +87,8 @@ func Register(user *UserInfo) error {
 	password := user.Password
 	email := user.Email
 	phone := user.Phone
-	depart := user.DepartName
-	departId := user.DepartSecond
-	departPid := user.DepartFirst
+	//depart := user.DepartName
+	departId := user.DepartId
 	roleId := user.RoleID
 	EmailBool, err := dao.IsEmailExist(email)
 	if err != nil {
@@ -104,13 +104,11 @@ func Register(user *UserInfo) error {
 	}
 
 	u := &dao.User{ //Create user
-		Username:     username,
-		Password:     string(bs),
-		Phone:        phone,
-		Email:        email,
-		DepartName:   depart,
-		DepartFirst:  departPid,
-		DepartSecond: departId,
+		Username: username,
+		Password: string(bs),
+		Phone:    phone,
+		Email:    email,
+		DepartId: departId,
 	}
 	err = dao.AddUser(u)
 	if err != nil {
@@ -138,11 +136,9 @@ func DeleteUser(Email string) error {
 // 修改用户信息
 func UpdateUser(user UserInfo) error {
 	new := dao.User{
-		DepartFirst:  user.DepartFirst,
-		DepartSecond: user.DepartSecond,
-		DepartName:   user.DepartName,
-		Username:     user.Username,
-		Phone:        user.Phone,
+		DepartId: user.DepartId,
+		Username: user.Username,
+		Phone:    user.Phone,
 	}
 	//获取用户信息
 	_, err := dao.GetUserByEmail(user.Email)
@@ -178,14 +174,17 @@ func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error
 	}
 	var returnUsers []ReturnUser
 	for _, user := range users {
+		depart, err := dao.GetDepartById(user.DepartId)
+		if err != nil {
+			logger.Error(errors.New("不存在此部门").Error())
+		}
 		userinfo := ReturnUser{
-			ID:           user.ID,
-			DepartFirst:  user.DepartFirst,
-			DepartSecond: user.DepartSecond,
-			DepartName:   user.DepartName,
-			Username:     user.Username,
-			Phone:        user.Phone,
-			Email:        user.Email,
+			ID:         user.ID,
+			DepartId:   user.DepartId,
+			DepartName: depart.Depart,
+			Username:   user.Username,
+			Phone:      user.Phone,
+			Email:      user.Email,
 		}
 		roleids, err := dao.GetRolesByUid(user.ID)
 		if err != nil {
@@ -226,14 +225,17 @@ func GetUserByEmail(email string) (*ReturnUser, error) {
 	if err != nil {
 		return nil, err
 	}
+	depart, err := dao.GetDepartById(user.DepartId)
+	if err != nil {
+		logger.Error(errors.New("不存在此部门").Error())
+	}
 	userinfo := &ReturnUser{
-		ID:           user.ID,
-		DepartFirst:  user.DepartFirst,
-		DepartSecond: user.DepartSecond,
-		DepartName:   user.DepartName,
-		Username:     user.Username,
-		Phone:        user.Phone,
-		Email:        user.Email,
+		ID:         user.ID,
+		DepartId:   user.DepartId,
+		DepartName: depart.Depart,
+		Username:   user.Username,
+		Phone:      user.Phone,
+		Email:      user.Email,
 	}
 	roleids, err := dao.GetRolesByUid(user.ID)
 	if err != nil {
@@ -266,14 +268,17 @@ func GetUserPaged(offset, size int) (int64, []ReturnUser, error) {
 		return 0, nil, err
 	}
 	for _, user := range users {
+		depart, err := dao.GetDepartById(user.DepartId)
+		if err != nil {
+			logger.Error(errors.New("不存在此部门").Error())
+		}
 		userinfo := ReturnUser{
-			ID:           user.ID,
-			DepartFirst:  user.DepartFirst,
-			DepartSecond: user.DepartSecond,
-			DepartName:   user.DepartName,
-			Username:     user.Username,
-			Phone:        user.Phone,
-			Email:        user.Email,
+			ID:         user.ID,
+			DepartId:   user.DepartId,
+			DepartName: depart.Depart,
+			Username:   user.Username,
+			Phone:      user.Phone,
+			Email:      user.Email,
 		}
 		roleids, err := dao.GetRolesByUid(user.ID)
 		if err != nil {
@@ -307,8 +312,8 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				UserExit = append(UserExit, email)
 				continue
 			}
-			departName := row.Cells[3].Value            //4：部门
-			pid, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
+			departName := row.Cells[3].Value          //4：部门
+			_, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
 			if err != nil {
 
 				return UserExit, err
@@ -319,14 +324,13 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				return UserExit, err
 			}
 			password := strings.Split(email, "@")[0]
+
 			u := &dao.User{
-				Username:     userName,
-				Phone:        phone,
-				Password:     password,
-				Email:        email,
-				DepartName:   departName, //4：部门
-				DepartFirst:  pid,
-				DepartSecond: id,
+				Username: userName,
+				Phone:    phone,
+				Password: password,
+				Email:    email,
+				DepartId: id,
 			}
 			err = dao.AddUser(u)
 			if err != nil {

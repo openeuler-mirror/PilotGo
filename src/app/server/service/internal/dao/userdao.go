@@ -25,15 +25,13 @@ import (
 )
 
 type User struct {
-	ID           uint `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	CreatedAt    time.Time
-	DepartFirst  int    `gorm:"size:25" json:"departPid,omitempty"`
-	DepartSecond int    `gorm:"size:25" json:"departId,omitempty"`
-	DepartName   string `gorm:"size:25" json:"departName,omitempty"`
-	Username     string `json:"username,omitempty" `
-	Password     string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
-	Phone        string `gorm:"size:11" json:"phone,omitempty"`
-	Email        string `gorm:"type:varchar(30);not null;unique" json:"email,omitempty"`
+	ID        uint `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	CreatedAt time.Time
+	DepartId  int    `gorm:"size:25" json:"departId,omitempty"`
+	Username  string `json:"username,omitempty" `
+	Password  string `gorm:"type:varchar(100);not null" json:"password,omitempty"`
+	Phone     string `gorm:"size:11" json:"phone,omitempty"`
+	Email     string `gorm:"type:varchar(30);not null;unique" json:"email,omitempty"`
 }
 
 // 邮箱账户是否存在
@@ -135,7 +133,7 @@ func DeleteUser(email string) error {
 
 func DelUserByDeptId(deptId int) error {
 	var user User
-	return mysqlmanager.MySQL().Where("depart_second=?", deptId).Unscoped().Delete(user).Error
+	return mysqlmanager.MySQL().Where("depart_id=?", deptId).Unscoped().Delete(user).Error
 }
 
 // 根据用户邮箱模糊查询
