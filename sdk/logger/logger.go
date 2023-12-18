@@ -16,6 +16,7 @@ package logger
 
 import (
 	"errors"
+	"io"
 	"os"
 	"time"
 
@@ -90,6 +91,11 @@ func Init(conf *LogOpts) error {
 	logrus.Debug("log init")
 
 	return nil
+}
+
+// 不输出日志
+func Discard() {
+	logrus.SetOutput(io.Discard)
 }
 
 func Trace(format string, args ...interface{}) {
