@@ -143,10 +143,7 @@ func MachineInfo(id int) (*MachineNode, error) {
 }
 
 func UpdateMachineDepartState(uuid string, DeptId int) error {
-	Ma := &MachineNode{
-		DepartId: DeptId,
-	}
-	return mysqlmanager.MySQL().Model(&MachineNode{}).Where("machine_uuid=?", uuid).Updates(Ma).Error
+	return mysqlmanager.MySQL().Model(&MachineNode{}).Where("machine_uuid=?", uuid).Update("depart_id", DeptId).Error
 }
 
 // 根据机器id获取机器信息

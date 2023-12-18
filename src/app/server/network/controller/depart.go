@@ -26,6 +26,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type MachineModifyDepart struct {
+	MachineID string `json:"machineid"`
+	DepartID  int    `json:"departid"`
+}
+
+type NewDepart struct {
+	DepartID   int    `json:"DepartID" binding:"required" msg:"部门id不能为空"`
+	DepartName string `json:"DepartName" binding:"required" msg:"部门名称不能为空"`
+}
+
 // 获取部门下所有机器列表
 func MachineListHandler(c *gin.Context) {
 	DepartId := c.Query("DepartId")
@@ -71,7 +81,7 @@ func DepartInfoHandler(c *gin.Context) {
 }
 
 func AddDepartHandler(c *gin.Context) {
-	newDepart := depart.AddDepart{}
+	newDepart := depart.AddDepartNode{}
 	if err := c.Bind(&newDepart); err != nil {
 		response.Fail(c, nil, net.GetValidMsg(err, &newDepart))
 		return
@@ -92,7 +102,7 @@ func AddDepartHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	err = depart.AddDepartMethod(&newDepart)
+	err = depart.AddDepart(&newDepart)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -102,7 +112,7 @@ func AddDepartHandler(c *gin.Context) {
 }
 
 func DeleteDepartDataHandler(c *gin.Context) {
-	var DelDept depart.DeleteDepart
+	var DelDept depart.DeleteDeparts
 	if err := c.Bind(&DelDept); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
@@ -123,7 +133,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	err = depart.DeleteDepartData(&DelDept)
+	err = depart.DeleteDepart(&DelDept)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -133,7 +143,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 }
 
 func UpdateDepartHandler(c *gin.Context) {
-	var new depart.NewDepart
+	var new NewDepart
 	if err := c.Bind(&new); err != nil {
 		response.Fail(c, nil, net.GetValidMsg(err, &new))
 		return
@@ -164,7 +174,7 @@ func UpdateDepartHandler(c *gin.Context) {
 }
 
 func ModifyMachineDepartHandler(c *gin.Context) {
-	var M depart.MachineModifyDepart
+	var M MachineModifyDepart
 	if err := c.Bind(&M); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return

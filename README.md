@@ -84,7 +84,8 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
 
 1.  [PilotGo使用手册](https://gitee.com/openeuler/docs/tree/master/docs/zh/docs/PilotGo/使用手册.md)
 2.  PilotGo[软件包仓](https://gitee.com/src-openeuler/PilotGo)
-
+3.  PliotGo社区开发微信群
+![Alt text](./docs/images/PilotGo社区开发群.jpg)
 
 #### 参与贡献
 
