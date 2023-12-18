@@ -54,6 +54,8 @@ func InfoHandler(c *gin.Context) {
 }
 
 func BindHandler(c *gin.Context) {
+	port := c.Query("port")
+
 	v, ok := c.Get("__internal__client_instance")
 	if !ok {
 		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
@@ -64,7 +66,7 @@ func BindHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, "client信息错误")
 		return
 	}
-	client.server = c.Request.RemoteAddr
+	client.server = strings.Split(c.Request.RemoteAddr, ":")[0] + ":" + port
 
 	response.Success(c, nil, "bind server success")
 }

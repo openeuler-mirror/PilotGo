@@ -165,7 +165,7 @@ func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 }
 
 func (m *PluginManager) addPlugin(url string) error {
-	err := handshake(url)
+	err := Handshake(url)
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 }
 
 // 与plugin进行握手，绑定PilotGo与server端
-func handshake(url string) error {
+func Handshake(url string) error {
 	index := strings.Index(url, "plugin")
 	if index > 0 {
 		url = url[:index]
