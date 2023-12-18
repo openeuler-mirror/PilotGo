@@ -43,9 +43,8 @@ type DepartTreeNode struct {
 
 // 将数据库DepartNode表数据转换成DepartTreeNode类型指针，并找到根节点
 func Returnptrchild(depart []dao.DepartNode) (ptrchild []*DepartTreeNode, deptRoot DepartTreeNode) {
-	departnode := make([]DepartTreeNode, 0)
 	ptrchild = make([]*DepartTreeNode, 0)
-	//将DepartNode表数据转换成DepartTreeNode类型
+	//将DepartNode表数据转换成*DepartTreeNode类型
 	for _, value := range depart {
 		if value.NodeLocate == 0 {
 			deptRoot = DepartTreeNode{
@@ -54,21 +53,15 @@ func Returnptrchild(depart []dao.DepartNode) (ptrchild []*DepartTreeNode, deptRo
 				Pid:   0,
 			}
 		} else {
-			departnode = append(departnode, DepartTreeNode{
+			ptrchild = append(ptrchild, &DepartTreeNode{
 				Label: value.Depart,
 				Id:    value.ID,
 				Pid:   value.PID,
 			})
 		}
 	}
-	//添加根节点
-	ptrchild = append(ptrchild, &deptRoot)
-	//将[]DepartTreeNode添加到[]*DepartTreeNode中
-	var a *DepartTreeNode
-	for key := range departnode {
-		a = &departnode[key]
-		ptrchild = append(ptrchild, a)
-	}
+	//在第一个位置添加根节点
+	ptrchild = append([]*DepartTreeNode{&deptRoot}, ptrchild...)
 	return ptrchild, deptRoot
 }
 
@@ -96,6 +89,17 @@ func findchild(node *DepartTreeNode, ptrchild []*DepartTreeNode) (ret []*DepartT
 	return
 }
 
+// 返回节点的所有子节点的ID
+func AllChild(node *DepartTreeNode) (dts []int) {
+	if node.Children != nil {
+		for _, value := range node.Children {
+			dts = append(dts, value.Id)
+			dts = append(dts, AllChild(value)...)
+		}
+	}
+	return dts
+}
+
 // 判断是否存在子节点
 func IsChildExist(node *DepartTreeNode, ptrchild []*DepartTreeNode) bool {
 	for _, child := range ptrchild {
@@ -118,20 +122,16 @@ func LoopTree(node *DepartTreeNode, ID int, res **DepartTreeNode) {
 }
 
 // 查询部门节点
-func Dept(tmp int) (*DepartTreeNode, error) {
-	node, err := DepartInfo()
-	if err != nil {
-		return nil, errors.New("构造部门树错误")
+func Dept(tmp int, root *DepartTreeNode) (*DepartTreeNode, error) {
+	if root == nil {
+		return nil, errors.New("部门根节点为空")
 	}
 	var d *DepartTreeNode
-	if node.Id != tmp {
-		LoopTree(node, tmp, &d)
-		node = d
+	if root.Id != tmp {
+		LoopTree(root, tmp, &d)
+		root = d
 	}
-	if node == nil {
-		return nil, errors.New("部门ID有误")
-	}
-	return node, nil
+	return root, nil
 }
 
 func DepartInfo() (*DepartTreeNode, error) {
@@ -203,12 +203,20 @@ func DeleteDepart(DelDept *DeleteDeparts) error {
 	}
 	//先查询所有子部门，然后查询所有子部门机器和用户，若不为空则不可删除，若为空直接删除
 	//查询所有子节点
-	departs, err := dao.SubDepartId(DelDept.DepartID) //数组需要去重吗？
+	departRoot, err := DepartInfo()
 	if err != nil {
 		return err
 	}
+	departnode, err := Dept(DelDept.DepartID, departRoot)
+	if err != nil {
+		return err
+	}
+	departs := AllChild(departnode)
+
 	//将要删除的节点添加到数组中
 	departs = append([]int{DelDept.DepartID}, departs...)
+
+	//查询与此部门相关的机器和用户
 	var node []dao.MachineNode
 	var users []dao.User
 	for _, depart := range departs {
