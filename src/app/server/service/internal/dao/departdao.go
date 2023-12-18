@@ -17,7 +17,6 @@ package dao
 import (
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/global"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 type DepartNode struct {
@@ -85,17 +84,6 @@ func Deletedepartdata(needdelete []int) error {
 	return mysqlmanager.MySQL().Where("id=?", needdelete[0]).Delete(&DepartInfo).Error
 }
 
-// 向需要删除的depart的组内增加需要删除的子节点
-func Insertdepartlist(needdelete []int, str string) ([]int, error) {
-	var DepartInfo []DepartNode
-
-	err := mysqlmanager.MySQL().Where("p_id=?", str).Find(&DepartInfo).Error
-	for _, value := range DepartInfo {
-		needdelete = append(needdelete, value.ID)
-	}
-	return needdelete, err
-}
-
 // 根据部门名字查询id和pid,批量操作需完善
 func GetPidAndId(depart string) (pid, id int, err error) {
 	var dep DepartNode
@@ -105,14 +93,7 @@ func GetPidAndId(depart string) (pid, id int, err error) {
 
 // 根据部门ids查询所属部门，待确定
 func DepartIdsToGetDepartNames(ids []int) (names []string) {
-	for _, id := range ids {
-		var depart DepartNode
-		err := mysqlmanager.MySQL().Where("id = ?", id).Find(&depart).Error
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		names = append(names, depart.Depart)
-	}
+	mysqlmanager.MySQL().Model(&DepartNode{}).Select("depart").Where("id=?", ids[0]).Find(&names)
 	return
 }
 
@@ -125,8 +106,7 @@ func CreateOrganization() error {
 	}
 	if Depart.ID == 0 {
 		Depart = DepartNode{
-			PID: global.Departroot,
-			//ParentDepart: "",
+			PID:        global.Departroot,
 			Depart:     "组织名",
 			NodeLocate: global.Departroot,
 		}
