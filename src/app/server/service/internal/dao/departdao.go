@@ -81,7 +81,7 @@ func UpdateDepart(DepartID int, DepartName string) error {
 // 删除节点
 func Deletedepartdata(needdelete []int) error {
 	var DepartInfo []DepartNode
-	return mysqlmanager.MySQL().Where("id=?", needdelete[0]).Delete(&DepartInfo).Error
+	return mysqlmanager.MySQL().Where("id in (?)", needdelete).Delete(&DepartInfo).Error
 }
 
 // 根据部门名字查询id和pid,批量操作需完善

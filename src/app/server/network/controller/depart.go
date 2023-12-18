@@ -63,7 +63,12 @@ func DepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "部门ID有误")
 		return
 	}
-	node, err := depart.Dept(tmp)
+	departRoot, err := depart.DepartInfo()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	node, err := depart.Dept(tmp, departRoot)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
