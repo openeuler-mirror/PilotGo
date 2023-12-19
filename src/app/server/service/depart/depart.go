@@ -17,9 +17,9 @@ package depart
 import (
 	"errors"
 
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/global"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils"
 )
 
@@ -203,15 +203,8 @@ func DeleteDepart(DelDept *DeleteDeparts) error {
 	}
 	//先查询所有子部门，然后查询所有子部门机器和用户，若不为空则不可删除，若为空直接删除
 	//查询所有子节点
-	departRoot, err := DepartInfo()
-	if err != nil {
-		return err
-	}
-	departnode, err := Dept(DelDept.DepartID, departRoot)
-	if err != nil {
-		return err
-	}
-	departs := AllChild(departnode)
+	var departs []int
+	ReturnSpecifiedDepart(DelDept.DepartID, &departs)
 
 	//将要删除的节点添加到数组中
 	departs = append([]int{DelDept.DepartID}, departs...)
@@ -250,7 +243,7 @@ func UpdateDepart(DepartID int, DepartName string) error {
 // 获取部门下所有机器列表
 func MachineList(DepId int) ([]dao.Res, error) {
 	var departId []int
-	common.ReturnSpecifiedDepart(DepId, &departId)
+	ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)
 	machinelist1, err := dao.MachineList(departId)
 	return machinelist1, err
@@ -277,6 +270,21 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 		}
 	}
 	return nil
+}
+
+// 返回所有子部门id
+func ReturnSpecifiedDepart(id int, res *[]int) {
+	temp, err := dao.SubDepartId(id)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	if len(temp) == 0 {
+		return
+	}
+	for _, value := range temp {
+		*res = append(*res, value)
+		ReturnSpecifiedDepart(value, res)
+	}
 }
 
 // 创建公司组织

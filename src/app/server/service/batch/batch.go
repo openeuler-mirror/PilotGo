@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	scommon "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -59,7 +59,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		var machineids []int
 		for _, ids := range batchinfo.DepartIDs {
 			Departids = append(Departids, ids)
-			common.ReturnSpecifiedDepart(ids, &Departids)
+			depart.ReturnSpecifiedDepart(ids, &Departids)
 		}
 
 		machines, err := dao.MachineList(Departids)

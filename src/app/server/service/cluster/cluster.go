@@ -18,7 +18,7 @@ import (
 	"errors"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
@@ -96,7 +96,7 @@ func DepartClusterInfo() []DepartMachineInfo {
 	for _, depart_Id := range FirstDepartIds {
 		Departids := make([]int, 0)
 		Departids = append(Departids, depart_Id)
-		common.ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
+		depart.ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
 
 		lists, err := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
 		if err != nil {

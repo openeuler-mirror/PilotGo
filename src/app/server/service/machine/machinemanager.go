@@ -1,7 +1,8 @@
 package machine
 
 import (
-	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	departservice "gitee.com/openeuler/PilotGo/app/server/service/depart"
+
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
 
@@ -17,7 +18,7 @@ type DeleteUUID struct {
 func MachineInfo(depart *Depart, offset, size int) (int64, []dao.Res, error) {
 
 	var TheDeptAndSubDeptIds []int
-	common.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
+	departservice.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append(TheDeptAndSubDeptIds, depart.ID)
 	total, data, err := dao.GetMachinePaged(TheDeptAndSubDeptIds, offset, size)
 	return total, data, err
