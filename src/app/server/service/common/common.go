@@ -17,8 +17,6 @@ package common
 import (
 	"net/http"
 
-	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,21 +26,6 @@ type PaginationQ struct {
 	CurrentPageNum int         `form:"page" json:"page"`
 	Data           interface{} `json:"data" comment:"muster be a pointer of slice gorm.Model"` // save pagination list
 	TotalPage      int         `json:"total"`
-}
-
-// 返回所有子部门id
-func ReturnSpecifiedDepart(id int, res *[]int) {
-	temp, err := dao.SubDepartId(id)
-	if err != nil {
-		logger.Error(err.Error())
-	}
-	if len(temp) == 0 {
-		return
-	}
-	for _, value := range temp {
-		*res = append(*res, value)
-		ReturnSpecifiedDepart(value, res)
-	}
 }
 
 // 拼装json 分页数据

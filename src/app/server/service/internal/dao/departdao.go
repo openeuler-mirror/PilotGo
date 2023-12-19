@@ -52,13 +52,6 @@ func GetDepartById(id int) (DepartNode, error) {
 	return departName, err
 }
 
-// 查询子部门
-func Pid2Depart(pid int) ([]DepartNode, error) {
-	var DepartInfo []DepartNode
-	err := mysqlmanager.MySQL().Where("p_id=?", pid).Find(&DepartInfo).Error
-	return DepartInfo, err
-}
-
 // 获取下级部门id
 func SubDepartId(pid int) ([]int, error) {
 	var departids []int
