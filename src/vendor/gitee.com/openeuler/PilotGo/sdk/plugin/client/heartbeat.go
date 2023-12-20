@@ -10,7 +10,16 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-var HeartbeatInterval = 30 * time.Second
+const (
+	HeartbeatInterval = 30 * time.Second
+	HeartbeatKey      = "heartbeat:"
+)
+
+// 插件连接状态
+type PluginStatus struct {
+	Connected   bool
+	LastConnect time.Time
+}
 
 func (client *Client) SendHeartbeat() {
 	clientID := client.PluginInfo.Url + "+" + client.PluginInfo.Name
