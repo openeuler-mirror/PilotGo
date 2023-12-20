@@ -13,14 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	mu           sync.Mutex
-	heartbeatKey = "heartbeat:"
-)
-
-type HeartbeatTime struct {
-	HeartbeatTime string
-}
+var mu sync.Mutex
 
 func PluginHeartbeat(c *gin.Context) {
 	ClientID := &struct {
@@ -31,16 +24,17 @@ func PluginHeartbeat(c *gin.Context) {
 		return
 	}
 
-	key := heartbeatKey + ClientID.ClientID
-	value := HeartbeatTime{
-		HeartbeatTime: time.Now().Format(time.RFC3339),
+	// 更新心跳时间
+	key := client.HeartbeatKey + ClientID.ClientID
+	value := client.PluginStatus{
+		Connected:   true,
+		LastConnect: time.Now(),
 	}
 	err := redismanager.Set(key, value)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	logger.Discard()
 	response.Success(c, nil, "Heartbeat received")
 }
 
@@ -55,28 +49,32 @@ func checkAndRebind() {
 	mu.Lock()
 	defer mu.Unlock()
 
-	pluginkeys := redismanager.Scan(heartbeatKey + "*")
-	if len(pluginkeys) != 0 {
-		for _, pluginkey := range pluginkeys {
-			url_name := strings.Split(pluginkey, heartbeatKey)[1]
-			url := strings.Split(url_name, "+")[0]
-			var valueObj HeartbeatTime
-			lastHeartbeatStr, err := redismanager.Get(pluginkey, &valueObj)
-			if err != nil {
-				logger.Error("Error getting %v last heartbeat: %v", url, err)
-				continue
-			}
-			lastHeartbeat, err := time.Parse(time.RFC3339, lastHeartbeatStr.(*HeartbeatTime).HeartbeatTime)
-			if err != nil {
-				logger.Error("Error parse %v last heartbeat: %v", url, err)
-				continue
-			}
+	pluginkeys := redismanager.Scan(client.HeartbeatKey + "*")
+	for _, pluginkey := range pluginkeys {
+		url_name := strings.Split(pluginkey, client.HeartbeatKey)[1]
+		url := strings.Split(url_name, "+")[0]
+		var valueObj client.PluginStatus
+		plugin_status, err := redismanager.Get(pluginkey, &valueObj)
+		if err != nil {
+			logger.Error("Error getting %v last heartbeat: %v", url, err)
+			continue
+		}
 
-			if time.Since(lastHeartbeat) > client.HeartbeatInterval {
-				err := plugin.Handshake(url)
-				if err != nil {
-					logger.Error("rebind plugin and pilotgo server failed:%v", err.Error())
+		if !plugin_status.(*client.PluginStatus).Connected || time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval+1 {
+			err := plugin.Handshake(url)
+			if err != nil {
+				logger.Error("rebind plugin and pilotgo server failed:%v", err.Error())
+				value := client.PluginStatus{
+					Connected:   false,
+					LastConnect: plugin_status.(*client.PluginStatus).LastConnect,
 				}
+				redismanager.Set(pluginkey, value)
+			} else {
+				value := client.PluginStatus{
+					Connected:   true,
+					LastConnect: time.Now(),
+				}
+				redismanager.Set(pluginkey, value)
 			}
 		}
 	}
