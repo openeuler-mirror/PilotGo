@@ -15,8 +15,6 @@
 package batch
 
 import (
-	//"errors"
-
 	"strconv"
 	"strings"
 

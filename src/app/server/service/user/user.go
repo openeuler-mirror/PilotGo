@@ -124,6 +124,9 @@ func DeleteUser(Email string) error {
 	if err != nil {
 		return err
 	}
+	if Email == "admin" {
+		return errors.New("admin用户不可删除")
+	}
 	//删除用户权限表的数据
 	err = dao.DeleteByUid(u.ID)
 	if err != nil {
