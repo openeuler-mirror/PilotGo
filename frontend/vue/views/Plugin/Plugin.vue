@@ -19,7 +19,15 @@
         </el-table-column>
         <el-table-column prop="url" label="服务端地址" width="250">
         </el-table-column>
-        <el-table-column prop="enabled" label="状态" width="150">
+        <el-table-column prop="status" label="连接状态" width="150">
+          <template slot-scope="scope">
+            <el-icon :class="{ 'el-icon-success': scope.row.status, 'el-icon-error': !scope.row.status }"></el-icon>
+            <span>{{ scope.row.status === true ? '连接' : '断开' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="lastheatbeat" label="上次心跳时间" width="250">
+        </el-table-column>
+        <el-table-column prop="enabled" label="启用状态" width="150">
           <template slot-scope="scope">
             <span>{{ scope.row.enabled === 0 ? '已禁用' : '已启用' }}</span>
           </template>
@@ -95,15 +103,15 @@ export default {
     },
     // 启用/停用插件
     handlePluginState(item) {
-      let targetEnabled = item.enabled === 1?0:1
+      let targetEnabled = item.enabled === 1 ? 0 : 1
       unLoadPlugin({ uuid: item.uuid, enable: targetEnabled }).then(res => {
         if (res.data.code === 200) {
           this.refresh();
           this.$store.dispatch('SetDynamicRouters', []).then(() => {
-            this.$store.dispatch('GenerateRoutes').catch((err)=>{
-            console.log("generate router error: ", err)
-          })
-          }).catch((err)=>{
+            this.$store.dispatch('GenerateRoutes').catch((err) => {
+              console.log("generate router error: ", err)
+            })
+          }).catch((err) => {
             console.log("update dynamic router error: ", err)
           })
           this.$message.success(res.data.msg);
@@ -132,5 +140,13 @@ export default {
 <style scoped lang="scss">
 .plugin {
   width: 100%;
+}
+
+.el-icon-success {
+  color: green;
+}
+
+.el-icon-error {
+  color: red;
 }
 </style>

@@ -16,7 +16,6 @@ package logger
 
 import (
 	"errors"
-	"io"
 	"os"
 	"time"
 
@@ -93,11 +92,6 @@ func Init(conf *LogOpts) error {
 	return nil
 }
 
-// 不输出日志
-func Discard() {
-	logrus.SetOutput(io.Discard)
-}
-
 func Trace(format string, args ...interface{}) {
 	logrus.Tracef(format, args...)
 }
@@ -149,12 +143,14 @@ func RequestLogger() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 
 		// 日志格式
-		Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
-			statusCode,
-			latencyTime,
-			clientIP,
-			reqMethod,
-			reqUri,
-		)
+		if reqUri != "/api/v1/pluginapi/heartbeat" {
+			Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
+				statusCode,
+				latencyTime,
+				clientIP,
+				reqMethod,
+				reqUri,
+			)
+		}
 	}
 }

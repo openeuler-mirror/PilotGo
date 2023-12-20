@@ -135,7 +135,9 @@ func UnloadPluginHandler(c *gin.Context) {
 	auditlog.Add(log)
 
 	logger.Info("unload plugin:%s", uuid)
-	plugin.DeletePlugin(uuid)
+	if err := plugin.DeletePlugin(uuid); err != nil {
+		return
+	}
 	response.Success(c, nil, "插件信息更新成功")
 }
 

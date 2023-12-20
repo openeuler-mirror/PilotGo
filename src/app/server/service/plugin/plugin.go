@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
+	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
@@ -36,16 +38,18 @@ func Init() error {
 }
 
 type Plugin struct {
-	UUID        string `json:"uuid"`
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-	Author      string `json:"author"`
-	Email       string `json:"email"`
-	Url         string `json:"url"`
-	PluginType  string `json:"plugin_type"`
-	Enabled     int    `json:"enabled"`
-	Extentions  []*common.Extention
+	UUID              string `json:"uuid"`
+	Name              string `json:"name"`
+	Version           string `json:"version"`
+	Description       string `json:"description"`
+	Author            string `json:"author"`
+	Email             string `json:"email"`
+	Url               string `json:"url"`
+	PluginType        string `json:"plugin_type"`
+	ConnectStatus     bool   `json:"status"`
+	LastHeartbeatTime string `json:"lastheatbeat"`
+	Enabled           int    `json:"enabled"`
+	Extentions        []*common.Extention
 }
 
 func (p *Plugin) Clone() *Plugin {
@@ -180,6 +184,15 @@ func (m *PluginManager) addPlugin(url string) error {
 	}
 
 	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
+		return err
+	}
+
+	key := client.HeartbeatKey + p.Url + "+" + p.Name
+	value := client.PluginStatus{
+		Connected:   true,
+		LastConnect: time.Now(),
+	}
+	if err := redismanager.Set(key, value); err != nil {
 		return err
 	}
 
@@ -410,6 +423,13 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 			logger.Error("manager get plugin %s", err)
 			continue
 		}
+		plugin_status, err := GetPluginConnectStatus(p.Url, p.Name)
+		if err != nil {
+			logger.Error("plugin status get failed %s", err)
+			continue
+		}
+		plugin.ConnectStatus = plugin_status.Connected
+		plugin.LastHeartbeatTime = plugin_status.LastConnect.Format("2006-01-02 15:04:05")
 		result = append(result, plugin)
 	}
 
@@ -435,9 +455,16 @@ func AddPlugin(param *AddPluginParam) error {
 func DeletePlugin(uuid string) error {
 	logger.Debug("delete plugin: %s", uuid)
 
+	if err := deletePluginInRedis(uuid); err != nil {
+		logger.Error("failed to delete plugin heartbeat in redis:%s", err.Error())
+		return err
+	}
+
 	if err := globalPluginManager.deletePlugin(uuid); err != nil {
 		logger.Error("failed to delete plugin info:%s", err.Error())
+		return err
 	}
+
 	return nil
 }
 
@@ -448,4 +475,28 @@ func TogglePlugin(uuid string, enable int) error {
 	}
 
 	return nil
+}
+
+func deletePluginInRedis(uuid string) error {
+	url, name, err := dao.GetURLAndName(uuid)
+	if err != nil {
+		return err
+	}
+	logger.Debug("delete %v plugin heartbeat in redis: %v", name, url)
+	key := client.HeartbeatKey + url + "+" + name
+	err = redismanager.Delete(key)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetPluginConnectStatus(url string, name string) (*client.PluginStatus, error) {
+	key := client.HeartbeatKey + url + "+" + name
+	var valueObj client.PluginStatus
+	plugin_status, err := redismanager.Get(key, &valueObj)
+	if err != nil {
+		return plugin_status.(*client.PluginStatus), err
+	}
+	return plugin_status.(*client.PluginStatus), nil
 }
