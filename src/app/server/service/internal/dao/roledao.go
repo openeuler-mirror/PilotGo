@@ -134,6 +134,11 @@ func CreateAdministratorUser() error {
 			Description: "超级管理员",
 		}
 		mysqlmanager.MySQL().Create(&role)
+	}
+
+	var user User
+	mysqlmanager.MySQL().Where("username =?", "admin").Find(&user)
+	if user.ID == 0 {
 		bs, err := utils.CryptoPassword(SuperUserPasswd)
 		if err != nil {
 			return err
@@ -142,10 +147,9 @@ func CreateAdministratorUser() error {
 		user := User{
 			CreatedAt: time.Time{},
 			DepartId:  global.UncateloguedDepartId,
-			//DepartName: "超级用户",
-			Username: strings.Split(SuperUser, "@")[0],
-			Password: string(bs),
-			Email:    SuperUser,
+			Username:  strings.Split(SuperUser, "@")[0],
+			Password:  string(bs),
+			Email:     SuperUser,
 		}
 		mysqlmanager.MySQL().Create(&user)
 
@@ -154,9 +158,7 @@ func CreateAdministratorUser() error {
 			RoleID: role.ID,
 		}
 		mysqlmanager.MySQL().Create(&ur)
-
 	}
-
 	return nil
 }
 

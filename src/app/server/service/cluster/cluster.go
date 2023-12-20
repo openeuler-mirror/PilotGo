@@ -15,8 +15,6 @@
 package cluster
 
 import (
-	"errors"
-
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
@@ -57,22 +55,10 @@ func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
 	return
 }
 
-// 查找所有机器
-func SelectAllMachine() ([]dao.MachineNode, error) {
-	machines, err := dao.AllMachine()
-	if err != nil {
-		return machines, err
-	}
-	if len(machines) == 0 {
-		return nil, errors.New("未获取到机器")
-	}
-	return machines, nil
-}
-
 // 获取集群概览
 func ClusterInfo() (ClusterInfoParam, error) {
 	data := ClusterInfoParam{}
-	machines, err := SelectAllMachine()
+	machines, err := dao.AllMachine()
 	if err != nil {
 		return data, err
 	}
