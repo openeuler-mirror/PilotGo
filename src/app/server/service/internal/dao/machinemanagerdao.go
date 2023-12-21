@@ -134,20 +134,18 @@ func MachineStore(departid int) ([]MachineNode, error) {
 	return Machineinfo, err
 }
 
-func MachineInfo(id int) (*MachineNode, error) {
-	var machine = &MachineNode{}
-	if err := mysqlmanager.MySQL().Where("id=?", id).Find(machine).Error; err != nil {
-		return nil, err
-	}
-	return machine, nil
-}
-
 func UpdateMachineDepartState(uuid string, DeptId int) error {
 	return mysqlmanager.MySQL().Model(&MachineNode{}).Where("machine_uuid=?", uuid).Update("depart_id", DeptId).Error
 }
 
+func MachineInfoByUUID(uuid string) (MachineNode, error) {
+	var machine MachineNode
+	err := mysqlmanager.MySQL().Where("machine_uuid=?", uuid).Find(&machine).Error
+	return machine, err
+}
+
 // 根据机器id获取机器信息
-func MachineData(MacId int) (MachineNode, error) {
+func MachineInfo(MacId int) (MachineNode, error) {
 	var m MachineNode
 	err := mysqlmanager.MySQL().Where("id=?", MacId).Find(&m).Error
 	return m, err
