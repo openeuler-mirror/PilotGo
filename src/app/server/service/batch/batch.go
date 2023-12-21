@@ -173,7 +173,7 @@ func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, erro
 	// 获取机器的所有信息
 	machinesInfo := make([]dao.MachineNode, 0)
 	for _, macId := range machineIdlist {
-		MacInfo, err := dao.MachineData(int(macId.MachineNodeID))
+		MacInfo, err := dao.MachineInfo(int(macId.MachineNodeID))
 		if err != nil {
 			logger.Error(err.Error())
 		}

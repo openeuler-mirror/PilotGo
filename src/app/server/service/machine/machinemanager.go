@@ -7,6 +7,7 @@ import (
 )
 
 type MachineNode = dao.MachineNode
+type Res = dao.Res
 type Depart struct {
 	ID int `form:"DepartId"`
 }
@@ -58,8 +59,24 @@ func DeleteMachine(Deluuid []string) map[string]string {
 	return machinelist
 }
 
-func MachineBasic(uuid string) (ip string, state int, dept string, err error) {
-	return dao.MachineBasic(uuid)
+func MachineBasic(uuid string) (*Res, error) {
+	node, err := dao.MachineInfoByUUID(uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	depart, err := dao.GetDepartById(node.DepartId)
+	r := &Res{
+		ID:         node.ID,
+		Departid:   node.DepartId,
+		Departname: depart.Depart,
+		IP:         node.IP,
+		UUID:       node.MachineUUID,
+		CPU:        node.CPU,
+		State:      node.State,
+		Systeminfo: node.Systeminfo,
+	}
+	return r, err
 }
 
 func UpdateMachineState(uuid string, state int) error {

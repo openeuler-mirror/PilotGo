@@ -37,9 +37,9 @@ func AgentOverviewHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 	}
 
-	ip, state, dept, err := machine.MachineBasic(uuid)
+	node, err := machine.MachineBasic(uuid)
 	if err != nil {
-		response.Fail(c, gin.H{"IP": ip, "state": state, "depart": dept}, err.Error())
+		response.Fail(c, gin.H{"IP": node.IP, "state": node.State, "depart": node.Departname}, err.Error())
 	}
 
 	type DiskUsage struct {
@@ -73,8 +73,8 @@ func AgentOverviewHandler(c *gin.Context) {
 		Immutable       bool        `json:"immutable"`
 	}{
 		IP:              info.IP,
-		Department:      dept,
-		State:           state,
+		Department:      node.Departname,
+		State:           node.State,
 		Platform:        info.SysInfo.Platform,
 		PlatformVersion: info.SysInfo.PlatformVersion,
 		KernelArch:      info.SysInfo.KernelArch,
@@ -99,9 +99,9 @@ func AgentListHandler(c *gin.Context) {
 
 func OsBasic(c *gin.Context) {
 	uuid := c.Query("uuid")
-	ip, state, dept, err := machine.MachineBasic(uuid)
+	node, err := machine.MachineBasic(uuid)
 	if err != nil {
-		response.Fail(c, gin.H{"IP": ip, "state": state, "depart": dept}, err.Error())
+		response.Fail(c, gin.H{"IP": node.IP, "state": node.State, "depart": node.Departname}, err.Error())
 	}
-	response.Success(c, gin.H{"IP": ip, "state": state, "depart": dept}, "Success")
+	response.Success(c, gin.H{"IP": node.IP, "state": node.State, "depart": node.Departname}, "Success")
 }
