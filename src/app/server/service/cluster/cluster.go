@@ -15,9 +15,9 @@
 package cluster
 
 import (
-	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
@@ -38,15 +38,13 @@ type AgentStatus struct {
 }
 
 // 统计所有机器的状态
-func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
+func AgentStatusCounts(machines []dao.Res) (normal, Offline, free int) {
 	for _, agent := range machines {
-		state := agent.State
+		state := agent.Runstatus
 		switch state {
-		case agentmanager.Free:
-			free++
-		case agentmanager.OffLine:
+		case machine.OfflineStatus:
 			Offline++
-		case agentmanager.Normal:
+		case machine.NormalStauts:
 			normal++
 		default:
 			continue
@@ -58,7 +56,7 @@ func AgentStatusCounts(machines []dao.MachineNode) (normal, Offline, free int) {
 // 获取集群概览
 func ClusterInfo() (ClusterInfoParam, error) {
 	data := ClusterInfoParam{}
-	machines, err := dao.AllMachine()
+	machines, err := dao.MachineAll()
 	if err != nil {
 		return data, err
 	}
@@ -84,7 +82,7 @@ func DepartClusterInfo() []DepartMachineInfo {
 		Departids = append(Departids, depart_Id)
 		depart.ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
 
-		lists, err := dao.SomeDepartMachine(Departids) //某一级部门及其下属部门所有机器
+		lists, err := dao.MachineList(Departids) //某一级部门及其下属部门所有机器
 		if err != nil {
 			logger.Error(err.Error())
 		}
