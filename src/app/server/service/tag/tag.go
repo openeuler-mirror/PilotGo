@@ -55,8 +55,8 @@ func RequestTag(UUIDList []string) ([]common.Tag, error) {
 		}
 		for _, vt := range tags {
 			vt.PluginName = v.Name
+			msg = append(msg, vt)
 		}
-		msg = append(msg, tags...)
 	}
 	return msg, err
 }

@@ -2,11 +2,8 @@ package pluginapi
 
 import (
 	"github.com/gin-gonic/gin"
-	uuidservice "github.com/google/uuid"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
-	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -22,26 +19,26 @@ func Service(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "GetService",
-	}
-	auditlog.Add(log)
+	/*
+		u, err := jwt.ParseUser(c)
+		if err != nil {
+			response.Fail(c, nil, "user token error:"+err.Error())
+			return
+		}
+		log := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: "",
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "GetService",
+		}
+		auditlog.Add(log)*/
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			log_s := &auditlog.AuditLog{
+			/*log_s := &auditlog.AuditLog{
 				LogUUID:    uuidservice.New().String(),
 				ParentUUID: log.LogUUID,
 				Module:     auditlog.ModulePlugin,
@@ -50,11 +47,11 @@ func Service(c *gin.Context) {
 				Action:     "GetService",
 				Message:    "agentuuid:" + uuid,
 			}
-			auditlog.Add(log_s)
+			auditlog.Add(log_s)*/
 			serviceInfo, err := agent.GetService(d.ServiceName)
 			if err != nil {
-				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
+				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("获取服务状态结果:%v", serviceInfo)
@@ -92,44 +89,44 @@ func StartService(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "GetService",
-	}
-	auditlog.Add(log)
+	/*
+		u, err := jwt.ParseUser(c)
+		if err != nil {
+			response.Fail(c, nil, "user token error:"+err.Error())
+			return
+		}
+		log := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: "",
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "GetService",
+		}
+		auditlog.Add(log)*/
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			log_s := &auditlog.AuditLog{
-				LogUUID:    uuidservice.New().String(),
-				ParentUUID: log.LogUUID,
-				Module:     auditlog.ModulePlugin,
-				Status:     auditlog.StatusOK,
-				UserID:     u.ID,
-				Action:     "StartService",
-				Message:    "agentuuid:" + uuid,
-			}
-			auditlog.Add(log_s)
+			/*	log_s := &auditlog.AuditLog{
+					LogUUID:    uuidservice.New().String(),
+					ParentUUID: log.LogUUID,
+					Module:     auditlog.ModulePlugin,
+					Status:     auditlog.StatusOK,
+					UserID:     u.ID,
+					Action:     "StartService",
+					Message:    "agentuuid:" + uuid,
+				}
+				auditlog.Add(log_s)*/
 			service_status, Err, err := agent.ServiceStart(d.ServiceName)
 			if len(Err) != 0 || err != nil {
-				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+Err)
-				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
+				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+Err)
+				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("开启服务失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("开启服务结果:%v", service_status)
 
-			log_s = &auditlog.AuditLog{
+			/*log_s = &auditlog.AuditLog{
 				LogUUID:    uuidservice.New().String(),
 				ParentUUID: log.LogUUID,
 				Module:     auditlog.ModulePlugin,
@@ -137,11 +134,11 @@ func StartService(c *gin.Context) {
 				UserID:     u.ID,
 				Action:     "GetService",
 				Message:    "agentuuid:" + uuid,
-			}
+			}*/
 			serviceInfo, err := agent.GetService(d.ServiceName)
 			if err != nil {
-				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
+				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("获取服务状态结果:%v", serviceInfo)
@@ -178,44 +175,44 @@ func StopService(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "GetService",
-	}
-	auditlog.Add(log)
+	/*
+		u, err := jwt.ParseUser(c)
+		if err != nil {
+			response.Fail(c, nil, "user token error:"+err.Error())
+			return
+		}
+		log := &auditlog.AuditLog{
+			LogUUID:    uuidservice.New().String(),
+			ParentUUID: "",
+			Module:     auditlog.ModulePlugin,
+			Status:     auditlog.StatusOK,
+			UserID:     u.ID,
+			Action:     "GetService",
+		}
+		auditlog.Add(log)*/
 
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			log_s := &auditlog.AuditLog{
-				LogUUID:    uuidservice.New().String(),
-				ParentUUID: log.LogUUID,
-				Module:     auditlog.ModulePlugin,
-				Status:     auditlog.StatusOK,
-				UserID:     u.ID,
-				Action:     "StopService",
-				Message:    "agentuuid:" + uuid,
-			}
-			auditlog.Add(log_s)
+			/*	log_s := &auditlog.AuditLog{
+					LogUUID:    uuidservice.New().String(),
+					ParentUUID: log.LogUUID,
+					Module:     auditlog.ModulePlugin,
+					Status:     auditlog.StatusOK,
+					UserID:     u.ID,
+					Action:     "StopService",
+					Message:    "agentuuid:" + uuid,
+				}
+				auditlog.Add(log_s)*/
 			service_status, Err, err := agent.ServiceStop(d.ServiceName)
 			if len(Err) != 0 || err != nil {
-				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+Err)
-				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
+				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+Err)
+				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("停止服务失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("停止服务结果:%v", service_status)
 
-			log_s = &auditlog.AuditLog{
+			/*log_s = &auditlog.AuditLog{
 				LogUUID:    uuidservice.New().String(),
 				ParentUUID: log.LogUUID,
 				Module:     auditlog.ModulePlugin,
@@ -224,11 +221,11 @@ func StopService(c *gin.Context) {
 				Action:     "GetService",
 				Message:    "agentuuid:" + uuid,
 			}
-			auditlog.Add(log_s)
+			auditlog.Add(log_s)*/
 			serviceInfo, err := agent.GetService(d.ServiceName)
 			if err != nil {
-				auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
-				auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
+				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
+				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 				logger.Error("获取服务状态失败!, agent:%s, command:%s", uuid, d.ServiceName)
 			}
 			logger.Debug("获取服务状态结果:%v", serviceInfo)
