@@ -23,16 +23,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
-// 机器运行状态
-const (
-	// 机器运行
-	Normal = 1
-	// 脱机
-	OffLine = 2
-	// 空闲
-	Free = 3
-)
-
 // 用于管理server连接的agent
 type AgentManager struct {
 	agentMap sync.Map
@@ -127,43 +117,41 @@ func AddAgents2DB(a *Agent) {
 		logger.Error("初始化系统信息失败: %s", err.Error())
 		return
 	}
-	UUIDExistbool, err := machineservice.IsUUIDExist(a.UUID)
+	//查找此uuid是否已存入数据库
+	node, err := machineservice.MachineInfoByUUID(a.UUID)
 	if err != nil {
 		logger.Error(err.Error())
 		return
 	}
-	if UUIDExistbool {
+	//如果uuid已存入，则修改ip和状态等信息
+	if node.ID != 0 {
 		logger.Warn("机器%s已经存在!", agent_os.IP)
-		departId, err := machineservice.UUIDForDepartId(a.UUID)
+		Ma := &machineservice.MachineNode{
+			IP:        agent_os.IP,
+			RunStatus: machineservice.OnlineStatus,
+		}
+		if node.Departid != global.UncateloguedDepartId {
+			Ma.MaintStatus = machineservice.NormalStauts
+		} else {
+			Ma.MaintStatus = machineservice.MaintenanceStatus
+		}
+		err := machineservice.UpdateMachine(a.UUID, Ma)
 		if err != nil {
 			logger.Error(err.Error())
-			return
-		}
-		if departId != global.UncateloguedDepartId {
-			err := machineservice.UpdateMachineIPState(a.UUID, agent_os.IP, Normal)
-			if err != nil {
-				logger.Error(err.Error())
-				return
-			}
-		} else {
-			err := machineservice.UpdateMachineIPState(a.UUID, agent_os.IP, Free)
-			if err != nil {
-				logger.Error(err.Error())
-				return
-			}
 		}
 		return
 	}
-
-	agent_list := machineservice.MachineNode{
+	//新添加一台机器信息的时候自动分配到根节点部门，并设为在线状态和维护状态
+	agent_list := &machineservice.MachineNode{
 		IP:          agent_os.IP,
 		MachineUUID: a.UUID,
 		DepartId:    global.UncateloguedDepartId,
 		Systeminfo:  agent_os.PrettyName,
 		CPU:         agent_os.ModelName,
-		State:       Free,
+		RunStatus:   machineservice.OnlineStatus,
+		MaintStatus: machineservice.MaintenanceStatus,
 	}
-	err = machineservice.AddNewMachine(agent_list)
+	err = machineservice.AddMachine(agent_list)
 	if err != nil {
 		logger.Error(err.Error())
 		return

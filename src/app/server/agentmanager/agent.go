@@ -89,7 +89,7 @@ func (a *Agent) startListen() {
 		buff := make([]byte, 1024)
 		n, err := a.conn.Read(buff)
 		if err != nil {
-			err := machineservice.UpdateMachineState(a.UUID, OffLine)
+			err := machineservice.UpdateMachine(a.UUID, &machineservice.MachineNode{RunStatus: machineservice.OfflineStatus})
 			if err != nil {
 				logger.Error("update machine status failed: %s", err.Error())
 			}

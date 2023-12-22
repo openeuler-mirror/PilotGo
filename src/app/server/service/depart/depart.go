@@ -20,7 +20,6 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/utils"
 )
 
 type DepartNode = dao.DepartNode
@@ -210,27 +209,25 @@ func DeleteDepart(DelDept *DeleteDeparts) error {
 	departs = append([]int{DelDept.DepartID}, departs...)
 
 	//查询与此部门相关的机器和用户
-	var node []dao.MachineNode
 	var users []dao.User
+	nodes, err := dao.MachineList(departs)
+	if err != nil {
+		return err
+	}
 	for _, depart := range departs {
-		machine, err := dao.MachineStore(depart)
-		if err != nil {
-			return err
-		}
-		node = append(node, machine...)
 		us, err := dao.GetUserBypid(depart)
 		if err != nil {
 			return err
 		}
 		users = append(users, us...)
 	}
-	if len(node) > 0 {
+	if len(nodes) > 0 {
 		return errors.New("该部门有机器不允许删除")
 	}
 	if len(users) > 0 {
 		return errors.New("该部门有用户不允许删除")
 	}
-	if len(node) == 0 && len(users) == 0 {
+	if len(nodes) == 0 && len(users) == 0 {
 		return dao.Deletedepartdata(departs)
 	}
 	return nil
@@ -247,29 +244,6 @@ func MachineList(DepId int) ([]dao.Res, error) {
 	departId = append(departId, DepId)
 	machinelist1, err := dao.MachineList(departId)
 	return machinelist1, err
-}
-
-func ModifyMachineDepart(MachineID string, DepartID int) error {
-	//查询部门节点是否存在
-	depart, err := dao.GetDepartById(DepartID)
-	if err != nil {
-		return err
-	}
-	if depart.ID == 0 {
-		return errors.New("此部门不存在")
-	}
-	ResIds := utils.String2Int(MachineID)
-	for _, id := range ResIds {
-		machine, err := dao.MachineInfo(id)
-		if err != nil {
-			return err
-		}
-		err = dao.UpdateMachineDepartState(machine.MachineUUID, DepartID)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // 返回所有子部门id

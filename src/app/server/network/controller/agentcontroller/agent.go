@@ -37,9 +37,9 @@ func AgentOverviewHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 	}
 
-	node, err := machine.MachineBasic(uuid)
+	node, err := machine.MachineInfoByUUID(uuid)
 	if err != nil {
-		response.Fail(c, gin.H{"IP": node.IP, "state": node.State, "depart": node.Departname}, err.Error())
+		response.Fail(c, gin.H{"IP": node.IP, "state": node.Maintstatus, "depart": node.Departname}, err.Error())
 	}
 
 	type DiskUsage struct {
@@ -74,7 +74,6 @@ func AgentOverviewHandler(c *gin.Context) {
 	}{
 		IP:              info.IP,
 		Department:      node.Departname,
-		State:           node.State,
 		Platform:        info.SysInfo.Platform,
 		PlatformVersion: info.SysInfo.PlatformVersion,
 		KernelArch:      info.SysInfo.KernelArch,
@@ -99,9 +98,9 @@ func AgentListHandler(c *gin.Context) {
 
 func OsBasic(c *gin.Context) {
 	uuid := c.Query("uuid")
-	node, err := machine.MachineBasic(uuid)
+	node, err := machine.MachineInfoByUUID(uuid)
 	if err != nil {
-		response.Fail(c, gin.H{"IP": node.IP, "state": node.State, "depart": node.Departname}, err.Error())
+		response.Fail(c, gin.H{"IP": node.IP, "state": node.Maintstatus, "depart": node.Departname}, err.Error())
 	}
-	response.Success(c, gin.H{"IP": node.IP, "state": node.State, "depart": node.Departname}, "Success")
+	response.Success(c, gin.H{"IP": node.IP, "state": node.Maintstatus, "depart": node.Departname}, "Success")
 }

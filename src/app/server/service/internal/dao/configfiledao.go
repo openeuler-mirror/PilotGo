@@ -16,11 +16,11 @@ type ConfigFile struct {
 }
 
 func AddConfigFile(cf ConfigFile) error {
-	UUIDExistbool, err := IsUUIDExist(cf.MachineUUID)
+	node, err := MachineInfoByUUID(cf.MachineUUID)
 	if err != nil {
 		return err
 	}
-	if UUIDExistbool {
+	if node.ID != 0 {
 		return mysqlmanager.MySQL().Save(&cf).Error
 	}
 	return fmt.Errorf("机器不存在")

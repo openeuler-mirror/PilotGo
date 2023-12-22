@@ -9,7 +9,7 @@ import (
 )
 
 func MachineList(c *gin.Context) {
-	data, err := machineservice.Machines()
+	data, err := machineservice.MachineAll()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -18,12 +18,13 @@ func MachineList(c *gin.Context) {
 	resp := []*common.MachineNode{}
 	for _, item := range data {
 		d := &common.MachineNode{
-			UUID:       item.UUID,
-			IP:         item.IP,
-			Department: item.Departname,
-			CPUArch:    item.CPU,
-			OS:         item.Systeminfo,
-			State:      item.State,
+			UUID:        item.UUID,
+			IP:          item.IP,
+			Department:  item.Departname,
+			CPUArch:     item.CPU,
+			OS:          item.Systeminfo,
+			RunStatus:   item.Runstatus,
+			MaintStatus: item.Maintstatus,
 		}
 
 		resp = append(resp, d)

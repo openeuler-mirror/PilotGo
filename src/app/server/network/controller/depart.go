@@ -20,6 +20,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
+	"gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gitee.com/openeuler/PilotGo/utils/message/net"
 	"github.com/gin-gonic/gin"
@@ -184,7 +185,7 @@ func ModifyMachineDepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	err := depart.ModifyMachineDepart(M.MachineID, M.DepartID)
+	err := machine.ModifyMachineDepart(M.MachineID, M.DepartID)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
