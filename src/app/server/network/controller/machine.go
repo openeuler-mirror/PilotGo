@@ -22,6 +22,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type MachineModifyDepart struct {
+	MachineID string `json:"machineid"`
+	DepartID  int    `json:"departid"`
+}
+
+// 分页获取机器列表
 func MachineInfoHandler(c *gin.Context) {
 	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
@@ -44,7 +50,7 @@ func MachineInfoHandler(c *gin.Context) {
 	common.JsonPagination(c, data, total, query)
 }
 
-// 资源池返回接口
+// 资源池返回接口，查询没分配的机器，即departid=1,应该修改成维护状态的机器
 func FreeMachineSource(c *gin.Context) {
 	query := &common.PaginationQ{}
 	err := c.ShouldBindQuery(query)
@@ -61,6 +67,7 @@ func FreeMachineSource(c *gin.Context) {
 	common.JsonPagination(c, data, total, query)
 }
 
+// 返回所有机器指定字段
 func MachineAllDataHandler(c *gin.Context) {
 	datas, err := machineservice.MachineAllData()
 	if err != nil {
@@ -84,4 +91,19 @@ func DeleteMachineHandler(c *gin.Context) {
 	} else {
 		response.Success(c, nil, "机器删除成功!")
 	}
+}
+
+// 修改机器departid
+func ModifyMachineDepartHandler(c *gin.Context) {
+	var M MachineModifyDepart
+	if err := c.Bind(&M); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	err := machineservice.ModifyMachineDepart(M.MachineID, M.DepartID)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "机器部门修改成功")
 }

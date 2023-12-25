@@ -45,6 +45,7 @@ func ReturnMachinePaged(departid, offset, size int) (int64, []dao.Res, error) {
 	return dao.ReturnMachinePaged(departid, offset, size)
 }
 
+// 删除此方法更换面板
 func MachineAllData() ([]map[string]string, error) {
 	AllData, err := dao.MachineAll()
 	if err != nil {

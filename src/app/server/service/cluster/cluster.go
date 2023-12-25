@@ -15,9 +15,9 @@
 package cluster
 
 import (
-	"gitee.com/openeuler/PilotGo/app/server/service/depart"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/machine"
+	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
@@ -37,66 +37,62 @@ type AgentStatus struct {
 	Free    int `json:"free"`
 }
 
-// 统计所有机器的状态
-func AgentStatusCounts(machines []dao.Res) (normal, Offline, free int) {
-	for _, agent := range machines {
-		state := agent.Runstatus
-		switch state {
-		case machine.OfflineStatus:
-			Offline++
-		case machine.NormalStauts:
-			normal++
-		default:
-			continue
-		}
-	}
-	return
-}
-
 // 获取集群概览
 func ClusterInfo() (ClusterInfoParam, error) {
 	data := ClusterInfoParam{}
-	machines, err := dao.MachineAll()
+	count, err := dao.CountMachineNode(global.UncateloguedDepartId)
 	if err != nil {
 		return data, err
 	}
-	normal, Offline, free := AgentStatusCounts(machines)
+	data.AgentTotal = count
+	//从数据库进行状态统计
+	online, err := dao.CountRunStatus(machine.OnlineStatus, global.UncateloguedDepartId)
+	if err != nil {
+		return data, err
+	}
+	offline, err := dao.CountRunStatus(machine.OfflineStatus, global.UncateloguedDepartId)
+	if err != nil {
+		return data, err
+	}
+	maint, err := dao.CountMaintStatus(machine.MaintenanceStatus, global.UncateloguedDepartId)
+	if err != nil {
+		return data, err
+	}
 
-	data.AgentTotal = len(machines)
-	data.AgentStatus.Normal = normal
-	data.AgentStatus.OffLine = Offline
-	data.AgentStatus.Free = free
+	//Normal显示的事在线机器数量，前端字段需要做修改
+	data.AgentStatus.Normal = online
+	data.AgentStatus.OffLine = offline
+	data.AgentStatus.Free = maint
 	return data, nil
 }
 
 // 获取各部门集群状态
 func DepartClusterInfo() []DepartMachineInfo {
 	var departs []DepartMachineInfo
-
-	FirstDepartIds, err := dao.SubDepartId(1)
+	//获取所有部门
+	departnode, err := dao.GetAllDepart()
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	for _, depart_Id := range FirstDepartIds {
-		Departids := make([]int, 0)
-		Departids = append(Departids, depart_Id)
-		depart.ReturnSpecifiedDepart(depart_Id, &Departids) //某一级部门及其下属部门id
-
-		lists, err := dao.MachineList(Departids) //某一级部门及其下属部门所有机器
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		depart, err := dao.GetDepartById(depart_Id)
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		normal, Offline, free := AgentStatusCounts(lists)
-
+	//获取每个部门的机器状态数量
+	for _, depart := range departnode {
 		departInfo := DepartMachineInfo{}
 		departInfo.DepartName = depart.Depart
-		departInfo.AgentStatus.Normal = normal
-		departInfo.AgentStatus.OffLine = Offline
-		departInfo.AgentStatus.Free = free
+		online, err := dao.CountRunStatus(machine.OnlineStatus, depart.ID)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		offline, err := dao.CountRunStatus(machine.OfflineStatus, depart.ID)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		maint, err := dao.CountMaintStatus(machine.MaintenanceStatus, depart.ID)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		departInfo.AgentStatus.Normal = online
+		departInfo.AgentStatus.OffLine = offline
+		departInfo.AgentStatus.Free = maint
 
 		departs = append(departs, departInfo)
 	}
