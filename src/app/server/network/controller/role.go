@@ -39,16 +39,17 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 	response.Success(c, gin.H{"menu": menu, "button": buttons}, "用户权限列表")
 }
 
+// 获取所有角色
 func GetRolesHandler(c *gin.Context) {
 	data, err := roleservice.GetRoles()
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-
 	response.Success(c, data, "角色权限列表")
 }
 
+// 分页获取所有角色
 func GetRolesPagedHandler(c *gin.Context) {
 	p := &common.PaginationQ{}
 	err := c.ShouldBindQuery(p)
@@ -66,6 +67,7 @@ func GetRolesPagedHandler(c *gin.Context) {
 	common.JsonPagination(c, data, total, p)
 }
 
+// 添加角色
 func AddRoleHandler(c *gin.Context) {
 	params := &struct {
 		Role        string `json:"role"`
@@ -105,6 +107,7 @@ func AddRoleHandler(c *gin.Context) {
 	response.Success(c, nil, "新增角色成功")
 }
 
+// 删除角色
 func DeleteRoleHandler(c *gin.Context) {
 	params := &struct {
 		RoleId int `json:"roleId"`
@@ -138,6 +141,7 @@ func DeleteRoleHandler(c *gin.Context) {
 	response.Success(c, nil, "角色删除成功")
 }
 
+// 更改角色
 func UpdateRoleInfoHandler(c *gin.Context) {
 	params := &struct {
 		Role        string `json:"role"`
@@ -172,6 +176,7 @@ func UpdateRoleInfoHandler(c *gin.Context) {
 	response.Success(c, nil, "角色信息修改成功")
 }
 
+// 更改角色权限
 func RolePermissionChangeHandler(c *gin.Context) {
 	params := &struct {
 		ButtonId []string `json:"buttonId"`

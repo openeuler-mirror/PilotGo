@@ -2,13 +2,9 @@ package common
 
 type AsyncCmdResult struct {
 	TaskID string       `json:"task_id"`
-	Result []*RunResult `json:"result"`
+	Result []*CmdResult `json:"result"`
 }
 
-type RunResult struct {
-	CmdResult CmdResult   `json:"cmd_result"`
-	Error     interface{} `json:"error"`
-}
 type CmdResult struct {
 	MachineUUID string `json:"machine_uuid"`
 	MachineIP   string `json:"machine_ip"`
@@ -20,4 +16,5 @@ type CmdResult struct {
 type CmdStruct struct {
 	Batch   *Batch `json:"batch"`
 	Command string `json:"command"`
+	CmdType string `json:"cmd_type"`
 }

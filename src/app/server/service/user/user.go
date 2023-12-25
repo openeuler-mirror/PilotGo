@@ -54,6 +54,7 @@ type UserDto struct {
 	Email    string `json:"email"`
 }
 
+// 登录
 func Login(user *UserInfo) (string, int, string, error) {
 	email := user.Email
 	pwd := user.Password
@@ -82,6 +83,7 @@ func Login(user *UserInfo) (string, int, string, error) {
 	return depart.Depart, u.DepartId, utils.Int2String(roleids), err
 }
 
+// 添加用户
 func Register(user *UserInfo) error {
 	username := user.Username
 	password := user.Password
@@ -170,6 +172,7 @@ func ResetPassword(email string) error {
 	return dao.ResetPassword(email)
 }
 
+// 分页搜索所有用户
 func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error) {
 	count, users, err := dao.UserSearchPaged(email, offset, size)
 	if err != nil {
@@ -201,6 +204,7 @@ func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error
 	return count, returnUsers, err
 }
 
+// 根据用户名字查询角色名字
 func GetUserRoles(username string) ([]string, error) {
 	user, err := dao.GetUserByName(username)
 	if err != nil {
@@ -214,10 +218,20 @@ func GetUserRoles(username string) ([]string, error) {
 	return dao.GetNamesByRoleIds(roleids)
 }
 
-func GetNamesByRoleIds(roleids []int) {
-	panic("unimplemented")
+// 根据角色id查询角色名字
+func GetNamesByRoleIds(roleids []int) ([]string, error) {
+	var roles []string
+	for _, v := range roleids {
+		role, err := dao.GetRoleById(v)
+		if err != nil {
+			return nil, err
+		}
+		roles = append(roles, role.Name)
+	}
+	return roles, nil
 }
 
+// 根据userid查询user信息
 func QueryUserByID(userID int) (*User, error) {
 	return dao.GetUserByID(userID)
 }

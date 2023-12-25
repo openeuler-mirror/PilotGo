@@ -2,7 +2,6 @@ package dao
 
 import (
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gorm.io/gorm"
 )
 
@@ -96,23 +95,4 @@ func GetMachineID(BatchID int) ([]uint, error) {
 	var machineids []uint
 	err := mysqlmanager.MySQL().Model(BatchMachines{}).Select("machine_node_id").Where("batch_id=?", BatchID).Find(&machineids).Error
 	return machineids, err
-}
-
-// 根据批次id获取所属的所有uuids
-func BatchIds2UUIDs(batchIds []int) (uuids []string) {
-	for _, batchId := range batchIds {
-		macIds, err := GetMachineID(batchId)
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		for _, macId := range macIds {
-			var machine MachineNode
-			err = mysqlmanager.MySQL().Where("id=?", macId).Find(&machine).Error
-			if err != nil {
-				logger.Error(err.Error())
-			}
-			uuids = append(uuids, machine.MachineUUID)
-		}
-	}
-	return
 }
