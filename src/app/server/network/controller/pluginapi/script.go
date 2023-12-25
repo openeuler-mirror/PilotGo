@@ -194,7 +194,7 @@ func RunCommandAsyncHandler(c *gin.Context) {
 	caller := "http://" + parsedURL.Host + "/plugin_manage/api/v1/command_result"
 
 	taskId := time.Now().Format("20060102150405")
-	macuuids := batch.GetMachineUUIDS(d.Batch.BatchId)
+	macuuids := batch.GetBatchMachineUUIDS(d.Batch)
 	for _, uuid := range macuuids {
 		/*log_s := &auditlog.AuditLog{
 			LogUUID:    uuidservice.New().String(),
@@ -220,36 +220,30 @@ func RunCommandAsyncHandler(c *gin.Context) {
 }
 
 func asyncCommandRunner(macuuid string, command string, taskId string, caller string) {
-	agent := agentmanager.GetAgent(macuuid)
 	var result common.AsyncCmdResult
-	if agent != nil {
+	var res []*common.CmdResult
+
+	agent := agentmanager.GetAgent(macuuid)
+	if agent == nil {
+		logger.Error("agent %v 不存在,请检查机器是否已经连接", macuuid)
+	} else {
 		data, err := agent.RunCommand(command)
 		if err != nil {
 			logger.Error("run command error, agent:%s, command:%s", macuuid, command)
 		}
-		result = common.AsyncCmdResult{
-			TaskID: taskId,
-			Result: []*common.RunResult{{
-				CmdResult: common.CmdResult{
-					MachineUUID: macuuid,
-					MachineIP:   agent.IP,
-					RetCode:     data.RetCode,
-					Stdout:      data.Stdout,
-					Stderr:      data.Stderr,
-				},
-				Error: nil,
-			}},
+		r := &common.CmdResult{
+			MachineUUID: macuuid,
+			MachineIP:   agent.IP,
+			RetCode:     data.RetCode,
+			Stdout:      data.Stdout,
+			Stderr:      data.Stderr,
 		}
-	} else {
-		result = common.AsyncCmdResult{
-			TaskID: taskId,
-			Result: []*common.RunResult{{
-				CmdResult: common.CmdResult{
-					MachineUUID: macuuid,
-				},
-				Error: "agent " + macuuid + " 不存在或者已经离线，请检查机器状态",
-			}},
-		}
+		res = append(res, r)
+	}
+
+	result = common.AsyncCmdResult{
+		TaskID: taskId,
+		Result: res,
 	}
 
 	_, err := httputils.Put(caller, &httputils.Params{

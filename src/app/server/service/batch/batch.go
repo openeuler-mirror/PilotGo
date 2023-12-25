@@ -183,6 +183,19 @@ func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, erro
 	return count, machinesInfo, nil
 }
 
+// get common.CmdStruct batch uuids
+func GetBatchMachineUUIDS(b *scommon.Batch) []string {
+	var machine_uuids []string
+	if b.MachineUUIDs != nil {
+		machine_uuids = append(machine_uuids, b.MachineUUIDs...)
+	}
+	if b.BatchId != 0 {
+		machine_uuids = append(machine_uuids, GetMachineUUIDS(b.BatchId)...)
+
+	}
+	return machine_uuids
+}
+
 // from batch get all machines
 func GetMachineUUIDS(batchid int) []string {
 	if batchid != 0 {

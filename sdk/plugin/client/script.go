@@ -13,7 +13,7 @@ type CallbackHandler struct {
 	TaskLen            int
 }
 
-type RunCommandCallback func([]*common.RunResult)
+type RunCommandCallback func([]*common.CmdResult)
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command"
