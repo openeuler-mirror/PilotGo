@@ -20,24 +20,18 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
-	"gitee.com/openeuler/PilotGo/app/server/service/machine"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gitee.com/openeuler/PilotGo/utils/message/net"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-type MachineModifyDepart struct {
-	MachineID string `json:"machineid"`
-	DepartID  int    `json:"departid"`
-}
-
 type NewDepart struct {
 	DepartID   int    `json:"DepartID" binding:"required" msg:"部门id不能为空"`
 	DepartName string `json:"DepartName" binding:"required" msg:"部门名称不能为空"`
 }
 
-// 获取部门下所有机器列表
+// 获取部门下所有机器列表，若想获取根节点部门，传入departid=1
 func MachineListHandler(c *gin.Context) {
 	DepartId := c.Query("DepartId")
 	DepId, err := strconv.Atoi(DepartId)
@@ -57,6 +51,7 @@ func MachineListHandler(c *gin.Context) {
 	response.Success(c, machinelist, "部门下所属机器获取成功")
 }
 
+// 根据部门id在部门树中查询部门节点
 func DepartHandler(c *gin.Context) {
 	departID := c.Query("DepartID")
 	tmp, err := strconv.Atoi(departID)
@@ -64,11 +59,13 @@ func DepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "部门ID有误")
 		return
 	}
+	//构造部门树
 	departRoot, err := depart.DepartInfo()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
+	//查询节点
 	node, err := depart.Dept(tmp, departRoot)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
@@ -77,6 +74,7 @@ func DepartHandler(c *gin.Context) {
 	response.Success(c, node, "获取当前部门及子部门信息")
 }
 
+// 生成部门树
 func DepartInfoHandler(c *gin.Context) {
 	departRoot, err := depart.DepartInfo()
 	if err != nil {
@@ -86,6 +84,7 @@ func DepartInfoHandler(c *gin.Context) {
 	response.Success(c, departRoot, "获取全部的部门信息")
 }
 
+// 添加部门节点
 func AddDepartHandler(c *gin.Context) {
 	newDepart := depart.AddDepartNode{}
 	if err := c.Bind(&newDepart); err != nil {
@@ -117,6 +116,7 @@ func AddDepartHandler(c *gin.Context) {
 	response.Success(c, nil, "部门信息入库成功")
 }
 
+// 删除部门节点
 func DeleteDepartDataHandler(c *gin.Context) {
 	var DelDept depart.DeleteDeparts
 	if err := c.Bind(&DelDept); err != nil {
@@ -148,6 +148,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 	response.Success(c, nil, "部门删除成功")
 }
 
+// 更新部门节点名字
 func UpdateDepartHandler(c *gin.Context) {
 	var new NewDepart
 	if err := c.Bind(&new); err != nil {
@@ -177,18 +178,4 @@ func UpdateDepartHandler(c *gin.Context) {
 		return
 	}
 	response.Success(c, nil, "部门更新成功")
-}
-
-func ModifyMachineDepartHandler(c *gin.Context) {
-	var M MachineModifyDepart
-	if err := c.Bind(&M); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	err := machine.ModifyMachineDepart(M.MachineID, M.DepartID)
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
-	response.Success(c, nil, "机器部门修改成功")
 }

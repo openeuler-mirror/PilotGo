@@ -120,7 +120,7 @@ func LoopTree(node *DepartTreeNode, ID int, res **DepartTreeNode) {
 	}
 }
 
-// 查询部门节点
+// 根据部门id在部门树中查询部门节点
 func Dept(tmp int, root *DepartTreeNode) (*DepartTreeNode, error) {
 	if root == nil {
 		return nil, errors.New("部门根节点为空")
@@ -133,6 +133,7 @@ func Dept(tmp int, root *DepartTreeNode) (*DepartTreeNode, error) {
 	return root, nil
 }
 
+// 生成部门树
 func DepartInfo() (*DepartTreeNode, error) {
 	depart, err := dao.GetAllDepart()
 	if err != nil {
@@ -141,7 +142,9 @@ func DepartInfo() (*DepartTreeNode, error) {
 	if len(depart) == 0 {
 		return nil, errors.New("当前无部门节点")
 	}
+	//返回所有根节点喝孩子节点
 	ptrchild, departRoot := Returnptrchild(depart)
+	//构造树
 	MakeTree(&departRoot, ptrchild)
 	return &departRoot, nil
 }
