@@ -88,6 +88,7 @@ func findchild(node *DepartTreeNode, ptrchild []*DepartTreeNode) (ret []*DepartT
 	return
 }
 
+/*
 // 返回节点的所有子节点的ID
 func AllChild(node *DepartTreeNode) (dts []int) {
 	if node.Children != nil {
@@ -97,7 +98,7 @@ func AllChild(node *DepartTreeNode) (dts []int) {
 		}
 	}
 	return dts
-}
+}*/
 
 // 判断是否存在子节点
 func IsChildExist(node *DepartTreeNode, ptrchild []*DepartTreeNode) bool {
@@ -149,6 +150,7 @@ func DepartInfo() (*DepartTreeNode, error) {
 	return &departRoot, nil
 }
 
+// 添加部门
 func AddDepart(newDepart *AddDepartNode) error {
 	pid := newDepart.ParentID
 	depart := newDepart.DepartName
@@ -194,6 +196,7 @@ func AddDepart(newDepart *AddDepartNode) error {
 	return nil
 }
 
+// 删除部门
 func DeleteDepart(DelDept *DeleteDeparts) error {
 	//查看该部门是否存在
 	temp, err := dao.GetDepartById(DelDept.DepartID)
@@ -236,6 +239,7 @@ func DeleteDepart(DelDept *DeleteDeparts) error {
 	return nil
 }
 
+// 更改部门名字
 func UpdateDepart(DepartID int, DepartName string) error {
 	return dao.UpdateDepart(DepartID, DepartName)
 }

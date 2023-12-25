@@ -25,12 +25,14 @@ type EventBus struct {
 
 var eventTypeMap map[int][]Listener
 
+// 添加监听事件
 func (e *EventBus) AddListener(l *Listener) {
 	e.Lock()
 	defer e.Unlock()
 	e.listeners = append(e.listeners, l)
 }
 
+// 删除监听事件
 func (e *EventBus) RemoveListener(l *Listener) {
 	e.Lock()
 	defer e.Unlock()
@@ -47,12 +49,14 @@ func (e *EventBus) RemoveListener(l *Listener) {
 	}
 }
 
+// 添加event事件
 func (e *EventBus) AddEventMap(eventtpye int, l *Listener) {
 	e.Lock()
 	defer e.Unlock()
 	eventTypeMap[eventtpye] = append(eventTypeMap[eventtpye], *l)
 }
 
+// 删除event事件
 func (e *EventBus) RemoveEventMap(eventtpye int, l *Listener) {
 	e.Lock()
 	defer e.Unlock()
@@ -68,6 +72,7 @@ func (e *EventBus) RemoveEventMap(eventtpye int, l *Listener) {
 	}
 }
 
+// 判断监听是否存在
 func (e *EventBus) IsExitEventMap(l *Listener) bool {
 	e.Lock()
 	defer e.Unlock()
@@ -88,7 +93,6 @@ func (e *EventBus) Run() {
 			case <-e.stop:
 				logger.Info("event bus exit")
 				e.wait.Done()
-				break
 			case m := <-e.event:
 				e.broadcast(m)
 			}

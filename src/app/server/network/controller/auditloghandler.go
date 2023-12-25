@@ -39,6 +39,7 @@ func AuditLogAllHandler(c *gin.Context) {
 	common.JsonPagination(c, data, total, query)
 }
 
+// 根据模块名字查询日志
 func ModuleLogHandler(c *gin.Context) {
 	var moduleName string
 	if c.Bind(&moduleName) != nil {

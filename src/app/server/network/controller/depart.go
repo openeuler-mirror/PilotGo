@@ -148,7 +148,7 @@ func DeleteDepartDataHandler(c *gin.Context) {
 	response.Success(c, nil, "部门删除成功")
 }
 
-// 更新部门节点名字
+// 更改部门节点名字
 func UpdateDepartHandler(c *gin.Context) {
 	var new NewDepart
 	if err := c.Bind(&new); err != nil {

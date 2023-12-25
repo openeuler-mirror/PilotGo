@@ -67,7 +67,7 @@ func FreeMachineSource(c *gin.Context) {
 	common.JsonPagination(c, data, total, query)
 }
 
-// 返回所有机器指定字段
+// 返回所有机器指定字段，供插件使用
 func MachineAllDataHandler(c *gin.Context) {
 	datas, err := machineservice.MachineAllData()
 	if err != nil {

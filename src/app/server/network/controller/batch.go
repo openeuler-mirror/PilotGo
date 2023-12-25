@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// 添加批次
 func CreateBatchHandler(c *gin.Context) {
 	params := &batch.CreateBatchParam{}
 	if err := c.Bind(params); err != nil {
@@ -43,6 +44,7 @@ func CreateBatchHandler(c *gin.Context) {
 	response.Success(c, nil, "批次入库成功")
 }
 
+// 分页查询所有批次
 func BatchInfoHandler(c *gin.Context) {
 	p := &common.PaginationQ{}
 	err := c.ShouldBindQuery(p)
@@ -60,6 +62,7 @@ func BatchInfoHandler(c *gin.Context) {
 	common.JsonPagination(c, data, total, p)
 }
 
+// 删除批次
 func DeleteBatchHandler(c *gin.Context) {
 	batchdel := struct {
 		BatchID []int `json:"BatchID"`
@@ -96,6 +99,7 @@ func DeleteBatchHandler(c *gin.Context) {
 	response.Success(c, nil, "批次删除成功")
 }
 
+// 更改批次
 func UpdateBatchHandler(c *gin.Context) {
 	batchinfo := struct {
 		BatchId     int    `json:"BatchID"`
@@ -131,6 +135,7 @@ func UpdateBatchHandler(c *gin.Context) {
 	response.Success(c, nil, "批次修改成功")
 }
 
+// 查询某一个批次
 func BatchMachineInfoHandler(c *gin.Context) {
 	p := &common.PaginationQ{}
 	err := c.ShouldBindQuery(p)
@@ -155,6 +160,7 @@ func BatchMachineInfoHandler(c *gin.Context) {
 	common.JsonPagination(c, data, total, p)
 }
 
+// 一次性获取素有批次，供下拉列表选择
 func SelectBatchHandler(c *gin.Context) {
 	batch, err := batch.SelectBatch()
 	if err != nil {

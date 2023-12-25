@@ -31,6 +31,7 @@ import (
 	"github.com/tealeg/xlsx"
 )
 
+// 添加用户
 func RegisterHandler(c *gin.Context) {
 	user := &userservice.UserInfo{}
 	if err := c.Bind(user); err != nil {
@@ -62,6 +63,7 @@ func RegisterHandler(c *gin.Context) {
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
+// 登录
 func LoginHandler(c *gin.Context) {
 	user := userservice.UserInfo{}
 	if err := c.Bind(&user); err != nil {

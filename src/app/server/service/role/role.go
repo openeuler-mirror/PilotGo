@@ -123,6 +123,7 @@ func getRoleMenuButtons(role string) (string, []string) {
 	return menu, buttons
 }
 
+// 添加角色
 func AddRole(userRole *Role) error {
 	err := dao.AddRole(userRole)
 	if err != nil {
@@ -131,6 +132,7 @@ func AddRole(userRole *Role) error {
 	return nil
 }
 
+// 删除角色
 func DeleteRole(roleId int) error {
 	role, err := dao.GetRoleById(roleId)
 	if err != nil {
@@ -147,10 +149,12 @@ func DeleteRole(roleId int) error {
 	return nil
 }
 
+// 更改角色
 func UpdateRoleInfo(name, description string) error {
 	return dao.UpdateRoleDescription(name, description)
 }
 
+// 更改角色权限
 func UpdateRolePermissions(role string, buttons, menus []string) error {
 	return auth.UpdateRolePermissions(role, buttons, menus)
 }

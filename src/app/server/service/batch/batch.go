@@ -132,6 +132,7 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 	return nil
 }
 
+// 查询所有批次
 func SelectBatch() ([]dao.Batch, error) {
 	return dao.GetBatch()
 }
@@ -141,6 +142,7 @@ func GetBatchPaged(offset, size int) (int64, []Batch, error) {
 	return dao.GetBatchrPaged(offset, size)
 }
 
+// 删除批次
 func DeleteBatch(ids []int) error {
 	for _, value := range ids {
 		err := dao.DeleteBatch(value)
@@ -151,6 +153,7 @@ func DeleteBatch(ids []int) error {
 	return nil
 }
 
+// 更改批次
 func UpdateBatch(batchid int, name, description string) error {
 	temp, err := dao.IsExistID(batchid)
 	if err != nil {
@@ -183,17 +186,12 @@ func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, erro
 	return count, machinesInfo, nil
 }
 
-// get common.CmdStruct batch uuids
-func GetBatchMachineUUIDS(b *scommon.Batch) []string {
-	var machine_uuids []string
-	if b.MachineUUIDs != nil {
-		machine_uuids = append(machine_uuids, b.MachineUUIDs...)
+// 根据批次id获取所属的所有uuids
+func BatchIds2UUIDs(batchIds []int) (uuids []string) {
+	for _, batchid := range batchIds {
+		uuids = append(uuids, GetMachineUUIDS(batchid)...)
 	}
-	if b.BatchId != 0 {
-		machine_uuids = append(machine_uuids, GetMachineUUIDS(b.BatchId)...)
-
-	}
-	return machine_uuids
+	return uuids
 }
 
 // from batch get all machines
@@ -218,6 +216,19 @@ func GetMachineUUIDS(batchid int) []string {
 	return nil
 }
 
+// get common.CmdStruct batch uuids
+func GetBatchMachineUUIDS(b *scommon.Batch) []string {
+	var machine_uuids []string
+	if b.MachineUUIDs != nil {
+		machine_uuids = append(machine_uuids, b.MachineUUIDs...)
+	}
+	if b.BatchId != 0 {
+		machine_uuids = append(machine_uuids, GetMachineUUIDS(b.BatchId)...)
+
+	}
+	return machine_uuids
+}
+
 type R interface{}
 
 func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []R {
@@ -234,8 +245,4 @@ func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []
 	}
 
 	return result
-}
-
-func BatchIds2UUIDs(batchIds []int) (uuids []string) {
-	return dao.BatchIds2UUIDs(batchIds)
 }
