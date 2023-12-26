@@ -125,22 +125,37 @@ func MachineList(departId []int) (machinelist []Res, err error) {
 }
 
 // 统计总数
-func CountMachineNode(departid int) (int, error) {
+func CountMachineNode(departid interface{}) (int, error) {
 	var count int64
-	err := mysqlmanager.MySQL().Model(MachineNode{}).Where("depart_id=?", departid).Count(&count).Error
+	var err error
+	if departid != nil {
+		err = mysqlmanager.MySQL().Model(MachineNode{}).Where("depart_id= ?", departid).Count(&count).Error
+		return int(count), err
+	}
+	err = mysqlmanager.MySQL().Model(MachineNode{}).Distinct("id").Count(&count).Error
 	return int(count), err
 }
 
 // 统计runstatus
-func CountRunStatus(status string, departid int) (int, error) {
+func CountRunStatus(status string, departid interface{}) (int, error) {
 	var count int64
-	err := mysqlmanager.MySQL().Model(MachineNode{}).Where("run_status=? and depart_id=?", status, departid).Count(&count).Error
+	var err error
+	if departid != nil {
+		err = mysqlmanager.MySQL().Model(&MachineNode{}).Where("run_status=? and depart_id= ?", status, departid).Count(&count).Error
+		return int(count), err
+	}
+	err = mysqlmanager.MySQL().Model(MachineNode{}).Where("run_status=? ", status).Count(&count).Error
 	return int(count), err
 }
 
 // 统计maintstatus
-func CountMaintStatus(status string, departid int) (int, error) {
+func CountMaintStatus(status string, departid interface{}) (int, error) {
 	var count int64
-	err := mysqlmanager.MySQL().Model(MachineNode{}).Where("maint_status=? and depart_id=?", status, departid).Count(&count).Error
+	var err error
+	if departid != nil {
+		err = mysqlmanager.MySQL().Model(MachineNode{}).Where("maint_status=? and depart_id= ?", status, departid).Count(&count).Error
+		return int(count), err
+	}
+	err = mysqlmanager.MySQL().Model(MachineNode{}).Where("maint_status=? ", status).Count(&count).Error
 	return int(count), err
 }

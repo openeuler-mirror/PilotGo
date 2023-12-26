@@ -17,7 +17,6 @@ package cluster
 import (
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/machine"
-	"gitee.com/openeuler/PilotGo/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
@@ -40,21 +39,21 @@ type AgentStatus struct {
 // 获取集群概览
 func ClusterInfo() (ClusterInfoParam, error) {
 	data := ClusterInfoParam{}
-	count, err := dao.CountMachineNode(global.UncateloguedDepartId)
+	count, err := dao.CountMachineNode(nil)
 	if err != nil {
 		return data, err
 	}
 	data.AgentTotal = count
 	//从数据库进行状态统计
-	online, err := dao.CountRunStatus(machine.OnlineStatus, global.UncateloguedDepartId)
+	online, err := dao.CountRunStatus(machine.OnlineStatus, nil)
 	if err != nil {
 		return data, err
 	}
-	offline, err := dao.CountRunStatus(machine.OfflineStatus, global.UncateloguedDepartId)
+	offline, err := dao.CountRunStatus(machine.OfflineStatus, nil)
 	if err != nil {
 		return data, err
 	}
-	maint, err := dao.CountMaintStatus(machine.MaintenanceStatus, global.UncateloguedDepartId)
+	maint, err := dao.CountMaintStatus(machine.MaintenanceStatus, nil)
 	if err != nil {
 		return data, err
 	}
