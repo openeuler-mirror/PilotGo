@@ -66,8 +66,13 @@ func BindHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, "client信息错误")
 		return
 	}
-	client.server = strings.Split(c.Request.RemoteAddr, ":")[0] + ":" + port
-
+	server := strings.Split(c.Request.RemoteAddr, ":")[0] + ":" + port
+	if client.server == "" {
+		client.server = server
+	} else if client.server != "" && client.server != server {
+		logger.Error("已有PilotGo-server与此插件绑定")
+	}
+	client.sendHeartBeat()
 	response.Success(c, nil, "bind server success")
 }
 

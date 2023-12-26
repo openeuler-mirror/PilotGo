@@ -21,7 +21,7 @@ type PluginStatus struct {
 	LastConnect time.Time
 }
 
-func (client *Client) SendHeartbeat() {
+func (client *Client) sendHeartBeat() {
 	clientID := client.PluginInfo.Url + "+" + client.PluginInfo.Name
 	go func() {
 		for {

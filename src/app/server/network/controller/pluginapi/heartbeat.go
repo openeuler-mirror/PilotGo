@@ -59,8 +59,7 @@ func checkAndRebind() {
 			logger.Error("Error getting %v last heartbeat: %v", url, err)
 			continue
 		}
-
-		if !plugin_status.(*client.PluginStatus).Connected || time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval+1 {
+		if !plugin_status.(*client.PluginStatus).Connected || time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval+1*time.Second {
 			err := plugin.Handshake(url)
 			if err != nil {
 				logger.Error("rebind plugin and pilotgo server failed:%v", err.Error())

@@ -44,6 +44,7 @@ func Get(key string, obj interface{}) (interface{}, error) {
 	}
 	return nil, fmt.Errorf("未启用Redis")
 }
+
 func Scan(key string) []string {
 	var ctx = context.Background()
 	keys := []string{}
@@ -52,8 +53,8 @@ func Scan(key string) []string {
 		for iterator.Next(ctx) {
 			key := iterator.Val()
 			keys = append(keys, key)
-			return keys
 		}
+		return keys
 	}
 	return []string{}
 }
