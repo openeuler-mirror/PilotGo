@@ -11,6 +11,8 @@ type GetTagsCallback func([]string) []common.Tag
 
 type Client struct {
 	PluginInfo *PluginInfo
+	// 并发锁
+	l sync.Mutex
 
 	// 远程PilotGo server地址
 	server string
@@ -29,7 +31,7 @@ type Client struct {
 	// 用于平台扩展点功能
 	extentions []*common.Extention
 
-	//用于检查是否bind
+	//bind阻塞功能支持
 	mu   sync.Mutex
 	cond *sync.Cond
 }
@@ -106,4 +108,12 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 func (client *Client) OnGetTags(callback GetTagsCallback) {
 	client.getTagsCallback = callback
+}
+
+// client是否bind PilotGo server
+func (client *Client) IsBind() bool {
+	client.l.Lock()
+	defer client.l.Unlock()
+
+	return !(client.server == "")
 }
