@@ -61,12 +61,6 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// 启动所有功能模块服务
-	if err := startServices(); err != nil {
-		logger.Error("start services error: %s", err)
-		os.Exit(-1)
-	}
-
 	// 启动agent socket server
 	if err := network.SocketServerInit(&config.Config().SocketServer); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
@@ -77,6 +71,12 @@ func main() {
 	err = network.HttpServerInit(&config.Config().HttpServer)
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
+		os.Exit(-1)
+	}
+
+	// 启动所有功能模块服务
+	if err := startServices(); err != nil {
+		logger.Error("start services error: %s", err)
 		os.Exit(-1)
 	}
 

@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -26,6 +27,9 @@ type PluginFullInfo struct {
 }
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
 	url := c.Server() + "/api/v1/pluginapi/plugins"
 	r, err := httputils.Get(url, nil)
 	if err != nil {

@@ -69,28 +69,28 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 		c.Set("__internal__client_instance", client)
 	})
 	{
-		mg.GET("/info", InfoHandler)
+		mg.GET("/info", infoHandler)
 		// 绑定PilotGo server
-		mg.PUT("/bind", BindHandler)
+		mg.PUT("/bind", bindHandler)
 	}
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
 		api.GET("/extentions", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, ExtentionsHandler)
+		}, extentionsHandler)
 
 		api.GET("/gettags", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, TagsHandler)
+		}, tagsHandler)
 
 		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, EventHandler)
+		}, eventHandler)
 
 		api.PUT("/command_result", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, CommandResultHandler)
+		}, commandResultHandler)
 	}
 
 	// pg := router.Group("/plugin/" + desc.Name)

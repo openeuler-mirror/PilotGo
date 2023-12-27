@@ -18,7 +18,7 @@ type RunCommandCallback func([]*common.CmdResult)
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command"
@@ -55,7 +55,7 @@ type ScriptStruct struct {
 
 func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_script"
 
@@ -86,7 +86,7 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 
 func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
 	if !c.IsBind() {
-		return errors.New("PilotGo server does not have bind")
+		return errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
 

@@ -10,7 +10,7 @@ import (
 
 func (c *Client) MachineList() ([]*common.MachineNode, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)

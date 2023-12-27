@@ -365,3 +365,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 	}
 	return UserExit, nil
 }
+
+func GetRolesByUid(uid uint) ([]int, error) {
+	return dao.GetRolesByUid(uid)
+}
