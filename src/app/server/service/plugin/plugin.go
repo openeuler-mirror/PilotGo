@@ -133,6 +133,10 @@ func (m *PluginManager) recovery() error {
 func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 	// 查询最新的插件信息
 	logger.Debug("update plugin")
+	err := Handshake(url)
+	if err != nil {
+		return err
+	}
 	info, err := requestPluginInfo(url)
 	if err != nil {
 		logger.Error("failed to request plugin info:%s", err.Error())
