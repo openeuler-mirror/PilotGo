@@ -1,6 +1,8 @@
 package client
 
 import (
+	"sync"
+
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +28,10 @@ type Client struct {
 
 	// 用于平台扩展点功能
 	extentions []*common.Extention
+
+	//用于检查是否bind
+	mu   sync.Mutex
+	cond *sync.Cond
 }
 
 var global_client *Client
@@ -40,6 +46,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
 	}
+	global_client.cond = sync.NewCond(&global_client.mu)
 
 	return global_client
 }
