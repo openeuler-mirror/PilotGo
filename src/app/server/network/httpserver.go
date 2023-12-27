@@ -84,9 +84,6 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 		}()
 	}
 
-	// 检查插件状态，重新绑定plugin与pilotgo
-	go pluginapi.CheckPluginHeartbeats()
-
 	return nil
 }
 
