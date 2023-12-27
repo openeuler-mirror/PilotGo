@@ -28,7 +28,7 @@ func checkAndRebind() {
 			continue
 		}
 
-		if !plugin_status.(*client.PluginStatus).Connected || time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval+1 {
+		if !plugin_status.(*client.PluginStatus).Connected || time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval+1*time.Second {
 			err := Handshake(p.Url)
 			if err != nil {
 				logger.Error("rebind plugin and pilotgo server failed:%v", err.Error())

@@ -115,19 +115,28 @@ func Logout(c *gin.Context) {
 		Module:     auditlog.ModuleUser,
 		Status:     auditlog.StatusOK,
 		UserID:     u.ID,
-		Action:     "用户注销",
+		Action:     "用户退出",
 	}
 	auditlog.Add(log)
 	response.Success(c, nil, "退出成功!")
 }
 
 func Info(c *gin.Context) {
-	user, _ := c.Get("x-user")
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		// TODO: fix type assertion
-		"data": gin.H{"user": userservice.ToUserDto(user.(userservice.User))},
-	})
+	u, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	d := &struct {
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+	}{
+		Name:  u.Username,
+		Phone: u.Phone,
+	}
+
+	response.Success(c, d, "用户信息查询成功")
 }
 
 // 查询所有用户
