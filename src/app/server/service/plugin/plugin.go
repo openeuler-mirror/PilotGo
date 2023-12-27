@@ -187,7 +187,7 @@ func (m *PluginManager) addPlugin(url string) error {
 		return err
 	}
 
-	key := client.HeartbeatKey + p.Url + "+" + p.Name
+	key := client.HeartbeatKey + p.Url
 	value := client.PluginStatus{
 		Connected:   true,
 		LastConnect: time.Now(),
@@ -334,7 +334,7 @@ func Handshake(url string) error {
 
 	resp, err := httputils.Put(url, nil)
 	if err != nil {
-		logger.Debug("request plugin info error:%s", err.Error())
+		logger.Error("request plugin info error:%s", err.Error())
 		return err
 	}
 
@@ -423,7 +423,7 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 			logger.Error("manager get plugin %s", err)
 			continue
 		}
-		plugin_status, err := GetPluginConnectStatus(p.Url, p.Name)
+		plugin_status, err := GetPluginConnectStatus(p.Url)
 		if err != nil {
 			logger.Error("plugin status get failed %s", err)
 			continue
@@ -478,12 +478,12 @@ func TogglePlugin(uuid string, enable int) error {
 }
 
 func deletePluginInRedis(uuid string) error {
-	url, name, err := dao.GetURLAndName(uuid)
+	p, err := dao.QueryPluginById(uuid)
 	if err != nil {
 		return err
 	}
-	logger.Debug("delete %v plugin heartbeat in redis: %v", name, url)
-	key := client.HeartbeatKey + url + "+" + name
+	logger.Debug("delete %v plugin heartbeat in redis: %v", p.Name, p.Url)
+	key := client.HeartbeatKey + p.Url
 	err = redismanager.Delete(key)
 	if err != nil {
 		return err
@@ -491,12 +491,12 @@ func deletePluginInRedis(uuid string) error {
 	return nil
 }
 
-func GetPluginConnectStatus(url string, name string) (*client.PluginStatus, error) {
-	key := client.HeartbeatKey + url + "+" + name
+func GetPluginConnectStatus(url string) (*client.PluginStatus, error) {
+	key := client.HeartbeatKey + url
 	var valueObj client.PluginStatus
 	plugin_status, err := redismanager.Get(key, &valueObj)
 	if err != nil {
-		return plugin_status.(*client.PluginStatus), err
+		return nil, err
 	}
 	return plugin_status.(*client.PluginStatus), nil
 }
