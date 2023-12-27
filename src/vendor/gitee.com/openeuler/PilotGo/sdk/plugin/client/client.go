@@ -95,7 +95,6 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 	// TODO: start command result process service
 	client.startEventProcessor()
 	client.startCommandResultProcessor()
-	client.SendHeartbeat()
 }
 
 func (client *Client) OnGetTags(callback GetTagsCallback) {

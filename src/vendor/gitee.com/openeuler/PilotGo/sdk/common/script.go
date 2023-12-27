@@ -16,5 +16,4 @@ type CmdResult struct {
 type CmdStruct struct {
 	Batch   *Batch `json:"batch"`
 	Command string `json:"command"`
-	CmdType string `json:"cmd_type"`
 }
