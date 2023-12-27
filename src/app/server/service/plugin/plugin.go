@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
+
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
@@ -25,7 +26,6 @@ const (
 	PluginDisabled = 0
 )
 
-// type Plugin = dao.PluginModel
 func Init() error {
 	if err := mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{}); err != nil {
 		return err
@@ -34,6 +34,10 @@ func Init() error {
 	if err := globalPluginManager.recovery(); err != nil {
 		return err
 	}
+
+	// 检查插件状态，重新绑定plugin与pilotgo
+	go CheckPluginHeartbeats()
+
 	return nil
 }
 
