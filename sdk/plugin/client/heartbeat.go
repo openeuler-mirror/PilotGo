@@ -22,7 +22,7 @@ type PluginStatus struct {
 }
 
 func (client *Client) sendHeartBeat() {
-	clientID := client.PluginInfo.Url + "+" + client.PluginInfo.Name
+	clientID := client.PluginInfo.Url
 	go func() {
 		for {
 			err := client.sendHeartbeat(clientID)
@@ -36,9 +36,9 @@ func (client *Client) sendHeartBeat() {
 
 func (client *Client) sendHeartbeat(clientID string) error {
 	p := &struct {
-		ClientID string `json:"clientID"`
+		PluginUrl string `json:"clientID"`
 	}{
-		ClientID: clientID,
+		PluginUrl: clientID,
 	}
 
 	ServerUrl := "http://" + client.Server() + "/api/v1/pluginapi/heartbeat"
