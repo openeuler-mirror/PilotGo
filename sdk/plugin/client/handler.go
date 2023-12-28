@@ -72,6 +72,7 @@ func BindHandler(c *gin.Context) {
 	} else if client.server != "" && client.server != server {
 		logger.Error("已有PilotGo-server与此插件绑定")
 	}
+	client.cond.Broadcast()
 	client.sendHeartBeat()
 	response.Success(c, nil, "bind server success")
 }
