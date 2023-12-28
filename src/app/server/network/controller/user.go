@@ -22,6 +22,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/role"
 	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -384,4 +385,26 @@ func ImportUser(c *gin.Context) {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
+}
+
+// 获取登录用户权限
+func GetLoginUserPermissionHandler(c *gin.Context) {
+	u, err := jwt.ParseUser(c)
+	if err != nil {
+		response.Fail(c, nil, "user token error:"+err.Error())
+		return
+	}
+
+	roleids, err := userservice.GetRolesByUid(u.ID)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	menu, buttons, err := role.GetLoginUserPermission(roleids)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, gin.H{"menu": menu, "button": buttons}, "用户权限列表")
 }

@@ -22,15 +22,11 @@ import (
 type Role = dao.Role
 type UserRole = dao.UserRole
 
-type RoleID struct {
-	RoleId []int `json:"roleId"`
-}
-
 // 获取用户最高权限的角色id
-func RoleId(R RoleID) int {
-	min := R.RoleId[0]
-	if len(R.RoleId) > 1 {
-		for _, v := range R.RoleId {
+func RoleId(R []int) int {
+	min := R[0]
+	if len(R) > 1 {
+		for _, v := range R {
 			if v < min {
 				min = v
 			}
@@ -40,7 +36,7 @@ func RoleId(R RoleID) int {
 }
 
 // return menu, button, error
-func GetLoginUserPermission(Roleid RoleID) (string, []string, error) {
+func GetLoginUserPermission(Roleid []int) (string, []string, error) {
 	// TODO: multi role case
 	roleId := RoleId(Roleid) //用户的最高权限
 	role, err := dao.GetRoleById(roleId)

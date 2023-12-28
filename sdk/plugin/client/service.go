@@ -10,7 +10,7 @@ import (
 
 func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*common.ServiceResult, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := c.Server() + "/api/v1/pluginapi/service/:name"
 
@@ -36,7 +36,7 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*comm
 
 func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := c.Server() + "/api/v1/pluginapi/start_service"
 
@@ -62,7 +62,7 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*commo
 
 func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := c.Server() + "/api/v1/pluginapi/stop_service"
 

@@ -9,6 +9,9 @@ import (
 )
 
 func (c *Client) ApplyConfig(batch *common.Batch, path, content string) error {
+	if !c.IsBind() {
+		return errors.New("PilotGo server does not have bind")
+	}
 	url := c.Server() + "/api/v1/pluginapi/apply_config"
 	r, err := httputils.Put(url, nil)
 	if err != nil {

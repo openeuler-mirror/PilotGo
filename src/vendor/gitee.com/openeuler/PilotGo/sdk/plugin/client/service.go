@@ -2,12 +2,16 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*common.ServiceResult, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
 	url := c.Server() + "/api/v1/pluginapi/service/:name"
 
 	p := &common.ServiceStruct{
@@ -31,6 +35,9 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*comm
 }
 
 func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
 	url := c.Server() + "/api/v1/pluginapi/start_service"
 
 	p := &common.ServiceStruct{
@@ -54,6 +61,9 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*commo
 }
 
 func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
 	url := c.Server() + "/api/v1/pluginapi/stop_service"
 
 	p := &common.ServiceStruct{

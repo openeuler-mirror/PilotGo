@@ -28,7 +28,7 @@ type PluginFullInfo struct {
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
 	if !c.IsBind() {
-		return nil, errors.New("PilotGo server does not have bind")
+		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := c.Server() + "/api/v1/pluginapi/plugins"
 	r, err := httputils.Get(url, nil)

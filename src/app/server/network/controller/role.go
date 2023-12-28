@@ -24,21 +24,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// 获取登录用户权限
-func GetLoginUserPermissionHandler(c *gin.Context) {
-	var RoleId roleservice.RoleID
-	if err := c.Bind(&RoleId); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	menu, buttons, err := roleservice.GetLoginUserPermission(RoleId)
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
-	response.Success(c, gin.H{"menu": menu, "button": buttons}, "用户权限列表")
-}
-
 // 获取所有角色
 func GetRolesHandler(c *gin.Context) {
 	data, err := roleservice.GetRoles()
