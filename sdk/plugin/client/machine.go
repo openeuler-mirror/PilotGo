@@ -2,12 +2,16 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) MachineList() ([]*common.MachineNode, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)
 	if err != nil {

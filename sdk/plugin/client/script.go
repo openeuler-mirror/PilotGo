@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -16,6 +17,10 @@ type CallbackHandler struct {
 type RunCommandCallback func([]*common.CmdResult)
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
+
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command"
 
 	p := &common.CmdStruct{
@@ -49,6 +54,9 @@ type ScriptStruct struct {
 }
 
 func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
+	if !c.IsBind() {
+		return nil, errors.New("PilotGo server does not have bind")
+	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_script"
 
 	p := &ScriptStruct{
@@ -77,6 +85,9 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 }
 
 func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
+	if !c.IsBind() {
+		return errors.New("PilotGo server does not have bind")
+	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
 
 	p := &common.CmdStruct{
