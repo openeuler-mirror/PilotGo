@@ -109,6 +109,10 @@ func MachineInfoByUUID(uuid string) (*Res, error) {
 }
 
 func UpdateMachine(uuid string, ma *MachineNode) error {
+	err := IsStatus(ma.MaintStatus)
+	if err != nil {
+		return err
+	}
 	return dao.UpdateMachine(uuid, ma)
 }
 
@@ -139,4 +143,33 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 		}
 	}
 	return nil
+}
+
+func IsStatus(maintstatus string) error {
+	if maintstatus != MaintenanceStatus && maintstatus != NormalStatus {
+		return errors.New("维护状态字段不存在")
+	}
+	return nil
+}
+
+func UpdateMaintStatus(MachineIDs string, maintstatus string) ([]int, error) {
+	//判断状态名是否正确
+	err := IsStatus(maintstatus)
+	if err != nil {
+		return nil, err
+	}
+	ids := utils.String2Int(MachineIDs)
+	var result []int
+	for _, v := range ids {
+		uuid, err := dao.MachineIdToUUID(v)
+		if err != nil {
+			result = append(result, v)
+			continue
+		}
+		err = dao.UpdateMachine(uuid, &MachineNode{MaintStatus: maintstatus})
+		if err != nil {
+			result = append(result, v)
+		}
+	}
+	return result, nil
 }
