@@ -36,12 +36,8 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3fOKtUw0Xmo=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20231226012702-5675c072848d h1:kOyHsdN5M3zOIO2qvarhffNgLQv/PtAbWWsjzEmwa8o=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20231226012702-5675c072848d/go.mod h1:zEVmY3l48/CvR2kIM3DJpD/jWTG1qkOxRoHJii/D0us=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20231227070920-c289614a2e10 h1:RUbvPYH43bj1Ebu3w32oWdoQLOvlJRfQVzRE319uu/Q=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20231227070920-c289614a2e10/go.mod h1:zEVmY3l48/CvR2kIM3DJpD/jWTG1qkOxRoHJii/D0us=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20231228054728-31172137f072 h1:EcAlodjvjA/+WD0UL3FcUlMgA0TZSPAjGyhpwtR1dc0=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20231228054728-31172137f072/go.mod h1:zEVmY3l48/CvR2kIM3DJpD/jWTG1qkOxRoHJii/D0us=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231228085307-dc52ef15f72b h1:belwkjmmBIIORpmcATepmT1JxYdNX27T+o7s0QjJ308=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231228085307-dc52ef15f72b/go.mod h1:zEVmY3l48/CvR2kIM3DJpD/jWTG1qkOxRoHJii/D0us=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.0.0/go.mod h1:uGG2W01BaETf0Ozp+QxxKJdMBNRWPdstHG0Fmdwn1/U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.2/go.mod h1:uGG2W01BaETf0Ozp+QxxKJdMBNRWPdstHG0Fmdwn1/U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.0/go.mod h1:bjGvMhVMb+EEm3VRNQawDMUyMMjo+S5ewNjflkep/0Q=
