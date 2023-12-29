@@ -10,11 +10,15 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 )
 
-// 机器状态
+// 机器运行状态
 const (
-	OnlineStatus      = "online"
-	OfflineStatus     = "offline"
-	NormalStauts      = "normal"
+	OnlineStatus  = "online"
+	OfflineStatus = "offline"
+)
+
+// 机器维护状态
+const (
+	NormalStatus      = "normal"
 	MaintenanceStatus = "maintenance"
 )
 
@@ -125,7 +129,7 @@ func ModifyMachineDepart(MachineID string, DepartID int) error {
 		}
 		Ma := &dao.MachineNode{DepartId: DepartID}
 		if DepartID != global.UncateloguedDepartId {
-			Ma.MaintStatus = NormalStauts
+			Ma.MaintStatus = NormalStatus
 		} else {
 			Ma.MaintStatus = MaintenanceStatus
 		}

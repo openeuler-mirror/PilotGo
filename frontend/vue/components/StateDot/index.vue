@@ -13,30 +13,53 @@
  -->
 <template>
   <div>
-    <span class="status-dot" :class="dotClass"></span>
-    <span :class="dotTextClass">
-      {{textSpan}}
-    </span>
+    <div>
+      <span class="status-dot" :class="dotClass"></span>
+      <span :class="dotTextClass">
+        {{ textSpan }}
+      </span>
+    </div>
+    <div>
+      <span class="status-dot" :class="maintDotClass"></span>
+      <span :class="maintDotTextClass">
+        {{ maintTextSpan }}
+      </span>
+    </div>
   </div>
 </template>
 <script>
 
-export default{
+export default {
   props: {
-    state: {
-      type: Number,
-      default: 1
+    // 主机运行状态
+    runstatus: {
+      type: String,
+      default: ""
+    },
+    // 主机维护状态
+    maintstatus: {
+      type: String,
+      default: ""
     },
   },
   computed: {
     dotClass() {
-     return  this.state == 1 ? 'online' : this.state ==  3 ? 'unSet' : 'offline';
+      return this.runstatus === 'online' ? 'online' : this.runstatus === 'offline' ? 'offline' : 'unSet';
     },
     dotTextClass() {
-      return this.state == 1 ? 'onlineText' : this.state ==  3 ? 'unSetText' : 'offlineText';
+      return this.runstatus === 'online' ? 'onlineText' : this.runstatus === 'offline' ? 'offlineText' : 'unsetText';
     },
     textSpan() {
-      return this.state == 1 ? '在线' : this.state ==  3 ? '未分配' : '离线'
+      return this.runstatus === 'online' ? '在线' : this.runstatus === 'offline' ? '离线' : '未知';
+    },
+    maintDotClass() {
+      return this.maintstatus === 'normal' ? 'online' : this.maintstatus === 'maintenance' ? 'unSet' : 'offline';
+    },
+    maintDotTextClass() {
+      return this.maintstatus == 'normal' ? 'online' : this.maintstatus === 'maintenance' ? 'unsetText' : 'offlineText';
+    },
+    maintTextSpan() {
+      return this.maintstatus == 'normal' ? '正常' : this.maintstatus === 'maintenance' ? '维护中' : '未知';
     }
   },
 }
@@ -50,22 +73,28 @@ export default{
   vertical-align: middle;
   border-radius: 50%;
 }
+
 .online {
   background: rgb(82, 196, 26);
 }
+
 .onlineText {
   color: rgb(82, 196, 26);
 }
+
 .offline {
   background: rgb(128, 128, 128);
 }
+
 .offlineText {
   color: rgb(128, 128, 128);
 }
+
 .unSet {
-/* background: rgb(45, 69, 153); */
+  /* background: rgb(45, 69, 153); */
   background: rgb(253, 190, 0);
 }
+
 .unSetText {
   color: rgb(255, 191, 0);
 }

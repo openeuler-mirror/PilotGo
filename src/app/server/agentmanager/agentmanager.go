@@ -131,7 +131,7 @@ func AddAgents2DB(a *Agent) {
 			RunStatus: machineservice.OnlineStatus,
 		}
 		if node.Departid != global.UncateloguedDepartId {
-			Ma.MaintStatus = machineservice.NormalStauts
+			Ma.MaintStatus = machineservice.NormalStatus
 		} else {
 			Ma.MaintStatus = machineservice.MaintenanceStatus
 		}
