@@ -15,7 +15,7 @@ func ApplyConfig(c *gin.Context) {
 }
 
 // 配置文件下发
-func ConfigDeploy(c *gin.Context) {
+func FileDeploy(c *gin.Context) {
 	fd := &struct {
 		Deploy_BatchIds  []int    `json:"deploy_batches"`
 		Deploy_DepartIds []int    `json:"deploy_departs"`

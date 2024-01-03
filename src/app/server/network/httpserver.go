@@ -326,7 +326,7 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.PUT("/stop_service", pluginapi.StopService)
 
 		pluginAPI.GET("/machine_list", pluginapi.MachineList)
-		pluginAPI.POST("/file_deploy", pluginapi.ConfigDeploy)
+		pluginAPI.POST("/file_deploy", pluginapi.FileDeploy)
 	}
 	// plugin
 	{
