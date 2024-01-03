@@ -63,6 +63,7 @@ func GetAgentRepo(c *gin.Context) {
 	response.Success(c, repos, "获取到repo源")
 }
 
+// TODO: 去除，移至插件
 func ConfigFileBroadcastToAgents(c *gin.Context) {
 	fd := &struct {
 		Username string `json:"userName,omitempty"`
