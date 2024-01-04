@@ -40,6 +40,8 @@ import PGTree from "@/components/PGTree.vue";
 import { changeDepartment } from "@/request/cluster";
 import { RespCodeOK } from "@/request/request";
 
+const emits = defineEmits(["departUpdated", "close"])
+
 const props = defineProps({
     machines: {
         type: Array,
@@ -80,6 +82,8 @@ function onChangeDepartment() {
                 "departid": selectedDepartment.value.id,
             }).then((resp: any) => {
                 if (resp.code === RespCodeOK) {
+                    emits("departUpdated")
+                    formRef.value.resetFields()
                     ElMessage.success("更换部门成功:" + resp.msg);
                 } else {
                     ElMessage.error("更换部门失败:" + resp.msg);
@@ -87,6 +91,7 @@ function onChangeDepartment() {
             }).catch((err: any) => {
                 ElMessage.error("更换部门失败" + err.msg);
             })
+            emits("close")
         } else {
             ElMessage.error("部门信息选择错误");
         }

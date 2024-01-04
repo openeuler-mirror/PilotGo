@@ -23,6 +23,8 @@ import { ElMessage } from 'element-plus';
 import { RespCodeOK } from "@/request/request";
 import { updateRole } from "@/request/role";
 
+const emits = defineEmits(["rolesUpdated", "close"])
+
 const rules = {
     description: [
         {
@@ -54,6 +56,8 @@ function onUpdateRole() {
         if (valid) {
             updateRole(params).then((resp: any) => {
                 if (resp.code === RespCodeOK) {
+                    emits("rolesUpdated")
+                    formRef.value.resetFields()
                     ElMessage.success("success to update role info:"+ resp.msg);
                 } else {
                     ElMessage.error("failed to update role info:"+ resp.msg);
@@ -61,6 +65,7 @@ function onUpdateRole() {
             }).catch((err: any) => {
                 ElMessage.error("添加失败,请检查输入内容:"+ err.msg);
             });
+            emits("close")
         } else {
             ElMessage.error("请检查输入内容");
         }

@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 
 import { RespCodeOK } from "@/request/request";
@@ -51,8 +51,8 @@ function onAddRole() {
             addRole(params)
                 .then((resp: any) => {
                     if (resp.code === RespCodeOK) {
-                        // TODO: update role list
                         emits("rolesUpdated")
+                        formRef.value.resetFields()
                         ElMessage.success(resp.msg);
                     } else {
                         ElMessage.error(resp.msg);

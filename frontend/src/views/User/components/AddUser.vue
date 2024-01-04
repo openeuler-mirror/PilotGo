@@ -143,8 +143,8 @@ function onAddUser() {
             addUser(params).then((res: any) => {
                 if (res.code === RespCodeOK) {
                     emits('userUpdated')
-                    ElMessage.success(res.msg);
                     formRef.value.resetFields();
+                    ElMessage.success(res.msg);
                 } else {
                     ElMessage.error("添加用户失败:" + res.msg);
                 }

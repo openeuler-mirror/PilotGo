@@ -49,6 +49,7 @@ function onUpdateBatch() {
             }).then((resp: any) => {
                 if (resp.code == RespCodeOK) {
                     emits('batchUpdated')
+                    updateBatchFormRef.value.resetFields();
                     ElMessage.success("update batch info success")
                 } else {
                     ElMessage.error("failed to update batch info:" + resp.msg)

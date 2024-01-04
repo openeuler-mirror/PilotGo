@@ -60,7 +60,7 @@
         </div>
 
         <el-dialog title="主机部门变更" v-model="showChangeDepartDialog" destroy-on-close>
-            <change-depart :machines="selectedMachines" />
+            <change-depart :machines="selectedMachines" @depart-updated="updateDepartmentMachines(departmentID)" @close="showChangeDepartDialog = false"/>
         </el-dialog>
     </div>
 </template>
