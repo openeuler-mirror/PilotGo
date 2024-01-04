@@ -45,18 +45,16 @@ import { getRoles } from '@/request/role';
 import { addUser } from '@/request/user';
 
 const rules = {
-    userName: [
-        {
-            required: true,
-            message: "请输入用户名",
-            trigger: "blur"
-        }],
-    password: [
-        {
-            required: true,
-            message: "请输入密码",
-            trigger: "blur"
-        }],
+    userName: [{
+        required: true,
+        message: "请输入用户名",
+        trigger: "blur"
+    }],
+    password: [{
+        required: true,
+        message: "请输入密码",
+        trigger: "blur"
+    }],
     departName: [{
         required: true,
         message: "请选择部门",
@@ -67,23 +65,25 @@ const rules = {
         message: "请选择角色",
         trigger: "blur"
     }],
-    phone: [
-        {
-            validator: checkPhone,
-            message: "请输入正确的手机号格式",
-            trigger: "change",
-        }],
-    email: [
-        {
-            required: true,
-            message: "请输入邮箱",
-            trigger: "blur",
-        },
-        {
-            validator: checkEmail,
-            message: "请输入正确的邮箱格式",
-            trigger: "change",
-        }],
+    phone: [{
+        required: false,
+        message: "请输入手机号",
+        trigger: "blur",
+    }, {
+        validator: checkPhone,
+        message: "请输入正确的手机号格式",
+        trigger: "change",
+    }],
+    email: [{
+        required: true,
+        message: "请输入邮箱",
+        trigger: "blur",
+    },
+    {
+        validator: checkEmail,
+        message: "请输入正确的邮箱格式",
+        trigger: "change",
+    }],
 }
 
 const emits = defineEmits(["userUpdated", "close"])
@@ -146,10 +146,10 @@ function onAddUser() {
                     ElMessage.success(res.msg);
                     formRef.value.resetFields();
                 } else {
-                    ElMessage.error("添加用户失败:", res.msg);
+                    ElMessage.error("添加用户失败:" + res.msg);
                 }
             }).catch((err: any) => {
-                ElMessage.error("添加用户失败:", err.msg);
+                ElMessage.error("添加用户失败:" + err.msg);
             });
             emits('close')
         } else {

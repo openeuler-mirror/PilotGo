@@ -18,6 +18,10 @@ export let checkEmail = (rule: any, value: any, callback: Function) => {
 
 // 校验手机号
 export let checkPhone = (rule: any, value: any, callback: Function) => {
+    if (!value) {
+        return callback();
+    }
+
     let reg = /^[1]([3-9])[0-9]{9}$/;
     if (!reg.test(value)) {
         return callback(new Error("手机号格式错误"))

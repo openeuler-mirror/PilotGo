@@ -59,7 +59,7 @@ function onAddRole() {
                     }
                 })
                 .catch((err: any) => {
-                    ElMessage.error("添加失败,请检查输入内容", err.msg);
+                    ElMessage.error("添加失败,请检查输入内容" + err.msg);
                 });
             emits("close")
         } else {
