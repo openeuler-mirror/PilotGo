@@ -31,13 +31,13 @@ import (
 var StaticFiles embed.FS
 
 func StaticRouter(router *gin.Engine) {
-	sf, err := fs.Sub(StaticFiles, "static")
+	sf, err := fs.Sub(StaticFiles, "assets")
 	if err != nil {
-		logger.Error("failed to load frontend static files: %s", err.Error())
+		logger.Error("failed to load frontend assets files: %s", err.Error())
 		return
 	}
 
-	router.StaticFS("/static", http.FS(sf))
+	router.StaticFS("/assets", http.FS(sf))
 	router.GET("/", func(c *gin.Context) {
 		c.FileFromFS("/", http.FS(StaticFiles))
 	})
