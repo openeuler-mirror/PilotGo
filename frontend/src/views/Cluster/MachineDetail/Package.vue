@@ -2,9 +2,9 @@
     <div class="content">
         <div class="repo">
             <el-table :data="allRepos">
-                <el-table-column prop="File" label="文件" width="400px"></el-table-column>
-                <el-table-column prop="Enabled" label="enabled" width="100px"></el-table-column>
-                <el-table-column prop="URL" label="repo地址"></el-table-column>
+                <el-table-column align="center" prop="File" label="文件" width="400px"></el-table-column>
+                <el-table-column align="center" prop="Enabled" label="enabled" width="100px"></el-table-column>
+                <el-table-column align="center" prop="URL" label="repo地址"></el-table-column>
             </el-table>
         </div>
         <div class="packages">

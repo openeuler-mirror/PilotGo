@@ -9,7 +9,7 @@
         <div class="content">
             <el-table :data="props.data" :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
                 @selection-change="onSelectionChange">
-                <el-table-column type="selection" width="60" align="center" v-if="showSelect" />
+                <el-table-column align="center" type="selection" width="60" v-if="showSelect" />
                 <slot name="content"></slot>
             </el-table>
         </div>
@@ -94,16 +94,18 @@ const onSelectionChange = (val: any[]) => {
 
     .content {
         width: 100%;
-        height: 100%;
-        overflow: scroll;
+        height: 88%;
     }
 
     .pagination {
         width: 100%;
-        height: 40px;
+        height: 6%;
+        padding-left: 5px;
+        display: flex;
 
         :deep(.el-pagination) {
-            justify-content: flex-end;
+            width: 100%;
+            display: flex;
 
             .el-pagination__sizes {
                 flex: 1,

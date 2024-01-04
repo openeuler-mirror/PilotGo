@@ -21,22 +21,22 @@
                 </el-dropdown>
             </template>
             <template v-slot:content>
-                <el-table-column label="批次名称">
+                <el-table-column align="center" label="批次名称">
                     <template #default="scope">
                         <router-link :to="'/batch/detail/' + scope.row.ID">
                             {{ scope.row.name }}
                         </router-link>
                     </template>
                 </el-table-column>
-                <el-table-column prop="manager" label="创建者">
+                <el-table-column align="center" prop="manager" label="创建者">
                 </el-table-column>
-                <el-table-column prop="DepartName" label="部门">
+                <el-table-column align="center" prop="DepartName" label="部门">
                 </el-table-column>
-                <el-table-column prop="CreatedAt" label="创建时间" sortable>
+                <el-table-column align="center" prop="CreatedAt" label="创建时间" sortable>
                 </el-table-column>
-                <el-table-column prop="description" label="备注">
+                <el-table-column align="center" prop="description" label="备注">
                 </el-table-column>
-                <el-table-column prop="operation" label="操作">
+                <el-table-column align="center" prop="operation" label="操作">
                     <template #default="scope">
                         <auth-button auth="button/batch_update" @click="onEditBatch(scope.row.ID)">
                             编辑
