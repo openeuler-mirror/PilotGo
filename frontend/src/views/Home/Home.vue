@@ -102,7 +102,7 @@ onMounted(() => {
             ElMessage.error("failed to login:" + resp.msg)
         }
     }).catch((err) => {
-        ElMessage.error("get platform version failed:" + err)
+        ElMessage.error("get platform version failed:" + err.msg)
     })
 })
 
@@ -124,7 +124,7 @@ function updateUserInfo() {
             ElMessage.error("failed to login:" + resp.msg)
         }
     }).catch((err) => {
-        ElMessage.error("get platform version failed:" + err)
+        ElMessage.error("get platform version failed:" + err.msg)
     })
 }
 
@@ -138,7 +138,7 @@ function handleLogout() {
             doLogout()
             ElMessage.success("logout success")
         }).catch((err) => {
-            ElMessage.error("logout error: " + err)
+            ElMessage.error("logout error: " + err.msg)
         })
     }).catch(() => {
         // cancel logout

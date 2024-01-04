@@ -3,7 +3,7 @@
     <template v-for="item in routes">
       <router-link :to="item.path">
         <el-menu-item :index="item.panel" v-if="!item.subMenus">
-          <component class="sidebar_icon" :is="item.icon" ></component>
+          <component class="sidebar_icon" :is="item.icon"></component>
           <template #title>
             <span style="padding-left: 2px;">{{ item.title }}</span>
           </template>
@@ -49,5 +49,9 @@ watchEffect(() => {
   background: #f2f8ff !important;
   border-right: 3px solid rgb(241, 139, 14);
   color: rgb(241, 139, 14);
+}
+
+a {
+  text-decoration: none;
 }
 </style>

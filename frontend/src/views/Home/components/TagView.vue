@@ -100,4 +100,8 @@ function closeSelectedTag(tag: Taginfo) {
     }
 
 }
+
+a {
+  text-decoration: none;
+}
 </style>

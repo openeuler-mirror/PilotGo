@@ -124,10 +124,10 @@ function onUpdateUser() {
                     ElMessage.success(res.msg);
                     formRef.value.resetFields();
                 } else {
-                    ElMessage.error("修改用户信息失败:", res.msg);
+                    ElMessage.error("修改用户信息失败:" + res.msg);
                 }
             }).catch((err: any) => {
-                ElMessage.error("修改用户信息失败", err.msg);
+                ElMessage.error("修改用户信息失败" + err.msg);
             });
             emits('close')
         } else {

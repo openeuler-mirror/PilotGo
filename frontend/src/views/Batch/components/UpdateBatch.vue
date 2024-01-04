@@ -54,7 +54,7 @@ function onUpdateBatch() {
                     ElMessage.error("failed to update batch info:" + resp.msg)
                 }
             }).catch((error) => {
-                ElMessage.error("failed to update batch info:" + error)
+                ElMessage.error("failed to update batch info:" + error.msg)
             })
             emits('close')
         } else {

@@ -96,7 +96,7 @@ function submitLogin() {
                     ElMessage.error("failed to login:" + resp.msg)
                 }
             }).catch((error) => {
-                ElMessage.error("failed to login:" + error)
+                ElMessage.error("failed to login:" + error.msg)
             })
         } else {
             ElMessage.error("login user or email invalid")

@@ -47,9 +47,9 @@ export function updatePlugins() {
             })
             iframeComponents.value = iframes;
         } else {
-            ElMessage.error("查询插件列表错误：", res.msg);
+            ElMessage.error("查询插件列表错误：" + res.msg);
         }
     }).catch((err) => {
-        ElMessage.error("查询插件列表错误：", err.msg);
+        ElMessage.error("查询插件列表错误：" + err.msg);
     })
 }
