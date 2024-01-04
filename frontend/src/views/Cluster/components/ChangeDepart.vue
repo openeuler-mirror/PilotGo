@@ -6,9 +6,9 @@
                     <span>已选机器列表</span>
                 </div>
                 <el-table :data="props.machines">
-                    <el-table-column prop="ip" label="ip">
+                    <el-table-column align="center" prop="ip" label="ip">
                     </el-table-column>
-                    <el-table-column prop="departname" label="原部门">
+                    <el-table-column align="center" prop="departname" label="原部门">
                     </el-table-column>
                 </el-table>
             </div>

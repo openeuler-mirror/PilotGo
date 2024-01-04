@@ -5,13 +5,13 @@
                 <el-button type="primary" @click="onAddRole">添加</el-button>
             </template>
             <template v-slot:content>
-                <el-table-column prop="id" label="角色ID" sortable>
+                <el-table-column align="center" prop="id" label="角色ID" sortable>
                 </el-table-column>
-                <el-table-column prop="role" label="角色名">
+                <el-table-column align="center" prop="role" label="角色名">
                 </el-table-column>
-                <el-table-column prop="description" label="描述">
+                <el-table-column align="center" prop="description" label="描述">
                 </el-table-column>
-                <el-table-column label="权限">
+                <el-table-column align="center" label="权限">
                     <template #default="scope">
                         <el-button name="default_all" type="primary" size="small"
                             @click="showRoleDetail(scope.row)">查看</el-button>
@@ -19,7 +19,7 @@
                             @click="onEditRolePermission(scope.row)">变更</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" fixed="right">
+                <el-table-column align="center" label="操作" fixed="right">
                     <template #default="scope">
                         <el-button :disabled="(scope.row.role === 'admin')" name="role_update" size="small" type="primary"
                             @click="onEditRoleInfo(scope.row)">编辑</el-button>

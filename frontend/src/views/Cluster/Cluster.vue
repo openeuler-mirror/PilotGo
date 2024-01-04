@@ -20,7 +20,8 @@
                         <template #dropdown>
                             <el-dropdown-menu>
                                 <el-dropdown-item>
-                                    <auth-button auth="button/dept_change" :show="true" @click="showChangeDepartDialog = true">
+                                    <auth-button auth="button/dept_change" :show="true"
+                                        @click="showChangeDepartDialog = true">
                                         变更部门
                                     </auth-button>
                                 </el-dropdown-item>
@@ -34,25 +35,25 @@
                     </el-dropdown>
                 </template>
                 <template v-slot:content>
-                    <el-table-column label="ip">
+                    <el-table-column align="center" label="ip">
                         <template #default="data">
                             <span title="查看机器详情" @click="machineDetail(data.row)">
                                 {{ data.row.ip }}
                             </span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="departname" label="部门">
+                    <el-table-column align="center" prop="departname" label="部门">
                     </el-table-column>
-                    <el-table-column prop="cpu" label="cpu">
+                    <el-table-column align="center" prop="cpu" label="cpu">
                     </el-table-column>
-                    <el-table-column label="状态">
+                    <el-table-column align="center" label="状态">
                         <template #default="scope">
                             <state-dot :runstatus="scope.row.runstatus" :maintstatus="scope.row.maintstatus"></state-dot>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="tags" label="标签">
+                    <el-table-column align="center" prop="tags" label="标签">
                     </el-table-column>
-                    <el-table-column prop="systeminfo" label="系统">
+                    <el-table-column align="center" prop="systeminfo" label="系统">
                     </el-table-column>
                 </template>
             </PGTable>

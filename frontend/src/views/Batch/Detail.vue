@@ -24,21 +24,21 @@
             </el-dropdown>
         </template>
         <template v-slot:content>
-            <el-table-column label="ip">
+            <el-table-column align="center" label="ip">
                 <template v-slot="data">
                     <span title="查看机器详情">
                         {{ data.row.ip }}
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="CPU" label="cpu">
+            <el-table-column align="center" prop="CPU" label="cpu">
             </el-table-column>
-            <el-table-column label="状态">
+            <el-table-column align="center" label="状态">
                 <template #default="scope">
                     <state-dot :runstatus="scope.row.runstatus" :maintstatus="scope.row.maintstatus"></state-dot>
                 </template>
             </el-table-column>
-            <el-table-column prop="sysinfo" label="系统">
+            <el-table-column align="center" prop="sysinfo" label="系统">
             </el-table-column>
         </template>
     </PGTable>

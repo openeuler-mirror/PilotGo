@@ -43,10 +43,10 @@ const maintDotClass = computed(() => {
     return props.maintstatus === 'normal' ? 'online' : props.maintstatus === 'maintenance' ? 'unSet' : 'offline';
 })
 const maintTextClass = computed(() => {
-    return props.maintstatus == 'normal' ? 'online' : props.maintstatus === 'maintenance' ? 'unsetText' : 'offlineText';
+    return props.maintstatus == 'normal' ? 'onlineText' : props.maintstatus === 'maintenance' ? 'unsetText' : 'offlineText';
 })
 const maintStateText = computed(() => {
-    return props.maintstatus == 'normal' ? '正常' : props.maintstatus === 'maintenance' ? '维护中' : '未知';
+    return props.maintstatus == 'normal' ? '正常使用' : props.maintstatus === 'maintenance' ? '维护中' : '未知';
 })
 
 
