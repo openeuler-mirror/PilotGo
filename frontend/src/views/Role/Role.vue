@@ -37,7 +37,7 @@
         </PGTable>
 
         <el-dialog :title="roleOperateTitle" v-model="showRoleOperate">
-            <UpdateRole v-if="operate === 'UpdateRole'" :role="selectedRole" />
+            <UpdateRole v-if="operate === 'UpdateRole'" :role="selectedRole" @rolesUpdated="updateRoles" @close="showRoleOperate = false" />
             <AddRole v-if="operate === 'AddRole'" @rolesUpdated="updateRoles" @close="showRoleOperate = false"/>
         </el-dialog>
 
@@ -124,9 +124,8 @@ function onAddRole() {
 }
 
 function onDeleteRole(role: any) {
-    // TODO: use other params
     deleteRole({
-        role: role.role
+        role: role.id
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             ElMessage.success("删除角色成功:" + resp.msg)
