@@ -109,9 +109,11 @@ func MachineInfoByUUID(uuid string) (*Res, error) {
 }
 
 func UpdateMachine(uuid string, ma *MachineNode) error {
-	err := IsStatus(ma.MaintStatus)
-	if err != nil {
-		return err
+	if ma.MaintStatus != "" {
+		err := IsStatus(ma.MaintStatus)
+		if err != nil {
+			return err
+		}
 	}
 	return dao.UpdateMachine(uuid, ma)
 }
