@@ -27,7 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed static index.html
+//go:embed assets index.html
 var StaticFiles embed.FS
 
 func StaticRouter(router *gin.Engine) {
