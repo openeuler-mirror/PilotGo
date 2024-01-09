@@ -5,16 +5,15 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-func RequestExtention(p dao.PluginModel) ([]common.Extention, error) {
+func RequestExtention(Url string) ([]common.Extention, error) {
 
 	//TODO:规定插件接收请求的api
-	url := p.Url + "/plugin_manage/api/v1/extentions"
+	url := Url + "/plugin_manage/api/v1/extentions"
 
 	r, err := httputils.Get(url, &httputils.Params{})
 	if err != nil {
@@ -35,12 +34,9 @@ func RequestExtention(p dao.PluginModel) ([]common.Extention, error) {
 		logger.Error(resp.Message)
 		return nil, err
 	}
-	var buttons []common.Extention
-	if err := resp.ParseData(&buttons); err != nil {
+	var extention []common.Extention
+	if err := resp.ParseData(&extention); err != nil {
 		logger.Error(err.Error())
 	}
-	for _, vb := range buttons {
-		vb.PluginName = p.Name
-	}
-	return buttons, err
+	return extention, err
 }
