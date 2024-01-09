@@ -11,6 +11,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 
+	"gitee.com/openeuler/PilotGo/app/server/service/extention"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
@@ -53,7 +54,7 @@ type Plugin struct {
 	ConnectStatus     bool   `json:"status"`
 	LastHeartbeatTime string `json:"lastheatbeat"`
 	Enabled           int    `json:"enabled"`
-	Extentions        []*common.Extention
+	Extentions        []common.Extention
 }
 
 func (p *Plugin) Clone() *Plugin {
@@ -67,16 +68,14 @@ func (p *Plugin) Clone() *Plugin {
 		Url:         p.Url,
 		PluginType:  p.PluginType,
 		Enabled:     p.Enabled,
-		Extentions:  []*common.Extention{},
 	}
-	for _, e := range p.Extentions {
-		result.Extentions = append(result.Extentions, &common.Extention{
-			PluginName: e.PluginName,
-			Name:       e.Name,
-			Type:       e.Type,
-			URL:        e.URL,
-		})
+
+	es := make([]common.Extention, len(p.Extentions))
+	for i, e := range p.Extentions {
+		cloned := e.Clone() // 调用每个成员的 Clone 方法，假设实现了 Clone 方法
+		es[i] = cloned
 	}
+	result.Extentions = es
 
 	return result
 }
@@ -308,7 +307,13 @@ func (m *PluginManager) getPlugins() ([]*Plugin, error) {
 	m.Lock()
 	for _, v := range m.Plugins {
 		// 使用深拷贝避免指针泄露
-		result = append(result, v.Clone())
+		p := v.Clone()
+		ex, err := extention.RequestExtention(v.Url)
+		if err != nil {
+			logger.Error("Failed to request the list of plugin extensions: %s", err)
+		}
+		p.Extentions = ex
+		result = append(result, p)
 	}
 	m.Unlock()
 
