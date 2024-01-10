@@ -382,23 +382,34 @@ func requestPluginInfo(url string) (*Plugin, error) {
 		return nil, err
 	}
 
-	info := &client.PluginFullInfo{}
-	err = json.Unmarshal(resp.Body, info)
+	//先解析插件信息
+	PluginInfo := &client.PluginInfo{}
+	err = json.Unmarshal(resp.Body, PluginInfo)
 	if err != nil {
 		logger.Error("unmarshal request plugin info error:%s", err.Error())
 		return nil, err
 	}
-	// TODO: check info valid
 
+	//解析插件扩展点信息
+	data := struct {
+		Extentions []map[string]interface{} `json:"extentions"`
+	}{}
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
+		logger.Error("request plugin extentions error:%s", err.Error())
+		return nil, err
+	}
+	extentions := common.ParseParameters(data.Extentions)
+
+	// TODO: check info valid
 	return &Plugin{
-		Name:        info.Name,
-		Version:     info.Version,
-		Description: info.Description,
-		Author:      info.Author,
-		Email:       info.Email,
-		Url:         info.Url,
-		PluginType:  info.PluginType,
-		Extentions:  info.Extentions,
+		Name:        PluginInfo.Name,
+		Version:     PluginInfo.Version,
+		Description: PluginInfo.Description,
+		Author:      PluginInfo.Author,
+		Email:       PluginInfo.Email,
+		Url:         PluginInfo.Url,
+		PluginType:  PluginInfo.PluginType,
+		Extentions:  extentions,
 		// Status:      common.StatusLoaded,
 	}, nil
 }
