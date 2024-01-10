@@ -11,7 +11,6 @@ import (
 )
 
 func RequestExtention(Url string) ([]common.Extention, error) {
-
 	//TODO:规定插件接收请求的api
 	url := Url + "/plugin_manage/api/v1/extentions"
 
@@ -34,9 +33,11 @@ func RequestExtention(Url string) ([]common.Extention, error) {
 		logger.Error(resp.Message)
 		return nil, err
 	}
-	var extention []common.Extention
-	if err := resp.ParseData(&extention); err != nil {
-		logger.Error(err.Error())
+
+	var data []map[string]interface{}
+	if err := json.Unmarshal(resp.Data, &data); err != nil {
+		panic(err)
 	}
-	return extention, err
+	extentions := common.ParseParameters(data)
+	return extentions, err
 }
