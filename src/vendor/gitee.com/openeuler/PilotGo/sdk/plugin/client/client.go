@@ -29,7 +29,7 @@ type Client struct {
 	getTagsCallback GetTagsCallback
 
 	// 用于平台扩展点功能
-	extentions []*common.Extention
+	extentions []common.Extention
 
 	//bind阻塞功能支持
 	mu   sync.Mutex

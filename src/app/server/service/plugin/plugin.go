@@ -301,6 +301,26 @@ func (m *PluginManager) getPlugin(name string) (*Plugin, error) {
 	return result, nil
 }
 
+func (m *PluginManager) GetPluginByUUID(uuid string) (*Plugin, error) {
+	var result *Plugin
+	found := false
+	m.Lock()
+	for _, v := range m.Plugins {
+		if v.UUID == uuid {
+			// 使用深拷贝避免指针泄露
+			result = v.Clone()
+			found = true
+			break
+		}
+	}
+	m.Unlock()
+
+	if !found {
+		return nil, fmt.Errorf("plugin %s not found", uuid)
+	}
+	return result, nil
+}
+
 // 获取所有插件
 func (m *PluginManager) getPlugins() ([]*Plugin, error) {
 	result := []*Plugin{}
@@ -417,6 +437,16 @@ func requestPluginInfo(url string) (*Plugin, error) {
 // 获取单个plugin
 func GetPlugin(name string) (*Plugin, error) {
 	plugin, err := globalPluginManager.getPlugin(name)
+	if err != nil {
+		logger.Error("failed to read plugin info from db:%s", err.Error())
+		return nil, err
+	}
+	return plugin, nil
+}
+
+// 获取单个plugin
+func GetPluginByUUID(uuid string) (*Plugin, error) {
+	plugin, err := globalPluginManager.GetPluginByUUID(uuid)
 	if err != nil {
 		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return nil, err

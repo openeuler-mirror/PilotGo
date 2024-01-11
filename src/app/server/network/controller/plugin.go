@@ -109,7 +109,12 @@ func TogglePluginHandler(c *gin.Context) {
 		response.Fail(c, nil, "toggle plugin error:"+err.Error())
 		return
 	}
-	response.Success(c, nil, "插件信息更新成功")
+	//根据uuid从pluginmanage中获取本插件信息，并返回插件扩展点信息
+	plugin, err := plugin.GetPluginByUUID(param.UUID)
+	if err != nil {
+		response.Fail(c, nil, "get plugin by uuid error:"+err.Error())
+	}
+	response.Success(c, plugin.Extentions, "插件信息更新成功")
 }
 
 // 卸载插件

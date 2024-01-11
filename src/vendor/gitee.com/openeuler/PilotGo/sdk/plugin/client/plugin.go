@@ -23,7 +23,7 @@ type PluginInfo struct {
 // 用于插件与PilotGo server通讯
 type PluginFullInfo struct {
 	PluginInfo
-	Extentions []*common.Extention
+	Extentions []common.Extention
 }
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
