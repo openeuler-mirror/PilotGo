@@ -47,6 +47,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
+		extentions:              []common.Extention{},
 	}
 	global_client.cond = sync.NewCond(&global_client.mu)
 

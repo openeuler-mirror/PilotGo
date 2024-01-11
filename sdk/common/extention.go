@@ -30,7 +30,6 @@ type BatchExtention struct {
 type PageExtention struct {
 	Type       string `json:"type"`
 	Name       string `json:"name"`
-	IsIndex    bool   `json:"is_index"`
 	URL        string `json:"url"`
 	Permission string `json:"permission"`
 }
@@ -52,7 +51,7 @@ func (pe *PageExtention) Clone() Extention {
 
 // 解析extentions参数
 func ParseParameters(data []map[string]interface{}) []Extention {
-	var extentions []Extention
+	extentions := []Extention{}
 	for _, v := range data {
 		switch v["type"] {
 		case ExtentionMachine:
@@ -79,7 +78,6 @@ func ParseParameters(data []map[string]interface{}) []Extention {
 				URL:        v["url"].(string),
 				Permission: v["permission"].(string),
 				Type:       v["type"].(string),
-				IsIndex:    v["is_index"].(bool),
 			}
 			extentions = append(extentions, pe)
 		}
