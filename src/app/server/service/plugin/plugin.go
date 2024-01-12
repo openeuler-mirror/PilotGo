@@ -11,7 +11,6 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 
-	"gitee.com/openeuler/PilotGo/app/server/service/extention"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
@@ -43,18 +42,19 @@ func Init() error {
 }
 
 type Plugin struct {
-	UUID              string `json:"uuid"`
-	Name              string `json:"name"`
-	Version           string `json:"version"`
-	Description       string `json:"description"`
-	Author            string `json:"author"`
-	Email             string `json:"email"`
-	Url               string `json:"url"`
-	PluginType        string `json:"plugin_type"`
-	ConnectStatus     bool   `json:"status"`
-	LastHeartbeatTime string `json:"lastheatbeat"`
-	Enabled           int    `json:"enabled"`
-	Extentions        []common.Extention
+	UUID              string              `json:"uuid"`
+	Name              string              `json:"name"`
+	Version           string              `json:"version"`
+	Description       string              `json:"description"`
+	Author            string              `json:"author"`
+	Email             string              `json:"email"`
+	Url               string              `json:"url"`
+	PluginType        string              `json:"plugin_type"`
+	ConnectStatus     bool                `json:"status"`
+	LastHeartbeatTime string              `json:"lastheatbeat"`
+	Enabled           int                 `json:"enabled"`
+	Extentions        []common.Extention  `json:"extentions"`
+	Permissions       []common.Permission `json:"permissions"`
 }
 
 func (p *Plugin) Clone() *Plugin {
@@ -68,6 +68,7 @@ func (p *Plugin) Clone() *Plugin {
 		Url:         p.Url,
 		PluginType:  p.PluginType,
 		Enabled:     p.Enabled,
+		Permissions: p.Permissions,
 	}
 
 	es := make([]common.Extention, len(p.Extentions))
@@ -328,11 +329,6 @@ func (m *PluginManager) getPlugins() ([]*Plugin, error) {
 	for _, v := range m.Plugins {
 		// 使用深拷贝避免指针泄露
 		p := v.Clone()
-		ex, err := extention.RequestExtention(v.Url)
-		if err != nil {
-			logger.Error("Failed to request the list of plugin extensions: %s", err)
-		}
-		p.Extentions = ex
 		result = append(result, p)
 	}
 	m.Unlock()
@@ -420,6 +416,14 @@ func requestPluginInfo(url string) (*Plugin, error) {
 	}
 	extentions := common.ParseParameters(data.Extentions)
 
+	permissions := struct {
+		Permissions []common.Permission `json:"permissions"`
+	}{}
+	if err := json.Unmarshal(resp.Body, &permissions); err != nil {
+		logger.Error("request plugin permissions error:%s", err.Error())
+		return nil, err
+	}
+
 	// TODO: check info valid
 	return &Plugin{
 		Name:        PluginInfo.Name,
@@ -430,6 +434,7 @@ func requestPluginInfo(url string) (*Plugin, error) {
 		Url:         PluginInfo.Url,
 		PluginType:  PluginInfo.PluginType,
 		Extentions:  extentions,
+		Permissions: permissions.Permissions,
 		// Status:      common.StatusLoaded,
 	}, nil
 }

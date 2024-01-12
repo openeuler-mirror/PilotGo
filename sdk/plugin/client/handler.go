@@ -46,8 +46,9 @@ func infoHandler(c *gin.Context) {
 	}
 
 	info := &PluginFullInfo{
-		PluginInfo: *client.PluginInfo,
-		Extentions: client.extentions,
+		PluginInfo:  *client.PluginInfo,
+		Extentions:  client.extentions,
+		Permissions: client.permissions,
 	}
 
 	c.JSON(http.StatusOK, info)
@@ -99,21 +100,6 @@ func eventHandler(c *gin.Context) {
 	}
 
 	client.ProcessEvent(&msg)
-}
-
-func extentionsHandler(c *gin.Context) {
-	v, ok := c.Get("__internal__client_instance")
-	if !ok {
-		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
-		return
-	}
-	client, ok := v.(*Client)
-	if !ok {
-		response.Fail(c, gin.H{"status": false}, "client信息错误")
-		return
-	}
-
-	response.Success(c, client.extentions, "")
 }
 
 func commandResultHandler(c *gin.Context) {
