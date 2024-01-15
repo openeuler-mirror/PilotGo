@@ -29,12 +29,11 @@ type Batch = dao.Batch
 type BatchMachines = dao.BatchMachines
 type CreateBatchParam struct {
 	Name        string   `json:"Name"`
-	Description string   `json:"Descrip"`
+	Description string   `json:"Description"`
 	Manager     string   `json:"Manager"`
 	DepartName  []string `json:"DepartName"`
 	DepartID    []int    `json:"DepartID"`
 	Machines    []int    `json:"Machines"`
-	DepartIDs   []int    `json:"deptids"`
 }
 
 func CreateBatch(batchinfo *CreateBatchParam) error {
@@ -46,88 +45,66 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 		return errors.New("已存在该名称批次")
 	}
 
-	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartIDs) == 0 {
+	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartID) == 0 {
 		return errors.New("请先选择机器IP或部门")
 	}
 	// 机器id列表
-	var machinelist string
 	Departids := make([]int, 0)
-	if len(batchinfo.Machines) == 0 {
+
+	if len(batchinfo.Machines) == 0 && len(batchinfo.DepartID) != 0 {
 		// 点选部门创建批次
-		var machineids []int
-		for _, ids := range batchinfo.DepartIDs {
+		for _, ids := range batchinfo.DepartID {
 			Departids = append(Departids, ids)
 			depart.ReturnSpecifiedDepart(ids, &Departids)
 		}
 
-		machines, err := dao.MachineList(Departids)
-		if err != nil {
-			return err
-		}
-		for _, mamachine := range machines {
-			machineids = append(machineids, mamachine.ID)
-		}
-		if len(machineids) == 0 {
-			return errors.New("该部门下没有机器，请重新确认")
-		}
-		batchinfo.Machines = machineids
-		for _, id := range machineids {
-			machinelist = machinelist + "," + strconv.Itoa(id)
-			machinelist = strings.Trim(machinelist, ",")
-		}
-	} else {
-		// 点选ip创建批次
-		for _, id := range batchinfo.Machines {
-			machinelist = machinelist + "," + strconv.Itoa(id)
-			machinelist = strings.Trim(machinelist, ",")
-		}
-	}
-
-	// 机器所属部门ids
-	var departIdlist string
-	if len(batchinfo.DepartID) == 0 {
+		// 机器所属部门ids
+		var departIdlist string
 		for _, id := range Departids {
 			departIdlist = departIdlist + "," + strconv.Itoa(id)
 			departIdlist = strings.Trim(departIdlist, ",")
 		}
-	} else {
-		for _, id := range batchinfo.DepartID {
-			departIdlist = departIdlist + "," + strconv.Itoa(id)
-			departIdlist = strings.Trim(departIdlist, ",")
-		}
-	}
 
-	// 机器所属部门
-	var departNamelist string
-	if len(batchinfo.DepartID) == 0 {
+		// 机器所属部门
+		var departNamelist string
 		list := dao.DepartIdsToGetDepartNames(Departids)
 		departNamelist = strings.Join(list, ",")
-	} else {
-		List := dao.DepartIdsToGetDepartNames(batchinfo.DepartID)
-		departNamelist = strings.Join(List, ",")
-	}
 
-	Batch := &dao.Batch{
-		Name:        batchinfo.Name,
-		Description: batchinfo.Description,
-		Manager:     batchinfo.Manager,
-		Depart:      departIdlist,
-		DepartName:  departNamelist,
-	}
-	err = dao.CreateBatchMessage(Batch)
-	if err != nil {
-		return err
-	}
-
-	//添加数据到Batch2Machine
-	for _, id := range batchinfo.Machines {
-		err := dao.AddBatch2Machine(dao.BatchMachines{
-			BatchID:       Batch.ID,
-			MachineNodeID: uint(id),
-		})
+		Batch := &dao.Batch{
+			Name:        batchinfo.Name,
+			Description: batchinfo.Description,
+			Manager:     batchinfo.Manager,
+			Depart:      departIdlist,
+			DepartName:  departNamelist,
+		}
+		err = dao.CreateBatchMessage(Batch)
 		if err != nil {
 			return err
 		}
+	} else if len(batchinfo.DepartID) == 0 && len(batchinfo.Machines) != 0 {
+		//按机器创建批次
+		Batch := &dao.Batch{
+			Name:        batchinfo.Name,
+			Description: batchinfo.Description,
+			Manager:     batchinfo.Manager,
+		}
+		err = dao.CreateBatchMessage(Batch)
+		if err != nil {
+			return err
+		}
+
+		// 添加数据到Batch2Machine
+		for _, id := range batchinfo.Machines {
+			err := dao.AddBatch2Machine(dao.BatchMachines{
+				BatchID:       Batch.ID,
+				MachineNodeID: uint(id),
+			})
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		return errors.New("输入参数有误")
 	}
 	return nil
 }
