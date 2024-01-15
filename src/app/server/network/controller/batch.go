@@ -35,6 +35,7 @@ func CreateBatchHandler(c *gin.Context) {
 		Action:     "创建批次",
 	}
 	auditlog.Add(log)
+	params.Manager = u.Email
 
 	if err := batch.CreateBatch(params); err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
