@@ -34,7 +34,7 @@ PilotGo 核心功能模块包括：
 
 #### 应用场景
 
-PiotGo可用于典型的服务器集群管理场景，支持大批量的服务器集群基本管理及监控；通过集成对应的业务功能插件，还可实现业务集群的统一平台管理，例如Mysql数据库集群、redis数据缓存集群、nginx网关集群等。
+PilotGo可用于典型的服务器集群管理场景，支持大批量的服务器集群基本管理及监控；通过集成对应的业务功能插件，还可实现业务集群的统一平台管理，例如Mysql数据库集群、redis数据缓存集群、nginx网关集群等。
 
 #### 安装、启动教程
 
@@ -79,6 +79,8 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
 4.  插件安装：
    [PilotGo-plugin-grafana插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-grafana)  
    [PilotGo-plugin-prometheus插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-prometheus)
+   [PilotGo-plugin-a-tune插件安装](https://gitee.com/openeuler/PilotGo-plugin-a-tune)
+   [PilotGo-plugin-topology插件安装](https://gitee.com/openeuler/PilotGo-plugin-topology)
 
 #### 补充链接
 
