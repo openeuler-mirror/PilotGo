@@ -1,10 +1,13 @@
 package client
 
 import (
+	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) RegisterPermission(pers []common.Permission) error {
@@ -16,4 +19,36 @@ func (c *Client) RegisterPermission(pers []common.Permission) error {
 		}
 	}
 	return nil
+}
+
+func (c *Client) HasPermission(resource, operate string) (bool, error) {
+	if !c.IsBind() {
+		return false, errors.New("unbind PilotGo-server platform")
+	}
+
+	url := "http://" + c.Server() + "/api/v1/pluginapi/permission"
+	p := &common.Permission{
+		Resource: resource,
+		Operate:  operate,
+	}
+
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	res := &struct {
+		Code    int    `json:"code"`
+		Message string `json:"msg"`
+		Data    bool   `json:"data"`
+	}{}
+	if err := json.Unmarshal(r.Body, res); err != nil {
+		return false, err
+	}
+	if res.Code != http.StatusOK {
+		return false, errors.New(res.Message)
+	}
+	return res.Data, nil
 }

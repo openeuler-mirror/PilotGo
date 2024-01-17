@@ -332,6 +332,7 @@ func registerPluginApi(router *gin.Engine) {
 	{
 		pluginAPI.GET("/plugins", pluginapi.PluginList)
 		pluginAPI.POST("/heartbeat", pluginapi.PluginHeartbeat)
+		pluginAPI.POST("/has_permission", pluginapi.HasPermission)
 	}
 }
 

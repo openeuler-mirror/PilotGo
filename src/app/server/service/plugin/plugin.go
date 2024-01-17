@@ -11,6 +11,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 
+	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
@@ -508,11 +509,31 @@ func AddPlugin(param *AddPluginParam) error {
 	if err := globalPluginManager.addPlugin(url); err != nil {
 		return err
 	}
-	return nil
+
+	//向数据库添加admin用户的插件权限
+	p, err := requestPluginInfo(url)
+	if err != nil {
+		return err
+	}
+	err = auth.AddPluginPermission(p.Permissions)
+	return err
 }
 
 func DeletePlugin(uuid string) error {
 	logger.Debug("delete plugin: %s", uuid)
+
+	//删除插件权限
+	plugin, err := GetPluginByUUID(uuid)
+	if err != nil {
+		logger.Error("get plugin by uuid error:%s", err.Error())
+		return err
+	}
+	logger.Debug("delete %s plugin permission", plugin.Name)
+	err = auth.DeletePluginPermission(plugin.Permissions)
+	if err != nil {
+		logger.Error("failed to delete plugin permissions in mysql:%s", err.Error())
+		return err
+	}
 
 	if err := deletePluginInRedis(uuid); err != nil {
 		logger.Error("failed to delete plugin heartbeat in redis:%s", err.Error())
