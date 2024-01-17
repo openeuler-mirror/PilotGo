@@ -21,6 +21,7 @@ import (
 
 	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
 	suser "gitee.com/openeuler/PilotGo/app/server/service/user"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/casbin/casbin/v2"
 	casbinmodel "github.com/casbin/casbin/v2/model"
@@ -169,6 +170,37 @@ var (
 		"plugin",
 	}
 )
+
+// 添加信息到列表中
+func AddPluginPermission(permissions []common.Permission) error {
+	//TODO；先添加到列表中可以展示，再通过修改权限进行调整
+	// 添加admin的插件权限
+	for _, v := range permissions {
+		ok, err := addPolicy("admin", v.Resource, v.Operate)
+		if err != nil {
+			logger.Error("init plugin-admin policy failed:%s", err)
+		}
+		if !ok {
+			logger.Debug("plugin-admin %s permission already exists: %s", v.Operate, v.Resource)
+		}
+	}
+	return nil
+}
+
+// 删除插件权限
+func DeletePluginPermission(permissions []common.Permission) error {
+	for _, v := range permissions {
+		fmt.Println(v)
+		ok, err := G_Enfocer.RemoveFilteredPolicy(1, v.Resource, v.Operate)
+		if err != nil {
+			logger.Error("delete plugin policy failed:%s", err)
+		}
+		if !ok {
+			logger.Debug("delete plugin %s permission failed: %s", v.Operate, v.Resource)
+		}
+	}
+	return nil
+}
 
 func initAdminPolicy() {
 	G_Enfocer.AddRoleForUser("admin", "admin")
