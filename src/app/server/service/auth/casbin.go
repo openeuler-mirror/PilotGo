@@ -41,19 +41,23 @@ var (
 	once sync.Once
 )
 
+const (
+	DomainPilotGo = "PilotGo-server"
+)
+
 func Casbin(conf *sconfig.MysqlDBInfo) {
 	text := `
 	[request_definition]
-	r = sub, obj, act
+	r = sub, obj, act, domain
 
 	[policy_definition]
-	p = sub, obj, act
+	p = sub, obj, act, domain
 
 	[role_definition]
 	g = _, _
 
 	[matchers]
-	m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
+	m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)&& regexMatch(r.domain, p.domain)
 
 	[policy_effect]
 	e = some(where (p.eft == allow))
@@ -136,8 +140,8 @@ func PolicyAdd(rule CasbinRule) bool {
 	return false
 }
 
-func addPolicy(role, resource, action string) (bool, error) {
-	return G_Enfocer.AddPolicy(role, resource, action)
+func addPolicy(role, resource, action, domain string) (bool, error) {
+	return G_Enfocer.AddPolicy(role, resource, action, domain)
 }
 
 var (
@@ -172,11 +176,11 @@ var (
 )
 
 // 添加信息到列表中
-func AddPluginPermission(permissions []common.Permission) error {
+func AddPluginPermission(permissions []common.Permission, uuid string) error {
 	//TODO；先添加到列表中可以展示，再通过修改权限进行调整
 	// 添加admin的插件权限
 	for _, v := range permissions {
-		ok, err := addPolicy("admin", v.Resource, v.Operate)
+		ok, err := addPolicy("admin", v.Resource, v.Operate, uuid)
 		if err != nil {
 			logger.Error("init plugin-admin policy failed:%s", err)
 		}
@@ -188,10 +192,10 @@ func AddPluginPermission(permissions []common.Permission) error {
 }
 
 // 删除插件权限
-func DeletePluginPermission(permissions []common.Permission) error {
+func DeletePluginPermission(permissions []common.Permission, uuid string) error {
 	for _, v := range permissions {
 		fmt.Println(v)
-		ok, err := G_Enfocer.RemoveFilteredPolicy(1, v.Resource, v.Operate)
+		ok, err := G_Enfocer.RemoveFilteredPolicy(1, v.Resource, v.Operate, uuid)
 		if err != nil {
 			logger.Error("delete plugin policy failed:%s", err)
 		}
@@ -206,7 +210,7 @@ func initAdminPolicy() {
 	G_Enfocer.AddRoleForUser("admin", "admin")
 
 	for _, p := range PermissionList {
-		ok, err := addPolicy("admin", p, "button")
+		ok, err := addPolicy("admin", p, "button", DomainPilotGo)
 		if err != nil {
 			logger.Error("init admin policy failed:%s", err)
 		}
@@ -216,7 +220,7 @@ func initAdminPolicy() {
 	}
 
 	for _, m := range MenuList {
-		ok, err := addPolicy("admin", m, "menu")
+		ok, err := addPolicy("admin", m, "menu", DomainPilotGo)
 		if err != nil {
 			logger.Error("init admin policy failed:%s", err)
 		}
@@ -227,7 +231,7 @@ func initAdminPolicy() {
 
 	// test
 	{
-		ok, err := addPolicy("admin", "plugins", "get")
+		ok, err := addPolicy("admin", "plugins", "get", DomainPilotGo)
 		if err != nil {
 			logger.Error("init admin policy failed:%s", err)
 		}
@@ -237,14 +241,14 @@ func initAdminPolicy() {
 	}
 }
 
-func CheckAuth(user, resource, action string) (bool, error) {
+func CheckAuth(user, resource, action, domain string) (bool, error) {
 	roles, err := suser.GetUserRoles(user)
 	if err != nil {
 		return false, err
 	}
 	for _, role := range roles {
-		ok, err := G_Enfocer.Enforce(role, resource, action)
-		logger.Debug("check %s auth: %s %s %s, result: %t", user, role, resource, action, ok)
+		ok, err := G_Enfocer.Enforce(role, resource, action, domain)
+		logger.Debug("check %s auth: %s %s %s %s, result: %t", user, role, resource, action, domain, ok)
 
 		if err != nil {
 			return false, err
@@ -269,7 +273,7 @@ func GetUserRoles(user string) ([]string, error) {
 
 func AddRole(role string) error {
 	// TODO: 为了兼容历史版本创建空role，创建一个无用的权限
-	addPolicy(role, "empty", "emply")
+	addPolicy(role, "empty", "emply", DomainPilotGo)
 	return nil
 }
 
@@ -277,6 +281,7 @@ type Policy struct {
 	Role     string
 	Resource string
 	Action   string
+	Domain   string
 }
 
 func GetAllPolicies() []Policy {
@@ -333,7 +338,7 @@ func UpdateRolePermissions(role string, buttons, menus []string) error {
 	}
 
 	for _, p := range buttons {
-		_, err := addPolicy(role, p, "button")
+		_, err := addPolicy(role, p, "button", DomainPilotGo)
 		if err != nil {
 			logger.Error("add role:%s buttion policy failed:%s", role, err)
 			return err
@@ -341,7 +346,7 @@ func UpdateRolePermissions(role string, buttons, menus []string) error {
 	}
 
 	for _, m := range menus {
-		_, err := addPolicy(role, m, "menu")
+		_, err := addPolicy(role, m, "menu", DomainPilotGo)
 		if err != nil {
 			logger.Error("add role:%s menu policy failed:%s", role, err)
 			return err
