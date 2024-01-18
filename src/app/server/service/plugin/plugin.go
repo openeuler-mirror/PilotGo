@@ -515,7 +515,8 @@ func AddPlugin(param *AddPluginParam) error {
 	if err != nil {
 		return err
 	}
-	err = auth.AddPluginPermission(p.Permissions)
+	//TODO:传输数据换成uuid
+	err = auth.AddPluginPermission(p.Permissions, p.UUID)
 	return err
 }
 
@@ -529,7 +530,8 @@ func DeletePlugin(uuid string) error {
 		return err
 	}
 	logger.Debug("delete %s plugin permission", plugin.Name)
-	err = auth.DeletePluginPermission(plugin.Permissions)
+	//TODO:传输数据换成uuid
+	err = auth.DeletePluginPermission(plugin.Permissions, plugin.UUID)
 	if err != nil {
 		logger.Error("failed to delete plugin permissions in mysql:%s", err.Error())
 		return err

@@ -59,7 +59,10 @@ func HasPermission(c *gin.Context) {
 		return
 	}
 	logger.Debug("request from %d, %s", claims.UserId, claims.UserName)
-	ok, err := auth.CheckAuth(claims.UserName, p.Resource, p.Operate)
+
+	//TODO:解析发送请求插件的uuid
+	var uuid string
+	ok, err := auth.CheckAuth(claims.UserName, p.Resource, p.Operate, uuid)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
