@@ -14,7 +14,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
-	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,12 +21,6 @@ import (
 func AuthCheck(c *gin.Context) {
 	// TODO
 	c.Next()
-}
-
-type RunResult struct {
-	*utils.CmdResult
-	MachineUUID string
-	MachineIP   string
 }
 
 // 远程运行脚本
@@ -78,14 +71,16 @@ func RunCommandHandler(c *gin.Context) {
 				logger.Error("run command error, agent:%s, command:%s", uuid, d.Command)
 			}
 			logger.Debug("run command on agent result:%v", data)
-			re := RunResult{
-				CmdResult:   data,
+			re := common.CmdResult{
 				MachineUUID: uuid,
 				MachineIP:   agent.IP,
+				RetCode:     data.RetCode,
+				Stdout:      data.Stdout,
+				Stderr:      data.Stderr,
 			}
 			return re
 		}
-		return RunResult{}
+		return common.CmdResult{}
 	}
 
 	result := batch.BatchProcess(d.Batch, f, d.Command)
@@ -140,14 +135,16 @@ func RunScriptHandler(c *gin.Context) {
 				logger.Error("run script error, agent:%s, command:%s", uuid, d.Script)
 			}
 			logger.Debug("run script on agent result:%v", data)
-			re := RunResult{
-				CmdResult:   data,
+			re := common.CmdResult{
 				MachineUUID: uuid,
 				MachineIP:   agent.IP,
+				RetCode:     data.RetCode,
+				Stdout:      data.Stdout,
+				Stderr:      data.Stderr,
 			}
 			return re
 		}
-		return RunResult{}
+		return common.CmdResult{}
 	}
 
 	result := batch.BatchProcess(d.Batch, f, d.Script, d.Params)
