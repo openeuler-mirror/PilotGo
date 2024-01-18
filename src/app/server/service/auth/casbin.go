@@ -298,6 +298,10 @@ func GetAllPolicies() []Policy {
 	return result
 }
 
+func GetFilteredPolicy(role, object, action, domain string) [][]string {
+	return G_Enfocer.GetFilteredPolicy(0, role, object, action, domain)
+}
+
 // 获取指定用户的buttion权限和menu权限
 func GetPermissionsOfUser(user string) ([]string, []string, error) {
 	ps, err := G_Enfocer.GetImplicitPermissionsForUser(user)

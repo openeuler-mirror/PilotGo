@@ -43,7 +43,6 @@ func GetLoginUserPermission(Roleid []int) (string, []string, error) {
 	if err != nil {
 		return "", nil, err
 	}
-
 	menu, buttons := getRoleMenuButtons(role.Name)
 
 	return menu, buttons, nil
@@ -99,22 +98,18 @@ func GetRoles() ([]*ReturnRole, error) {
 func getRoleMenuButtons(role string) (string, []string) {
 	menu := ""
 	buttons := []string{}
-
-	policies := auth.GetAllPolicies()
-	for _, p := range policies {
-		if role == p.Role {
-			switch p.Action {
-			case "button":
-				buttons = append(buttons, p.Resource)
-			case "menu":
-				menu = menu + "," + p.Resource
-			}
-		}
+	policys := auth.GetFilteredPolicy(role, "", "button", "")
+	for _, v := range policys {
+		buttons = append(buttons, v[1])
 	}
-
+	policys = auth.GetFilteredPolicy(role, "", "menu", "")
+	for _, v := range policys {
+		menu = menu + "," + v[1]
+	}
 	if len(menu) > 0 {
 		menu = menu[1:]
 	}
+	//TODO：遍历查询插件权限
 
 	return menu, buttons
 }
