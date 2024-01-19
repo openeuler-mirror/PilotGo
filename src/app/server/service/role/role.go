@@ -15,6 +15,8 @@
 package role
 
 import (
+	"errors"
+
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
@@ -155,8 +157,19 @@ func UpdateRoleInfo(name, description string) error {
 }
 
 // 更改角色权限
-func UpdateRolePermissions(role string, buttons, menus []string) error {
-	return auth.UpdateRolePermissions(role, buttons, menus)
+func UpdateRolePermissions(role string, buttons, menus []string, PluginPermissions []plugin.PluginPermission) error {
+	if role == "admin" {
+		return errors.New("admin角色权限不可修改")
+	}
+
+	if err := auth.DeleteRole(role); err != nil {
+		return err
+	}
+	if err := auth.UpdateRolePermissions(role, buttons, menus); err != nil {
+		return err
+	}
+
+	return plugin.UpdatePluginPermissions(role, PluginPermissions)
 }
 
 // 分页查询

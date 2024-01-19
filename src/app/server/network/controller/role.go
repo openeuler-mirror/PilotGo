@@ -18,6 +18,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
+	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	roleservice "gitee.com/openeuler/PilotGo/app/server/service/role"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -164,9 +165,10 @@ func UpdateRoleInfoHandler(c *gin.Context) {
 // 更改角色权限
 func RolePermissionChangeHandler(c *gin.Context) {
 	params := &struct {
-		ButtonId []string `json:"buttonId"`
-		Menus    []string `json:"menus"`
-		Role     string   `json:"role"`
+		ButtonId          []string                  `json:"buttonId"`
+		Menus             []string                  `json:"menus"`
+		Role              string                    `json:"role"`
+		PluginPermissions []plugin.PluginPermission `json:"pluginpermissions"`
 	}{}
 	if err := c.Bind(params); err != nil {
 		response.Fail(c, nil, "parameter error:"+err.Error())
@@ -188,7 +190,7 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	err = roleservice.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus)
+	err = roleservice.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus, params.PluginPermissions)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())

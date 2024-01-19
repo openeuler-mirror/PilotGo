@@ -512,7 +512,7 @@ func AddPlugin(param *AddPluginParam) error {
 	}
 
 	//向数据库添加admin用户的插件权限
-	err = auth.AddPluginPermission(p.Permissions, p.UUID)
+	err = auth.AddPluginPermission("admin", p.Permissions, p.UUID)
 	return err
 }
 
@@ -599,4 +599,21 @@ func GetRolePluginPermission(role string) map[string]interface{} {
 		}
 	}
 	return p2p
+}
+
+type PluginPermission struct {
+	UUID        string              `json:"uuid"`
+	Permissions []common.Permission `json:"permissions"`
+}
+
+// 更新插件角色权限
+func UpdatePluginPermissions(role string, PluginPermissions []PluginPermission) error {
+	for _, p := range PluginPermissions {
+		err := auth.AddPluginPermission(role, p.Permissions, p.UUID)
+		if err != nil {
+			logger.Error("add role:%s buttion policy failed:%s", role, err)
+			return err
+		}
+	}
+	return nil
 }
