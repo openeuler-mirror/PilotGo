@@ -51,12 +51,11 @@ func GetLoginUserPermission(Roleid []int) (map[string]interface{}, error) {
 }
 
 type ReturnRole struct {
-	ID          int      `json:"id"`
-	Role        string   `json:"role"`
-	Type        int      `json:"type"`
-	Description string   `json:"description"`
-	Menus       string   `json:"menus"`
-	Buttons     []string `json:"buttons"`
+	ID          int                    `json:"id"`
+	Role        string                 `json:"role"`
+	Type        int                    `json:"type"`
+	Description string                 `json:"description"`
+	Permissions map[string]interface{} `json:"permissions"`
 }
 
 func GetRoles() ([]*ReturnRole, error) {
@@ -67,31 +66,14 @@ func GetRoles() ([]*ReturnRole, error) {
 	}
 
 	for _, role := range roles {
+		permissions := getRoleMenuButtons(role.Name)
+
 		result = append(result, &ReturnRole{
 			ID:          role.ID,
 			Role:        role.Name,
 			Description: role.Description,
-			Menus:       "",
-			Buttons:     []string{},
+			Permissions: permissions,
 		})
-	}
-
-	policies := auth.GetAllPolicies()
-
-	for _, item := range result {
-		for _, p := range policies {
-			if item.Role == p.Role {
-				switch p.Action {
-				case "menu":
-					item.Menus = item.Menus + "," + p.Resource
-				case "button":
-					item.Buttons = append(item.Buttons, p.Resource)
-				}
-			}
-		}
-		if len(item.Menus) > 0 {
-			item.Menus = item.Menus[1:]
-		}
 	}
 
 	return result, nil
@@ -181,31 +163,13 @@ func GetRolePaged(offset, size int) (int64, []*ReturnRole, error) {
 	}
 
 	for _, role := range data {
+		permissions := getRoleMenuButtons(role.Name)
 		result = append(result, &ReturnRole{
 			ID:          role.ID,
 			Role:        role.Name,
 			Description: role.Description,
-			Menus:       "",
-			Buttons:     []string{},
+			Permissions: permissions,
 		})
-	}
-
-	policies := auth.GetAllPolicies()
-
-	for _, item := range result {
-		for _, p := range policies {
-			if item.Role == p.Role {
-				switch p.Action {
-				case "menu":
-					item.Menus = item.Menus + "," + p.Resource
-				case "button":
-					item.Buttons = append(item.Buttons, p.Resource)
-				}
-			}
-		}
-		if len(item.Menus) > 0 {
-			item.Menus = item.Menus[1:]
-		}
 	}
 
 	return total, result, err
