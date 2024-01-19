@@ -326,6 +326,7 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.PUT("/stop_service", pluginapi.StopService)
 
 		pluginAPI.GET("/machine_list", pluginapi.MachineList)
+		pluginAPI.GET("/machine_info", pluginapi.MachineInfoByUUID)
 		pluginAPI.POST("/file_deploy", pluginapi.FileDeploy)
 
 		pluginAPI.GET("/batch_list", pluginapi.BatchListHandler)

@@ -32,3 +32,14 @@ func MachineList(c *gin.Context) {
 
 	response.Success(c, resp, "获取所有的机器数据")
 }
+
+func MachineInfoByUUID(c *gin.Context) {
+	machine_uuid := c.Query("machine_uuid")
+	data, err := machineservice.MachineInfoByUUID(machine_uuid)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	response.Success(c, data, "获取所有的机器数据")
+}
