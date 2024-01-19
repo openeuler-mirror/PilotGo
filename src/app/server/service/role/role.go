@@ -17,6 +17,7 @@ package role
 import (
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
+	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 )
 
 type Role = dao.Role
@@ -36,16 +37,15 @@ func RoleId(R []int) int {
 }
 
 // return menu, button, error
-func GetLoginUserPermission(Roleid []int) (string, []string, error) {
+func GetLoginUserPermission(Roleid []int) (map[string]interface{}, error) {
 	// TODO: multi role case
 	roleId := RoleId(Roleid) //用户的最高权限
 	role, err := dao.GetRoleById(roleId)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
-	menu, buttons := getRoleMenuButtons(role.Name)
-
-	return menu, buttons, nil
+	permissions := getRoleMenuButtons(role.Name)
+	return permissions, nil
 }
 
 type ReturnRole struct {
@@ -95,13 +95,17 @@ func GetRoles() ([]*ReturnRole, error) {
 	return result, nil
 }
 
-func getRoleMenuButtons(role string) (string, []string) {
+func getRoleMenuButtons(role string) map[string]interface{} {
+	permissions := make(map[string]interface{})
+	//获取pilotgo-server的权限信息
 	menu := ""
 	buttons := []string{}
 	policys := auth.GetFilteredPolicy(role, "", "button", "")
 	for _, v := range policys {
 		buttons = append(buttons, v[1])
 	}
+	permissions["buttons"] = buttons
+
 	policys = auth.GetFilteredPolicy(role, "", "menu", "")
 	for _, v := range policys {
 		menu = menu + "," + v[1]
@@ -109,9 +113,14 @@ func getRoleMenuButtons(role string) (string, []string) {
 	if len(menu) > 0 {
 		menu = menu[1:]
 	}
-	//TODO：遍历查询插件权限
+	permissions["menu"] = menu
 
-	return menu, buttons
+	//遍历查询插件权限
+	p := plugin.GetRolePluginPermission(role)
+	for k, v := range p {
+		permissions[k] = v
+	}
+	return permissions
 }
 
 // 添加角色

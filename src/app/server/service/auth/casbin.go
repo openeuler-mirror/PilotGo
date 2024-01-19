@@ -175,7 +175,7 @@ var (
 	}
 )
 
-// 添加信息到列表中
+// 添加插件权限到列表中
 func AddPluginPermission(permissions []common.Permission, uuid string) error {
 	//TODO；先添加到列表中可以展示，再通过修改权限进行调整
 	// 添加admin的插件权限

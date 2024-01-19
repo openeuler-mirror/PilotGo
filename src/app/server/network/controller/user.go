@@ -401,10 +401,10 @@ func GetLoginUserPermissionHandler(c *gin.Context) {
 		return
 	}
 
-	menu, buttons, err := role.GetLoginUserPermission(roleids)
+	permissions, err := role.GetLoginUserPermission(roleids)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{"menu": menu, "button": buttons}, "用户权限列表")
+	response.Success(c, permissions, "用户权限列表")
 }

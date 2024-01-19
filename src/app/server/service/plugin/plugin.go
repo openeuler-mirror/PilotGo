@@ -578,3 +578,25 @@ func GetPluginConnectStatus(url string) (*client.PluginStatus, error) {
 	}
 	return plugin_status.(*client.PluginStatus), nil
 }
+
+// 从db获取某个权限的所有插件权限
+func GetRolePluginPermission(role string) map[string]interface{} {
+	p2p := make(map[string]interface{})
+	for _, v := range globalPluginManager.Plugins {
+		pers := []string{}
+		policys := auth.GetFilteredPolicy(role, "", "", v.UUID)
+		for _, p := range policys {
+			pers = append(pers, p[1]+"/"+p[2])
+		}
+		p2p[v.UUID] = struct {
+			UUID        string
+			Name        string
+			Permassions []string
+		}{
+			UUID:        v.UUID,
+			Name:        v.Name,
+			Permassions: pers,
+		}
+	}
+	return p2p
+}
