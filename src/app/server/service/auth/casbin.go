@@ -194,7 +194,6 @@ func AddPluginPermission(permissions []common.Permission, uuid string) error {
 // 删除插件权限
 func DeletePluginPermission(permissions []common.Permission, uuid string) error {
 	for _, v := range permissions {
-		fmt.Println(v)
 		ok, err := G_Enfocer.RemoveFilteredPolicy(1, v.Resource, v.Operate, uuid)
 		if err != nil {
 			logger.Error("delete plugin policy failed:%s", err)

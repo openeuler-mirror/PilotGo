@@ -177,15 +177,15 @@ func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 	return nil
 }
 
-func (m *PluginManager) addPlugin(url string) error {
+func (m *PluginManager) addPlugin(url string) (*Plugin, error) {
 	err := Handshake(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p, err := requestPluginInfo(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if p.UUID == "" {
@@ -193,7 +193,7 @@ func (m *PluginManager) addPlugin(url string) error {
 	}
 
 	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
-		return err
+		return nil, err
 	}
 
 	key := client.HeartbeatKey + p.Url
@@ -202,14 +202,14 @@ func (m *PluginManager) addPlugin(url string) error {
 		LastConnect: time.Now(),
 	}
 	if err := redismanager.Set(key, value); err != nil {
-		return err
+		return nil, err
 	}
 
 	m.Lock()
 	m.Plugins = append(m.Plugins, p)
 	m.Unlock()
 
-	return nil
+	return p, nil
 }
 
 func (m *PluginManager) deletePlugin(uuid string) error {
@@ -506,16 +506,12 @@ func AddPlugin(param *AddPluginParam) error {
 	url := param.Url
 	logger.Debug("add plugin from %s", url)
 
-	if err := globalPluginManager.addPlugin(url); err != nil {
+	p, err := globalPluginManager.addPlugin(url)
+	if err != nil {
 		return err
 	}
 
 	//向数据库添加admin用户的插件权限
-	p, err := requestPluginInfo(url)
-	if err != nil {
-		return err
-	}
-	//TODO:传输数据换成uuid
 	err = auth.AddPluginPermission(p.Permissions, p.UUID)
 	return err
 }
@@ -530,7 +526,7 @@ func DeletePlugin(uuid string) error {
 		return err
 	}
 	logger.Debug("delete %s plugin permission", plugin.Name)
-	//TODO:传输数据换成uuid
+
 	err = auth.DeletePluginPermission(plugin.Permissions, plugin.UUID)
 	if err != nil {
 		logger.Error("failed to delete plugin permissions in mysql:%s", err.Error())
