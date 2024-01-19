@@ -176,11 +176,10 @@ var (
 )
 
 // 添加插件权限到列表中
-func AddPluginPermission(permissions []common.Permission, uuid string) error {
-	//TODO；先添加到列表中可以展示，再通过修改权限进行调整
-	// 添加admin的插件权限
+func AddPluginPermission(role string, permissions []common.Permission, uuid string) error {
+	//TODO；先添加到列表中可以展示
 	for _, v := range permissions {
-		ok, err := addPolicy("admin", v.Resource, v.Operate, uuid)
+		ok, err := addPolicy(role, v.Resource, v.Operate, uuid)
 		if err != nil {
 			logger.Error("init plugin-admin policy failed:%s", err)
 		}
@@ -332,14 +331,6 @@ func GetPermissionsOfUser(user string) ([]string, []string, error) {
 }
 
 func UpdateRolePermissions(role string, buttons, menus []string) error {
-	if role == "admin" {
-		return errors.New("admin角色权限不可修改")
-	}
-
-	if _, err := G_Enfocer.DeleteRole(role); err != nil {
-		return err
-	}
-
 	for _, p := range buttons {
 		_, err := addPolicy(role, p, "button", DomainPilotGo)
 		if err != nil {
