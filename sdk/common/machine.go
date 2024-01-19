@@ -10,6 +10,13 @@ type MachineNode struct {
 	MaintStatus string `json:"maintatatus"`
 }
 
+type BatchList struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Manager     string `json:"manager"`
+}
+
 type Batch struct {
 	BatchId       int      `json:"batch_id"`
 	DepartmentIDs []string `json:"department_ids"`
