@@ -42,6 +42,10 @@ func main() {
 		fmt.Println("failed to load configure, exit..", err)
 		os.Exit(-1)
 	}
+	if config.Config().Storage.Path == "" {
+		fmt.Println("Please set the path for file service storage in yaml")
+		os.Exit(-1)
+	}
 
 	if err := logger.Init(&config.Config().Logopts); err != nil {
 		fmt.Printf("logger init failed, please check the config file: %s", err)

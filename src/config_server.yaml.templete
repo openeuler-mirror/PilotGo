@@ -29,3 +29,5 @@ redis:
   defaultDB: 0
   dialTimeout: 5s #redis连接超时时间.默认5s
   enableRedis: yes #是否启用redis
+storage:  #文件服务存储路径
+  path: ""

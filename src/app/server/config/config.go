@@ -55,6 +55,10 @@ type RedisDBInfo struct {
 	EnableRedis bool          `yaml:"enableRedis"`
 }
 
+type Storage struct {
+	Path string `yaml:"path"`
+}
+
 type ServerConfig struct {
 	HttpServer   HttpServer     `yaml:"http_server"`
 	SocketServer SocketServer   `yaml:"socket_server"`
@@ -62,6 +66,7 @@ type ServerConfig struct {
 	Logopts      logger.LogOpts `yaml:"log"`
 	MysqlDBinfo  MysqlDBInfo    `yaml:"mysql"`
 	RedisDBinfo  RedisDBInfo    `yaml:"redis"`
+	Storage      Storage        `yaml:"storage"`
 }
 
 var global_config ServerConfig
