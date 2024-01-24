@@ -20,7 +20,6 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/service/common"
 	"gitee.com/openeuler/PilotGo/app/server/service/cron"
-	cronservice "gitee.com/openeuler/PilotGo/app/server/service/cron"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -28,7 +27,7 @@ import (
 
 func CreatCron(c *gin.Context) {
 	// 存入数据库
-	var newCron cronservice.CrontabUpdate
+	var newCron cron.CrontabUpdate
 	c.Bind(&newCron)
 
 	uuid := newCron.MachineUUID
@@ -42,7 +41,7 @@ func CreatCron(c *gin.Context) {
 		response.Fail(c, nil, "任务名字不能为空")
 		return
 	}
-	temp, err := cronservice.IsTaskNameExist(TaskName)
+	temp, err := cron.IsTaskNameExist(TaskName)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -59,7 +58,7 @@ func CreatCron(c *gin.Context) {
 		response.Fail(c, nil, "执行命令不能为空")
 		return
 	}
-	newcron := cronservice.CrontabList{
+	newcron := cron.CrontabList{
 		MachineUUID: uuid,
 		TaskName:    TaskName,
 		Description: description,
@@ -67,7 +66,7 @@ func CreatCron(c *gin.Context) {
 		Command:     command,
 		Status:      &status,
 	}
-	id, err := cronservice.NewCron(newcron)
+	id, err := cron.NewCron(newcron)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -78,7 +77,7 @@ func CreatCron(c *gin.Context) {
 	}
 
 	// 远程命令执行
-	cronSpec, Command, err := cronservice.Id2CronInfo(id)
+	cronSpec, Command, err := cron.Id2CronInfo(id)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
 		return
@@ -93,7 +92,7 @@ func CreatCron(c *gin.Context) {
 }
 
 func DeleteCronTask(c *gin.Context) {
-	var crons cronservice.DelCrons
+	var crons cron.DelCrons
 	var cronIds string
 	c.Bind(&crons)
 	uuid := crons.MachineUUID
@@ -103,7 +102,7 @@ func DeleteCronTask(c *gin.Context) {
 			cronIds = strconv.Itoa(cronId) + ","
 			continue
 		}
-		if err := cronservice.DeleteTask(cronId); err != nil {
+		if err := cron.DeleteTask(cronId); err != nil {
 			logger.Error(err.Error())
 		}
 	}
@@ -116,7 +115,7 @@ func DeleteCronTask(c *gin.Context) {
 }
 
 func UpdateCron(c *gin.Context) {
-	var Cron cronservice.CrontabUpdate
+	var Cron cron.CrontabUpdate
 	c.Bind(&Cron)
 	id := Cron.ID
 	TaskName := Cron.TaskName
@@ -125,7 +124,7 @@ func UpdateCron(c *gin.Context) {
 	command := Cron.Command
 	uuid := Cron.MachineUUID
 	status := Cron.Status
-	UpdateCron := cronservice.CrontabList{
+	UpdateCron := cron.CrontabList{
 		TaskName:    TaskName,
 		Description: description,
 		CronSpec:    spec[:len(spec)-2],
@@ -133,7 +132,7 @@ func UpdateCron(c *gin.Context) {
 		Status:      &status,
 	}
 	// 数据库内容修改
-	if err := cronservice.UpdateTask(id, UpdateCron); err != nil {
+	if err := cron.UpdateTask(id, UpdateCron); err != nil {
 		response.Fail(c, nil, err.Error())
 	}
 	if !status {
@@ -159,12 +158,12 @@ func UpdateCron(c *gin.Context) {
 }
 
 func CronTaskStatus(c *gin.Context) {
-	var Cron cronservice.CrontabUpdate
+	var Cron cron.CrontabUpdate
 	c.Bind(&Cron)
 	id := Cron.ID
 	uuid := Cron.MachineUUID
 	status := Cron.Status
-	temp, err := cronservice.IsTaskStatus(id, status)
+	temp, err := cron.IsTaskStatus(id, status)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -174,7 +173,7 @@ func CronTaskStatus(c *gin.Context) {
 		return
 	}
 
-	if err := cronservice.CronTaskStatus(id, status); err != nil {
+	if err := cron.CronTaskStatus(id, status); err != nil {
 		response.Fail(c, nil, err.Error())
 	}
 
@@ -188,7 +187,7 @@ func CronTaskStatus(c *gin.Context) {
 		return
 	}
 
-	cronSpec, Command, err := cronservice.Id2CronInfo(id)
+	cronSpec, Command, err := cron.Id2CronInfo(id)
 	if err != nil {
 		response.Fail(c, gin.H{"error": err}, "任务执行失败!")
 		return
