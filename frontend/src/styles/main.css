@@ -4,6 +4,7 @@ html {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
+  min-width: 1440px;
 }
 
 body {
@@ -24,4 +25,17 @@ body {
   padding: 0;
 
   font-weight: normal;
+}
+.transition3 {
+  transition: all .3s;
+}
+
+/* color */
+:root {
+  --active-color:rgb(241, 139, 14);
+}
+
+/* element */
+.el-menu {
+  border-right: 0 !important;
 }
