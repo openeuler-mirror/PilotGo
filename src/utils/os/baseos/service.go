@@ -75,28 +75,20 @@ func parseServiceInfo(tmp string) *common.ServiceInfo {
 		switch strings.Split(service.UnitName, ".")[1] {
 		case "service":
 			service.UnitType = common.ServiceUnit
-			break
 		case "socket":
 			service.UnitType = common.SocketUnit
-			break
 		case "target":
 			service.UnitType = common.TargetUnit
-			break
 		case "mount":
 			service.UnitType = common.MountUnit
-			break
 		case "automount":
 			service.UnitType = common.AutomountUnit
-			break
 		case "path":
 			service.UnitType = common.PathUnit
-			break
 		case "time":
 			service.UnitType = common.TimeUnit
-			break
 		default:
 			service.UnitType = common.UNKnown
-			break
 		}
 		for i, value := range strings.Split(strings.Trim(serviceResult[1], " "), " ") {
 			if i == 2 {
@@ -107,19 +99,14 @@ func parseServiceInfo(tmp string) *common.ServiceInfo {
 				switch strings.Trim(value, ";") {
 				case "enabled":
 					service.ServiceLoadedStatus = common.ServiceLoadedStatusEnabled
-					break
 				case "disabled":
 					service.ServiceLoadedStatus = common.ServiceLoadedStatusDisabled
-					break
 				case "static":
 					service.ServiceLoadedStatus = common.ServiceLoadedStatusStatic
-					break
 				case "mask":
 					service.ServiceLoadedStatus = common.ServiceLoadedStatusMask
-					break
 				default:
 					service.ServiceLoadedStatus = common.ServiceLoadedStatusUnknown
-					break
 				}
 			}
 		}
@@ -129,26 +116,20 @@ func parseServiceInfo(tmp string) *common.ServiceInfo {
 				switch value {
 				case "inactive":
 					service.ServiceActiveStatus = common.ServiceActiveStatusInactive
-					break
 				case "active":
 					service.ServiceActiveStatus = "active"
-					break
 				default:
 					service.ServiceActiveStatus = common.ServiceActiveStatusUnknown
-					break
 				}
 			}
 			if i == 2 && service.ServiceActiveStatus == "active" {
 				switch strings.Trim(value, "()") {
 				case "running":
 					service.ServiceActiveStatus = common.ServiceActiveStatusRunning
-					break
 				case "exited":
 					service.ServiceActiveStatus = common.ServiceActiveStatusExited
-					break
 				case "waiting":
 					service.ServiceActiveStatus = common.ServiceActiveStatusWaiting
-					break
 				}
 			}
 			if i == 5 {

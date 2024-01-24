@@ -108,19 +108,16 @@ func GetFiles(filePath string, scanSub bool) (fs []string, err error) {
 
 func UpdateFile(path, filename, data interface{}) (lastversion string, err error) {
 	fullname := path.(string) + "/" + filename.(string)
-	if fok, dok := IsFileExist(fullname); !fok {
-		if dok {
-			return "", fmt.Errorf("存在同名目录,文件下发失败")
+	if fok, _ := IsFileExist(fullname); !fok {
+		lastversion, err = FileReadString(fullname)
+		if err != nil {
+			return "", err
 		}
 		err := FileSaveString(fullname, data.(string))
 		if err != nil {
 			return "", err
 		}
+		return lastversion, err
 	}
-	lastversion, err = FileReadString(fullname)
-	if err != nil {
-		return "", err
-	}
-	err = FileSaveString(fullname, data.(string))
-	return lastversion, err
+	return "", fmt.Errorf(fullname + " is a directory")
 }
