@@ -131,5 +131,4 @@ func RegitsterHandler(c *network.SocketClient) {
 	c.BindHandler(protocol.ReadFile, handler.ReadFileHandler)
 	c.BindHandler(protocol.EditFile, handler.EditFileHandler)
 	c.BindHandler(protocol.AgentConfig, handler.AgentConfigHandler)
-	c.BindHandler(protocol.RepoConfig, handler.RepoConfigHandler)
 }

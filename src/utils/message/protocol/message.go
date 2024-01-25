@@ -151,8 +151,6 @@ const (
 	AgentOverview = 69
 	//获取服务信息
 	GetService = 70
-	//获取repo配置信息
-	RepoConfig = 71
 )
 
 type Message struct {

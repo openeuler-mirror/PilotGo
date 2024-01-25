@@ -1,11 +1,15 @@
 package pluginapi
 
 import (
+	"encoding/base64"
+	"strings"
+
 	"gitee.com/openeuler/PilotGo/utils"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	batchservice "gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
@@ -86,4 +90,49 @@ func FileDeploy(c *gin.Context) {
 	case false:
 		response.Success(c, nil, "配置文件下发完成")
 	}
+}
+
+func GetNodeFiles(c *gin.Context) {
+	fd := &struct {
+		NodeUUIds []string `json:"nodes"`
+		Path      string   `json:"path"`
+		FileName  string   `json:"filename"`
+	}{}
+	if err := c.Bind(fd); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+
+	r := make(map[string]interface{})
+	for _, uuid := range fd.NodeUUIds {
+		agent := agentmanager.GetAgent(uuid)
+		if agent == nil {
+			r[uuid] = "get agent failed"
+			logger.Error("get agent failed, agent:%s", uuid)
+			continue
+		}
+
+		//查找文件
+		cmd := "find " + fd.Path + " -type f -name \"*" + fd.FileName + "\""
+		data, err := agent.RunCommand(base64.StdEncoding.EncodeToString([]byte(cmd)))
+		if err != nil {
+			r[uuid] = "run command error"
+			logger.Error("run command error, agent:%s, command:%s", uuid, cmd)
+			continue
+		}
+
+		result := make(map[string]string)
+		for _, v := range strings.Split(data.Stdout, "\n") {
+			file, _, err := agent.ReadConfigFile(v)
+			if err != nil {
+				logger.Error(err.Error())
+			}
+			name := strings.Split(v, "/")[len(strings.Split(v, "/"))-1]
+			result["path"] = fd.Path
+			result["name"] = name
+			result["file"] = file
+		}
+		r[uuid] = result
+	}
+	response.Success(c, r, "配置文件获取完成")
 }
