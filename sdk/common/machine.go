@@ -22,3 +22,9 @@ type Batch struct {
 	DepartmentIDs []string `json:"department_ids"`
 	MachineUUIDs  []string `json:"machine_uuids"`
 }
+
+type File struct {
+	Path    string `json:"path"`
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
