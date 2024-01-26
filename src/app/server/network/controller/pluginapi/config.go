@@ -9,6 +9,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	batchservice "gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/app/server/service/depart"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -121,16 +122,16 @@ func GetNodeFiles(c *gin.Context) {
 			continue
 		}
 
-		result := make(map[string]string)
+		result := []common.File{}
 		for _, v := range strings.Split(data.Stdout, "\n") {
 			file, _, err := agent.ReadConfigFile(v)
 			if err != nil {
 				logger.Error(err.Error())
 			}
 			name := strings.Split(v, "/")[len(strings.Split(v, "/"))-1]
-			result["path"] = fd.Path
-			result["name"] = name
-			result["file"] = file
+			result = append(result, common.File{Path: fd.Path,
+				Name:    name,
+				Content: file})
 		}
 		r[uuid] = result
 	}
