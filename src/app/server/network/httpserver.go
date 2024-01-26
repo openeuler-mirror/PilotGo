@@ -331,6 +331,7 @@ func registerPluginApi(router *gin.Engine) {
 
 		pluginAPI.GET("/batch_list", pluginapi.BatchListHandler)
 		pluginAPI.GET("/batch_uuid", pluginapi.MachineListOfBatch)
+		pluginAPI.POST("/getnodefiles", pluginapi.GetNodeFiles)
 	}
 	// plugin
 	{

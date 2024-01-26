@@ -1,7 +1,6 @@
 package common
 
 type OSOperator interface {
-	RepoConfig
 	SystemOperator
 	CpuOperator
 	MemoryOperator
@@ -14,10 +13,6 @@ type OSOperator interface {
 	NetworkOperator
 	PackageOperator
 }
-type RepoConfig interface {
-	GetRepoConfig() (string, error)
-}
-
 type SystemOperator interface {
 	GetHostInfo() (*SystemInfo, error)
 }
