@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // 将string写入到指定文件
@@ -107,8 +108,10 @@ func GetFiles(filePath string, scanSub bool) (fs []string, err error) {
 }
 
 func UpdateFile(path, filename, data interface{}) (lastversion string, err error) {
-	fullname := path.(string) + "/" + filename.(string)
-	if fok, _ := IsFileExist(fullname); !fok {
+	//判断path是否带有斜杠
+	fullname := strings.TrimRight(path.(string), "/") + "/" + filename.(string)
+	fok, lok := IsFileExist(fullname)
+	if fok {
 		lastversion, err = FileReadString(fullname)
 		if err != nil {
 			return "", err
@@ -119,5 +122,8 @@ func UpdateFile(path, filename, data interface{}) (lastversion string, err error
 		}
 		return lastversion, err
 	}
-	return "", fmt.Errorf(fullname + " is a directory")
+	if lok {
+		return "", fmt.Errorf(fullname + " is a directory")
+	}
+	return "", fmt.Errorf(fullname + " does not exist")
 }

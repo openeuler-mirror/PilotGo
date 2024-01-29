@@ -22,6 +22,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
 	scommon "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/pkg/errors"
 )
 
@@ -199,27 +200,35 @@ func GetBatchMachineUUIDS(b *scommon.Batch) []string {
 	if b.MachineUUIDs != nil {
 		machine_uuids = append(machine_uuids, b.MachineUUIDs...)
 	}
-	if b.BatchId != 0 {
-		machine_uuids = append(machine_uuids, GetMachineUUIDS(b.BatchId)...)
-
+	if b.BatchIds != nil {
+		for _, v := range b.BatchIds {
+			machine_uuids = append(machine_uuids, GetMachineUUIDS(v)...)
+		}
 	}
+	if b.DepartmentIDs != nil {
+		for _, v := range b.DepartmentIDs {
+			r, err := depart.MachineList(v)
+			if err != nil {
+				logger.Error("failed to get machine uuid from departid:%s", err.Error())
+			}
+			for _, k := range r {
+				machine_uuids = append(machine_uuids, k.UUID)
+			}
+		}
+	}
+	//给uuid除重
+	machine_uuids = utils.RemoveRepByMap(machine_uuids)
 	return machine_uuids
 }
 
 type R interface{}
 
 func BatchProcess(b *scommon.Batch, f func(uuid string) R, it ...interface{}) []R {
-	var uuids []string
-	if b.MachineUUIDs != nil {
-		uuids = b.MachineUUIDs
-	} else {
-		uuids = GetMachineUUIDS(b.BatchId)
-	}
+	uuids := GetBatchMachineUUIDS(b)
 	result := []R{}
 	for _, uuid := range uuids {
 		r := f(uuid)
 		result = append(result, r)
 	}
-
 	return result
 }
