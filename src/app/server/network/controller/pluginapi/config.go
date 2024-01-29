@@ -22,22 +22,22 @@ func ApplyConfig(c *gin.Context) {
 // 配置文件下发
 func FileDeploy(c *gin.Context) {
 	fd := &struct {
-		Deploy_BatchIds  []int    `json:"deploy_batches"`
-		Deploy_DepartIds []int    `json:"deploy_departs"`
-		Deploy_NodeUUIds []string `json:"deploy_nodes"`
-		Deploy_Path      string   `json:"deploy_path"`
-		Deploy_FileName  string   `json:"deploy_name"`
-		Deploy_Text      string   `json:"deploy_file"`
+		DeployBatchIds  []int    `json:"deploybatches"`
+		DeployDepartIds []int    `json:"deploydeparts"`
+		DeployNodeUUIds []string `json:"deploynodes"`
+		DeployPath      string   `json:"deploypath"`
+		DeployFileName  string   `json:"deployname"`
+		DeployText      string   `json:"deployfile"`
 	}{}
 	if err := c.Bind(fd); err != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
-	batchIds := fd.Deploy_BatchIds
+	batchIds := fd.DeployBatchIds
 	UUIDs := batchservice.BatchIds2UUIDs(batchIds)
 	//添加部门机器数据，获取子部门，查找机器
-	for _, v := range fd.Deploy_DepartIds {
+	for _, v := range fd.DeployDepartIds {
 		machinelist, err := depart.MachineList(v)
 		if err != nil {
 			response.Fail(c, nil, err.Error())
@@ -48,23 +48,23 @@ func FileDeploy(c *gin.Context) {
 		}
 	}
 
-	UUIDs = append(UUIDs, fd.Deploy_NodeUUIds...)
+	UUIDs = append(UUIDs, fd.DeployNodeUUIds...)
 	//uuid数组去重
 	uuids := utils.RemoveRepByMap(UUIDs)
-	path := fd.Deploy_Path
-	filename := fd.Deploy_FileName
-	text := fd.Deploy_Text
+	path := fd.DeployPath
+	filename := fd.DeployFileName
+	text := fd.DeployText
 
 	if len(path) == 0 {
-		response.Fail(c, nil, "路径为空，请检查配置文件路径")
+		response.Fail(c, nil, "路径为空，请检查文件路径")
 		return
 	}
 	if len(filename) == 0 {
-		response.Fail(c, nil, "文件名为空，请检查配置文件名字")
+		response.Fail(c, nil, "文件名为空，请检查文件名字")
 		return
 	}
 	if len(text) == 0 {
-		response.Fail(c, nil, "文件内容为空，请重新检查文件内容")
+		response.Fail(c, nil, "文件内容为空，请重新文件内容")
 		return
 	}
 
@@ -87,9 +87,9 @@ func FileDeploy(c *gin.Context) {
 
 	switch len(result) > 0 {
 	case true:
-		response.Success(c, result, "部分配置文件下发失败")
+		response.Success(c, result, "部分文件下发失败")
 	case false:
-		response.Success(c, nil, "配置文件下发完成")
+		response.Success(c, nil, "文件下发完成")
 	}
 }
 
@@ -103,12 +103,17 @@ func GetNodeFiles(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-
-	r := make(map[string]interface{})
+	type FileResult struct {
+		UUID  string
+		Error string
+		Data  interface{}
+	}
+	r := []FileResult{}
 	for _, uuid := range fd.NodeUUIds {
 		agent := agentmanager.GetAgent(uuid)
 		if agent == nil {
-			r[uuid] = "get agent failed"
+			r = append(r, FileResult{UUID: uuid,
+				Error: "get agent failed"})
 			logger.Error("get agent failed, agent:%s", uuid)
 			continue
 		}
@@ -117,23 +122,29 @@ func GetNodeFiles(c *gin.Context) {
 		cmd := "find " + fd.Path + " -type f -name \"*" + fd.FileName + "\""
 		data, err := agent.RunCommand(base64.StdEncoding.EncodeToString([]byte(cmd)))
 		if err != nil {
-			r[uuid] = "run command error"
+			r = append(r, FileResult{UUID: uuid,
+				Error: "run command error"})
 			logger.Error("run command error, agent:%s, command:%s", uuid, cmd)
 			continue
 		}
-
-		result := []common.File{}
-		for _, v := range strings.Split(data.Stdout, "\n") {
-			file, _, err := agent.ReadConfigFile(v)
-			if err != nil {
-				logger.Error(err.Error())
+		if data.Stdout != "" && data.Stderr == "" {
+			result := []common.File{}
+			for _, v := range strings.Split(data.Stdout, "\n") {
+				file, _, err := agent.ReadConfigFile(v)
+				if err != nil {
+					logger.Error("failed to read the file:%s", err.Error())
+				}
+				name := strings.Split(v, "/")[len(strings.Split(v, "/"))-1]
+				result = append(result, common.File{Path: fd.Path,
+					Name:    name,
+					Content: file})
 			}
-			name := strings.Split(v, "/")[len(strings.Split(v, "/"))-1]
-			result = append(result, common.File{Path: fd.Path,
-				Name:    name,
-				Content: file})
+			r = append(r, FileResult{UUID: uuid,
+				Data: result})
+		} else {
+			r = append(r, FileResult{UUID: uuid,
+				Error: "no such file or directory"})
 		}
-		r[uuid] = result
 	}
-	response.Success(c, r, "配置文件获取完成")
+	response.Success(c, r, "文件获取完成")
 }
