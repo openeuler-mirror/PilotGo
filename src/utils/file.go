@@ -16,6 +16,7 @@
 package utils
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -29,11 +30,14 @@ func FileSaveString(filePath string, data string) error {
 	if err != nil {
 		return err
 	}
-
-	data_length := len(data)
+	decodedate, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return err
+	}
+	data_length := len(decodedate)
 	send_count := 0
 	for {
-		n, err := f.WriteString(data[send_count:])
+		n, err := f.Write(decodedate[send_count:])
 		if err != nil {
 			return err
 		}
@@ -126,4 +130,44 @@ func UpdateFile(path, filename, data interface{}) (lastversion string, err error
 		return "", fmt.Errorf(fullname + " is a directory")
 	}
 	return "", fmt.Errorf(fullname + " does not exist")
+}
+
+// 存储文件，文件存在时直接更新内容，文件不存在路径存在时创建新文件，路径不存在时报错
+func SaveFile(path, filename, data string) error {
+	path = strings.TrimRight(path, "/")
+	fullname := path + "/" + filename
+	fok, _ := IsFileExist(fullname)
+	if fok {
+		//更新文件
+		err := FileSaveString(fullname, data)
+		return err
+	} else {
+		//判断是否是文件夹
+		_, lok := IsFileExist(path)
+		if lok {
+			//创建文件
+			file, err := os.Create(fullname)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			// 写入内容到文件
+			decodedate, err := base64.StdEncoding.DecodeString(data)
+			data_length := len(decodedate)
+			send_count := 0
+			for {
+				n, err := file.Write(decodedate[send_count:])
+				if err != nil {
+					return err
+				}
+				if n+send_count >= data_length {
+					send_count += n
+					break
+				}
+			}
+			return err
+		}
+		return fmt.Errorf(path + " does not exist")
+	}
 }

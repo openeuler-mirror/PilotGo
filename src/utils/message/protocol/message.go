@@ -151,6 +151,8 @@ const (
 	AgentOverview = 69
 	//获取服务信息
 	GetService = 70
+	//保存文件
+	SaveFile = 71
 )
 
 type Message struct {

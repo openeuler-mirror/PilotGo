@@ -30,7 +30,7 @@ import (
 	uuidservice "github.com/google/uuid"
 )
 
-func ReadConfigFile(c *gin.Context) {
+func ReadFile(c *gin.Context) {
 	uuid := c.Query("uuid")
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
@@ -39,7 +39,7 @@ func ReadConfigFile(c *gin.Context) {
 	}
 
 	filepath := c.Query("file")
-	result, Err, err := agent.ReadConfigFile(filepath)
+	result, Err, err := agent.ReadFile(filepath)
 	if err != nil {
 		response.Fail(c, nil, Err)
 		return
@@ -135,7 +135,7 @@ func ConfigFileBroadcastToAgents(c *gin.Context) {
 			continue
 		}
 
-		_, Err, err := agent.UpdateConfigFile(path, filename, text)
+		_, Err, err := agent.UpdateFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
 			message := Err + path + "/" + filename + strconv.Itoa(http.StatusBadRequest)
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)

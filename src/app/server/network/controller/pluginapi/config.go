@@ -51,7 +51,7 @@ func FileDeploy(c *gin.Context) {
 				Error: "get agent failed"}
 		}
 
-		_, Err, err := agent.UpdateConfigFile(path, filename, text)
+		_, Err, err := agent.SaveFile(path, filename, text)
 		if len(Err) != 0 || err != nil {
 			return common.NodeResult{UUID: uuid,
 				Error: Err + err.Error()}
@@ -92,14 +92,14 @@ func GetNodeFiles(c *gin.Context) {
 		if data.Stdout != "" && data.Stderr == "" {
 			result := []common.File{}
 			for _, v := range strings.Split(data.Stdout, "\n") {
-				file, _, err := agent.ReadConfigFile(v)
+				file, _, err := agent.ReadFile(v)
 				if err != nil {
 					logger.Error("failed to read the file:%s", err.Error())
 				}
 				name := strings.Split(v, "/")[len(strings.Split(v, "/"))-1]
 				result = append(result, common.File{Path: fd.Path,
 					Name:    name,
-					Content: file})
+					Content: base64.StdEncoding.EncodeToString([]byte(file))})
 			}
 			return common.NodeResult{UUID: uuid,
 				Data: result}
