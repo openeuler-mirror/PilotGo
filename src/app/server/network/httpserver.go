@@ -259,7 +259,7 @@ func registerAPIs(router *gin.Engine) {
 
 	configmanager := api.Group("config") // 配置管理
 	{
-		configmanager.GET("/read_file", agentcontroller.ReadConfigFile)
+		configmanager.GET("/read_file", agentcontroller.ReadFile)
 		configmanager.POST("/fileSaveAdd", controller.SaveConfigFileToDatabaseHandler)
 		configmanager.GET("/file_all", controller.AllConfigFiles)
 		configmanager.POST("/file_search", controller.ConfigFileSearchHandler)

@@ -182,7 +182,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 	switch ip_assignment {
 	case "static":
 		text := baseos.NetworkStatic(oldnets3, ipv4_addr, ipv4_netmask, ipv4_gateway, ipv4_dns1, network.DNS2)
-		_, Err, err := agent.UpdateConfigFile(NetWorkPath, nic_name, text)
+		_, Err, err := agent.UpdateFile(NetWorkPath, nic_name, text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
 			return
@@ -196,7 +196,7 @@ func ConfigNetworkConnect(c *gin.Context) {
 
 	case "dhcp":
 		text := baseos.NetworkDHCP(oldnets3)
-		_, Err, err := agent.UpdateConfigFile(NetWorkPath, nic_name, text)
+		_, Err, err := agent.UpdateFile(NetWorkPath, nic_name, text)
 		if len(Err) != 0 || err != nil {
 			response.Fail(c, nil, Err)
 			return

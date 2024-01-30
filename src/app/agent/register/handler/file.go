@@ -68,6 +68,40 @@ func EditFileHandler(c *network.SocketClient, msg *protocol.Message) error {
 	return c.Send(resp_msg)
 }
 
+func SaveFileHandler(c *network.SocketClient, msg *protocol.Message) error {
+	logger.Debug("process agent info command:%s", msg.String())
+	result := &common.UpdateFile{}
+	err := msg.BindData(result)
+	if err != nil {
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  err.Error(),
+		}
+		return c.Send(resp_msg)
+	}
+
+	err = utils.SaveFile(result.Path, result.Name, result.Text)
+	if err != nil {
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  err.Error(),
+		}
+		return c.Send(resp_msg)
+	}
+
+	resp_msg := &protocol.Message{
+		UUID:   msg.UUID,
+		Type:   msg.Type,
+		Status: 0,
+		Data:   result,
+	}
+	return c.Send(resp_msg)
+}
+
 func AgentConfigHandler(c *network.SocketClient, msg *protocol.Message) error {
 	logger.Debug("process agent info command:%s", msg.String())
 	p, ok := msg.Data.(map[string]interface{})
