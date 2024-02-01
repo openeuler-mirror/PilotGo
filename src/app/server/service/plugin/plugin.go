@@ -467,8 +467,18 @@ func GetPlugins() ([]*Plugin, error) {
 		logger.Error("failed to read plugin info from db:%s", err.Error())
 		return nil, err
 	}
-
-	return plugins, nil
+	result := []*Plugin{}
+	for _, p := range plugins {
+		plugin_status, err := GetPluginConnectStatus(p.Url)
+		if err != nil {
+			logger.Error("plugin status get failed %s", err)
+			continue
+		}
+		p.ConnectStatus = plugin_status.Connected
+		p.LastHeartbeatTime = plugin_status.LastConnect.Format("2006-01-02 15:04:05")
+		result = append(result, p)
+	}
+	return result, nil
 }
 
 // 分页查询
