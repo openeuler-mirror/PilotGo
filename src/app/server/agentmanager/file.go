@@ -1,8 +1,10 @@
 package agentmanager
 
 import (
+	"errors"
 	"fmt"
 
+	sdkcommon "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
@@ -10,25 +12,44 @@ import (
 )
 
 // 查看配置文件内容
-func (a *Agent) ReadFile(filepath string) (string, string, error) {
+func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
-		Type: protocol.ReadFile,
-		Data: filepath,
+		Type: protocol.ReadFilePattern,
+		Data: sdkcommon.File{Path: filepath, Name: pattern},
 	}
 
 	resp_message, err := a.sendMessage(msg, true, 0)
 	if err != nil {
 		logger.Error("failed to run script on agent")
-		return "", "", err
+		return nil, "", err
 	}
 
 	if resp_message.Status == -1 || resp_message.Error != "" {
 		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
+		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
 	}
 
-	return resp_message.Data.(string), resp_message.Error, nil
+	data, ok := resp_message.Data.([]interface{})
+	if !ok {
+		logger.Error("failed to get msg data on agent: %s", resp_message.Error)
+		return nil, resp_message.Error, errors.New("failed to get msg data")
+	}
+
+	var files []sdkcommon.File
+	for _, item := range data {
+		if fileMap, ok := item.(map[string]interface{}); ok {
+			f := sdkcommon.File{
+				Path:    fileMap["path"].(string),
+				Name:    fileMap["name"].(string),
+				Content: fileMap["content"].(string),
+			}
+			files = append(files, f)
+		} else {
+			logger.Error("failed to get file from data")
+		}
+	}
+	return files, resp_message.Error, nil
 }
 
 // 更新配置文件

@@ -1,9 +1,6 @@
 package pluginapi
 
 import (
-	"encoding/base64"
-	"strings"
-
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	batchservice "gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -81,31 +78,15 @@ func GetNodeFiles(c *gin.Context) {
 			return common.NodeResult{UUID: uuid,
 				Error: "get agent failed"}
 		}
-		// 查找文件
-		cmd := "find " + fd.Path + " -type f -name \"*" + fd.FileName + "\""
-		data, err := agent.RunCommand(base64.StdEncoding.EncodeToString([]byte(cmd)))
+		//获取此路径下的所有文件，检查文件是否符合正则表达式
+		data, _, err := agent.ReadFilePattern(fd.Path, fd.FileName)
 		if err != nil {
-			logger.Error("run command error, agent:%s, command:%s", uuid, cmd)
+			logger.Error("failed to read the file, agent:%s,err:%s", uuid, err)
 			return common.NodeResult{UUID: uuid,
-				Error: "run command error"}
-		}
-		if data.Stdout != "" && data.Stderr == "" {
-			result := []common.File{}
-			for _, v := range strings.Split(data.Stdout, "\n") {
-				file, _, err := agent.ReadFile(v)
-				if err != nil {
-					logger.Error("failed to read the file:%s", err.Error())
-				}
-				name := strings.Split(v, "/")[len(strings.Split(v, "/"))-1]
-				result = append(result, common.File{Path: fd.Path,
-					Name:    name,
-					Content: base64.StdEncoding.EncodeToString([]byte(file))})
-			}
-			return common.NodeResult{UUID: uuid,
-				Data: result}
+				Error: "failed to read the file"}
 		}
 		return common.NodeResult{UUID: uuid,
-			Error: "no such file or directory"}
+			Data: data}
 	}
 
 	rs := batchservice.BatchProcess(&fd.DeployBatch, f)
