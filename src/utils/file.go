@@ -21,7 +21,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
+
+	"gitee.com/openeuler/PilotGo/sdk/common"
 )
 
 // 将string写入到指定文件
@@ -47,6 +50,46 @@ func FileSaveString(filePath string, data string) error {
 		}
 	}
 	return nil
+}
+
+// 根据正则表达式读文件，并返回结构体
+func ReadFilePattern(path, pattern string) ([]common.File, error) {
+	var matchingFiles []common.File
+	path = strings.TrimRight(path, "/") + "/"
+	// 编译正则表达式
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return nil, err
+	}
+
+	// 打开目录s
+	dir, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// 读取目录中的文件
+	files, err := dir.Readdirnames(0)
+	if err != nil {
+		return nil, err
+	}
+	dir.Close()
+	// 遍历文件并匹配正则表达式
+	for _, file := range files {
+		if re.MatchString(file) {
+			// 符合正则表达式的文件，读取其内容
+			f := common.File{
+				Path: path,
+				Name: file,
+			}
+			f.Content, err = FileReadString(path + file)
+			if err != nil {
+				return nil, err
+			}
+			matchingFiles = append(matchingFiles, f)
+		}
+	}
+	return matchingFiles, nil
 }
 
 // 读取文件所有数据，返回字符串

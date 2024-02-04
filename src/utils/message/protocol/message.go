@@ -116,7 +116,7 @@ const (
 	// 获取repo源
 	GetRepoSource = 52
 	// 读取配置文件内容
-	ReadFile = 53
+	ReadFilePattern = 53
 	// 编辑配置文件
 	EditFile = 54
 	// 获取网络连接信息

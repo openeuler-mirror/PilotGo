@@ -24,6 +24,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	batchservice "gitee.com/openeuler/PilotGo/app/server/service/batch"
 	userservice "gitee.com/openeuler/PilotGo/app/server/service/user"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -37,9 +38,12 @@ func ReadFile(c *gin.Context) {
 		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
-
-	filepath := c.Query("file")
-	result, Err, err := agent.ReadFile(filepath)
+	file := common.File{}
+	if err := c.Bind(&file); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+	result, Err, err := agent.ReadFilePattern(file.Path, file.Name)
 	if err != nil {
 		response.Fail(c, nil, Err)
 		return

@@ -9,11 +9,21 @@ import (
 	"gitee.com/openeuler/PilotGo/utils/os/common"
 )
 
-func ReadFileHandler(c *network.SocketClient, msg *protocol.Message) error {
+func ReadFilePatternHandler(c *network.SocketClient, msg *protocol.Message) error {
 	logger.Debug("process agent info command:%s", msg.String())
 
-	file := msg.Data.(string)
-	data, err := utils.FileReadString(file)
+	file, ok := msg.Data.(map[string]interface{})
+	if !ok {
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  "get msg data error",
+		}
+		return c.Send(resp_msg)
+	}
+
+	data, err := utils.ReadFilePattern(file["path"].(string), file["name"].(string))
 	if err != nil {
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
