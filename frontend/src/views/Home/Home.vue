@@ -27,30 +27,32 @@
               <el-icon size="20">
                 <User />
               </el-icon>
-              <el-popover placement="bottom" trigger="click">
-                <template #reference>
-                  <span>hello {{ user.name }}!</span>
+              <el-dropdown trigger="click">
+                <span class="user_menu">hello {{ user.name }}!</span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item>修改密码</el-dropdown-item>
+                  </el-dropdown-menu>
                 </template>
-                <el-button>修改密码</el-button>
-              </el-popover>
-              <el-icon class="user_logout" size="20" @click="handleLogout">
+              </el-dropdown>
+              <el-icon class="user_logout transition3" size="20" @click="handleLogout">
                 <SwitchButton />
               </el-icon>
             </div>
           </div>
         </el-header>
         <el-main style="padding: 5px;">
-          <router-view v-slot="{ Component }" v-if="!route.path.startsWith('/plugin-')">
+          <router-view v-slot="{ Component }">
             <keep-alive>
               <component :is="Component"></component>
             </keep-alive>
             <!-- 插件页面 -->
           </router-view>
-          <div v-for="item in iframeComponents" style="height:100%; width:100%" v-if="route.path.startsWith('/plugin-')">
+          <!-- <div v-for="item in iframeComponents" style="height:100%; width:100%" v-if="route.path.startsWith('/plugin-')">
             <component :key="item.name" :is="item.name" :url="item.url" :plugin_type="item.plugin_type" :name="item.name"
-              :path="item.path" v-if="route.path === item.path" style="height:100%; width:100%">
+              :path="item.path" :subMenus="item.subMenus" v-if="route.path === item.path" style="height:100%; width:100%">
             </component>
-          </div>
+          </div> -->
         </el-main>
         <div class="footer">
           <p> <a href="https://gitee.com/openeuler/PilotGo" target="_blank">PilotGo</a> version: {{ version.commit
@@ -78,7 +80,6 @@ import { RespCodeOK } from "@/request/request";
 import { type User, userStore } from "@/stores/user";
 import { iframeComponents, updatePlugins } from "@/views/Plugin/plugin";
 import { useRoute } from "vue-router";
-
 const route = useRoute();
 const user = ref<User>({})
 const isCollapse = ref(true); // 是否折叠菜单栏
@@ -264,6 +265,7 @@ function doLogout() {
 
     .user {
       height: 100%;
+      font-size: 20px;
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -272,14 +274,17 @@ function doLogout() {
         color: var(--active-color);
       }
 
-      font-size: 20px;
-      /* span {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      } */
+      &_menu,
+      &_logout {
+        cursor: pointer;
+      }
+
+      &_logout {
+        &:hover {
+          transform: scale(1.2);
+        }
+      }
+
     }
   }
 }
