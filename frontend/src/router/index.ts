@@ -10,6 +10,15 @@ const commonRoutes = [
     name: 'login',
     component: () => import('@/views/Login/Login.vue'),
   },
+  {
+    path: '/404',
+    name: 'errorPage',
+    component: () => import('@/views/errorPage.vue')
+  },
+  {
+    path: '/:catchAll(.*)',
+    redirect: '/404'
+  }
 ];
 
 let sidebarRoutes = [
@@ -206,36 +215,68 @@ import { useRouter } from "vue-router";
 export function updateSidebarItems() {
   let menus = generateLocalMenus();
   for (let item of iframeComponents.value) {
+    // console.log(item)
+    // 添加插件路由信息
+    addPluginRoute(item);
+    // 更新侧边菜单
     let obj: Menu = {
       path: item.path,
       title: item.name,
       hidden: false,
       panel: item.name,
       icon: "Menu",
-      subMenus: item.subMenus || [],
+      subMenus: null,
     }
+    let subMenus = [] as any;
+    if (item.subMenus.length > 0) {
+      item.subMenus.forEach((subItem: any) => {
+        subMenus.push({
+          hidden: false,
+          icon: "",
+          panel: subItem.subRoute,
+          title: subItem.title,
+          path: item.path + subItem.subRoute,
+        })
+      })
+    }
+    obj.subMenus = subMenus;
     menus.push(obj)
 
     // app.component(item.name, PluginFrame);
-    router.addRoute("home", {
-      path: item.path,
-      name: item.name,
-      component: () => import('@/views/Plugin/PluginFrame.vue'),
-      meta: {
-        path: item.path,
-        title: item.name,
-        hidden: false,
-        panel: item.name,
-        icon: "Menu",
-        subMenus: item.subMenus || [],
-        props: {
-          url: item.url,
-          plugin_type: item.plugin_type,
-        }
-      }
-    })
+
   }
   routerStore().menus = menus;
+}
+
+function addPluginRoute(item: any) {
+  let childrens = [] as any;
+  if (item.subMenus && item.subMenus.length > 0) {
+    // 如果有多级菜单
+    item.subMenus.forEach((subItem: any) => {
+      childrens.push({
+        path: item.path + subItem.subRoute,
+        component: () => import('@/views/Plugin/PluginFrame.vue'),
+        meta: {
+          title: subItem.title,
+          subRoute: subItem.path + subItem.subRoute,
+          breadcrumb: []
+        }
+      })
+    })
+  }
+  router.addRoute("home", {
+    path: item.path,
+    name: item.name,
+    component: () => import('@/views/Plugin/PluginFrame.vue'),
+    meta: {
+      icon: "Menu",
+      name: item.name,
+      url: item.url,
+      plugin_type: item.plugin_type,
+      title: item.name
+    },
+    children: childrens
+  })
 }
 
 function generateLocalMenus() {

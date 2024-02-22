@@ -34,11 +34,11 @@ export function updatePlugins() {
           item.extentions.filter((extItem: Extention) => extItem.type === 'page')
             .forEach((pageItem: Extention) => {
               let subMenuObj = {
-                path: '/plugin-' + item.name,
+                path: '/plugin/' + item.name,
                 subRoute: pageItem.url,
                 title: pageItem.name,
                 hidden: false,
-                panel: item.name,
+                panel: '/plugin/' + item.name,
                 icon: '',
                 subMenus: null,
                 isPlug: true,
