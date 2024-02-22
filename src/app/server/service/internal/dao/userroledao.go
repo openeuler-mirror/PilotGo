@@ -22,24 +22,9 @@ func GetRolesByUid(uid uint) ([]int, error) {
 	return Roleid, err
 }
 
-func DeleteByRid(rid int) error {
-	var urs UserRole
-	return mysqlmanager.MySQL().Where("role_id = ?", rid).Unscoped().Delete(urs).Error
-}
-
 func DeleteByUid(uid uint) error {
 	var urs UserRole
 	return mysqlmanager.MySQL().Where("user_id = ?", uid).Unscoped().Delete(urs).Error
-}
-
-// 是否有用户绑定某角色
-func IsUserBindingRole(roleId int) (bool, error) {
-	var Userid []int
-	err := mysqlmanager.MySQL().Model(&UserRole{}).Select("user_id").Where("role_id=?", roleId).Find(&Userid).Error
-	if len(Userid) > 0 {
-		return true, err
-	}
-	return false, err
 }
 
 func UpdateU2R(uid uint, rids []int) error {

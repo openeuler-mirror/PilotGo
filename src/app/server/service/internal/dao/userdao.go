@@ -75,14 +75,6 @@ func GetUserPaged(offset, size int) (int64, []User, error) {
 	return count, users, err
 }
 
-// 查询所有的用户
-func UserAll() (int64, []User, error) {
-	var users []User
-	var count int64
-	err := mysqlmanager.MySQL().Order("id desc").Find(&users).Count(&count).Error
-	return count, users, err
-}
-
 // 修改密码
 func UpdatePassword(email, newPWD string) error {
 	var user User
@@ -137,15 +129,10 @@ func DeleteUser(email string) error {
 	return mysqlmanager.MySQL().Where("email=?", email).Unscoped().Delete(user).Error
 }
 
-func DelUserByDeptId(deptId int) error {
-	var user User
-	return mysqlmanager.MySQL().Where("depart_id=?", deptId).Unscoped().Delete(user).Error
-}
-
 // 根据用户邮箱模糊查询
 func UserSearchPaged(email string, offset, size int) (int64, []User, error) {
 	var users []User
 	var count int64
-	err := mysqlmanager.MySQL().Order("id desc").Where("email LIKE ?", "%"+email+"%").Offset(offset).Limit(size).Find(&users).Offset(-1).Limit(-1).Count(&count).Error
-	return 0, users, err
+	err := mysqlmanager.MySQL().Order("id desc").Where("email like ?", "%"+email+"%").Offset(offset).Limit(size).Find(&users).Offset(-1).Limit(-1).Count(&count).Error
+	return count, users, err
 }

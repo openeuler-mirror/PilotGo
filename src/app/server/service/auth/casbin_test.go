@@ -56,9 +56,3 @@ func TestMain(m *testing.M) {
 
 	m.Run()
 }
-
-func TestGetPermissionsOfUser(t *testing.T) {
-	pbutton, pmenu, err := GetPermissionsOfUser("admin")
-	assert.NoError(t, err)
-	fmt.Printf("pbutton: %v, pmenu: %v\n", pbutton, pmenu)
-}

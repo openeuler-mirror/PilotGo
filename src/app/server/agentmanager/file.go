@@ -1,6 +1,7 @@
 package agentmanager
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -42,7 +43,7 @@ func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, str
 			f := sdkcommon.File{
 				Path:    fileMap["path"].(string),
 				Name:    fileMap["name"].(string),
-				Content: fileMap["content"].(string),
+				Content: base64.StdEncoding.EncodeToString([]byte(fileMap["content"].(string))),
 			}
 			files = append(files, f)
 		} else {

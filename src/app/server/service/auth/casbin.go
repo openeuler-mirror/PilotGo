@@ -97,49 +97,6 @@ func Casbin(conf *sconfig.MysqlDBInfo) {
 	})
 }
 
-// deprecated
-func AllPolicy() (interface{}, int) {
-	casbin := make([]map[string]interface{}, 0)
-	list := G_Enfocer.GetPolicy()
-	for _, vlist := range list {
-		policy := make(map[string]interface{})
-		policy["role"] = vlist[0]
-		policy["url"] = vlist[1]
-		policy["method"] = vlist[2]
-		casbin = append(casbin, policy)
-	}
-	total := len(casbin)
-	return casbin, total
-}
-
-// deprecated
-func PolicyRemove(rule CasbinRule) bool {
-	ok, err := G_Enfocer.RemovePolicy(rule.RoleType, rule.Url, rule.Method)
-	if err == nil {
-		if !ok {
-			return false
-		} else {
-			return true
-		}
-	}
-	logger.Error("remove policy error:%s", err)
-	return false
-}
-
-// deprecated
-func PolicyAdd(rule CasbinRule) bool {
-	ok, err := G_Enfocer.AddPolicy(rule.RoleType, rule.Url, rule.Method)
-	if err == nil {
-		if !ok {
-			return false
-		} else {
-			return true
-		}
-	}
-	logger.Error("add policy error:%s", err)
-	return false
-}
-
 func addPolicy(role, resource, action, domain string) (bool, error) {
 	return G_Enfocer.AddPolicy(role, resource, action, domain)
 }
@@ -298,36 +255,6 @@ func GetAllPolicies() []Policy {
 
 func GetFilteredPolicy(role, object, action, domain string) [][]string {
 	return G_Enfocer.GetFilteredPolicy(0, role, object, action, domain)
-}
-
-// 获取指定用户的buttion权限和menu权限
-func GetPermissionsOfUser(user string) ([]string, []string, error) {
-	ps, err := G_Enfocer.GetImplicitPermissionsForUser(user)
-	if err != nil {
-		return nil, nil, err
-	}
-	// fmt.Printf("user permissions: %v\n", ps)
-
-	pbutton := []string{}
-	pmenu := []string{}
-	for _, ss := range ps {
-		// user := ss[0]
-		resource := ss[1]
-		ptype := ss[2]
-
-		switch ptype {
-		case "button":
-			pbutton = append(pbutton, resource)
-		case "menu":
-			pmenu = append(pmenu, resource)
-		case "empty":
-			// TODO: 历史兼容性保留的空权限
-			continue
-		default:
-			logger.Warn("unknown permission type: %s", ptype)
-		}
-	}
-	return pbutton, pmenu, nil
 }
 
 func UpdateRolePermissions(role string, buttons, menus []string) error {

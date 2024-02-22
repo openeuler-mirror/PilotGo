@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 	"regexp"
-	"strconv"
 	"strings"
 
 	aconfig "gitee.com/openeuler/PilotGo/app/agent/config"
@@ -295,25 +294,6 @@ func (b *BaseOS) RestartNetwork(nic string) error {
 	}
 
 	return nil
-}
-
-func ModuleMatch(key string, value string, network *common.NetworkConfig) {
-	if key == "IPADDR" {
-		network.IPAddr = value
-	} else if key == "NETMASK" {
-		network.NetMask = value
-	} else if key == "GATEWAY" {
-		network.GateWay = value
-	} else if key == "DNS1" {
-		network.DNS1 = value
-	} else if key == "DNS2" {
-		network.DNS2 = value
-	} else if key == "BOOTPROTO" {
-		network.BootProto = value
-	} else if key == "PREFIX" {
-		prefix, _ := strconv.Atoi(value)
-		network.NetMask = common.LenToSubNetMask(prefix)
-	}
 }
 
 func (b *BaseOS) GetHostIp() (string, error) {
