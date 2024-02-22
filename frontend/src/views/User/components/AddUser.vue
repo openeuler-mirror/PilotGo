@@ -15,7 +15,7 @@
             </el-form-item>
             <el-form-item label="用户角色:" prop="role">
                 <el-select v-model="form.role" multiple placeholder="请选择">
-                    <el-option v-for="item in roles" :key="item.id" :label="item.description" :value="item.id">
+                    <el-option v-for="item in roles" :key="item.id" :label="item.role" :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
