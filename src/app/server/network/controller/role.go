@@ -96,7 +96,7 @@ func AddRoleHandler(c *gin.Context) {
 // 删除角色
 func DeleteRoleHandler(c *gin.Context) {
 	params := &struct {
-		RoleId int `json:"roleId"`
+		RoleId int `json:"role"`
 	}{}
 	if err := c.Bind(params); err != nil {
 		response.Fail(c, nil, "parameter error:"+err.Error())
