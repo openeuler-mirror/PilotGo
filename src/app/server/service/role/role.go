@@ -88,7 +88,7 @@ func getRoleMenuButtons(role string) map[string]interface{} {
 	for _, v := range policys {
 		buttons = append(buttons, v[1])
 	}
-	permissions["buttons"] = buttons
+	permissions["button"] = buttons
 
 	policys = auth.GetFilteredPolicy(role, "", "menu", "")
 	for _, v := range policys {
