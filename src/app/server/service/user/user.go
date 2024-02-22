@@ -218,19 +218,6 @@ func GetUserRoles(username string) ([]string, error) {
 	return dao.GetNamesByRoleIds(roleids)
 }
 
-// 根据角色id查询角色名字
-func GetNamesByRoleIds(roleids []int) ([]string, error) {
-	var roles []string
-	for _, v := range roleids {
-		role, err := dao.GetRoleById(v)
-		if err != nil {
-			return nil, err
-		}
-		roles = append(roles, role.Name)
-	}
-	return roles, nil
-}
-
 // 根据userid查询user信息
 func QueryUserByID(userID int) (*User, error) {
 	return dao.GetUserByID(userID)
@@ -261,15 +248,6 @@ func GetUserByEmail(email string) (*ReturnUser, error) {
 	userinfo.Roles, err = dao.GetNamesByRoleIds(roleids)
 
 	return userinfo, err
-}
-
-func ToUserDto(user User) UserDto {
-	return UserDto{
-		Name:     user.Username,
-		Password: user.Password,
-		Phone:    user.Phone,
-		Email:    user.Email,
-	}
 }
 
 // 创建管理员账户

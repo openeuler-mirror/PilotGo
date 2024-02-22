@@ -56,15 +56,6 @@ func GetPluginPaged(offset, size int) (int64, []*PluginModel, error) {
 	return count, pluginModels, err
 }
 
-// 查询单个插件信息
-func QueryPlugin(name string) (*PluginModel, error) {
-	var plugins *PluginModel
-	if err := mysqlmanager.MySQL().Where("name=?", name).Find(&plugins).Error; err != nil {
-		return nil, err
-	}
-	return plugins, nil
-}
-
 // 更新插件使能状态
 func UpdatePluginEnabled(plugin *PluginModel) error {
 	var p PluginModel

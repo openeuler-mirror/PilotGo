@@ -16,7 +16,6 @@ package dao
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -55,30 +54,6 @@ func GetRoleById(roleid int) (Role, error) {
 	return role, err
 }
 
-// 登录用户的权限按钮
-func PermissionButtons(button string) ([]string, error) {
-	var buttons []string
-	if button == "" {
-		return []string{}, nil
-	}
-	IDs := strings.Split(button, ",")
-
-	for _, id := range IDs {
-		var SubButton RoleButton
-		i, err := strconv.Atoi(id)
-		if err != nil {
-			panic(err)
-		}
-		err = mysqlmanager.MySQL().Where("id = ?", i).Find(&SubButton).Error
-		if err != nil {
-			return buttons, err
-		}
-		button := SubButton.Button
-		buttons = append(buttons, button)
-	}
-	return buttons, nil
-}
-
 // 分页查询
 func GetRolePaged(offset, size int) (int64, []Role, error) {
 	var count int64
@@ -107,12 +82,6 @@ func AddRole(r *Role) error {
 func DeleteRole(roleId int) error {
 	var UserRole Role
 	return mysqlmanager.MySQL().Where("id = ?", roleId).Unscoped().Delete(UserRole).Error
-}
-
-// 修改角色名称
-func UpdateRoleName(roleId int, name string) error {
-	var UserRole Role
-	return mysqlmanager.MySQL().Model(&UserRole).Where("id = ?", roleId).Update("role", name).Error
 }
 
 // 修改角色描述

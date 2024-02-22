@@ -52,18 +52,6 @@ func IsExistID(id int) (bool, error) {
 	return batch.ID != 0, err
 }
 
-func GetBatchID(name string) (uint, error) {
-	var batch Batch
-	err := mysqlmanager.MySQL().Where("name=?", name).Find(&batch).Error
-	return batch.ID, err
-}
-
-func GetBatchName(id int) (string, error) {
-	var batch Batch
-	err := mysqlmanager.MySQL().Where("id=?", id).Find(&batch).Error
-	return batch.Name, err
-}
-
 func DeleteBatch(departid int) error {
 	var batch Batch
 	return mysqlmanager.MySQL().Where("id=?", departid).Delete(&batch).Error
