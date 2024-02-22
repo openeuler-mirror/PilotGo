@@ -4,42 +4,44 @@
     <iframe :src="props.url" class="iframe"></iframe>
   </div>
   <div class="micro_content" v-show="!showFrame">
-    <!-- 当开启fiber后，micro-app会降低子应用的优先级，通过异步执行子应用的js文件 -->
-    <micro-app class="micro" :name="props.name" :url="microUrl" inline keep-alive fiber iframe></micro-app>
+    <micro-app class="micro" :baseroute="'/' + props.name" :name="props.name" :url="props.url" inline keep-alive fiber
+      iframe disable-memory-router></micro-app>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watchEffect } from "vue";
+import { onMounted, reactive, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
-import type { Extention } from '@/types/plugin';
-
+import microApp from '@micro-zoe/micro-app';
 
 const showFrame = ref(false);
-const microUrl = ref('');
 const route: any = useRoute();
 let props = reactive({
   url: '',
   plugin_type: '',
   name: '',
-  subMenus: [] as any
-
-
 })
-
 watchEffect(() => {
-  props.url = route.meta.props.url;
-  props.plugin_type = route.meta.props.plugin_type;
-  props.name = route.name;
-  props.subMenus = route.meta.subMenus.filter((item: Extention) => item.type === 'page');
+  if (route.meta.plugin_type) {
+    console.log(route)
+    // 如果是插件
+    if (route.meta.subRoute) {
+      // 插件的子路由
+      let { plugin_type, url, subRoute, name } = route.meta;
+      props.plugin_type = plugin_type;
+      props.name = name;
 
-  // 判断插件采用哪种方式展示
-  showFrame.value = props.plugin_type === 'iframe' ? true : false;
-  if (props.plugin_type === 'micro-app') {
-    // 采用micro微前端
-    microUrl.value = window.location.origin + '/plugin/atune'
+      showFrame.value = props.plugin_type === 'iframe' ? true : false;
+      if (props.plugin_type === 'micro-app') {
+        props.url = window.location.origin + subRoute;
+      } else {
+        props.url = url;
+      }
+    } else {
+      // 插件只有一级路由
+
+    }
   }
-
 })
 </script>
 
