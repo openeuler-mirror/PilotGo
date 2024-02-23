@@ -39,3 +39,7 @@ body {
 .el-menu {
   border-right: 0 !important;
 }
+/* el-dropdown */
+.el-tooltip__trigger:focus-visible {
+    outline: unset;
+} 
