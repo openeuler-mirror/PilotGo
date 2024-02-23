@@ -10,12 +10,13 @@
             </el-icon>
             <span>{{ menu.title }}</span>
           </template>
-          <el-menu-item v-for="(subMenu, subIndex) in menu.subMenus" :index="subMenu.path">
+          <el-menu-item v-for="(subMenu, subIndex) in menu.subMenus" :index="subMenu.path"
+            :class="subMenu.title === activeTitle ? 'active' : ''">
             {{ subMenu.title }}
           </el-menu-item>
         </el-sub-menu>
         <!-- 不带子菜单的项 -->
-        <el-menu-item v-if="!menu.subMenus" :index="menu.path">
+        <el-menu-item v-if="!menu.subMenus" :index="menu.path" :class="menu.title === activeTitle ? 'is-active' : ''">
           <component class="sidebar_icon" :is="menu.icon"></component>
           <template #title>{{ menu.title }}</template>
         </el-menu-item>
@@ -27,7 +28,10 @@
 <script setup lang="ts">
 import { ref, watchEffect, onMounted } from "vue";
 import { routerStore, type Menu } from "@/stores/router";
+import { useRoute } from "vue-router";
 let routes: any = ref<Menu[]>([]);
+let route = useRoute();
+let activeTitle = ref('')
 let props = defineProps({
   isCollapse: {
     type: Boolean,
@@ -46,6 +50,7 @@ const handleClose = (_key: string, _keyPath: string[]) => {
 }
 watchEffect(() => {
   routes.value = routerStore().menus;
+  activeTitle.value = route.meta.title as string;
 })
 </script>
 
@@ -60,7 +65,7 @@ watchEffect(() => {
   height: 20px;
 }
 
-.el-menu-item.is-active {
+.active {
   background: rgb(236, 245, 255);
   border-right: 2px solid var(--active-color);
   color: var(--active-color);
