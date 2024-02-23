@@ -15,10 +15,10 @@ const commonRoutes = [
     name: 'errorPage',
     component: () => import('@/views/errorPage.vue')
   },
-  {
+  /* {
     path: '/:catchAll(.*)',
     redirect: '/404'
-  }
+  } */
 ];
 
 let sidebarRoutes = [
@@ -214,6 +214,7 @@ import { useRouter } from "vue-router";
 
 export function updateSidebarItems() {
   let menus = generateLocalMenus();
+  routerStore().routers = [];
   for (let item of iframeComponents.value) {
     // console.log(item)
     // 添加插件路由信息
@@ -233,9 +234,9 @@ export function updateSidebarItems() {
         subMenus.push({
           hidden: false,
           icon: "",
-          panel: subItem.subRoute,
-          title: subItem.title,
-          path: item.path + subItem.subRoute,
+          panel: subItem.url,
+          title: subItem.name,
+          path: item.path + subItem.url,
         })
       })
     }
@@ -249,16 +250,17 @@ export function updateSidebarItems() {
 }
 
 function addPluginRoute(item: any) {
+  routerStore().routers.push(item);
   let childrens = [] as any;
   if (item.subMenus && item.subMenus.length > 0) {
     // 如果有多级菜单
     item.subMenus.forEach((subItem: any) => {
       childrens.push({
-        path: item.path + subItem.subRoute,
+        path: item.path + subItem.url,
         component: () => import('@/views/Plugin/PluginFrame.vue'),
         meta: {
-          title: subItem.title,
-          subRoute: subItem.path + subItem.subRoute,
+          title: subItem.name,
+          subRoute: '/plugin/' + item.name.split('-')[1] + subItem.url,
           breadcrumb: []
         }
       })
@@ -318,9 +320,30 @@ function generateLocalMenus() {
   return menus;
 }
 
-router.beforeEach((to, from) => {
+router.beforeEach((to, from, next) => {
   if (to.meta && to.meta.title) {
     document.title = to.meta.title as string
+  }
+  // 解决在插件页面一刷新页面空白问题
+  if (to.path.includes('plugin-')) {
+    let paths = [] as any;
+    router.getRoutes().forEach(routeItem => {
+      paths.push(routeItem.path);
+    })
+    if (paths.includes(to.path)) {
+      next();
+    } else {
+      new Promise(async (resolve, rejection) => {
+        await routerStore().routers.forEach((route: any) => {
+          addPluginRoute(route);
+        })
+        resolve('addRoute success');
+      }).then(res => {
+        next({ ...to, replace: true })
+      })
+    }
+  } else {
+    next();
   }
 })
 

@@ -46,7 +46,6 @@ const handleClose = (_key: string, _keyPath: string[]) => {
 }
 watchEffect(() => {
   routes.value = routerStore().menus;
-  console.log(routes.value)
 })
 </script>
 
