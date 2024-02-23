@@ -2,7 +2,6 @@
   <div>
     <el-breadcrumb separator="/">
       <el-breadcrumb-item to="/overview">
-        <em class="el-icon-s-home"></em>
         <span class="el-dropdown-link">
           首页
         </span>
@@ -10,24 +9,24 @@
 
       <template v-for="item in route.meta.breadcrumb">
         <el-breadcrumb-item :key="item.name" v-if="item.path && !item.hidden && item.children">
-          <el-dropdown>
-            <span class="el-dropdown-link">
-              {{ item.name }}<em class="el-icon-arrow-down el-icon--right"></em>
+          <el-dropdown @command="router2path">
+            <span class="el-dropdown-link ">
+              {{ item.name }}
+              <el-icon class="el-icon--right">
+                <arrow-down />
+              </el-icon>
             </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item v-for="route in item.children" v-if="!route.hidden" :key="route.name"
-                :command="route.name">
-                {{ route.menuName }}
-              </el-dropdown-item>
-            </el-dropdown-menu>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-for="route in item.children" v-if="!route.hidden" :key="route.name" :command="route">
+                  {{ route.menuName }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
           </el-dropdown>
         </el-breadcrumb-item>
- 
-        <el-breadcrumb-item :key="item.name" v-if="item.path && !item.hidden && !item.children" :to="{ path: item.path }">
-          {{ item.name }}
-        </el-breadcrumb-item>
 
-        <el-breadcrumb-item :key="item.name" v-if="!item.path && !item.hidden">
+        <el-breadcrumb-item :key="item.name" v-if="!item.hidden && !item.children">
           {{ item.name }}
         </el-breadcrumb-item>
       </template>
@@ -36,10 +35,27 @@
 </template>
   
 <script setup lang="ts">
+import { watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
+import { ArrowDown } from '@element-plus/icons-vue';
+import { directTo } from '@/router';
 
-const route = useRoute() as any
+const route = useRoute() as any;
+
+const router2path = (path: any) => {
+  directTo(path)
+}
+watchEffect(() => {
+  console.log(route.meta.breadcrumb)
+})
 
 </script>
   
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.el-dropdown-link {
+  cursor: pointer;
+  color: var(--el-color-primary);
+  display: flex;
+  align-items: center;
+}
+</style>
