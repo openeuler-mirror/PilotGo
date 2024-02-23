@@ -252,18 +252,35 @@ export function updateSidebarItems() {
 function addPluginRoute(item: any) {
   routerStore().routers.push(item);
   let childrens = [] as any;
+  // 插件至少两级子菜单
   if (item.subMenus && item.subMenus.length > 0) {
-    // 如果有多级菜单
+    let breadChild = [] as any;
     item.subMenus.forEach((subItem: any) => {
+      // 1.创建breadcrumb的children
+      breadChild.push({
+        path: item.path + subItem.url,
+        menuName: subItem.name
+      })
+      // 2.创建router -> children
       childrens.push({
         path: item.path + subItem.url,
         component: () => import('@/views/Plugin/PluginFrame.vue'),
         meta: {
           title: subItem.name,
           subRoute: '/plugin/' + item.name.split('-')[1] + subItem.url,
-          breadcrumb: []
+          breadcrumb: [{
+            name: item.name,
+            path: item.path
+          }, {
+            name: subItem.name
+          }]
         }
       })
+    })
+
+    // 3.给子router添加breadCrumb的children
+    childrens.forEach((childRoute: any, index: number) => {
+      childRoute.meta.breadcrumb[0].children = breadChild.filter((breabItem: any, bIndex: number) => index !== bIndex)
     })
   }
   router.addRoute("home", {
@@ -275,7 +292,10 @@ function addPluginRoute(item: any) {
       name: item.name,
       url: item.url,
       plugin_type: item.plugin_type,
-      title: item.name
+      title: item.name,
+      breadcrumb: [{
+        name: item.name
+      }]
     },
     children: childrens
   })

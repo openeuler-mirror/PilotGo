@@ -45,9 +45,6 @@ const route = useRoute() as any;
 const router2path = (path: any) => {
   directTo(path)
 }
-watchEffect(() => {
-  console.log(route.meta.breadcrumb)
-})
 
 </script>
   
