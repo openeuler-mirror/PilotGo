@@ -34,6 +34,7 @@ watchEffect(() => {
       showFrame.value = props.plugin_type === 'iframe' ? true : false;
       if (props.plugin_type === 'micro-app') {
         props.url = window.location.origin + subRoute;
+        console.log(props.url)
       } else {
         props.url = url;
       }

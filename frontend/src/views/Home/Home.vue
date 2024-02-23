@@ -82,7 +82,7 @@ import { iframeComponents, updatePlugins } from "@/views/Plugin/plugin";
 import { useRoute } from "vue-router";
 const route = useRoute();
 const user = ref<User>({})
-const isCollapse = ref(true); // 是否折叠菜单栏
+const isCollapse = ref(false); // 是否折叠菜单栏
 const collapseWidth = ref('10%') // el-aside宽度
 
 interface VersionInfo {

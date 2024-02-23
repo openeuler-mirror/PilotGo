@@ -25,28 +25,13 @@ export function updatePlugins() {
           name: 'plugin-' + item.name,
           url: item.url,
           plugin_type: item.plugin_type,
-          subMenus: []
         }
-        // 添加扩展点信息
+
+        // 筛选插件所有的page页面
         if (item.extentions && item.extentions.length > 0) {
-          // 遍历page页面添加subMenu
-          let subMenus = [] as any;
-          item.extentions.filter((extItem: Extention) => extItem.type === 'page')
-            .forEach((pageItem: Extention) => {
-              let subMenuObj = {
-                path: '/plugin/' + item.name,
-                subRoute: pageItem.url,
-                title: pageItem.name,
-                hidden: false,
-                panel: '/plugin/' + item.name,
-                icon: '',
-                subMenus: null,
-                isPlug: true,
-              }
-              subMenus.push(subMenuObj);
-            })
-          iframeObj.subMenus = subMenus;
+          iframeObj.subMenus = item.extentions.filter((extItem: Extention) => extItem.type === 'page')
         }
+
         iframes.push(iframeObj);
       })
       iframeComponents.value = iframes;

@@ -10,9 +10,14 @@ export interface Menu {
   subMenus: Menu[] | null
 }
 
-// 存储的router信息用于sidebar动态生成
-export const routerStore = defineStore('router', () => {
-  const menus = ref<Menu[]>([])
-  return { menus }
+// 存储的router信息用于sidebar和router动态生成
+export const routerStore = defineStore('router', {
+  state: () => {
+    return {
+      menus: [] as Menu[],
+      routers: [] as any
+    }
+  },
+  persist: true
 })
 
