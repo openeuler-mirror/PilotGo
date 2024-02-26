@@ -19,6 +19,7 @@ import "gitee.com/openeuler/PilotGo/dbmanager/mysqlmanager"
 type PluginModel struct {
 	ID          int    `gorm:"type:int"`
 	UUID        string `gorm:"type:varchar(50)" json:"uuid"`
+	CustomName  string `gorm:"type:varchar(100)" json:"custom_name"`
 	Name        string `gorm:"type:varchar(100)" json:"name"`
 	Version     string `gorm:"type:varchar(50)" json:"version"`
 	Description string `gorm:"type:text" json:"description"`
