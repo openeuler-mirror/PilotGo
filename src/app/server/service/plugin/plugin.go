@@ -44,6 +44,7 @@ func Init() error {
 
 type Plugin struct {
 	UUID              string              `json:"uuid"`
+	CustomName        string              `json:"custom_name"`
 	Name              string              `json:"name"`
 	Version           string              `json:"version"`
 	Description       string              `json:"description"`
@@ -60,6 +61,7 @@ type Plugin struct {
 
 func (p *Plugin) Clone() *Plugin {
 	result := &Plugin{
+		CustomName:  p.CustomName,
 		UUID:        p.UUID,
 		Name:        p.Name,
 		Version:     p.Version,
@@ -103,13 +105,14 @@ func (m *PluginManager) recovery() error {
 
 	for _, p := range plugins {
 		logger.Debug("recovery plugin:%s %s %d", p.UUID, p.Url, p.Enabled)
-		err := m.updatePlugin(p.UUID, p.Url, p.Enabled)
+		err := m.updatePlugin(p.UUID, &PluginParam{CustomName: p.CustomName, Url: p.Url}, p.Enabled)
 		if err != nil {
 			logger.Error("failed to update plugin %s info", p.Name)
 			// 插件离线等异常状况
 			// 使用历史数据
 			m.Lock()
 			m.Plugins = append(m.Plugins, &Plugin{
+				CustomName:  p.CustomName,
 				UUID:        p.UUID,
 				Name:        p.Name,
 				Version:     p.Version,
@@ -131,14 +134,14 @@ func (m *PluginManager) recovery() error {
 }
 
 // 根据url查询最新的plugin信息，更新到指定的uuid记录当中
-func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
+func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) error {
 	// 查询最新的插件信息
 	logger.Debug("update plugin")
-	err := Handshake(url)
+	err := Handshake(pp.Url)
 	if err != nil {
 		return err
 	}
-	info, err := requestPluginInfo(url)
+	info, err := requestPluginInfo(pp)
 	if err != nil {
 		logger.Error("failed to request plugin info:%s", err.Error())
 		return err
@@ -146,6 +149,7 @@ func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 
 	p := &Plugin{
 		UUID:        uuid,
+		CustomName:  info.CustomName,
 		Name:        info.Name,
 		Version:     info.Version,
 		Description: info.Description,
@@ -177,13 +181,13 @@ func (m *PluginManager) updatePlugin(uuid, url string, enabled int) error {
 	return nil
 }
 
-func (m *PluginManager) addPlugin(url string) (*Plugin, error) {
-	err := Handshake(url)
+func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
+	err := Handshake(addPlugin.Url)
 	if err != nil {
 		return nil, err
 	}
 
-	p, err := requestPluginInfo(url)
+	p, err := requestPluginInfo(addPlugin)
 	if err != nil {
 		return nil, err
 	}
@@ -247,18 +251,20 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 	}
 
 	url := ""
+	custom_name := ""
 	m.Lock()
 	for _, v := range m.Plugins {
 		if v.UUID == uuid {
 			v.Enabled = enable
 			url = v.Url
+			custom_name = v.CustomName
 			break
 		}
 	}
 	m.Unlock()
 
 	// 更新最新的插件信息
-	info, err := requestPluginInfo(url)
+	info, err := requestPluginInfo(&PluginParam{CustomName: custom_name, Url: url})
 	if err != nil {
 		logger.Error("failed to request plugin info:%s", err.Error())
 		return errors.New("plugin offline or unreachable")
@@ -266,6 +272,7 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 	m.Lock()
 	for _, v := range m.Plugins {
 		if v.UUID == uuid {
+			v.CustomName = info.CustomName
 			v.Name = info.Name
 			v.Version = info.Version
 			v.Description = info.Description
@@ -282,12 +289,12 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 	return nil
 }
 
-func (m *PluginManager) getPlugin(name string) (*Plugin, error) {
+func (m *PluginManager) getPlugin(uuid string) (*Plugin, error) {
 	var result *Plugin
 	found := false
 	m.Lock()
 	for _, v := range m.Plugins {
-		if v.Name == name {
+		if v.UUID == uuid {
 			// 使用深拷贝避免指针泄露
 			result = v.Clone()
 			found = true
@@ -297,7 +304,7 @@ func (m *PluginManager) getPlugin(name string) (*Plugin, error) {
 	m.Unlock()
 
 	if !found {
-		return nil, fmt.Errorf("plugin %s not found", name)
+		return nil, fmt.Errorf("plugin %s not found", uuid)
 	}
 
 	return result, nil
@@ -339,6 +346,7 @@ func (m *PluginManager) getPlugins() ([]*Plugin, error) {
 
 func toPluginDao(p *Plugin) *dao.PluginModel {
 	return &dao.PluginModel{
+		CustomName:  p.CustomName,
 		UUID:        p.UUID,
 		Name:        p.Name,
 		Version:     p.Version,
@@ -385,7 +393,8 @@ func Handshake(url string) error {
 }
 
 // 获取到插件的基本信息
-func requestPluginInfo(url string) (*Plugin, error) {
+func requestPluginInfo(plugin *PluginParam) (*Plugin, error) {
+	url := plugin.Url
 	index := strings.Index(url, "plugin")
 	if index > 0 {
 		url = url[:index]
@@ -427,6 +436,7 @@ func requestPluginInfo(url string) (*Plugin, error) {
 
 	// TODO: check info valid
 	return &Plugin{
+		CustomName:  plugin.CustomName,
 		Name:        PluginInfo.Name,
 		Version:     PluginInfo.Version,
 		Description: PluginInfo.Description,
@@ -488,7 +498,7 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 
 	result := []*Plugin{}
 	for _, p := range plugins {
-		plugin, err := globalPluginManager.getPlugin(p.Name)
+		plugin, err := globalPluginManager.getPlugin(p.UUID)
 		if err != nil {
 			logger.Error("manager get plugin %s", err)
 			continue
@@ -506,17 +516,16 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 	return total, result, error
 }
 
-type AddPluginParam struct {
-	Name string `json:"name"`
-	Type string `json:"plugin_type"`
-	Url  string `json:"url"`
+type PluginParam struct {
+	CustomName string `json:"custom_name"`
+	Url        string `json:"url"`
 }
 
-func AddPlugin(param *AddPluginParam) error {
+func AddPlugin(param *PluginParam) error {
 	url := param.Url
 	logger.Debug("add plugin from %s", url)
 
-	p, err := globalPluginManager.addPlugin(url)
+	p, err := globalPluginManager.addPlugin(param)
 	if err != nil {
 		return err
 	}
