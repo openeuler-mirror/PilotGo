@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-      <el-form-item label="插件名称:" prop="name">
-        <el-input class="ipInput" controls-position="right" v-model="form.name" autocomplete="off"></el-input>
+      <el-form-item label="插件名称:" prop="custom_name">
+        <el-input class="ipInput" controls-position="right" v-model="form.custom_name" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="主机地址:" prop="url">
         <el-input class="ipInput" controls-position="right" v-model="form.url" autocomplete="off"></el-input>
@@ -23,7 +23,7 @@ import { RespCodeOK } from "@/request/request";
 import { addPlugin } from '@/request/plugin';
 
 const rules = {
-  name: [
+  custom_name: [
     {
       required: true,
       message: '插件名称不能为空',
@@ -43,7 +43,7 @@ const emits = defineEmits(["pluginUpdated", "close"])
 
 const formRef = ref()
 const form = ref<any>({
-  name: "",
+  custom_name: "",
   url: "",
 });
 
@@ -57,7 +57,7 @@ function onDepartSelected(data: any) {
 
 function onAddPlugin() {
   let params = {
-    name: form.value.name,
+    custom_name: form.value.custom_name,
     url: form.value.url,
   }
   formRef.value.validate((valid: boolean) => {

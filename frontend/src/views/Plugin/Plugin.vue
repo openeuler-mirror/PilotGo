@@ -5,7 +5,9 @@
         <el-button type="primary" @click="displayDialog = true">添加插件</el-button>
       </template>
       <template v-slot:content>
-        <el-table-column align="center" prop="name" label="名称" width="150">
+        <el-table-column align="center" prop="custom_name" label="插件名称" width="150">
+        </el-table-column>
+        <el-table-column align="center" prop="name" label="插件类型" width="150">
         </el-table-column>
         <el-table-column align="center" prop="version" label="版本" width="150">
         </el-table-column>

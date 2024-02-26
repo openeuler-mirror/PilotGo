@@ -48,7 +48,7 @@ func GetPluginsPagedHandler(c *gin.Context) {
 
 // 添加插件
 func AddPluginHandler(c *gin.Context) {
-	param := plugin.AddPluginParam{}
+	param := plugin.PluginParam{}
 	if err := c.BindJSON(&param); err != nil {
 		response.Fail(c, nil, "参数错误")
 		return
