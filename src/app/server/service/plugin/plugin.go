@@ -525,6 +525,14 @@ func AddPlugin(param *PluginParam) error {
 	url := param.Url
 	logger.Debug("add plugin from %s", url)
 
+	ok, err := dao.IsExistCustomName(param.CustomName)
+	if err != nil {
+		return err
+	}
+	if ok {
+		return errors.New("已存在相同插件名称")
+	}
+
 	p, err := globalPluginManager.addPlugin(param)
 	if err != nil {
 		return err

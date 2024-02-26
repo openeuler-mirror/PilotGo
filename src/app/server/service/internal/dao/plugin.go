@@ -85,3 +85,9 @@ func QueryPluginById(uuid string) (*PluginModel, error) {
 	}
 	return plugins, nil
 }
+
+func IsExistCustomName(name string) (bool, error) {
+	var pm PluginModel
+	err := mysqlmanager.MySQL().Where("custom_name = ?", name).Find(&pm).Error
+	return pm.ID != 0, err
+}
