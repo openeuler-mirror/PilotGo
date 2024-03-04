@@ -14,15 +14,16 @@
             </el-table>
         </div>
         <div class="pagination">
-            <el-pagination layout="total, sizes, prev, pager, next, jumper" :total="total" :current-page="currentPage"
-                :page-sizes="pageSizes" @current-change="onPageChanged">
+            <el-pagination layout="total, sizes, prev, pager, next, jumper" :total="total" :page-sizes="pageSizes"
+            :current-page="currentPage" :page-size="currentSize"
+            @current-change="currentChangeHandler" @size-change="sizeChangeHandler">
             </el-pagination>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { toRaw } from "vue";
+import { toRaw, ref } from "vue";
 
 const props = defineProps({
     title: String,
@@ -36,15 +37,11 @@ const props = defineProps({
         type: Array,
         default: [],
     },
-
     total: {
         type: Number,
         default: 0,
     },
-    currentPage: {
-        type: Number,
-        default: 1,
-    },
+
     pageSizes: {
         type: Array,
         default: [10, 20, 50, 100],
@@ -52,8 +49,12 @@ const props = defineProps({
 
     onPageChanged: {
         type: Function,
+        default: () => { },
     }
 })
+
+const currentPage = ref(1)
+const currentSize = ref(10)
 
 const emit = defineEmits(['update:selectedData'])
 
@@ -64,6 +65,16 @@ const onSelectionChange = (val: any[]) => {
     })
 
     emit('update:selectedData', d)
+}
+
+function currentChangeHandler(cpage: number) {
+    props.onPageChanged(cpage, currentSize.value)
+    currentPage.value = cpage
+}
+
+function sizeChangeHandler(pSize: number) {
+    props.onPageChanged(1, pSize)
+    currentSize.value = pSize
 }
 
 </script>
@@ -94,7 +105,8 @@ const onSelectionChange = (val: any[]) => {
 
     .content {
         width: 100%;
-        height: 88%;
+        flex:1;
+        overflow: auto;
     }
 
     .pagination {
