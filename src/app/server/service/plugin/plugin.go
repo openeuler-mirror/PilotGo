@@ -289,12 +289,12 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 	return nil
 }
 
-func (m *PluginManager) getPlugin(uuid string) (*Plugin, error) {
+func (m *PluginManager) getPlugin(name string) (*Plugin, error) {
 	var result *Plugin
 	found := false
 	m.Lock()
 	for _, v := range m.Plugins {
-		if v.UUID == uuid {
+		if v.Name == name {
 			// 使用深拷贝避免指针泄露
 			result = v.Clone()
 			found = true
@@ -304,7 +304,7 @@ func (m *PluginManager) getPlugin(uuid string) (*Plugin, error) {
 	m.Unlock()
 
 	if !found {
-		return nil, fmt.Errorf("plugin %s not found", uuid)
+		return nil, fmt.Errorf("plugin %s not found", name)
 	}
 
 	return result, nil
@@ -498,7 +498,7 @@ func GetPluginPaged(offset, size int) (int64, []*Plugin, error) {
 
 	result := []*Plugin{}
 	for _, p := range plugins {
-		plugin, err := globalPluginManager.getPlugin(p.UUID)
+		plugin, err := globalPluginManager.GetPluginByUUID(p.UUID)
 		if err != nil {
 			logger.Error("manager get plugin %s", err)
 			continue
