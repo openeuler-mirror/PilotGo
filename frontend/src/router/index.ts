@@ -267,7 +267,8 @@ function addPluginRoute(item: any) {
         component: () => import('@/views/Plugin/PluginFrame.vue'),
         meta: {
           title: subItem.name,
-          subRoute: '/plugin/' + item.name.split('plugin-')[1] + subItem.url,
+          subRoute: '/plugin/' + item.name.split('-')[1] + subItem.url,
+          // subRoute: '/plugin/' + item.name.split('plugin-')[1] + subItem.url,
           breadcrumb: [{
             name: item.name,
             path: item.path
