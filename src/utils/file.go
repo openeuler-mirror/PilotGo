@@ -33,14 +33,10 @@ func FileSaveString(filePath string, data string) error {
 	if err != nil {
 		return err
 	}
-	decodedate, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		return err
-	}
-	data_length := len(decodedate)
+	data_length := len(data)
 	send_count := 0
 	for {
-		n, err := f.Write(decodedate[send_count:])
+		n, err := f.WriteString(data[send_count:])
 		if err != nil {
 			return err
 		}
@@ -163,7 +159,12 @@ func UpdateFile(path, filename, data interface{}) (lastversion string, err error
 		if err != nil {
 			return "", err
 		}
-		err := FileSaveString(fullname, data.(string))
+		//解码参数
+		decodedate, err := base64.StdEncoding.DecodeString(data.(string))
+		if err != nil {
+			return "", err
+		}
+		err = FileSaveString(fullname, string(decodedate))
 		if err != nil {
 			return "", err
 		}
@@ -181,8 +182,13 @@ func SaveFile(path, filename, data string) error {
 	fullname := path + "/" + filename
 	fok, _ := IsFileExist(fullname)
 	if fok {
+		//解码参数
+		decodedate, err := base64.StdEncoding.DecodeString(data)
+		if err != nil {
+			return err
+		}
 		//更新文件
-		err := FileSaveString(fullname, data)
+		err = FileSaveString(fullname, string(decodedate))
 		return err
 	} else {
 		//判断是否是文件夹
