@@ -41,7 +41,7 @@ export function updatePlugins() {
       ElMessage.error("查询插件列表错误：" + res.msg);
     }
   }).catch((err) => {
-    console.log('处理数据流程出错：', err)
+    ElMessage.error('处理数据流程出错：', err)
   })
 }
 

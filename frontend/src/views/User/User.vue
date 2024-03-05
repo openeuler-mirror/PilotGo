@@ -1,6 +1,7 @@
 <template>
     <div class="container">
-        <PGTable :data="users" title="用户列表" :showSelect="true" v-model:selectedData="selectedUsers">
+        <PGTable ref="refTable" :data="users" title="用户列表" :showSelect="true" :total="total"
+            v-model:selectedData="selectedUsers" :onPageChanged="onPageChanged">
             <template v-slot:action>
                 <div class="search">
                     <el-input v-model.trim="searchInput" placeholder="请输入邮箱名进行搜索..." style="width: 300px;" />
@@ -17,6 +18,7 @@
                     <el-button type="primary">批量导入</el-button>
                 </div>
             </template>
+
             <template v-slot:content>
                 <el-table-column align="center" prop="username" label="用户名">
                 </el-table-column>
@@ -56,25 +58,22 @@ import UpdateUser from "./components/UpdateUser.vue";
 import { getUsers, searchUser, resetUserPasswd, deleteUser } from "@/request/user";
 import { RespCodeOK } from "@/request/request";
 
-const users = ref([])
+const refTable = ref()
 
-const currentPage = ref(1)
-const pageSize = ref(10)
+const users = ref([])
 const total = ref(0)
 
 onMounted(() => {
     updateUsers()
 })
 
-function updateUsers() {
+function updateUsers(page: number = 1, size: number = 10) {
     getUsers({
-        page: currentPage.value,
-        size: pageSize.value,
+        page: page,
+        size: size,
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             total.value = resp.total
-            currentPage.value = resp.page
-            pageSize.value = resp.size
             users.value = resp.data
         } else {
             ElMessage.error("failed to get users info: " + resp.msg)
@@ -97,7 +96,7 @@ function onAddUser() {
 const selectedUsers = ref<any[]>([])
 function onDeleteUser() {
     let params: string[] = []
-    selectedUsers.value.forEach((item:any)=>{
+    selectedUsers.value.forEach((item: any) => {
         params.push(item.email);
     })
 
@@ -126,13 +125,27 @@ function onUpdateUser(user: any) {
 const searchInput = ref("")
 
 function onSearchUser() {
+    // 重置到table第一页
+    refTable.value.resetPage()
+
+    if (searchInput.value === "") {
+        tableMode = "list"
+        updateUsers()
+        return
+    }
+
+    tableMode = "search"
+    searchUserList()
+}
+
+function searchUserList(page: number = 1, size: number = 10){
     searchUser({
-        email: searchInput.value
+        email: searchInput.value,
+        page: page,
+        size: size,
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             total.value = resp.total
-            currentPage.value = resp.page
-            pageSize.value = resp.size
             users.value = resp.data
         } else {
             ElMessage.error("failed to search users:" + resp.msg)
@@ -154,6 +167,19 @@ function onResetUserPasswd(user: any) {
     }).catch((err: any) => {
         ElMessage.error("failed to reset user password" + err.msg)
     })
+}
+
+// list:所有用户清单
+// search:搜索用户
+let tableMode = "list"
+function onPageChanged(currentPage: number, currentSize: number) {
+    if (tableMode === "search") {
+        searchUserList(currentPage, currentSize)
+    } else if (tableMode === "list") {
+        updateUsers(currentPage, currentSize)
+    } else {
+        ElMessage.error("invalid table mode:" + tableMode)
+    }
 }
 </script>
 

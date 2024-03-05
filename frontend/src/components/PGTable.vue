@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { toRaw, ref } from "vue";
+import { toRaw, ref, defineExpose } from "vue";
 
 const props = defineProps({
     title: String,
@@ -57,6 +57,10 @@ const currentPage = ref(1)
 const currentSize = ref(10)
 
 const emit = defineEmits(['update:selectedData'])
+function resetPage() {
+    currentPage.value = 1
+}
+defineExpose({resetPage})
 
 const onSelectionChange = (val: any[]) => {
     let d: any[] = []
