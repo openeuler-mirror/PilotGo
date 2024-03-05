@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <PGTable :data="logs" title="审计日志" :showSelect="false" :total="total" :currentPage="currentPage">
+        <PGTable :data="logs" title="审计日志" :showSelect="false" :total="total" :onPageChanged="onPageChanged">
             <template v-slot:content>
                 <el-table-column align="center" prop="action" label="日志名称">
                 </el-table-column>
@@ -45,14 +45,16 @@ const pageSize = ref(10)
 const total = ref(0)
 
 onMounted(() => {
+    getPageLogs(currentPage.value, pageSize.value)
+})
+
+function getPageLogs(page: number, size: number) {
     getLogs({
-        page: currentPage.value,
-        size: pageSize.value,
+        page: page,
+        size: size,
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             total.value = resp.total
-            currentPage.value = resp.page
-            pageSize.value = resp.size
             logs.value = resp.data
         } else {
             ElMessage.error("failed to get audit logs: " + resp.msg)
@@ -60,7 +62,12 @@ onMounted(() => {
     }).catch((err: any) => {
         ElMessage.error("failed to get audit logs:" + err.msg)
     })
-})
+}
+
+
+function onPageChanged(currentPage: number, currentSize: number) {
+    getPageLogs(currentPage, currentSize)
+}
 </script>
 
 <style lang="scss" scoped>
