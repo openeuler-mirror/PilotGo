@@ -138,9 +138,10 @@ function onSearchUser() {
     searchUserList()
 }
 
-function searchUserList(page: number = 1, size: number = 10){
+function searchUserList(page: number = 1, size: number = 10) {
     searchUser({
-        email: searchInput.value,
+        email: searchInput.value
+    }, {
         page: page,
         size: size,
     }).then((resp: any) => {
@@ -192,6 +193,7 @@ function onPageChanged(currentPage: number, currentSize: number) {
         height: 100%;
         display: flex;
         flex-direction: row;
+        align-items: center;
     }
 
     .el-button {

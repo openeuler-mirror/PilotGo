@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <PGTable :data="plugins" title="插件列表" :total="total" :currentPage="currentPage">
+    <PGTable :data="plugins" title="插件列表" :total="total" :onPageChanged="onPageChanged">
       <template v-slot:action>
         <el-button type="primary" @click="displayDialog = true">添加插件</el-button>
       </template>
@@ -64,23 +64,19 @@ import { usePluginStore } from "@/stores/plugin";
 const displayDialog = ref(false)
 
 const plugins = ref([])
-const currentPage = ref(1)
-const pageSize = ref(10)
 const total = ref(0)
 
 onMounted(() => {
   updatePluginList()
 })
 
-function updatePluginList() {
+function updatePluginList(page: number = 1, size: number = 10) {
   getPluginsPaged({
-    page: currentPage.value,
-    size: pageSize.value,
+    page: page,
+    size: size,
   }).then((resp: any) => {
     if (resp.code === RespCodeOK) {
       total.value = resp.total
-      currentPage.value = resp.page
-      pageSize.value = resp.size
       plugins.value = resp.data
     } else {
       ElMessage.error("failed to get plugins: " + resp.msg)
@@ -88,6 +84,10 @@ function updatePluginList() {
   }).catch((err: any) => {
     ElMessage.error("failed to get plugins:" + err.msg)
   })
+}
+
+function onPageChanged(currentPage: number, currentSize: number) {
+  updatePluginList(currentPage, currentSize)
 }
 
 function togglePluginState(item: any) {

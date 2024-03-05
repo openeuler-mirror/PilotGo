@@ -1,5 +1,5 @@
 <template>
-    <PGTable :data="machines" title="机器列表" :showSelect="showSelect" :total="total" :currentPage="currentPage">
+    <PGTable :data="machines" title="机器列表" :showSelect="showSelect" :total="total" :onPageChanged="onPageChanged">
         <template v-slot:action>
             <el-dropdown>
                 <el-button type="primary">
@@ -62,20 +62,20 @@ const route = useRoute()
 const batchID = ref(route.params.id)
 const showSelect = ref(true)
 const machines = ref([])
-const currentPage = ref(1)
-const pageSize = ref(10)
 const total = ref(0)
 
 onMounted(() => {
+    updateBatchList()
+})
+
+function updateBatchList(page: number = 1, size: number = 10){
     getBatchDetail({
-        page: currentPage.value,
-        size: pageSize.value,
+        page: page,
+        size: size,
         ID: batchID.value,
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             total.value = resp.total
-            currentPage.value = resp.page
-            pageSize.value = resp.size
             machines.value = resp.data
         } else {
             ElMessage.error("failed to get batch detail info: " + resp.msg)
@@ -83,7 +83,11 @@ onMounted(() => {
     }).catch((err: any) => {
         ElMessage.error("failed to get batch detail info:" + err.msg)
     })
-})
+}
+
+function onPageChanged(currentPage: number, currentSize: number) {
+    updateBatchList(currentPage, currentSize)
+}
 
 </script>
 
