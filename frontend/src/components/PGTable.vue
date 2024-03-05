@@ -2,7 +2,7 @@
     <div class="container">
         <div class="header">
             <span>{{ title }}</span>
-            <div style="margin-right: 10px;">
+            <div class="slot">
                 <slot name="action"></slot>
             </div>
         </div>
@@ -105,6 +105,9 @@ function sizeChangeHandler(pSize: number) {
             margin-left: 10px;
         }
 
+        .slot {
+            margin-right: 10px;
+        }
     }
 
     .content {

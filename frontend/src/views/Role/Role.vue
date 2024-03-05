@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <PGTable :data="roles" title="角色列表" :showSelect="true" :total="total" :currentPage="currentPage">
+        <PGTable :data="roles" title="角色列表" :showSelect="true" :total="total" :onPageChanged="onPageChanged">
             <template v-slot:action>
                 <el-button type="primary" @click="onAddRole">添加</el-button>
             </template>
@@ -61,23 +61,19 @@ import { getRolesPaged, deleteRole } from "@/request/role";
 import { RespCodeOK } from "@/request/request";
 
 const roles = ref([])
-const currentPage = ref(1)
-const pageSize = ref(10)
 const total = ref(0)
 
 onMounted(() => {
     updateRoles()
 })
 
-function updateRoles() {
+function updateRoles(page: number = 1, size: number = 10) {
     getRolesPaged({
-        page: currentPage.value,
-        size: pageSize.value,
+        page: page,
+        size: size,
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             total.value = resp.total
-            currentPage.value = resp.page
-            pageSize.value = resp.size
             roles.value = resp.data
         } else {
             ElMessage.error("failed to get role info: " + resp.msg)
@@ -85,6 +81,10 @@ function updateRoles() {
     }).catch((err: any) => {
         ElMessage.error("failed to get role info:" + err.msg)
     })
+}
+
+function onPageChanged(currentPage: number, currentSize: number) {
+    updateRoles(currentPage, currentSize)
 }
 
 const roleDetailTitle = ref("权限详情")

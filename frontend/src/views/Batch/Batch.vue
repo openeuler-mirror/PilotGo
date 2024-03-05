@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <PGTable :data="batches" title="批次列表" :showSelect="true" :total="total" :currentPage="currentPage"
+        <PGTable :data="batches" title="批次列表" :showSelect="true" :total="total" :onPageChanged="onPageChanged"
             v-model:selectedData="selectedBatches">
             <template v-slot:action>
                 <el-dropdown>
@@ -47,7 +47,8 @@
         </PGTable>
 
         <el-dialog title="编辑批次" v-model="showChangeBatchDialog">
-            <UpdateBatch :batchID="updateBatchID" @batchUpdated="updateBatchInfo" @close="showChangeBatchDialog = false" />
+            <UpdateBatch :batchID="updateBatchID" @batchUpdated="updateBatchInfo"
+                @close="showChangeBatchDialog = false" />
         </el-dialog>
     </div>
 </template>
@@ -71,18 +72,16 @@ function onEditBatch(id: number) {
 }
 
 const batches = ref([])
-const currentPage = ref(1)
-const pageSize = ref(10)
 const total = ref(0)
 
 onMounted(() => {
     updateBatchInfo()
 })
 
-function updateBatchInfo() {
+function updateBatchInfo(page: number = 1, size: number = 10) {
     getBatches({
-        page: currentPage.value,
-        size: pageSize.value,
+        page: page,
+        size: size,
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             total.value = resp.total
@@ -105,8 +104,7 @@ function batchDelete() {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
-        })
-        .then(() => {
+        }).then(() => {
             // TODO: fix proxy object problem
             let params: number[] = [];
             (toRaw(selectedBatches.value) as any[]).forEach((item) => {
@@ -129,6 +127,9 @@ function batchDelete() {
         })
 }
 
+function onPageChanged(currentPage: number, currentSize: number) {
+    updateBatchInfo(currentPage, currentSize)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -138,6 +139,6 @@ function batchDelete() {
 }
 
 a {
-  text-decoration: none;
+    text-decoration: none;
 }
 </style>

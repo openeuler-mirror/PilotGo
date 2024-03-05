@@ -8,7 +8,7 @@
       </PGTree>
     </div>
     <div class="cluster">
-      <PGTable :data="machines" title="机器列表" :showSelect="showSelect" :total="total" :currentPage="currentPage"
+      <PGTable :data="machines" title="机器列表" :showSelect="showSelect" :total="total" :onPageChanged="onPageChanged"
         v-model:selectedData="selectedMachines">
         <template v-slot:action>
           <el-dropdown>
@@ -92,8 +92,6 @@ const departmentID = ref(1)
 // 机器列表
 const showSelect = ref(true)
 const machines = ref<any>([])
-const currentPage = ref(1)
-const pageSize = ref(10)
 const total = ref(0)
 
 const showChangeDepartDialog = ref(false)
@@ -110,16 +108,14 @@ watch(usePluginStore().extention, (newV, oldV) => {
   }
 }, { immediate: true })
 
-function updateDepartmentMachines(departID: number) {
+function updateDepartmentMachines(departID: number, page: number = 1, size: number = 10) {
   getPagedDepartMachines({
-    page: currentPage.value,
-    size: pageSize.value,
+    page: page,
+    size: size,
     DepartId: departID,
   }).then((resp: any) => {
     if (resp.code === RespCodeOK) {
       total.value = resp.total
-      currentPage.value = resp.page
-      pageSize.value = resp.size
       machines.value = resp.data
 
       // 获取机器节点的tags标签
@@ -153,11 +149,16 @@ function updateDepartmentMachines(departID: number) {
   })
 }
 
+function onPageChanged(currentPage: number, currentSize: number) {
+  updateDepartmentMachines(departmentID.value, currentPage, currentSize)
+}
+
 function machineDetail(info: any) {
   directTo("/cluster/machine/" + info.uuid)
 }
 
 function onDepartmentClicked(depart: any) {
+  departmentID.value = depart.id
   updateDepartmentMachines(depart.id)
 }
 

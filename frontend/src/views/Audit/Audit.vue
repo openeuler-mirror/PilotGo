@@ -40,15 +40,13 @@ import { getLogs } from "@/request/audit";
 import { RespCodeOK } from "@/request/request";
 
 const logs = ref([])
-const currentPage = ref(1)
-const pageSize = ref(10)
 const total = ref(0)
 
 onMounted(() => {
-    getPageLogs(currentPage.value, pageSize.value)
+    getPageLogs()
 })
 
-function getPageLogs(page: number, size: number) {
+function getPageLogs(page: number = 1, size: number = 10) {
     getLogs({
         page: page,
         size: size,
@@ -63,7 +61,6 @@ function getPageLogs(page: number, size: number) {
         ElMessage.error("failed to get audit logs:" + err.msg)
     })
 }
-
 
 function onPageChanged(currentPage: number, currentSize: number) {
     getPageLogs(currentPage, currentSize)
