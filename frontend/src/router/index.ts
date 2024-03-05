@@ -216,7 +216,6 @@ export function updateSidebarItems() {
   let menus = generateLocalMenus();
   routerStore().routers = [];
   for (let item of iframeComponents.value) {
-    // console.log(item)
     // 添加插件路由信息
     addPluginRoute(item);
     // 更新侧边菜单
