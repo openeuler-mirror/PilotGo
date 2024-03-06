@@ -61,7 +61,7 @@ func main() {
 
 	// init agent info
 	if err := localstorage.Init(); err != nil {
-		logger.Error("local storage init failed: %s", err)
+		logger.ErrorStack("local storage init failed", err)
 		os.Exit(-1)
 	}
 	logger.Info("agent uuid is:%s", localstorage.AgentUUID())
