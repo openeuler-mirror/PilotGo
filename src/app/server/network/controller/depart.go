@@ -45,9 +45,6 @@ func MachineListHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	if len(machinelist) == 0 {
-		response.Success(c, []interface{}{}, "部门下所属机器获取成功")
-	}
 	response.Success(c, machinelist, "部门下所属机器获取成功")
 }
 

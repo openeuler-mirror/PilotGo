@@ -13,14 +13,12 @@
                     <el-input class="ipInput" type="text" v-model="branchForm.batchName" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="描述:" prop="description">
-                    <el-input class="ipInput" type="text" v-model="branchForm.description" autocomplete="off"></el-input>
+                    <el-input class="ipInput" type="text" v-model="branchForm.description"
+                        autocomplete="off"></el-input>
                 </el-form-item>
             </el-form>
-            <el-transfer class="transfer" filterable filter-placeholder="请输入关键字" :titles="['备选项', '已选项']"
-                :data="nodeMachines" v-model="selectedMachines">
-                <template #left-footer>
-                    <el-button type="primary">重置</el-button>
-                </template>
+            <el-transfer class="transfer" filterable filter-placeholder="请输入IP" :filter-method="filterMethod"
+                :titles="['备选项', '已选项']" :data="nodeMachines" v-model="selectedMachines">
                 <template #right-footer>
                     <el-button type="primary" @click="onCreateBatch">创建</el-button>
                 </template>
@@ -84,12 +82,12 @@ function onNodeClicked(node: any) {
 
 function onCreateBatch() {
     createBatch({
-        Name:branchForm.value.batchName,
+        Name: branchForm.value.batchName,
         Description: branchForm.value.description,
-        Machines:selectedMachines.value,
+        Machines: selectedMachines.value,
         // TODO:
-        Manager:"admin@123.com",
-        DepartID:[],
+        Manager: "admin@123.com",
+        DepartID: [],
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
             ElMessage.success("创建批次成功")
@@ -101,6 +99,13 @@ function onCreateBatch() {
     })
 }
 
+function filterMethod(query: any, item: any) {
+    if (query === "") {
+        return true
+    } else {
+        return item.label.includes(query)
+    }
+}
 </script>
 
 <style lang="scss" scoped>
