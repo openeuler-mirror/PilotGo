@@ -200,6 +200,7 @@ func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		returnUsers = append(returnUsers, userinfo)
 	}
 	return count, returnUsers, err
 }
