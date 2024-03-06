@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, toRaw } from "vue";
+import { ref, onMounted, toRaw, watch } from "vue";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import AuthButton from "@/components/AuthButton.vue";
 import PGTable from "@/components/PGTable.vue";
@@ -62,6 +62,7 @@ import UpdateBatch from "./components/UpdateBatch.vue";
 
 import { RespCodeOK } from "@/request/request";
 import { getBatches, deleteBatch } from '@/request/batch';
+import { BatchMidifiedMessageStore } from "@/stores/message";
 
 const showChangeBatchDialog = ref(false)
 const updateBatchID = ref(0)
@@ -77,6 +78,10 @@ const total = ref(0)
 onMounted(() => {
     updateBatchInfo()
 })
+
+watch(BatchMidifiedMessageStore().msg, () => {
+    updateBatchInfo()
+}, { immediate: true })
 
 function updateBatchInfo(page: number = 1, size: number = 10) {
     getBatches({

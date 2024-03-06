@@ -52,6 +52,7 @@ const branchFormRule = ref({
 import { getDepartMachines } from "@/request/cluster";
 import { createBatch } from "@/request/batch";
 import { RespCodeOK } from "@/request/request";
+import { notify_batch_modified } from "@/stores/message";
 
 const nodeMachines = ref<any[]>([])
 const selectedMachines = ref<any[]>([])
@@ -90,6 +91,7 @@ function onCreateBatch() {
         DepartID: [],
     }).then((resp: any) => {
         if (resp.code === RespCodeOK) {
+            notify_batch_modified()
             ElMessage.success("创建批次成功")
         } else {
             ElMessage.error("failed to create batch: " + resp.msg)
