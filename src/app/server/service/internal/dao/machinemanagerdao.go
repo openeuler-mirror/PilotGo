@@ -110,18 +110,19 @@ func MachineAll() ([]Res, error) {
 }
 
 // 获取该部门下的所有机器
-func MachineList(departId []int) (machinelist []Res, err error) {
+func MachineList(departId []int) ([]Res, error) {
+	machinelist := []Res{}
 	for _, value := range departId {
 		list := []Res{}
-		err = mysqlmanager.MySQL().Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
+		err := mysqlmanager.MySQL().Table("machine_node").Where("depart_id=?", value).Select("machine_node.id as id,machine_node.depart_id as departid," +
 			"depart_node.depart as departname,machine_node.ip as ip,machine_node.machine_uuid as uuid,  machine_node.cpu as cpu,machine_node.run_status as runstatus," +
 			"machine_node.maint_status as maintstatus, machine_node.systeminfo as systeminfo").Joins("left join depart_node on machine_node.depart_id = depart_node.id").Scan(&list).Error
 		if err != nil {
-			return
+			return []Res{}, err
 		}
 		machinelist = append(machinelist, list...)
 	}
-	return
+	return machinelist, nil
 }
 
 // 统计总数
