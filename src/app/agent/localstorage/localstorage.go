@@ -20,7 +20,8 @@ import (
 	"flag"
 	"sync"
 
-	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"github.com/pkg/errors"
+
 	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/google/uuid"
 )
@@ -39,14 +40,12 @@ func Init() error {
 	flag.Parse()
 	if fok, _ := utils.IsFileExist(LocalStorageFile); !fok {
 		if err := reset(); err != nil {
-			logger.Error("init local storage failed:%s", err.Error())
-			return err
+			return errors.WithMessage(err, "init local storage failed")
 		}
 	}
 
 	if err := load(); err != nil {
-		logger.Error("load local storage failed:%s", err.Error())
-		return err
+		return errors.WithMessage(err, "load local storage failed")
 	}
 
 	return nil
@@ -63,12 +62,12 @@ func AgentUUID() string {
 func load() error {
 	s, err := utils.FileReadString(LocalStorageFile)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to read local storage file")
 	}
 
 	data := &localData{}
 	if err := json.Unmarshal([]byte(s), data); err != nil {
-		return err
+		return errors.Wrap(err, "failed to unmarshal local storage data")
 	}
 
 	globalLock.Lock()
@@ -86,12 +85,12 @@ func reset() error {
 
 	bs, err := json.Marshal(data)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to marshal local data")
 	}
 
 	err = utils.FileSaveString(LocalStorageFile, string(bs))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to save local storage file")
 	}
 
 	globalLock.Lock()

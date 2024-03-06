@@ -112,6 +112,10 @@ func Error(format string, args ...interface{}) {
 	logrus.Errorf(format, args...)
 }
 
+func ErrorStack(msg string, err error) {
+	logrus.Errorf(msg+"\n%+v", err)
+}
+
 func Fatal(format string, args ...interface{}) {
 	logrus.Fatalf(format, args...)
 }
