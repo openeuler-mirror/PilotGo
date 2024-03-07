@@ -108,6 +108,7 @@ func (model Model) GetPolicy(sec string, ptype string) [][]string {
 
 // GetFilteredPolicy gets rules based on field filters from a policy.
 func (model Model) GetFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) [][]string {
+
 	res := [][]string{}
 
 	for _, rule := range model[sec][ptype].Policy {
