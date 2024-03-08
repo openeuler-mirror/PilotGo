@@ -1,0 +1,122 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-04-08 11:34:55
+ LastEditTime: 2023-09-08 16:24:49
+ -->
+<template>
+  <div class="content" style="width:96%; padding-top:20px; margin: 0 auto">
+    <el-descriptions :column="2" size="medium" border>
+      <el-descriptions-item label="机器IP">{{ IP }}</el-descriptions-item>
+      <el-descriptions-item label="所属部门">{{ dept }}</el-descriptions-item>
+      <el-descriptions-item label="监控状态">{{ status }}</el-descriptions-item>
+      <el-descriptions-item label="系统版本">{{ macPlatform }}</el-descriptions-item>
+      <el-descriptions-item label="架构">{{ mackernel }}</el-descriptions-item>
+      <el-descriptions-item label="cpu">{{ macCPU }}</el-descriptions-item>
+      <el-descriptions-item label="内存">{{ macMEM }}</el-descriptions-item>
+      <el-descriptions-item label="内核版本">{{ osVersion }}</el-descriptions-item>
+      <el-descriptions-item :label="item.device" :span="2" v-for="item in diskData" :key="item.$index">
+        <span class="diskMount">{{ "挂载点：" + item.path + "(" + item.total + ")" }}</span>
+        <p class="progress">
+          <span :style="{ width: item.used_percent }">{{ item.used_percent }}</span>
+        </p>
+      </el-descriptions-item>
+    </el-descriptions>
+  </div>
+</template>
+<script>
+import { getBasicInfo, getCpu, getOS, getMemory, getDisk, getOverview } from '@/request/cluster';
+export default {
+  name: "BaseInfo",
+  data() {
+    return {
+      params: {},
+      diskData: [
+        // {
+        //   "device": "/dev/dm-0",
+        //   "fileSystem": "/dev/dm-0(挂载点：/)",
+        //   "fstype": "xfs",
+        //   "path": "/",
+        //   "total": "64G",
+        //   "used": "45G",
+        //   "usedPercent": "71%"
+        // }
+      ],
+      IP: '',
+      dept: '',
+      manager: '',
+      status: '',
+      IP: '',
+      macPlatform: '',
+      mackernel: '',
+      macCPU: '',
+      macMEM: '',
+      osVersion: ''
+    }
+  },
+  mounted() {
+    let obj = this.params = { uuid: this.$route.params.detail };
+    if (this.$route.params.detail != undefined) {
+      this.$nextTick(() => {
+        getOverview(obj).then(res => {
+          if (res.data.code === 200) {
+            let result = res.data.data
+            this.IP = result.ip;
+            this.dept = result.department;
+            this.status = result.state === 1 ? '在线' : result.state === 2 ? '离线' : 'unknown';
+            this.macPlatform = result.platform + ' ' + result.platform_version;
+            this.mackernel = result.kernel_arch;
+            this.osVersion = result.kernel_version;
+            this.macCPU = result.cpu_num + '核 ' + result.model_name;
+            let memTotal = 0;
+            memTotal = result.memory_total / 1024 / 1024;
+            this.macMEM = memTotal.toFixed(2) + 'G';
+            this.diskData = result.disk_usage;
+
+            this.$store.commit('SET_IMMUTABLE', result.immutable)
+          } else {
+            console.log(res.data.msg)
+          }
+        })
+      })
+    }
+  }
+}
+</script>
+<style scoped lang="scss">
+.content {
+  .diskMount {
+    display: inline-block;
+    font-size: 12px;
+    word-break: break-all;
+    width: 22%;
+    text-align: center;
+  }
+
+  .progress {
+    display: inline-block;
+    width: 74%;
+    margin-left: 2%;
+    border: 1px solid rgba(11, 35, 117, .5);
+    background: #fff;
+    border-radius: 10px;
+    text-align: left;
+
+    span {
+      display: inline-block;
+      background: rgba(11, 35, 117, .6);
+      text-align: center;
+      color: #fff;
+      border: 1px solid #fff;
+      border-radius: 10px;
+    }
+  }
+}
+</style>
