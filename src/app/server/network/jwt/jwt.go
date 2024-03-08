@@ -15,8 +15,8 @@
 package jwt
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -28,16 +28,16 @@ import (
 
 var Issue = "PilotGo"
 
-type MyClaims struct {
+type UserClaims struct {
 	jwt.StandardClaims
 
 	UserId   uint
 	UserName string
 }
 
-func ReleaseToken(user userservice.ReturnUser) (string, error) {
+func GenerateUserToken(user userservice.ReturnUser) (string, error) {
 	expirationTime := time.Now().Add(6 * 60 * time.Minute) //到期时间
-	claims := &MyClaims{
+	claims := &UserClaims{
 		UserId:   user.ID,
 		UserName: user.Username,
 
@@ -56,15 +56,8 @@ func ReleaseToken(user userservice.ReturnUser) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (*jwt.Token, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (i interface{}, err error) {
-		return []byte(config.Config().JWT.SecretKey), nil
-	})
-	return token, err
-}
-
 func ParseUser(c *gin.Context) (*userservice.User, error) {
-	claims, err := ParseMyClaims(c)
+	claims, err := parseMyClaims(c)
 	if err != nil {
 		return nil, err
 	}
@@ -76,27 +69,83 @@ func ParseUser(c *gin.Context) (*userservice.User, error) {
 	return user, nil
 }
 
-func ParseMyClaims(c *gin.Context) (*MyClaims, error) {
-	var tokenString string
-	var token *jwt.Token
-	var cookie *http.Cookie
-	var claims *MyClaims
-
-	var err error
-	var ok bool
-
-	cookie, err = c.Request.Cookie("Admin-Token") //Get authorization header
+func parseMyClaims(c *gin.Context) (*UserClaims, error) {
+	cookie, err := c.Request.Cookie("Admin-Token") //Get authorization header
 	if err != nil {
-		goto OnError
+		return nil, err
 	}
 
-	tokenString = cookie.Value
+	claims, err := parseClaims(cookie.Value, &UserClaims{})
+	if err != nil {
+		return nil, err
+	}
+	m, ok := claims.(*UserClaims)
+	if !ok {
+		return nil, errors.New("invalid plugin claims")
+	}
+	return m, nil
+}
+
+type PluginClaims struct {
+	jwt.StandardClaims
+
+	Name string
+	UUID string
+}
+
+func GeneratePluginToken(name, uuid string) (string, error) {
+	claims := &PluginClaims{
+		Name: name,
+		UUID: uuid,
+
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt: time.Now().Unix(),
+			Issuer:   Issue,
+			Subject:  "plugin token",
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(config.Config().JWT.SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
+
+func ParsePluginClaims(c *gin.Context) (*PluginClaims, error) {
+	cookie, err := c.Request.Cookie("PluginToken") //Get authorization header
+	if err != nil {
+		return nil, err
+	}
+
+	claims, err := parseClaims(cookie.Value, &PluginClaims{})
+	if err != nil {
+		return nil, err
+	}
+	m, ok := claims.(*PluginClaims)
+	if !ok {
+		return nil, errors.New("invalid plugin claims")
+	}
+	return m, nil
+}
+
+func parseToken(tokenString string, clames jwt.Claims) (*jwt.Token, error) {
+	token, err := jwt.ParseWithClaims(tokenString, clames, func(token *jwt.Token) (i interface{}, err error) {
+		return []byte(config.Config().JWT.SecretKey), nil
+	})
+	return token, err
+}
+
+func parseClaims(tokenString string, clames jwt.Claims) (jwt.Claims, error) {
+	var token *jwt.Token
+	var err error
+
 	if tokenString == "" {
 		err = fmt.Errorf("token is empty")
 		goto OnError
 	}
 
-	token, err = ParseToken(tokenString)
+	token, err = parseToken(tokenString, clames)
 	if err != nil {
 		goto OnError
 	}
@@ -105,13 +154,7 @@ func ParseMyClaims(c *gin.Context) (*MyClaims, error) {
 		err = fmt.Errorf("token is invalid")
 		goto OnError
 	}
-
-	claims, ok = token.Claims.(*MyClaims)
-	if !ok {
-		err = fmt.Errorf("token claims is invalid")
-		goto OnError
-	}
-	return claims, nil
+	return token.Claims, nil
 
 OnError:
 	return nil, err

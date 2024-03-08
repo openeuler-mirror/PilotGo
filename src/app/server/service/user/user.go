@@ -221,7 +221,14 @@ func GetUserRoles(username string) ([]string, error) {
 
 // 根据userid查询user信息
 func QueryUserByID(userID int) (*User, error) {
-	return dao.GetUserByID(userID)
+	user, err := dao.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("用户不存在")
+	}
+	return user, err
 }
 
 // 查询某用户信息

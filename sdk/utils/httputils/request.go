@@ -54,6 +54,16 @@ func request(method, url string, param *Params) (*Response, error) {
 				}
 			}
 		}
+
+		// 处理token
+		if len(param.Cookie) > 0 {
+			for k, v := range param.Cookie {
+				req.AddCookie(&http.Cookie{
+					Name:  k,
+					Value: v,
+				})
+			}
+		}
 	}
 
 	hc := &http.Client{Transport: &http.Transport{
@@ -88,6 +98,8 @@ type Params struct {
 	Form map[string]string
 	// Body 参数会被序列化成json字符串
 	Body interface{}
+	// Cookit 参数会被添加到请求cookie当中
+	Cookie map[string]string
 }
 
 type Response struct {

@@ -94,7 +94,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.ReleaseToken(*u)
+	token, err := jwt.GenerateUserToken(*u)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
