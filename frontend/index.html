@@ -1,16 +1,61 @@
+<!--
+ * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+ * PilotGo is licensed under the Mulan PSL v2.
+ * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *     http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * @Author: zhaozhenfang
+ * @Date: 2022-01-14 10:41:07
+ * @LastEditTime: 2022-06-14 17:25:39
+-->
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <link rel="icon" href="/pilotgo.ico">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PilotGo</title>
-</head>
-
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
-
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+    <title>pilotgo-web</title>
+    <link rel="icon" href="./static/pilotgo.ico">
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
 </html>
+<script>
+  (function () {
+    function setRootFontSize() {
+        let rem = 0;
+        let rootWidth = 0;
+        let rootHtml = document.documentElement;
+        //限制展现页面的最小宽度
+        rootWidth = rootHtml.clientWidth <= 1366 ? 1366 : rootHtml.clientWidth;
+        rem = rootWidth / 120;
+        // 动态写入样式
+        rootHtml.style.fontSize = rem + 'px';
+    }
+    setRootFontSize();
+    window.addEventListener("resize", setRootFontSize, false);
+})();
+
+// 禁用网页缩放时放开此处代码
+/* document.addEventListener('mousewheel', function (e) {
+  e = e || window.event;
+  if ((e.wheelDelta && event.ctrlKey) || e.detail) {
+    event.preventDefault();
+  }
+}, {
+  capture: false,
+  passive: false
+});
+document.addEventListener('keydown', function (event) {
+  if ((event.ctrlKey === true || event.metaKey === true) &&
+    (event.keyCode === 61 || event.keyCode === 107 ||
+      event.keyCode === 173 || event.keyCode === 109 ||
+      event.keyCode === 187 || event.keyCode === 189)) {
+    event.preventDefault();
+  }
+}, false); */
+</script>

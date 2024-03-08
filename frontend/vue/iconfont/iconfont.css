@@ -1,0 +1,79 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3196855 */
+  src: url('iconfont.woff2?t=1652234974667') format('woff2'),
+       url('iconfont.woff?t=1652234974667') format('woff'),
+       url('iconfont.ttf?t=1652234974667') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-logout:before {
+  content: "\e77b";
+}
+
+.icon-icon-test:before {
+  content: "\e650";
+}
+
+.icon-dangqianyonghushu:before {
+  content: "\e61e";
+}
+
+.icon-chenggong:before {
+  content: "\e63e";
+}
+
+.icon-shibai:before {
+  content: "\e645";
+}
+
+.icon-fankui:before {
+  content: "\ee9b";
+}
+
+.icon-women:before {
+  content: "\ee9e";
+}
+
+.icon-fenlei:before {
+  content: "\eea7";
+}
+
+.icon-qingdan:before {
+  content: "\eeae";
+}
+
+.icon-wode:before {
+  content: "\eeca";
+}
+
+.icon-yonghuguanli:before {
+  content: "\fcea";
+}
+
+.icon-tongjiguanli:before {
+  content: "\fced";
+}
+
+.icon-quanxianguanli:before {
+  content: "\fcf5";
+}
+
+.icon-leimuguanli:before {
+  content: "\fcf9";
+}
+
+.icon-jigouguanli:before {
+  content: "\fcfd";
+}
+
+.icon-gailan:before {
+  content: "\e612";
+}
+

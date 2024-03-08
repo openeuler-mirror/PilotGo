@@ -1,0 +1,93 @@
+<!-- 
+  Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
+  PilotGo is licensed under the Mulan PSL v2.
+  You can use this software accodring to the terms and conditions of the Mulan PSL v2.
+  You may obtain a copy of Mulan PSL v2 at:
+      http://license.coscl.org.cn/MulanPSL2
+  THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+  EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+  See the Mulan PSL v2 for more details.
+  Author: zhaozhenfang
+  Date: 2022-01-14 10:57:55
+  LastEditTime: 2022-02-28 13:43:11
+  Description: provide agent log manager of pilotgo
+ -->
+<template>
+  <div class="errPage-container">
+    <el-button @click="back" icon='arrow-left' class="pan-back-btn">返回</el-button>
+    <el-row>
+      <el-col :span="12">
+        <h2>你没有权限去该页面</h2>
+        <h6>如有不满请联系你领导</h6>
+        <ul class="list-unstyled">
+          <li>或者你可以去:</li>
+          <li class="link-type">
+            <router-link to="/">回首页</router-link>
+          </li>
+        </ul>
+      </el-col>
+      <el-col :span="12">
+        <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream.">
+      </el-col>
+    </el-row>
+  </div>
+</template>
+
+<script>
+import errGif from '@/assets/images/401.gif'
+
+export default {
+  name: 'page401',
+  data() {
+    return {
+      errGif: errGif + '?' + +new Date()
+    }
+  },
+  methods: {
+    back() {
+      if (this.$route.query.noGoBack) {
+        this.$router.push({ path: '/' })
+      } else {
+        this.$router.go(-1)
+      }
+    }
+  }
+}
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+  .errPage-container {
+    width: 800px;
+    margin: 100px auto;
+    .pan-back-btn {
+      background: #008489;
+      color: #fff;
+    }
+    .pan-gif {
+      margin: 0 auto;
+      display: block;
+    }
+    .pan-img {
+      display: block;
+      margin: 0 auto;
+    }
+    .text-jumbo {
+      font-size: 60px;
+      font-weight: 700;
+      color: #484848;
+    }
+    .list-unstyled {
+      font-size: 14px;
+      li {
+        padding-bottom: 5px;
+      }
+      a {
+        color: #008489;
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+</style>
