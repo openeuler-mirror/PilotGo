@@ -5,12 +5,11 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 
 func AuthMiddleware(c *gin.Context) {
-	claims, err := jwt.ParseMyClaims(c)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code": 401,
@@ -18,9 +17,8 @@ func AuthMiddleware(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	logger.Debug("request from %d, %s", claims.UserId, claims.UserName)
 
-	ok, err := auth.CheckAuth(claims.UserName, c.Request.RequestURI, "get", auth.DomainPilotGo)
+	ok, err := auth.CheckAuth(user.Username, c.Request.RequestURI, "get", auth.DomainPilotGo)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code": 401,
@@ -41,7 +39,7 @@ func AuthMiddleware(c *gin.Context) {
 
 func NeedPermission(resource, action string) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		claims, err := jwt.ParseMyClaims(c)
+		user, err := jwt.ParseUser(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": 401,
@@ -49,9 +47,8 @@ func NeedPermission(resource, action string) func(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		logger.Debug("request from %d, %s", claims.UserId, claims.UserName)
 
-		ok, err := auth.CheckAuth(claims.UserName, resource, action, auth.DomainPilotGo)
+		ok, err := auth.CheckAuth(user.Username, resource, action, auth.DomainPilotGo)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": 401,
@@ -72,7 +69,7 @@ func NeedPermission(resource, action string) func(c *gin.Context) {
 }
 
 func TokenCheckMiddleware(c *gin.Context) {
-	_, err := jwt.ParseMyClaims(c)
+	_, err := jwt.ParseUser(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code": 401,

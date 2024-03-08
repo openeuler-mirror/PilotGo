@@ -8,7 +8,6 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/common"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -53,16 +52,15 @@ func HasPermission(c *gin.Context) {
 		return
 	}
 
-	claims, err := jwt.ParseMyClaims(c)
+	user, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	logger.Debug("request from %d, %s", claims.UserId, claims.UserName)
 
 	//TODO:解析发送请求插件的uuid
 	var uuid string
-	ok, err := auth.CheckAuth(claims.UserName, p.Resource, p.Operate, uuid)
+	ok, err := auth.CheckAuth(user.Username, p.Resource, p.Operate, uuid)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return

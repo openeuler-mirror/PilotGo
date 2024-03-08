@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
@@ -137,13 +138,14 @@ func (m *PluginManager) recovery() error {
 func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) error {
 	// 查询最新的插件信息
 	logger.Debug("update plugin")
-	err := Handshake(pp.Url)
-	if err != nil {
-		return err
-	}
 	info, err := requestPluginInfo(pp)
 	if err != nil {
 		logger.Error("failed to request plugin info:%s", err.Error())
+		return err
+	}
+	info.UUID = uuid
+	err = Handshake(pp.Url, info)
+	if err != nil {
 		return err
 	}
 
@@ -182,11 +184,6 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 }
 
 func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
-	err := Handshake(addPlugin.Url)
-	if err != nil {
-		return nil, err
-	}
-
 	p, err := requestPluginInfo(addPlugin)
 	if err != nil {
 		return nil, err
@@ -194,6 +191,11 @@ func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
 
 	if p.UUID == "" {
 		p.UUID = uuid.New().String()
+	}
+
+	err = Handshake(addPlugin.Url, p)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
@@ -360,7 +362,7 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 }
 
 // 与plugin进行握手，绑定PilotGo与server端
-func Handshake(url string) error {
+func Handshake(url string, p *Plugin) error {
 	index := strings.Index(url, "plugin")
 	if index > 0 {
 		url = url[:index]
@@ -370,7 +372,17 @@ func Handshake(url string) error {
 	url = strings.TrimRight(url, "/") + "/plugin_manage/bind?port=" + port
 	logger.Debug("plugin url is:%s", url)
 
-	resp, err := httputils.Put(url, nil)
+	token, err := jwt.GeneratePluginToken(p.Name, p.UUID)
+	if err != nil {
+		logger.Error("generate plugin token error:%s", err.Error())
+		return err
+	}
+
+	resp, err := httputils.Put(url, &httputils.Params{
+		Cookie: map[string]string{
+			"PluginToken": token,
+		},
+	})
 	if err != nil {
 		logger.Error("request plugin info error:%s", err.Error())
 		return err
