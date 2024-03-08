@@ -4,11 +4,13 @@ package pluginapi
 
 import (
 	"fmt"
+	"net/http"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/agentmanager"
 	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/batch"
+	"openeuler.org/PilotGo/PilotGo/pkg/app/server/service/jwt"
 	"openeuler.org/PilotGo/PilotGo/pkg/logger"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils"
 	"openeuler.org/PilotGo/PilotGo/pkg/utils/response"
@@ -16,7 +18,14 @@ import (
 
 // 检查plugin接口调用权限
 func AuthCheck(c *gin.Context) {
-	// TODO
+	_, err := jwt.ParsePluginClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 401,
+			"msg":  "plugin token check error:" + err.Error()})
+		c.Abort()
+		return
+	}
 	c.Next()
 }
 
