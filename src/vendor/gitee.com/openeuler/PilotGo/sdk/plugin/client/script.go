@@ -30,6 +30,9 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResul
 
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -67,6 +70,9 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -97,6 +103,9 @@ func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCo
 
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return err

@@ -13,7 +13,11 @@ func (c *Client) BatchList() ([]*common.BatchList, error) {
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/batch_list"
-	r, err := httputils.Get(url, nil)
+	r, err := httputils.Get(url, &httputils.Params{
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +37,11 @@ func (c *Client) BatchUUIDList(batchId string) ([]string, error) {
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/batch_uuid?batchId=" + batchId
-	r, err := httputils.Get(url, nil)
+	r, err := httputils.Get(url, &httputils.Params{
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}

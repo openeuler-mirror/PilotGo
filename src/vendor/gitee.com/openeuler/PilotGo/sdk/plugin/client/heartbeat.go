@@ -44,6 +44,9 @@ func (client *Client) sendHeartbeat(clientID string) error {
 	ServerUrl := "http://" + client.Server() + "/api/v1/pluginapi/heartbeat"
 	resp, err := httputils.Post(ServerUrl, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: client.token,
+		},
 	})
 	if err != nil {
 		return err
