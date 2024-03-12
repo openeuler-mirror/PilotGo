@@ -119,6 +119,7 @@ func registerAPIs(router *gin.Engine) {
 		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
 		noAuthenApis.GET("/plugins", controller.GetPluginsHandler)
 		noAuthenApis.GET("/plugins_paged", controller.GetPluginsPagedHandler)
+		noAuthenApis.GET("/download/:filename", controller.Download)
 	}
 
 	authenApi := router.Group("/api/v1")
@@ -269,12 +270,6 @@ func registerAPIs(router *gin.Engine) {
 		configmanager.POST("/lastfile_rollback", controller.LastConfigFileRollBackHandler)
 	}
 
-	fileservive := api.Group("") //文件服务
-	{
-		fileservive.POST("/upload", controller.Upload)
-		fileservive.GET("/download/:filename", controller.Download)
-	}
-
 	userLog := api.Group("log") // 日志管理
 	{
 		userLog.GET("/log_all", controller.LogAllHandler)
@@ -310,6 +305,8 @@ func registerPluginApi(router *gin.Engine) {
 	pluginAPI := router.Group("/api/v1/pluginapi")
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
+		pluginAPI.POST("/upload", controller.Upload)
+
 		pluginAPI.POST("/run_command_async", pluginapi.RunCommandAsyncHandler)
 		pluginAPI.POST("/run_command", pluginapi.RunCommandHandler)
 		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)
