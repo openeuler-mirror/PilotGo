@@ -21,6 +21,9 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*comm
 
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -47,6 +50,9 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*commo
 
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -73,6 +79,9 @@ func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common
 
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return nil, err

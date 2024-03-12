@@ -13,7 +13,11 @@ func (c *Client) MachineList() ([]*common.MachineNode, error) {
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_list"
-	r, err := httputils.Get(url, nil)
+	r, err := httputils.Get(url, &httputils.Params{
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +37,11 @@ func (c *Client) MachineInfoByUUID(machine_uuid string) (*common.MachineNode, er
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
 	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_info?machine_uuid=" + machine_uuid
-	r, err := httputils.Get(url, nil)
+	r, err := httputils.Get(url, &httputils.Params{
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
