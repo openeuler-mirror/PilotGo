@@ -27,7 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed assets index.html
+//go:embed all:assets index.html pilotgo.ico
 var StaticFiles embed.FS
 
 func StaticRouter(router *gin.Engine) {
@@ -41,8 +41,8 @@ func StaticRouter(router *gin.Engine) {
 	router.GET("/", func(c *gin.Context) {
 		c.FileFromFS("/", http.FS(StaticFiles))
 	})
-	router.GET("/favicon.ico", func(c *gin.Context) {
-		c.FileFromFS("/favicon.ico", http.FS(StaticFiles))
+	router.GET("/pilotgo.ico", func(c *gin.Context) {
+		c.FileFromFS("/pilotgo.ico", http.FS(StaticFiles))
 	})
 
 	// 解决页面刷新404的问题
