@@ -1,6 +1,7 @@
 package agentmanager
 
 import (
+	"errors"
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -27,12 +28,16 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 		return nil, err
 	}
 
-	result := &utils.CmdResult{}
-	err = resp_message.BindData(result)
-	if err != nil {
-		return nil, err
+	if resp_message.Status == 0 {
+		//状态为-1的时候不会有数据
+		result := &utils.CmdResult{}
+		err = resp_message.BindData(result)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
 	}
-	return result, nil
+	return nil, errors.New(resp_message.Error)
 }
 
 // 远程在agent上运行脚本文件
@@ -55,12 +60,15 @@ func (a *Agent) RunScript(script string, params []string) (*utils.CmdResult, err
 		return nil, err
 	}
 
-	result := &utils.CmdResult{}
-	err = resp_message.BindData(result)
-	if err != nil {
-		return nil, err
+	if resp_message.Status == 0 {
+		result := &utils.CmdResult{}
+		err = resp_message.BindData(result)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
 	}
-	return result, nil
+	return nil, errors.New(resp_message.Error)
 }
 
 // chmod [-R] 权限值 文件名
