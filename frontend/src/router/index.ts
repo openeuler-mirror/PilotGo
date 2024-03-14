@@ -228,7 +228,7 @@ export function updateSidebarItems() {
       subMenus: null,
     }
     let subMenus = [] as any;
-    if (item.subMenus.length > 0) {
+    if (item.subMenus && item.subMenus.length > 0) {
       item.subMenus.forEach((subItem: any) => {
         subMenus.push({
           hidden: false,
@@ -346,25 +346,31 @@ router.beforeEach((to, from, next) => {
   }
   // 解决在插件页面一刷新页面空白问题
   if (to.path.includes('plugin-')) {
-    let paths = [] as any;
+    /* let paths = [] as any;
     router.getRoutes().forEach(routeItem => {
       paths.push(routeItem.path);
     })
-    if (paths.includes(to.path)) {
-      next();
-    } else {
+    if (paths.includes(to.path)) { */
+    if (!router.hasRoute(to.fullPath)) {
+      console.log('没有这条路径')
       new Promise(async (resolve, rejection) => {
         await routerStore().routers.forEach((route: any) => {
           addPluginRoute(route);
         })
         resolve('addRoute success');
       }).then(res => {
+        console.log(router.getRoutes())
         next({ ...to, replace: true })
+        // return to.fullPath
       })
+      /* routerStore().routers.forEach(async (route: any) => {
+        await addPluginRoute(route);
+      })
+      return to.fullPath */
+
     }
-  } else {
-    next();
   }
+  next()
 })
 
 export function directTo(to: any) {

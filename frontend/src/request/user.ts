@@ -96,3 +96,12 @@ export function getPermission() {
         method: 'post',
     })
 }
+
+// 批量导入用户
+export function importUser(data:any) {
+  return request({
+    url: '/user/import',
+    method: 'post',
+    data
+  })
+}
