@@ -14,7 +14,7 @@
             </template>
           </el-popconfirm>
           <el-button @click="exportUser">导出</el-button>
-          <auth-button auth="button/user_import">批量导入</auth-button>
+          <auth-button auth="button/user_import" @click="handleImport">批量导入</auth-button>
         </div>
       </template>
 
@@ -38,10 +38,12 @@
       </template>
     </PGTable>
 
-    <el-dialog :title="title" v-model="display" width="560px">
+    <el-dialog :title="title" v-model="display" width="560px" destroy-on-close>
       <AddUser v-if="displayDialog === 'AddUser'" @userUpdated="updateUsers" @close="display = false" />
       <UpdateUser v-if="displayDialog === 'UpdateUser'" :user="editedUser" @userUpdated="updateUsers"
         @close="display = false" />
+      <importUser v-if="displayDialog === 'importUser'" @userUpdated="updateUsers" @close="display = false">
+      </importUser>
     </el-dialog>
   </div>
 </template>
@@ -54,6 +56,7 @@ import { saveAs } from 'file-saver';
 import PGTable from "@/components/PGTable.vue";
 import AddUser from "./components/AddUser.vue";
 import UpdateUser from "./components/UpdateUser.vue";
+import importUser from "./components/importUser.vue";
 import AuthButton from "@/components/AuthButton.vue";
 import {
   getUsers,
@@ -62,12 +65,9 @@ import {
   deleteUser
 } from "@/request/user";
 import { RespCodeOK } from "@/request/request";
-
 const refTable = ref();
-
 const users = ref([]);
 const total = ref(0);
-
 onMounted(() => {
   updateUsers();
 });
@@ -112,6 +112,13 @@ const exportUser = () => {
 const display = ref(false);
 const displayDialog = ref("");
 const title = ref("");
+
+// 批量导入
+const handleImport = () => {
+  display.value = true;
+  title.value = '批量导入用户';
+  displayDialog.value = 'importUser';
+}
 
 function onAddUser() {
   title.value = "添加用户";
