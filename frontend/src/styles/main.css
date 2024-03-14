@@ -26,6 +26,9 @@ body {
 
   font-weight: normal;
 }
+#main {
+  padding: 6px;
+}
 .transition3 {
   transition: all .3s;
 }
