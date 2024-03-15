@@ -12,7 +12,7 @@
         v-model:selectedData="selectedMachines">
         <template v-slot:action>
           <el-dropdown>
-            <el-button type="primary">
+            <el-button>
               操作 <el-icon>
                 <ArrowDown />
               </el-icon>

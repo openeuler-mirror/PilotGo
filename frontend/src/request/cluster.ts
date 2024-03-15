@@ -189,6 +189,15 @@ export function installPackage(data: any) {
     })
 }
 
+// 卸载软件包
+export function removePackage(data:any) {
+  return request({
+    url: 'agent/rpm_remove',
+    method: 'post',
+    data
+  })
+}
+
 // 获取给定主机列表的tag标签
 export function getMachineTags(data: any) {
     return request({
