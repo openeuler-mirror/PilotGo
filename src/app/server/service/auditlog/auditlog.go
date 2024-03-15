@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
-	"gorm.io/gorm"
 )
 
 // 日志执行操作状态
@@ -71,7 +70,7 @@ func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
 }
 
 // 查询子日志
-func GetAuditLogById(logUUId string) (*[]dao.AuditLog, *gorm.DB, error) {
+func GetAuditLogById(logUUId string) ([]dao.AuditLog, error) {
 	return dao.GetAuditLogById(logUUId)
 }
 

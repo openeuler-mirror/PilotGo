@@ -53,11 +53,10 @@ func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
 }
 
 // 查询子日志
-func GetAuditLogById(logUUId string) (list *[]AuditLog, tx *gorm.DB, err error) {
-	list = &[]AuditLog{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_uuid=?", logUUId).Find(&list)
-	err = tx.Error
-	return
+func GetAuditLogById(logUUId string) ([]AuditLog, error) {
+	var list []AuditLog
+	err := mysqlmanager.MySQL().Order("created_at desc").Where("parent_uuid=?", logUUId).Find(&list).Error
+	return list, err
 }
 
 // 查询父日志为空的记录

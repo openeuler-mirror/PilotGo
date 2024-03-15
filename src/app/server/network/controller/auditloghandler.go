@@ -71,3 +71,14 @@ func LogAllHandler(c *gin.Context) {
 	}
 	common.JsonPagination(c, data, total, query)
 }
+
+// 查询其子日志
+func GetAuditLogByIdHandler(c *gin.Context) {
+	parent_uuid := c.Query("uuid")
+	data, err := auditlog.GetAuditLogById(parent_uuid)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, data, "审计子日志查询成功!")
+}

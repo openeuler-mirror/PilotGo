@@ -273,6 +273,7 @@ func registerAPIs(router *gin.Engine) {
 	userLog := api.Group("log") // 日志管理
 	{
 		userLog.GET("/log_all", controller.LogAllHandler)
+		userLog.GET("/log_child", controller.GetAuditLogByIdHandler)
 	}
 
 	plugin := api.Group("plugins") // 插件
