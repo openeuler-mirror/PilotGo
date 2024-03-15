@@ -24,10 +24,8 @@ import (
 )
 
 type AgentService struct {
-	UUID         string `json:"uuid"`
-	Service      string `json:"service"`
-	UserName     string `json:"userName"`
-	UserDeptName string `json:"userDept"`
+	UUID    string `json:"uuid"`
+	Service string `json:"service"`
 }
 
 func ServiceListHandler(c *gin.Context) {

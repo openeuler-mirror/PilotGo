@@ -61,7 +61,7 @@ func AgentOverviewHandler(c *gin.Context) {
 	result := struct {
 		IP              string      `json:"ip"`
 		Department      string      `json:"department"`
-		State           int         `json:"state"`
+		State           string      `json:"state"`
 		Platform        string      `json:"platform"`
 		PlatformVersion string      `json:"platform_version"`
 		KernelArch      string      `json:"kernel_arch"`
@@ -83,6 +83,7 @@ func AgentOverviewHandler(c *gin.Context) {
 		MemoryTotal:     info.MemoryInfo.MemTotal,
 		DiskUsage:       dus,
 		Immutable:       info.IsImmutable,
+		State:           node.Runstatus,
 	}
 
 	response.Success(c, result, "Success")
