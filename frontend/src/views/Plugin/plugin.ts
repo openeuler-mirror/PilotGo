@@ -23,8 +23,6 @@ export function updatePlugins() {
         let iframeObj: any = {
           path: '/plugin-' + item.name,
           name: 'plugin-' + item.name,
-          // path: '/plugin-' + item.custom_name,
-          // name: 'plugin-' + item.custom_name,
           url: item.url,
           plugin_type: item.plugin_type,
         }

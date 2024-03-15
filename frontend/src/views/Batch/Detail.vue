@@ -1,58 +1,62 @@
 <template>
-    <PGTable :data="machines" title="机器列表" :showSelect="showSelect" :total="total" :onPageChanged="onPageChanged">
-        <template v-slot:action>
-            <el-dropdown>
-                <el-button type="primary">
-                    操作 <el-icon>
-                        <ArrowDown />
-                    </el-icon>
-                </el-button>
-                <template #dropdown>
-                    <el-dropdown-menu>
-                        <el-dropdown-item>
-                            <auth-button auth="button/rpm_install" :show="true">
-                                rpm下发
-                            </auth-button>
-                        </el-dropdown-item>
-                        <el-dropdown-item>
-                            <auth-button auth="button/rpm_uninstall" :show="true">
-                                rpm卸载
-                            </auth-button>
-                        </el-dropdown-item>
-                    </el-dropdown-menu>
-                </template>
-            </el-dropdown>
-        </template>
-        <template v-slot:content>
-            <el-table-column align="center" label="ip">
-                <template v-slot="data">
-                    <span title="查看机器详情">
-                        {{ data.row.ip }}
-                    </span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="CPU" label="cpu">
-            </el-table-column>
-            <el-table-column align="center" label="状态">
-                <template #default="scope">
-                    <state-dot :runstatus="scope.row.runstatus" :maintstatus="scope.row.maintstatus"></state-dot>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="sysinfo" label="系统">
-            </el-table-column>
-        </template>
+  <div>
+    <PGTable :data="machines" title="批次详情" :showSelect="showSelect" :total="total" :onPageChanged="onPageChanged">
+      <template v-slot:action>
+        <el-dropdown>
+          <el-button>
+            操作<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item>
+                <auth-button auth="button/rpm_install" @click="handleUpdateRpm('软件包下发')" :show="true">
+                  rpm下发
+                </auth-button>
+              </el-dropdown-item>
+              <el-dropdown-item>
+                <auth-button auth="button/rpm_uninstall" @click="handleUpdateRpm('软件包卸载')" :show="true">
+                  rpm卸载
+                </auth-button>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </template>
+      <template v-slot:content>
+        <el-table-column align="center" label="ip">
+          <template v-slot="data">
+            <span title="查看机器详情">
+              {{ data.row.ip }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="CPU" label="cpu">
+        </el-table-column>
+        <el-table-column align="center" label="状态">
+          <template #default="scope">
+            <state-dot :runstatus="scope.row.runstatus" :maintstatus="scope.row.maintstatus"></state-dot>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="sysinfo" label="系统">
+        </el-table-column>
+      </template>
     </PGTable>
+    <el-dialog :title="title" v-model="display" width="760px" destroy-on-close @close="display = false">
+      <UpdateRpm :acType='title' :machines='machines' />
+    </el-dialog>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onActivated } from "vue";
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus';
 
 import PGTable from "@/components/PGTable.vue";
 import AuthButton from "@/components/AuthButton.vue";
 import StateDot from "@/components/StateDot.vue";
-
+import UpdateRpm from "./components/UpdateRpm.vue";
+import type { BatchMachineInfo } from '@/types/batch';
 import { getBatchDetail } from "@/request/batch";
 import { RespCodeOK } from "@/request/request";
 
@@ -61,32 +65,45 @@ const route = useRoute()
 // 机器列表
 const batchID = ref(route.params.id)
 const showSelect = ref(true)
-const machines = ref([])
+const machines = ref<BatchMachineInfo[]>([])
 const total = ref(0)
 
-onMounted(() => {
-    updateBatchList()
+onActivated(() => {
+  batchID.value = route.params.id;
+  updateBatchList()
 })
 
-function updateBatchList(page: number = 1, size: number = 10){
-    getBatchDetail({
-        page: page,
-        size: size,
-        ID: batchID.value,
-    }).then((resp: any) => {
-        if (resp.code === RespCodeOK) {
-            total.value = resp.total
-            machines.value = resp.data
-        } else {
-            ElMessage.error("failed to get batch detail info: " + resp.msg)
-        }
-    }).catch((err: any) => {
-        ElMessage.error("failed to get batch detail info:" + err.msg)
-    })
+onMounted(() => {
+  updateBatchList()
+})
+
+const title = ref('');
+const display = ref(false);
+// 下发/卸载rpm
+const handleUpdateRpm = (type: string) => {
+  title.value = type;
+  display.value = true;
+}
+
+function updateBatchList(page: number = 1, size: number = 10) {
+  getBatchDetail({
+    page: page,
+    size: size,
+    ID: batchID.value,
+  }).then((resp: any) => {
+    if (resp.code === RespCodeOK) {
+      total.value = resp.total
+      machines.value = resp.data
+    } else {
+      ElMessage.error("failed to get batch detail info: " + resp.msg)
+    }
+  }).catch((err: any) => {
+    ElMessage.error("failed to get batch detail info:" + err.msg)
+  })
 }
 
 function onPageChanged(currentPage: number, currentSize: number) {
-    updateBatchList(currentPage, currentSize)
+  updateBatchList(currentPage, currentSize)
 }
 
 </script>

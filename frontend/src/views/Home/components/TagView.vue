@@ -27,7 +27,8 @@ watchEffect(() => {
 watch(() => route.path, () => {
   // 避免添加重复tagview
   for (let i = 0; i < tagviewStore().taginfos.length; i++) {
-    if (tagviewStore().taginfos[i].path === route.path) {
+    // if (tagviewStore().taginfos[i].path === route.path) {
+    if (tagviewStore().taginfos[i].title === route.meta.title) {
       return
     }
   }
