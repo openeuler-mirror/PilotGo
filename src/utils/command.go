@@ -124,3 +124,15 @@ func RunScript(absPath string, params []string) (*CmdResult, error) {
 		Stderr:  s2,
 	}, nil
 }
+
+// 检查字符串是否包含特殊字符
+func CheckString(str string) bool {
+	// 定义允许的字符范围
+	for _, char := range str {
+		// 检查字符是否在允许的字符范围内
+		if !((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') || char == '-' || char == '.' || char == '+' || char == '_') {
+			return false // 如果包含特殊字符，则返回 true
+		}
+	}
+	return true
+}
