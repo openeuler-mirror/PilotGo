@@ -24,6 +24,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/gin-gonic/gin"
 	uuidservice "github.com/google/uuid"
 )
@@ -96,6 +97,11 @@ func InstallRpmHandler(c *gin.Context) {
 	}
 	if len(rpm.UUIDs) == 0 {
 		response.Fail(c, nil, "机器uuid不能为空")
+		return
+	}
+
+	if !utils.CheckString(rpm.RPM) {
+		response.Fail(c, nil, "软件包名有除_+-.以外的特殊字符")
 		return
 	}
 
@@ -190,6 +196,11 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	if len(rpm.UUIDs) == 0 {
 		response.Fail(c, nil, "机器uuid不能为空")
+		return
+	}
+
+	if !utils.CheckString(rpm.RPM) {
+		response.Fail(c, nil, "软件包名有除_+-.以外的特殊字符")
 		return
 	}
 
