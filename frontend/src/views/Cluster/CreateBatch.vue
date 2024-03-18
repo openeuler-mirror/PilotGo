@@ -7,13 +7,14 @@
         </template>
       </PGTree>
     </div>
+    <el-divider direction="vertical" style="height:100%"></el-divider>
     <div class="creater">
-      <el-form :model="branchForm" :rules="branchFormRule" label-width="100px">
+      <el-form ref="batch_form" :model="branchForm" :rules="branchFormRule" label-width="100px" style="width: 50%;">
         <el-form-item label="批次名称:" prop="batchName">
           <el-input class="ipInput" type="text" v-model="branchForm.batchName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="描述:" prop="description">
-          <el-input class="ipInput" type="text" v-model="branchForm.description" autocomplete="off"></el-input>
+          <el-input class="ipInput" type="textarea" v-model="branchForm.description" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <el-transfer class="transfer" filterable filter-placeholder="请输入IP" :filter-method="filterMethod"
@@ -27,13 +28,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRaw, onMounted } from "vue";
+import { ref, toRaw } from "vue";
 import { ElMessage } from 'element-plus';
 
 import PGTree from "@/components/PGTree.vue";
 
-onMounted(() => {
-})
+import type { DeptTree } from "@/types/cluster";
 
 const branchForm = ref({
   batchName: "",
@@ -50,26 +50,34 @@ const branchFormRule = ref({
 
 import { getDepartMachines } from "@/request/cluster";
 import { createBatch } from "@/request/batch";
-import { RespCodeOK } from "@/request/request";
+import { RespCodeOK, type RespInterface } from "@/request/request";
+import type { MachineInfo } from "@/types/cluster";
 
-const nodeMachines = ref<any[]>([])
-const selectedMachines = ref<any[]>([])
+interface NodeMachine {
+  key: number;
+  label: string;
+  disabled: boolean;
+}
+const nodeMachines = ref<NodeMachine[]>([])
+const selectedMachines = ref<number[]>([])
 
-function onNodeClicked(node: any) {
+function onNodeClicked(node: DeptTree) {
   let nodeInfo = toRaw(node)
-
+  nodeMachines.value = []
   getDepartMachines({
     DepartId: nodeInfo.id,
-  }).then((resp: any) => {
+  }).then((resp: RespInterface) => {
     if (resp.code === RespCodeOK) {
-      nodeMachines.value = []
-      resp.data.forEach((item: any) => {
-        nodeMachines.value.push({
-          key: item.id,
-          label: item.ip,
+      let macs: NodeMachine[] = [];
+      resp.data && resp.data.forEach((item: unknown) => {
+        let i: MachineInfo = item as MachineInfo;
+        macs.push({
+          key: i.id,
+          label: i.ip,
           disabled: false,
         })
       });
+      nodeMachines.value = macs;
     } else {
       ElMessage.error("failed to get department machines: " + resp.msg)
     }
@@ -77,7 +85,7 @@ function onNodeClicked(node: any) {
     ElMessage.error("failed to get department machines:" + err.msg)
   })
 }
-
+const batch_form = ref();
 function onCreateBatch() {
   createBatch({
     Name: branchForm.value.batchName,
@@ -86,8 +94,10 @@ function onCreateBatch() {
     // TODO:
     Manager: "admin@123.com",
     DepartID: [],
-  }).then((resp: any) => {
+  }).then((resp: RespInterface) => {
     if (resp.code === RespCodeOK) {
+      nodeMachines.value = [];
+      batch_form.value.resetFields();
       ElMessage.success("创建批次成功")
     } else {
       ElMessage.error("failed to create batch: " + resp.msg)
@@ -119,7 +129,7 @@ function filterMethod(query: any, item: any) {
   }
 
   .creater {
-    width: 80%;
+    width: 70%;
     height: 100%;
 
     .transfer {
@@ -128,6 +138,7 @@ function filterMethod(query: any, item: any) {
       display: flex;
       align-items: center;
       justify-content: space-evenly;
+      // box-shadow: 0px 1px 12px 0px rgb(185, 183, 183);
 
       :deep(.el-transfer-panel) {
         width: 40%;
