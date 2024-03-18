@@ -41,9 +41,9 @@
         <template v-slot:content>
           <el-table-column align="center" label="ip">
             <template #default="data">
-              <span title="查看机器详情" @click="machineDetail(data.row)">
+              <el-button link type="primary" title="查看机器详情" @click="machineDetail(data.row)">
                 {{ data.row.ip }}
-              </span>
+              </el-button>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="departname" label="部门">

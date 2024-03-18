@@ -1,33 +1,16 @@
 <template>
-    <div class="content">
-        <el-tabs class="tab" v-model="activePane">
-            <el-tab-pane name="base" label="机器信息">
-                <Base />
-            </el-tab-pane>
-            <el-tab-pane name="user" label="用户信息">
-                <User />
-            </el-tab-pane>
-            <el-tab-pane name="service" label="服务信息">
-                <Service />
-            </el-tab-pane>
-            <el-tab-pane name="network" label="网络配置">
-                <Network />
-            </el-tab-pane>
-            <el-tab-pane name="systl" label="内核参数">
-                <Sysctl />
-            </el-tab-pane>
-            <el-tab-pane name="npm" label="软件包">
-                <Package />
-            </el-tab-pane>
-            <el-tab-pane name="terminal" label="远程终端">
-                <Terminal />
-            </el-tab-pane>
-        </el-tabs>
-    </div>
+  <div class="tab_content">
+    <el-tabs class="tab" v-model="activePane">
+      <el-tab-pane v-for="tab in tabs" :key="tab.name" :name="tab.name" :label="tab.label">
+        <component :is="tab.component" v-if="activePane == tab.name" style="padding: 30px;">
+        </component>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { onMounted, markRaw, ref, type Component } from "vue";
 
 import Base from "./Base.vue";
 import User from "./User.vue";
@@ -38,28 +21,44 @@ import Package from "./Package.vue";
 import Terminal from "./Terminal.vue";
 
 const activePane = ref("base")
-
+interface Tab {
+  name: string;
+  label: string;
+  component: Component;
+}
+let tabs = ref<Tab[]>([]);
+onMounted(() => {
+  tabs.value = [
+    { name: 'base', label: '机器信息', component: markRaw(Base) },
+    { name: 'user', label: '用户信息', component: markRaw(User) },
+    { name: 'service', label: '服务信息', component: markRaw(Service) },
+    { name: 'network', label: '网络配置', component: markRaw(Network) },
+    { name: 'systl', label: '内核参数', component: markRaw(Sysctl) },
+    { name: 'package', label: '软件包', component: markRaw(Package) },
+    { name: 'terminal', label: '远程终端', component: markRaw(Terminal) },
+  ]
+})
 
 </script>
 
 <style lang="scss" scoped>
-.content {
+.tab_content {
+  width: 100%;
+  height: 100%;
+
+  .tab {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 
-    .tab {
-        width: 100%;
+    :deep(.el-tabs__content) {
+      flex: 1;
+
+      .el-tab-pane {
         height: 100%;
-        display: flex;
-        flex-direction: column;
-
-        :deep(.el-tabs__content) {
-            flex: 1;
-
-            .el-tab-pane {
-                height: 100%;
-            }
-        }
+      }
     }
+  }
 }
 </style>

@@ -50,8 +50,7 @@ const handleParams = () => {
   let ids = macs.value.map(item => item.machineuuid);
   let params = {
     uuid: ids,
-    rpm: rpm_name.value,
-    userName: userStore().user.name
+    rpm: rpm_name.value
   }
   return params;
 }
