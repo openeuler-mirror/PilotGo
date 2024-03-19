@@ -51,3 +51,7 @@ body {
 .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
   color: var(--active-color);
 }
+/* 隐藏无子设备的展开图表 */
+.el-table .row-expand-cover .cell .el-table__expand-icon {
+  display: none;
+}
