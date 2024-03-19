@@ -8,3 +8,13 @@ export function getLogs(data:any) {
     params: data
   })
 }
+
+
+// 获取子日志
+export function getLogChildrens(data:{uuid:string}) {
+  return request({
+    url: '/log/log_child',
+    method: 'get',
+    params: data
+  })
+}

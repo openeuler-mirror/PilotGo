@@ -5,7 +5,7 @@ import { directTo } from "@/router/index"
 export const RespCodeOK = 200
 export interface RespInterface {
   code?: number;
-  data?: [{ keys: unknown }];
+  data?: any[];
   msg?: string;
   ok?:boolean;
   page?:number;

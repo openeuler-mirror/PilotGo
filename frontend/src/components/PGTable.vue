@@ -8,7 +8,7 @@
     </div>
     <div class="content">
       <el-table :data="props.data" :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
-        @selection-change="onSelectionChange">
+        @selection-change="onSelectionChange" @expand-change="onExpandChange" :row-class-name="getRowClassOfIsExpand">
         <el-table-column align="center" type="selection" width="60" v-if="showSelect" />
         <slot name="content"></slot>
       </el-table>
@@ -50,13 +50,17 @@ const props = defineProps({
   onPageChanged: {
     type: Function,
     default: () => { },
+  },
+  isExpand: {
+    type: Boolean,
+    default: false
   }
 })
 
 const currentPage = ref(1)
 const currentSize = ref(10)
 
-const emit = defineEmits(['update:selectedData'])
+const emit = defineEmits(['update:selectedData', 'update:expandData'])
 function resetPage() {
   currentPage.value = 1
 }
@@ -71,6 +75,10 @@ const onSelectionChange = (val: any[]) => {
   emit('update:selectedData', d)
 }
 
+const onExpandChange = (row: any) => {
+  emit('update:expandData', row)
+}
+
 function currentChangeHandler(cpage: number) {
   props.onPageChanged(cpage, currentSize.value)
   currentPage.value = cpage
@@ -79,6 +87,15 @@ function currentChangeHandler(cpage: number) {
 function sizeChangeHandler(pSize: number) {
   props.onPageChanged(1, pSize)
   currentSize.value = pSize
+}
+
+// 控制expand图标显示隐藏
+const getRowClassOfIsExpand = ({ row }: any) => {
+  if (row.Isempty == 0) {
+    return "row-expand-cover";
+  } else {
+    return "";
+  }
 }
 
 </script>
