@@ -25,7 +25,7 @@
                   </auth-button>
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <auth-button auth="button/mac_change" :show="true">
+                  <auth-button auth="button/machine_delete" :show="true">
                     删除
                   </auth-button>
                 </el-dropdown-item>

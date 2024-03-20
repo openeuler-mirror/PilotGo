@@ -53,8 +53,6 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="message" label="日志">
-        </el-table-column>
       </template>
     </PGTable>
     <el-drawer title="日志详情" v-model="showDetail" :before-close="handleClose" width="40%">

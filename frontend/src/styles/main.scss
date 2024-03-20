@@ -55,3 +55,7 @@ body {
 .el-table .row-expand-cover .cell .el-table__expand-icon {
   display: none;
 }
+/* 权限页面 行颜色修改 */
+.el-table .warning-row {
+  --el-table-tr-bg-color: var(--el-color-info-light-8);
+}
