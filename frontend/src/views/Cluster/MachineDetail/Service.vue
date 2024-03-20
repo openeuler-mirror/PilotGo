@@ -3,9 +3,9 @@
     <div class="services">
       <el-autocomplete style="width:50%; margin-right:10px" class="inline-input" v-model="searchName"
         :fetch-suggestions="querySuggestions" @select="onSelectService" placeholder="请输入服务名称"></el-autocomplete>
-      <el-button plain type="primary" @click="onStartService">启动</el-button>
+      <!-- <el-button plain type="primary" @click="onStartService">启动</el-button>
       <el-button plain type="primary" @click="onStopService">停止</el-button>
-      <el-button plain type="primary" @click="onRestartService">重启</el-button>
+      <el-button plain type="primary" @click="onRestartService">重启</el-button> -->
     </div>
     <div class="info">
       <div class="detail" v-if="display">

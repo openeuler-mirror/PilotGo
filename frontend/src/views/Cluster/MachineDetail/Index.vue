@@ -35,7 +35,7 @@ onMounted(() => {
     { name: 'network', label: '网络配置', component: markRaw(Network) },
     { name: 'systl', label: '内核参数', component: markRaw(Sysctl) },
     { name: 'package', label: '软件包', component: markRaw(Package) },
-    { name: 'terminal', label: '远程终端', component: markRaw(Terminal) },
+    // { name: 'terminal', label: '远程终端', component: markRaw(Terminal) },
   ]
 })
 
