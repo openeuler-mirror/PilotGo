@@ -182,6 +182,7 @@ func InstallRpmHandler(c *gin.Context) {
 		return
 	case "1.00":
 		response.Success(c, nil, "软件包安装成功")
+		return
 	default:
 		response.Success(c, nil, "软件包安装部分成功")
 	}
