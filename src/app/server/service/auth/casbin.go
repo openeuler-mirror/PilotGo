@@ -118,6 +118,7 @@ var (
 		"role_modify",
 		"config_install",
 		"dept_change",
+		"machine_delete",
 	}
 
 	MenuList = []string{
