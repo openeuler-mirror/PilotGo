@@ -18,6 +18,15 @@ export function getDepartMachines(data: any) {
     })
 }
 
+// 删除机器接口
+export function deleteMachine(data:any) {
+  return request({
+    url: 'macList/deletemachine',
+    method: 'post',
+    data
+  })
+}
+
 // 获取指定部门下的子部门
 export function getSubDepartment(data: any) {
     return request({
