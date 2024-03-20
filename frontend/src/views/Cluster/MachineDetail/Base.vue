@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { ElMessage } from 'element-plus';
 import { useRoute } from 'vue-router'
 
@@ -40,7 +40,18 @@ const machineID = ref(route.params.uuid)
 
 const machineInfo = ref<any>({})
 
+
+watch(() => route.params.uuid, (new_uuid) => {
+  if (new_uuid) {
+    machineID.value = new_uuid;
+    getMachineBaseInfo();
+  }
+})
 onMounted(() => {
+  getMachineBaseInfo();
+})
+
+const getMachineBaseInfo = () => {
   getMachineOverview({
     uuid: machineID.value
   }).then((resp: any) => {
@@ -52,7 +63,7 @@ onMounted(() => {
   }).catch((err: any) => {
     ElMessage.error("failed to get machines overview info:" + err.msg)
   })
-})
+}
 
 // 设置磁盘占比颜色
 const customColorMethod = (percentage: number) => {
