@@ -133,6 +133,7 @@ func registerAPIs(router *gin.Engine) {
 			batchmanager := authenApi.Group("batchmanager")
 			batchmanager.POST("/updatebatch", middleware.NeedPermission("batch_update", "button"), controller.UpdateBatchHandler)
 			batchmanager.POST("/deletebatch", middleware.NeedPermission("batch_delete", "button"), controller.DeleteBatchHandler)
+			batchmanager.POST("/createbatch", middleware.NeedPermission("batch_create", "button"), controller.CreateBatchHandler)
 		}
 		{
 			user := authenApi.Group("user")
@@ -175,7 +176,6 @@ func registerAPIs(router *gin.Engine) {
 		macList.POST("/deletemachine", controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DepartHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
-		macList.POST("/createbatch", controller.CreateBatchHandler)
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
 		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
@@ -276,7 +276,7 @@ func registerAPIs(router *gin.Engine) {
 
 	userLog := api.Group("log") // 日志管理
 	{
-		userLog.GET("/log_all", controller.LogAllHandler)
+		userLog.GET("/log_all", middleware.NeedPermission("log", "menu"), controller.LogAllHandler)
 		userLog.GET("/log_child", controller.GetAuditLogByIdHandler)
 	}
 
