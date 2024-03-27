@@ -30,7 +30,7 @@ export function deleteBatch(data: any) {
 // 创建批次
 export function createBatch(data: any) {
     return request({
-        url: 'macList/createbatch',
+        url: 'batchmanager/createbatch',
         method: 'post',
         data
     })

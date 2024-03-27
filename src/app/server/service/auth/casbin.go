@@ -105,6 +105,7 @@ var (
 	PermissionList = []string{
 		"rpm_install",
 		"rpm_uninstall",
+		"batch_create",
 		"batch_update",
 		"batch_delete",
 		"user_add",
@@ -116,7 +117,6 @@ var (
 		"role_update",
 		"role_delete",
 		"role_modify",
-		"config_install",
 		"dept_change",
 		"machine_delete",
 	}
@@ -127,7 +127,6 @@ var (
 		"batch",
 		"usermanager",
 		"rolemanager",
-		"config",
 		"log",
 		"plugin",
 	}
