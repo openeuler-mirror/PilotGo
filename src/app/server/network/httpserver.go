@@ -150,9 +150,9 @@ func registerAPIs(router *gin.Engine) {
 		}
 		{
 			macList := authenApi.Group("/macList")
-			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_change", "button"), controller.DeleteDepartDataHandler)
-			macList.POST("/adddepart", middleware.NeedPermission("dept_change", "button"), controller.AddDepartHandler)
-			macList.POST("/updatedepart", middleware.NeedPermission("dept_change", "button"), controller.UpdateDepartHandler)
+			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_delete", "button"), controller.DeleteDepartDataHandler)
+			macList.POST("/adddepart", middleware.NeedPermission("dept_add", "button"), controller.AddDepartHandler)
+			macList.POST("/updatedepart", middleware.NeedPermission("dept_update", "button"), controller.UpdateDepartHandler)
 		}
 		/*
 			{
@@ -173,11 +173,11 @@ func registerAPIs(router *gin.Engine) {
 	macList := api.Group("/macList") // 机器管理
 	{
 		macList.POST("/script_save", controller.AddScriptHandler)
-		macList.POST("/deletemachine", controller.DeleteMachineHandler)
+		macList.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DepartHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
-		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
+		macList.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 		macList.POST("/gettags", pluginapi.GetTagHandler)
 	}
