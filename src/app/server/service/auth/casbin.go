@@ -118,6 +118,9 @@ var (
 		"role_delete",
 		"role_modify",
 		"dept_change",
+		"dept_add",
+		"dept_delete",
+		"dept_update",
 		"machine_delete",
 	}
 
