@@ -211,6 +211,7 @@ import PluginFrame from "@/views/Plugin/PluginFrame.vue";
 
 import { app } from "@/main";
 import { useRouter } from "vue-router";
+import { hasPermisson } from '@/module/permission';
 
 export function updateSidebarItems() {
   let menus = generateLocalMenus();
@@ -220,6 +221,7 @@ export function updateSidebarItems() {
     addPluginRoute(item);
     // 更新侧边菜单
     let obj: Menu = {
+      type:'plugin',
       path: item.path,
       title: item.name,
       hidden: false,
@@ -245,6 +247,10 @@ export function updateSidebarItems() {
     // app.component(item.name, PluginFrame);
 
   }
+  menus.map((menu: any) => {
+    if (menu.type === 'plugin') return; // 插件权限先不做限制
+    menu.hidden = !hasPermisson('menu/' + menu.panel);
+  })
   routerStore().menus = menus;
 }
 

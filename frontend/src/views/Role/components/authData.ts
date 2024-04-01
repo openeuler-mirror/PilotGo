@@ -1,4 +1,7 @@
-// 整个系统需要控制权限的按钮配置项
+// 整个系统需要控制权限的按钮配置项 当前27
+
+// 需要做动态添加插件权限逻辑
+
 export let authData = [{
     id: '1',
     label: '概览',
@@ -30,6 +33,11 @@ export let authData = [{
         btnId: '16',
         label: '机器删除',
         menuName: 'machine_delete',
+    },{
+        id: '24',
+        btnId: '17',
+        label: '创建批次',
+        menuName: 'batch_create',
     }]
 }, {
     id: '3',
@@ -106,7 +114,7 @@ export let authData = [{
             menuName: 'role_modify',
         }]
 },
-{
+/* {
     id: '6',
     label: '配置管理',
     isMenu: true,
@@ -117,7 +125,7 @@ export let authData = [{
         label: '配置下发',
         menuName: 'config_install',
     }]
-},
+}, */
 {
     id: '7',
     label: '日志管理',

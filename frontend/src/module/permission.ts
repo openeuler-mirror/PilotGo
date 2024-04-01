@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus';
 
 import { getPermission } from "@/request/user";
 import { RespCodeOK } from "@/request/request";
+import { updateSidebarItems } from "@/router";
 
 const userPermissions = ref<any>({})
 
@@ -20,7 +21,8 @@ export function hasPermisson(permission: string): boolean {
 export function updatePermisson(): void {
     getPermission().then((resp: any) => {
         if (resp.code === RespCodeOK) {
-            userPermissions.value = resp.data
+          userPermissions.value = resp.data;
+            updateSidebarItems();
         } else {
             ElMessage.error("failed to get machines overview info: " + resp.msg)
         }

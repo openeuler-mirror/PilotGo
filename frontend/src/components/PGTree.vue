@@ -9,15 +9,12 @@
         <span class="custom-tree-node">
           <span>{{ node.label }}</span>
           <span v-if="editable">
-            <el-icon @click.stop="addNode(node, data)">
-              <Plus />
-            </el-icon>
-            <el-icon v-if="data.id !== 1" @click.stop="deleteNode(node, data)">
-              <Delete />
-            </el-icon>
-            <el-icon @click.stop="renameNode(node, data)">
-              <EditPen />
-            </el-icon>
+            <auth-button link auth="button/dept_add" title="添加" :icon="Plus"
+              @click.stop="addNode(node, data)"></auth-button>
+            <auth-button link auth="button/dept_delete" title="删除" :icon="Delete"
+              @click.stop="deleteNode(node, data)"></auth-button>
+            <AuthButton link auth="button/dept_update" title="编辑" :icon="Edit" @click.stop="renameNode(node, data)">
+            </AuthButton>
           </span>
         </span>
       </template>
@@ -28,9 +25,11 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { Delete, Edit, Plus, Share, Upload } from '@element-plus/icons-vue'
 
 import { getSubDepartment, updateDepartment, deleteDepartment, addDepartment } from "@/request/cluster";
 import { RespCodeOK } from "@/request/request";
+import AuthButton from "./AuthButton.vue";
 
 import type { DeptTree } from "@/types/cluster";
 const emits = defineEmits(["onNodeClicked"])
@@ -177,5 +176,10 @@ function addNode(node: any, data: any) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  .el-button+.el-button {
+    margin-left: 0 !important;
+  }
+
 }
 </style>
