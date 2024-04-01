@@ -3,7 +3,7 @@
     <el-menu :collapse="props.isCollapse" :router="true">
       <template v-for="(menu, index) in routes" :key="index">
         <!-- 带子菜单的项 -->
-        <el-sub-menu v-if="menu.subMenus" :index="menu.path">
+        <el-sub-menu v-if="menu.subMenus && !menu.hidden" :index="menu.path">
           <template #title>
             <el-icon>
               <component class="sidebar_icon" :is="menu.icon"></component>
@@ -16,7 +16,8 @@
           </el-menu-item>
         </el-sub-menu>
         <!-- 不带子菜单的项 -->
-        <el-menu-item v-if="!menu.subMenus" :index="menu.path" :class="menu.title === activeTitle ? 'active' : 'inactive'">
+        <el-menu-item v-if="!menu.subMenus && !menu.hidden" :index="menu.path"
+          :class="menu.title === activeTitle ? 'active' : 'inactive'">
           <component class="sidebar_icon" :is="menu.icon"></component>
           <template #title>{{ menu.title }}</template>
         </el-menu-item>
@@ -26,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect, onMounted } from "vue";
+import { ref, watchEffect, onMounted, watch } from "vue";
 import { routerStore, type Menu } from "@/stores/router";
 import { useRoute } from "vue-router";
 let routes: any = ref<Menu[]>([]);
@@ -40,18 +41,15 @@ let props = defineProps({
   }
 })
 onMounted(() => {
-  routes.value = routerStore().menus
+  setTimeout(() => {
+    routes.value = routerStore().menus
+  }, 100)
 });
-const handleOpen = (_key: string, _keyPath: string[]) => {
-  // console.log(key, keyPath)
-}
-const handleClose = (_key: string, _keyPath: string[]) => {
-  // console.log(key, keyPath)
-}
 watchEffect(() => {
-  routes.value = routerStore().menus;
+  routes.value = routerStore().menus
   activeTitle.value = route.meta.title as string;
 })
+
 </script>
 
 <style lang="scss" scoped>
@@ -70,11 +68,12 @@ watchEffect(() => {
   border-right: 2px solid var(--active-color);
   color: var(--active-color);
 }
+
 .inactive {
-  color:var(--el-menu-text-color) !important;
+  color: var(--el-menu-text-color) !important;
 }
+
 .el-menu-item.is-active {
   color: var(--active-color)
 }
-
 </style>

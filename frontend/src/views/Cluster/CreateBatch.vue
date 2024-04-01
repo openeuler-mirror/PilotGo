@@ -20,7 +20,7 @@
       <el-transfer class="transfer" filterable filter-placeholder="请输入IP" :filter-method="filterMethod"
         :titles="['备选项', '已选项']" :data="nodeMachines" v-model="selectedMachines">
         <template #right-footer>
-          <el-button type="primary" @click="onCreateBatch">创建</el-button>
+          <auth-button auth="button/batch_create" type="primary" @click="onCreateBatch">创建</auth-button>
         </template>
       </el-transfer>
     </div>
@@ -32,6 +32,7 @@ import { ref, toRaw } from "vue";
 import { ElMessage } from 'element-plus';
 
 import PGTree from "@/components/PGTree.vue";
+import AuthButton from "@/components/AuthButton.vue";
 
 import type { DeptTree } from "@/types/cluster";
 

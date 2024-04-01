@@ -99,9 +99,8 @@ const version = ref<VersionInfo>({})
 
 onMounted(() => {
   updatePlugins();
-  updateSidebarItems();
-  updateUserInfo();
   updatePermisson();
+  updateUserInfo();
 
   platformVersion().then((resp: any) => {
     if (resp.code == RespCodeOK) {
@@ -167,9 +166,11 @@ function handleLogout() {
 }
 
 import { removeToken } from "@/module/cookie";
+import { routerStore } from "@/stores/router";
 
 function doLogout() {
   userStore().$reset()
+  routerStore().reset();
   removeToken()
   directTo('/login')
 }
