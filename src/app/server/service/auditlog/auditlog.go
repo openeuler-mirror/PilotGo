@@ -30,7 +30,7 @@ const (
 
 type AuditLog = dao.AuditLog
 
-// 单机操作成功状态:是否成功，机器数量，比率
+// 单机操作成功状态:是否成功，机器数量，成功率
 const (
 	ActionOK    = "1,1,1.00"
 	ActionFalse = "0,1,0.00"

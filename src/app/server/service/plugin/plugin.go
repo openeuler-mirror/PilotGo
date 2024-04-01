@@ -198,6 +198,8 @@ func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
 		return nil, err
 	}
 
+	// use accessible url as plugin url
+	p.Url = addPlugin.Url
 	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
 		return nil, err
 	}
