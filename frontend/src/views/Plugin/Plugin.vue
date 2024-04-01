@@ -123,6 +123,9 @@ function onDeletePlugin(item: any) {
       updatePlugins();
       // 删除插件tagview
       clearTagview(item);
+      // 删除插件扩展点
+      let pluginExt = item.extentions && item.extentions.filter((item: Extention) => item.type === 'machine');
+      usePluginStore().delExtention(pluginExt)
     } else {
       ElMessage.error(res.msg);
     }

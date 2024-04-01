@@ -1,4 +1,4 @@
-// 整个系统需要控制权限的按钮配置项 当前27
+// 整个系统需要控制权限的按钮配置项 当前24
 
 // 需要做动态添加插件权限逻辑
 
@@ -38,7 +38,22 @@ export let authData = [{
         btnId: '17',
         label: '创建批次',
         menuName: 'batch_create',
-    }]
+    },{
+        id: '25',
+        btnId: '18',
+        label: '添加部门',
+        menuName: 'dept_add',
+    },{
+        id: '26',
+        btnId: '19',
+        label: '删除部门',
+        menuName: 'dept_delete',
+    },{
+        id: '27',
+        btnId: '20',
+        label: '编辑部门',
+        menuName: 'dept_update',
+    },]
 }, {
     id: '3',
     label: '批次',
