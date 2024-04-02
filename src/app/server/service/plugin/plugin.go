@@ -157,7 +157,7 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 		Description: info.Description,
 		Author:      info.Author,
 		Email:       info.Email,
-		Url:         info.Url,
+		Url:         pp.Url,
 		PluginType:  info.PluginType,
 		Enabled:     enabled,
 		Extentions:  info.Extentions,
@@ -266,6 +266,10 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 		}
 	}
 	m.Unlock()
+	if url == "" {
+		logger.Error("get plugin url error")
+		return errors.New("get plugin url error")
+	}
 
 	// 更新最新的插件信息
 	info, err := requestPluginInfo(&PluginParam{CustomName: custom_name, Url: url})
@@ -282,7 +286,7 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 			v.Description = info.Description
 			v.Author = info.Author
 			v.Email = info.Email
-			v.Url = info.Url
+			v.Url = url
 			v.PluginType = info.PluginType
 			v.Extentions = info.Extentions
 			break
@@ -456,7 +460,7 @@ func requestPluginInfo(plugin *PluginParam) (*Plugin, error) {
 		Description: PluginInfo.Description,
 		Author:      PluginInfo.Author,
 		Email:       PluginInfo.Email,
-		Url:         PluginInfo.Url,
+		Url:         url,
 		PluginType:  PluginInfo.PluginType,
 		Extentions:  extentions,
 		Permissions: permissions.Permissions,
