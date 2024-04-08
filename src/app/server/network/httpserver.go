@@ -276,7 +276,7 @@ func registerAPIs(router *gin.Engine) {
 
 	userLog := api.Group("log") // 日志管理
 	{
-		userLog.GET("/log_all", middleware.NeedPermission("log", "menu"), controller.LogAllHandler)
+		userLog.GET("/log_all", middleware.NeedPermission("audit", "menu"), controller.LogAllHandler)
 		userLog.GET("/log_child", controller.GetAuditLogByIdHandler)
 	}
 
