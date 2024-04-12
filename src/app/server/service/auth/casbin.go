@@ -130,7 +130,7 @@ var (
 		"batch",
 		"usermanager",
 		"rolemanager",
-		"log",
+		"audit",
 		"plugin",
 	}
 )

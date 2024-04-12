@@ -143,7 +143,7 @@ func DepartInfo() (*DepartTreeNode, error) {
 	if len(depart) == 0 {
 		return nil, errors.New("当前无部门节点")
 	}
-	//返回所有根节点喝孩子节点
+	//返回所有根节点和孩子节点
 	ptrchild, departRoot := Returnptrchild(depart)
 	//构造树
 	MakeTree(&departRoot, ptrchild)
@@ -241,11 +241,29 @@ func DeleteDepart(DelDept *DeleteDeparts) error {
 
 // 更改部门名字
 func UpdateDepart(DepartID int, DepartName string) error {
+	//查看该部门是否存在
+	temp, err := dao.GetDepartById(DepartID)
+	if err != nil {
+		return err
+	}
+	if temp.ID == 0 {
+		return errors.New("不存在该部门")
+	}
 	return dao.UpdateDepart(DepartID, DepartName)
 }
 
 // 获取部门下所有机器列表
 func MachineList(DepId int) ([]dao.Res, error) {
+	//查看该部门是否存在
+	temp, err := dao.GetDepartById(DepId)
+	if err != nil {
+		return nil, err
+	}
+	if temp.ID == 0 {
+		return nil, errors.New("不存在该部门")
+	}
+
+	//查询所有子节点
 	var departId []int
 	ReturnSpecifiedDepart(DepId, &departId)
 	departId = append(departId, DepId)

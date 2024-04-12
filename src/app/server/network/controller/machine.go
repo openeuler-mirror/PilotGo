@@ -108,31 +108,10 @@ func ModifyMachineDepartHandler(c *gin.Context) {
 	response.Success(c, nil, "机器部门修改成功")
 }
 
-// 改变机器维护状态
-func UpdateMaintStatus(c *gin.Context) {
-	var M struct {
-		MachineIDs  string `json:"machineids"`
-		MaintStatus string `json:"maintstatus"`
-	}
-	if err := c.Bind(&M); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	result, err := machineservice.UpdateMaintStatus(M.MachineIDs, M.MaintStatus)
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
-	if len(result) != 0 {
-		response.Fail(c, result, err.Error())
-	}
-	response.Success(c, nil, "机器维护状态修改成功")
-}
-
 // 维护状态列表
 func MaintStatusList(c *gin.Context) {
 	var datas []string
 	datas = append(datas, machineservice.NormalStatus)
 	datas = append(datas, machineservice.MaintenanceStatus)
-	response.Success(c, datas, "机器维护状态修改成功")
+	response.Success(c, datas, "机器维护状态列表")
 }

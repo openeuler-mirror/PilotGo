@@ -147,6 +147,15 @@ func UpdateBatch(batchid int, name, description string) error {
 
 // 分页获取某批次的机器信息
 func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, error) {
+	//检查批次id是否存在
+	isExist, err := dao.IsExistID(batchid)
+	if !isExist {
+		return 0, nil, errors.New("批次不存在")
+	}
+	if err != nil {
+		return 0, nil, err
+	}
+
 	count, machineIdlist, err := dao.GetMachineIDPaged(offset, size, batchid)
 	if err != nil {
 		return 0, nil, err
