@@ -161,17 +161,19 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 		PluginType:  info.PluginType,
 		Enabled:     enabled,
 		Extentions:  info.Extentions,
+		Permissions: info.Permissions,
 	}
 
 	if err := dao.UpdatePluginInfo(toPluginDao(p)); err != nil {
 		return err
 	}
-
+	//更新插件管理器的插件列表
 	found := false
 	m.Lock()
 	for i, v := range m.Plugins {
 		if v.UUID == uuid {
 			m.Plugins[i] = p
+			found = true
 			break
 		}
 	}
@@ -201,15 +203,6 @@ func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
 	// use accessible url as plugin url
 	p.Url = addPlugin.Url
 	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
-		return nil, err
-	}
-
-	key := client.HeartbeatKey + p.Url
-	value := client.PluginStatus{
-		Connected:   true,
-		LastConnect: time.Now(),
-	}
-	if err := redismanager.Set(key, value); err != nil {
 		return nil, err
 	}
 
@@ -270,30 +263,14 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 		logger.Error("get plugin url error")
 		return errors.New("get plugin url error")
 	}
-
-	// 更新最新的插件信息
-	info, err := requestPluginInfo(&PluginParam{CustomName: custom_name, Url: url})
-	if err != nil {
-		logger.Error("failed to request plugin info:%s", err.Error())
-		return errors.New("plugin offline or unreachable")
-	}
-	m.Lock()
-	for _, v := range m.Plugins {
-		if v.UUID == uuid {
-			v.CustomName = info.CustomName
-			v.Name = info.Name
-			v.Version = info.Version
-			v.Description = info.Description
-			v.Author = info.Author
-			v.Email = info.Email
-			v.Url = url
-			v.PluginType = info.PluginType
-			v.Extentions = info.Extentions
-			break
+	// 开启插件的时候更新最新的插件信息
+	if enable == 1 {
+		err := m.updatePlugin(uuid, &PluginParam{CustomName: custom_name, Url: url}, enable)
+		if err != nil {
+			logger.Error("failed to update plugin info:%s", err.Error())
+			return err
 		}
 	}
-	m.Unlock()
-
 	return nil
 }
 
@@ -464,7 +441,6 @@ func requestPluginInfo(plugin *PluginParam) (*Plugin, error) {
 		PluginType:  PluginInfo.PluginType,
 		Extentions:  extentions,
 		Permissions: permissions.Permissions,
-		// Status:      common.StatusLoaded,
 	}, nil
 }
 
@@ -556,6 +532,11 @@ func AddPlugin(param *PluginParam) error {
 		return err
 	}
 
+	if err := addPluginInRedis(p.UUID); err != nil {
+		logger.Error("failed to add plugin heartbeat in redis:%s", err.Error())
+		return err
+	}
+
 	//向数据库添加admin用户的插件权限
 	err = auth.AddPluginPermission("admin", p.Permissions, p.UUID)
 	return err
@@ -614,6 +595,21 @@ func deletePluginInRedis(uuid string) error {
 	return nil
 }
 
+func addPluginInRedis(uuid string) error {
+	p, err := dao.QueryPluginById(uuid)
+	if err != nil {
+		return err
+	}
+	logger.Debug("add %v plugin heartbeat in redis: %v", p.Name, p.Url)
+	key := client.HeartbeatKey + p.Url
+	value := client.PluginStatus{
+		Connected:   true,
+		LastConnect: time.Now(),
+	}
+	err = redismanager.Set(key, value)
+	return err
+}
+
 func GetPluginConnectStatus(url string) (*client.PluginStatus, error) {
 	key := client.HeartbeatKey + url
 	var valueObj client.PluginStatus
@@ -624,7 +620,7 @@ func GetPluginConnectStatus(url string) (*client.PluginStatus, error) {
 	return plugin_status.(*client.PluginStatus), nil
 }
 
-// 从db获取某个权限的所有插件权限
+// 从db获取某个角色的所有插件权限
 func GetRolePluginPermission(role string) map[string]interface{} {
 	p2p := make(map[string]interface{})
 	for _, v := range globalPluginManager.Plugins {
