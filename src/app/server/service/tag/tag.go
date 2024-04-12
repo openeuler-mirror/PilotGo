@@ -54,6 +54,7 @@ func RequestTag(UUIDList []string) ([]common.Tag, error) {
 			logger.Error(err.Error())
 		}
 		for _, vt := range tags {
+			vt.UUID = v.UUID
 			vt.PluginName = v.Name
 			msg = append(msg, vt)
 		}
