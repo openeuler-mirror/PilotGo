@@ -3,6 +3,16 @@ import { directTo } from "@/router/index"
 
 // 公共定义
 export const RespCodeOK = 200
+export interface RespInterface {
+  code?: number;
+  data?: any[];
+  msg?: string;
+  ok?:boolean;
+  page?:number;
+  size?: number;
+  total?: number;
+}
+  
 
 // 创建一个axios实例
 const instance = axios.create({

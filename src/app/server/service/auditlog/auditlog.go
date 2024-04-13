@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
-	"gorm.io/gorm"
 )
 
 // 日志执行操作状态
@@ -31,7 +30,7 @@ const (
 
 type AuditLog = dao.AuditLog
 
-// 单机操作成功状态:是否成功，机器数量，比率
+// 单机操作成功状态:是否成功，机器数量，成功率
 const (
 	ActionOK    = "1,1,1.00"
 	ActionFalse = "0,1,0.00"
@@ -71,7 +70,7 @@ func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
 }
 
 // 查询子日志
-func GetAuditLogById(logUUId string) (*[]dao.AuditLog, *gorm.DB, error) {
+func GetAuditLogById(logUUId string) ([]dao.AuditLog, error) {
 	return dao.GetAuditLogById(logUUId)
 }
 

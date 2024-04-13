@@ -15,7 +15,6 @@
 package dao
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -71,10 +70,6 @@ func GetRoles() ([]Role, error) {
 
 // 新增角色
 func AddRole(r *Role) error {
-	if r.Name == "" {
-		return fmt.Errorf("角色名不能为空")
-	}
-
 	return mysqlmanager.MySQL().Save(r).Error
 }
 

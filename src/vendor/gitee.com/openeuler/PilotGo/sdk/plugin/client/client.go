@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const TokenCookie = "PluginToken"
+
 type GetTagsCallback func([]string) []common.Tag
 
 type Client struct {
@@ -16,6 +18,9 @@ type Client struct {
 
 	// 远程PilotGo server地址
 	server string
+
+	// 鉴权token
+	token string
 
 	// 用于event消息处理
 	eventChan        chan *common.EventMessage

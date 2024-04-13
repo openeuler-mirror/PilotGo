@@ -119,6 +119,7 @@ func registerAPIs(router *gin.Engine) {
 		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
 		noAuthenApis.GET("/plugins", controller.GetPluginsHandler)
 		noAuthenApis.GET("/plugins_paged", controller.GetPluginsPagedHandler)
+		noAuthenApis.GET("/download/:filename", controller.Download)
 	}
 
 	authenApi := router.Group("/api/v1")
@@ -132,6 +133,7 @@ func registerAPIs(router *gin.Engine) {
 			batchmanager := authenApi.Group("batchmanager")
 			batchmanager.POST("/updatebatch", middleware.NeedPermission("batch_update", "button"), controller.UpdateBatchHandler)
 			batchmanager.POST("/deletebatch", middleware.NeedPermission("batch_delete", "button"), controller.DeleteBatchHandler)
+			batchmanager.POST("/createbatch", middleware.NeedPermission("batch_create", "button"), controller.CreateBatchHandler)
 		}
 		{
 			user := authenApi.Group("user")
@@ -148,14 +150,16 @@ func registerAPIs(router *gin.Engine) {
 		}
 		{
 			macList := authenApi.Group("/macList")
-			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_change", "button"), controller.DeleteDepartDataHandler)
-			macList.POST("/adddepart", middleware.NeedPermission("dept_change", "button"), controller.AddDepartHandler)
-			macList.POST("/updatedepart", middleware.NeedPermission("dept_change", "button"), controller.UpdateDepartHandler)
+			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_delete", "button"), controller.DeleteDepartDataHandler)
+			macList.POST("/adddepart", middleware.NeedPermission("dept_add", "button"), controller.AddDepartHandler)
+			macList.POST("/updatedepart", middleware.NeedPermission("dept_update", "button"), controller.UpdateDepartHandler)
 		}
-		{
-			configmanager := authenApi.Group("config")
-			configmanager.POST("/file_broadcast", middleware.NeedPermission("config_install", "button"), agentcontroller.ConfigFileBroadcastToAgents)
-		}
+		/*
+			{
+				configmanager := authenApi.Group("config")
+				configmanager.POST("/file_broadcast", middleware.NeedPermission("config_install", "button"), agentcontroller.ConfigFileBroadcastToAgents)
+			}
+		*/
 	}
 
 	api := router.Group("/api/v1")
@@ -169,12 +173,11 @@ func registerAPIs(router *gin.Engine) {
 	macList := api.Group("/macList") // 机器管理
 	{
 		macList.POST("/script_save", controller.AddScriptHandler)
-		macList.POST("/deletemachine", controller.DeleteMachineHandler)
+		macList.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DepartHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
-		macList.POST("/createbatch", controller.CreateBatchHandler)
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
-		macList.POST("/modifydepart", controller.ModifyMachineDepartHandler)
+		macList.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 		macList.POST("/gettags", pluginapi.GetTagHandler)
 	}
@@ -208,37 +211,37 @@ func registerAPIs(router *gin.Engine) {
 		macDetails.GET("/firewall_zone", agentcontroller.FirewalldZoneConfig)
 		macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
 	}
-
-	macBasicModify := api.Group("/agent") // 机器配置
-	{
-		macBasicModify.GET("/sysctl_change", agentcontroller.SysctlChangeHandler)
-		macBasicModify.POST("/service_stop", agentcontroller.ServiceStopHandler)
-		macBasicModify.POST("/service_start", agentcontroller.ServiceStartHandler)
-		macBasicModify.POST("/service_restart", agentcontroller.ServiceRestartHandler)
-		macBasicModify.GET("/disk_mount", agentcontroller.DiskMountHandler)
-		macBasicModify.GET("/disk_umount", agentcontroller.DiskUMountHandler)
-		macBasicModify.GET("/disk_format", agentcontroller.DiskFormatHandler)
-		macBasicModify.GET("/user_add", agentcontroller.AddLinuxUserHandler)
-		macBasicModify.GET("/user_del", agentcontroller.DelUserHandler)
-		macBasicModify.GET("/user_ower", agentcontroller.ChangeFileOwnerHandler)
-		macBasicModify.GET("/user_per", agentcontroller.ChangePermissionHandler)
-		macBasicModify.POST("cron_new", agentcontroller.CreatCron)
-		macBasicModify.POST("/cron_del", agentcontroller.DeleteCronTask)
-		macBasicModify.POST("/cron_update", agentcontroller.UpdateCron)
-		macBasicModify.POST("/cron_status", agentcontroller.CronTaskStatus)
-		macBasicModify.GET("/cron_list", agentcontroller.CronTaskList)
-		macBasicModify.GET("/firewall_restart", agentcontroller.FirewalldRestart)
-		macBasicModify.GET("/firewall_stop", agentcontroller.FirewalldStop)
-		macBasicModify.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
-		macBasicModify.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
-		macBasicModify.POST("/firewall_default", agentcontroller.FirewalldSetDefaultZone)
-		macBasicModify.POST("/firewall_serviceAdd", agentcontroller.FirewalldServiceAdd)
-		macBasicModify.POST("/firewall_serviceRemove", agentcontroller.FirewalldServiceRemove)
-		macBasicModify.POST("/firewall_sourceAdd", agentcontroller.FirewalldSourceAdd)
-		macBasicModify.POST("/firewall_sourceRemove", agentcontroller.FirewalldSourceRemove)
-		macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
-	}
-
+	/*
+		macBasicModify := api.Group("/agent") // 机器配置
+		{
+			macBasicModify.GET("/sysctl_change", agentcontroller.SysctlChangeHandler)
+			macBasicModify.POST("/service_stop", agentcontroller.ServiceStopHandler)
+			macBasicModify.POST("/service_start", agentcontroller.ServiceStartHandler)
+			macBasicModify.POST("/service_restart", agentcontroller.ServiceRestartHandler)
+			macBasicModify.GET("/disk_mount", agentcontroller.DiskMountHandler)
+			macBasicModify.GET("/disk_umount", agentcontroller.DiskUMountHandler)
+			macBasicModify.GET("/disk_format", agentcontroller.DiskFormatHandler)
+			macBasicModify.GET("/user_add", agentcontroller.AddLinuxUserHandler)
+			macBasicModify.GET("/user_del", agentcontroller.DelUserHandler)
+			macBasicModify.GET("/user_ower", agentcontroller.ChangeFileOwnerHandler)
+			macBasicModify.GET("/user_per", agentcontroller.ChangePermissionHandler)
+			macBasicModify.POST("cron_new", agentcontroller.CreatCron)
+			macBasicModify.POST("/cron_del", agentcontroller.DeleteCronTask)
+			macBasicModify.POST("/cron_update", agentcontroller.UpdateCron)
+			macBasicModify.POST("/cron_status", agentcontroller.CronTaskStatus)
+			macBasicModify.GET("/cron_list", agentcontroller.CronTaskList)
+			macBasicModify.GET("/firewall_restart", agentcontroller.FirewalldRestart)
+			macBasicModify.GET("/firewall_stop", agentcontroller.FirewalldStop)
+			macBasicModify.POST("/firewall_addzp", agentcontroller.FirewalldZonePortAdd)
+			macBasicModify.POST("/firewall_delzp", agentcontroller.FirewalldZonePortDel)
+			macBasicModify.POST("/firewall_default", agentcontroller.FirewalldSetDefaultZone)
+			macBasicModify.POST("/firewall_serviceAdd", agentcontroller.FirewalldServiceAdd)
+			macBasicModify.POST("/firewall_serviceRemove", agentcontroller.FirewalldServiceRemove)
+			macBasicModify.POST("/firewall_sourceAdd", agentcontroller.FirewalldSourceAdd)
+			macBasicModify.POST("/firewall_sourceRemove", agentcontroller.FirewalldSourceRemove)
+			macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
+		}
+	*/
 	batchmanager := api.Group("batchmanager") // 批次
 	{
 		batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
@@ -257,27 +260,24 @@ func registerAPIs(router *gin.Engine) {
 		user.GET("/roles_paged", controller.GetRolesPagedHandler)
 	}
 
-	configmanager := api.Group("config") // 配置管理
-	{
-		configmanager.GET("/read_file", agentcontroller.ReadFile)
-		configmanager.POST("/fileSaveAdd", controller.SaveConfigFileToDatabaseHandler)
-		configmanager.GET("/file_all", controller.AllConfigFiles)
-		configmanager.POST("/file_search", controller.ConfigFileSearchHandler)
-		configmanager.POST("/file_update", controller.UpdateConfigFileHandler)
-		configmanager.POST("/file_delete", controller.DeleteConfigFileHandler)
-		configmanager.GET("/lastfile_all", controller.HistoryConfigFilesHandler)
-		configmanager.POST("/lastfile_rollback", controller.LastConfigFileRollBackHandler)
-	}
-
-	fileservive := api.Group("") //文件服务
-	{
-		fileservive.POST("/upload", controller.Upload)
-		fileservive.GET("/download/:filename", controller.Download)
-	}
+	/*
+		configmanager := api.Group("config") // 配置管理
+		{
+			configmanager.GET("/read_file", agentcontroller.ReadFile)
+			configmanager.POST("/fileSaveAdd", controller.SaveConfigFileToDatabaseHandler)
+			configmanager.GET("/file_all", controller.AllConfigFiles)
+			configmanager.POST("/file_search", controller.ConfigFileSearchHandler)
+			configmanager.POST("/file_update", controller.UpdateConfigFileHandler)
+			configmanager.POST("/file_delete", controller.DeleteConfigFileHandler)
+			configmanager.GET("/lastfile_all", controller.HistoryConfigFilesHandler)
+			configmanager.POST("/lastfile_rollback", controller.LastConfigFileRollBackHandler)
+		}
+	*/
 
 	userLog := api.Group("log") // 日志管理
 	{
-		userLog.GET("/log_all", controller.LogAllHandler)
+		userLog.GET("/log_all", middleware.NeedPermission("audit", "menu"), controller.LogAllHandler)
+		userLog.GET("/log_child", controller.GetAuditLogByIdHandler)
 	}
 
 	plugin := api.Group("plugins") // 插件
@@ -310,6 +310,8 @@ func registerPluginApi(router *gin.Engine) {
 	pluginAPI := router.Group("/api/v1/pluginapi")
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
+		pluginAPI.POST("/upload", controller.Upload)
+
 		pluginAPI.POST("/run_command_async", pluginapi.RunCommandAsyncHandler)
 		pluginAPI.POST("/run_command", pluginapi.RunCommandHandler)
 		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)

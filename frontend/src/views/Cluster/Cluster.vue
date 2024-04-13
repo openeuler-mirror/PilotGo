@@ -12,7 +12,7 @@
         v-model:selectedData="selectedMachines">
         <template v-slot:action>
           <el-dropdown>
-            <el-button type="primary">
+            <el-button>
               操作 <el-icon>
                 <ArrowDown />
               </el-icon>
@@ -25,7 +25,7 @@
                   </auth-button>
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <auth-button auth="button/mac_change" :show="true">
+                  <auth-button auth="button/machine_delete" :show="true" @click="handleDeleteMachine">
                     删除
                   </auth-button>
                 </el-dropdown-item>
@@ -41,9 +41,9 @@
         <template v-slot:content>
           <el-table-column align="center" label="ip">
             <template #default="data">
-              <span title="查看机器详情" @click="machineDetail(data.row)">
+              <el-button link type="primary" title="查看机器详情" @click="machineDetail(data.row)">
                 {{ data.row.ip }}
-              </span>
+              </el-button>
             </template>
           </el-table-column>
           <el-table-column align="center" prop="departname" label="部门">
@@ -75,7 +75,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, reactive, watch } from "vue";
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import axios from "axios";
 import AuthButton from "@/components/AuthButton.vue";
 import PGTable from "@/components/PGTable.vue";
@@ -83,8 +83,8 @@ import PGTree from "@/components/PGTree.vue";
 import StateDot from "@/components/StateDot.vue";
 import ChangeDepart from "./components/ChangeDepart.vue";
 import { directTo } from "@/router/index"
-import { getPagedDepartMachines, getMachineTags } from "@/request/cluster";
-import { RespCodeOK } from "@/request/request";
+import { getPagedDepartMachines, getMachineTags, deleteMachine } from "@/request/cluster";
+import { RespCodeOK, type RespInterface } from "@/request/request";
 import { usePluginStore } from "@/stores/plugin";
 // 部门树
 const departmentID = ref(1)
@@ -176,6 +176,42 @@ const handlePluginAPI = (url: string) => {
       }, 2000)
     }
   })
+}
+
+/* 
+* 删除机器
+* @params deluuid[] 机器的uuid列表 
+*  */
+const handleDeleteMachine = () => {
+  ElMessageBox.confirm(
+    'Are you sure yoou want to delete these machines. Continue?',
+    'Warning',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      let uuidArr = Array<string>();
+      selectedMachines.value.forEach((item: any) => {
+        uuidArr.push(item.uuid);
+      })
+      deleteMachine({ deluuid: uuidArr }).then((res: RespInterface) => {
+        if (res.code === RespCodeOK) {
+          updateDepartmentMachines(1, 1, 10);
+          ElMessage.success(res.msg);
+        } else {
+          ElMessage.success(res.msg)
+        }
+      })
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: 'Delete canceled',
+      })
+    })
 }
 
 const selectedMachines = ref([])

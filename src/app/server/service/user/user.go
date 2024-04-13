@@ -221,7 +221,14 @@ func GetUserRoles(username string) ([]string, error) {
 
 // 根据userid查询user信息
 func QueryUserByID(userID int) (*User, error) {
-	return dao.GetUserByID(userID)
+	user, err := dao.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("用户不存在")
+	}
+	return user, err
 }
 
 // 查询某用户信息
@@ -297,48 +304,59 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 			if rowIndex == 0 {
 				continue
 			}
-			userName := row.Cells[0].Value //1:用户名
-			phone := row.Cells[1].Value    //2：手机号
-			email := row.Cells[2].Value    //3：邮箱
-			EmailBool, err := dao.IsEmailExist(email)
-			if err != nil {
-				return nil, err
-			}
-			if EmailBool {
-				UserExit = append(UserExit, email)
-				continue
-			}
-			departName := row.Cells[3].Value          //4：部门
-			_, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
-			if err != nil {
+			if !isEmptyRow(row) {
+				userName := row.Cells[0].Value //1:用户名
+				phone := row.Cells[1].Value    //2：手机号
+				email := row.Cells[2].Value    //3：邮箱
+				EmailBool, err := dao.IsEmailExist(email)
+				if err != nil {
+					UserExit = append(UserExit, email+"邮箱错误"+err.Error())
+					logger.Error("邮箱错误" + err.Error())
+					continue
+				}
+				if EmailBool {
+					UserExit = append(UserExit, email+"已存在")
+					continue
+				}
+				departName := row.Cells[3].Value          //4：部门
+				_, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
+				if err != nil {
+					UserExit = append(UserExit, email+"部门错误"+err.Error())
+					logger.Error("部门错误" + err.Error())
+					continue
+				}
+				userRole := row.Cells[4].Value         // 5：角色
+				roleId, err := dao.GetRoleId(userRole) //角色对应id和用户类型
+				if err != nil {
+					UserExit = append(UserExit, email+"角色错误"+err.Error())
+					logger.Error("角色错误" + err.Error())
+					continue
+				}
+				password := strings.Split(email, "@")[0]
 
-				return UserExit, err
-			}
-			userRole := row.Cells[4].Value         // 5：角色
-			roleId, err := dao.GetRoleId(userRole) //角色对应id和用户类型
-			if err != nil {
-				return UserExit, err
-			}
-			password := strings.Split(email, "@")[0]
-
-			u := &dao.User{
-				Username: userName,
-				Phone:    phone,
-				Password: password,
-				Email:    email,
-				DepartId: id,
-			}
-			err = dao.AddUser(u)
-			if err != nil {
-				return UserExit, err
-			}
-			ur := &dao.UserRole{
-				UserID: u.ID,
-				RoleID: roleId,
-			}
-			err = ur.Add()
-			if err != nil {
-				return UserExit, err
+				u := &dao.User{
+					Username: userName,
+					Phone:    phone,
+					Password: password,
+					Email:    email,
+					DepartId: id,
+				}
+				err = dao.AddUser(u)
+				if err != nil {
+					UserExit = append(UserExit, email+"添加用户错误"+err.Error())
+					logger.Error("添加用户错误" + err.Error())
+					continue
+				}
+				ur := &dao.UserRole{
+					UserID: u.ID,
+					RoleID: roleId,
+				}
+				err = ur.Add()
+				if err != nil {
+					UserExit = append(UserExit, email+"添加角色关系错误"+err.Error())
+					logger.Error("添加角色关系错误" + err.Error())
+					continue
+				}
 			}
 		}
 	}
@@ -347,4 +365,14 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 
 func GetRolesByUid(uid uint) ([]int, error) {
 	return dao.GetRolesByUid(uid)
+}
+
+// 判断是否为空行
+func isEmptyRow(row *xlsx.Row) bool {
+	for _, cell := range row.Cells {
+		if cell.String() != "" {
+			return false // 只要有一个单元格不为空，即认为当前行不为空行
+		}
+	}
+	return true
 }

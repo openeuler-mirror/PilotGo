@@ -23,6 +23,9 @@ func (c *Client) ListenEvent(eventTypes []int, callbacks []EventCallback) error 
 	url := c.Server() + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: c.PluginInfo,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return err
@@ -62,6 +65,9 @@ func (c *Client) UnListenEvent(eventTypes []int) error {
 	url := c.Server() + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
 	r, err := httputils.Delete(url, &httputils.Params{
 		Body: c.PluginInfo,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return err
@@ -97,6 +103,9 @@ func (c *Client) PublishEvent(msg common.EventMessage) error {
 	url := c.Server() + "/api/v1/pluginapi/publish_event"
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: &msg,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return err

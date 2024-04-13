@@ -28,6 +28,7 @@ type AuditLog struct {
 	UserID     uint   `gorm:"not null" json:"user_id"`
 	Action     string `gorm:"not null" json:"action"`
 	Message    string `gorm:"type:text" json:"message"`
+	Isempty    int
 }
 
 // 存储日志
@@ -53,19 +54,26 @@ func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
 }
 
 // 查询子日志
-func GetAuditLogById(logUUId string) (list *[]AuditLog, tx *gorm.DB, err error) {
-	list = &[]AuditLog{}
-	tx = mysqlmanager.MySQL().Order("created_at desc").Where("parent_uuid=?", logUUId).Find(&list)
-	err = tx.Error
-	return
+func GetAuditLogById(logUUId string) ([]AuditLog, error) {
+	var list []AuditLog
+	err := mysqlmanager.MySQL().Order("created_at desc").Where("parent_uuid=?", logUUId).Find(&list).Error
+	return list, err
 }
 
 // 查询父日志为空的记录
 func GetParentLog(offset, size int) (int64, []AuditLog, error) {
 	var count int64
 	var auditlogs []AuditLog
-	err := mysqlmanager.MySQL().Model(AuditLog{}).Order("id desc").Where("parent_uuid=?", "").Offset(offset).Limit(size).Find(&auditlogs).Offset(-1).Limit(-1).Count(&count).Error
-	return count, auditlogs, err
+	rows := mysqlmanager.MySQL().Raw("SELECT count(*) FROM audit_log WHERE parent_uuid = ''").Scan(&count)
+	if rows.Error != nil {
+		return 0, nil, rows.Error
+	}
+	sql := "select id,log_uuid,parent_uuid,module,status,user_id,action,message,exists(select 1 from audit_log t2 where t2.parent_uuid=t1.log_uuid) as isempty from audit_log t1 where t1.parent_uuid='' order by id desc limit ? offset ?;"
+	rows = mysqlmanager.MySQL().Raw(sql, size, offset).Scan(&auditlogs)
+	if rows.Error != nil {
+		return count, nil, rows.Error
+	}
+	return count, auditlogs, nil
 }
 
 // 根据模块名字查询日志

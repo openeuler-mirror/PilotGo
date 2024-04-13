@@ -27,7 +27,7 @@
               <el-icon size="20">
                 <User />
               </el-icon>
-              <el-dropdown trigger="click">
+              <el-dropdown trigger="click" @command="changePWD">
                 <span class="user_menu">hello {{ user.name }}!</span>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -41,11 +41,13 @@
             </div>
           </div>
         </el-header>
-        <el-main style="padding: 5px;">
+        <el-main id="main">
           <router-view v-slot="{ Component }">
-            <keep-alive>
-              <component :is="Component"></component>
-            </keep-alive>
+            <transition name="fade">
+              <keep-alive>
+                <component :is="Component"></component>
+              </keep-alive>
+            </transition>
             <!-- 插件页面 -->
           </router-view>
           <!-- <div v-for="item in iframeComponents" style="height:100%; width:100%" v-if="route.path.startsWith('/plugin-')">
@@ -56,10 +58,11 @@
         </el-main>
         <div class="footer">
           <p> <a href="https://gitee.com/openeuler/PilotGo" target="_blank">PilotGo</a> version: {{ version.commit
-            ? version.version + "-" + version.commit : version.version }}, build time: {{ version.build_time }}
+        ? version.version + "-" + version.commit : version.version }}, build time: {{ version.build_time }}
             All right reserved</p>
         </div>
       </el-container>
+      <changePwd v-if="changePassword" />
     </el-container>
   </div>
 </template>
@@ -71,7 +74,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import BreadCrumb from "./components/BreadCrumb.vue";
 import TagView from "./components/TagView.vue";
 import Sidebar from "./components/Sidebar.vue";
-
+import changePwd from "./components/changePwd.vue";
 import { directTo, updateSidebarItems } from "@/router/index";
 import { updatePermisson } from "@/module/permission";
 import { platformVersion } from "@/request/basic"
@@ -84,6 +87,7 @@ const route = useRoute();
 const user = ref<User>({})
 const isCollapse = ref(false); // 是否折叠菜单栏
 const collapseWidth = ref('10%') // el-aside宽度
+const changePassword = ref(false);
 
 interface VersionInfo {
   commit?: string
@@ -95,9 +99,8 @@ const version = ref<VersionInfo>({})
 
 onMounted(() => {
   updatePlugins();
-  updateSidebarItems();
-  updateUserInfo();
   updatePermisson();
+  updateUserInfo();
 
   platformVersion().then((resp: any) => {
     if (resp.code == RespCodeOK) {
@@ -125,6 +128,11 @@ watchEffect(() => {
 watch(() => iframeComponents.value, () => {
   updateSidebarItems();
 })
+
+// 修改密码
+const changePWD = () => {
+  changePassword.value = true;
+}
 
 function updateUserInfo() {
   getCurrentUser().then((resp: any) => {
@@ -158,9 +166,11 @@ function handleLogout() {
 }
 
 import { removeToken } from "@/module/cookie";
+import { routerStore } from "@/stores/router";
 
 function doLogout() {
   userStore().$reset()
+  routerStore().reset();
   removeToken()
   directTo('/login')
 }
@@ -286,6 +296,16 @@ function doLogout() {
       }
 
     }
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity .3s;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
   }
 }
 

@@ -2,7 +2,7 @@
   <div class="container">
     <PGTable :data="plugins" title="插件列表" :total="total" :onPageChanged="onPageChanged">
       <template v-slot:action>
-        <el-button type="primary" @click="displayDialog = true">添加插件</el-button>
+        <el-button @click="displayDialog = true">添加插件</el-button>
       </template>
       <template v-slot:content>
         <el-table-column align="center" prop="custom_name" label="插件名称" width="150">
@@ -35,10 +35,10 @@
         </el-table-column>
         <el-table-column align="center" label="操作" width="160">
           <template #default="scope">
-            <el-button type="primary" plain name="default_all" @click="togglePluginState(scope.row)">
+            <el-button size="small" plain name="default_all" @click="togglePluginState(scope.row)">
               {{ scope.row.enabled === 1 ? '禁用' : '启用' }}
             </el-button>
-            <el-button type="danger" @click="onDeletePlugin(scope.row)">移除</el-button>
+            <el-button size="small" type="danger" @click="onDeletePlugin(scope.row)">移除</el-button>
           </template>
         </el-table-column>
       </template>
@@ -123,6 +123,9 @@ function onDeletePlugin(item: any) {
       updatePlugins();
       // 删除插件tagview
       clearTagview(item);
+      // 删除插件扩展点
+      let pluginExt = item.extentions && item.extentions.filter((item: Extention) => item.type === 'machine');
+      usePluginStore().delExtention(pluginExt)
     } else {
       ElMessage.error(res.msg);
     }

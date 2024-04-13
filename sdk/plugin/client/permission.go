@@ -34,6 +34,9 @@ func (c *Client) HasPermission(resource, operate string) (bool, error) {
 
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
+		Cookie: map[string]string{
+			TokenCookie: c.token,
+		},
 	})
 	if err != nil {
 		return false, err

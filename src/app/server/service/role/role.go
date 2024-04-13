@@ -109,6 +109,14 @@ func getRoleMenuButtons(role string) map[string]interface{} {
 
 // 添加角色
 func AddRole(userRole *Role) error {
+	if userRole.Name == "" {
+		return errors.New("role name can not be empty")
+	}
+
+	id, _ := dao.GetRoleId(userRole.Name)
+	if id > 0 {
+		return errors.New("role name already exists")
+	}
 	err := dao.AddRole(userRole)
 	if err != nil {
 		return err

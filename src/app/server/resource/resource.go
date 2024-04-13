@@ -27,6 +27,7 @@ import (
 
 func StaticRouter(router *gin.Engine) {
 	router.Static("/assets", "../frontend/dist/assets")
+	router.Static("/pilotgo.ico", "../frontend/dist/pilotgo.ico")
 	router.StaticFile("/", "../frontend/dist/index.html")
 
 	// 解决页面刷新404的问题

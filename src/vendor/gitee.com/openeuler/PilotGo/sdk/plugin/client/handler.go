@@ -74,6 +74,13 @@ func bindHandler(c *gin.Context) {
 		logger.Error("已有PilotGo-server与此插件绑定")
 	}
 	client.cond.Broadcast()
+
+	for _, c := range c.Request.Cookies() {
+		if c.Name == TokenCookie {
+			client.token = c.Value
+		}
+	}
+
 	client.sendHeartBeat()
 	response.Success(c, nil, "bind server success")
 }

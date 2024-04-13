@@ -94,7 +94,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.ReleaseToken(*u)
+	token, err := jwt.GenerateUserToken(*u)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
@@ -343,9 +343,8 @@ func UpdateUserHandler(c *gin.Context) {
 
 // 一键导入用户数据
 func ImportUser(c *gin.Context) {
-	form, _ := c.MultipartForm()
-	files := form.File["upload"]
-	if files == nil {
+	_, file, err := c.Request.FormFile("upload")
+	if err != nil {
 		response.Fail(c, nil, "请先选择要上传的文件")
 		return
 	}
@@ -366,23 +365,28 @@ func ImportUser(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	for _, file := range files {
-		name := file.Filename
-		c.SaveUploadedFile(file, name)
-		xlFile, error := xlsx.OpenFile(name)
-		if error != nil {
-			return
-		}
-		UserExit, err = userservice.ReadFile(xlFile, UserExit)
-		if err != nil {
-			return
-		}
+	name := file.Filename
+	c.SaveUploadedFile(file, name)
+	xlFile, err := xlsx.OpenFile(name)
+	if err != nil {
+		response.Fail(c, nil, "获取文件错误："+err.Error())
+		return
+	}
+	UserExit, err = userservice.ReadFile(xlFile, UserExit)
+	if err != nil {
+		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateMessage(log, strings.Join(UserExit, ";"))
+		println(log)
+		response.Fail(c, gin.H{"UserExit": UserExit}, err.Error())
+		return
 	}
 
 	if len(UserExit) == 0 {
 		response.Success(c, nil, "导入用户信息成功")
+		return
 	} else {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateMessage(log, strings.Join(UserExit, ";"))
 		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/network/jwt"
 
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
 	"gitee.com/openeuler/PilotGo/app/server/service/internal/dao"
@@ -137,13 +138,14 @@ func (m *PluginManager) recovery() error {
 func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) error {
 	// 查询最新的插件信息
 	logger.Debug("update plugin")
-	err := Handshake(pp.Url)
-	if err != nil {
-		return err
-	}
 	info, err := requestPluginInfo(pp)
 	if err != nil {
 		logger.Error("failed to request plugin info:%s", err.Error())
+		return err
+	}
+	info.UUID = uuid
+	err = Handshake(pp.Url, info)
+	if err != nil {
 		return err
 	}
 
@@ -155,21 +157,23 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 		Description: info.Description,
 		Author:      info.Author,
 		Email:       info.Email,
-		Url:         info.Url,
+		Url:         pp.Url,
 		PluginType:  info.PluginType,
 		Enabled:     enabled,
 		Extentions:  info.Extentions,
+		Permissions: info.Permissions,
 	}
 
 	if err := dao.UpdatePluginInfo(toPluginDao(p)); err != nil {
 		return err
 	}
-
+	//更新插件管理器的插件列表
 	found := false
 	m.Lock()
 	for i, v := range m.Plugins {
 		if v.UUID == uuid {
 			m.Plugins[i] = p
+			found = true
 			break
 		}
 	}
@@ -182,11 +186,6 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 }
 
 func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
-	err := Handshake(addPlugin.Url)
-	if err != nil {
-		return nil, err
-	}
-
 	p, err := requestPluginInfo(addPlugin)
 	if err != nil {
 		return nil, err
@@ -196,16 +195,14 @@ func (m *PluginManager) addPlugin(addPlugin *PluginParam) (*Plugin, error) {
 		p.UUID = uuid.New().String()
 	}
 
-	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
+	err = Handshake(addPlugin.Url, p)
+	if err != nil {
 		return nil, err
 	}
 
-	key := client.HeartbeatKey + p.Url
-	value := client.PluginStatus{
-		Connected:   true,
-		LastConnect: time.Now(),
-	}
-	if err := redismanager.Set(key, value); err != nil {
+	// use accessible url as plugin url
+	p.Url = addPlugin.Url
+	if err := dao.RecordPlugin(toPluginDao(p)); err != nil {
 		return nil, err
 	}
 
@@ -262,30 +259,18 @@ func (m *PluginManager) togglePlugin(uuid string, enable int) error {
 		}
 	}
 	m.Unlock()
-
-	// 更新最新的插件信息
-	info, err := requestPluginInfo(&PluginParam{CustomName: custom_name, Url: url})
-	if err != nil {
-		logger.Error("failed to request plugin info:%s", err.Error())
-		return errors.New("plugin offline or unreachable")
+	if url == "" {
+		logger.Error("get plugin url error")
+		return errors.New("get plugin url error")
 	}
-	m.Lock()
-	for _, v := range m.Plugins {
-		if v.UUID == uuid {
-			v.CustomName = info.CustomName
-			v.Name = info.Name
-			v.Version = info.Version
-			v.Description = info.Description
-			v.Author = info.Author
-			v.Email = info.Email
-			v.Url = info.Url
-			v.PluginType = info.PluginType
-			v.Extentions = info.Extentions
-			break
+	// 开启插件的时候更新最新的插件信息
+	if enable == 1 {
+		err := m.updatePlugin(uuid, &PluginParam{CustomName: custom_name, Url: url}, enable)
+		if err != nil {
+			logger.Error("failed to update plugin info:%s", err.Error())
+			return err
 		}
 	}
-	m.Unlock()
-
 	return nil
 }
 
@@ -360,7 +345,7 @@ func toPluginDao(p *Plugin) *dao.PluginModel {
 }
 
 // 与plugin进行握手，绑定PilotGo与server端
-func Handshake(url string) error {
+func Handshake(url string, p *Plugin) error {
 	index := strings.Index(url, "plugin")
 	if index > 0 {
 		url = url[:index]
@@ -370,7 +355,17 @@ func Handshake(url string) error {
 	url = strings.TrimRight(url, "/") + "/plugin_manage/bind?port=" + port
 	logger.Debug("plugin url is:%s", url)
 
-	resp, err := httputils.Put(url, nil)
+	token, err := jwt.GeneratePluginToken(p.Name, p.UUID)
+	if err != nil {
+		logger.Error("generate plugin token error:%s", err.Error())
+		return err
+	}
+
+	resp, err := httputils.Put(url, &httputils.Params{
+		Cookie: map[string]string{
+			"PluginToken": token,
+		},
+	})
 	if err != nil {
 		logger.Error("request plugin info error:%s", err.Error())
 		return err
@@ -442,11 +437,10 @@ func requestPluginInfo(plugin *PluginParam) (*Plugin, error) {
 		Description: PluginInfo.Description,
 		Author:      PluginInfo.Author,
 		Email:       PluginInfo.Email,
-		Url:         PluginInfo.Url,
+		Url:         url,
 		PluginType:  PluginInfo.PluginType,
 		Extentions:  extentions,
 		Permissions: permissions.Permissions,
-		// Status:      common.StatusLoaded,
 	}, nil
 }
 
@@ -538,6 +532,11 @@ func AddPlugin(param *PluginParam) error {
 		return err
 	}
 
+	if err := addPluginInRedis(p.UUID); err != nil {
+		logger.Error("failed to add plugin heartbeat in redis:%s", err.Error())
+		return err
+	}
+
 	//向数据库添加admin用户的插件权限
 	err = auth.AddPluginPermission("admin", p.Permissions, p.UUID)
 	return err
@@ -596,6 +595,21 @@ func deletePluginInRedis(uuid string) error {
 	return nil
 }
 
+func addPluginInRedis(uuid string) error {
+	p, err := dao.QueryPluginById(uuid)
+	if err != nil {
+		return err
+	}
+	logger.Debug("add %v plugin heartbeat in redis: %v", p.Name, p.Url)
+	key := client.HeartbeatKey + p.Url
+	value := client.PluginStatus{
+		Connected:   true,
+		LastConnect: time.Now(),
+	}
+	err = redismanager.Set(key, value)
+	return err
+}
+
 func GetPluginConnectStatus(url string) (*client.PluginStatus, error) {
 	key := client.HeartbeatKey + url
 	var valueObj client.PluginStatus
@@ -606,7 +620,7 @@ func GetPluginConnectStatus(url string) (*client.PluginStatus, error) {
 	return plugin_status.(*client.PluginStatus), nil
 }
 
-// 从db获取某个权限的所有插件权限
+// 从db获取某个角色的所有插件权限
 func GetRolePluginPermission(role string) map[string]interface{} {
 	p2p := make(map[string]interface{})
 	for _, v := range globalPluginManager.Plugins {

@@ -165,7 +165,7 @@ func UpdateRoleInfoHandler(c *gin.Context) {
 // 更改角色权限
 func RolePermissionChangeHandler(c *gin.Context) {
 	params := &struct {
-		ButtonId          []string                  `json:"buttonId"`
+		Buttons           []string                  `json:"buttons"`
 		Menus             []string                  `json:"menus"`
 		Role              string                    `json:"role"`
 		PluginPermissions []plugin.PluginPermission `json:"pluginpermissions"`
@@ -190,7 +190,7 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	err = roleservice.UpdateRolePermissions(params.Role, params.ButtonId, params.Menus, params.PluginPermissions)
+	err = roleservice.UpdateRolePermissions(params.Role, params.Buttons, params.Menus, params.PluginPermissions)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())

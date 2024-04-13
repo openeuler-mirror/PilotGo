@@ -18,6 +18,15 @@ export function getDepartMachines(data: any) {
     })
 }
 
+// 删除机器接口
+export function deleteMachine(data:any) {
+  return request({
+    url: 'macList/deletemachine',
+    method: 'post',
+    data
+  })
+}
+
 // 获取指定部门下的子部门
 export function getSubDepartment(data: any) {
     return request({
@@ -187,6 +196,15 @@ export function installPackage(data: any) {
         method: 'post',
         data
     })
+}
+
+// 卸载软件包
+export function removePackage(data:any) {
+  return request({
+    url: 'agent/rpm_remove',
+    method: 'post',
+    data
+  })
 }
 
 // 获取给定主机列表的tag标签

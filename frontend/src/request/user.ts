@@ -17,6 +17,15 @@ export function logout() {
     })
 }
 
+// 用户修改密码
+export function changeUserPwd(data: {email:string,password:string}) {
+    return request({
+        url: '/user/updatepwd',
+        method: 'post',
+        data,
+    });
+}
+
 // 获取全部用户信息
 export function getUsers(data: any) {
     return request({
@@ -86,4 +95,13 @@ export function getPermission() {
         url: '/user/permission',
         method: 'post',
     })
+}
+
+// 批量导入用户
+export function importUser(data:any) {
+  return request({
+    url: '/user/import',
+    method: 'post',
+    data
+  })
 }
