@@ -76,6 +76,11 @@ func DeleteMachine(Deluuid []string) map[string]string {
 			machinelist[machinedeluuid] = err.Error()
 		}
 		if node.ID != 0 {
+			//删除机器批次关系表数据
+			if err := dao.DeleteMachineBatch(node.ID); err != nil {
+				machinelist[machinedeluuid] = err.Error()
+				continue
+			}
 			if err := dao.DeleteMachine(machinedeluuid); err != nil {
 				machinelist[machinedeluuid] = err.Error()
 			}

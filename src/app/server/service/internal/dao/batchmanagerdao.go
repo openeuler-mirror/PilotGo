@@ -84,3 +84,8 @@ func GetMachineID(BatchID int) ([]uint, error) {
 	err := mysqlmanager.MySQL().Model(BatchMachines{}).Select("machine_node_id").Where("batch_id=?", BatchID).Find(&machineids).Error
 	return machineids, err
 }
+
+func DeleteMachineBatch(NodeID int) error {
+	var bm BatchMachines
+	return mysqlmanager.MySQL().Where("machine_node_id=?", NodeID).Delete(&bm).Error
+}
