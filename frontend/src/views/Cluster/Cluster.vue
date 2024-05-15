@@ -30,9 +30,10 @@
                   </auth-button>
                 </el-dropdown-item>
                 <el-dropdown-item v-for="item in extButtons">
-                  <auth-button :auth="item.permission" :show="true" @click="handlePluginAPI(item.url)">
+                  <!-- <auth-button :auth="'button/' + item.permission" :show="true" @click="handlePluginAPI(item.url)">
                     {{ item.name }}
-                  </auth-button>
+                  </auth-button> -->
+                  <el-button @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
