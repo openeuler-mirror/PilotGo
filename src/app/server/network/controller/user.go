@@ -129,14 +129,11 @@ func Info(c *gin.Context) {
 		return
 	}
 
-	d := &struct {
-		Name  string `json:"name"`
-		Phone string `json:"phone"`
-	}{
-		Name:  u.Username,
-		Phone: u.Phone,
+	d, err := userservice.GetUserByEmail(u.Email)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
 	}
-
 	response.Success(c, d, "用户信息查询成功")
 }
 
