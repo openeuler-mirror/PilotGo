@@ -212,6 +212,7 @@ import { app } from "@/main";
 import { useRouter } from "vue-router";
 import { hasPermisson } from '@/module/permission';
 import { userStore } from '@/stores/user';
+import { getToken } from "@/module/cookie";
 
 export function updateSidebarItems() {
   let menus = generateLocalMenus();
@@ -352,12 +353,11 @@ router.beforeEach((to, from, next) => {
   if (to.meta && to.meta.title) {
     document.title = to.meta.title as string
   }
-  if (userStore().user.name) {
+  if (getToken()) {
     // 已登录
     if (to.path.includes('plugin-')) {
     // 解决在插件页面一刷新页面空白问题
     if (!router.hasRoute(to.fullPath)) {
-      console.log('没有这条路径')
       new Promise(async (resolve, rejection) => {
         await routerStore().routers.forEach((route: any) => {
           addPluginRoute(route);

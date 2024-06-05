@@ -8,6 +8,9 @@ const CookieAuthToken = "Admin-Token"
 export function setToken(token: string) {
     Cookies.set(CookieAuthToken, token)
 }
+export function getToken() {
+  return Cookies.get(CookieAuthToken)
+}
 
 export function removeToken() {
     Cookies.remove(CookieAuthToken)
