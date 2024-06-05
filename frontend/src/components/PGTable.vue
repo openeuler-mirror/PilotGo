@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { toRaw, ref, defineExpose } from "vue";
+import { toRaw, ref } from "vue";
 
 const props = defineProps({
   title: String,
