@@ -20,7 +20,7 @@ func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, str
 		Data: sdkcommon.File{Path: filepath, Name: pattern},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
@@ -66,7 +66,7 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 		Data: updatefile,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
@@ -99,7 +99,7 @@ func (a *Agent) SaveFile(filepath string, filename string, text string) (*common
 		Data: updatefile,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err

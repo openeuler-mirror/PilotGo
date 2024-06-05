@@ -17,7 +17,7 @@ func (a *Agent) ServiceList() ([]*common.ListService, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -45,7 +45,7 @@ func (a *Agent) GetService(service string) (*common.ServiceInfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -72,7 +72,7 @@ func (a *Agent) ServiceRestart(service string) (string, string, error) {
 		Data: service,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
@@ -94,7 +94,7 @@ func (a *Agent) ServiceStop(service string) (string, string, error) {
 		Data: service,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
@@ -116,7 +116,7 @@ func (a *Agent) ServiceStart(service string) (string, string, error) {
 		Data: service,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err

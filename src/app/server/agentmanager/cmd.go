@@ -22,7 +22,7 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 		},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run command on agent")
 		return nil, err
@@ -54,7 +54,7 @@ func (a *Agent) RunScript(script string, params []string) (*utils.CmdResult, err
 		},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -79,7 +79,7 @@ func (a *Agent) ChangePermission(permission, file string) (string, error) {
 		Data: permission + "," + file,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -101,7 +101,7 @@ func (a *Agent) ChangeFileOwner(user, file string) (string, error) {
 		Data: user + "," + file,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -123,7 +123,7 @@ func (a *Agent) ChangeSysctl(args string) (string, error) {
 		Data: args,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err

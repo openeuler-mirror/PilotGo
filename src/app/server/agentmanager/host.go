@@ -17,7 +17,7 @@ func (a *Agent) AgentOverview() (*mc.AgentOverview, error) {
 		Type: protocol.AgentOverview,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to send agent message: %v", err)
 		return nil, err
@@ -51,7 +51,7 @@ func (a *Agent) AgentInfo() (*AgentInfo, error) {
 		Type: protocol.AgentInfo,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -80,7 +80,7 @@ func (a *Agent) GetOSInfo() (*common.SystemInfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -108,7 +108,7 @@ func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -136,7 +136,7 @@ func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent: %s", err.Error())
 		return nil, err
@@ -164,7 +164,7 @@ func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -192,7 +192,7 @@ func (a *Agent) SysctlView(args string) (string, error) {
 		Data: args,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -214,7 +214,7 @@ func (a *Agent) DiskUsage() ([]*common.DiskUsageINfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -242,7 +242,7 @@ func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -274,7 +274,7 @@ func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
 		Data: sourceDisk + "," + destPath,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return err.Error(), err
@@ -295,7 +295,7 @@ func (a *Agent) DiskUMount(diskPath string) (string, error) {
 		Data: diskPath,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return err.Error(), err
@@ -316,7 +316,7 @@ func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
 		Data: fileType + "," + diskPath,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -338,7 +338,7 @@ func (a *Agent) NetTCP() (*common.NetConnect, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -366,7 +366,7 @@ func (a *Agent) NetUDP() (*common.NetConnect, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -394,7 +394,7 @@ func (a *Agent) NetIOCounter() (*common.IOCnt, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -422,7 +422,7 @@ func (a *Agent) NetNICConfig() (*common.NetInterfaceCard, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -450,7 +450,7 @@ func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -478,7 +478,7 @@ func (a *Agent) GetRepoSource() ([]*common.RepoSource, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -506,7 +506,7 @@ func (a *Agent) GetTimeInfo() (string, error) {
 		Type: protocol.AgentTime,
 		Data: struct{}{},
 	}
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to get time on agent")
 		return "", err

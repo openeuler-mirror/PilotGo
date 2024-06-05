@@ -17,7 +17,7 @@ func (a *Agent) FirewalldConfig() (*common.FireWalldConfig, string, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
@@ -45,7 +45,7 @@ func (a *Agent) FirewalldSetDefaultZone(zone string) (string, string, error) {
 		Data: zone,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
@@ -67,7 +67,7 @@ func (a *Agent) FirewalldZoneConfig(zone string) (*common.FirewalldCMDList, stri
 		Data: zone,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
@@ -95,7 +95,7 @@ func (a *Agent) FirewalldServiceAdd(zone, service string) (string, error) {
 		Data: zone + "," + service,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -117,7 +117,7 @@ func (a *Agent) FirewalldServiceRemove(zone, service string) (string, error) {
 		Data: zone + "," + service,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -139,7 +139,7 @@ func (a *Agent) FirewalldSourceAdd(zone, source string) (string, error) {
 		Data: zone + "," + source,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -161,7 +161,7 @@ func (a *Agent) FirewalldSourceRemove(zone, source string) (string, error) {
 		Data: zone + "," + source,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -183,7 +183,7 @@ func (a *Agent) FirewalldRestart() (bool, string, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return false, "", err
@@ -205,7 +205,7 @@ func (a *Agent) FirewalldStop() (bool, string, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return false, "", err
@@ -227,7 +227,7 @@ func (a *Agent) FirewalldZonePortAdd(zone, port, proto string) (string, string, 
 		Data: zone + "," + port + "," + proto,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
@@ -249,7 +249,7 @@ func (a *Agent) FirewalldZonePortDel(zone, port, proto string) (string, string, 
 		Data: zone + "," + port + "," + proto,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
