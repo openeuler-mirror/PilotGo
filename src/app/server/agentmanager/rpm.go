@@ -17,7 +17,7 @@ func (a *Agent) AllRpm() ([]string, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -48,7 +48,7 @@ func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 		Data: rpm,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -76,7 +76,7 @@ func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 		Data: rpm,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, "", err
@@ -104,7 +104,7 @@ func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 		Data: rpm,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
@@ -126,7 +126,7 @@ func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
 		Data: rpm,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err

@@ -17,7 +17,7 @@ func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -45,7 +45,7 @@ func (a *Agent) AllUser() ([]*common.AllUserInfo, error) {
 		Data: struct{}{},
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return nil, err
@@ -73,7 +73,7 @@ func (a *Agent) AddLinuxUser(username, password string) (string, error) {
 		Data: username + "," + password,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -95,7 +95,7 @@ func (a *Agent) DelUser(username string) (string, string, error) {
 		Data: username,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
