@@ -153,7 +153,7 @@ func (a *Agent) Init() error {
 	return nil
 }
 
-func (a *Agent) sendMessage(msg *protocol.Message, wait bool, timeout time.Duration) (*protocol.Message, error) {
+func (a *Agent) sendMessage(msg *protocol.Message, wait bool) (*protocol.Message, error) {
 	if msg.UUID == "" {
 		msg.UUID = uuid.New().String()
 	}
@@ -182,7 +182,7 @@ func (a *Agent) HeartBeat() (string, error) {
 		Data: "connection is normal",
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -204,7 +204,7 @@ func (a *Agent) CronStart(id int, spec string, command string) (string, string, 
 		Data: strconv.Itoa(id) + "," + spec + "," + command,
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", "", err
@@ -226,7 +226,7 @@ func (a *Agent) CronStopAndDel(id int) (string, error) {
 		Data: strconv.Itoa(id),
 	}
 
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
@@ -247,7 +247,7 @@ func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
 		Type: protocol.AgentConfig,
 		Data: ConMess,
 	}
-	resp_message, err := a.sendMessage(msg, true, 0)
+	resp_message, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to config on agent")
 		return err
