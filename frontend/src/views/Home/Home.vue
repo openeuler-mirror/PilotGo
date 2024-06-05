@@ -137,8 +137,13 @@ const changePWD = () => {
 function updateUserInfo() {
   getCurrentUser().then((resp: any) => {
     if (resp.code == RespCodeOK) {
+      let { departId, departName, email, id, phone, role, username } = resp.data;
       userStore().user = {
-        name: resp.data.name,
+        name: username,
+        department: departName,
+        departmentID: departId,
+        email: email,
+        role: role
       }
     } else {
       ElMessage.error("failed to login:" + resp.msg)
@@ -167,11 +172,13 @@ function handleLogout() {
 
 import { removeToken } from "@/module/cookie";
 import { routerStore } from "@/stores/router";
+import { tagviewStore } from "@/stores/tagview";
 
 function doLogout() {
-  userStore().$reset()
+  userStore().$reset();
   routerStore().reset();
-  removeToken()
+  tagviewStore().$reset();
+  removeToken();
   directTo('/login')
 }
 

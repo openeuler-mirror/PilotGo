@@ -8,6 +8,7 @@ export interface User {
     departmentID?: number
     department?: string
     roleID?: string
+    role?:string[]
 }
 
 export const userStore = defineStore('user', {
