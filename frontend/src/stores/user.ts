@@ -10,12 +10,16 @@ export interface User {
     roleID?: string
 }
 
-export const userStore = defineStore('user', () => {
-    const user = ref<User>({})
-
-    function $reset() {
-        user.value = {}
+export const userStore = defineStore('user', {
+  state: () => {
+    return {
+      user: {} as User,
     }
-
-    return { user, $reset }
+  },
+  actions: {
+    $reset() {
+      this.user = {}
+    }
+  },
+  persist:true
 })
