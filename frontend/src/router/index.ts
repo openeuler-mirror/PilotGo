@@ -204,7 +204,6 @@ const router = createRouter({
 
 export default router;
 
-import { ref, onMounted, watchEffect, shallowRef } from "vue";
 import { routerStore, type Menu } from '@/stores/router';
 import { iframeComponents } from "@/views/Plugin/plugin";
 import PluginFrame from "@/views/Plugin/PluginFrame.vue";
@@ -212,6 +211,7 @@ import PluginFrame from "@/views/Plugin/PluginFrame.vue";
 import { app } from "@/main";
 import { useRouter } from "vue-router";
 import { hasPermisson } from '@/module/permission';
+import { userStore } from '@/stores/user';
 
 export function updateSidebarItems() {
   let menus = generateLocalMenus();
@@ -346,17 +346,16 @@ function generateLocalMenus() {
   return menus;
 }
 
+// 路由导航
+const whiteList = ['/login']
 router.beforeEach((to, from, next) => {
   if (to.meta && to.meta.title) {
     document.title = to.meta.title as string
   }
-  // 解决在插件页面一刷新页面空白问题
-  if (to.path.includes('plugin-')) {
-    /* let paths = [] as any;
-    router.getRoutes().forEach(routeItem => {
-      paths.push(routeItem.path);
-    })
-    if (paths.includes(to.path)) { */
+  if (userStore().user.name) {
+    // 已登录
+    if (to.path.includes('plugin-')) {
+    // 解决在插件页面一刷新页面空白问题
     if (!router.hasRoute(to.fullPath)) {
       console.log('没有这条路径')
       new Promise(async (resolve, rejection) => {
@@ -367,16 +366,21 @@ router.beforeEach((to, from, next) => {
       }).then(res => {
         console.log(router.getRoutes())
         next({ ...to, replace: true })
-        // return to.fullPath
       })
-      /* routerStore().routers.forEach(async (route: any) => {
-        await addPluginRoute(route);
-      })
-      return to.fullPath */
-
     }
   }
-  next()
+    next()
+  } else {
+    // 未登录
+    if (whiteList.indexOf(to.path) !== -1) {
+      // 如果在白名单的话，放行
+      next()
+    } else {
+      // 如果不在白名单的话，转login登录
+      next('/login')
+    }
+  }
+  
 })
 
 export function directTo(to: any) {
