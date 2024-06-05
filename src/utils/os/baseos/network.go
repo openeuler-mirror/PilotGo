@@ -297,12 +297,25 @@ func (b *BaseOS) RestartNetwork(nic string) error {
 }
 
 func (b *BaseOS) GetHostIp() (string, error) {
-	conn, err := net.Dial("udp", aconfig.Config().Server.Addr)
-	if err != nil {
-		return "", err
+	var IP string
+	//判断配置文件是否为localhost
+	if strings.Split(aconfig.Config().Server.Addr, ":")[0] == "localhost" {
+		//通过网卡信息方式获取ip地址
+		n, err := b.GetNetworkConnInfo()
+		if err != nil {
+			return "", err
+		}
+		IP = n.IPAddr
+	} else {
+		//获取IP
+		conn, err := net.Dial("udp", aconfig.Config().Server.Addr)
+		if err != nil {
+			return "", err
+		}
+		defer conn.Close()
+		IP = strings.Split(conn.LocalAddr().String(), ":")[0]
 	}
-	defer conn.Close()
-	return strings.Split(conn.LocalAddr().String(), ":")[0], nil
+	return IP, nil
 }
 
 // dhcp方式配置网络

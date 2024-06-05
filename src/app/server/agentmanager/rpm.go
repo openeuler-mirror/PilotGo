@@ -96,7 +96,7 @@ func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 	return info, resp_message.Error, nil
 }
 
-// 获取源软件包名以及源
+// 安装软件包
 func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
@@ -118,7 +118,7 @@ func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 	return resp_message.Data.(string), resp_message.Error, nil
 }
 
-// 获取源软件包名以及源
+// 卸载软件包
 func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
