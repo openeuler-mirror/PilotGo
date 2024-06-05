@@ -2,12 +2,9 @@ package baseos
 
 import (
 	"errors"
-	"fmt"
-	"net"
 	"strings"
 	"time"
 
-	aconfig "gitee.com/openeuler/PilotGo/app/agent/config"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
 	"github.com/duke-git/lancet/datetime"
 	"github.com/duke-git/lancet/fileutil"
@@ -15,13 +12,11 @@ import (
 )
 
 func (b *BaseOS) GetHostInfo() (*common.SystemInfo, error) {
-	//获取IP
-	conn, err := net.Dial("udp", aconfig.Config().Server.Addr)
+	IP, err := b.GetHostIp()
 	if err != nil {
-		fmt.Println("failed to get IP")
+		return nil, errors.New("get host ip failed:" + err.Error())
 	}
-	defer conn.Close()
-	IP := strings.Split(conn.LocalAddr().String(), ":")[0]
+
 	hostInfo, err := host.Info()
 	if err != nil {
 		return nil, errors.New("get host info failed:" + err.Error())
