@@ -55,6 +55,7 @@ function build_frontend() {
     # # move frontend binary files to resource dir
     # cp ./dist/index.html ./resource/index.html
     # cp -r ./dist/static/* ./resource/
+    cp -rf ./dist/* ../src/app/server/resource/
     popd
 }
 
@@ -68,11 +69,11 @@ function build_backend() {
 
     echo "building server for ${1}..."
     mkdir -p ${version_path}/server
-    CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/server/pilotgo-server ./pkg/app/server/main.go
+    CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build  -tags=production -o ${version_path}/server/pilotgo-server ./src/app/server/main.go
 
     echo "building agent for ${1}..."
     mkdir -p ${version_path}/agent
-    CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/pilotgo-agent pkg/app/agent/main.go
+    CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/pilotgo-agent ./src/app/agent/main.go
 }
 
 function pack_tar() {
@@ -82,10 +83,10 @@ function pack_tar() {
 
     echo "adding scripts and config files..."
     mkdir -p ${version_path}/server
-    cp config_server.yaml.templete ${version_path}/server/config_server.yaml
+    cp ./src/config_server.yaml.templete ${version_path}/server/config_server.yaml
 
     mkdir -p ${version_path}/agent
-    cp config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
+    cp ./src/config_agent.yaml.templete ${version_path}/agent/config_agent.yaml
     
     cp ./scripts/shell/install_server.sh ${version_path}/server/
     cp ./scripts/shell/install_agent.sh ${version_path}/agent/
