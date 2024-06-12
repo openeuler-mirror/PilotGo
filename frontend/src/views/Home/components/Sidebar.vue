@@ -19,7 +19,7 @@
         <el-menu-item v-if="!menu.subMenus && !menu.hidden" :index="menu.path"
           :class="menu.title === activeTitle ? 'active' : 'inactive'">
           <component class="sidebar_icon" :is="menu.icon"></component>
-          <template #title>{{ menu.title }}</template>
+          <template #title>&nbsp;{{ menu.title }}</template>
         </el-menu-item>
       </template>
     </el-menu>
