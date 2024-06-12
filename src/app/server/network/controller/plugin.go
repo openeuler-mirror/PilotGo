@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"crypto/tls"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -12,6 +13,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 	uuidservice "github.com/google/uuid"
 )
@@ -171,6 +173,18 @@ func PluginGatewayHandler(c *gin.Context) {
 	auditlog.Add(log)
 
 	s := strings.Replace(p.Url, "/plugin/"+name, "", 1)
+	ishttp, err := httputils.ServerIsHttp(s)
+	if err != nil {
+		c.String(http.StatusNotFound, "parse plugin url error: "+err.Error())
+		return
+	}
+	if ishttp && strings.Split(s, "://")[0] == "https" {
+		s = "http://" + strings.Split(s, "://")[1]
+	}
+	if !ishttp && strings.Split(s, "://")[0] == "http" {
+		s = "https://" + strings.Split(s, "://")[1]
+	}
+
 	target, err := url.Parse(s)
 	if err != nil {
 		c.String(http.StatusNotFound, "parse plugin url error: "+err.Error())
@@ -180,5 +194,8 @@ func PluginGatewayHandler(c *gin.Context) {
 	c.Request.Host = target.Host
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
+	proxy.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
