@@ -1,8 +1,9 @@
 <template>
   <div>
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-      <el-form-item label="用户名:" prop="username">
-        <el-input class="ipInput" type="text" v-model="form.userName" autocomplete="off"></el-input>
+      <el-form-item label="用户名:" prop="userName">
+        <el-input class="ipInput" type="text" v-model="form.userName" autocomplete="off" show-word-limit
+          maxlength="10"></el-input>
       </el-form-item>
       <el-form-item label="密码:" prop="password">
         <el-input type="password" class="ipInput" controls-position="right" v-model="form.password"
@@ -48,27 +49,27 @@ const rules = {
   userName: [{
     required: true,
     message: "请输入用户名",
-    trigger: "blur"
+    trigger: "change"
   }],
   password: [{
     required: true,
     message: "请输入密码",
-    trigger: "blur"
+    trigger: "change"
   }],
   departName: [{
     required: true,
     message: "请选择部门",
-    trigger: "blur"
+    trigger: "change"
   }],
   role: [{
     required: true,
     message: "请选择角色",
-    trigger: "blur"
+    trigger: "change"
   }],
   phone: [{
     required: false,
     message: "请输入手机号",
-    trigger: "blur",
+    trigger: "change",
   }, {
     validator: checkPhone,
     message: "请输入正确的手机号格式",
@@ -77,7 +78,7 @@ const rules = {
   email: [{
     required: true,
     message: "请输入邮箱",
-    trigger: "blur",
+    trigger: "change",
   },
   {
     validator: checkEmail,

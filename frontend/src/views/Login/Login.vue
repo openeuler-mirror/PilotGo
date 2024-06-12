@@ -14,7 +14,8 @@
             </el-input>
           </el-form-item>
           <el-form-item class="form-item" prop="password" label="输入密码">
-            <el-input type="password" clearable v-model="loginData.password" placeholder="请输入密码" @keyup.enter="submitLogin">
+            <el-input type="password" clearable v-model="loginData.password" placeholder="请输入密码"
+              @keyup.enter="submitLogin">
             </el-input>
           </el-form-item>
         </el-form>
@@ -50,19 +51,19 @@ const rules = {
     {
       required: true,
       message: "请输入邮箱",
-      trigger: "blur"
+      trigger: "change"
     },
     {
       validator: checkAccount,
       message: "请输入正确的邮箱格式",
-      trigger: "blur"
+      trigger: "change"
     }
   ],
   password: [
     {
       required: true,
       message: "请输入密码",
-      trigger: "blur"
+      trigger: "change"
     }
   ],
 }
