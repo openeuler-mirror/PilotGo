@@ -36,8 +36,8 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3fOKtUw0Xmo=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20240612060031-03250988491e h1:XTLR1oV1X/RFHhrrE/VFWIcTCw3Ej46T+g9u01POiNA=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20240612060031-03250988491e/go.mod h1:87giU5v2IkUx78GRfezNBHhDGqzlwhNICOVY+hUYSJM=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20240612062829-11adb82d6774 h1:F7APS9ICH2CrzJOC4qe1XV0uskplbweQxm6vTx0d3cI=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20240612062829-11adb82d6774/go.mod h1:87giU5v2IkUx78GRfezNBHhDGqzlwhNICOVY+hUYSJM=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.0.0/go.mod h1:uGG2W01BaETf0Ozp+QxxKJdMBNRWPdstHG0Fmdwn1/U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.2/go.mod h1:uGG2W01BaETf0Ozp+QxxKJdMBNRWPdstHG0Fmdwn1/U=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.0/go.mod h1:bjGvMhVMb+EEm3VRNQawDMUyMMjo+S5ewNjflkep/0Q=

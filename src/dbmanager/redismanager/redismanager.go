@@ -16,6 +16,7 @@ package redismanager
 
 import (
 	"context"
+	"crypto/tls"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -33,6 +34,9 @@ func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Durat
 		Addr:     redisConn,
 		Password: redisPwd,
 		DB:       defaultDB,
+		TLSConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
 	})
 	// 使用超时上下文，验证redis
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), dialTimeout)

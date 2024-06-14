@@ -8,8 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 func request(method, url string, param *Params) (*Response, error) {
@@ -23,7 +21,6 @@ func request(method, url string, param *Params) (*Response, error) {
 	} else {
 		url = fmt.Sprintf("https://%s", strings.Split(url, "://")[1])
 	}
-	logger.Debug(">>>ishttp: %v", ishttp)
 
 	// 处理form参数
 	if param != nil && len(param.Form) > 0 {
