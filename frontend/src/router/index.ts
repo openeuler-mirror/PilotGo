@@ -206,12 +206,8 @@ export default router;
 
 import { routerStore, type Menu } from '@/stores/router';
 import { iframeComponents } from "@/views/Plugin/plugin";
-import PluginFrame from "@/views/Plugin/PluginFrame.vue";
 
-import { app } from "@/main";
-import { useRouter } from "vue-router";
 import { hasPermisson } from '@/module/permission';
-import { userStore } from '@/stores/user';
 import { getToken } from "@/module/cookie";
 
 export function updateSidebarItems() {
@@ -356,20 +352,27 @@ router.beforeEach((to, from, next) => {
   if (getToken()) {
     // 已登录
     if (to.path.includes('plugin-')) {
-    // 解决在插件页面一刷新页面空白问题
-    if (!router.hasRoute(to.fullPath)) {
-      new Promise(async (resolve, rejection) => {
-        await routerStore().routers.forEach((route: any) => {
-          addPluginRoute(route);
-        })
-        resolve('addRoute success');
-      }).then(res => {
-        console.log(router.getRoutes())
-        next({ ...to, replace: true })
+      // 解决在插件页面一刷新页面空白问题
+      let paths = [] as any;
+      router.getRoutes().forEach(routeItem => {
+        paths.push(routeItem.path);
       })
+      if (paths.includes(to.path)) {
+        next();
+      } else {
+        new Promise(async (resolve, rejection) => {
+          await routerStore().routers.forEach((route: any) => {
+            addPluginRoute(route);
+          })
+          resolve('addRoute success');
+        }).then(res => {
+          next({ ...to, replace: true })
+        })
     }
-  }
-    next()
+    } else {
+      next()
+    }
+  
   } else {
     // 未登录
     if (whiteList.indexOf(to.path) !== -1) {

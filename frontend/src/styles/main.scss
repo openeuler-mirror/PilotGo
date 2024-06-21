@@ -3,8 +3,10 @@
 html {
   height: 100%;
   width: 100%;
-  box-sizing: border-box;
   min-width: 1440px;
+}
+* {
+  box-sizing: border-box;
 }
 
 body {
