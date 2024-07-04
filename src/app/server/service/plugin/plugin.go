@@ -475,7 +475,7 @@ func GetPlugins() ([]*Plugin, error) {
 	for _, p := range plugins {
 		plugin_status, err := GetPluginConnectStatus(p.Url)
 		if err != nil {
-			logger.Error("plugin status get failed %s", err)
+			logger.Error("plugin status get failed %s, %s", err, p.Url)
 			continue
 		}
 		p.ConnectStatus = plugin_status.Connected
