@@ -3,11 +3,29 @@
   hosts: standalone
   become: yes
   become_user: root
-  tasks:
+  tasks: 
+    - name: check redis rpm
+      shell: rpm -qa | grep -e 'redis*4*'
+      register: rpm_info
+      ignore_errors: yes
+    - name: uninstall redis4
+      dnf: 
+        name: redis
+        state: absent
+      when: rpm_info.rc == 0
     - name: install redis 6 through euler repo
       dnf: 
-        name: redis6-6.2.7-3
+        name: redis6
         state: present
+      ignore_errors: yes
+    - name: change redis.conf
+      shell: sed -i 's#bind 0.0.0.0#bind {{ groups['standalone'][0] }}#g' /etc/redis/redis.conf
+    - name: change passwd
+      lineinfile:  
+        path: /etc/redis/redis.conf  
+        regexp: '^#?requirepass'  
+        line: 'requirepass {{ redis_password }}'
+        backrefs: yes
     - name: restart redis service
       service: 
         name: redis
