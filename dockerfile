@@ -1,7 +1,6 @@
 FROM node:20-alpine as ui
 
-RUN apk update
-
+RUN npm config set registry https://registry.npmmirror.com/  && yarn config set registry https://registry.npmmirror.com/
 COPY frontend/package.json frontend/yarn.lock frontend/
 
 RUN yarn --cwd frontend install --network-timeout 1000000
