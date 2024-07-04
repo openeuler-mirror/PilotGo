@@ -49,6 +49,7 @@ type MysqlDBInfo struct {
 
 type RedisDBInfo struct {
 	RedisConn   string        `yaml:"redis_conn"`
+	UseTLS      bool          `yaml:"use_tls"`
 	RedisPwd    string        `yaml:"redis_pwd"`
 	DefaultDB   int           `yaml:"defaultDB"`
 	DialTimeout time.Duration `yaml:"dialTimeout"`

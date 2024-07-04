@@ -25,6 +25,7 @@ mysql:
   data_base: PilotGo
 redis:
   redis_conn: localhost:6379
+  use_tls: false
   redis_pwd: ''
   defaultDB: 0
   dialTimeout: 5s #redis连接超时时间.默认5s

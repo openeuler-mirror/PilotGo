@@ -19,6 +19,7 @@ import (
 	"crypto/tls"
 	"time"
 
+	"gitee.com/openeuler/PilotGo/app/server/config"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -30,14 +31,25 @@ var (
 )
 
 func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Duration, enableRedis bool) error {
-	global_redis = redis.NewClient(&redis.Options{
-		Addr:     redisConn,
-		Password: redisPwd,
-		DB:       defaultDB,
-		TLSConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	})
+	var cfg *redis.Options
+	if config.Config().RedisDBinfo.UseTLS {
+		cfg = &redis.Options{
+			Addr:     redisConn,
+			Password: redisPwd,
+			DB:       defaultDB,
+			TLSConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	} else {
+		cfg = &redis.Options{
+			Addr:     redisConn,
+			Password: redisPwd,
+			DB:       defaultDB,
+		}
+	}
+
+	global_redis = redis.NewClient(cfg)
 	// 使用超时上下文，验证redis
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), dialTimeout)
 	defer cancelFunc()
