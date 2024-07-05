@@ -24,7 +24,10 @@ require (
 	golang.org/x/crypto v0.21.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
+	k8s.io/klog/v2 v2.9.0
 )
+
+require github.com/go-logr/logr v0.4.0 // indirect
 
 require (
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect

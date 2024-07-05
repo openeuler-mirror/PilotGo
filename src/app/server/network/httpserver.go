@@ -15,6 +15,7 @@
 package network
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -29,7 +30,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func HttpServerInit(conf *sconfig.HttpServer) error {
+func HttpServerInit(conf *sconfig.HttpServer, stopCh <-chan struct{}) error {
 	if err := SessionManagerInit(conf); err != nil {
 		return err
 	}
@@ -39,7 +40,17 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 
 		// 启动websocket服务
 		go websocket.CliManager.Start()
-
+		shutdownCtx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		srv := &http.Server{
+			Addr:    conf.Addr,
+			Handler: r,
+		}
+		go func() {
+			<-stopCh
+			_ = srv.Shutdown(shutdownCtx)
+			logger.Warn("httpserver close")
+		}()
 		// 启动http server服务
 		if conf.UseHttps {
 			if conf.CertFile == "" || conf.KeyFile == "" {
@@ -48,12 +59,13 @@ func HttpServerInit(conf *sconfig.HttpServer) error {
 			}
 
 			logger.Info("start http service on: https://%s", conf.Addr)
-			if err := r.RunTLS(conf.Addr, conf.CertFile, conf.KeyFile); err != nil {
+
+			if err := srv.ListenAndServeTLS(conf.CertFile, conf.KeyFile); err != nil {
 				logger.Error("start http server failed:%v", err)
 			}
 		} else {
 			logger.Info("start http service on: http://%s", conf.Addr)
-			if err := r.Run(conf.Addr); err != nil {
+			if err := srv.ListenAndServe(); err != nil {
 				logger.Error("start http server failed:%v", err)
 			}
 		}

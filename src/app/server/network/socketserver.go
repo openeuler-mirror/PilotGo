@@ -29,12 +29,17 @@ type SocketServer struct {
 	OnStop   func()
 }
 
-func SocketServerInit(conf *sconfig.SocketServer) error {
+func SocketServerInit(conf *sconfig.SocketServer, stopCh <-chan struct{}) error {
 	server := &SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
 		OnAccept: agentmanager.AddandRunAgent,
 		OnStop:   agentmanager.StopAgentManager,
 	}
+	go func() {
+		<-stopCh
+		server.Stop()
+		logger.Warn("SocketServer close")
+	}()
 
 	go func() {
 		if err := server.Run(conf.Addr); err != nil {

@@ -87,11 +87,18 @@ func (c *Client) SendMsg(msg []byte) {
 }
 
 // 监测系统日志警告推送到前端
-func SendWarnMsgToWeb() {
+func SendWarnMsgToWeb(stopCh <-chan struct{}) {
 	for {
-		data := <-agentmanager.WARN_MSG
-		CliManager.Broadcast <- []byte(data.(string))
+		select {
+		case <-stopCh:
+			logger.Warn("SendWarnMsgToWeb close")
+			return
+		default:
+			data := <-agentmanager.WARN_MSG
+			CliManager.Broadcast <- []byte(data.(string))
+		}
 	}
+
 }
 
 // 心跳超时

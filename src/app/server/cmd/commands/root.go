@@ -3,11 +3,10 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/pkg/errors"
+	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
 	"gitee.com/openeuler/PilotGo/app/server/cmd/options"
 	"gitee.com/openeuler/PilotGo/app/server/config"
@@ -17,10 +16,8 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager"
-	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 )
 
 const flagconfig = "conf"
@@ -31,7 +28,7 @@ func NewServerCommand() *cobra.Command {
 		Use:  "pilotgo",
 		Long: `Run the pilotgo API server`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(s, signals.SetupSignalHandler(), cmd)
+			return Run(s, signals.SetupSignalHandler(), cmd, nil)
 		},
 		SilenceUsage: true,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{
@@ -50,7 +47,7 @@ func NewServerCommand() *cobra.Command {
 	cmd.AddCommand(versionCmd)
 	return cmd
 }
-func run(_ *options.ServerOptions, _ context.Context, cmd *cobra.Command) error {
+func run(_ *options.ServerOptions, ctx context.Context, cmd *cobra.Command) error {
 	config_file, err := cmd.Flags().GetString(flagconfig)
 	if err != nil {
 		return errors.Wrapf(err, "error accessing flag %s for command %s", flagconfig, cmd.Name())
@@ -71,7 +68,7 @@ func run(_ *options.ServerOptions, _ context.Context, cmd *cobra.Command) error 
 	logger.Info("Thanks to choose PilotGo!")
 
 	// redis db初始化
-	if err := dbmanager.RedisdbInit(&config.Config().RedisDBinfo); err != nil {
+	if err := dbmanager.RedisdbInit(&config.Config().RedisDBinfo, ctx.Done()); err != nil {
 		logger.Error("redis db init failed, please check again: %s", err)
 		return err
 	}
@@ -83,61 +80,81 @@ func run(_ *options.ServerOptions, _ context.Context, cmd *cobra.Command) error 
 	}
 
 	// 启动agent socket server
-	if err := network.SocketServerInit(&config.Config().SocketServer); err != nil {
+	if err := network.SocketServerInit(&config.Config().SocketServer, ctx.Done()); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		return err
 	}
 
 	//此处启动前端及REST http server
-	err = network.HttpServerInit(&config.Config().HttpServer)
+	err = network.HttpServerInit(&config.Config().HttpServer, ctx.Done())
 	if err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		return err
 	}
 
 	// 启动所有功能模块服务
-	if err := startServices(); err != nil {
+	if err := startServices(ctx.Done()); err != nil {
 		logger.Error("start services error: %s", err)
 		return err
 	}
 
 	// 前端推送告警
-	go websocket.SendWarnMsgToWeb()
+	go websocket.SendWarnMsgToWeb(ctx.Done())
 
 	logger.Info("start to serve.")
 
-	// 信号监听
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	for {
-		s := <-c
-		switch s {
-		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-			logger.Info("signal interrupted: %s", s.String())
-			// TODO: DO EXIT
-
-			redismanager.Redis().Close()
-
-			goto EXIT
-		default:
-			logger.Info("unknown signal: %s", s.String())
-		}
-	}
-
-EXIT:
-	logger.Info("exit system, bye~")
+	// 信号监听 redis
 	return nil
 
 }
-func startServices() error {
+func startServices(stopCh <-chan struct{}) error {
 	// 鉴权模块初始化
 	auth.Casbin(&config.Config().MysqlDBinfo)
 
 	// 初始化plugin服务
-	plugin.Init()
+	plugin.Init(stopCh)
 
 	//初始化eventbus
-	eventbus.Init()
+	eventbus.Init(stopCh)
 
 	return nil
+}
+
+func Run(s *options.ServerOptions, ctx context.Context, cmd *cobra.Command, configCh <-chan string) error {
+
+	cctx, cancelFunc := context.WithCancel(context.TODO())
+	errCh := make(chan error)
+	defer close(errCh)
+	go func() {
+		if err := runer(s, cctx, cmd); err != nil {
+			klog.Errorf("runner start error:%v", err)
+			errCh <- err
+		}
+	}()
+	for {
+		select {
+		case <-ctx.Done():
+			cancelFunc()
+			klog.Warningln("pilotgo exit bye")
+			return nil
+		case cfg := <-configCh:
+			cancelFunc()
+			s.Config = cfg
+			cctx, cancelFunc = context.WithCancel(context.TODO())
+			go func() {
+				if err := runer(s, cctx, cmd); err != nil {
+					klog.Errorf("config is change , reboot server error:%v", err)
+					errCh <- err
+				}
+			}()
+		case err := <-errCh:
+			cancelFunc()
+			return err
+		}
+	}
+
+}
+
+func runer(s *options.ServerOptions, ctx context.Context, cmd *cobra.Command) error {
+	return run(s, ctx, cmd)
 }
