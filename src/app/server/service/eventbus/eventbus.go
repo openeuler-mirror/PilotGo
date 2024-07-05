@@ -86,7 +86,13 @@ func (e *EventBus) IsExitEventMap(l *Listener) bool {
 	return false
 }
 
-func (e *EventBus) Run() {
+func (e *EventBus) Run(stopCh <-chan struct{}) {
+	go func() {
+		<-stopCh
+		e.Stop()
+		logger.Warn("EventBus stop")
+	}()
+
 	go func(e *EventBus) {
 		for {
 			select {
@@ -129,12 +135,12 @@ func (e *EventBus) broadcast(msg *common.EventMessage) {
 
 var globalEventBus *EventBus
 
-func Init() {
+func Init(stopCh <-chan struct{}) {
 	eventTypeMap = make(map[int][]Listener)
 	globalEventBus = &EventBus{
 		event: make(chan *common.EventMessage, 20),
 	}
-	globalEventBus.Run()
+	globalEventBus.Run(stopCh)
 }
 
 func Stop() {

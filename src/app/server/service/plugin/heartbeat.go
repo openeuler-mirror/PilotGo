@@ -8,10 +8,16 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 )
 
-func CheckPluginHeartbeats() {
+func CheckPluginHeartbeats(stopCh <-chan struct{}) {
 	for {
-		time.Sleep(client.HeartbeatInterval)
-		checkAndRebind()
+		select {
+		case <-stopCh:
+			logger.Warn("CheckPluginHeartbeats close")
+			return
+		default:
+			time.Sleep(client.HeartbeatInterval)
+			checkAndRebind()
+		}
 	}
 }
 

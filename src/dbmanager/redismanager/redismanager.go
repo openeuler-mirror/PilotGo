@@ -21,6 +21,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/app/server/config"
 	"github.com/go-redis/redis/v8"
+	"k8s.io/klog/v2"
 )
 
 var (
@@ -30,7 +31,7 @@ var (
 	global_redis *redis.Client
 )
 
-func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Duration, enableRedis bool) error {
+func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Duration, enableRedis bool, stopCh <-chan struct{}) error {
 	var cfg *redis.Options
 	if config.Config().RedisDBinfo.UseTLS {
 		cfg = &redis.Options{
@@ -51,6 +52,12 @@ func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Durat
 
 	global_redis = redis.NewClient(cfg)
 	// 使用超时上下文，验证redis
+	go func() {
+		<-stopCh
+		global_redis.Close()
+		klog.Warning("global_redis release")
+
+	}()
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), dialTimeout)
 	defer cancelFunc()
 	_, err := global_redis.Ping(timeoutCtx).Result()

@@ -16,13 +16,14 @@ import (
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 )
 
-func RedisdbInit(conf *sconfig.RedisDBInfo) error {
+func RedisdbInit(conf *sconfig.RedisDBInfo, stopCh <-chan struct{}) error {
 	err := redismanager.RedisInit(
 		conf.RedisConn,
 		conf.RedisPwd,
 		conf.DefaultDB,
 		conf.DialTimeout,
-		conf.EnableRedis)
+		conf.EnableRedis,
+		stopCh)
 	if err != nil {
 		return err
 	}

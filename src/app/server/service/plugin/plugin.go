@@ -28,7 +28,7 @@ const (
 	PluginDisabled = 0
 )
 
-func Init() error {
+func Init(stopCh <-chan struct{}) error {
 	if err := mysqlmanager.MySQL().AutoMigrate(&dao.PluginModel{}); err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func Init() error {
 	}
 
 	// 检查插件状态，重新绑定plugin与pilotgo
-	go CheckPluginHeartbeats()
+	go CheckPluginHeartbeats(stopCh)
 
 	return nil
 }
