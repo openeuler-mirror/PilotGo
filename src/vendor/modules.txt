@@ -463,6 +463,11 @@ gorm.io/gorm/utils
 # gorm.io/plugin/dbresolver v1.4.1
 ## explicit; go 1.14
 gorm.io/plugin/dbresolver
+# k8s.io/apimachinery v0.22.1
+## explicit; go 1.16
+k8s.io/apimachinery/pkg/util/clock
+k8s.io/apimachinery/pkg/util/runtime
+k8s.io/apimachinery/pkg/util/wait
 # k8s.io/klog/v2 v2.9.0
 ## explicit; go 1.13
 k8s.io/klog/v2

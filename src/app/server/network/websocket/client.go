@@ -7,6 +7,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gorilla/websocket"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -91,11 +92,11 @@ func SendWarnMsgToWeb(stopCh <-chan struct{}) {
 	for {
 		select {
 		case <-stopCh:
-			logger.Warn("SendWarnMsgToWeb close")
+			klog.Warningln("SendWarnMsgToWeb success exit")
 			return
-		default:
-			data := <-agentmanager.WARN_MSG
+		case data := <-agentmanager.WARN_MSG:
 			CliManager.Broadcast <- []byte(data.(string))
+
 		}
 	}
 

@@ -38,7 +38,7 @@ func Init(stopCh <-chan struct{}) error {
 	}
 
 	// 检查插件状态，重新绑定plugin与pilotgo
-	go CheckPluginHeartbeats(stopCh)
+	CheckPluginHeartbeats(stopCh)
 
 	return nil
 }

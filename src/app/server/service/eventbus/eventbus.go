@@ -8,6 +8,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
+	"k8s.io/klog/v2"
 )
 
 type Listener struct {
@@ -19,7 +20,6 @@ type EventBus struct {
 	sync.Mutex
 	listeners []*Listener
 	stop      chan struct{}
-	wait      sync.WaitGroup
 	event     chan *common.EventMessage
 }
 
@@ -90,26 +90,24 @@ func (e *EventBus) Run(stopCh <-chan struct{}) {
 	go func() {
 		<-stopCh
 		e.Stop()
-		logger.Warn("EventBus stop")
+		klog.Warningln("EventBus prepare stop")
 	}()
-
 	go func(e *EventBus) {
 		for {
 			select {
 			case <-e.stop:
-				logger.Info("event bus exit")
-				e.wait.Done()
+				klog.Warningln("EventBus success exit ")
+				return
 			case m := <-e.event:
 				e.broadcast(m)
 			}
 		}
 	}(e)
+
 }
 
 func (e *EventBus) Stop() {
-	e.wait.Add(1)
 	e.stop <- struct{}{}
-	e.wait.Wait()
 }
 
 func (e *EventBus) publish(m *common.EventMessage) {
@@ -139,6 +137,7 @@ func Init(stopCh <-chan struct{}) {
 	eventTypeMap = make(map[int][]Listener)
 	globalEventBus = &EventBus{
 		event: make(chan *common.EventMessage, 20),
+		stop:  make(chan struct{}),
 	}
 	globalEventBus.Run(stopCh)
 }

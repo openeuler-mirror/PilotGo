@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 
 	"github.com/pkg/errors"
 	"k8s.io/klog/v2"
@@ -22,13 +23,29 @@ import (
 
 const flagconfig = "conf"
 
+var conut int64
+
 func NewServerCommand() *cobra.Command {
+
 	s := options.NewServerOptions()
+	conf, err := options.TryLoadFromDisk()
+	if err == nil {
+		s.ServerConfig = conf
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "HttpServer", *s.ServerConfig.HttpServer)
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "SocketServer", *s.ServerConfig.SocketServer)
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "JWT", *s.ServerConfig.JWT)
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "Logopts", *s.ServerConfig.Logopts)
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "RedisDBinfo", *s.ServerConfig.RedisDBinfo)
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "MysqlDBinfo", *s.ServerConfig.MysqlDBinfo)
+		klog.InfoS("TryLoadFromDisk pilotgo config !", "Storage", *s.ServerConfig.Storage)
+	} else {
+		klog.Fatal("Failed to load configuration from disk", err)
+	}
 	cmd := &cobra.Command{
 		Use:  "pilotgo",
 		Long: `Run the pilotgo API server`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return Run(s, signals.SetupSignalHandler(), cmd, nil)
+			return Run(s, signals.SetupSignalHandler(), cmd, options.WatchConfigChange())
 		},
 		SilenceUsage: true,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{
@@ -47,7 +64,13 @@ func NewServerCommand() *cobra.Command {
 	cmd.AddCommand(versionCmd)
 	return cmd
 }
+
 func run(_ *options.ServerOptions, ctx context.Context, cmd *cobra.Command) error {
+	if atomic.LoadInt64(&conut) > 0 {
+		return nil
+	}
+	atomic.AddInt64(&conut, 1)
+
 	config_file, err := cmd.Flags().GetString(flagconfig)
 	if err != nil {
 		return errors.Wrapf(err, "error accessing flag %s for command %s", flagconfig, cmd.Name())
@@ -88,7 +111,7 @@ func run(_ *options.ServerOptions, ctx context.Context, cmd *cobra.Command) erro
 	//此处启动前端及REST http server
 	err = network.HttpServerInit(&config.Config().HttpServer, ctx.Done())
 	if err != nil {
-		logger.Error("socket server init failed, error:%v", err)
+		logger.Error("HttpServerInit socket server init failed, error:%v", err)
 		return err
 	}
 
@@ -101,8 +124,8 @@ func run(_ *options.ServerOptions, ctx context.Context, cmd *cobra.Command) erro
 	// 前端推送告警
 	go websocket.SendWarnMsgToWeb(ctx.Done())
 
-	logger.Info("start to serve.")
-
+	logger.Info("start to serve")
+	atomic.AddInt64(&conut, -1)
 	// 信号监听 redis
 	return nil
 
@@ -120,7 +143,7 @@ func startServices(stopCh <-chan struct{}) error {
 	return nil
 }
 
-func Run(s *options.ServerOptions, ctx context.Context, cmd *cobra.Command, configCh <-chan string) error {
+func Run(s *options.ServerOptions, ctx context.Context, cmd *cobra.Command, configCh <-chan options.ServerConfig) error {
 
 	cctx, cancelFunc := context.WithCancel(context.TODO())
 	errCh := make(chan error)
@@ -138,8 +161,9 @@ func Run(s *options.ServerOptions, ctx context.Context, cmd *cobra.Command, conf
 			klog.Warningln("pilotgo exit bye")
 			return nil
 		case cfg := <-configCh:
+			klog.Warningln("config is change")
 			cancelFunc()
-			s.Config = cfg
+			s.ServerConfig = &cfg
 			cctx, cancelFunc = context.WithCancel(context.TODO())
 			go func() {
 				if err := runer(s, cctx, cmd); err != nil {
