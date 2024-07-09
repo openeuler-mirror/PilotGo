@@ -28,6 +28,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/resource"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
+	"k8s.io/klog/v2"
 )
 
 func HttpServerInit(conf *sconfig.HttpServer, stopCh <-chan struct{}) error {
@@ -48,8 +49,8 @@ func HttpServerInit(conf *sconfig.HttpServer, stopCh <-chan struct{}) error {
 		}
 		go func() {
 			<-stopCh
+			klog.Warningln("httpserver prepare stop")
 			_ = srv.Shutdown(shutdownCtx)
-			logger.Warn("httpserver close")
 		}()
 		// 启动http server服务
 		if conf.UseHttps {
@@ -61,12 +62,19 @@ func HttpServerInit(conf *sconfig.HttpServer, stopCh <-chan struct{}) error {
 			logger.Info("start http service on: https://%s", conf.Addr)
 
 			if err := srv.ListenAndServeTLS(conf.CertFile, conf.KeyFile); err != nil {
-				logger.Error("start http server failed:%v", err)
+				if err != http.ErrServerClosed {
+					logger.Error("ListenAndServeTLS start http server failed:%v", err)
+					return
+				}
 			}
 		} else {
 			logger.Info("start http service on: http://%s", conf.Addr)
 			if err := srv.ListenAndServe(); err != nil {
-				logger.Error("start http server failed:%v", err)
+				if err != http.ErrServerClosed {
+					logger.Error("ListenAndServe start http server failed:%v", err)
+
+				}
+
 			}
 		}
 	}()

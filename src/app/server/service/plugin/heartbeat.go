@@ -6,19 +6,13 @@ import (
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 func CheckPluginHeartbeats(stopCh <-chan struct{}) {
-	for {
-		select {
-		case <-stopCh:
-			logger.Warn("CheckPluginHeartbeats close")
-			return
-		default:
-			time.Sleep(client.HeartbeatInterval)
-			checkAndRebind()
-		}
-	}
+	go wait.Until(func() {
+		checkAndRebind()
+	}, client.HeartbeatInterval, stopCh)
 }
 
 func checkAndRebind() {

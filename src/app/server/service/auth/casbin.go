@@ -63,38 +63,36 @@ func Casbin(conf *sconfig.MysqlDBInfo) {
 	e = some(where (p.eft == allow))
 	`
 
-	once.Do(func() {
-		// m := casbinmodel.Model{}
-		m, err := casbinmodel.NewModelFromString(text)
-		if err != nil {
-			logger.Error("casbin model create failed: %s", err)
-			return
-		}
+	// m := casbinmodel.Model{}
+	m, err := casbinmodel.NewModelFromString(text)
+	if err != nil {
+		logger.Error("casbin model create failed: %s", err)
+		return
+	}
 
-		url := fmt.Sprintf("%s:%s@tcp(%s:%d)/",
-			conf.UserName,
-			conf.Password,
-			conf.HostName,
-			conf.Port)
-		a, err := gormadapter.NewAdapter("mysql", url, conf.DataBase)
-		if err != nil {
-			logger.Error("casbin adapter create failed: %s", err)
-			return
-		}
-		enforcer, err := casbin.NewEnforcer(m, a)
-		if err != nil {
-			logger.Error("casbin enforcer create failed: %s", err)
-			return
-		}
-		if err := enforcer.LoadPolicy(); err != nil {
-			logger.Error("casbin load Policy failed: %s", err.Error())
-		}
+	url := fmt.Sprintf("%s:%s@tcp(%s:%d)/",
+		conf.UserName,
+		conf.Password,
+		conf.HostName,
+		conf.Port)
+	a, err := gormadapter.NewAdapter("mysql", url, conf.DataBase)
+	if err != nil {
+		logger.Error("casbin adapter create failed: %s", err)
+		return
+	}
+	enforcer, err := casbin.NewEnforcer(m, a)
+	if err != nil {
+		logger.Error("casbin enforcer create failed: %s", err)
+		return
+	}
+	if err := enforcer.LoadPolicy(); err != nil {
+		logger.Error("casbin load Policy failed: %s", err.Error())
+	}
 
-		G_Enfocer = enforcer
+	G_Enfocer = enforcer
 
-		// TODO:
-		initAdminPolicy()
-	})
+	// TODO:
+	initAdminPolicy()
 }
 
 func addPolicy(role, resource, action, domain string) (bool, error) {
