@@ -105,6 +105,9 @@ function build_docker_image() {
 
 function clean() {
     rm -rf ./out
+    rm -rf ./src/app/server/resource/assets
+    rm -rf ./src/app/server/resource/index.html
+    rm -rf ./src/app/server/resource/pilotgo.ico
 }
 
 case $1 in
