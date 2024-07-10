@@ -15,6 +15,7 @@
 package redismanager
 
 import (
+	"context"
 	"crypto/tls"
 	"time"
 
@@ -50,19 +51,20 @@ func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Durat
 	}
 
 	global_redis = redis.NewClient(cfg)
+	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), dialTimeout)
 	// 使用超时上下文，验证redis
 	go func() {
 		<-stopCh
 		global_redis.Close()
+		cancelFunc()
 		klog.Warning("global_redis success exit")
 
 	}()
-	// timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), dialTimeout)
-	// defer cancelFunc()
-	// _, err := global_redis.Ping(timeoutCtx).Result()
-	// if err != nil {
-	// 	return err
-	// }
+	defer cancelFunc()
+	_, err := global_redis.Ping(timeoutCtx).Result()
+	if err != nil {
+		return err
+	}
 	DialTimeout = dialTimeout
 	EnableRedis = enableRedis
 	return nil
