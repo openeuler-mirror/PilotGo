@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/cmd/options"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/google/uuid"
 )
@@ -26,7 +26,7 @@ type SessionInfo struct {
 	sessionTime time.Time
 }
 
-func SessionManagerInit(conf *sconfig.HttpServer) error {
+func SessionManagerInit(conf *options.HttpServer) error {
 	var sessionManage SessionManage
 	sessionManage.Init(conf.SessionMaxAge, conf.SessionCount)
 	return nil

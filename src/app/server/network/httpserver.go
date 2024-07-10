@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"strings"
 
-	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/cmd/options"
 	"gitee.com/openeuler/PilotGo/app/server/network/controller"
 	"gitee.com/openeuler/PilotGo/app/server/network/controller/agentcontroller"
 	"gitee.com/openeuler/PilotGo/app/server/network/controller/pluginapi"
@@ -31,7 +31,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func HttpServerInit(conf *sconfig.HttpServer, stopCh <-chan struct{}) error {
+func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 	if err := SessionManagerInit(conf); err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func HttpServerInit(conf *sconfig.HttpServer, stopCh <-chan struct{}) error {
 		r := setupRouter()
 
 		// 启动websocket服务
-		go websocket.CliManager.Start()
+		go websocket.CliManager.Start(stopCh)
 		shutdownCtx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		srv := &http.Server{

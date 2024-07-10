@@ -350,7 +350,7 @@ func Handshake(url string, p *Plugin) error {
 	if index > 0 {
 		url = url[:index]
 	}
-	port := strings.Split(config.Config().HttpServer.Addr, ":")[1]
+	port := strings.Split(config.OptionsConfig.HttpServer.Addr, ":")[1]
 
 	url = strings.TrimRight(url, "/") + "/plugin_manage/bind?port=" + port
 	logger.Debug("plugin url is:%s", url)

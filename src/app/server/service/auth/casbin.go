@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"sync"
 
-	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/cmd/options"
 	suser "gitee.com/openeuler/PilotGo/app/server/service/user"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -45,7 +45,7 @@ const (
 	DomainPilotGo = "PilotGo-server"
 )
 
-func Casbin(conf *sconfig.MysqlDBInfo) {
+func Casbin(conf *options.MysqlDBInfo) {
 	text := `
 	[request_definition]
 	r = sub, obj, act, domain

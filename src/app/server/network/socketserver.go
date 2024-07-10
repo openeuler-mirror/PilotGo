@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"gitee.com/openeuler/PilotGo/app/server/agentmanager"
-	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/cmd/options"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"k8s.io/klog/v2"
 )
@@ -30,7 +30,7 @@ type SocketServer struct {
 	OnStop   func()
 }
 
-func SocketServerInit(conf *sconfig.SocketServer, stopCh <-chan struct{}) error {
+func SocketServerInit(conf *options.SocketServer, stopCh <-chan struct{}) error {
 	server := &SocketServer{
 		// MessageProcesser: protocol.NewMessageProcesser(),
 		OnAccept: agentmanager.AddandRunAgent,

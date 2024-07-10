@@ -132,13 +132,6 @@ func (c *pilotgoConfig) watchConfig() <-chan ServerConfig {
 			if err := viper.Unmarshal(cfg); err != nil {
 				klog.Errorf("config reload error", err)
 			} else {
-				klog.InfoS("watchConfig pilotgo config !", "HttpServer", cfg.HttpServer)
-				klog.InfoS("watchConfig pilotgo config !", "SocketServer", cfg.SocketServer)
-				klog.InfoS("watchConfig pilotgo config !", "JWT", cfg.JWT)
-				klog.InfoS("watchConfig pilotgo config !", "Logopts", cfg.Logopts)
-				klog.InfoS("watchConfig pilotgo config !", "RedisDBinfo", cfg.RedisDBinfo)
-				klog.InfoS("watchConfig pilotgo config !", "MysqlDBinfo", cfg.MysqlDBinfo)
-				klog.InfoS("watchConfig pilotgo config !", "Storage", cfg.Storage)
 				if in.Op&fsnotify.Write != 0 && len(viper.AllKeys()) > 0 {
 					c.cfgChangeCh <- *cfg
 				}

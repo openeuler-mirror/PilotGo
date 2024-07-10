@@ -33,8 +33,8 @@ func Upload(c *gin.Context) {
 		}
 		filename := parsedURL.Query().Get("filename")
 
-		uploadPath := c.DefaultQuery("path", config.Config().Storage.Path) // 获取上传文件的保存路径，可以通过path设置上传路径
-		if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil {       // 确保保存路径存在，如果不存在则创建
+		uploadPath := c.DefaultQuery("path", config.OptionsConfig.Storage.Path) // 获取上传文件的保存路径，可以通过path设置上传路径
+		if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil {            // 确保保存路径存在，如果不存在则创建
 			response.Fail(c, gin.H{"error": err.Error()}, "创建保存路径失败")
 			return
 		}
@@ -62,7 +62,7 @@ func Upload(c *gin.Context) {
 		}
 		defer file.Close()
 
-		uploadPath := c.DefaultQuery("path", config.Config().Storage.Path) // 获取上传文件的保存路径,可以通过path设置上传路径
+		uploadPath := c.DefaultQuery("path", config.OptionsConfig.Storage.Path) // 获取上传文件的保存路径,可以通过path设置上传路径
 
 		if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil { // 确保保存路径存在，如果不存在则创建
 			response.Fail(c, gin.H{"error": err.Error()}, "保存路径创建失败")
@@ -91,7 +91,7 @@ func Download(c *gin.Context) {
 	filename := c.Param("filename")
 
 	// 获取下载文件的路径，可以通过path设置
-	downloadPath := c.DefaultQuery("path", config.Config().Storage.Path)
+	downloadPath := c.DefaultQuery("path", config.OptionsConfig.Storage.Path)
 
 	// 构建完整的文件路径
 	filePath := filepath.Join(downloadPath, filename)
