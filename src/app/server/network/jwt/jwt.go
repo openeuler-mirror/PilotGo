@@ -49,7 +49,7 @@ func GenerateUserToken(user userservice.ReturnUser) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(config.Config().JWT.SecretKey))
+	tokenString, err := token.SignedString([]byte(config.OptionsConfig.JWT.SecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +105,7 @@ func GeneratePluginToken(name, uuid string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(config.Config().JWT.SecretKey))
+	tokenString, err := token.SignedString([]byte(config.OptionsConfig.JWT.SecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -131,7 +131,7 @@ func ParsePluginClaims(c *gin.Context) (*PluginClaims, error) {
 
 func parseToken(tokenString string, clames jwt.Claims) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenString, clames, func(token *jwt.Token) (i interface{}, err error) {
-		return []byte(config.Config().JWT.SecretKey), nil
+		return []byte(config.OptionsConfig.JWT.SecretKey), nil
 	})
 	return token, err
 }

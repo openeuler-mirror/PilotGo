@@ -1,7 +1,7 @@
 package dbmanager
 
 import (
-	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
+	"gitee.com/openeuler/PilotGo/app/server/cmd/options"
 	"gitee.com/openeuler/PilotGo/app/server/service/auditlog"
 	"gitee.com/openeuler/PilotGo/app/server/service/batch"
 	"gitee.com/openeuler/PilotGo/app/server/service/configfile"
@@ -16,21 +16,22 @@ import (
 	"gitee.com/openeuler/PilotGo/dbmanager/redismanager"
 )
 
-func RedisdbInit(conf *sconfig.RedisDBInfo, stopCh <-chan struct{}) error {
+func RedisdbInit(conf *options.RedisDBInfo, stopCh <-chan struct{}) error {
 	err := redismanager.RedisInit(
 		conf.RedisConn,
 		conf.RedisPwd,
 		conf.DefaultDB,
 		conf.DialTimeout,
 		conf.EnableRedis,
-		stopCh)
+		stopCh,
+		conf.UseTLS)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func MysqldbInit(conf *sconfig.MysqlDBInfo) error {
+func MysqldbInit(conf *options.MysqlDBInfo) error {
 	_, err := mysqlmanager.MysqlInit(
 		conf.HostName,
 		conf.UserName,

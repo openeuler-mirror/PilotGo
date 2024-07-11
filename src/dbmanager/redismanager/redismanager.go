@@ -19,7 +19,6 @@ import (
 	"crypto/tls"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/app/server/config"
 	"github.com/go-redis/redis/v8"
 	"k8s.io/klog/v2"
 )
@@ -31,9 +30,9 @@ var (
 	global_redis *redis.Client
 )
 
-func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Duration, enableRedis bool, stopCh <-chan struct{}) error {
+func RedisInit(redisConn, redisPwd string, defaultDB int, dialTimeout time.Duration, enableRedis bool, stopCh <-chan struct{}, useTLS bool) error {
 	var cfg *redis.Options
-	if config.Config().RedisDBinfo.UseTLS {
+	if useTLS {
 		cfg = &redis.Options{
 			Addr:     redisConn,
 			Password: redisPwd,

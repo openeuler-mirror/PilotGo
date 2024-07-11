@@ -16,12 +16,9 @@ package auth
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	sconfig "gitee.com/openeuler/PilotGo/app/server/config"
 )
 
 func TestGetRoles(t *testing.T) {
@@ -44,15 +41,15 @@ func TestGetAllPolicy(t *testing.T) {
 	fmt.Printf("policies: %v\n", policies)
 }
 
-func TestMain(m *testing.M) {
-	err := sconfig.Init("D:\\tmp\\PilotGo-projects\\PilotGo\\config_server.yaml")
-	if err != nil {
-		fmt.Println("failed to load configure, exit..", err)
-		os.Exit(-1)
-	}
+// func TestMain(m *testing.M) {
+// 	err := sconfig.Init("D:\\tmp\\PilotGo-projects\\PilotGo\\config_server.yaml")
+// 	if err != nil {
+// 		fmt.Println("failed to load configure, exit..", err)
+// 		os.Exit(-1)
+// 	}
 
-	// 鉴权模块初始化
-	Casbin(&sconfig.Config().MysqlDBinfo)
+// 	// 鉴权模块初始化
+// 	Casbin(&sconfig.Config().MysqlDBinfo)
 
-	m.Run()
-}
+// 	m.Run()
+// }

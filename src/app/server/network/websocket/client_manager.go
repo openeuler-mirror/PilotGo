@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"k8s.io/klog/v2"
 )
 
 var (
@@ -82,9 +83,12 @@ func (manager *ClientManager) EventUnregister(client *Client) {
 }
 
 // 管道处理程序
-func (manager *ClientManager) Start() {
+func (manager *ClientManager) Start(stopCh <-chan struct{}) {
 	for {
 		select {
+		case <-stopCh:
+			klog.Warningln("websocket CliManager success exit")
+			return
 		case conn := <-manager.Register:
 			// 建立连接事件
 			manager.EventRegister(conn)
