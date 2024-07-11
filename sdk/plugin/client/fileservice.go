@@ -5,12 +5,15 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (client *Client) FileUpload(filePath string, filename string) error {
@@ -22,6 +25,15 @@ func (client *Client) FileUpload(filePath string, filename string) error {
 	}
 
 	upload_addr := "http://" + client.Server() + "/api/v1/pluginapi/upload?filename=" + filename
+	// 判断服务端是否是http协议
+	ishttp, err := httputils.ServerIsHttp(upload_addr)
+	if err != nil {
+		return err
+	}
+	if !ishttp {
+		upload_addr = fmt.Sprintf("https://%s", strings.Split(upload_addr, "://")[1])
+	}
+
 	req, err := http.NewRequest("POST", upload_addr, bodyBuf)
 	if err != nil {
 		return err
