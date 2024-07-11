@@ -1,10 +1,7 @@
 package options
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -29,10 +26,9 @@ import (
  * LastEditTime: 2023-09-04 16:16:36
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
-
-const (
+var (
 	defaultConfigurationName = "config_server"
-	defaultConfigurationPath = "/opt/PilotGo/server"
+	DefaultConfigFilePath    = fmt.Sprintf("./%s.yaml", defaultConfigurationName)
 )
 
 type HttpServer struct {
@@ -90,7 +86,7 @@ type ServerOptions struct {
 
 func NewServerOptions() *ServerOptions {
 	s := &ServerOptions{
-		Config:       "./config_server.yaml",
+		Config:       DefaultConfigFilePath,
 		ServerConfig: New(),
 	}
 	return s
@@ -109,18 +105,6 @@ type pilotgoConfig struct {
 	loadOnce    sync.Once
 }
 
-func ReadFileMd5(sfile string) (string, error) {
-	ssconfig, err := os.ReadFile(sfile)
-	if err != nil {
-		return "", err
-	}
-	return getMD5(ssconfig), nil
-}
-func getMD5(s []byte) string {
-	m := md5.New()
-	m.Write([]byte(s))
-	return hex.EncodeToString(m.Sum(nil))
-}
 func WatchConfigChange() <-chan ServerConfig {
 	return _config.watchConfig()
 }
@@ -144,7 +128,11 @@ func (c *pilotgoConfig) watchConfig() <-chan ServerConfig {
 func New() *ServerConfig {
 	return &ServerConfig{}
 }
-func TryLoadFromDisk() (*ServerConfig, error) {
+func TryLoadFromDisk(configfile string) (*ServerConfig, error) {
+	viper.SetConfigFile(configfile)
+	viper.SetEnvPrefix("pilotgo")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	return _config.loadFromDisk()
 }
 
@@ -164,12 +152,6 @@ func (c *pilotgoConfig) loadFromDisk() (*ServerConfig, error) {
 	return c.cfg, err
 }
 func defaultConfig() *pilotgoConfig {
-	viper.SetConfigName(defaultConfigurationName)
-	viper.AddConfigPath(".")
-	viper.AddConfigPath(defaultConfigurationPath)
-	viper.SetEnvPrefix("pilotgo")
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	return &pilotgoConfig{
 		cfg:         New(),

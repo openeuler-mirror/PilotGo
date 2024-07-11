@@ -14,6 +14,8 @@ yarn-debug.log*
 yarn-error.log*
 /src/app/server/resource/index.html
 /src/app/server/resource/static/
+/src/app/server/resource/assets
+/src/app/server/resource/pilotgo.ico
 
 # Editor directories and files
 .idea
