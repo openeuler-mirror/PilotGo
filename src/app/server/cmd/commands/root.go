@@ -50,6 +50,10 @@ func NewServerCommand() *cobra.Command {
 			} else {
 				klog.Fatal("Failed to load configuration from disk", err)
 			}
+			if errs := s.ServerConfig.Validate(); len(errs) != 0 {
+				klog.Errorf("please check current config, errors is:%v", errs)
+				return errors.New("please check config_server.yaml")
+			}
 			return Run(s, signals.SetupSignalHandler(), cmd, options.WatchConfigChange())
 		},
 		SilenceUsage: true,

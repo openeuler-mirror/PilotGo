@@ -41,8 +41,24 @@ type HttpServer struct {
 	KeyFile       string `yaml:"key_file" mapstructure:"key_file"`
 }
 
+func (hs *HttpServer) Validate() []error {
+	var errors []error
+	if len(hs.Addr) == 0 {
+		errors = append(errors, fmt.Errorf("HttpServer config addr is nil"))
+	}
+	return errors
+}
+
 type SocketServer struct {
 	Addr string `yaml:"addr" mapstructure:"addr"`
+}
+
+func (hs *SocketServer) Validate() []error {
+	var errors []error
+	if len(hs.Addr) == 0 {
+		errors = append(errors, fmt.Errorf("SocketServer config addr is nil"))
+	}
+	return errors
 }
 
 type JWTConfig struct {
@@ -79,6 +95,14 @@ type ServerConfig struct {
 	RedisDBinfo  *RedisDBInfo    `yaml:"redis" mapstructure:"redis"`
 	Storage      *Storage        `yaml:"storage" mapstructure:"storage"`
 }
+
+func (s *ServerConfig) Validate() []error {
+	var errors []error
+	errors = append(errors, s.HttpServer.Validate()...)
+	errors = append(errors, s.SocketServer.Validate()...)
+	return errors
+}
+
 type ServerOptions struct {
 	Config       string
 	ServerConfig *ServerConfig
