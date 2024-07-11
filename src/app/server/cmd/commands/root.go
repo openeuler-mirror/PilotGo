@@ -26,26 +26,30 @@ const flagconfig = "conf"
 var conut int64
 
 func NewServerCommand() *cobra.Command {
-
 	s := options.NewServerOptions()
-	conf, err := options.TryLoadFromDisk()
-	if err == nil {
-		s.ServerConfig = conf
-		config.OptionsConfig = conf
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "HttpServer", *s.ServerConfig.HttpServer)
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "SocketServer", *s.ServerConfig.SocketServer)
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "JWT", *s.ServerConfig.JWT)
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "Logopts", *s.ServerConfig.Logopts)
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "RedisDBinfo", *s.ServerConfig.RedisDBinfo)
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "MysqlDBinfo", *s.ServerConfig.MysqlDBinfo)
-		klog.InfoS("TryLoadFromDisk pilotgo config !", "Storage", *s.ServerConfig.Storage)
-	} else {
-		klog.Fatal("Failed to load configuration from disk", err)
-	}
 	cmd := &cobra.Command{
 		Use:  "pilotgo",
 		Long: `Run the pilotgo API server`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			config_file, err := cmd.Flags().GetString(flagconfig)
+			if err != nil {
+				return errors.Wrapf(err, "error accessing flag %s for command %s", flagconfig, cmd.Name())
+			}
+			klog.Infof("load configuration config_file is:%s", config_file)
+			conf, err := options.TryLoadFromDisk(config_file)
+			if err == nil {
+				s.ServerConfig = conf
+				config.OptionsConfig = conf
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "HttpServer", *s.ServerConfig.HttpServer)
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "SocketServer", *s.ServerConfig.SocketServer)
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "JWT", *s.ServerConfig.JWT)
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "Logopts", *s.ServerConfig.Logopts)
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "RedisDBinfo", *s.ServerConfig.RedisDBinfo)
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "MysqlDBinfo", *s.ServerConfig.MysqlDBinfo)
+				klog.InfoS("TryLoadFromDisk pilotgo config !", "Storage", *s.ServerConfig.Storage)
+			} else {
+				klog.Fatal("Failed to load configuration from disk", err)
+			}
 			return Run(s, signals.SetupSignalHandler(), cmd, options.WatchConfigChange())
 		},
 		SilenceUsage: true,
@@ -54,7 +58,7 @@ func NewServerCommand() *cobra.Command {
 		},
 	}
 	cmd.ResetFlags()
-	cmd.Flags().StringP(flagconfig, "c", "./config_server.yaml", "yaml")
+	cmd.Flags().StringP(flagconfig, "c", options.DefaultConfigFilePath, "choose config yaml file")
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print the version of pilotgo server",
@@ -71,16 +75,6 @@ func run(opts *options.ServerOptions, ctx context.Context, cmd *cobra.Command) e
 		return nil
 	}
 	atomic.AddInt64(&conut, 1)
-
-	// config_file, err := cmd.Flags().GetString(flagconfig)
-	// if err != nil {
-	// 	return errors.Wrapf(err, "error accessing flag %s for command %s", flagconfig, cmd.Name())
-	// }
-	// err = config.Init(config_file)
-	// if err != nil {
-	// 	fmt.Println("failed to load configure, exit..", err)
-	// 	return err
-	// }
 	config := opts.ServerConfig
 	if config.Storage.Path == "" {
 		fmt.Println("Please set the path for file service storage in yaml")
