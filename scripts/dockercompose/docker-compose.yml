@@ -1,0 +1,62 @@
+version: '3'
+services:
+  server:
+    build:
+      context: ../../
+      dockerfile: ./dockerfile
+    ports:
+      - "8888:8888"
+      - "8889:8889"
+    volumes:
+      - type: bind  
+        source: ./config_server.yaml 
+        target: /home/pilotgo/config_server.yaml
+    depends_on:
+      redis:
+         condition: service_healthy
+      mysql:
+         condition: service_healthy
+    networks:
+      - pilotgo_net
+  mysql:
+    image: mysql:8.0.21
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    security_opt:
+      - seccomp:unconfined
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 50s
+      timeout: 5s
+      retries: 3 
+    # ports:
+    #   - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'u3bd99dMNFKQ3Wi9'
+      MYSQL_DATABASE: 'PilotGo'
+      MYSQL_USER: 'root'
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - pilotgo_net
+  redis:
+    image: redis:alpine
+    command: redis-server --requirepass '12345678'
+    restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 50s
+      timeout: 5s
+      retries: 3
+    # ports:
+    #   - "16379:6379"
+    volumes:
+      - redis:/data
+    networks:
+      - pilotgo_net
+networks:
+ pilotgo_net:
+    driver: bridge
+volumes:
+  mysql:
+  redis:

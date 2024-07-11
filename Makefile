@@ -15,3 +15,7 @@ clean: ; $(info $(M)...Begin to clean out dir.)  @ ## clean out dir.
 all: clean pilotgo-front pilotgo-server
 pack: ; $(info $(M)...Begin to pack tar package  dir.)  @ ##  pack tar package .
 	scripts/build.sh pack ${GOARCH}
+docker-compose-up: ; $(info $(M)...Begin to deploy by docker-compose.)  @ ## deploy by docker-compose.
+	docker-compose -f scripts/dockercompose/docker-compose.yml up
+docker-compose-down: ; $(info $(M)...Begin to stop by docker-compose.)  @ ## stop by docker-compose.
+	docker-compose -f scripts/dockercompose/docker-compose.yml down -v
