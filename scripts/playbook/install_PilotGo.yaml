@@ -5,7 +5,7 @@
   become_user: root
   tasks: 
     - name: check redis rpm
-      shell: rpm -qa | grep -e 'redis*4*'
+      shell: rpm -qa | grep -e '^redis*4*'
       register: rpm_info
       ignore_errors: yes
     - name: uninstall redis4
@@ -18,8 +18,18 @@
         name: redis6
         state: present
       ignore_errors: yes
-    - name: change redis.conf
-      shell: sed -i 's#bind 0.0.0.0#bind {{ groups['standalone'][0] }}#g' /etc/redis/redis.conf
+    - name: change bind
+      lineinfile:  
+        path: /etc/redis/redis.conf  
+        regexp: '^#?bind'  
+        line: 'bind {{ groups["standalone"][0] }}'
+        backrefs: yes
+    - name: change daemonize
+      lineinfile:  
+        path: /etc/redis/redis.conf  
+        regexp: '^#?daemonize'
+        line: 'daemonize yes'
+        backrefs: yes
     - name: change passwd
       lineinfile:  
         path: /etc/redis/redis.conf  
@@ -30,3 +40,28 @@
       service: 
         name: redis
         state: restarted
+    - name: install mysql through euler repo
+      dnf: 
+        name: "{{ item }}"
+        state: present
+      with_items: 
+        - mysql-server
+        - python3-pexpect
+      ignore_errors: yes
+    - name: start mysql
+      service:
+        name: mysqld
+        state: restarted
+    - name: change passwd
+      expect: 
+        command: mysqladmin -u root -p password '{{ mysql_password }}'
+        responses: 
+          (?i)password: "\n"
+      vars: 
+        ansible_python_interpreter: /usr/bin/python3
+      register: info
+      ignore_errors: yes
+    - name: change passwd
+      debug: 
+        msg: '{{ info.stdout_lines }} mysql already has pqssword'
+      when: info.rc != 0
