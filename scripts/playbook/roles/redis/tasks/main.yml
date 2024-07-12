@@ -1,0 +1,37 @@
+---
+- name: check redis rpm
+  shell: rpm -qa | grep -e '^redis*4*'
+  register: rpm_info
+  ignore_errors: yes
+- name: uninstall redis4
+  dnf: 
+    name: redis
+    state: absent
+  when: rpm_info.rc == 0
+- name: install redis 6 through euler repo
+  dnf: 
+    name: redis6
+    state: present
+  ignore_errors: yes
+- name: change bind
+  lineinfile: 
+    path: /etc/redis/redis.conf
+    regexp: '^#?bind'
+    line: 'bind {{ groups["standalone"][0] }}'
+    backrefs: yes
+- name: change daemonize
+  lineinfile: 
+    path: /etc/redis/redis.conf
+    regexp: '^#?daemonize'
+    line: 'daemonize yes'
+    backrefs: yes
+- name: change passwd
+  lineinfile: 
+    path: /etc/redis/redis.conf
+    regexp: '^#?requirepass'
+    line: 'requirepass {{ redis_password }}'
+    backrefs: yes
+- name: restart redis service
+  service: 
+    name: redis
+    state: restarted
