@@ -16,15 +16,15 @@ FROM golang:1.21-alpine3.18 as builder
 
 ARG version_path="/out/backend/pilotgo/"
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk update && apk add --no-cache \
-    git \
-    make \
-    ca-certificates \
-    wget \
-    curl \
-    gcc \
-    bash \
-    build-base
+# RUN apk update && apk add --no-cache \
+#     git \
+#     make \
+#     ca-certificates \
+#     wget \
+#     curl \
+#     gcc \
+#     bash \
+#     build-base
 
 WORKDIR /PilotGo
 COPY . .

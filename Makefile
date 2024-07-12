@@ -16,6 +16,8 @@ all: clean pilotgo-front pilotgo-server
 pack: ; $(info $(M)...Begin to pack tar package  dir.)  @ ##  pack tar package .
 	scripts/build.sh pack ${GOARCH}
 docker-compose-up: ; $(info $(M)...Begin to deploy by docker-compose.)  @ ## deploy by docker-compose.
-	docker-compose -f scripts/dockercompose/docker-compose.yml up
+	DOCKER_BUILDKIT=0 docker-compose -f scripts/dockercompose/docker-compose.yml up
 docker-compose-down: ; $(info $(M)...Begin to stop by docker-compose.)  @ ## stop by docker-compose.
-	docker-compose -f scripts/dockercompose/docker-compose.yml down -v
+	DOCKER_BUILDKIT=0 docker-compose -f scripts/dockercompose/docker-compose.yml down -v
+docker-compose-build: ; $(info $(M)...Begin to build image by docker-compose.)  @ ## build image by docker-compose.
+	DOCKER_BUILDKIT=0 docker-compose -f scripts/dockercompose/docker-compose.yml build --no-cache
