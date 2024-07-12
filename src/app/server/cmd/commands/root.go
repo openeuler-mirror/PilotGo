@@ -74,7 +74,7 @@ func NewServerCommand() *cobra.Command {
 	return cmd
 }
 
-func run(opts *options.ServerOptions, ctx context.Context, cmd *cobra.Command) error {
+func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) error {
 	if atomic.LoadInt64(&conut) > 0 {
 		return nil
 	}
