@@ -1,7 +1,8 @@
+include makefiles/const.mk
+include makefiles/dependent.mk
+
 APP_VERSION = v2.1.1
-
 GOARCH=amd64
-
 # Build pilotgo-front binary
 pilotgo-front: ; $(info $(M)...Begin to build pilotgo-front binary.)  @ ## Build pilotgo-front.
 	scripts/build.sh front;
@@ -21,3 +22,10 @@ docker-compose-down: ; $(info $(M)...Begin to stop by docker-compose.)  @ ## sto
 	DOCKER_BUILDKIT=0 docker-compose -f scripts/dockercompose/docker-compose.yml down -v
 docker-compose-build: ; $(info $(M)...Begin to build image by docker-compose.)  @ ## build image by docker-compose.
 	DOCKER_BUILDKIT=0 docker-compose -f scripts/dockercompose/docker-compose.yml build --no-cache
+## lint: Run the golangci-lint
+lint: golangci
+	@{ \
+	$(INFO) lint ;\
+	GOFLAGS="-buildvcs=false" ;\
+	go work edit -json | jq -r '.Use[].DiskPath'  | xargs -I{} $(GOLANGCILINT) run {}/... ;\
+	}
