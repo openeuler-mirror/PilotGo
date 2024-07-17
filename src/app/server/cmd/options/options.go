@@ -1,17 +1,3 @@
-package options
-
-import (
-	"fmt"
-	"strings"
-	"sync"
-	"time"
-
-	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
-	"k8s.io/klog/v2"
-)
-
 /******************************************************************************
  * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
  * PilotGo is licensed under the Mulan PSL v2.
@@ -26,16 +12,42 @@ import (
  * LastEditTime: 2023-09-04 16:16:36
  * Description: provide agent log manager of pilotgo
  ******************************************************************************/
+package options
+
+import (
+	"fmt"
+	"strings"
+	"sync"
+	"time"
+
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+	"k8s.io/klog/v2"
+)
+
 var (
 	defaultConfigurationName = "config_server"
 	DefaultConfigFilePath    = fmt.Sprintf("./%s.yaml", defaultConfigurationName)
 )
 
+func NewHttpServerOptions() *HttpServer {
+	return &HttpServer{
+		Addr:          "0.0.0.0:8888",
+		SessionCount:  100,
+		SessionMaxAge: 1800,
+		Debug:         false,
+		UseHttps:      false,
+		CertFile:      "",
+		KeyFile:       "",
+	}
+}
+
 type HttpServer struct {
 	Addr          string `yaml:"addr" mapstructure:"addr"`
 	SessionCount  int    `yaml:"session_count" mapstructure:"session_count"`
 	SessionMaxAge int    `yaml:"session_max_age" mapstructure:"session_max_age"`
-	Debug         bool   `yaml:"debug" mapstructure:"debug"`
+	Debug         bool   `yaml:"debug" mapstructure:"debug" comment:"if true, will start pprof on :6060"`
 	UseHttps      bool   `yaml:"use_https" mapstructure:"use_https"`
 	CertFile      string `yaml:"cert_file" mapstructure:"cert_file"`
 	KeyFile       string `yaml:"key_file" mapstructure:"key_file"`
@@ -53,6 +65,11 @@ type SocketServer struct {
 	Addr string `yaml:"addr" mapstructure:"addr"`
 }
 
+func NewSocketServerOptions() *SocketServer {
+	return &SocketServer{
+		Addr: "0.0.0.0:8879",
+	}
+}
 func (hs *SocketServer) Validate() []error {
 	var errors []error
 	if len(hs.Addr) == 0 {
@@ -65,12 +82,37 @@ type JWTConfig struct {
 	SecretKey string `yaml:"secret_key" mapstructure:"secret_key"`
 }
 
+func NewJWTConfigOptions() *JWTConfig {
+	return &JWTConfig{
+		SecretKey: "",
+	}
+}
+func NewLogOptsOptions() *logger.LogOpts {
+	return &logger.LogOpts{
+		Level:   "debug",
+		Driver:  "file",
+		Path:    "./log/pilotgo_server.log",
+		MaxFile: 1,
+		MaxSize: 10485760,
+	}
+}
+
 type MysqlDBInfo struct {
 	HostName string `yaml:"host_name" mapstructure:"host_name"`
-	UserName string `yaml:"user_name" mapstructure:"user_name"`
+	UserName string `yaml:"user_name" mapstructure:"user_name" comment:"this is the username of database"`
 	Password string `yaml:"password" mapstructure:"password"`
 	DataBase string `yaml:"data_base" mapstructure:"data_base"`
 	Port     int    `yaml:"port" mapstructure:"port"`
+}
+
+func NewMysqlDBInfoOpts() *MysqlDBInfo {
+	return &MysqlDBInfo{
+		HostName: "localhost",
+		UserName: "root",
+		Password: "",
+		DataBase: "PilotGo",
+		Port:     3306,
+	}
 }
 
 type RedisDBInfo struct {
@@ -78,12 +120,29 @@ type RedisDBInfo struct {
 	UseTLS      bool          `yaml:"use_tls" mapstructure:"use_tls"`
 	RedisPwd    string        `yaml:"redis_pwd" mapstructure:"redis_pwd"`
 	DefaultDB   int           `yaml:"defaultDB" mapstructure:"defaultDB"`
-	DialTimeout time.Duration `yaml:"dialTimeout" mapstructure:"dialTimeout"`
-	EnableRedis bool          `yaml:"enableRedis" mapstructure:"enableRedis"`
+	DialTimeout time.Duration `yaml:"dialTimeout" mapstructure:"dialTimeout" comment:"redis连接超时时间.默认5s"`
+	EnableRedis bool          `yaml:"enableRedis" mapstructure:"enableRedis" comment:"是否启用redis"`
+}
+
+func NewRedisDBInfoOpts() *RedisDBInfo {
+	return &RedisDBInfo{
+		RedisConn:   "localhost:6379",
+		UseTLS:      false,
+		RedisPwd:    "",
+		DefaultDB:   0,
+		DialTimeout: time.Duration(5 * time.Second),
+		EnableRedis: true,
+	}
 }
 
 type Storage struct {
-	Path string `yaml:"path" mapstructure:"path"`
+	Path string `yaml:"path" mapstructure:"path" comment:"文件服务存储路径"`
+}
+
+func NewStorageOptions() *Storage {
+	return &Storage{
+		Path: "",
+	}
 }
 
 type ServerConfig struct {
