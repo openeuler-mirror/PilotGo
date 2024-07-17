@@ -1,6 +1,8 @@
 package os
 
 import (
+	"strings"
+
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/utils/os/centos"
 	"gitee.com/openeuler/PilotGo/utils/os/common"
@@ -10,10 +12,10 @@ import (
 )
 
 const (
-	OpenEuler = "openEuler"
+	OpenEuler = "openeuler"
 	Kylin     = "kylin"
-	NestOS    = "NestOS"
-	CentOS    = "CentOS"
+	NestOS    = "nestos"
+	CentOS    = "centos"
 )
 
 func OS() common.OSOperator {
@@ -22,16 +24,16 @@ func OS() common.OSOperator {
 		logger.Error("osname init failed: %s", err)
 		return nil
 	}
-	switch osinfo.OSName {
+	switch strings.ToLower(osinfo.OSName) {
 	case OpenEuler:
 		return &openeuler.OpenEuler{}
 	case Kylin:
 		return &kylin.Kylin{}
 	case NestOS:
-		switch osinfo.ID {
-		case "NestOS For Container":
+		switch strings.ToLower(osinfo.ID) {
+		case "nestos for container":
 			return &nestos.NestOS4Container{}
-		case "NestOS For Virt":
+		case "nestos for virt":
 			return &nestos.NestOS4Virt{}
 		}
 	case CentOS:
