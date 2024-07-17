@@ -29,3 +29,8 @@ lint: golangci
 	GOFLAGS="-buildvcs=false" ;\
 	go work edit -json | jq -r '.Use[].DiskPath'  | xargs -I{} $(GOLANGCILINT) run {}/... ;\
 	}
+# check-license-header: Check license header
+check-license-header:
+	./scripts/licence/header-check.sh
+fix-license-header:
+	./scripts/licence/header-check.sh fix
