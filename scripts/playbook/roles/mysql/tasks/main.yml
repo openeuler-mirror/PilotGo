@@ -1,0 +1,26 @@
+---
+- name: install mysql through euler repo
+  dnf: 
+    name: "{{ item }}"
+    state: present
+  with_items: 
+    - mysql-server
+    - python3-pexpect
+  ignore_errors: yes
+- name: start mysql
+  service:
+    name: mysqld
+    state: restarted
+- name: change passwd
+  expect: 
+    command: mysqladmin -u root -p password '{{ mysql_password }}'
+    responses: 
+      (?i)password: "\n"
+  vars: 
+    ansible_python_interpreter: /usr/bin/python3
+  register: info
+  ignore_errors: yes
+- name: change passwd
+  debug: 
+    msg: '{{ info.stdout_lines }} mysql already has password'
+  when: info.rc != 0
