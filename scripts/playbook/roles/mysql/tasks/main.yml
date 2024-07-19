@@ -24,10 +24,3 @@
   debug: 
     msg: '{{ info.stdout_lines }} mysql already has password'
   when: info.rc != 0
-- name: Ensure a user can connect from a specific host  
-  mysql_user:  
-    name: root  
-    host: '%'  
-    password: '{{ mysql_password }}'  
-    priv: '*.*:ALL,GRANT'  
-    state: present
