@@ -25,6 +25,12 @@
     regexp: '^#?daemonize'
     line: 'daemonize yes'
     backrefs: yes
+- name: change protected mode
+  lineinfile: 
+    path: /etc/redis/redis.conf
+    regexp: '^#?protected-mode'
+    line: 'protected-mode no'
+    backrefs: yes
 - name: change passwd
   lineinfile: 
     path: /etc/redis/redis.conf
