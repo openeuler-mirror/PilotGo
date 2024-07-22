@@ -1,4 +1,4 @@
-# gitee.com/openeuler/PilotGo/sdk v0.0.0-20240711084602-e34bc1158484
+# gitee.com/openeuler/PilotGo/sdk v0.0.0 => ../sdk
 ## explicit; go 1.20
 gitee.com/openeuler/PilotGo/sdk/common
 gitee.com/openeuler/PilotGo/sdk/logger
@@ -511,4 +511,4 @@ modernc.org/sqlite/lib
 # sigs.k8s.io/controller-runtime v0.10.0
 ## explicit; go 1.16
 sigs.k8s.io/controller-runtime/pkg/manager/signals
-# gitee.com/openeuler/PilotGo/PilotGo/sdk => ../sdk
+# gitee.com/openeuler/PilotGo/sdk => ../sdk
