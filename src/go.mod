@@ -3,7 +3,6 @@ module gitee.com/openeuler/PilotGo
 go 1.20
 
 require (
-	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240711084602-e34bc1158484
 	github.com/casbin/casbin/v2 v2.69.1
 	github.com/casbin/gorm-adapter/v3 v3.18.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -27,9 +26,16 @@ require (
 	k8s.io/klog/v2 v2.9.0
 )
 
-require github.com/go-logr/logr v0.4.0 // indirect
+require (
+	github.com/go-logr/logr v0.4.0 // indirect
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
 
 require (
+	gitee.com/openeuler/PilotGo/sdk v0.0.0
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -59,8 +65,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
-	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
-	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/lib/pq v1.10.7 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -75,7 +79,6 @@ require (
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
@@ -95,7 +98,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.5.2 // indirect
 	gorm.io/driver/sqlserver v1.5.0 // indirect
@@ -108,4 +110,4 @@ require (
 	sigs.k8s.io/controller-runtime v0.10.0
 )
 
-replace gitee.com/openeuler/PilotGo/PilotGo/sdk => ../sdk
+replace gitee.com/openeuler/PilotGo/sdk => ../sdk

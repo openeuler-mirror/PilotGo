@@ -26,7 +26,7 @@ import (
 
 type LogOpts struct {
 	Level   string `yaml:"level"`
-	Driver  string `yaml:"driver"`
+	Driver  string `yaml:"driver" comment:"可选stdout和file.stdout:输出到终端控制台;file:输出到path下的指定文件。"`
 	Path    string `yaml:"path"`
 	MaxFile int    `yaml:"max_file"`
 	MaxSize int    `yaml:"max_size"`

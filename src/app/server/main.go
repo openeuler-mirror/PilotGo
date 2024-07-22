@@ -14,15 +14,8 @@
  ******************************************************************************/
 package main
 
-import (
-	"log"
-
-	rootCmd "gitee.com/openeuler/PilotGo/app/server/cmd/commands"
-)
+import "gitee.com/openeuler/PilotGo/app/server/cmd/commands"
 
 func main() {
-	commands := rootCmd.NewServerCommand()
-	if err := commands.Execute(); err != nil {
-		log.Fatal(err)
-	}
+	commands.Execute()
 }

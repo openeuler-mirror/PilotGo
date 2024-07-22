@@ -46,7 +46,7 @@ func ensureDatabase(m *MysqlManager) error {
 	if err = d.Close(); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
