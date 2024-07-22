@@ -27,7 +27,7 @@ type PluginFullInfo struct {
 	Permissions []common.Permission
 }
 
-func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
+func (c *Client) GetPlugins() ([]*PluginInfo, error) {
 	if !c.IsBind() {
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
@@ -41,10 +41,13 @@ func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
 		return nil, err
 	}
 
-	resp := &PluginInfo{}
-	if err := json.Unmarshal(r.Body, resp); err != nil {
+	resp := struct {
+		Code int           `json:"code"`
+		Data []*PluginInfo `json:"data"`
+	}{}
+	if err := json.Unmarshal(r.Body, &resp); err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return resp.Data, nil
 }
