@@ -1,3 +1,9 @@
+
+ROOT_DIR =  $(shell pwd)
+
+APP_VERSION = v2.1.1
+GOARCH      = amd64
+
 TIME_LONG	= `date +%Y-%m-%d' '%H:%M:%S`
 TIME_SHORT	= `date +%H:%M:%S`
 TIME		= $(TIME_SHORT)

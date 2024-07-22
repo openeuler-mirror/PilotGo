@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync/atomic"
 
 	"github.com/pkg/errors"
@@ -18,6 +19,7 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -40,13 +42,6 @@ func NewServerCommand() *cobra.Command {
 			if err == nil {
 				s.ServerConfig = conf
 				config.OptionsConfig = conf
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "HttpServer", *s.ServerConfig.HttpServer)
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "SocketServer", *s.ServerConfig.SocketServer)
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "JWT", *s.ServerConfig.JWT)
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "Logopts", *s.ServerConfig.Logopts)
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "RedisDBinfo", *s.ServerConfig.RedisDBinfo)
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "MysqlDBinfo", *s.ServerConfig.MysqlDBinfo)
-				klog.InfoS("TryLoadFromDisk pilotgo config !", "Storage", *s.ServerConfig.Storage)
 			} else {
 				klog.Fatal("Failed to load configuration from disk", err)
 			}
@@ -70,10 +65,42 @@ func NewServerCommand() *cobra.Command {
 			cmd.Println("2.1.1")
 		},
 	}
+	templeteCmd := &cobra.Command{
+		Use:   "templete",
+		Short: "Print the templete of pilotgo server",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return TempleteRun()
+		},
+	}
 	cmd.AddCommand(versionCmd)
+	cmd.AddCommand(templeteCmd)
 	return cmd
 }
-
+func TempleteRun() error {
+	config := options.ServerConfig{
+		HttpServer:   options.NewHttpServerOptions(),
+		SocketServer: options.NewSocketServerOptions(),
+		JWT:          options.NewJWTConfigOptions(),
+		Logopts:      options.NewLogOptsOptions(),
+		MysqlDBinfo:  options.NewMysqlDBInfoOpts(),
+		RedisDBinfo:  options.NewRedisDBInfoOpts(),
+		Storage:      options.NewStorageOptions(),
+	}
+	operator := utils.NewYamlOpeartor(config,
+		utils.WithCommentsTagFlag(utils.PilotGoHeadComment),
+		utils.WithDefaultTagName(utils.DefaultTagName))
+	yamlContent, err := operator.Marshal()
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+		return err
+	}
+	err = os.WriteFile("./src/config_server.yaml.templete", yamlContent, os.ModePerm)
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+		return err
+	}
+	return nil
+}
 func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) error {
 	if atomic.LoadInt64(&conut) > 0 {
 		return nil
@@ -168,13 +195,6 @@ func Run(s *options.ServerOptions, ctx context.Context, cmd *cobra.Command, conf
 			cancelFunc()
 			s.ServerConfig = &cfg
 			config.OptionsConfig = &cfg
-			klog.InfoS("watchConfig pilotgo config receive!", "HttpServer", cfg.HttpServer)
-			klog.InfoS("watchConfig pilotgo config receive!", "SocketServer", cfg.SocketServer)
-			klog.InfoS("watchConfig pilotgo config receive!", "JWT", cfg.JWT)
-			klog.InfoS("watchConfig pilotgo config receive!", "Logopts", cfg.Logopts)
-			klog.InfoS("watchConfig pilotgo config receive!", "RedisDBinfo", cfg.RedisDBinfo)
-			klog.InfoS("watchConfig pilotgo config receive!", "MysqlDBinfo", cfg.MysqlDBinfo)
-			klog.InfoS("watchConfig pilotgo config receive!", "Storage", cfg.Storage)
 			cctx, cancelFunc = context.WithCancel(context.TODO())
 			go func() {
 				if err := runer(s, cctx, cmd); err != nil {
