@@ -35,7 +35,7 @@ require (
 )
 
 require (
-	gitee.com/openeuler/PilotGo/sdk v0.0.0
+	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240722065021-a11187709b79
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect

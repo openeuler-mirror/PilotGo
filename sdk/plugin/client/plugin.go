@@ -31,7 +31,7 @@ func (c *Client) GetPlugins() ([]*PluginInfo, error) {
 	if !c.IsBind() {
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
-	url := c.Server() + "/api/v1/pluginapi/plugins"
+	url := "http://" + c.Server() + "/api/v1/pluginapi/plugins"
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
 			TokenCookie: c.token,
