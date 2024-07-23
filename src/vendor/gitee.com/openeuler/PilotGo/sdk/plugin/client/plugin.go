@@ -27,11 +27,11 @@ type PluginFullInfo struct {
 	Permissions []common.Permission
 }
 
-func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
+func (c *Client) GetPlugins() ([]*PluginInfo, error) {
 	if !c.IsBind() {
 		return nil, errors.New("unbind PilotGo-server platform")
 	}
-	url := c.Server() + "/api/v1/pluginapi/plugins"
+	url := "http://" + c.Server() + "/api/v1/pluginapi/plugins"
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
 			TokenCookie: c.token,
@@ -41,10 +41,13 @@ func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
 		return nil, err
 	}
 
-	resp := &PluginInfo{}
-	if err := json.Unmarshal(r.Body, resp); err != nil {
+	resp := struct {
+		Code int           `json:"code"`
+		Data []*PluginInfo `json:"data"`
+	}{}
+	if err := json.Unmarshal(r.Body, &resp); err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return resp.Data, nil
 }
