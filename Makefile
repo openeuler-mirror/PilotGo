@@ -52,3 +52,5 @@ build-server-templete:  ; $(info $(M)...Begin to build config_server.yaml.temple
 	go run src/app/server/main.go templete
 	cp -R config_server.yaml.templete ./src/config_server.yaml.templete
 	rm -rf ./config_server.yaml.templete
+vendor: ; $(info $(M)...Begin to update vendor.)  @ ## update vendor
+	cd src && GOWORK=off && go mod vendor
