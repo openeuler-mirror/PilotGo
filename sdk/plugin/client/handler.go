@@ -85,30 +85,6 @@ func bindHandler(c *gin.Context) {
 	response.Success(c, nil, "bind server success")
 }
 
-func eventHandler(c *gin.Context) {
-	j, err := io.ReadAll(c.Request.Body) // 接收数据
-	if err != nil {
-		logger.Error("没获取到：%s", err.Error())
-		return
-	}
-	var msg common.EventMessage
-	if err := json.Unmarshal(j, &msg); err != nil {
-		logger.Error("反序列化结果失败%s", err.Error())
-		return
-	}
-
-	v, ok := c.Get("__internal__client_instance")
-	if !ok {
-		return
-	}
-	client, ok := v.(*Client)
-	if !ok {
-		return
-	}
-
-	client.ProcessEvent(&msg)
-}
-
 func commandResultHandler(c *gin.Context) {
 	j, err := io.ReadAll(c.Request.Body) // 接收数据
 	if err != nil {

@@ -10,7 +10,6 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/network"
 	"gitee.com/openeuler/PilotGo/app/server/network/websocket"
 	"gitee.com/openeuler/PilotGo/app/server/service/auth"
-	"gitee.com/openeuler/PilotGo/app/server/service/eventbus"
 	"gitee.com/openeuler/PilotGo/app/server/service/plugin"
 	"gitee.com/openeuler/PilotGo/dbmanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -130,9 +129,6 @@ func startServices(mysqlInfo *options.MysqlDBInfo, stopCh <-chan struct{}) error
 
 	// 初始化plugin服务
 	plugin.Init(stopCh)
-
-	//初始化eventbus
-	eventbus.Init(stopCh)
 
 	return nil
 }
