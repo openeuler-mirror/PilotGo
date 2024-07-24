@@ -336,10 +336,6 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.POST("/run_command", pluginapi.RunCommandHandler)
 		pluginAPI.POST("/run_script", pluginapi.RunScriptHandler)
 
-		pluginAPI.PUT("/listener", pluginapi.RegisterListenerHandler)
-		pluginAPI.PUT("/publish_event", pluginapi.PublishEventHandler)
-		pluginAPI.DELETE("/listener", pluginapi.UnregisterListenerHandler)
-
 		pluginAPI.PUT("/install_package", pluginapi.InstallPackage)
 		pluginAPI.PUT("/uninstall_package", pluginapi.UninstallPackage)
 
