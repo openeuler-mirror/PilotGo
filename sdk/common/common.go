@@ -15,3 +15,5 @@ type CommonResult struct {
 func (r *CommonResult) ParseData(d interface{}) error {
 	return json.Unmarshal(r.Data, d)
 }
+
+type EventCallback func(e *EventMessage)
