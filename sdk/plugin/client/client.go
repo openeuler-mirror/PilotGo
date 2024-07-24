@@ -24,7 +24,7 @@ type Client struct {
 
 	// 用于event消息处理
 	EventChan        chan *common.EventMessage
-	EventCallbackMap map[int]EventCallback
+	EventCallbackMap map[int]common.EventCallback
 
 	// 用于异步command及script执行结果处理机
 	asyncCmdResultChan      chan *common.AsyncCmdResult
@@ -51,7 +51,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 		PluginInfo: desc,
 
 		EventChan:        make(chan *common.EventMessage, 20),
-		EventCallbackMap: make(map[int]EventCallback),
+		EventCallbackMap: make(map[int]common.EventCallback),
 
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
