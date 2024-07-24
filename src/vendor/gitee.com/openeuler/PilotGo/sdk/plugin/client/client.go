@@ -23,8 +23,8 @@ type Client struct {
 	token string
 
 	// 用于event消息处理
-	eventChan        chan *common.EventMessage
-	eventCallbackMap map[int]EventCallback
+	EventChan        chan *common.EventMessage
+	EventCallbackMap map[int]common.EventCallback
 
 	// 用于异步command及script执行结果处理机
 	asyncCmdResultChan      chan *common.AsyncCmdResult
@@ -50,8 +50,8 @@ func DefaultClient(desc *PluginInfo) *Client {
 	global_client = &Client{
 		PluginInfo: desc,
 
-		eventChan:        make(chan *common.EventMessage, 20),
-		eventCallbackMap: make(map[int]EventCallback),
+		EventChan:        make(chan *common.EventMessage, 20),
+		EventCallbackMap: make(map[int]common.EventCallback),
 
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
@@ -90,10 +90,6 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 			c.Set("__internal__client_instance", client)
 		}, tagsHandler)
 
-		api.POST("/event", func(c *gin.Context) {
-			c.Set("__internal__client_instance", client)
-		}, eventHandler)
-
 		api.PUT("/command_result", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
 		}, commandResultHandler)
@@ -108,7 +104,7 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 	// }
 
 	// TODO: start command result process service
-	client.startEventProcessor()
+	// client.startEventProcessor()
 	client.startCommandResultProcessor()
 }
 
