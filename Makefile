@@ -9,8 +9,8 @@ pilotgo-front: ; $(info $(M)...Begin to build pilotgo-front binary.)  @ ## Build
 pilotgo-server: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server.
 	scripts/build.sh backend ${GOARCH};
 
-pilotgo-server-debug: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server.
-	CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build  -tags=production -ldflags '${LDFLAGS}' -o ./pilotgo-server ./src/app/server/main.go
+pilotgo-server-debug: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server-debug.
+	cd src && export GOWORK=off && CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build  -tags=production -ldflags '${LDFLAGS}' -o ./pilotgo-server ./app/server/main.go
 
 container: ;$(info $(M)...Begin to build the docker image.)  @ ## Build the docker image.
 	DOCKER_BUILDKIT=0  docker build  --target pilotgo-server  -t pilotgo_server:${IMAGE_TAG} . --no-cache
@@ -53,4 +53,4 @@ build-server-templete:  ; $(info $(M)...Begin to build config_server.yaml.temple
 	cp -R config_server.yaml.templete ./src/config_server.yaml.templete
 	rm -rf ./config_server.yaml.templete
 vendor: ; $(info $(M)...Begin to update vendor.)  @ ## update vendor
-	cd src && GOWORK=off && go mod vendor
+	cd src && export GOWORK=off && go mod vendor

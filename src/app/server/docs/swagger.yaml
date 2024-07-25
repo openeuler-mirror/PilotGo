@@ -1,0 +1,52 @@
+definitions:
+  user.UserInfo:
+    properties:
+      departId:
+        type: integer
+      departName:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      phone:
+        type: string
+      roleId:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/user/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录接口,返回用户信息和token
+      parameters:
+      - description: 用户登录信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            type: string
+        "400":
+          description: 请求参数错误
+          schema:
+            type: string
+      summary: 用户登录
+      tags:
+      - user
+swagger: "2.0"

@@ -64,7 +64,15 @@ func RegisterHandler(c *gin.Context) {
 	response.Success(c, nil, "添加用户成功!") //Return result
 }
 
-// 登录
+// @Summary 用户登录
+// @Description 用户登录接口,返回用户信息和token
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param user body userservice.UserInfo true "用户登录信息"
+// @Failure 400 {string} string "请求参数错误"
+// @Failure 200 {string} string "登录成功"
+// @Router /api/v1/user/login [post]
 func LoginHandler(c *gin.Context) {
 	user := userservice.UserInfo{}
 	if err := c.Bind(&user); err != nil {

@@ -29,4 +29,5 @@ func init() {
 	rootCmd.AddCommand(NewServerCommand())
 	rootCmd.AddCommand(NewTempleteCommand())
 	rootCmd.AddCommand(NewVersionCommand())
+	rootCmd.AddCommand(NewDocsCmd())
 }
