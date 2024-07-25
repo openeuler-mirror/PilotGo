@@ -10,7 +10,7 @@ pilotgo-server: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Bui
 	scripts/build.sh backend ${GOARCH};
 
 pilotgo-server-debug: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server-debug.
-	cd src && export GOWORK=off && CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build  -tags=production -ldflags '${LDFLAGS}' -o ./pilotgo-server ./app/server/main.go
+	export GOWORK=off && CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build  -tags=production -ldflags '${LDFLAGS}' -o ./pilotgo-server ./cmd/server/main.go
 
 container: ;$(info $(M)...Begin to build the docker image.)  @ ## Build the docker image.
 	DOCKER_BUILDKIT=0  docker build  --target pilotgo-server  -t pilotgo_server:${IMAGE_TAG} . --no-cache
@@ -38,8 +38,7 @@ lint: golangci ; $(info $(M)...Begin to check  code.)  @ ## check  code.
 	$(INFO) lint ;\
 	$(INFO) $(ROOT_DIR) ;\
 	GOFLAGS="-buildvcs=false" ;\
-	# go list -f '{{.Dir}}' -m | xargs -I {} bash -c ' cd "{}" && $(GOLANGCILINT) run ./... --config $(ROOT_DIR)/.golangci.yml'  ;\
-	go work edit -json | jq -r '.Use[].DiskPath' | xargs -I {} bash -c ' cd "{}" && $(GOLANGCILINT) run ./... --config $(ROOT_DIR)/.golangci.yml ' ;\
+	export GOWORK=off && $(GOLANGCILINT) run ./... --config $(ROOT_DIR)/.golangci.yml ;\
 	}
 # check-license-header: Check license header
 check-license-header:
@@ -49,8 +48,12 @@ fix-license-header:
 	./scripts/licence/header-check.sh fix
 
 build-server-templete:  ; $(info $(M)...Begin to build config_server.yaml.templete.)  @ ## build config_server.yaml.templete
-	go run src/app/server/main.go templete
-	cp -R config_server.yaml.templete ./src/config_server.yaml.templete
+	export GOWORK=off && go run ./cmd/server/main.go templete
+	cp -R config_server.yaml.templete ./pkg/config_server.yaml.templete
 	rm -rf ./config_server.yaml.templete
+
 vendor: ; $(info $(M)...Begin to update vendor.)  @ ## update vendor
-	cd src && export GOWORK=off && go mod vendor
+	export GOWORK=off && go mod vendor
+
+server-api-docs: swagci ; $(info $(M)...Begin to update server apidocs.)
+	export GOWORK=off && $(SWAGCI) init -g ./cmd/server/main.go -parseDependency=true -o ./docs/swagger/server/

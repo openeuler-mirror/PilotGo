@@ -28,11 +28,11 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 WORKDIR /PilotGo
 COPY . .
-COPY --from=ui /frontend/dist/assets ./src/app/server/resource/assets
-COPY --from=ui /frontend/dist/index.html  ./src/app/server/resource/index.html 
-COPY --from=ui /frontend/dist/pilotgo.ico ./src/app/server/resource/pilotgo.ico
+COPY --from=ui /frontend/dist/assets      ./cmd/server/app/resource/assets
+COPY --from=ui /frontend/dist/index.html  ./cmd/server/app/resource/index.html 
+COPY --from=ui /frontend/dist/pilotgo.ico ./cmd/server/app/resource/pilotgo.ico
 
-RUN cd /PilotGo/src/app/server && GOWORK=off GO111MODULE=on go build -mod=vendor -o ${version_path}/server/pilotgo-server -tags="production" main.go 
+RUN  GOWORK=off GO111MODULE=on go build -mod=vendor -o ${version_path}/server/pilotgo-server -tags="production" ./cmd/server/main.go
 RUN  chmod a+x ${version_path}/server/pilotgo-server
 
 ####################################################################################################
@@ -45,6 +45,6 @@ EXPOSE 8888 8889
 WORKDIR /home/pilotgo
 
 COPY --from=builder /out/backend/pilotgo/server/pilotgo-server  pilotgo-server 
-COPY --from=builder /PilotGo/src/config_server.yaml.templete  config_server.yaml
-COPY --from=builder /PilotGo/src/user.xlsx.templete   user.xlsx
+COPY --from=builder /PilotGo/pkg/config_server.yaml.templete  config_server.yaml
+COPY --from=builder /PilotGo/pkg/user.xlsx.templete   user.xlsx
 CMD [ "./pilotgo-server" ]
