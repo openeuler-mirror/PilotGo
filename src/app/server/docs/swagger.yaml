@@ -1,3 +1,4 @@
+basePath: /api/v1
 definitions:
   user.UserInfo:
     properties:
@@ -20,8 +21,15 @@ definitions:
     required:
     - email
     type: object
+host: localhost:8888
 info:
   contact: {}
+  description: This is a pilotgo server API docs.
+  license:
+    name: MulanPSL2
+    url: http://license.coscl.org.cn/MulanPSL2
+  title: PilotGo Swagger  API
+  version: "1.0"
 paths:
   /api/v1/user/login:
     post:

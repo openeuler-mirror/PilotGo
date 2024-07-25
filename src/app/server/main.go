@@ -19,6 +19,14 @@ import (
 	_ "gitee.com/openeuler/PilotGo/app/server/docs"
 )
 
+// @title          PilotGo Swagger  API
+// @version         1.0
+// @description     This is a pilotgo server API docs.
+// @license.name  MulanPSL2
+// @license.url   http://license.coscl.org.cn/MulanPSL2
+// @host      localhost:8888
+// @BasePath  /api/v1
+// SwaggerUI: http://localhost:8888/swagger/index.html
 func main() {
 	commands.Execute()
 }

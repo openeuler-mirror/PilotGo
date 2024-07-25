@@ -1,8 +1,17 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is a pilotgo server API docs.",
+        "title": "PilotGo Swagger  API",
+        "contact": {},
+        "license": {
+            "name": "MulanPSL2",
+            "url": "http://license.coscl.org.cn/MulanPSL2"
+        },
+        "version": "1.0"
     },
+    "host": "localhost:8888",
+    "basePath": "/api/v1",
     "paths": {
         "/api/v1/user/login": {
             "post": {
