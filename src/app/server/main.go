@@ -14,7 +14,10 @@
  ******************************************************************************/
 package main
 
-import "gitee.com/openeuler/PilotGo/app/server/cmd/commands"
+import (
+	"gitee.com/openeuler/PilotGo/app/server/cmd/commands"
+	_ "gitee.com/openeuler/PilotGo/app/server/docs"
+)
 
 func main() {
 	commands.Execute()

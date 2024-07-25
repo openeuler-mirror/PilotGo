@@ -28,6 +28,8 @@ import (
 	"gitee.com/openeuler/PilotGo/app/server/resource"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"k8s.io/klog/v2"
 )
 
@@ -38,7 +40,6 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 
 	go func() {
 		r := setupRouter()
-
 		// 启动websocket服务
 		go websocket.CliManager.Start(stopCh)
 		shutdownCtx, cancel := context.WithCancel(context.Background())
@@ -110,6 +111,10 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
+	// config := &ginSwagger.Config{
+	// 	URL: "http://localhost:8080/swagger/doc.json", //The url pointing to API definition
+	// }
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Use(logger.RequestLogger())
 	router.Use(middleware.Recover)
 
