@@ -1,6 +1,6 @@
 
 ROOT_DIR =  $(shell pwd)
-PACKAGE=gitee.com/openeuler/PilotGo/app/server/cmd/commands
+PACKAGE=gitee.com/openeuler/PilotGo/cmd/server/app/cmd/commands
 
 BUILD_DATE:=$(if $(BUILD_DATE),$(BUILD_DATE),$(shell date -u +'%Y-%m-%dT%H:%M:%SZ'))
 GIT_COMMIT:=$(if $(GIT_COMMIT),$(GIT_COMMIT),$(shell git rev-parse HEAD))
