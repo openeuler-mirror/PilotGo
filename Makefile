@@ -9,7 +9,7 @@ pilotgo-front: ; $(info $(M)...Begin to build pilotgo-front binary.)  @ ## Build
 pilotgo-server: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server.
 	scripts/build.sh backend ${GOARCH};
 
-pilotgo-server-debug: ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server-debug.
+pilotgo-server-debug:  pilotgo-front ; $(info $(M)...Begin to build pilotgo-server binary.)  @ ## Build pilotgo-server-debug.
 	export GOWORK=off && CGO_ENABLED=0 GOOS=linux GOARCH=${GOARCH} go build  -tags=production -ldflags '${LDFLAGS}' -o ./pilotgo-server ./cmd/server/main.go
 
 container: ;$(info $(M)...Begin to build the docker image.)  @ ## Build the docker image.
