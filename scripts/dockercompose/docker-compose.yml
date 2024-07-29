@@ -1,9 +1,10 @@
 version: '3'
 services:
   server:
-    build:
-      context: ../../
-      dockerfile: ./dockerfile
+    # build:
+    #   context: ../../
+    #   dockerfile: ./dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/pilotgo/pilotgo:latest
     ports:
       - "8888:8888"
       - "8889:8889"
