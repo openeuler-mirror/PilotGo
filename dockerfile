@@ -1,4 +1,4 @@
-FROM node:20-alpine as ui
+FROM  m.daocloud.io/docker.io/library/node:20-alpine as ui
 
 RUN npm config set registry https://registry.npmmirror.com/  && yarn config set registry https://registry.npmmirror.com/
 COPY frontend/package.json frontend/yarn.lock frontend/
@@ -12,7 +12,7 @@ RUN yarn --cwd frontend build
 
 ####################################################################################################
 
-FROM golang:1.21-alpine3.18 as builder
+FROM m.daocloud.io/docker.io/library/golang:1.21-alpine3.18 as builder
 
 ARG version_path="/out/backend/pilotgo/"
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
@@ -38,7 +38,7 @@ RUN  chmod a+x ${version_path}/server/pilotgo-server
 ####################################################################################################
 
 # # FROM scratch as pilotgo-server 
-FROM alpine:3.16.2 as pilotgo-server 
+FROM m.daocloud.io/docker.io/library/alpine:3.16.2 as pilotgo-server
 
 
 EXPOSE 8888 8889
