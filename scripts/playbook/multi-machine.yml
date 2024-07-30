@@ -1,0 +1,41 @@
+---
+- name: install redis for PilotGo platform
+  hosts: reids
+  become: yes
+  become_user: root
+
+  roles: 
+    - redis
+  tasks: 
+  - name: change protected mode
+    lineinfile: 
+      path: /etc/redis/redis.conf
+      regexp: '^#?protected-mode'
+      line: 'protected-mode no'
+      backrefs: yes
+  - name: restart redis service
+    service: 
+      name: redis
+      state: restarted
+- name: install mysql for PilotGo platform
+  hosts: mysql
+  become: yes
+  become_user: root
+
+  roles: 
+    - mysql
+  tasks: 
+  - name: Ensure a user can connect from a specific host  
+    mysql_user:  
+      name: root  
+      host: '%'  
+      password: '{{ mysql_password }}'  
+      priv: '*.*:ALL,GRANT'  
+      state: present
+- name: install mysql for PilotGo platform
+  hosts: mysql
+  become: yes
+  become_user: root
+
+  roles: 
+    - pserver
