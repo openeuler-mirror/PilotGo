@@ -10,6 +10,12 @@ VERSION=$(shell cat ${ROOT_DIR}/VERSION)
 STATIC_BUILD?=false
 
 APP_VERSION = v2.1.1
+
+NODE_VERSION = v20.15.1
+YARN_VERSION = 1.22.22
+NVM_vERSION = 0.39.7
+GO_VERSION = 1.22.0
+
 GOARCH      = amd64
 
 TIME_LONG	= `date +%Y-%m-%d' '%H:%M:%S`
