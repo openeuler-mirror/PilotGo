@@ -17,6 +17,9 @@ yarn-error.log*
 /cmd/server/app/resource/assets
 /cmd/server/app/resource/pilotgo.ico
 
+.pilotgo-agent.data
+config_agent.yaml
+config_server.yaml
 # Editor directories and files
 .idea
 .vscode

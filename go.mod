@@ -50,6 +50,7 @@ require (
 )
 
 require (
+	gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20240730120230-bb8de73ea049
 	gitee.com/openeuler/PilotGo/sdk v0.0.0
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
