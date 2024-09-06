@@ -1,4 +1,3 @@
-
 ROOT_DIR =  $(shell pwd)
 PACKAGE=gitee.com/openeuler/PilotGo/cmd/server/app/cmd/commands
 
@@ -15,6 +14,8 @@ NODE_VERSION = v20.15.1
 YARN_VERSION = 1.22.22
 NVM_vERSION = 0.39.7
 GO_VERSION = 1.22.0
+DOCKER_VERSION= 26.1.3
+DOCKER_COMPOSE_VERSION = v2.27.1
 
 GOARCH      = amd64
 
