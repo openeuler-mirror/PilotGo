@@ -56,4 +56,4 @@ vendor: ; $(info $(M)...Begin to update vendor.)  @ ## update vendor
 	export GOWORK=off && go mod vendor
 
 server-api-docs: swagci ; $(info $(M)...Begin to update server apidocs.)
-	export GOWORK=off && $(SWAGCI) init -g ./cmd/server/main.go -parseDependency=true -o ./docs/swagger/server/
+	export GOWORK=off && $(SWAGCI) init -g ./cmd/server/main.go --parseDependency=true  -o ./docs/swagger/server/

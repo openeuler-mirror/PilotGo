@@ -1,10 +1,10 @@
 version: '3'
 services:
   server:
-    # build:
-    #   context: ../../
-    #   dockerfile: ./dockerfile
-    image: registry.cn-hangzhou.aliyuncs.com/pilotgo/pilotgo:latest
+    build:
+      context: ../../
+      dockerfile: ./dockerfile
+    # image: registry.cn-hangzhou.aliyuncs.com/pilotgo/pilotgo:latest
     ports:
       - "8888:8888"
       - "8889:8889"
@@ -20,7 +20,7 @@ services:
     networks:
       - pilotgo_net
   mysql:
-    image: mysql:8.0.21
+    image: mysql:8.1.0
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     security_opt:
       - seccomp:unconfined
@@ -35,7 +35,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 'u3bd99dMNFKQ3Wi9'
       MYSQL_DATABASE: 'PilotGo'
-      MYSQL_USER: 'root'
+      MYSQL_USER: 'pilotgo'
     volumes:
       - mysql:/var/lib/mysql
     networks:
