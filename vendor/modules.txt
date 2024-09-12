@@ -1,3 +1,5 @@
+# gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20240730120230-bb8de73ea049
+## explicit; go 1.21.6
 # gitee.com/openeuler/PilotGo/sdk v0.0.0 => ./sdk
 ## explicit; go 1.20
 gitee.com/openeuler/PilotGo/sdk/common
