@@ -1,7 +1,6 @@
 package agentmanager
 
 import (
-	"errors"
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/pkg/utils"
@@ -22,22 +21,22 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 		},
 	}
 
-	resp_message, err := a.sendMessage(msg, true)
+	respMessage, err := a.sendMessage(msg, true)
 	if err != nil {
-		logger.Error("failed to run command on agent")
+		logger.Error("failed to run command on agent: %v", err)
 		return nil, err
 	}
 
-	if resp_message.Status == 0 {
-		//状态为-1的时候不会有数据
+	if respMessage.Status == 0 {
+		//当状态为0时，表示命令执行成功，可以解析返回的数据。状态为-1的时候不会有数据
 		result := &utils.CmdResult{}
-		err = resp_message.BindData(result)
+		err = respMessage.BindData(result)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to bind command result: %v", err)
 		}
 		return result, nil
 	}
-	return nil, errors.New(resp_message.Error)
+	return nil, fmt.Errorf("agent returned error: %s", respMessage.Error)
 }
 
 // 远程在agent上运行脚本文件
@@ -54,21 +53,21 @@ func (a *Agent) RunScript(script string, params []string) (*utils.CmdResult, err
 		},
 	}
 
-	resp_message, err := a.sendMessage(msg, true)
+	respMessage, err := a.sendMessage(msg, true)
 	if err != nil {
-		logger.Error("failed to run script on agent")
+		logger.Error("failed to run script on agent: %v", err)
 		return nil, err
 	}
 
-	if resp_message.Status == 0 {
+	if respMessage.Status == 0 {
 		result := &utils.CmdResult{}
-		err = resp_message.BindData(result)
+		err = respMessage.BindData(result)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to bind command result: %v", err)
 		}
 		return result, nil
 	}
-	return nil, errors.New(resp_message.Error)
+	return nil, fmt.Errorf("agent returned error: %s", respMessage.Error)
 }
 
 // chmod [-R] 权限值 文件名
@@ -79,18 +78,18 @@ func (a *Agent) ChangePermission(permission, file string) (string, error) {
 		Data: permission + "," + file,
 	}
 
-	resp_message, err := a.sendMessage(msg, true)
+	respMessage, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
 
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
+	if respMessage.Status == -1 || respMessage.Error != "" {
+		logger.Error("failed to run script on agent: %s", respMessage.Error)
+		return "", fmt.Errorf(respMessage.Error)
 	}
 
-	return resp_message.Data.(string), nil
+	return respMessage.Data.(string), nil
 }
 
 // chown [-R] 所有者 文件或目录
@@ -101,18 +100,18 @@ func (a *Agent) ChangeFileOwner(user, file string) (string, error) {
 		Data: user + "," + file,
 	}
 
-	resp_message, err := a.sendMessage(msg, true)
+	respMessage, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
 
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
+	if respMessage.Status == -1 || respMessage.Error != "" {
+		logger.Error("failed to run script on agent: %s", respMessage.Error)
+		return "", fmt.Errorf(respMessage.Error)
 	}
 
-	return resp_message.Data.(string), nil
+	return respMessage.Data.(string), nil
 }
 
 // 临时修改agent端系统参数
@@ -123,16 +122,16 @@ func (a *Agent) ChangeSysctl(args string) (string, error) {
 		Data: args,
 	}
 
-	resp_message, err := a.sendMessage(msg, true)
+	respMessage, err := a.sendMessage(msg, true)
 	if err != nil {
 		logger.Error("failed to run script on agent")
 		return "", err
 	}
 
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
+	if respMessage.Status == -1 || respMessage.Error != "" {
+		logger.Error("failed to run script on agent: %s", respMessage.Error)
+		return "", fmt.Errorf(respMessage.Error)
 	}
 
-	return resp_message.Data.(string), nil
+	return respMessage.Data.(string), nil
 }
