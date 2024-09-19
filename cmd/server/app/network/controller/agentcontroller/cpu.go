@@ -22,17 +22,20 @@ import (
 
 func CPUInfoHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
-
+	if uuid == "" {
+		response.Fail(c, nil, "uuid参数缺失")
+		return
+	}
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
 		response.Fail(c, nil, "获取uuid失败!")
 		return
 	}
 
-	cpu_info, err := agent.GetCPUInfo()
+	cpuInfo, err := agent.GetCPUInfo()
 	if err != nil {
 		response.Fail(c, nil, "获取系统CPU信息失败!")
 		return
 	}
-	response.Success(c, gin.H{"CPU_info": cpu_info}, "Success")
+	response.Success(c, gin.H{"CPU_info": cpuInfo}, "Success")
 }

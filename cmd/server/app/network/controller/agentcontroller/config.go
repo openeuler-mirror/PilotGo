@@ -9,6 +9,10 @@ import (
 
 func ConfigfileHandler(c *gin.Context) {
 	uuid := c.Query("uuid")
+	if uuid == "" {
+		response.Fail(c, nil, "uuid参数缺失")
+		return
+	}
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
 		response.Fail(c, nil, "获取uuid失败!")
