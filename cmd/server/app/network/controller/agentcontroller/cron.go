@@ -25,6 +25,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreatCron 创建定时任务
 func CreatCron(c *gin.Context) {
 	// 存入数据库
 	var newCron cron.CrontabUpdate
@@ -91,6 +92,7 @@ func CreatCron(c *gin.Context) {
 	response.Success(c, gin.H{"data": newCron, "cron": cron_start}, "任务已生效")
 }
 
+// DeleteCronTask 是一个删除定时任务的函数
 func DeleteCronTask(c *gin.Context) {
 	var crons cron.DelCrons
 	var cronIds string
@@ -114,6 +116,7 @@ func DeleteCronTask(c *gin.Context) {
 	response.Success(c, nil, "任务删除成功!")
 }
 
+// UpdateCron 是一个处理更新定时任务的函数
 func UpdateCron(c *gin.Context) {
 	var Cron cron.CrontabUpdate
 	c.Bind(&Cron)
@@ -157,6 +160,7 @@ func UpdateCron(c *gin.Context) {
 	response.Success(c, gin.H{"cron": cron_start}, "任务更新成功,已开始执行")
 }
 
+// CronTaskStatus 处理任务状态更新请求
 func CronTaskStatus(c *gin.Context) {
 	var Cron cron.CrontabUpdate
 	c.Bind(&Cron)
@@ -201,6 +205,7 @@ func CronTaskStatus(c *gin.Context) {
 	response.Success(c, gin.H{"cron": cron_start}, "任务已开启")
 }
 
+// CronTaskList 获取定时任务列表
 func CronTaskList(c *gin.Context) {
 	uuid := c.Query("uuid")
 
@@ -211,8 +216,8 @@ func CronTaskList(c *gin.Context) {
 		return
 	}
 
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := cron.CronListPaged(uuid, num, query.Size)
+	offset := query.Size * (query.CurrentPageNum - 1)
+	total, data, err := cron.CronListPaged(uuid, offset, query.Size)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
