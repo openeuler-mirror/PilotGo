@@ -252,25 +252,33 @@ func FirewalldZonePortDelHandler(c *network.SocketClient, msg *protocol.Message)
 	logger.Debug("process agent info command:%s", msg.String())
 	zp := msg.Data.(string)
 	zps := strings.Split(zp, ",")
+	if len(zps) < 3 {
+		return c.Send(&protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  "Invalid data format",
+		})
+	}
+
 	zone := zps[0]
 	port := zps[1]
 	proto := zps[2]
-	del, err := uos.OS().DelZonePort(zone, port, proto)
-
+	// 调用删除端口函数
+	result, err := uos.OS().DelZonePort(zone, port, proto)
 	if err != nil {
-		resp_msg := &protocol.Message{
+		return c.Send(&protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: -1,
 			Error:  err.Error(),
-		}
-		return c.Send(resp_msg)
+		})
 	}
-	resp_msg := &protocol.Message{
+	// 发送成功响应
+	return c.Send(&protocol.Message{
 		UUID:   msg.UUID,
 		Type:   msg.Type,
 		Status: 0,
-		Data:   del,
-	}
-	return c.Send(resp_msg)
+		Data:   result,
+	})
 }
