@@ -181,26 +181,28 @@ func BatchIds2UUIDs(batchIds []int) (uuids []string) {
 	return uuids
 }
 
-// from batch get all machines
+// GetMachineUUIDS from batch get all machines
 func GetMachineUUIDS(batchid int) []string {
-	if batchid != 0 {
-		machineIdlist, err := dao.GetMachineID(batchid)
-		if err != nil {
-			return nil
-		}
-
-		// 获取机器的所有信息
-		uuids := make([]string, 0)
-		for _, macId := range machineIdlist {
-			macuuid, err := dao.MachineIdToUUID(int(macId))
-			if err != nil {
-				logger.Error(err.Error())
-			}
-			uuids = append(uuids, macuuid)
-		}
-		return uuids
+	if batchid == 0 {
+		return nil
 	}
-	return nil
+
+	machineIdlist, err := dao.GetMachineID(batchid)
+	if err != nil {
+		logger.Error("Failed to get machine IDs for batch ID %d: %v", batchid, err)
+		return nil
+	}
+
+	uuids := make([]string, 0, len(machineIdlist)) // 预先分配足够空间
+	for _, macID := range machineIdlist {
+		macuuid, err := dao.MachineIdToUUID(int(macID))
+		if err != nil {
+			logger.Error("Failed to get UUID for machine ID %d in batch ID %d: %v", macID, batchid, err)
+			continue // 跳过当前循环，不将错误的UUID添加到列表中
+		}
+		uuids = append(uuids, macuuid)
+	}
+	return uuids
 }
 
 // get common.CmdStruct batch uuids
