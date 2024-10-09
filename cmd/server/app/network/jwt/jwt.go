@@ -146,7 +146,7 @@ func parseClaims(tokenString string, claims jwt.Claims) (jwt.Claims, error) {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
 
-	if !token.Valid {
+	if token != nil && !token.Valid {
 		return nil, fmt.Errorf("token is invalid")
 	}
 
