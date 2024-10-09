@@ -136,26 +136,19 @@ func parseToken(tokenString string, clames jwt.Claims) (*jwt.Token, error) {
 	return token, err
 }
 
-func parseClaims(tokenString string, clames jwt.Claims) (jwt.Claims, error) {
-	var token *jwt.Token
-	var err error
-
+func parseClaims(tokenString string, claims jwt.Claims) (jwt.Claims, error) {
 	if tokenString == "" {
-		err = fmt.Errorf("token is empty")
-		goto OnError
+		return nil, fmt.Errorf("token is empty")
 	}
 
-	token, err = parseToken(tokenString, clames)
+	token, err := parseToken(tokenString, claims)
 	if err != nil {
-		goto OnError
+		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
 
 	if token != nil && !token.Valid {
-		err = fmt.Errorf("token is invalid")
-		goto OnError
+		return nil, fmt.Errorf("token is invalid")
 	}
-	return token.Claims, nil
 
-OnError:
-	return nil, err
+	return token.Claims, nil
 }
