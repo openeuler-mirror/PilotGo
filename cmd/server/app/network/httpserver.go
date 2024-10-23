@@ -366,4 +366,6 @@ func registerPluginGateway(router *gin.Engine) {
 	logger.Info("gateway process plugin request")
 	gateway.Any("/:plugin_name", controller.PluginGatewayHandler)
 	gateway.Any("/:plugin_name/*action", controller.PluginGatewayHandler)
+
+	gateway.GET("/ws/:plugin_name", controller.PluginWebsocketGatewayHandler)
 }
