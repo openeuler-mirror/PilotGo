@@ -213,7 +213,7 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 
 	u, err := jwt.ParseUser(c)
 	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
+		c.String(http.StatusUnauthorized, fmt.Sprintf("user token error: %s", err.Error()))
 		return
 	}
 	log := &auditlog.AuditLog{
@@ -242,20 +242,6 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 
 	logger.Debug("proxy plugin request to: %s", targetURL_str)
 
-	dialer := websocket.Dialer{
-		Proxy: nil,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-		HandshakeTimeout: 10 * time.Second,
-	}
-	target_wsconn, _, err := dialer.Dial(targetURL_str, nil)
-	if err != nil {
-		c.String(http.StatusBadGateway, fmt.Sprintf("dial to target WebSocket failed: %s", err.Error()))
-		return
-	}
-	defer target_wsconn.Close()
-
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:   1024,
 		WriteBufferSize:  1024,
@@ -271,11 +257,29 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 	}
 	defer client_wsconn.Close()
 
+	dialer := websocket.Dialer{
+		Proxy: nil,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+		HandshakeTimeout: 10 * time.Second,
+	}
+	target_wsconn, _, err := dialer.Dial(targetURL_str, nil)
+	if err != nil {
+		c.String(http.StatusBadGateway, fmt.Sprintf("dial to target WebSocket failed: %s", err.Error()))
+		return
+	}
+	defer target_wsconn.Close()
+
 	transferMsg := func(_srcConn, _destConn *websocket.Conn, _err_ch chan error) {
 		for {
 			messageType, message, err := _srcConn.ReadMessage()
 			if err != nil {
-				_err_ch <- fmt.Errorf("error while reading message: %s", err.Error())
+				if websocket.IsCloseError(err, websocket.CloseAbnormalClosure, websocket.CloseNormalClosure) {
+					_err_ch <- fmt.Errorf("websocket client %s closed: %s", _srcConn.RemoteAddr().String(), err.Error())
+					return
+				}
+				_err_ch <- fmt.Errorf("error while reading message(msgType: %d): %s, %s", messageType, err.Error(), message)
 				return
 			}
 
