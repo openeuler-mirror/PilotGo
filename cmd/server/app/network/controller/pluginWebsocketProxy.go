@@ -160,7 +160,7 @@ func transferMessages(_srcConn, _dstConn *websocket.Conn, _err_ch chan error) {
 					Code:    WebsocketProxyReadError,
 					SrcConn: _srcConn,
 					DstConn: _dstConn,
-					Text:    fmt.Sprintf("websocket src conn %s closed: %s", _srcConn.RemoteAddr().String(), err.Error()),
+					Text:    fmt.Sprintf("websocket src conn %s closed(%v->%v): %s", _srcConn.RemoteAddr().String(), _srcConn.RemoteAddr().String(), _dstConn.RemoteAddr().String(), err.Error()),
 				}
 				return
 			}
@@ -168,7 +168,7 @@ func transferMessages(_srcConn, _dstConn *websocket.Conn, _err_ch chan error) {
 				Code:    WebsocketProxyReadError,
 				SrcConn: _srcConn,
 				DstConn: _dstConn,
-				Text:    fmt.Sprintf("error while reading message(msgType: %d): %s, %s", messageType, err.Error(), message),
+				Text:    fmt.Sprintf("error while reading message(%v->%v, msgType: %d): %s, %s", _srcConn.RemoteAddr().String(), _dstConn.RemoteAddr().String(), messageType, err.Error(), message),			
 			}
 			return
 		}
@@ -178,7 +178,7 @@ func transferMessages(_srcConn, _dstConn *websocket.Conn, _err_ch chan error) {
 				Code:    WebsocketProxyWriteError,
 				SrcConn: _srcConn,
 				DstConn: _dstConn,
-				Text:    fmt.Sprintf("error while writing message: %s", err.Error()),
+				Text:    fmt.Sprintf("error while writing message(%v->%v): %s", _srcConn.RemoteAddr().String(), _dstConn.RemoteAddr().String(), err.Error()),
 			}
 			return
 		}
