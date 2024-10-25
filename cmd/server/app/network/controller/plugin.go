@@ -2,12 +2,10 @@ package controller
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
-	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
@@ -18,7 +16,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 	uuidservice "github.com/google/uuid"
-	"github.com/gorilla/websocket"
 )
 
 // 查询插件清单
@@ -201,107 +198,4 @@ func PluginGatewayHandler(c *gin.Context) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	proxy.ServeHTTP(c.Writer, c.Request)
-}
-
-func PluginWebsocketGatewayHandler(c *gin.Context) {
-	name := c.Param("plugin_name")
-	p, err := plugin.GetPlugin(name)
-	if err != nil {
-		c.String(http.StatusNotFound, "plugin not found: "+err.Error())
-		return
-	}
-
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		c.String(http.StatusUnauthorized, fmt.Sprintf("user token error: %s", err.Error()))
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "parse Plugin",
-	}
-	auditlog.Add(log)
-
-	target_addr := strings.Replace(strings.Split(p.Url, "//")[1], "/plugin/"+name, "", 1)
-	targetURL_str := fmt.Sprintf("ws://%s/ws/proxy", target_addr)
-	ishttp, err := httputils.ServerIsHttp("http://" + target_addr)
-	if err != nil {
-		c.String(http.StatusNotFound, "parse plugin url error: "+err.Error())
-		return
-	}
-	if ishttp && strings.Split(targetURL_str, "://")[0] == "wss" {
-		targetURL_str = "ws://" + strings.Split(targetURL_str, "://")[1]
-	}
-	if !ishttp && strings.Split(targetURL_str, "://")[0] == "ws" {
-		targetURL_str = "wss://" + strings.Split(targetURL_str, "://")[1]
-	}
-
-	logger.Debug("proxy plugin request to: %s", targetURL_str)
-
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:   1024,
-		WriteBufferSize:  1024,
-		HandshakeTimeout: 10 * time.Second,
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-	client_wsconn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		c.String(http.StatusBadGateway, fmt.Sprintf("update client WebSocket failed: %s", err.Error()))
-		return
-	}
-	defer client_wsconn.Close()
-
-	dialer := websocket.Dialer{
-		Proxy: nil,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-		HandshakeTimeout: 10 * time.Second,
-	}
-	target_wsconn, _, err := dialer.Dial(targetURL_str, nil)
-	if err != nil {
-		c.String(http.StatusBadGateway, fmt.Sprintf("dial to target WebSocket failed: %s", err.Error()))
-		return
-	}
-	defer target_wsconn.Close()
-
-	transferMsg := func(_srcConn, _destConn *websocket.Conn, _err_ch chan error) {
-		for {
-			messageType, message, err := _srcConn.ReadMessage()
-			if err != nil {
-				if websocket.IsCloseError(err, websocket.CloseAbnormalClosure, websocket.CloseNormalClosure) {
-					_err_ch <- fmt.Errorf("websocket client %s closed: %s", _srcConn.RemoteAddr().String(), err.Error())
-					return
-				}
-				_err_ch <- fmt.Errorf("error while reading message(msgType: %d): %s, %s", messageType, err.Error(), message)
-				return
-			}
-
-			err = _destConn.WriteMessage(messageType, message)
-			if err != nil {
-				_err_ch <- fmt.Errorf("error while writing message: %s", err.Error())
-				return
-			}
-		}
-	}
-	client2TargetErrChan, target2ClientErrChan := make(chan error, 1), make(chan error, 1)
-
-	go transferMsg(client_wsconn, target_wsconn, client2TargetErrChan)
-	go transferMsg(target_wsconn, client_wsconn, target2ClientErrChan)
-	select {
-	case err := <-client2TargetErrChan:
-		logger.Error(err.Error())
-		c.String(http.StatusBadGateway, err.Error())
-		return
-	case err := <-target2ClientErrChan:
-		logger.Error(err.Error())
-		c.String(http.StatusBadGateway, err.Error())
-		return
-	}
 }
