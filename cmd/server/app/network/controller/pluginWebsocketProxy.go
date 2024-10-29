@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
@@ -64,8 +65,12 @@ func (we *WebsocketError) Error() string {
 }
 
 func PluginWebsocketGatewayHandler(c *gin.Context) {
+	var wg sync.WaitGroup
 	errChan := make(chan error, 1)
-	defer close(errChan)
+	defer func() {
+		wg.Wait()
+		close(errChan)
+	}()
 
 	name := c.Param("plugin_name")
 	p, err := plugin.GetPlugin(name)
@@ -118,8 +123,10 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 	}
 	defer target_wsconn.Close()
 
-	go transferMessages(client_wsconn, target_wsconn, errChan)
-	go transferMessages(target_wsconn, client_wsconn, errChan)
+	wg.Add(1)
+	go transferMessages(client_wsconn, target_wsconn, errChan, &wg)
+	wg.Add(1)
+	go transferMessages(target_wsconn, client_wsconn, errChan, &wg)
 
 	err = <-errChan
 	logger.Error(err.Error())
@@ -151,7 +158,8 @@ func targetDirector(_r *http.Request) (http.Header, error) {
 	return header, nil
 }
 
-func transferMessages(_srcConn, _dstConn *websocket.Conn, _err_ch chan error) {
+func transferMessages(_srcConn, _dstConn *websocket.Conn, _err_ch chan error, _wg *sync.WaitGroup) {
+	defer _wg.Done()
 	for {
 		messageType, message, err := _srcConn.ReadMessage()
 		if err != nil {
