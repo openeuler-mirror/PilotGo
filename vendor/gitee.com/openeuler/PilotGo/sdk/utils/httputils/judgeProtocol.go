@@ -17,7 +17,7 @@ func ServerIsHttp(rawurl string) (bool, error) {
 	}
 
 	url_string := fmt.Sprintf("http://%s", net.JoinHostPort(url.Hostname(), url.Port()))
-	req, err := http.NewRequest("GET", url_string, nil)
+	req, err := http.NewRequest(http.MethodGet, url_string, nil)
 	if err != nil {
 		return false, err
 	}
