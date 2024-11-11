@@ -208,7 +208,7 @@ func registerAPIs(router *gin.Engine) {
 	{
 		macDetails.GET("/agent_overview", agentcontroller.AgentOverviewHandler)
 		macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
-		macDetails.GET("/run_script", agentcontroller.RunScript)
+		macDetails.GET("/run_command", agentcontroller.RunCmd)
 		macDetails.GET("/os_info", agentcontroller.OSInfoHandler)
 		macDetails.GET("/cpu_info", agentcontroller.CPUInfoHandler)
 		macDetails.GET("/memory_info", agentcontroller.MemoryInfoHandler)

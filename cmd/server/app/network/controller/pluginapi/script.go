@@ -124,7 +124,7 @@ func RunScriptHandler(c *gin.Context) {
 		}
 		auditlog.Add(log)*/
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
-
+	// TODO : shellcheck
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil { /*

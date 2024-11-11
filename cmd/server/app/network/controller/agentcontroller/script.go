@@ -15,7 +15,6 @@
 package agentcontroller
 
 import (
-	"fmt"
 	"net/http"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
@@ -23,18 +22,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RunScript(c *gin.Context) {
+func RunCmd(c *gin.Context) {
 	logger.Debug("process get agent request")
 	// TODO: process agent info
 	uuid := c.Query("uuid")
 	cmd := c.Query("cmd")
-	fmt.Println(uuid, cmd)
 
 	agent := agentmanager.GetAgent(uuid)
 	if agent != nil {
 		data, err := agent.RunCommand(cmd)
 		if err != nil {
 			logger.Error("run script error, agent:%s, cmd:%s", uuid, cmd)
+			// TODO : Modify the return message body
 			c.JSON(http.StatusOK, `{"status":-1}`)
 		}
 		logger.Info("run command on agent result:%v", data)
@@ -45,3 +44,6 @@ func RunScript(c *gin.Context) {
 	logger.Info("unknown agent:%s", uuid)
 	c.JSON(http.StatusOK, `{"status":-1}`)
 }
+
+// func RunScript(c *gin.Context) {
+// }
