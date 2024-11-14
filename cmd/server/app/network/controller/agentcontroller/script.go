@@ -15,10 +15,11 @@
 package agentcontroller
 
 import (
-	"net/http"
+	"regexp"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,18 +33,43 @@ func RunCmd(c *gin.Context) {
 	if agent != nil {
 		data, err := agent.RunCommand(cmd)
 		if err != nil {
-			logger.Error("run script error, agent:%s, cmd:%s", uuid, cmd)
-			// TODO : Modify the return message body
-			c.JSON(http.StatusOK, `{"status":-1}`)
+			logger.Error("run command error, agent:%s, cmd:%s", uuid, cmd)
+			response.Fail(c, gin.H{"status": false}, err.Error())
 		}
 		logger.Info("run command on agent result:%v", data)
-		c.JSON(http.StatusOK, `{"status":0}`)
+		response.Success(c, nil, "run command success")
 		return
 	}
 
 	logger.Info("unknown agent:%s", uuid)
-	c.JSON(http.StatusOK, `{"status":-1}`)
+	response.Fail(c, gin.H{"status": false}, "unknown agent")
 }
 
-// func RunScript(c *gin.Context) {
-// }
+func RunScriptWithBooleanCheck(c *gin.Context) {
+	// Func Init
+	logger.Debug("process get agent request")
+}
+
+func containsDangerousCommand(content string) bool {
+	for _, pattern := range dangerousCommandsList {
+		matched, err := regexp.MatchString(pattern, content)
+		if err != nil {
+			logger.Error("Error matching pattern %s: %v\n", pattern, err)
+			// TODO
+			continue
+		}
+		if matched {
+			return true
+		}
+	}
+	return false
+}
+
+var dangerousCommandsList = []string{
+	`.*rm\s+-[r,f,rf].*`,
+	`.*lvremove\s+-f.*`,
+	`.*poweroff.*`,
+	`.*shutdown\s+-[f,F,h,k,n,r,t,C].*`,
+	`.*pvremove\s+-f.*`,
+	`.*vgremove\s+-f.*`,
+}
