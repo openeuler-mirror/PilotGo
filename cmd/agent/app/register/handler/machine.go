@@ -196,11 +196,18 @@ func AgentOSInfoHandler(c *network.SocketClient, msg *protocol.Message) error {
 	systemAndCPUInfo := common.SystemAndCPUInfo{}
 
 	if erros != nil || errcpu != nil {
+		err_str := "fail to get agent os info: "
+		if erros != nil {
+			err_str = fmt.Sprintf("%s hostinfo(%s) ", err_str, erros.Error())
+		}
+		if errcpu != nil {
+			err_str = fmt.Sprintf("%s cpuinfo(%s) ", err_str, errcpu.Error())
+		}
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: -1,
-			Error:  erros.Error(),
+			Error:  err_str,
 			Data:   systemAndCPUInfo,
 		}
 		return c.Send(resp_msg)
