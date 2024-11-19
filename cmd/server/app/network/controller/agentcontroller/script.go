@@ -46,8 +46,32 @@ func RunCmd(c *gin.Context) {
 }
 
 func RunScriptWithBooleanCheck(c *gin.Context) {
-	// Func Init
-	logger.Debug("process get agent request")
+	logger.Debug("process get agent script request")
+	uuid := c.Query("uuid")
+	cmd := c.Query("cmd")
+
+	// 调用检测高危命令
+	if containsDangerousCommand(cmd) {
+		logger.Warn("Detected dangerous command")
+		response.Fail(c, gin.H{"status": false}, "Dangerous command detected in script.")
+		return
+	}
+
+	agent := agentmanager.GetAgent(uuid)
+	if agent != nil {
+		data, err := agent.RunCommand(cmd)
+		if err != nil {
+			logger.Error("run script error, agent:%s, cmd:%s", uuid, cmd)
+			response.Fail(c, gin.H{"status": false}, err.Error())
+			return
+		}
+		logger.Info("run script on agent result:%v", data)
+		response.Success(c, nil, "run script success")
+		return
+	}
+
+	logger.Info("unknown agent:%s", uuid)
+	response.Fail(c, gin.H{"status": false}, "unknown agent")
 }
 
 func containsDangerousCommand(content string) bool {
