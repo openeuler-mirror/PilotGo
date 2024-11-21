@@ -10,11 +10,11 @@
     msg: 'dnf install PilotGo-server failed'
   when: pilotgo_info.rc != 0
 - name: change PilotGo config
-  shell: sed -i '/^http_server:/,+1 s/0\.0\.0\.0/{{ groups['standalone'][0] }}/' /opt/PilotGo/server/config_server.yaml
+  shell: sed -i '/^http_server:/,+1 s/0\.0\.0\.0/{{ ansible_default_ipv4['address'] }}/' /opt/PilotGo/server/config_server.yaml
 - name: change PilotGo config
-  shell: sed -i '/^socket_server:/,+1 s/0\.0\.0\.0/{{ groups['standalone'][0] }}/' /opt/PilotGo/server/config_server.yaml
+  shell: sed -i '/^socket_server:/,+1 s/0\.0\.0\.0/{{ ansible_default_ipv4['address'] }}/' /opt/PilotGo/server/config_server.yaml
 - name: change PilotGo config
-  shell: sed -i '/^mysql:/,+1 s/localhost/{{ groups['standalone'][0] }}/' /opt/PilotGo/server/config_server.yaml
+  shell: sed -i '/^mysql:/,+1 s/localhost/{{ ansible_default_ipv4['address'] }}/' /opt/PilotGo/server/config_server.yaml
 - name: change passwd
   lineinfile: 
     path: /opt/PilotGo/server/config_server.yaml
@@ -22,7 +22,7 @@
     line: '  password: {{ mysql_password }}'
     backrefs: yes
 - name: change PilotGo config
-  shell: sed -i '/^redis:/,+1 s/localhost/{{ groups['standalone'][0] }}/' /opt/PilotGo/server/config_server.yaml
+  shell: sed -i '/^redis:/,+1 s/localhost/{{ ansible_default_ipv4['address'] }}/' /opt/PilotGo/server/config_server.yaml
 - name: change passwd
   lineinfile: 
     path: /opt/PilotGo/server/config_server.yaml
