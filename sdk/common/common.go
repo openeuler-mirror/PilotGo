@@ -16,4 +16,9 @@ func (r *CommonResult) ParseData(d interface{}) error {
 	return json.Unmarshal(r.Data, d)
 }
 
+// 将 MessageData json字符串转换成指定结构体的message消息数据
+func ToMessage(d string, s interface{}) error {
+	return json.Unmarshal([]byte(d), s)
+}
+
 type EventCallback func(e *EventMessage)
