@@ -99,23 +99,24 @@ func LoginHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	m := eventSDK.MessageData{
+	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgUserLogin,
 		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgUserLogin),
 		TimeStamp:   time.Now(),
-		Data:        user.Email + "登录平台",
+		Data: eventSDK.MDUserSystemSession{
+			UserName: u.Username,
+			Email:    u.Email,
+		},
 	}
-	msgData, err := commonSDK.ToJSONString(m)
+	msgDataString, err := msgData.ToMessageDataString()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
 	ms := commonSDK.EventMessage{
 		MessageType: eventSDK.MsgUserLogin,
-		MessageData: msgData,
+		MessageData: msgDataString,
 	}
-	logger.Info("event消息: %v", ms)
-
 	event.PublishEvent(ms)
 
 	departName, departId, roleId, err := userservice.Login(&user)
@@ -151,22 +152,24 @@ func Logout(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	m := eventSDK.MessageData{
+	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgUserLogout,
 		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgUserLogout),
 		TimeStamp:   time.Now(),
-		Data:        u.Email + "退出平台",
+		Data: eventSDK.MDUserSystemSession{
+			UserName: u.Username,
+			Email:    u.Email,
+		},
 	}
-	msgData, err := commonSDK.ToJSONString(m)
+	msgDataString, err := msgData.ToMessageDataString()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
 	ms := commonSDK.EventMessage{
 		MessageType: eventSDK.MsgUserLogin,
-		MessageData: msgData,
+		MessageData: msgDataString,
 	}
-	logger.Info("event消息: %v", ms)
 	event.PublishEvent(ms)
 
 	response.Success(c, nil, "退出成功!")

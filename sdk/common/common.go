@@ -2,11 +2,29 @@ package common
 
 import (
 	"encoding/json"
+	"time"
 )
+
+type MessageData struct {
+	MsgType     int         `json:"msg_type_id"`
+	MessageType string      `json:"msg_type"`
+	TimeStamp   time.Time   `json:"timestamp"`
+	Data        interface{} `json:"data"`
+}
 
 type EventMessage struct {
 	MessageType int    `json:"msgType"`
 	MessageData string `json:"msgData"`
+}
+
+type EventCallback func(e *EventMessage)
+
+func (msgData *MessageData) ToMessageDataString() (string, error) {
+	data, err := json.Marshal(msgData)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
 type CommonResult struct {
@@ -18,17 +36,3 @@ type CommonResult struct {
 func (r *CommonResult) ParseData(d interface{}) error {
 	return json.Unmarshal(r.Data, d)
 }
-
-// 将 MessageData json字符串转换成指定结构体的message消息数据
-func ToMessage(d string, s interface{}) error {
-	return json.Unmarshal([]byte(d), s)
-}
-func ToJSONString(v interface{}) (string, error) {
-	data, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
-}
-
-type EventCallback func(e *EventMessage)
