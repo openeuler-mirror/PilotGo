@@ -542,18 +542,13 @@ func AddPlugin(param *PluginParam) error {
 	return err
 }
 
-func DeletePlugin(uuid string) error {
+func DeletePlugin(uuid string, plugin *Plugin) error {
 	logger.Debug("delete plugin: %s", uuid)
 
 	//删除插件权限
-	plugin, err := GetPluginByUUID(uuid)
-	if err != nil {
-		logger.Error("get plugin by uuid error:%s", err.Error())
-		return err
-	}
 	logger.Debug("delete %s plugin permission", plugin.Name)
 
-	err = auth.DeletePluginPermission(plugin.Permissions, plugin.UUID)
+	err := auth.DeletePluginPermission(plugin.Permissions, plugin.UUID)
 	if err != nil {
 		logger.Error("failed to delete plugin permissions in mysql:%s", err.Error())
 		return err

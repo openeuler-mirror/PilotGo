@@ -6,11 +6,15 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
 
+	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/event"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -126,6 +130,14 @@ func UnloadPluginHandler(c *gin.Context) {
 		response.Fail(c, nil, "参数错误")
 		return
 	}
+
+	p, err := plugin.GetPluginByUUID(uuid) //获取插件信息
+	if err != nil {
+		logger.Error("get plugin by uuid error:%s", err.Error())
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
 	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
@@ -141,8 +153,30 @@ func UnloadPluginHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
+	msgData := commonSDK.MessageData{
+		MsgType:     eventSDK.MsgPluginRemove,
+		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginRemove),
+		TimeStamp:   time.Now(),
+		Data: eventSDK.MDPluginChange{
+			PluginName:  p.Name,
+			Version:     p.Version,
+			Url:         p.Url,
+			Description: p.Description,
+		},
+	}
+	msgDataString, err := msgData.ToMessageDataString()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	ms := commonSDK.EventMessage{
+		MessageType: eventSDK.MsgUserLogin,
+		MessageData: msgDataString,
+	}
+	event.PublishEvent(ms)
+
 	logger.Info("unload plugin:%s", uuid)
-	if err := plugin.DeletePlugin(uuid); err != nil {
+	if err := plugin.DeletePlugin(uuid, p); err != nil {
 		return
 	}
 	response.Success(c, nil, "插件信息更新成功")
