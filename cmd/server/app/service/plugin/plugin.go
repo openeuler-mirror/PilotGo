@@ -515,31 +515,31 @@ type PluginParam struct {
 	Url        string `json:"url"`
 }
 
-func AddPlugin(param *PluginParam) error {
+func AddPlugin(param *PluginParam) (*Plugin, error) {
 	url := param.Url
 	logger.Debug("add plugin from %s", url)
 
 	ok, err := dao.IsExistCustomName(param.CustomName)
 	if err != nil {
-		return err
+		return &Plugin{}, err
 	}
 	if ok {
-		return errors.New("已存在相同插件名称")
+		return &Plugin{}, errors.New("已存在相同插件名称")
 	}
 
 	p, err := globalPluginManager.addPlugin(param)
 	if err != nil {
-		return err
+		return p, err
 	}
 
 	if err := addPluginInRedis(p.UUID); err != nil {
 		logger.Error("failed to add plugin heartbeat in redis:%s", err.Error())
-		return err
+		return p, err
 	}
 
 	//向数据库添加admin用户的插件权限
 	err = auth.AddPluginPermission("admin", p.Permissions, p.UUID)
-	return err
+	return p, err
 }
 
 func DeletePlugin(uuid string, plugin *Plugin) error {

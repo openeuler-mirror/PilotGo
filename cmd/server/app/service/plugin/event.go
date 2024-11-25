@@ -1,4 +1,4 @@
-package event
+package plugin
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
@@ -55,7 +54,7 @@ func isPluginEventConnected() (string, bool) {
 	var eventServer string
 	var connected bool
 
-	plugins, err := plugin.GetPlugins()
+	plugins, err := GetPlugins()
 	if err != nil {
 		return "", false
 	}

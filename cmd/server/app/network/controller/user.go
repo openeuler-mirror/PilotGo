@@ -24,7 +24,7 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/event"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	userservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
@@ -117,7 +117,7 @@ func LoginHandler(c *gin.Context) {
 		MessageType: eventSDK.MsgUserLogin,
 		MessageData: msgDataString,
 	}
-	event.PublishEvent(ms)
+	plugin.PublishEvent(ms)
 
 	departName, departId, roleId, err := userservice.Login(&user)
 	if err != nil {
@@ -170,7 +170,7 @@ func Logout(c *gin.Context) {
 		MessageType: eventSDK.MsgUserLogin,
 		MessageData: msgDataString,
 	}
-	event.PublishEvent(ms)
+	plugin.PublishEvent(ms)
 
 	response.Success(c, nil, "退出成功!")
 }
