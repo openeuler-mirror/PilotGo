@@ -167,7 +167,7 @@ func Logout(c *gin.Context) {
 		return
 	}
 	ms := commonSDK.EventMessage{
-		MessageType: eventSDK.MsgUserLogin,
+		MessageType: eventSDK.MsgUserLogout,
 		MessageData: msgDataString,
 	}
 	plugin.PublishEvent(ms)

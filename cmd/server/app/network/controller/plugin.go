@@ -82,8 +82,8 @@ func AddPluginHandler(c *gin.Context) {
 	}
 
 	msgData := commonSDK.MessageData{
-		MsgType:     eventSDK.MsgPluginRemove,
-		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginRemove),
+		MsgType:     eventSDK.MsgPluginAdd,
+		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginAdd),
 		TimeStamp:   time.Now(),
 		Data: eventSDK.MDPluginChange{
 			PluginName:  p.Name,
@@ -98,7 +98,7 @@ func AddPluginHandler(c *gin.Context) {
 		return
 	}
 	ms := commonSDK.EventMessage{
-		MessageType: eventSDK.MsgUserLogin,
+		MessageType: eventSDK.MsgPluginAdd,
 		MessageData: msgDataString,
 	}
 	plugin.PublishEvent(ms)
@@ -193,7 +193,7 @@ func UnloadPluginHandler(c *gin.Context) {
 		return
 	}
 	ms := commonSDK.EventMessage{
-		MessageType: eventSDK.MsgUserLogin,
+		MessageType: eventSDK.MsgPluginRemove,
 		MessageData: msgDataString,
 	}
 	plugin.PublishEvent(ms)
