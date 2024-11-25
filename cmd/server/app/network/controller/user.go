@@ -18,13 +18,17 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
+	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/event"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	userservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
+	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -95,6 +99,25 @@ func LoginHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
+	m := eventSDK.MessageData{
+		MsgType:     eventSDK.MsgUserLogin,
+		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgUserLogin),
+		TimeStamp:   time.Now(),
+		Data:        user.Email + "登录平台",
+	}
+	msgData, err := commonSDK.ToJSONString(m)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	ms := commonSDK.EventMessage{
+		MessageType: eventSDK.MsgUserLogin,
+		MessageData: msgData,
+	}
+	logger.Info("event消息: %v", ms)
+
+	event.PublishEvent(ms)
+
 	departName, departId, roleId, err := userservice.Login(&user)
 	if err != nil {
 		auditlog.UpdateStatus(log, auditlog.StatusFailed)
@@ -127,6 +150,25 @@ func Logout(c *gin.Context) {
 		Action:     "用户退出",
 	}
 	auditlog.Add(log)
+
+	m := eventSDK.MessageData{
+		MsgType:     eventSDK.MsgUserLogout,
+		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgUserLogout),
+		TimeStamp:   time.Now(),
+		Data:        u.Email + "退出平台",
+	}
+	msgData, err := commonSDK.ToJSONString(m)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	ms := commonSDK.EventMessage{
+		MessageType: eventSDK.MsgUserLogin,
+		MessageData: msgData,
+	}
+	logger.Info("event消息: %v", ms)
+	event.PublishEvent(ms)
+
 	response.Success(c, nil, "退出成功!")
 }
 
