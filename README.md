@@ -57,7 +57,7 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
    >systemctl start PilotGo-server
 
    停止服务
-   >ystemctl stop PilotGo-server
+   >systemctl stop PilotGo-server
 
    服务状态
    >systemctl status PilotGo-server
