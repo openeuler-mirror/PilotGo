@@ -3,9 +3,12 @@ package plugin
 import (
 	"time"
 
+	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/pkg/dbmanager/redismanager"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+
+	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -43,6 +46,28 @@ func checkAndRebind() {
 					LastConnect: time.Now(),
 				}
 				redismanager.Set(key, value)
+
+				//
+				msgData := commonSDK.MessageData{
+					MsgType:     eventSDK.MsgPluginOnline,
+					MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginOnline),
+					TimeStamp:   time.Now(),
+					Data: eventSDK.MDPluginChange{
+						PluginName:  p.Name,
+						Version:     p.Version,
+						Url:         p.Url,
+						Description: p.Description,
+					},
+				}
+				msgDataString, err := msgData.ToMessageDataString()
+				if err != nil {
+					logger.Error("event message data marshal failed:%v", err.Error())
+				}
+				ms := commonSDK.EventMessage{
+					MessageType: eventSDK.MsgPluginOnline,
+					MessageData: msgDataString,
+				}
+				PublishEvent(ms)
 			}
 		}
 	}
