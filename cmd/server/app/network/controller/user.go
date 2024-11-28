@@ -8,7 +8,9 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -75,6 +77,19 @@ func LoginHandler(c *gin.Context) {
 	if err := c.Bind(&user); err != nil {
 		response.Fail(c, nil, net.GetValidMsg(err, &user))
 		return
+	}
+
+	// 输入email格式校验
+	if user.Email != "admin" {
+		patt := `^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$`
+		if match, err := regexp.MatchString(patt, user.Email); err != nil || !match {
+			if err != nil {
+				response.Fail(c, nil, fmt.Sprintf("email format error: %s, %s", user.Email, err.Error()))
+				return
+			}
+			response.Fail(c, nil, fmt.Sprintf("email format error: %s", user.Email))
+			return
+		}
 	}
 
 	u, err := userservice.GetUserByEmail(user.Email)
