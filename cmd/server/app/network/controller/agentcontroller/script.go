@@ -72,7 +72,6 @@ func containsDangerousCommand(content string) bool {
 		matched, err := regexp.MatchString(pattern, content)
 		if err != nil {
 			logger.Error("Error matching pattern %s: %v\n", pattern, err)
-			// TODO
 			continue
 		}
 		if matched {
@@ -80,6 +79,27 @@ func containsDangerousCommand(content string) bool {
 		}
 	}
 	return false
+}
+
+func findDangerousCommandsPos(content string) ([][]int, []string) {
+    var positions [][]int
+    var matchedCommands []string
+
+    for _, pattern := range dangerousCommandsList {
+        re, err := regexp.Compile(pattern)
+        if err != nil {
+            logger.Error("Error compiling pattern %s: %v\n", pattern, err)
+            continue
+        }
+        matches := re.FindAllStringIndex(content, -1)
+        for _, match := range matches {
+            start, end := match[0], match[1]-1
+            positions = append(positions, []int{start, end})
+            matchedCommands = append(matchedCommands, content[start:end+1])
+            // 记录高危命令
+        }
+    }
+    return positions, matchedCommands
 }
 
 var dangerousCommandsList = []string{
