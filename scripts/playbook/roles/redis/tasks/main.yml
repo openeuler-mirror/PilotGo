@@ -10,14 +10,14 @@
   when: rpm_info.rc == 0
 - name: install redis 6 through euler repo
   dnf: 
-    name: redis6
+    name: redis-6*
     state: present
   ignore_errors: yes
 - name: change bind
   lineinfile: 
     path: /etc/redis/redis.conf
     regexp: '^#?bind'
-    line: 'bind {{ groups["standalone"][0] }}'
+    line: 'bind {{ ansible_default_ipv4['address'] }}'
     backrefs: yes
 - name: change daemonize
   lineinfile: 

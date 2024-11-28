@@ -32,8 +32,8 @@
       password: '{{ mysql_password }}'  
       priv: '*.*:ALL,GRANT'  
       state: present
-- name: install mysql for PilotGo platform
-  hosts: mysql
+- name: install pserver PilotGo platform
+  hosts: pserver
   become: yes
   become_user: root
 
