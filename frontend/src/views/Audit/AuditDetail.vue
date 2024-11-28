@@ -1,3 +1,10 @@
+<!--
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo licensed under the Mulan Permissive Software License, Version 2. 
+ * See LICENSE file for more details.
+ * Author: zhaozhenfang <zhaozhenfang@kylinos.cn>
+ * Date: Tue Mar 19 11:41:25 2024 +0800
+-->
 <template>
   <div class="content">
     <div class="basic">

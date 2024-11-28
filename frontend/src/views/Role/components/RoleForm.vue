@@ -1,3 +1,10 @@
+<!--
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo licensed under the Mulan Permissive Software License, Version 2. 
+ * See LICENSE file for more details.
+ * Author: zhaozhenfang <zhaozhenfang@kylinos.cn>
+ * Date: Wed Mar 20 10:49:09 2024 +0800
+-->
 <template>
   <div class="content">
     <el-table ref="roleTable" :data="authData" :row-class-name="tableRowClassName">

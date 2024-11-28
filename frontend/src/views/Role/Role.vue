@@ -1,3 +1,10 @@
+<!--
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo licensed under the Mulan Permissive Software License, Version 2. 
+ * See LICENSE file for more details.
+ * Author: Gzx1999 <guozhengxin@kylinos.cn>
+ * Date: Wed Jan 3 18:00:12 2024 +0800
+-->
 <template>
   <div class="container">
     <PGTable :data="roles" title="角色列表" :showSelect="true" :total="total" :onPageChanged="onPageChanged">
