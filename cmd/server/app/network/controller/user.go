@@ -45,11 +45,38 @@ func RegisterHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+
+	// email格式校验
+	if user.Email != "admin" {
+		patt := `^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$`
+		if match, err := regexp.MatchString(patt, user.Email); err != nil || !match {
+			if err != nil {
+				response.Fail(c, nil, fmt.Sprintf("email format error: %s, %s", user.Email, err.Error()))
+				return
+			}
+			response.Fail(c, nil, fmt.Sprintf("email format error: %s", user.Email))
+			return
+		}
+	}
+	// phone格式校验
+	if user.Phone != "" {
+		patt := `^[1]([3-9])[0-9]{9}$`
+		if match, err := regexp.MatchString(patt, user.Phone); err != nil || !match {
+			if err != nil {
+				response.Fail(c, nil, fmt.Sprintf("phone format error: %s, %s", user.Phone, err.Error()))
+				return
+			}
+			response.Fail(c, nil, fmt.Sprintf("phone format error: %s", user.Phone))
+			return
+		}
+	}
+
 	u, err := jwt.ParseUser(c)
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
+
 	log := &auditlog.AuditLog{
 		LogUUID:    uuid.New().String(),
 		ParentUUID: "",
