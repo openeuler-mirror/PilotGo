@@ -1,3 +1,4 @@
 ---
 redis_password: "PilotGo13579!"
 mysql_password: "PilotGo13579!"
+pserver_config: /opt/PilotGo/server/config_server.yaml

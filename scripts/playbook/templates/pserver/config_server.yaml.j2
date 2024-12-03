@@ -1,0 +1,51 @@
+http_server:
+    addr: 0.0.0.0:8888
+    session_count: 100
+    session_max_age: 1800
+    # if true, will start pprof on :6060
+    debug: false
+    use_https: false
+    cert_file: ""
+    key_file: ""
+socket_server:
+    addr: 0.0.0.0:8879
+jwt:
+    secret_key: ""
+log:
+    level: debug
+    # 可选stdout和file.stdout:输出到终端控制台;file:输出到path下的指定文件。
+    driver: file
+    path: ./log/pilotgo_server.log
+    max_file: 1
+    max_size: 10485760
+mysql:
+    {% if groups | length == 1 %}
+
+    host_name: {{ groups['standalone'][0] }}
+    {% else %}
+
+    host_name: {{ groups['mysql'][0] }}
+    {% endif %}
+    # this is the username of database
+    user_name: root
+    password: "{{ mysql_password }}"
+    data_base: PilotGo
+    port: 3306
+redis:
+    {% if groups | length == 1 %}
+
+    redis_conn: {{ groups['standalone'][0] }}:6379
+    {% else %}
+
+    redis_conn: {{ groups['redis'][0] }}:6379
+    {% endif %}
+    use_tls: false
+    redis_pwd: "{{ redis_password }}"
+    defaultDB: 0
+    # redis连接超时时间.默认5s
+    dialTimeout: 5s
+    # 是否启用redis
+    enableRedis: true
+storage:
+    # 文件服务存储路径
+    path: "/opt/PilotGo/server/resource"
