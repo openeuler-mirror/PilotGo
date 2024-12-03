@@ -112,7 +112,10 @@ func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Use(logger.RequestLogger())
+	router.Use(logger.RequestLogger([]string{
+		"/api/v1/pluginapi/heartbeat",
+		"/plugin/prometheus/target",
+	}))
 	router.Use(middleware.Recover)
 
 	// 绑定 http api handler

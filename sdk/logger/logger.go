@@ -120,41 +120,45 @@ func Fatal(format string, args ...interface{}) {
 	logrus.Fatalf(format, args...)
 }
 
-func RequestLogger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 开始时间
-		startTime := time.Now()
+func RequestLogger(_skipPaths []string) gin.HandlerFunc {
+	var skip map[string]struct{}
+	if len(_skipPaths) > 0 {
+		skip = make(map[string]struct{}, len(_skipPaths))
 
-		// 处理请求
+		for _, path := range _skipPaths {
+			skip[path] = struct{}{}
+		}
+	}
+	return func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+
 		c.Next()
 
-		// 结束时间
-		endTime := time.Now()
+		if _, ok := skip[path]; !ok {
+			endTime := time.Now()
+			latency := endTime.Sub(start)
+			method := c.Request.Method
+			statusCode := c.Writer.Status()
+			clientIP := c.ClientIP()
+			errorMessage := c.Errors.ByType(gin.ErrorTypePrivate).String()
 
-		// 执行时间
-		latencyTime := endTime.Sub(startTime)
+			if raw != "" {
+				path = path + "?" + raw
+			}
+			if latency > time.Minute {
+				latency = latency.Truncate(time.Second)
+			}
 
-		// 请求方式
-		reqMethod := c.Request.Method
-
-		// 请求路由
-		reqUri := c.Request.RequestURI
-
-		// 状态码
-		statusCode := c.Writer.Status()
-
-		// 请求IP
-		clientIP := c.ClientIP()
-
-		// 日志格式
-		if reqUri != "/api/v1/pluginapi/heartbeat" && reqUri != "/plugin/prometheus/target" {
-			Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
+			Debug("%s|%3d|%-13v|%-15s|%-7s %#v\n%s",
+				start.Format("2006-01-02 15:04:05"),
 				statusCode,
-				latencyTime,
+				latency,
 				clientIP,
-				reqMethod,
-				reqUri,
-			)
+				method,
+				path,
+				errorMessage)
 		}
 	}
 }
