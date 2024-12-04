@@ -10,9 +10,13 @@ package agentmanager
 import (
 	"net"
 	"sync"
+	"time"
 
+	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/pkg/global"
+	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
@@ -149,4 +153,24 @@ func AddAgents2DB(a *Agent) {
 		logger.Error(err.Error())
 		return
 	}
+	// 发布“平台新增主机”事件
+	msgData := commonSDK.MessageData{
+		MsgType:     eventSDK.MsgHostAdd,
+		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgHostAdd),
+		TimeStamp:   time.Now(),
+		Data: eventSDK.MDHostChange{
+			IP:         agent_os.IP,
+			OS:         agent_os.Platform,
+			OSVersion:  agent_os.PlatformVersion,
+			PrettyName: agent_os.PrettyName,
+			CPU:        agent_os.ModelName,
+			Status:     machineservice.OnlineStatus,
+		},
+	}
+	msgDataString, _ := msgData.ToMessageDataString()
+	ms := commonSDK.EventMessage{
+		MessageType: eventSDK.MsgHostAdd,
+		MessageData: msgDataString,
+	}
+	plugin.PublishEvent(ms)
 }

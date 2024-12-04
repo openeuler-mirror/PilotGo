@@ -144,7 +144,7 @@ func RequestLogger(_skipPaths []string) gin.HandlerFunc {
 				latency = latency.Truncate(time.Second)
 			}
 
-			Debug("%s|%3d|%-13v|%-15s|%-7s %#v\n%s",
+			Debug("%s  status_code:%3d  latency_time:%-13v client_ip:%-15s  method:%-7s req_uri:%#v\n%s",
 				start.Format("2006-01-02 15:04:05"),
 				statusCode,
 				latency,
