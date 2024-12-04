@@ -47,6 +47,38 @@ func checkAndRebind() {
 					LastConnect: plugin_status.(*client.PluginStatus).LastConnect,
 				}
 				redismanager.Set(key, value)
+
+				// 缓存，发布“插件离线”事件
+				offlineKey := "offline:" + p.UUID
+				offlineValue := struct {
+					OfflineTime time.Time
+				}{
+					OfflineTime: time.Now(),
+				}
+				ok, err := redismanager.SetNX(offlineKey, offlineValue)
+				if ok && err == nil {
+					msgData := commonSDK.MessageData{
+						MsgType:     eventSDK.MsgPluginOffline,
+						MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginOffline),
+						TimeStamp:   time.Now(),
+						Data: eventSDK.MDPluginChange{
+							PluginName:  p.Name,
+							Version:     p.Version,
+							Url:         p.Url,
+							Description: p.Description,
+							Status:      false,
+						},
+					}
+					msgDataString, err := msgData.ToMessageDataString()
+					if err != nil {
+						logger.Error("event message data marshal failed:%v", err.Error())
+					}
+					ms := commonSDK.EventMessage{
+						MessageType: eventSDK.MsgPluginOffline,
+						MessageData: msgDataString,
+					}
+					PublishEvent(ms)
+				}
 			} else {
 				value := client.PluginStatus{
 					Connected:   true,
@@ -54,7 +86,8 @@ func checkAndRebind() {
 				}
 				redismanager.Set(key, value)
 
-				//
+				//删除缓存，发布“插件上线”事件
+				redismanager.Delete("offline:" + p.UUID)
 				msgData := commonSDK.MessageData{
 					MsgType:     eventSDK.MsgPluginOnline,
 					MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginOnline),
@@ -64,6 +97,7 @@ func checkAndRebind() {
 						Version:     p.Version,
 						Url:         p.Url,
 						Description: p.Description,
+						Status:      true,
 					},
 				}
 				msgDataString, err := msgData.ToMessageDataString()

@@ -133,7 +133,7 @@ func LoginHandler(c *gin.Context) {
 		Action:     "用户登录",
 	}
 	auditlog.Add(log)
-
+	// 发布“用户登录”事件
 	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgUserLogin,
 		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgUserLogin),
@@ -186,7 +186,7 @@ func Logout(c *gin.Context) {
 		Action:     "用户退出",
 	}
 	auditlog.Add(log)
-
+	// 发布“用户退出”事件
 	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgUserLogout,
 		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgUserLogout),

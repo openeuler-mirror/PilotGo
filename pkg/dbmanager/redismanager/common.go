@@ -13,6 +13,23 @@ import (
 	"fmt"
 )
 
+func SetNX(key string, value interface{}) (bool, error) {
+	var ctx = context.Background()
+	if EnableRedis {
+		bytes, err := json.Marshal(value)
+		if err != nil {
+			return false, err
+		}
+
+		set := Redis().SetNX(ctx, key, string(bytes), 0)
+		if err := set.Err(); err != nil {
+			return false, err
+		}
+		return set.Val(), nil
+	}
+	return false, nil
+}
+
 func Set(key string, value interface{}) error {
 	var ctx = context.Background()
 	if EnableRedis {

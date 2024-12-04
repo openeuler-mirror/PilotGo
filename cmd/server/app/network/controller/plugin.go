@@ -88,6 +88,7 @@ func AddPluginHandler(c *gin.Context) {
 		return
 	}
 
+	// 发布“插件添加”事件
 	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgPluginAdd,
 		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginAdd),
@@ -97,6 +98,7 @@ func AddPluginHandler(c *gin.Context) {
 			Version:     p.Version,
 			Url:         p.Url,
 			Description: p.Description,
+			Status:      true,
 		},
 	}
 	msgDataString, err := msgData.ToMessageDataString()
@@ -183,6 +185,7 @@ func UnloadPluginHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
+	// 发布“插件卸载”事件
 	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgPluginRemove,
 		MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgPluginRemove),
