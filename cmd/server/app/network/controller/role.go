@@ -10,7 +10,6 @@ package controller
 import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	roleservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -30,20 +29,20 @@ func GetRolesHandler(c *gin.Context) {
 
 // 分页获取所有角色
 func GetRolesPagedHandler(c *gin.Context) {
-	p := &common.PaginationQ{}
+	p := &response.PaginationQ{}
 	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := p.Size * (p.CurrentPageNum - 1)
-	total, data, err := roleservice.GetRolePaged(num, p.Size)
+	num := p.PageSize * (p.Page - 1)
+	total, data, err := roleservice.GetRolePaged(num, p.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, p)
+	response.DataPagination(c, data, int(total), p)
 }
 
 // 添加角色

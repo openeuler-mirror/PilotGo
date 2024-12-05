@@ -13,7 +13,6 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -54,20 +53,20 @@ func CreateBatchHandler(c *gin.Context) {
 
 // 分页查询所有批次
 func BatchInfoHandler(c *gin.Context) {
-	p := &common.PaginationQ{}
+	p := &response.PaginationQ{}
 	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := p.Size * (p.CurrentPageNum - 1)
-	total, data, err := batch.GetBatchPaged(num, p.Size)
+	num := p.PageSize * (p.Page - 1)
+	total, data, err := batch.GetBatchPaged(num, p.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, p)
+	response.DataPagination(c, data, int(total), p)
 }
 
 // 删除批次
@@ -145,7 +144,7 @@ func UpdateBatchHandler(c *gin.Context) {
 
 // 查询某一个批次
 func BatchMachineInfoHandler(c *gin.Context) {
-	p := &common.PaginationQ{}
+	p := &response.PaginationQ{}
 	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -159,13 +158,13 @@ func BatchMachineInfoHandler(c *gin.Context) {
 		return
 	}
 
-	num := p.Size * (p.CurrentPageNum - 1)
-	total, data, err := batch.GetBatchMachines(num, p.Size, batchid)
+	num := p.PageSize * (p.Page - 1)
+	total, data, err := batch.GetBatchMachines(num, p.PageSize, batchid)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, p)
+	response.DataPagination(c, data, int(total), p)
 }
 
 // 一次性获取素有批次，供下拉列表选择

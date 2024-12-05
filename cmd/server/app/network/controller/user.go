@@ -18,7 +18,6 @@ import (
 	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	userservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
@@ -227,20 +226,20 @@ func Info(c *gin.Context) {
 
 // 查询所有用户
 func UserAll(c *gin.Context) {
-	p := &common.PaginationQ{}
+	p := &response.PaginationQ{}
 	err := c.ShouldBindQuery(p)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := p.Size * (p.CurrentPageNum - 1)
-	total, data, err := userservice.GetUserPaged(num, p.Size)
+	num := p.PageSize * (p.Page - 1)
+	total, data, err := userservice.GetUserPaged(num, p.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, p)
+	response.DataPagination(c, data, int(total), p)
 }
 
 // 高级搜索
@@ -252,19 +251,19 @@ func UserSearchHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := userservice.UserSearchPaged(user.Email, num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := userservice.UserSearchPaged(user.Email, num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 // 修改密码

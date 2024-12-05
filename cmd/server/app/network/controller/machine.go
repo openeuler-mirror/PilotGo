@@ -8,7 +8,6 @@
 package controller
 
 import (
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -22,7 +21,7 @@ type MachineModifyDepart struct {
 
 // 分页获取机器列表
 func MachineInfoHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -34,30 +33,30 @@ func MachineInfoHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := machineservice.MachineInfo(depart, num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := machineservice.MachineInfo(depart, num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 // 资源池返回接口，查询没分配的机器，即departid=1,应该修改成维护状态的机器
 func FreeMachineSource(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := machineservice.ReturnMachinePaged(global.UncateloguedDepartId, num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := machineservice.ReturnMachinePaged(global.UncateloguedDepartId, num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 // 返回所有机器指定字段，供插件使用

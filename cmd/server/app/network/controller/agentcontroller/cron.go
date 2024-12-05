@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/cron"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -202,18 +201,18 @@ func CronTaskStatus(c *gin.Context) {
 func CronTaskList(c *gin.Context) {
 	uuid := c.Query("uuid")
 
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	offset := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := cron.CronListPaged(uuid, offset, query.Size)
+	offset := query.PageSize * (query.Page - 1)
+	total, data, err := cron.CronListPaged(uuid, offset, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
