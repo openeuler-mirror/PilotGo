@@ -9,10 +9,14 @@ package machine
 
 import (
 	"errors"
+	"time"
 
+	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	departservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/depart"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
+	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/internal/dao"
 )
@@ -91,6 +95,24 @@ func DeleteMachine(Deluuid []string) map[string]string {
 			if err := dao.DeleteMachine(machinedeluuid); err != nil {
 				machinelist[machinedeluuid] = err.Error()
 			}
+			// 发布“平台移除主机”事件
+			msgData := commonSDK.MessageData{
+				MsgType:     eventSDK.MsgHostRemove,
+				MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgHostRemove),
+				TimeStamp:   time.Now(),
+				Data: eventSDK.MDHostChange{
+					IP:     node.IP,
+					OS:     node.Systeminfo,
+					CPU:    node.CPU,
+					Status: OfflineStatus,
+				},
+			}
+			msgDataString, _ := msgData.ToMessageDataString()
+			ms := commonSDK.EventMessage{
+				MessageType: eventSDK.MsgHostRemove,
+				MessageData: msgDataString,
+			}
+			plugin.PublishEvent(ms)
 		} else {
 			machinelist[machinedeluuid] = errors.New("该机器不存在").Error()
 		}
