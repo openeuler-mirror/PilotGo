@@ -8,6 +8,8 @@
 package controller
 
 import (
+	"regexp"
+
 	scriptservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/script"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -22,4 +24,34 @@ func AddScriptHandler(c *gin.Context) {
 		return
 	}
 	response.Success(c, nil, "脚本文件添加成功")
+}
+
+// 高危命令检测
+func FindDangerousCommandsPos(content string) ([][]int, []string) {
+	var positions [][]int
+	var matchedCommands []string
+
+	for _, pattern := range DangerousCommandsList {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			// TOODO: info remind
+			continue
+		}
+		matches := re.FindAllStringIndex(content, -1)
+		for _, match := range matches {
+			start, end := match[0], match[1]-1
+			positions = append(positions, []int{start, end})
+			matchedCommands = append(matchedCommands, content[start:end+1])
+		}
+	}
+	return positions, matchedCommands
+}
+
+var DangerousCommandsList = []string{
+	`.*rm\s+-[r,f,rf].*`,
+	`.*lvremove\s+-f.*`,
+	`.*poweroff.*`,
+	`.*shutdown\s+-[f,F,h,k,n,r,t,C].*`,
+	`.*pvremove\s+-f.*`,
+	`.*vgremove\s+-f.*`,
 }
