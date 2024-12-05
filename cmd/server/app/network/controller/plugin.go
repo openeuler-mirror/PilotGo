@@ -18,7 +18,6 @@ import (
 	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -42,20 +41,20 @@ func GetPluginsHandler(c *gin.Context) {
 
 // 分页查询插件清单
 func GetPluginsPagedHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := plugin.GetPluginPaged(num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := plugin.GetPluginPaged(num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 // 添加插件

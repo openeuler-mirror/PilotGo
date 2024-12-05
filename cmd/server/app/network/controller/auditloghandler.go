@@ -9,27 +9,26 @@ package controller
 
 import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
 
 // 查询所有审计日志
 func AuditLogAllHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := auditlog.GetAuditLogPaged(num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := auditlog.GetAuditLogPaged(num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 // 根据模块名字查询日志
@@ -49,20 +48,20 @@ func ModuleLogHandler(c *gin.Context) {
 
 // 查询所有父日志为空的日志
 func LogAllHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := auditlog.GetParentLog(num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := auditlog.GetParentLog(num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 // 查询其子日志

@@ -10,7 +10,6 @@ package controller
 import (
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/common"
 	config "gitee.com/openeuler/PilotGo/cmd/server/app/service/configmanage"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -60,20 +59,20 @@ func UpdateConfigFileHandler(c *gin.Context) {
 }
 
 func AllConfigFiles(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
 
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := config.GetConfigFilesPaged(num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := config.GetConfigFilesPaged(num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 func ConfigFileSearchHandler(c *gin.Context) {
@@ -83,23 +82,23 @@ func ConfigFileSearchHandler(c *gin.Context) {
 		return
 	}
 
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := file.ConfigFileSearchPaged(file.Search, num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := file.ConfigFileSearchPaged(file.Search, num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 func HistoryConfigFilesHandler(c *gin.Context) {
-	query := &common.PaginationQ{}
+	query := &response.PaginationQ{}
 	err := c.ShouldBindQuery(query)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
@@ -114,13 +113,13 @@ func HistoryConfigFilesHandler(c *gin.Context) {
 	}
 
 	files := config.HistoryConfigFiles{}
-	num := query.Size * (query.CurrentPageNum - 1)
-	total, data, err := files.HistoryConfigFilesPaged(FileId, num, query.Size)
+	num := query.PageSize * (query.Page - 1)
+	total, data, err := files.HistoryConfigFilesPaged(FileId, num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
-	common.JsonPagination(c, data, total, query)
+	response.DataPagination(c, data, int(total), query)
 }
 
 func LastConfigFileRollBackHandler(c *gin.Context) {
