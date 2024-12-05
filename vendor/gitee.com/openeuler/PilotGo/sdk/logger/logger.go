@@ -1,17 +1,10 @@
-/******************************************************************************
- * Copyright (c) KylinSoft Co., Ltd.2021-2022. All rights reserved.
- * PilotGo is licensed under the Mulan PSL v2.
- * You can use this software accodring to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- *     http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN 'AS IS' BASIS, WITHOUT WARRANTIES OF ANY KIND,
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- * Author: yangzhao1
- * Date: 2022-03-01 09:59:30
- * LastEditTime: 2022-04-05 11:37:16
- * Description: provide agent log manager of pilotgo
- ******************************************************************************/
+/*
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo licensed under the Mulan Permissive Software License, Version 2.
+ * See LICENSE file for more details.
+ * Author: zhanghan2021 <zhanghan@kylinos.cn>
+ * Date: Wed Sep 27 17:35:12 2023 +0800
+ */
 package logger
 
 import (
@@ -120,41 +113,45 @@ func Fatal(format string, args ...interface{}) {
 	logrus.Fatalf(format, args...)
 }
 
-func RequestLogger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 开始时间
-		startTime := time.Now()
+func RequestLogger(_skipPaths []string) gin.HandlerFunc {
+	var skip map[string]struct{}
+	if len(_skipPaths) > 0 {
+		skip = make(map[string]struct{}, len(_skipPaths))
 
-		// 处理请求
+		for _, path := range _skipPaths {
+			skip[path] = struct{}{}
+		}
+	}
+	return func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+
 		c.Next()
 
-		// 结束时间
-		endTime := time.Now()
+		if _, ok := skip[path]; !ok {
+			endTime := time.Now()
+			latency := endTime.Sub(start)
+			method := c.Request.Method
+			statusCode := c.Writer.Status()
+			clientIP := c.ClientIP()
+			errorMessage := c.Errors.ByType(gin.ErrorTypePrivate).String()
 
-		// 执行时间
-		latencyTime := endTime.Sub(startTime)
+			if raw != "" {
+				path = path + "?" + raw
+			}
+			if latency > time.Minute {
+				latency = latency.Truncate(time.Second)
+			}
 
-		// 请求方式
-		reqMethod := c.Request.Method
-
-		// 请求路由
-		reqUri := c.Request.RequestURI
-
-		// 状态码
-		statusCode := c.Writer.Status()
-
-		// 请求IP
-		clientIP := c.ClientIP()
-
-		// 日志格式
-		if reqUri != "/api/v1/pluginapi/heartbeat" && reqUri != "/plugin/prometheus/target" {
-			Debug("status_code:%d latency_time:%s client_ip:%s req_method:%s req_uri:%s",
+			Debug("%s  status_code:%3d  latency_time:%-13v client_ip:%-15s  method:%-7s req_uri:%#v\n%s",
+				start.Format("2006-01-02 15:04:05"),
 				statusCode,
-				latencyTime,
+				latency,
 				clientIP,
-				reqMethod,
-				reqUri,
-			)
+				method,
+				path,
+				errorMessage)
 		}
 	}
 }
