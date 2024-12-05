@@ -13,11 +13,14 @@ import (
 	"strconv"
 	"time"
 
+	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/cmd/agent/app/global"
 	configservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/configfile"
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	pnet "gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
+	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/google/uuid"
 )
@@ -89,6 +92,23 @@ func (a *Agent) startListen() {
 			DeleteAgent(a.UUID)
 			str := "agent机器" + a.IP + "已断开连接"
 			logger.Warn("agent %s disconnected, ip:%s", a.UUID, a.IP)
+			// 发布“平台主机离线”事件
+			msgData := commonSDK.MessageData{
+				MsgType:     eventSDK.MsgHostOffline,
+				MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgHostOffline),
+				TimeStamp:   time.Now(),
+				Data: eventSDK.MDHostChange{
+					IP:     a.IP,
+					Status: machineservice.OfflineStatus,
+				},
+			}
+			msgDataString, _ := msgData.ToMessageDataString()
+			ms := commonSDK.EventMessage{
+				MessageType: eventSDK.MsgHostOffline,
+				MessageData: msgDataString,
+			}
+			plugin.PublishEvent(ms)
+			// 消息推送到前端
 			WARN_MSG <- str
 			return
 		}

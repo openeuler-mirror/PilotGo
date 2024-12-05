@@ -136,6 +136,26 @@ func AddAgents2DB(a *Agent) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+		// 发布“平台主机上线”事件
+		msgData := commonSDK.MessageData{
+			MsgType:     eventSDK.MsgHostOnline,
+			MessageType: eventSDK.GetMessageTypeString(eventSDK.MsgHostOnline),
+			TimeStamp:   time.Now(),
+			Data: eventSDK.MDHostChange{
+				IP:         agent_os.IP,
+				OS:         agent_os.Platform,
+				OSVersion:  agent_os.PlatformVersion,
+				PrettyName: agent_os.PrettyName,
+				CPU:        agent_os.ModelName,
+				Status:     machineservice.OnlineStatus,
+			},
+		}
+		msgDataString, _ := msgData.ToMessageDataString()
+		ms := commonSDK.EventMessage{
+			MessageType: eventSDK.MsgHostOnline,
+			MessageData: msgDataString,
+		}
+		plugin.PublishEvent(ms)
 		return
 	}
 	//新添加一台机器信息的时候自动分配到根节点部门，并设为在线状态和维护状态
