@@ -141,9 +141,7 @@ func registerAPIs(router *gin.Engine) {
 
 		noAuthenApis.POST("/user/login", controller.LoginHandler)
 		noAuthenApis.GET("/user/logout", controller.Logout)
-		noAuthenApis.POST("/user/permission", controller.GetLoginUserPermissionHandler)
-		noAuthenApis.GET("/plugins", controller.GetPluginsHandler)
-		noAuthenApis.GET("/plugins_paged", controller.GetPluginsPagedHandler)
+
 		noAuthenApis.GET("/download/:filename", controller.Download)
 	}
 
@@ -178,6 +176,14 @@ func registerAPIs(router *gin.Engine) {
 			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_delete", "button"), controller.DeleteDepartDataHandler)
 			macList.POST("/adddepart", middleware.NeedPermission("dept_add", "button"), controller.AddDepartHandler)
 			macList.POST("/updatedepart", middleware.NeedPermission("dept_update", "button"), controller.UpdateDepartHandler)
+			macList.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
+			macList.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
+		}
+		{
+			userLog := authenApi.Group("/log") // 日志管理
+			userLog.GET("/log_all", middleware.NeedPermission("audit", "menu"), controller.LogAllHandler)
+			// TODO: 界面未调用该接口
+			userLog.GET("/log_child", middleware.NeedPermission("audit", "menu"), controller.GetAuditLogByIdHandler)
 		}
 		/*
 			{
@@ -187,27 +193,25 @@ func registerAPIs(router *gin.Engine) {
 		*/
 	}
 
-	api := router.Group("/api/v1")
-	api.Use(middleware.TokenCheckMiddleware)
-	overview := api.Group("/overview") // 机器概览
+	tokenApi := router.Group("/api/v1")
+	tokenApi.Use(middleware.TokenCheckMiddleware)
+	overview := tokenApi.Group("/overview") // 机器概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)
 		overview.GET("/depart_info", controller.DepartClusterInfoHandler)
 	}
 
-	macList := api.Group("/macList") // 机器管理
+	macList := tokenApi.Group("/macList") // 机器管理
 	{
 		macList.POST("/script_save", controller.AddScriptHandler)
-		macList.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
 		macList.GET("/depart", controller.DepartHandler)
 		macList.GET("/selectmachine", controller.MachineListHandler)
 		macList.GET("/machineinfo", controller.MachineInfoHandler)
-		macList.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
 		macList.GET("/sourcepool", controller.FreeMachineSource)
 		macList.POST("/gettags", pluginapi.GetTagHandler)
 	}
 
-	macDetails := api.Group("/api") // 机器详情
+	macDetails := tokenApi.Group("/api") // 机器详情
 	{
 		macDetails.GET("/agent_overview", agentcontroller.AgentOverviewHandler)
 		macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
@@ -268,13 +272,13 @@ func registerAPIs(router *gin.Engine) {
 			macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
 		}
 	*/
-	batchmanager := api.Group("batchmanager") // 批次
+	batchmanager := tokenApi.Group("batchmanager") // 批次
 	{
 		batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
 		batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfoHandler)
 	}
 
-	user := api.Group("user") // 用户管理
+	user := tokenApi.Group("user") // 用户管理
 	{
 		user.POST("/updatepwd", controller.UpdatePasswordHandler)
 		// user.GET("/logout", controller.Logout)
@@ -284,6 +288,9 @@ func registerAPIs(router *gin.Engine) {
 		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
 		user.GET("/roles", controller.GetRolesHandler)
 		user.GET("/roles_paged", controller.GetRolesPagedHandler)
+
+		// 获取登录用户权限列表
+		user.POST("/permission", controller.GetLoginUserPermissionHandler)
 	}
 
 	/*
@@ -300,13 +307,8 @@ func registerAPIs(router *gin.Engine) {
 		}
 	*/
 
-	userLog := api.Group("log") // 日志管理
-	{
-		userLog.GET("/log_all", middleware.NeedPermission("audit", "menu"), controller.LogAllHandler)
-		userLog.GET("/log_child", controller.GetAuditLogByIdHandler)
-	}
-
-	plugin := api.Group("plugins") // 插件
+	tokenApi.GET("/plugins_paged", controller.GetPluginsPagedHandler)
+	plugin := tokenApi.Group("plugins") // 插件
 	{
 		// 添加插件
 		plugin.PUT("", controller.AddPluginHandler)
@@ -314,12 +316,15 @@ func registerAPIs(router *gin.Engine) {
 		plugin.POST("/:uuid", controller.TogglePluginHandler)
 		// 删除插件
 		plugin.DELETE("/:uuid", controller.UnloadPluginHandler)
+
+		// 获取插件列表
+		plugin.GET("/", controller.GetPluginsHandler)
 	}
 
 	// 对插件提供的api接口
 	registerPluginApi(router)
 
-	other := api.Group("")
+	other := tokenApi.Group("")
 	{
 		// 监控机器列表
 		other.GET("/macList/machinealldata", controller.MachineAllDataHandler)
