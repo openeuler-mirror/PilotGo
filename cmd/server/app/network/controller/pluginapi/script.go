@@ -12,9 +12,11 @@ package pluginapi
 import (
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/network/controller"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
@@ -130,8 +132,16 @@ func RunScriptHandler(c *gin.Context) {
 			Action:     "run script",
 		}
 		auditlog.Add(log)*/
+
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
-	// TODO : shellcheck
+	// Enabled according to the needs of the plugin
+	positions, matchedCommands := controller.FindDangerousCommandsPos(d.Script)
+	if len(positions) > 0 {
+		logger.Debug("Matched Commands: %v", matchedCommands)
+		str := strings.Join(matchedCommands, "\n")
+		response.Fail(c, nil, "Dangerous commands detected in script: "+str)
+		return
+	}
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil { /*
