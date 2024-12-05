@@ -39,3 +39,10 @@
 
   roles: 
     - pserver
+- name: install pagent for PilotGo platform
+  hosts: pagent
+  become: yes
+  become_user: root
+
+  roles: 
+    - pagent

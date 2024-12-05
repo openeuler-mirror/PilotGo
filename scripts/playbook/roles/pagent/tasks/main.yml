@@ -1,0 +1,13 @@
+---
+- name: install pilotgo-agent
+  dnf: 
+    name: PilotGo-agent
+    state: present
+  register: pilotgo_agent_info
+  ignore_errors: yes
+- name: exit when pilotgo-agent fail install
+  fail:  
+    msg: 'dnf install PilotGo-agent failed'
+  when: pilotgo_agent_info.rc != 0
+- name: change PilotGo agent config
+  template: src=templates/pagent/config_agent.yaml.j2 dest={{ pagent_config }}
