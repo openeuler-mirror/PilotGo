@@ -1,0 +1,14 @@
+server:
+  {% if groups | length == 1 %}
+
+  addr: {{ groups['standalone'][0] }}:8879
+  {% else %}
+
+  addr: {{ groups['pserver'][0] }}:8879
+  {% endif %}
+log:
+  level: debug
+  driver: file  #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。
+  path: ./log/pilotgo_agent.log
+  max_file: 3
+  max_size: 10485760

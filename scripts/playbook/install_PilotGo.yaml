@@ -8,5 +8,6 @@
     - redis
     - mysql
     - pserver
+    - pagent
 
     
