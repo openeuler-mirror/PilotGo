@@ -37,3 +37,9 @@ redis:
 storage:
     # 文件服务存储路径
     path: ""
+etcd:
+  endpoints:
+    - "localhost:2379"
+  service_name: "pilotgo-server"
+  version: "3.0"
+  dialTimeout: 5s

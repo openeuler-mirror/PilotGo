@@ -138,6 +138,22 @@ func NewStorageOptions() *Storage {
 	}
 }
 
+type Etcd struct {
+	Endpoints   []string      `yaml:"endpoints" mapstructure:"endpoints"`
+	ServiveName string        `yaml:"service_name" mapstructure:"service_name"`
+	Version     string        `yaml:"version" mapstructure:"version"`
+	DialTimeout time.Duration `yaml:"dialTimeout" mapstructure:"dialTimeout"`
+}
+
+func NewEtcdOptions() *Etcd {
+	return &Etcd{
+		Endpoints:   []string{"localhost:2379"},
+		ServiveName: "pilotgo-server",
+		Version:     "3.0",
+		DialTimeout: 5 * time.Second,
+	}
+}
+
 type ServerConfig struct {
 	HttpServer   *HttpServer     `yaml:"http_server" mapstructure:"http_server"`
 	SocketServer *SocketServer   `yaml:"socket_server" mapstructure:"socket_server"`
@@ -146,6 +162,7 @@ type ServerConfig struct {
 	MysqlDBinfo  *MysqlDBInfo    `yaml:"mysql" mapstructure:"mysql"`
 	RedisDBinfo  *RedisDBInfo    `yaml:"redis" mapstructure:"redis"`
 	Storage      *Storage        `yaml:"storage" mapstructure:"storage"`
+	Etcd         *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 
 func (s *ServerConfig) Validate() []error {

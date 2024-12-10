@@ -18,14 +18,20 @@ import (
 	"syscall"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/cmd/options"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
+type RegisterOptions struct {
+	Endpoints   []string
+	ServiceName string
+	ServiceAddr string
+	Version     string
+	DialTimeout time.Duration
+}
+
 type ServiceInfo struct {
-	ServiveName string            `json:"name"`
-	ID          string            `json:"id"`
+	ServiveName string            `json:"serviceName"`
 	Address     string            `json:"address"`
 	Port        string            `json:"port"`
 	Metadata    map[string]string `json:"metadata,omitempty"`
@@ -41,8 +47,8 @@ type ServiceRegister struct {
 }
 
 // SetupEtcdRegistration initializes etcd registration with graceful shutdown
-func EtcdRegistration(ctx context.Context, opts *options.ServerOptions) error {
-	serviceRegister, err := registerToEtcd(opts)
+func Register(ctx context.Context, opts *RegisterOptions) error {
+	serviceRegister, err := registerService(opts)
 	if err != nil {
 		return err
 	}
@@ -57,7 +63,7 @@ func EtcdRegistration(ctx context.Context, opts *options.ServerOptions) error {
 		case <-ctx.Done():
 		}
 		if serviceRegister != nil {
-			serviceRegister.Deregister()
+			serviceRegister.deregister()
 		}
 	}()
 
@@ -65,31 +71,6 @@ func EtcdRegistration(ctx context.Context, opts *options.ServerOptions) error {
 }
 
 // Deregister removes the service from etcd
-func (sr *ServiceRegister) Deregister() error {
-	// Cancel the context to stop keep-alive goroutine
-	if sr.cancel != nil {
-		sr.cancel()
-	}
-
-	// Delete the service key from etcd
-	_, err := sr.client.client.Delete(
-		context.Background(),
-		sr.servicePath,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to deregister service %s: %v", sr.serviceInfo.ID, err)
-	}
-
-	// Revoke the lease if it exists
-	if sr.leaseID != 0 {
-		_, err = sr.client.client.Revoke(context.Background(), sr.leaseID)
-		if err != nil {
-			return fmt.Errorf("failed to revoke lease for service %s: %v", sr.serviceInfo.ID, err)
-		}
-	}
-
-	return nil
-}
 
 // GetAllServices returns all registered services
 func (c *Client) GetAllServices() (map[string][]*ServiceInfo, error) {
@@ -117,25 +98,24 @@ func (c *Client) GetAllServices() (map[string][]*ServiceInfo, error) {
 }
 
 // RegisterToEtcd registers the server to etcd
-func registerToEtcd(opts *options.ServerOptions) (*ServiceRegister, error) {
+func registerService(opts *RegisterOptions) (*ServiceRegister, error) {
 	// Create etcd client
-	etcdClient, err := NewClient(opts.ServerConfig.Etcd.Endpoints, opts.ServerConfig.Etcd.DialTimeout)
+	etcdClient, err := NewClient(opts.Endpoints, opts.DialTimeout)
 	if err != nil {
 		return nil, errors.New("failed to create etcd client: " + err.Error())
 	}
 
 	// Create service info
 	serviceInfo := &ServiceInfo{
-		ServiveName: "server",
-		ID:          opts.ServerConfig.Etcd.ServerID,
-		Address:     strings.Split(opts.ServerConfig.HttpServer.Addr, ":")[0],
-		Port:        strings.Split(opts.ServerConfig.HttpServer.Addr, ":")[1],
+		ServiveName: opts.ServiceName,
+		Address:     strings.Split(opts.ServiceAddr, ":")[0],
+		Port:        strings.Split(opts.ServiceAddr, ":")[1],
 		Metadata: map[string]string{
-			"version": opts.ServerConfig.Etcd.Version,
+			"version": opts.Version,
 		},
 	}
 
-	// Register service without TTL
+	// Register service with TTL
 	serviceRegister, err := newServiceRegister(etcdClient, serviceInfo, 10)
 	if err != nil {
 		etcdClient.Close()
@@ -157,7 +137,7 @@ func newServiceRegister(client *Client, info *ServiceInfo, ttl int64) (*ServiceR
 	sr := &ServiceRegister{
 		client:      client,
 		serviceInfo: info,
-		servicePath: fmt.Sprintf("/services/%s/%s", info.ServiveName, info.ID),
+		servicePath: fmt.Sprintf("/services/%s", info.ServiveName),
 		cancel:      cancel,
 	}
 
@@ -218,6 +198,31 @@ func (sr *ServiceRegister) register(opts ...clientv3.OpOption) error {
 	)
 	return err
 }
+func (sr *ServiceRegister) deregister() error {
+	// Cancel the context to stop keep-alive goroutine
+	if sr.cancel != nil {
+		sr.cancel()
+	}
+
+	// Delete the service key from etcd
+	_, err := sr.client.client.Delete(
+		context.Background(),
+		sr.servicePath,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to deregister service %s: %v", sr.serviceInfo.ServiveName, err)
+	}
+
+	// Revoke the lease if it exists
+	if sr.leaseID != 0 {
+		_, err = sr.client.client.Revoke(context.Background(), sr.leaseID)
+		if err != nil {
+			return fmt.Errorf("failed to revoke lease for service %s: %v", sr.serviceInfo.ServiveName, err)
+		}
+	}
+
+	return nil
+}
 
 // keepAlive keeps the lease alive
 func (sr *ServiceRegister) keepAlive() {
@@ -225,15 +230,15 @@ func (sr *ServiceRegister) keepAlive() {
 		select {
 		case resp, ok := <-sr.keepAliveChan:
 			if !ok {
-				fmt.Printf("Keep-alive channel closed for service %s/%s\n", sr.serviceInfo.ServiveName, sr.serviceInfo.ID)
+				fmt.Printf("Keep-alive channel closed for service %s/%s\n", sr.serviceInfo.ServiveName, sr.serviceInfo.ServiveName)
 				return
 			}
 			if resp == nil {
-				fmt.Printf("Keep-alive response is nil for service %s/%s\n", sr.serviceInfo.ServiveName, sr.serviceInfo.ID)
+				fmt.Printf("Keep-alive response is nil for service %s/%s\n", sr.serviceInfo.ServiveName, sr.serviceInfo.ServiveName)
 				return
 			}
 		case <-sr.client.ctx.Done():
-			fmt.Printf("Context done for service %s/%s\n", sr.serviceInfo.ServiveName, sr.serviceInfo.ID)
+			fmt.Printf("Context done for service %s/%s\n", sr.serviceInfo.ServiveName, sr.serviceInfo.ServiveName)
 			return
 		}
 	}
