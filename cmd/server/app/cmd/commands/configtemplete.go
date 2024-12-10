@@ -40,6 +40,7 @@ func templeteRun() error {
 		MysqlDBinfo:  options.NewMysqlDBInfoOpts(),
 		RedisDBinfo:  options.NewRedisDBInfoOpts(),
 		Storage:      options.NewStorageOptions(),
+		Etcd:         options.NewEtcdOptions(),
 	}
 	operator := utils.NewYamlOpeartor(config,
 		utils.WithCommentsTagFlag(utils.PilotGoHeadComment),
