@@ -5,7 +5,7 @@
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Tue Dec 10 14:46:05 2024 +0800
  */
-package gateway
+package middleware
 
 import (
 	"net/http"

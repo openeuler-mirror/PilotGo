@@ -5,20 +5,15 @@
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Tue Dec 10 10:17:05 2024 +0800
  */
-package etcd
+package client
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"os/signal"
-	"strings"
-	"syscall"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -46,88 +41,8 @@ type ServiceRegister struct {
 	cancel        context.CancelFunc // To cancel the keep-alive goroutine
 }
 
-// SetupEtcdRegistration initializes etcd registration with graceful shutdown
-func Register(ctx context.Context, opts *RegisterOptions) error {
-	serviceRegister, err := registerService(opts)
-	if err != nil {
-		return err
-	}
-
-	// Handle graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		select {
-		case <-sigChan:
-		case <-ctx.Done():
-		}
-		if serviceRegister != nil {
-			serviceRegister.deregister()
-		}
-	}()
-
-	return nil
-}
-
-// Deregister removes the service from etcd
-
-// GetAllServices returns all registered services
-func (c *Client) GetAllServices() (map[string][]*ServiceInfo, error) {
-	services := make(map[string][]*ServiceInfo)
-
-	// Get all services with prefix "/services/"
-	resp, err := c.client.Get(context.Background(), "/services/", clientv3.WithPrefix())
-	if err != nil {
-		return nil, fmt.Errorf("failed to get services: %v", err)
-	}
-
-	// Process each service
-	for _, kv := range resp.Kvs {
-		var serviceInfo ServiceInfo
-		err := json.Unmarshal(kv.Value, &serviceInfo)
-		if err != nil {
-			fmt.Printf("Failed to unmarshal service info: %v\n", err)
-			continue
-		}
-
-		services[serviceInfo.ServiveName] = append(services[serviceInfo.ServiveName], &serviceInfo)
-	}
-
-	return services, nil
-}
-
-// RegisterToEtcd registers the server to etcd
-func registerService(opts *RegisterOptions) (*ServiceRegister, error) {
-	// Create etcd client
-	etcdClient, err := NewClient(opts.Endpoints, opts.DialTimeout)
-	if err != nil {
-		return nil, errors.New("failed to create etcd client: " + err.Error())
-	}
-
-	// Create service info
-	serviceInfo := &ServiceInfo{
-		ServiveName: opts.ServiceName,
-		Address:     strings.Split(opts.ServiceAddr, ":")[0],
-		Port:        strings.Split(opts.ServiceAddr, ":")[1],
-		Metadata: map[string]string{
-			"version": opts.Version,
-		},
-	}
-
-	// Register service with TTL
-	serviceRegister, err := newServiceRegister(etcdClient, serviceInfo, 10)
-	if err != nil {
-		etcdClient.Close()
-		return nil, errors.New("failed to register service: " + err.Error())
-	}
-	logger.Info("service registered to etcd successfully")
-
-	return serviceRegister, nil
-}
-
 // NewServiceRegister creates a new service register
-func newServiceRegister(client *Client, info *ServiceInfo, ttl int64) (*ServiceRegister, error) {
+func NewServiceRegister(client *Client, info *ServiceInfo, ttl int64) (*ServiceRegister, error) {
 	// 首先检查客户端是否可用
 	if client == nil || client.client == nil {
 		return nil, errors.New("etcd client is not initialized")
@@ -198,7 +113,7 @@ func (sr *ServiceRegister) register(opts ...clientv3.OpOption) error {
 	)
 	return err
 }
-func (sr *ServiceRegister) deregister() error {
+func (sr *ServiceRegister) Deregister() error {
 	// Cancel the context to stop keep-alive goroutine
 	if sr.cancel != nil {
 		sr.cancel()
