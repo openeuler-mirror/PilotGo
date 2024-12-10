@@ -5,7 +5,7 @@
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Mon Dec 09 13:56:05 2024 +0800
  */
-package etcd
+package client
 
 import (
 	"context"

@@ -16,22 +16,22 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/sdk/etcd"
+	"gitee.com/openeuler/PilotGo/sdk/etcd/client"
 )
 
 // Gateway represents the API gateway
 type Gateway struct {
-	etcdClient  *etcd.Client
-	services    map[string][]*etcd.ServiceInfo
+	etcdClient  *client.Client
+	services    map[string][]*client.ServiceInfo
 	serviceLock sync.RWMutex
-	watcher     *etcd.Watcher
+	watcher     *client.Watcher
 }
 
 // NewGateway creates a new API gateway
-func NewGateway(etcdClient *etcd.Client) *Gateway {
+func NewGateway(etcdClient *client.Client) *Gateway {
 	g := &Gateway{
 		etcdClient: etcdClient,
-		services:   make(map[string][]*etcd.ServiceInfo),
+		services:   make(map[string][]*client.ServiceInfo),
 	}
 
 	// Start watching for service changes
@@ -41,27 +41,27 @@ func NewGateway(etcdClient *etcd.Client) *Gateway {
 
 // watchServices watches for service changes in etcd
 func (g *Gateway) watchServices() {
-	callback := func(eventType etcd.EventType, key, value string) {
+	callback := func(eventType client.EventType, key, value string) {
 		switch eventType {
-		case etcd.EventTypePut:
-			var service etcd.ServiceInfo
+		case client.EventTypePut:
+			var service client.ServiceInfo
 			if err := json.Unmarshal([]byte(value), &service); err != nil {
 				fmt.Printf("Failed to unmarshal service info: %v\n", err)
 				return
 			}
 			g.addService(&service)
 
-		case etcd.EventTypeDelete:
+		case client.EventTypeDelete:
 			g.removeService(key)
 		}
 	}
 
-	g.watcher = etcd.NewWatcher(g.etcdClient, "/services/", callback)
+	g.watcher = client.NewWatcher(g.etcdClient, "/services/", callback)
 	g.watcher.Start()
 }
 
 // addService adds a service to the gateway
-func (g *Gateway) addService(service *etcd.ServiceInfo) {
+func (g *Gateway) addService(service *client.ServiceInfo) {
 	g.serviceLock.Lock()
 	defer g.serviceLock.Unlock()
 
@@ -93,7 +93,7 @@ func (g *Gateway) removeService(key string) {
 }
 
 // getService returns a service instance using round-robin load balancing
-func (g *Gateway) getService(name string) (*etcd.ServiceInfo, error) {
+func (g *Gateway) getService(name string) (*client.ServiceInfo, error) {
 	g.serviceLock.RLock()
 	defer g.serviceLock.RUnlock()
 
