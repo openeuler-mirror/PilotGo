@@ -9,11 +9,9 @@
   <div style="width: 100%; height: 100%;">
     <el-container style="width: 100%; height: 100%;">
       <el-aside :width="collapseWidth" class="menuSide">
-        <div class="menuSide_logos" v-if="isCollapse">
-          <img src="../../assets/logo_small.png" alt="">
-        </div>
-        <div class="menuSide_logo" v-else>
-          <img src="../../assets/logo.png" alt="">
+        <div class="menuSide_logo">
+          <img style="height:40px;" v-if="isCollapse" src="../../assets/logo_small.png" alt="">
+          <img style="height:60px" v-else src="../../assets/logo1.png" alt="">
         </div>
         <sidebar class="menuSide_menu" :isCollapse="isCollapse" />
         <div class="menuSide_collapse">
@@ -24,13 +22,15 @@
         </div>
       </el-aside>
       <el-container>
-        <el-header style="height:10%">
+        <el-header style="height:61px; border-bottom:1px solid #E6A23C;">
           <div class="title">
             <div class="route" style="">
               <bread-crumb class="breadcrumb"></bread-crumb>
               <TagView class="tagview"></TagView>
             </div>
             <div class="user">
+              <el-link href="https://product.kylinos.cn/productCase/153/42" target="_blank" type="warning">商业版</el-link>
+              &emsp;
               <el-icon size="20">
                 <User />
               </el-icon>
@@ -207,31 +207,16 @@ function doLogout() {
   justify-content: space-between;
   border-right: 1px solid #dcdfe6;
 
-  &_logo,
-  &_logos {
+  &_logo {
     width: 100%;
-    height: 10%;
+    height: 66px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  &_logo {
-    img {
-      display: inline-block;
-      height: 90%;
-    }
-  }
-
-  &_logos {
-    img {
-      display: inline-block;
-      height: 40%;
-    }
-  }
-
   &_menu {
-    height: 80%;
+    height: calc(100% - 66px);
     border-top: 1px solid #dcdfe6;
   }
 
