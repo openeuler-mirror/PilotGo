@@ -15,8 +15,6 @@
       <div class="search">
         <el-autocomplete style="width:50%" class="inline-input" v-model="userName" placeholder="请输入用户名"
           :fetch-suggestions="querySuggestions" @select="onSelectUser"></el-autocomplete>
-        &nbsp;
-        <el-button plain type="primary">搜索</el-button>
       </div>
     </div>
     <div style="width:30%;">

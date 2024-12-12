@@ -19,8 +19,8 @@
       <span>请选择软件包：</span>
       <el-autocomplete style="width:30%; margin-right: 10px;" class="inline-input" v-model="packageName"
         @select="onPackageSelected" :fetch-suggestions="querySuggestions" placeholder="请输入内容"></el-autocomplete>
-      <auth-button auth="button/rpm_install" name="rpm_install" @click="onInstallPackage">安装</auth-button>
-      <auth-button auth="button/rpm_uninstall" name="rpm_uninstall" @click="onUnInstallPackage">卸载</auth-button>
+      <auth-button auth="button/rpm_install" type="primary" name="rpm_install" @click="onInstallPackage">安装</auth-button>
+      <auth-button auth="button/rpm_uninstall" type="danger" name="rpm_uninstall" @click="onUnInstallPackage">卸载</auth-button>
     </div>
     <div class="info">
       <div class="detail" v-if="display">
@@ -166,7 +166,15 @@ const handleResult = (resp: any, actione_type: string) => {
   }
 }
 
+const rpmRegexTest = () => {
+  let regex = /^[A-Za-z0-9+-._]+$/; 
+  if(!regex.test(packageName.value)) {
+    ElMessage.error('请输入合法的软件包名称')
+    return false;
+  }
+}
 function onInstallPackage() {
+  if (!rpmRegexTest()) return;
   installPackage(handleBaseInfo('软件包安装'))
     .then((resp: any) => handleResult(resp, 'get'))
     .catch((err: any) => {
@@ -175,6 +183,7 @@ function onInstallPackage() {
 }
 
 const onUnInstallPackage = () => {
+  if (!rpmRegexTest()) return;
   removePackage(handleBaseInfo('软件包卸载'))
     .then((resp: any) => handleResult(resp, 'remove'))
     .catch((err: any) => {
