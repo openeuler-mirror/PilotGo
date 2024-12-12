@@ -26,17 +26,26 @@
         </div>
       </div>
       <div class="bottom">
-        <div class="bottom_panel zx">
-          <span>在线机器</span>
-          <p style="color: rgb(92, 123, 217)">{{ overview.normal }}</p>
+        <div class="bottom_panel">
+          <img src="../../assets/overview/zx.svg" alt="">
+          <div style="color: #67C23A">
+            <span>在线机器</span>
+            <p>{{ overview.normal }}</p>
+          </div>
         </div>
-        <div class="bottom_panel lx">
-          <span>离线机器</span>
-          <p style="color: rgb(138, 138, 138)">{{ overview.offline }}</p>
+        <div class="bottom_panel">
+          <img src="../../assets/overview/lx.svg" alt="">
+          <div style="color: #909399;"> 
+            <span>离线机器</span>
+            <p>{{ overview.offline }}</p>
+          </div>
         </div>
-        <div class="bottom_panel kx">
-          <span>未分配机器</span>
-          <p style="color: rgb(253, 190, 0)">{{ overview.free }}</p>
+        <div class="bottom_panel">
+          <img src="../../assets/overview/wfp.svg" alt="">
+          <div style="color: #E6A23C">
+            <span>未分配机器</span>
+            <p>{{ overview.free }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -147,6 +156,7 @@ onMounted(() => {
   .total {
     width: 48%;
     height: 40%;
+    padding-top:18px;
     box-shadow: 0 6px 12px 0 rgba(0, 0, 0, 0.1);
 
     .top {
@@ -182,24 +192,12 @@ onMounted(() => {
         border: 1px dashed #aaa;
         color: rgb(106, 106, 106);
         display: flex;
-        padding-top: 2%;
+        padding: 10px;
 
         :deep(.el-carousel__container) {
           height: 100%;
         }
 
-        .tips_item {
-          height: 50%
-        }
-
-        h4 {
-          padding: 0 0 0 2%;
-        }
-
-        p {
-          font-size: 14px;
-          padding: 2% 0 0 2%;
-        }
       }
     }
 
@@ -210,45 +208,23 @@ onMounted(() => {
       justify-content: space-evenly;
       align-items: center;
 
-      .bottom_panel {
+      &_panel {
         width: 28%;
         height: 64%;
         border: 1px dashed #aaa;
         border-radius: 6%;
         display: flex;
-        flex-direction: column;
         justify-content: space-evenly;
-        align-items: flex-end;
         color: rgb(106, 106, 106);
-
-        span {
-          display: inline-block;
-          width: 68%;
-          font-size: 16px;
-          text-align: center;
+        img {
+          width:30%;
         }
-
-        p {
-          width: 68%;
-          text-align: center;
-          font-size: 24px;
-          font-weight: bold;
+        div {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
         }
-      }
-
-      .zx {
-        background: url(@/assets/overview/zx.png) no-repeat left center;
-        background-size: 72%;
-      }
-
-      .lx {
-        background: url(@/assets/overview/lx.png) no-repeat left center;
-        background-size: 72%;
-      }
-
-      .kx {
-        background: url(@/assets/overview/kx.png) no-repeat left center;
-        background-size: 72%;
       }
     }
   }
