@@ -13,4 +13,7 @@ const (
 	// 是否为部门根节点
 	Departroot   = 0
 	DepartUnroot = 1
+
+	// 集群规模
+	ClusterSize = 10
 )

@@ -18,6 +18,7 @@ import (
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"github.com/pkg/errors"
 )
 
 // 用于管理server连接的agent
@@ -45,6 +46,15 @@ var globalAgentManager = AgentManager{}
 
 func (am *AgentManager) Stop() {
 	// stop server here
+}
+
+func (am *AgentManager) ReturnAgentNumber() int {
+	agentnum := 0
+	globalAgentManager.agentMap.Range(func(key, value any) bool {
+		agentnum++
+		return true
+	})
+	return agentnum
 }
 
 func AddAgent(a *Agent) {
@@ -84,6 +94,11 @@ func DeleteAgent(uuid string) {
 }
 
 func AddandRunAgent(c net.Conn) error {
+	if globalAgentManager.ReturnAgentNumber() == global.ClusterSize {
+		c.Close()
+		return errors.Errorf("cluster size is full, can't add new agent")
+	}
+
 	agent, err := NewAgent(c)
 	if err != nil {
 		logger.Warn("create agent from conn error, error:%s , remote addr is:%s",
