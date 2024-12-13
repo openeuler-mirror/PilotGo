@@ -206,7 +206,7 @@ func RunCommandAsyncHandler(c *gin.Context) {
 	name := c.Query("plugin_name")
 	p, err := plugin.GetPlugin(name)
 	if err != nil {
-		response.Fail(c, nil, "plugin not found: %v"+err.Error())
+		response.Fail(c, nil, "plugin not found: "+err.Error())
 		return
 	}
 	parsedURL, err := url.Parse(p.Url)
