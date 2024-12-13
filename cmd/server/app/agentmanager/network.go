@@ -8,110 +8,32 @@
 package agentmanager
 
 import (
-	"fmt"
-
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"github.com/google/uuid"
 )
 
 // 远程获取agent端的网络连接信息
 func (a *Agent) GetNetWorkConnectInfo() (*map[string]string, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.GetNetWorkConnectInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &map[string]string{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetSysctlInfo data error:%s", err)
-		return nil, resp_message.Error, err
-	}
-	return info, resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.GetNetWorkConnectInfo, struct{}{}, "failed to run script on agent", -1, info, "GetNetWorkConnectInfo")
+	return info, responseMessage.Error, err
 }
 
 // 获取agent的基础网络配置
 func (a *Agent) GetNetWorkConnInfo() (*common.NetworkConfig, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.GetNetWorkConnInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.NetworkConfig{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetNetWorkConnInfo data error:%s", err)
-		return nil, resp_message.Error, err
-	}
-	return info, resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.GetNetWorkConnInfo, struct{}{}, "failed to run script on agent", -1, info, "GetNetWorkConnInfo")
+	return info, responseMessage.Error, err
 }
 
 // 获取网卡名字
 func (a *Agent) GetNICName() (string, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.GetNICName,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.GetNICName, struct{}{}, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), responseMessage.Error, err
 }
 
 // 重启网卡配置
 func (a *Agent) RestartNetWork(NIC string) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.RestartNetWork,
-		Data: NIC,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.RestartNetWork, NIC, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Error, err
 }

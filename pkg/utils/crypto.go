@@ -7,10 +7,17 @@
  */
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+)
 
 func CryptoPassword(data string) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
+	if len([]byte(data)) <= 72 {
+		return bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
+	} else {
+		return []byte{}, fmt.Errorf("长度超过72字节，无法使用该加密方式")
+	}
 }
 
 func ComparePassword(hash, pwd string) error {

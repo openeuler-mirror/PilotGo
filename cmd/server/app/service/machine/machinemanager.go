@@ -57,7 +57,8 @@ func MachineInfo(depart *Depart, offset, size int) (int64, []dao.Res, error) {
 }
 
 func ReturnMachinePaged(departid, offset, size int) (int64, []dao.Res, error) {
-	return dao.ReturnMachinePaged(departid, offset, size)
+	count, list, err := dao.ReturnMachinePaged(departid, offset, size)
+	return count, list, err
 }
 
 // 插件调用

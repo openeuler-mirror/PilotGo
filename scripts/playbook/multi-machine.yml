@@ -1,6 +1,6 @@
 ---
 - name: install redis for PilotGo platform
-  hosts: reids
+  hosts: redis
   become: yes
   become_user: root
 

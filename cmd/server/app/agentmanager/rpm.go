@@ -13,61 +13,30 @@ import (
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"github.com/google/uuid"
 )
 
 // 获取全部安装的rpm包列表
 func (a *Agent) AllRpm() ([]string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.AllRpm,
-		Data: struct{}{},
-	}
+	responseMessage, err := a.SendMessageWrapper(protocol.AllRpm, struct{}{}, "failed to run script on agent", -1, nil, "")
 
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
-	if v, ok := resp_message.Data.([]interface{}); ok {
+	if v, ok := responseMessage.Data.([]interface{}); ok {
 		result := make([]string, len(v))
 		for i, item := range v {
 			if str, ok := item.(string); ok {
 				result[i] = str
 			}
 		}
-		return result, nil
+		return result, err
 	}
 	return nil, fmt.Errorf("failed to convert interface{} in allrpm")
 }
 
 // 获取源软件包名以及源
 func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.RpmSource,
-		Data: rpm,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.RpmSrc{}
-	err = resp_message.BindData(info)
+	responseMessage, err := a.SendMessageWrapper(protocol.RpmSource, rpm, "failed to run script on agent", -1, info, "RpmSource")
+
+	err = responseMessage.BindData(info)
 	if err != nil {
 		logger.Error("bind RpmSource data error:%s", err)
 		return nil, err
@@ -77,72 +46,19 @@ func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 
 // 获取软件包信息
 func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.RpmInfo,
-		Data: rpm,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.RpmInfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind RpmInfo data error:%s", err)
-		return nil, "", err
-	}
-	return info, resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.RpmInfo, rpm, "failed to run script on agent", -1, info, "RpmInfo")
+	return info, responseMessage.Error, err
 }
 
 // 安装软件包
 func (a *Agent) InstallRpm(rpm string) (string, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.InstallRpm,
-		Data: rpm,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.InstallRpm, rpm, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), responseMessage.Error, err
 }
 
 // 卸载软件包
 func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.RemoveRpm,
-		Data: rpm,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.RemoveRpm, rpm, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), responseMessage.Error, err
 }
