@@ -8,41 +8,16 @@
 package agentmanager
 
 import (
-	"fmt"
-
 	mc "gitee.com/openeuler/PilotGo/pkg/utils/message/common"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"github.com/google/uuid"
 )
 
 // 远程获取agent端的主机的概览信息
 func (a *Agent) AgentOverview() (*mc.AgentOverview, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.AgentOverview,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to send agent message: %v", err)
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to get agent overview: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &mc.AgentOverview{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind AgentOverview data error: %v", err)
-		return nil, err
-	}
-
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.AgentOverview, nil, "failed to send agent overview message", -1, info, "AgentOverview")
+	return info, err
 }
 
 type AgentInfo struct {
@@ -53,219 +28,56 @@ type AgentInfo struct {
 
 // 远程获取agent端的系统信息
 func (a *Agent) AgentInfo() (*AgentInfo, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.AgentInfo,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &AgentInfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind AgentInfo data error: %v", err)
-		return nil, err
-	}
-
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.AgentInfo, nil, "failed to run script on agent", -1, info, "AgentInfo")
+	return info, err
 }
 
 // 远程获取agent端的系统信息
 func (a *Agent) GetOSInfo() (*common.SystemInfo, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.OsInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.SystemInfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetOSInfo data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.OsInfo, struct{}{}, "failed to run script on agent", -1, info, "GetOSInfo")
+	return info, err
 }
 
 // 远程获取agent端的CPU信息
 func (a *Agent) GetCPUInfo() (*common.CPUInfo, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.CPUInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.CPUInfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetCPUInfo data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.CPUInfo, struct{}{}, "failed to run script on agent", -1, info, "GetCPUInfo")
+	return info, err
 }
 
 // 远程获取agent端的内存信息
 func (a *Agent) GetMemoryInfo() (*common.MemoryConfig, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.MemoryInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent: %s", err.Error())
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.MemoryConfig{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetMemoryInfo data error: %v", err)
-		return nil, err
-	}
+	_, _ = a.SendMessageWrapper(protocol.MemoryInfo, struct{}{}, "failed to run script on agent", -1, info, "GetMemoryInfo")
 	return info, nil
 }
 
 // 远程获取agent端的内核信息
 func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.SysctlInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &map[string]string{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetSysctlInfo data error: %v", err)
-		return nil, err
-	}
+	_, _ = a.SendMessageWrapper(protocol.SysctlInfo, struct{}{}, "failed to run script on agent", -1, info, "GetSysctlInfo")
 	return info, nil
 }
 
 // 查看某个内核参数的值
 func (a *Agent) SysctlView(args string) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.SysctlView,
-		Data: args,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
+	responseMessage, _ := a.SendMessageWrapper(protocol.SysctlView, args, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), nil
 }
 
 // 获取磁盘的使用情况
 func (a *Agent) DiskUsage() ([]*common.DiskUsageINfo, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.DiskUsage,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &[]*common.DiskUsageINfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind DiskUsage data error: %v", err)
-		return nil, err
-	}
+	_, _ = a.SendMessageWrapper(protocol.DiskUsage, struct{}{}, "failed to run script on agent", -1, info, "DiskUsage")
 	return *info, nil
 }
 
 // 获取磁盘的IO信息
 func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.DiskInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.DiskIOInfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind DiskInfo data error: %v", err)
-		return nil, err
-	}
+	_, _ = a.SendMessageWrapper(protocol.DiskInfo, struct{}{}, "failed to run script on agent", -1, info, "DiskInfo")
 	return info, nil
 }
 
@@ -275,254 +87,64 @@ func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 2.挂载磁盘
 */
 func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.DiskMount,
-		Data: sourceDisk + "," + destPath,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return err.Error(), err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
+	responseMessage, err := a.SendMessageWrapper(protocol.DiskMount, sourceDisk+","+destPath, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), err
 }
 
 func (a *Agent) DiskUMount(diskPath string) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.DiskUMount,
-		Data: diskPath,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return err.Error(), err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
+	responseMessage, err := a.SendMessageWrapper(protocol.DiskUMount, diskPath, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), err
 }
 
 func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.DiskFormat,
-		Data: fileType + "," + diskPath,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
+	responseMessage, err := a.SendMessageWrapper(protocol.DiskFormat, fileType+","+diskPath, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), err
 }
 
 // 获取当前TCP网络连接信息
 func (a *Agent) NetTCP() (*common.NetConnect, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.NetTCP,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.NetConnect{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind NetTCP data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.NetTCP, struct{}{}, "failed to run script on agent", -1, info, "NetTCP")
+	return info, err
 }
 
 // 获取当前UDP网络连接信息
 func (a *Agent) NetUDP() (*common.NetConnect, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.NetUDP,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.NetConnect{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind NetUDP data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.NetUDP, struct{}{}, "failed to run script on agent", -1, info, "NetUDP")
+	return info, err
 }
 
 // 获取网络读写字节／包的个数
 func (a *Agent) NetIOCounter() (*common.IOCnt, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.NetIOCounter,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.IOCnt{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind NetIOCounter data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.NetIOCounter, struct{}{}, "failed to run script on agent", -1, info, "NetIOCounter")
+	return info, err
 }
 
 // 获取网卡配置
 func (a *Agent) NetNICConfig() (*common.NetInterfaceCard, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.NetNICConfig,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.NetInterfaceCard{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind NetNICConfig data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.NetNICConfig, struct{}{}, "failed to run script on agent", -1, info, "NetNICConfig")
+	return info, err
 }
 
 // 远程获取agent端的内核信息
 func (a *Agent) GetAgentOSInfo() (*common.SystemAndCPUInfo, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.AgentOSInfo,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.SystemAndCPUInfo{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind GetAgentOSInfo data error: %v", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.AgentOSInfo, struct{}{}, "failed to run script on agent", -1, info, "GetAgentOSInfo")
+	return info, err
 }
 
 // 远程获取agent端的repo文件
 func (a *Agent) GetRepoSource() ([]*common.RepoSource, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.GetRepoSource,
-		Data: struct{}{},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &[]*common.RepoSource{}
-	// must pass a pointer
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind data error: %v", err)
-		return nil, err
-	}
-	return *info, nil
+	_, err := a.SendMessageWrapper(protocol.GetRepoSource, struct{}{}, "failed to run script on agent", -1, info, "GetRepoSource")
+	return *info, err
 }
 
 // 远程获取agent端的时间信息
 func (a *Agent) GetTimeInfo() (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.AgentTime,
-		Data: struct{}{},
-	}
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to get time on agent")
-		return "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to get time on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
+	responseMessage, err := a.SendMessageWrapper(protocol.AgentTime, struct{}{}, "failed to run script on agent", -1, nil, "")
+	return responseMessage.Data.(string), err
 }

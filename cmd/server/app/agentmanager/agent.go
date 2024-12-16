@@ -187,91 +187,69 @@ func (a *Agent) sendMessage(msg *protocol.Message, wait bool) (*protocol.Message
 	return nil, nil
 }
 
-// 心跳
-func (a *Agent) HeartBeat() (string, error) {
+func (a *Agent) SendMessageWrapper(protocolType int, msgData interface{}, errorMsg string, statusType int, info interface{}, bindErrorString string) (interface{}, error) {
 	msg := &protocol.Message{
 		UUID: uuid.New().String(),
-		Type: protocol.Heartbeat,
-		Data: "connection is normal",
+		Type: protocolType,
+		Data: msgData,
 	}
 
-	resp_message, err := a.sendMessage(msg, true)
+	responseMessage, err := a.sendMessage(msg, true)
 	if err != nil {
-		logger.Error("failed to run script on agent")
+		logger.Error(errorMsg)
 		return "", err
 	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
+	switch statusType {
+	case -1:
+		if responseMessage.Status == -1 || responseMessage.Error != "" {
+			logger.Error(errorMsg+": %s", responseMessage.Error)
+			return "", fmt.Errorf(responseMessage.Error)
+		}
+	case 0:
+		if responseMessage.Status == 0 {
+			//当状态为0时，表示命令执行成功，可以解析返回的数据。状态为-1的时候不会有数据
+			result := &utils.CmdResult{}
+			err = responseMessage.BindData(result)
+			if err != nil {
+				return nil, fmt.Errorf("failed to bind command result: %v", err)
+			}
+			return result, nil
+		}
 	}
 
-	return resp_message.Data.(string), nil
+	if info != nil {
+		err = responseMessage.BindData(info)
+		if err != nil {
+			logger.Error("bind "+bindErrorString+" data error: %v", err)
+			return nil, err
+		}
+	}
+
+	return responseMessage, nil
+}
+
+// 心跳
+func (a *Agent) HeartBeat() (string, error) {
+	responseMessage, err := a.SendMessageWrapper(protocol.Heartbeat, "connection is normal", "failed to run script on agent", -1, nil, "")
+	return responseMessage.(protocol.Message).Data.(string), err
 }
 
 // 开启定时任务
 func (a *Agent) CronStart(id int, spec string, command string) (string, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.CronStart,
-		Data: strconv.Itoa(id) + "," + spec + "," + command,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.CronStart, strconv.Itoa(id)+","+spec+","+command, "failed to run script on agent", -1, nil, "")
+	return responseMessage.(protocol.Message).Data.(string), responseMessage.Error, err
 }
 
 // 暂停定时任务
 func (a *Agent) CronStopAndDel(id int) (string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.CronStopAndDel,
-		Data: strconv.Itoa(id),
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return "", fmt.Errorf(resp_message.Error)
-	}
-
-	return resp_message.Data.(string), nil
+	responseMessage, err := a.SendMessageWrapper(protocol.CronStopAndDel, strconv.Itoa(id), "failed to run script on agent", -1, nil, "")
+	return responseMessage.(protocol.Message).Data.(string), err
 }
 
 // 监控配置文件
 func (a *Agent) ConfigfileInfo(ConMess global.ConfigMessage) error {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.AgentConfig,
-		Data: ConMess,
-	}
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to config on agent")
-		return err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to config on agent: %s", resp_message.Error)
-		return fmt.Errorf(resp_message.Error)
-	}
-
-	return nil
+	_, err := a.SendMessageWrapper(protocol.AgentConfig, ConMess, "failed to config on agent", -1, nil, "")
+	return err
 }
 
 // 监控文件信息回传

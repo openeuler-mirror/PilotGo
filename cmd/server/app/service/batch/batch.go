@@ -104,13 +104,16 @@ func CreateBatch(batchinfo *CreateBatchParam) error {
 }
 
 // 查询所有批次
-func SelectBatch() ([]dao.Batch, error) {
-	return dao.GetBatch()
+func SelectBatch() ([]Batch, error) {
+	var batch []Batch
+	batch, err := dao.GetBatch()
+	return batch, err
 }
 
 // 分页查询所有批次
 func GetBatchPaged(offset, size int) (int64, []Batch, error) {
-	return dao.GetBatchrPaged(offset, size)
+	count, batchs, err := dao.GetBatchrPaged(offset, size)
+	return count, batchs, err
 }
 
 // 删除批次
@@ -119,6 +122,7 @@ func DeleteBatch(ids []int) error {
 		err := dao.DeleteBatch(value)
 		if err != nil {
 			logger.Error(err.Error())
+			return err
 		}
 	}
 	return nil

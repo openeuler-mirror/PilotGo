@@ -13,6 +13,8 @@
         mode: '0540'
 
     - name: restart PilotGo agent service
-      command: systemctl restart PilotGo-agent
+      service:
+        name: PilotGo-agent
+        state: restarted
       become: yes
       become_user: root

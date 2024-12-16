@@ -10,38 +10,19 @@ package agentmanager
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
-
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
 	sdkcommon "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"github.com/google/uuid"
 )
 
 // 查看配置文件内容
 func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, string, error) {
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.ReadFilePattern,
-		Data: sdkcommon.File{Path: filepath, Name: pattern},
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
-	data, ok := resp_message.Data.([]interface{})
+	responseMessage, err := a.SendMessageWrapper(protocol.ReadFilePattern, sdkcommon.File{Path: filepath, Name: pattern}, "failed to run script on agent", -1, nil, "")
+	data, ok := responseMessage.Data.([]interface{})
 	if !ok {
-		logger.Error("failed to get msg data on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, errors.New("failed to get msg data")
+		logger.Error("failed to get msg data on agent: %s", responseMessage.Error)
+		return nil, responseMessage.Error, errors.New("failed to get msg data")
 	}
 
 	var files []sdkcommon.File
@@ -57,7 +38,7 @@ func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, str
 			logger.Error("failed to get file from data")
 		}
 	}
-	return files, resp_message.Error, nil
+	return files, responseMessage.Error, err
 }
 
 // 更新配置文件
@@ -67,30 +48,9 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 		Name: filename,
 		Text: text,
 	}
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.EditFile,
-		Data: updatefile,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.UpdateFile{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind UpdateFile data error:%s", err)
-		return nil, resp_message.Error, err
-	}
-	return info, resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.EditFile, updatefile, "failed to run script on agent", -1, info, "UpdateFile")
+	return info, responseMessage.Error, err
 }
 
 // 存储配置文件
@@ -100,28 +60,7 @@ func (a *Agent) SaveFile(filepath string, filename string, text string) (*common
 		Name: filename,
 		Text: text,
 	}
-	msg := &protocol.Message{
-		UUID: uuid.New().String(),
-		Type: protocol.SaveFile,
-		Data: updatefile,
-	}
-
-	resp_message, err := a.sendMessage(msg, true)
-	if err != nil {
-		logger.Error("failed to run script on agent")
-		return nil, "", err
-	}
-
-	if resp_message.Status == -1 || resp_message.Error != "" {
-		logger.Error("failed to run script on agent: %s", resp_message.Error)
-		return nil, resp_message.Error, fmt.Errorf(resp_message.Error)
-	}
-
 	info := &common.UpdateFile{}
-	err = resp_message.BindData(info)
-	if err != nil {
-		logger.Error("bind UpdateFile data error:%s", err)
-		return nil, resp_message.Error, err
-	}
-	return info, resp_message.Error, nil
+	responseMessage, err := a.SendMessageWrapper(protocol.SaveFile, updatefile, "failed to run script on agent", -1, info, "UpdateFile")
+	return info, responseMessage.Error, err
 }

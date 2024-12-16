@@ -107,6 +107,7 @@ func DeleteConfig(fileIds []int) error {
 		err = dao.DeleteHistoryConfigFile(fileId)
 		if err != nil {
 			logger.Error(err.Error())
+			return err
 		}
 	}
 	return nil
@@ -184,5 +185,6 @@ func LastConfigFileRollBack(file *RollBackConfigFiles) error {
 }
 
 func GetConfigFilesPaged(offset, size int) (int64, []ConfigFiles, error) {
-	return dao.GetConfigFilesPaged(offset, size)
+	count, configFiles, err := dao.GetConfigFilesPaged(offset, size)
+	return count, configFiles, err
 }
