@@ -32,7 +32,7 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 	}
 
 	go func() {
-		r := setupRouter()
+		r := SetupRouter()
 		// 启动websocket服务
 		go websocket.CliManager.Start(stopCh)
 		shutdownCtx, cancel := context.WithCancel(context.Background())
@@ -101,7 +101,7 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 	return nil
 }
 
-func setupRouter() *gin.Engine {
+func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
