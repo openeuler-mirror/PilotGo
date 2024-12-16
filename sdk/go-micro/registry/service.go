@@ -25,11 +25,11 @@ type ServiceRegistrar struct {
 }
 
 // NewServiceRegistrar creates a new service registrar
-func NewServiceRegistrar(opts *Options) error {
+func NewServiceRegistrar(opts *Options) (Registry, error) {
 	// Create registry client
 	reg, err := NewRegistry(RegistryTypeEtcd, opts)
 	if err != nil {
-		return fmt.Errorf("failed to create registry: %v", err)
+		return nil, fmt.Errorf("failed to create registry: %v", err)
 	}
 
 	// Create service info
@@ -46,7 +46,7 @@ func NewServiceRegistrar(opts *Options) error {
 	}
 
 	if err := sr.Start(); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Handle graceful shutdown
@@ -64,7 +64,7 @@ func NewServiceRegistrar(opts *Options) error {
 	}()
 
 	logger.Info("service registered to etcd successfully")
-	return nil
+	return reg, nil
 }
 
 // Start registers the service and starts keeping it alive
