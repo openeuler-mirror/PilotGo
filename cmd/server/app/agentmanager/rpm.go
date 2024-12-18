@@ -12,14 +12,13 @@ import (
 
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 // 获取全部安装的rpm包列表
 func (a *Agent) AllRpm() ([]string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.AllRpm, struct{}{}, "failed to run script on agent", -1, nil, "")
 
-	if v, ok := responseMessage.Data.([]interface{}); ok {
+	if v, ok := responseMessage.(protocol.Message).Data.([]interface{}); ok {
 		result := make([]string, len(v))
 		for i, item := range v {
 			if str, ok := item.(string); ok {
@@ -34,31 +33,25 @@ func (a *Agent) AllRpm() ([]string, error) {
 // 获取源软件包名以及源
 func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 	info := &common.RpmSrc{}
-	responseMessage, err := a.SendMessageWrapper(protocol.RpmSource, rpm, "failed to run script on agent", -1, info, "RpmSource")
-
-	err = responseMessage.BindData(info)
-	if err != nil {
-		logger.Error("bind RpmSource data error:%s", err)
-		return nil, err
-	}
-	return info, nil
+	_, err := a.SendMessageWrapper(protocol.RpmSource, rpm, "failed to run script on agent", -1, info, "RpmSource")
+	return info, err
 }
 
 // 获取软件包信息
 func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 	info := &common.RpmInfo{}
 	responseMessage, err := a.SendMessageWrapper(protocol.RpmInfo, rpm, "failed to run script on agent", -1, info, "RpmInfo")
-	return info, responseMessage.Error, err
+	return info, responseMessage.(protocol.Message).Error, err
 }
 
 // 安装软件包
 func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.InstallRpm, rpm, "failed to run script on agent", -1, nil, "")
-	return responseMessage.Data.(string), responseMessage.Error, err
+	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
 }
 
 // 卸载软件包
 func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.RemoveRpm, rpm, "failed to run script on agent", -1, nil, "")
-	return responseMessage.Data.(string), responseMessage.Error, err
+	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
 }

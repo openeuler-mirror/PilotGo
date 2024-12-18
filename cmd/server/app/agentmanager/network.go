@@ -16,24 +16,24 @@ import (
 func (a *Agent) GetNetWorkConnectInfo() (*map[string]string, string, error) {
 	info := &map[string]string{}
 	responseMessage, err := a.SendMessageWrapper(protocol.GetNetWorkConnectInfo, struct{}{}, "failed to run script on agent", -1, info, "GetNetWorkConnectInfo")
-	return info, responseMessage.Error, err
+	return info, responseMessage.(protocol.Message).Error, err
 }
 
 // 获取agent的基础网络配置
 func (a *Agent) GetNetWorkConnInfo() (*common.NetworkConfig, string, error) {
 	info := &common.NetworkConfig{}
 	responseMessage, err := a.SendMessageWrapper(protocol.GetNetWorkConnInfo, struct{}{}, "failed to run script on agent", -1, info, "GetNetWorkConnInfo")
-	return info, responseMessage.Error, err
+	return info, responseMessage.(protocol.Message).Error, err
 }
 
 // 获取网卡名字
 func (a *Agent) GetNICName() (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.GetNICName, struct{}{}, "failed to run script on agent", -1, nil, "")
-	return responseMessage.Data.(string), responseMessage.Error, err
+	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
 }
 
 // 重启网卡配置
 func (a *Agent) RestartNetWork(NIC string) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.RestartNetWork, NIC, "failed to run script on agent", -1, nil, "")
-	return responseMessage.Error, err
+	return responseMessage.(protocol.Message).Error, err
 }

@@ -14,7 +14,8 @@ import (
 
 // 获取当前用户信息
 func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
-	_, err := a.SendMessageWrapper(protocol.CurrentUser, struct{}{}, "failed to run script on agent", -1, nil, "")
+	info := &common.CurrentUser{}
+	_, err := a.SendMessageWrapper(protocol.CurrentUser, struct{}{}, "failed to run script on agent", -1, info, "")
 	return info, err
 }
 
@@ -22,17 +23,17 @@ func (a *Agent) CurrentUser() (*common.CurrentUser, error) {
 func (a *Agent) AllUser() ([]*common.AllUserInfo, error) {
 	info := &[]*common.AllUserInfo{}
 	_, err := a.SendMessageWrapper(protocol.AllUser, struct{}{}, "failed to run script on agent", -1, info, "AllUser")
-	return *info, nil
+	return *info, err
 }
 
 // 创建新的用户，并新建家目录
 func (a *Agent) AddLinuxUser(username, password string) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.AddLinuxUser, username+","+password, "failed to run script on agent", -1, nil, "")
-	return responseMessage.Data.(string), err
+	return responseMessage.(protocol.Message).Data.(string), err
 }
 
 // 删除用户
 func (a *Agent) DelUser(username string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.DelUser, username, "failed to run script on agent", -1, nil, "")
-	return responseMessage.Data.(string), responseMessage.Error, err
+	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
 }
