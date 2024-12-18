@@ -10,6 +10,7 @@ package agentmanager
 import (
 	"encoding/base64"
 	"errors"
+
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
 	sdkcommon "gitee.com/openeuler/PilotGo/sdk/common"
@@ -19,10 +20,10 @@ import (
 // 查看配置文件内容
 func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.ReadFilePattern, sdkcommon.File{Path: filepath, Name: pattern}, "failed to run script on agent", -1, nil, "")
-	data, ok := responseMessage.Data.([]interface{})
+	data, ok := responseMessage.(protocol.Message).Data.([]interface{})
 	if !ok {
-		logger.Error("failed to get msg data on agent: %s", responseMessage.Error)
-		return nil, responseMessage.Error, errors.New("failed to get msg data")
+		logger.Error("failed to get msg data on agent: %s", responseMessage.(protocol.Message).Error)
+		return nil, responseMessage.(protocol.Message).Error, errors.New("failed to get msg data")
 	}
 
 	var files []sdkcommon.File
@@ -38,7 +39,7 @@ func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, str
 			logger.Error("failed to get file from data")
 		}
 	}
-	return files, responseMessage.Error, err
+	return files, responseMessage.(protocol.Message).Error, err
 }
 
 // 更新配置文件
@@ -50,7 +51,7 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 	}
 	info := &common.UpdateFile{}
 	responseMessage, err := a.SendMessageWrapper(protocol.EditFile, updatefile, "failed to run script on agent", -1, info, "UpdateFile")
-	return info, responseMessage.Error, err
+	return info, responseMessage.(protocol.Message).Error, err
 }
 
 // 存储配置文件
@@ -62,5 +63,5 @@ func (a *Agent) SaveFile(filepath string, filename string, text string) (*common
 	}
 	info := &common.UpdateFile{}
 	responseMessage, err := a.SendMessageWrapper(protocol.SaveFile, updatefile, "failed to run script on agent", -1, info, "UpdateFile")
-	return info, responseMessage.Error, err
+	return info, responseMessage.(protocol.Message).Error, err
 }

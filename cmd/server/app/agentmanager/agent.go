@@ -18,6 +18,7 @@ import (
 	configservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/configfile"
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	"gitee.com/openeuler/PilotGo/pkg/utils"
 	pnet "gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
@@ -237,7 +238,7 @@ func (a *Agent) HeartBeat() (string, error) {
 // 开启定时任务
 func (a *Agent) CronStart(id int, spec string, command string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.CronStart, strconv.Itoa(id)+","+spec+","+command, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), responseMessage.Error, err
+	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
 }
 
 // 暂停定时任务
