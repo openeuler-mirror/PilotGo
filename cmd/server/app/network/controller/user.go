@@ -302,7 +302,7 @@ func UpdatePasswordHandler(c *gin.Context) {
 func ResetPasswordHandler(c *gin.Context) {
 	var user userservice.UserInfo
 	if c.Bind(&user) != nil {
-		response.Fail(c, nil, "parameter error")
+		response.Fail(c, nil, "参数错误")
 		return
 	}
 
@@ -327,7 +327,7 @@ func ResetPasswordHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, nil, "密码重置成功!")
+	response.Success(c, nil, "密码重置成功! 初始密码为邮箱用户名")
 }
 
 // 删除用户

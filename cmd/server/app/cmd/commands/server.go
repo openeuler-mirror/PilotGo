@@ -87,7 +87,7 @@ func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) err
 	}
 	logger.Info("Thanks to choose PilotGo!")
 
-	// redis db初始化
+	// redis db initialize
 	if err := dbmanager.RedisdbInit(config.RedisDBinfo, ctx.Done()); err != nil {
 		if err == context.Canceled {
 			return nil
@@ -96,45 +96,45 @@ func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) err
 		return err
 	}
 
-	// mysql db初始化
+	// mysql db initialize
 	if err := dbmanager.MysqldbInit(config.MysqlDBinfo); err != nil {
 		logger.Error("mysql db init failed, please check again: %s", err)
 		return err
 	}
 
-	// 启动agent socket server
+	// start agent socket server
 	if err := network.SocketServerInit(config.SocketServer, ctx.Done()); err != nil {
 		logger.Error("socket server init failed, error:%v", err)
 		return err
 	}
 
-	//此处启动前端及REST http server
+	//start http server,and bind the plugin api、static file
 	err := network.HttpServerInit(config.HttpServer, ctx.Done())
 	if err != nil {
 		logger.Error("HttpServerInit socket server init failed, error:%v", err)
 		return err
 	}
 
-	// 启动所有功能模块服务
+	// start other services
 	if err := startServices(config.MysqlDBinfo, ctx.Done()); err != nil {
 		logger.Error("start services error: %s", err)
 		return err
 	}
 
-	// 前端推送告警
+	// the platform push errors or warns to web
 	go websocket.SendWarnMsgToWeb(ctx.Done())
 
 	logger.Info("start to serve")
 	atomic.AddInt64(&conut, -1)
-	// 信号监听 redis
+
 	return nil
 
 }
 func startServices(mysqlInfo *options.MysqlDBInfo, stopCh <-chan struct{}) error {
-	// 鉴权模块初始化
+	// verify permission initialize
 	auth.Casbin(mysqlInfo)
 
-	// 初始化plugin服务
+	// plugin server initialize
 	plugin.Init(stopCh)
 
 	return nil

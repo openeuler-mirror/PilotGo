@@ -56,11 +56,6 @@ func MachineInfo(depart *Depart, offset, size int) (int64, []dao.Res, error) {
 	return total, data, err
 }
 
-func ReturnMachinePaged(departid, offset, size int) (int64, []dao.Res, error) {
-	count, list, err := dao.ReturnMachinePaged(departid, offset, size)
-	return count, list, err
-}
-
 // 插件调用
 func MachineAllData() ([]map[string]string, error) {
 	AllData, err := dao.MachineAll()

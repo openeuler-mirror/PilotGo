@@ -16,32 +16,11 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	batchservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
 	userservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
-	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	uuidservice "github.com/google/uuid"
 )
-
-func ReadFile(c *gin.Context) {
-	uuid := c.Query("uuid")
-	agent := agentmanager.GetAgent(uuid)
-	if agent == nil {
-		response.Fail(c, nil, "获取uuid失败!")
-		return
-	}
-	file := common.File{}
-	if err := c.Bind(&file); err != nil {
-		response.Fail(c, nil, "parameter error")
-		return
-	}
-	result, Err, err := agent.ReadFilePattern(file.Path, file.Name)
-	if err != nil {
-		response.Fail(c, nil, Err)
-		return
-	}
-	response.Success(c, gin.H{"file": result}, "Success")
-}
 
 func GetAgentRepo(c *gin.Context) {
 	uuid := c.Query("uuid")

@@ -232,19 +232,19 @@ func (a *Agent) SendMessageWrapper(protocolType int, msgData interface{}, errorM
 // 心跳
 func (a *Agent) HeartBeat() (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.Heartbeat, "connection is normal", "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }
 
 // 开启定时任务
 func (a *Agent) CronStart(id int, spec string, command string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.CronStart, strconv.Itoa(id)+","+spec+","+command, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
+	return responseMessage.(*protocol.Message).Data.(string), responseMessage.(*protocol.Message).Error, err
 }
 
 // 暂停定时任务
 func (a *Agent) CronStopAndDel(id int) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.CronStopAndDel, strconv.Itoa(id), "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }
 
 // 监控配置文件

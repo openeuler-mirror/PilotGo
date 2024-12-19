@@ -18,7 +18,7 @@ import (
 func (a *Agent) AllRpm() ([]string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.AllRpm, struct{}{}, "failed to run script on agent", -1, nil, "")
 
-	if v, ok := responseMessage.(protocol.Message).Data.([]interface{}); ok {
+	if v, ok := responseMessage.(*protocol.Message).Data.([]interface{}); ok {
 		result := make([]string, len(v))
 		for i, item := range v {
 			if str, ok := item.(string); ok {
@@ -41,17 +41,17 @@ func (a *Agent) RpmSource(rpm string) (*common.RpmSrc, error) {
 func (a *Agent) RpmInfo(rpm string) (*common.RpmInfo, string, error) {
 	info := &common.RpmInfo{}
 	responseMessage, err := a.SendMessageWrapper(protocol.RpmInfo, rpm, "failed to run script on agent", -1, info, "RpmInfo")
-	return info, responseMessage.(protocol.Message).Error, err
+	return info, responseMessage.(*protocol.Message).Error, err
 }
 
 // 安装软件包
 func (a *Agent) InstallRpm(rpm string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.InstallRpm, rpm, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
+	return responseMessage.(*protocol.Message).Data.(string), responseMessage.(*protocol.Message).Error, err
 }
 
 // 卸载软件包
 func (a *Agent) RemoveRpm(rpm string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.RemoveRpm, rpm, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
+	return responseMessage.(*protocol.Message).Data.(string), responseMessage.(*protocol.Message).Error, err
 }

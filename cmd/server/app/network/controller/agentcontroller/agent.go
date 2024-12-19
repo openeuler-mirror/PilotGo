@@ -18,7 +18,6 @@ import (
 )
 
 func AgentOverviewHandler(c *gin.Context) {
-	logger.Debug("process get agent overview request")
 	uuid := c.Query("uuid")
 	agent := agentmanager.GetAgent(uuid)
 	if agent == nil {
