@@ -9,7 +9,6 @@ package controller
 
 import (
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
-	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
@@ -35,23 +34,6 @@ func MachineInfoHandler(c *gin.Context) {
 	}
 	num := query.PageSize * (query.Page - 1)
 	total, data, err := machineservice.MachineInfo(depart, num, query.PageSize)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	response.DataPagination(c, data, int(total), query)
-}
-
-// 资源池返回接口，查询没分配的机器，即departid=1,应该修改成维护状态的机器
-func FreeMachineSource(c *gin.Context) {
-	query := &response.PaginationQ{}
-	err := c.ShouldBindQuery(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	num := query.PageSize * (query.Page - 1)
-	total, data, err := machineservice.ReturnMachinePaged(global.UncateloguedDepartId, num, query.PageSize)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return

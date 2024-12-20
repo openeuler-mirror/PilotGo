@@ -29,11 +29,11 @@ func (a *Agent) AllUser() ([]*common.AllUserInfo, error) {
 // 创建新的用户，并新建家目录
 func (a *Agent) AddLinuxUser(username, password string) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.AddLinuxUser, username+","+password, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }
 
 // 删除用户
 func (a *Agent) DelUser(username string) (string, string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.DelUser, username, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), responseMessage.(protocol.Message).Error, err
+	return responseMessage.(*protocol.Message).Data.(string), responseMessage.(*protocol.Message).Error, err
 }

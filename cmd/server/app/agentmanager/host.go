@@ -64,7 +64,7 @@ func (a *Agent) GetSysctlInfo() (*map[string]string, error) {
 // 查看某个内核参数的值
 func (a *Agent) SysctlView(args string) (string, error) {
 	responseMessage, _ := a.SendMessageWrapper(protocol.SysctlView, args, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), nil
+	return responseMessage.(*protocol.Message).Data.(string), nil
 }
 
 // 获取磁盘的使用情况
@@ -88,17 +88,17 @@ func (a *Agent) DiskInfo() (*common.DiskIOInfo, error) {
 */
 func (a *Agent) DiskMount(sourceDisk, destPath string) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.DiskMount, sourceDisk+","+destPath, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }
 
 func (a *Agent) DiskUMount(diskPath string) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.DiskUMount, diskPath, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }
 
 func (a *Agent) DiskFormat(fileType, diskPath string) (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.DiskFormat, fileType+","+diskPath, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }
 
 // 获取当前TCP网络连接信息
@@ -146,5 +146,5 @@ func (a *Agent) GetRepoSource() ([]*common.RepoSource, error) {
 // 远程获取agent端的时间信息
 func (a *Agent) GetTimeInfo() (string, error) {
 	responseMessage, err := a.SendMessageWrapper(protocol.AgentTime, struct{}{}, "failed to run script on agent", -1, nil, "")
-	return responseMessage.(protocol.Message).Data.(string), err
+	return responseMessage.(*protocol.Message).Data.(string), err
 }

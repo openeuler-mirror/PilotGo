@@ -23,7 +23,7 @@ func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, str
 	data, ok := responseMessage.(protocol.Message).Data.([]interface{})
 	if !ok {
 		logger.Error("failed to get msg data on agent: %s", responseMessage.(protocol.Message).Error)
-		return nil, responseMessage.(protocol.Message).Error, errors.New("failed to get msg data")
+		return nil, responseMessage.(*protocol.Message).Error, errors.New("failed to get msg data")
 	}
 
 	var files []sdkcommon.File
@@ -39,7 +39,7 @@ func (a *Agent) ReadFilePattern(filepath, pattern string) ([]sdkcommon.File, str
 			logger.Error("failed to get file from data")
 		}
 	}
-	return files, responseMessage.(protocol.Message).Error, err
+	return files, responseMessage.(*protocol.Message).Error, err
 }
 
 // 更新配置文件
@@ -51,7 +51,7 @@ func (a *Agent) UpdateFile(filepath string, filename string, text string) (*comm
 	}
 	info := &common.UpdateFile{}
 	responseMessage, err := a.SendMessageWrapper(protocol.EditFile, updatefile, "failed to run script on agent", -1, info, "UpdateFile")
-	return info, responseMessage.(protocol.Message).Error, err
+	return info, responseMessage.(*protocol.Message).Error, err
 }
 
 // 存储配置文件
@@ -63,5 +63,5 @@ func (a *Agent) SaveFile(filepath string, filename string, text string) (*common
 	}
 	info := &common.UpdateFile{}
 	responseMessage, err := a.SendMessageWrapper(protocol.SaveFile, updatefile, "failed to run script on agent", -1, info, "UpdateFile")
-	return info, responseMessage.(protocol.Message).Error, err
+	return info, responseMessage.(*protocol.Message).Error, err
 }

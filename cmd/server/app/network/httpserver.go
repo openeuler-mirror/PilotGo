@@ -33,7 +33,7 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 
 	go func() {
 		r := SetupRouter()
-		// 启动websocket服务
+		// start websocket server
 		go websocket.CliManager.Start(stopCh)
 		shutdownCtx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -46,7 +46,7 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 			klog.Warningln("httpserver prepare stop")
 			_ = srv.Shutdown(shutdownCtx)
 		}()
-		// 启动http server服务
+		// start http server
 		if conf.UseHttps {
 			if conf.CertFile == "" || conf.KeyFile == "" {
 				logger.Error("https cert or key not configd")
@@ -75,7 +75,7 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 
 	if conf.Debug {
 		go func() {
-			// 分解字符串然后添加后缀6060
+			// pprof
 			portIndex := strings.Index(conf.Addr, ":")
 			addr := conf.Addr[:portIndex] + ":6060"
 			logger.Debug("start pprof service on: %s", addr)
@@ -113,12 +113,11 @@ func SetupRouter() *gin.Engine {
 	// 绑定 http api handler
 	registerAPIs(router)
 
+	// 对插件提供的api接口
+	registerPluginApi(router)
+
 	// 绑定插件接口反向代理handler
 	registerPluginGateway(router)
-
-	// 全局通用接口
-	router.GET("/ws", controller.WS)
-	router.GET("/event", controller.PushAlarmHandler)
 
 	// 绑定前端静态资源handler
 	resource.StaticRouter(router)
@@ -127,17 +126,22 @@ func SetupRouter() *gin.Engine {
 }
 
 func registerAPIs(router *gin.Engine) {
-	noAuthenApis := router.Group("/api/v1")
+	router.GET("/ws", controller.WS)
+	router.GET("/event", controller.PushAlarmHandler)
+
+	api := router.Group("/api/v1")
+
+	noTokenApi := api.Group("") // 首页登录、退出
 	{
-		noAuthenApis.GET("/version", controller.VersionHandler)
+		noTokenApi.GET("/version", controller.VersionHandler)
 
-		noAuthenApis.POST("/user/login", controller.LoginHandler)
-		noAuthenApis.GET("/user/logout", controller.Logout)
+		noTokenApi.POST("/user/login", controller.LoginHandler)
+		noTokenApi.GET("/user/logout", controller.Logout)
 
-		noAuthenApis.GET("/download/:filename", controller.Download)
+		noTokenApi.GET("/download/:filename", controller.Download)
 	}
 
-	authenApi := router.Group("/api/v1")
+	authenApi := api.Group("") // 按钮权限，是否显示
 	{
 		{
 			macBasicModify := authenApi.Group("/agent")
@@ -145,13 +149,13 @@ func registerAPIs(router *gin.Engine) {
 			macBasicModify.POST("/rpm_remove", middleware.NeedPermission("rpm_uninstall", "button"), agentcontroller.RemoveRpmHandler)
 		}
 		{
-			batchmanager := authenApi.Group("batchmanager")
-			batchmanager.POST("/updatebatch", middleware.NeedPermission("batch_update", "button"), controller.UpdateBatchHandler)
-			batchmanager.POST("/deletebatch", middleware.NeedPermission("batch_delete", "button"), controller.DeleteBatchHandler)
-			batchmanager.POST("/createbatch", middleware.NeedPermission("batch_create", "button"), controller.CreateBatchHandler)
+			batch := authenApi.Group("/batchmanager")
+			batch.POST("/updatebatch", middleware.NeedPermission("batch_update", "button"), controller.UpdateBatchHandler)
+			batch.POST("/deletebatch", middleware.NeedPermission("batch_delete", "button"), controller.DeleteBatchHandler)
+			batch.POST("/createbatch", middleware.NeedPermission("batch_create", "button"), controller.CreateBatchHandler)
 		}
 		{
-			user := authenApi.Group("user")
+			user := authenApi.Group("/user")
 			user.POST("/register", middleware.NeedPermission("user_add", "button"), controller.RegisterHandler)
 			user.POST("/reset", middleware.NeedPermission("user_reset", "button"), controller.ResetPasswordHandler)
 			user.POST("/delete", middleware.NeedPermission("user_del", "button"), controller.DeleteUserHandler)
@@ -164,75 +168,89 @@ func registerAPIs(router *gin.Engine) {
 			user.POST("/roleChange", middleware.NeedPermission("role_modify", "button"), controller.RolePermissionChangeHandler)
 		}
 		{
-			macList := authenApi.Group("/macList")
-			macList.POST("/deletedepartdata", middleware.NeedPermission("dept_delete", "button"), controller.DeleteDepartDataHandler)
-			macList.POST("/adddepart", middleware.NeedPermission("dept_add", "button"), controller.AddDepartHandler)
-			macList.POST("/updatedepart", middleware.NeedPermission("dept_update", "button"), controller.UpdateDepartHandler)
-			macList.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
-			macList.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
+			system := authenApi.Group("/macList")
+			system.POST("/deletedepartdata", middleware.NeedPermission("dept_delete", "button"), controller.DeleteDepartDataHandler)
+			system.POST("/adddepart", middleware.NeedPermission("dept_add", "button"), controller.AddDepartHandler)
+			system.POST("/updatedepart", middleware.NeedPermission("dept_update", "button"), controller.UpdateDepartHandler)
+			system.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
+			system.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
 		}
-		{
-			userLog := authenApi.Group("/log") // 日志管理
-			userLog.GET("/log_all", middleware.NeedPermission("audit", "menu"), controller.LogAllHandler)
-			// TODO: 界面未调用该接口
-			userLog.GET("/log_child", middleware.NeedPermission("audit", "menu"), controller.GetAuditLogByIdHandler)
-		}
-		/*
-			{
-				configmanager := authenApi.Group("config")
-				configmanager.POST("/file_broadcast", middleware.NeedPermission("config_install", "button"), agentcontroller.ConfigFileBroadcastToAgents)
-			}
-		*/
 	}
 
-	tokenApi := router.Group("/api/v1")
+	tokenApi := api.Group("") // web页面显示
 	tokenApi.Use(middleware.TokenCheckMiddleware)
-	overview := tokenApi.Group("/overview") // 机器概览
+
+	overview := tokenApi.Group("/overview") // 概览
 	{
 		overview.GET("/info", controller.ClusterInfoHandler)
 		overview.GET("/depart_info", controller.DepartClusterInfoHandler)
 	}
 
-	macList := tokenApi.Group("/macList") // 机器管理
+	system := tokenApi.Group("") // 系统
 	{
-		macList.POST("/script_save", controller.AddScriptHandler)
-		macList.GET("/depart", controller.DepartHandler)
-		macList.GET("/selectmachine", controller.MachineListHandler)
-		macList.GET("/machineinfo", controller.MachineInfoHandler)
-		macList.GET("/sourcepool", controller.FreeMachineSource)
-		macList.POST("/gettags", pluginapi.GetTagHandler)
+		{
+			//machine list
+			mac := system.Group("/macList")
+			mac.GET("/machineinfo", controller.MachineInfoHandler)
+			mac.POST("/gettags", pluginapi.GetTagHandler)
+			mac.GET("/machinealldata", controller.MachineAllDataHandler)
+		}
+		{
+			// depart manager
+			depart := system.Group("/macList")
+			depart.GET("/depart", controller.DepartHandler)
+			depart.GET("/departinfo", controller.DepartInfoHandler)
+		}
+		{
+			// batch related
+			batch := system.Group("/macList")
+			batch.GET("/selectmachine", controller.MachineListHandler)
+
+			batchmanager := system.Group("/batchmanager")
+			{
+				batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
+				batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfoHandler)
+				batchmanager.GET("/selectbatch", controller.SelectBatchHandler)
+			}
+		}
+		{
+			// machine detail info
+			macDetails := system.Group("/api")
+			macDetails.GET("/agent_overview", agentcontroller.AgentOverviewHandler)
+			macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
+			macDetails.GET("/run_command", agentcontroller.RunCmd)
+			macDetails.GET("/run_script", agentcontroller.RunScriptWithBooleanCheck)
+			macDetails.GET("/os_info", agentcontroller.OSInfoHandler)
+			macDetails.GET("/cpu_info", agentcontroller.CPUInfoHandler)
+			macDetails.GET("/memory_info", agentcontroller.MemoryInfoHandler)
+			macDetails.GET("/sysctl_info", agentcontroller.SysInfoHandler)
+			macDetails.GET("/sysctl_view", agentcontroller.SysctlViewHandler)
+			macDetails.GET("/service_list", agentcontroller.ServiceListHandler)
+			macDetails.GET("/service_status", agentcontroller.ServiceStatusHandler)
+			macDetails.GET("/rpm_all", agentcontroller.AllRpmHandler)
+			macDetails.GET("/rpm_source", agentcontroller.RpmSourceHandler)
+			macDetails.GET("/repos", agentcontroller.GetAgentRepo)
+			macDetails.GET("/rpm_info", agentcontroller.RpmInfoHandler)
+			macDetails.GET("/disk_use", agentcontroller.DiskUsageHandler)
+			macDetails.GET("/disk_info", agentcontroller.DiskInfoHandler)
+			macDetails.GET("/net_tcp", agentcontroller.NetTCPHandler)
+			macDetails.GET("/net_udp", agentcontroller.NetUDPHandler)
+			macDetails.GET("/net_io", agentcontroller.NetIOCounterHandler)
+			macDetails.GET("/net_nic", agentcontroller.NetNICConfigHandler)
+			macDetails.GET("/user_info", agentcontroller.CurrentUserInfoHandler)
+			macDetails.GET("/user_all", agentcontroller.AllUserInfoHandler)
+			macDetails.GET("/os_basic", agentcontroller.OsBasic)
+			macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
+			macDetails.GET("/firewall_zone", agentcontroller.FirewalldZoneConfig)
+			macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
+		}
+		{
+			// script manager
+			script := system.Group("/script")
+			script.POST("/save", controller.AddScriptHandler)
+		}
 	}
 
-	macDetails := tokenApi.Group("/api") // 机器详情
-	{
-		macDetails.GET("/agent_overview", agentcontroller.AgentOverviewHandler)
-		macDetails.GET("/agent_list", agentcontroller.AgentListHandler)
-		macDetails.GET("/run_command", agentcontroller.RunCmd)
-		macDetails.GET("/run_script", agentcontroller.RunScriptWithBooleanCheck)
-		macDetails.GET("/os_info", agentcontroller.OSInfoHandler)
-		macDetails.GET("/cpu_info", agentcontroller.CPUInfoHandler)
-		macDetails.GET("/memory_info", agentcontroller.MemoryInfoHandler)
-		macDetails.GET("/sysctl_info", agentcontroller.SysInfoHandler)
-		macDetails.GET("/sysctl_view", agentcontroller.SysctlViewHandler)
-		macDetails.GET("/service_list", agentcontroller.ServiceListHandler)
-		macDetails.GET("/service_status", agentcontroller.ServiceStatusHandler)
-		macDetails.GET("/rpm_all", agentcontroller.AllRpmHandler)
-		macDetails.GET("/rpm_source", agentcontroller.RpmSourceHandler)
-		macDetails.GET("/repos", agentcontroller.GetAgentRepo)
-		macDetails.GET("/rpm_info", agentcontroller.RpmInfoHandler)
-		macDetails.GET("/disk_use", agentcontroller.DiskUsageHandler)
-		macDetails.GET("/disk_info", agentcontroller.DiskInfoHandler)
-		macDetails.GET("/net_tcp", agentcontroller.NetTCPHandler)
-		macDetails.GET("/net_udp", agentcontroller.NetUDPHandler)
-		macDetails.GET("/net_io", agentcontroller.NetIOCounterHandler)
-		macDetails.GET("/net_nic", agentcontroller.NetNICConfigHandler)
-		macDetails.GET("/user_info", agentcontroller.CurrentUserInfoHandler)
-		macDetails.GET("/user_all", agentcontroller.AllUserInfoHandler)
-		macDetails.GET("/os_basic", agentcontroller.OsBasic)
-		macDetails.GET("/firewall_config", agentcontroller.FirewalldConfig)
-		macDetails.GET("/firewall_zone", agentcontroller.FirewalldZoneConfig)
-		macDetails.GET("/net", agentcontroller.GetAgentNetworkConnect)
-	}
 	/*
 		macBasicModify := api.Group("/agent") // 机器配置
 		{
@@ -264,73 +282,51 @@ func registerAPIs(router *gin.Engine) {
 			macBasicModify.POST("/network", agentcontroller.ConfigNetworkConnect)
 		}
 	*/
-	batchmanager := tokenApi.Group("batchmanager") // 批次
+
+	user := tokenApi.Group("/user") // 用户、角色管理
 	{
-		batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
-		batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfoHandler)
-	}
-
-	user := tokenApi.Group("user") // 用户管理
-	{
-		user.POST("/updatepwd", controller.UpdatePasswordHandler)
-		// user.GET("/logout", controller.Logout)
-		user.GET("/searchAll", controller.UserAll)
-		user.POST("/userSearch", controller.UserSearchHandler)
-		user.GET("/info", controller.Info)
-		// user.POST("/permission", controller.GetLoginUserPermissionHandler)
-		user.GET("/roles", controller.GetRolesHandler)
-		user.GET("/roles_paged", controller.GetRolesPagedHandler)
-
-		// 获取登录用户权限列表
-		user.POST("/permission", controller.GetLoginUserPermissionHandler)
-	}
-
-	/*
-		configmanager := api.Group("config") // 配置管理
 		{
-			configmanager.GET("/read_file", agentcontroller.ReadFile)
-			configmanager.POST("/fileSaveAdd", controller.SaveConfigFileToDatabaseHandler)
-			configmanager.GET("/file_all", controller.AllConfigFiles)
-			configmanager.POST("/file_search", controller.ConfigFileSearchHandler)
-			configmanager.POST("/file_update", controller.UpdateConfigFileHandler)
-			configmanager.POST("/file_delete", controller.DeleteConfigFileHandler)
-			configmanager.GET("/lastfile_all", controller.HistoryConfigFilesHandler)
-			configmanager.POST("/lastfile_rollback", controller.LastConfigFileRollBackHandler)
+			u := user.Group("")
+			u.GET("/info", controller.Info)
+			u.POST("/updatepwd", controller.UpdatePasswordHandler)
+			u.GET("/searchAll", controller.UserAll)
+			u.POST("/userSearch", controller.UserSearchHandler)
+			u.POST("/permission", controller.GetLoginUserPermissionHandler)
 		}
-	*/
-
-	tokenApi.GET("/plugins_paged", controller.GetPluginsPagedHandler)
-	plugin := tokenApi.Group("plugins") // 插件
-	{
-		// 添加插件
-		plugin.PUT("", controller.AddPluginHandler)
-		// 启用/停用plugin
-		plugin.POST("/:uuid", controller.TogglePluginHandler)
-		// 删除插件
-		plugin.DELETE("/:uuid", controller.UnloadPluginHandler)
-
-		// 获取插件列表
-		plugin.GET("/", controller.GetPluginsHandler)
+		{
+			role := user.Group("")
+			role.GET("/roles", controller.GetRolesHandler)
+			role.GET("/roles_paged", controller.GetRolesPagedHandler)
+		}
 	}
 
-	// 对插件提供的api接口
-	registerPluginApi(router)
-
-	other := tokenApi.Group("")
+	AuditLog := tokenApi.Group("/log") // 审计日志
 	{
-		// 监控机器列表
-		other.GET("/macList/machinealldata", controller.MachineAllDataHandler)
-		// 未用到
-		other.GET("/macList/departinfo", controller.DepartInfoHandler)
-		// 配置批次下发
-		other.GET("/batchmanager/selectbatch", controller.SelectBatchHandler)
-		// 健康监测
-		other.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
+		AuditLog.GET("/log_all", controller.LogAllHandler)
+		// TODO: 界面未调用该接口
+		AuditLog.GET("/log_child", controller.GetAuditLogByIdHandler)
+	}
+
+	plugin := tokenApi.Group("") // 插件管理
+	{
+		plugin.GET("/plugins_paged", controller.GetPluginsPagedHandler)
+		p := plugin.Group("/plugins")
+		{
+			// 添加插件
+			p.PUT("", controller.AddPluginHandler)
+			// 启用/停用plugin
+			p.POST("/:uuid", controller.TogglePluginHandler)
+			// 删除插件
+			p.DELETE("/:uuid", controller.UnloadPluginHandler)
+			// 获取插件列表
+			p.GET("/", controller.GetPluginsHandler)
+		}
 	}
 }
 
 func registerPluginApi(router *gin.Engine) {
-	pluginAPI := router.Group("/api/v1/pluginapi")
+	api := router.Group("/api/v1")
+	pluginAPI := api.Group("/pluginapi")
 	pluginAPI.Use(pluginapi.AuthCheck)
 	{
 		pluginAPI.POST("/upload", controller.Upload)

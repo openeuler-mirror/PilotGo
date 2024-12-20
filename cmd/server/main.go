@@ -13,7 +13,7 @@ import (
 )
 
 // @title          PilotGo Swagger  API
-// @version         1.0
+// @version         2.0
 // @description     This is a pilotgo server API docs.
 // @license.name  MulanPSL2
 // @license.url   http://license.coscl.org.cn/MulanPSL2
