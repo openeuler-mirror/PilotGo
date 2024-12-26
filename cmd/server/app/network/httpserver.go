@@ -126,7 +126,6 @@ func SetupRouter() *gin.Engine {
 }
 
 func registerAPIs(router *gin.Engine) {
-	router.GET("/ws", controller.WS)
 	router.GET("/event", controller.PushAlarmHandler)
 
 	api := router.Group("/api/v1")
@@ -139,6 +138,8 @@ func registerAPIs(router *gin.Engine) {
 		noTokenApi.GET("/user/logout", controller.Logout)
 
 		noTokenApi.GET("/download/:filename", controller.Download)
+
+		noTokenApi.GET("/webterminal", controller.WebTerminal)
 	}
 
 	authenApi := api.Group("") // 按钮权限，是否显示

@@ -59,6 +59,7 @@ type Plugin struct {
 	Author            string              `json:"author"`
 	Email             string              `json:"email"`
 	Url               string              `json:"url"`
+	Icon              string              `json:"icon"`
 	PluginType        string              `json:"plugin_type"`
 	ConnectStatus     bool                `json:"status"`
 	LastHeartbeatTime string              `json:"lastheatbeat"`
@@ -77,6 +78,7 @@ func (p *Plugin) Clone() *Plugin {
 		Author:      p.Author,
 		Email:       p.Email,
 		Url:         p.Url,
+		Icon:        p.Icon,
 		PluginType:  p.PluginType,
 		Enabled:     p.Enabled,
 		Permissions: p.Permissions,
@@ -165,6 +167,7 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 		Author:      info.Author,
 		Email:       info.Email,
 		Url:         pp.Url,
+		Icon:        info.Icon,
 		PluginType:  info.PluginType,
 		Enabled:     enabled,
 		Extentions:  info.Extentions,
@@ -445,6 +448,7 @@ func requestPluginInfo(plugin *PluginParam) (*Plugin, error) {
 		Author:      PluginInfo.Author,
 		Email:       PluginInfo.Email,
 		Url:         url,
+		Icon:        PluginInfo.Icon,
 		PluginType:  PluginInfo.PluginType,
 		Extentions:  extentions,
 		Permissions: permissions.Permissions,

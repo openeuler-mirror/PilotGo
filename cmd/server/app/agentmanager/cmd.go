@@ -8,8 +8,6 @@
 package agentmanager
 
 import (
-	"fmt"
-
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 )
@@ -21,8 +19,8 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 	}{
 		Command: cmd,
 	}
-	responseMessage, _ := a.SendMessageWrapper(protocol.RunCommand, data, "failed to run command on agent", 0, nil, "")
-	return nil, fmt.Errorf("agent returned error: %s", responseMessage.(*protocol.Message).Error)
+	responseMessage, err := a.SendMessageWrapper(protocol.RunCommand, data, "failed to run command on agent", 0, nil, "")
+	return responseMessage.(*utils.CmdResult), err
 }
 
 // 远程在agent上运行脚本文件
@@ -34,8 +32,8 @@ func (a *Agent) RunScript(script string, params []string) (*utils.CmdResult, err
 		Script: script,
 		Params: params,
 	}
-	responseMessage, _ := a.SendMessageWrapper(protocol.RunScript, data, "failed to run script on agent", 0, nil, "")
-	return nil, fmt.Errorf("agent returned error: %s", responseMessage.(*protocol.Message).Error)
+	responseMessage, err := a.SendMessageWrapper(protocol.RunScript, data, "failed to run script on agent", 0, nil, "")
+	return responseMessage.(*utils.CmdResult), err
 }
 
 // chmod [-R] 权限值 文件名

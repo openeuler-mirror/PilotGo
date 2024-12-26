@@ -5,8 +5,11 @@ After=network-online.target
 
 [Service]
 Type=simple
-Restart=always
-RestartSec=3s
+Restart=on-failure      
+RestartSec=5s           
+StartLimitInterval=30s  
+StartLimitBurst=3
+
 WorkingDirectory=/opt/PilotGo/agent
 ExecStart=/opt/PilotGo/agent/PilotGo-agent 
 

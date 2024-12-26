@@ -139,7 +139,7 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 	go transferMessages(target_wsconn, client_wsconn, errChan, &wg, doneChan)
 
 	err = <-errChan
-	logger.Error(err.Error())
+	logger.Error("%s", err.Error())
 	wserr := err.(*WebsocketError)
 	switch wserr.Code {
 	case WebsocketProxyReadError:

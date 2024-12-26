@@ -10,7 +10,6 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"sync"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/cmd/options"
 	suser "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
@@ -29,10 +28,6 @@ type CasbinRule struct {
 	Url      string `json:"url"`
 	Method   string `json:"method"`
 }
-
-var (
-	once sync.Once
-)
 
 const (
 	DomainPilotGo = "PilotGo-server"
@@ -123,6 +118,7 @@ var (
 		"rolemanager",
 		"audit",
 		"plugin",
+		"terminal",
 	}
 )
 

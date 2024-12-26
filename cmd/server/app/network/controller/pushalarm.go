@@ -18,7 +18,7 @@ import (
 func PushAlarmHandler(c *gin.Context) {
 	conn, err := websocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("%s", err.Error())
 		return
 	}
 	logger.Debug("webSocket 建立连接: %s", conn.RemoteAddr().String())
