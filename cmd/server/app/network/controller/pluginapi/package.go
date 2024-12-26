@@ -62,7 +62,7 @@ func InstallPackage(c *gin.Context) {
 			if resp_message_err != "" {
 				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+resp_message_err)
 				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-				logger.Error(resp_message_err)
+				logger.Error("安装软件包失败: %v", resp_message_err)
 			}
 			if err != nil {
 				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
@@ -119,7 +119,7 @@ func UninstallPackage(c *gin.Context) {
 			if resp_message_err != "" {
 				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+resp_message_err)
 				//auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-				logger.Error(resp_message_err)
+				logger.Error("卸载软件包失败: %v", resp_message_err)
 			}
 			if err != nil {
 				//auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())

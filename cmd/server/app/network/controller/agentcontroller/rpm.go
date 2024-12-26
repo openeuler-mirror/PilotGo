@@ -139,7 +139,7 @@ func InstallRpmHandler(c *gin.Context) {
 		if err != nil {
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			logger.Error(err.Error())
+			logger.Error("%v",err.Error())
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -166,7 +166,7 @@ func InstallRpmHandler(c *gin.Context) {
 	}
 	status := auditlog.BatchActionStatus(StatusCodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error(err.Error())
+		logger.Error("%v",err.Error())
 	}
 
 	switch strings.Split(status, ",")[2] {
@@ -239,7 +239,7 @@ func RemoveRpmHandler(c *gin.Context) {
 		if err != nil {
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			logger.Error(err.Error())
+			logger.Error("%v",err.Error())
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -267,7 +267,7 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	status := auditlog.BatchActionStatus(StatusCodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error(err.Error())
+		logger.Error("%v",err.Error())
 	}
 
 	switch strings.Split(status, ",")[2] {

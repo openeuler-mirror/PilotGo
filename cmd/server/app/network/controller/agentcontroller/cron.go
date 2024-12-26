@@ -97,7 +97,7 @@ func DeleteCronTask(c *gin.Context) {
 			continue
 		}
 		if err := cron.DeleteTask(cronId); err != nil {
-			logger.Error(err.Error())
+			logger.Error("删除定时任务失败 : %v", err.Error())
 		}
 	}
 	if len(cronIds) != 0 {

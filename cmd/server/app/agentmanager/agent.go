@@ -197,14 +197,13 @@ func (a *Agent) SendMessageWrapper(protocolType int, msgData interface{}, errorM
 
 	responseMessage, err := a.sendMessage(msg, true)
 	if err != nil {
-		logger.Error(errorMsg)
 		return "", err
 	}
 	switch statusType {
 	case -1:
 		if responseMessage.Status == -1 || responseMessage.Error != "" {
 			logger.Error(errorMsg+": %s", responseMessage.Error)
-			return "", fmt.Errorf(responseMessage.Error)
+			return responseMessage, fmt.Errorf("%s", responseMessage.Error)
 		}
 	case 0:
 		if responseMessage.Status == 0 {
@@ -265,7 +264,7 @@ func ConfigMessageInfo(Data interface{}) {
 		}
 		err := configservice.AddConfigFile(cf)
 		if err != nil {
-			logger.Error("配置文件添加失败" + err.Error())
+			logger.Error("配置文件添加失败%s", err.Error())
 		}
 	}
 }

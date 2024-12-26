@@ -96,14 +96,14 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 	err = msg.BindData(d)
 	if err != nil {
 		errorInfo = "parse data error:" + err.Error()
-		logger.Error(errorInfo)
+		logger.Error("%s", errorInfo)
 		goto ERROR
 	}
 
 	decoded_script, err = base64.StdEncoding.DecodeString(d.Script)
 	if err != nil {
 		errorInfo = "Err decoding base64: " + err.Error()
-		logger.Error(errorInfo)
+		logger.Error("%s", errorInfo)
 		goto ERROR
 	}
 
@@ -112,14 +112,14 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 	err = utils.FileSaveString(filePath, strings.Replace(string(decoded_script), "\r", "", -1))
 	if err != nil {
 		errorInfo = "Err running filesavestring:" + err.Error()
-		logger.Error(errorInfo)
+		logger.Error("%s", errorInfo)
 		goto ERROR
 	}
 
 	result, err = utils.RunScript(filePath, d.Params)
 	if err != nil {
 		errorInfo = "run command error:" + err.Error()
-		logger.Error(errorInfo)
+		logger.Error("%s", errorInfo)
 		goto ERROR
 	}
 

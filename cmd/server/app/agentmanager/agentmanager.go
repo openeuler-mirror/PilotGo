@@ -132,7 +132,7 @@ func AddAgents2DB(a *Agent) {
 	//查找此uuid是否已存入数据库
 	node, err := machineservice.MachineInfoByUUID(a.UUID)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("%s", err.Error())
 		return
 	}
 	//如果uuid已存入，则修改ip和状态等信息
@@ -149,7 +149,7 @@ func AddAgents2DB(a *Agent) {
 		}
 		err := machineservice.UpdateMachine(a.UUID, Ma)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%s", err.Error())
 		}
 		// 发布“平台主机上线”事件
 		msgData := commonSDK.MessageData{
@@ -185,7 +185,7 @@ func AddAgents2DB(a *Agent) {
 	}
 	err = machineservice.AddMachine(agent_list)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("%s", err.Error())
 		return
 	}
 	// 发布“平台新增主机”事件
