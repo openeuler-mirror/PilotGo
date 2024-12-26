@@ -87,13 +87,13 @@ func InstallRpmHandler(c *network.SocketClient, msg *protocol.Message) error {
 	rpmname := msg.Data.(string)
 
 	err := uos.OS().InstallRpm(rpmname)
-
 	if err != nil {
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
 			Type:   msg.Type,
 			Status: -1,
 			Error:  err.Error(),
+			Data:   "",
 		}
 		return c.Send(resp_msg)
 	} else {
@@ -118,6 +118,7 @@ func RemoveRpmHandler(c *network.SocketClient, msg *protocol.Message) error {
 			Type:   msg.Type,
 			Status: -1,
 			Error:  err.Error(),
+			Data:   "",
 		}
 		return c.Send(resp_msg)
 	} else {

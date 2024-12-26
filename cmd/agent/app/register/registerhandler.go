@@ -41,7 +41,7 @@ func Send_heartbeat(client *network.SocketClient) {
 
 	out, err := uos.OS().GetTime()
 	if err == nil {
-		logger.Debug(string(out))
+		logger.Debug("%s", string(out))
 	}
 }
 

@@ -281,11 +281,11 @@ func (b *BaseOS) InstallRpm(rpm string) error {
 	exitc, result, stde, err := utils.RunCommand("yum -y --nogpgcheck install " + rpm)
 	if exitc == 0 && result != "" && err == nil {
 		if verifyRpmInstalled(strings.NewReader(result), `Nothing to do.`) || verifyRpmInstalled(strings.NewReader(result), `无需任何处理。`) {
-			logger.Error("failed to run RPM package installation command due to package already being installed")
-			return fmt.Errorf("this RPM package is already installed")
+			logger.Error("%v is already installed", rpm)
+			return fmt.Errorf("%v is already installed", rpm)
 		} else if verifyRpmInstalled(strings.NewReader(result), `^Error: Unable to find a match:.*`) {
-			logger.Error("failed to run RPM package installation command due to the package not being found in the source")
-			return fmt.Errorf("the package cannot be found in the source")
+			logger.Error("%v cannot be found in the source", rpm)
+			return fmt.Errorf("%v cannot be found in the source", rpm)
 		} else {
 			logger.Info("successfully installed %s", rpm)
 			return nil

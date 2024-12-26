@@ -240,7 +240,7 @@ func AgentTimeHandler(c *network.SocketClient, msg *protocol.Message) error {
 
 	timeinfo, err := uos.OS().GetTime()
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug("%s", err.Error())
 	}
 
 	resp_msg := &protocol.Message{
