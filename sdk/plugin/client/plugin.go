@@ -17,6 +17,7 @@ import (
 
 // 用于初始化Client
 type PluginInfo struct {
+	MenuName    string `json:"menuName"`
 	Name        string `json:"name"`
 	Version     string `json:"version"`
 	Description string `json:"description"`

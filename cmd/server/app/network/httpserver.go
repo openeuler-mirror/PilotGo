@@ -107,6 +107,7 @@ func SetupRouter() *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Use(logger.RequestLogger([]string{
 		"/api/v1/pluginapi/heartbeat",
+		"/",
 	}))
 	router.Use(middleware.Recover)
 

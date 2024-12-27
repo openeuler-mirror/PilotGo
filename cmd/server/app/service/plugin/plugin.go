@@ -53,6 +53,7 @@ func Init(stopCh <-chan struct{}) error {
 type Plugin struct {
 	UUID              string              `json:"uuid"`
 	CustomName        string              `json:"custom_name"`
+	MenuName          string              `json:"menuName"`
 	Name              string              `json:"name"`
 	Version           string              `json:"version"`
 	Description       string              `json:"description"`
@@ -71,6 +72,7 @@ type Plugin struct {
 func (p *Plugin) Clone() *Plugin {
 	result := &Plugin{
 		CustomName:  p.CustomName,
+		MenuName:    p.MenuName,
 		UUID:        p.UUID,
 		Name:        p.Name,
 		Version:     p.Version,
@@ -161,6 +163,7 @@ func (m *PluginManager) updatePlugin(uuid string, pp *PluginParam, enabled int) 
 	p := &Plugin{
 		UUID:        uuid,
 		CustomName:  info.CustomName,
+		MenuName:    info.MenuName,
 		Name:        info.Name,
 		Version:     info.Version,
 		Description: info.Description,
@@ -441,6 +444,7 @@ func requestPluginInfo(plugin *PluginParam) (*Plugin, error) {
 
 	// TODO: check info valid
 	return &Plugin{
+		MenuName:    PluginInfo.MenuName,
 		CustomName:  plugin.CustomName,
 		Name:        PluginInfo.Name,
 		Version:     PluginInfo.Version,
