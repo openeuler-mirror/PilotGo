@@ -19,7 +19,7 @@ import (
 )
 
 // 终端连接功能删除
-func WS(c *gin.Context) {
+func WebTerminal(c *gin.Context) {
 	// 升级协议并获得socket连接
 	conn, err := Websocket.Upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

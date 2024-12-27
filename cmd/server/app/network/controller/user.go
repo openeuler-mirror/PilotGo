@@ -380,7 +380,7 @@ func DeleteUserHandler(c *gin.Context) {
 
 	status := auditlog.BatchActionStatus(statuscodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error(err.Error())
+		logger.Error("%s", err.Error())
 	}
 
 	switch strings.Split(status, ",")[2] {

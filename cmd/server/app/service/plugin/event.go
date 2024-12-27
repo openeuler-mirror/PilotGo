@@ -74,7 +74,7 @@ func isPluginEventConnected() (string, bool) {
 		}
 	}
 
-	if eventServer == "" || connected == false {
+	if eventServer == "" || !connected {
 		return "", false
 	}
 	return eventServer, connected

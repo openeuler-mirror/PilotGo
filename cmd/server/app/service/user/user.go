@@ -175,7 +175,7 @@ func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error
 	for _, user := range users {
 		depart, err := dao.GetDepartById(user.DepartId)
 		if err != nil {
-			logger.Error(errors.New("不存在此部门").Error())
+			logger.Error("%s", errors.New("不存在此部门").Error())
 		}
 		userinfo := ReturnUser{
 			ID:         user.ID,
@@ -187,11 +187,11 @@ func UserSearchPaged(email string, offset, size int) (int64, []ReturnUser, error
 		}
 		roleids, err := dao.GetRolesByUid(user.ID)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%s", err.Error())
 		}
 		userinfo.Roles, err = dao.GetNamesByRoleIds(roleids)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%s", err.Error())
 		}
 		returnUsers = append(returnUsers, userinfo)
 	}
@@ -232,7 +232,7 @@ func GetUserByEmail(email string) (*ReturnUser, error) {
 	}
 	depart, err := dao.GetDepartById(user.DepartId)
 	if err != nil {
-		logger.Error(errors.New("不存在此部门").Error())
+		logger.Error("%s", errors.New("不存在此部门").Error())
 	}
 	userinfo := &ReturnUser{
 		ID:         user.ID,
@@ -266,7 +266,7 @@ func GetUserPaged(offset, size int) (int64, []ReturnUser, error) {
 	for _, user := range users {
 		depart, err := dao.GetDepartById(user.DepartId)
 		if err != nil {
-			logger.Error(errors.New("不存在此部门").Error())
+			logger.Error("%s", errors.New("不存在此部门").Error())
 		}
 		userinfo := ReturnUser{
 			ID:         user.ID,
@@ -278,11 +278,11 @@ func GetUserPaged(offset, size int) (int64, []ReturnUser, error) {
 		}
 		roleids, err := dao.GetRolesByUid(user.ID)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%s", err.Error())
 		}
 		userinfo.Roles, err = dao.GetNamesByRoleIds(roleids)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%s", err.Error())
 		}
 		returnUsers = append(returnUsers, userinfo)
 	}
@@ -304,7 +304,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				EmailBool, err := dao.IsEmailExist(email)
 				if err != nil {
 					UserExit = append(UserExit, email+"邮箱错误"+err.Error())
-					logger.Error("邮箱错误" + err.Error())
+					logger.Error("%s", "邮箱错误"+err.Error())
 					continue
 				}
 				if EmailBool {
@@ -315,14 +315,14 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				_, id, err := dao.GetPidAndId(departName) // 部门对应的PId和Id
 				if err != nil {
 					UserExit = append(UserExit, email+"部门错误"+err.Error())
-					logger.Error("部门错误" + err.Error())
+					logger.Error("%s", "部门错误"+err.Error())
 					continue
 				}
 				userRole := row.Cells[4].Value         // 5：角色
 				roleId, err := dao.GetRoleId(userRole) //角色对应id和用户类型
 				if err != nil {
 					UserExit = append(UserExit, email+"角色错误"+err.Error())
-					logger.Error("角色错误" + err.Error())
+					logger.Error("%s", "角色错误"+err.Error())
 					continue
 				}
 				password := strings.Split(email, "@")[0]
@@ -337,7 +337,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				err = dao.AddUser(u)
 				if err != nil {
 					UserExit = append(UserExit, email+"添加用户错误"+err.Error())
-					logger.Error("添加用户错误" + err.Error())
+					logger.Error("%s", "添加用户错误"+err.Error())
 					continue
 				}
 				ur := &dao.UserRole{
@@ -347,7 +347,7 @@ func ReadFile(xlFile *xlsx.File, UserExit []string) ([]string, error) {
 				err = ur.Add()
 				if err != nil {
 					UserExit = append(UserExit, email+"添加角色关系错误"+err.Error())
-					logger.Error("添加角色关系错误" + err.Error())
+					logger.Error("%s", "添加角色关系错误"+err.Error())
 					continue
 				}
 			}
