@@ -7,15 +7,28 @@
 -->
 <template>
   <div class="container">
-    <PGTable ref="refTable" id="exportTab" :data="users" title="用户列表" :showSelect="true" :total="total"
-      v-model:selectedData="selectedUsers" :onPageChanged="onPageChanged">
+    <PGTable
+      ref="refTable"
+      id="exportTab"
+      :data="users"
+      title="用户列表"
+      :showSelect="true"
+      :total="total"
+      v-model:selectedData="selectedUsers"
+      :onPageChanged="onPageChanged"
+    >
       <template v-slot:action>
         <div class="search">
-          <el-input v-model.trim="searchInput" placeholder="请输入邮箱名进行搜索..." style="width: 300px" />
+          <el-input class="search_input" v-model.trim="searchInput" placeholder="请输入邮箱名进行搜索..." />
           <el-button @click="onSearchUser">搜索</el-button>
           <el-divider direction="vertical" style="height: 2.5em" />
           <auth-button auth="button/user_add" @click="onAddUser"> 添加</auth-button>
-          <el-popconfirm title="确定删除此用户？" confirm-button-text="确定" cancel-button-text="取消" @confirm="onDeleteUser">
+          <el-popconfirm
+            title="确定删除此用户？"
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            @confirm="onDeleteUser"
+          >
             <template #reference>
               <auth-button auth="button/user_del">删除</auth-button>
             </template>
@@ -26,20 +39,17 @@
       </template>
 
       <template v-slot:content>
-        <el-table-column align="center" prop="username" label="用户名">
-        </el-table-column>
-        <el-table-column align="center" prop="departName" label="部门">
-        </el-table-column>
-        <el-table-column align="center" prop="role" label="角色">
-        </el-table-column>
-        <el-table-column align="center" prop="phone" label="手机号">
-        </el-table-column>
-        <el-table-column align="center" prop="email" label="邮箱">
-        </el-table-column>
+        <el-table-column align="center" prop="username" label="用户名"> </el-table-column>
+        <el-table-column align="center" prop="departName" label="部门"> </el-table-column>
+        <el-table-column align="center" prop="role" label="角色"> </el-table-column>
+        <el-table-column align="center" prop="phone" label="手机号"> </el-table-column>
+        <el-table-column align="center" prop="email" label="邮箱"> </el-table-column>
         <el-table-column align="center" label="操作" fixed="right" class="operate">
           <template #default="scope">
             <auth-button size="small" auth="button/user_edit" @click="onUpdateUser(scope.row)">编辑</auth-button>
-            <auth-button size="small" auth="button/user_reset" @click="onResetUserPasswd(scope.row)">重置密码</auth-button>
+            <auth-button size="small" auth="button/user_reset" @click="onResetUserPasswd(scope.row)"
+              >重置密码</auth-button
+            >
           </template>
         </el-table-column>
       </template>
@@ -47,8 +57,12 @@
 
     <el-dialog :title="title" v-model="display" width="560px" destroy-on-close>
       <AddUser v-if="displayDialog === 'AddUser'" @userUpdated="updateUsers" @close="display = false" />
-      <UpdateUser v-if="displayDialog === 'UpdateUser'" :user="editedUser" @userUpdated="updateUsers"
-        @close="display = false" />
+      <UpdateUser
+        v-if="displayDialog === 'UpdateUser'"
+        :user="editedUser"
+        @userUpdated="updateUsers"
+        @close="display = false"
+      />
       <importUser v-if="displayDialog === 'importUser'" @userUpdated="updateUsers" @close="display = false">
       </importUser>
     </el-dialog>
@@ -58,19 +72,14 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import PGTable from "@/components/PGTable.vue";
 import AddUser from "./components/AddUser.vue";
 import UpdateUser from "./components/UpdateUser.vue";
 import importUser from "./components/importUser.vue";
 import AuthButton from "@/components/AuthButton.vue";
-import {
-  getUsers,
-  searchUser,
-  resetUserPasswd,
-  deleteUser
-} from "@/request/user";
+import { getUsers, searchUser, resetUserPasswd, deleteUser } from "@/request/user";
 import { RespCodeOK } from "@/request/request";
 const refTable = ref();
 const users = ref([]);
@@ -100,21 +109,23 @@ function updateUsers(page: number = 1, size: number = 10) {
 // 导出用户
 const exportUser = () => {
   const xlsxParam = { raw: true };
-  const exportTabElement = document.querySelector('#exportTab');
+  const exportTabElement = document.querySelector("#exportTab");
 
   let t2b = null;
   t2b = XLSX.utils.table_to_book(exportTabElement, xlsxParam);
-  const userExcel = XLSX.write(t2b, { bookType: 'xlsx', bookSST: true, type: 'array' });
+  const userExcel = XLSX.write(t2b, { bookType: "xlsx", bookSST: true, type: "array" });
   try {
     saveAs(
       new Blob([userExcel], {
-        type: 'application/octet-stream'
-      }), 'userInfo.xlsx');
+        type: "application/octet-stream",
+      }),
+      "userInfo.xlsx"
+    );
   } catch (e) {
-    ElMessage.error("导出失败")
+    ElMessage.error("导出失败");
   }
   return userExcel;
-}
+};
 
 const display = ref(false);
 const displayDialog = ref("");
@@ -123,9 +134,9 @@ const title = ref("");
 // 批量导入
 const handleImport = () => {
   display.value = true;
-  title.value = '批量导入用户';
-  displayDialog.value = 'importUser';
-}
+  title.value = "批量导入用户";
+  displayDialog.value = "importUser";
+};
 
 function onAddUser() {
   title.value = "添加用户";
@@ -243,6 +254,9 @@ function onPageChanged(currentPage: number, currentSize: number) {
     display: flex;
     flex-direction: row;
     align-items: center;
+    &_input {
+      width: 300px;
+    }
   }
 
   .el-button {

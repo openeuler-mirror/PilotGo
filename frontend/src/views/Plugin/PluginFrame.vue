@@ -7,27 +7,38 @@
 -->
 
 <template>
-  <div class="iframe-content" v-if="showFrame">
-    <iframe :src="props.url" class="iframe"></iframe>
-  </div>
-  <div class="micro_content" v-show="!showFrame">
-    <micro-app class="micro" :baseroute="'/' + props.name" :name="props.name" :url="props.url" inline keep-alive fiber
-      iframe disable-memory-router></micro-app>
+  <div>
+    <div class="iframe-content" v-if="showFrame">
+      <iframe :src="props.url" class="iframe"></iframe>
+    </div>
+    <div class="micro_content" v-show="!showFrame">
+      <micro-app
+        class="micro"
+        :baseroute="'/' + props.name"
+        :name="props.name"
+        :url="props.url"
+        inline
+        keep-alive
+        fiber
+        iframe
+        disable-memory-router
+      ></micro-app>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
-import microApp from '@micro-zoe/micro-app';
+import microApp from "@micro-zoe/micro-app";
 
 const showFrame = ref(false);
 const route: any = useRoute();
 let props = reactive({
-  url: '',
-  plugin_type: '',
-  name: '',
-})
+  url: "",
+  plugin_type: "",
+  name: "",
+});
 watchEffect(() => {
   if (route.meta.plugin_type) {
     // 如果是插件
@@ -37,18 +48,17 @@ watchEffect(() => {
       props.plugin_type = plugin_type;
       props.name = name;
 
-      showFrame.value = props.plugin_type === 'iframe' ? true : false;
-      if (props.plugin_type === 'micro-app') {
+      showFrame.value = props.plugin_type === "iframe" ? true : false;
+      if (props.plugin_type === "micro-app") {
         props.url = window.location.origin + subRoute;
       } else {
         props.url = url;
       }
     } else {
       // 插件只有一级路由
-
     }
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

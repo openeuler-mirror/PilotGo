@@ -1,28 +1,16 @@
-@import './base.css';
+@import "./base.css";
 
 html {
-  height: 100%;
-  width: 100%;
-  min-width: 1440px;
-}
-* {
-  box-sizing: border-box;
-}
-
-body {
-  height: 100%;
-  width: 100%;
-  margin: 0px;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB,
-    Microsoft YaHei, Arial, sans-serif;
+  // min-width: 1440px;
+  font-family: Noto Sans CJK SC;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
 }
 
 #app {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
   padding: 0;
 
@@ -30,14 +18,15 @@ body {
 }
 #main {
   padding: 6px;
+  background-color: #fafafa;
 }
 .transition3 {
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 /* color */
 :root {
-  --active-color:rgb(241, 139, 14);
+  --active-color: rgb(241, 139, 14);
 }
 
 /* element */
@@ -46,11 +35,11 @@ body {
 }
 /* el-dropdown */
 .el-tooltip__trigger:focus-visible {
-    outline: unset;
-} 
+  outline: unset;
+}
 
 /* el-tree */
-.el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
   color: var(--active-color);
 }
 /* 隐藏无子设备的展开图表 */

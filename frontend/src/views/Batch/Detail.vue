@@ -7,7 +7,7 @@
 -->
 <template>
   <div>
-    <PGTable :data="machines" title="批次详情" :showSelect="showSelect" :total="total" :onPageChanged="onPageChanged">
+    <PGTable :data="machines" title="批次详情" :showSelect="false" :total="total" :onPageChanged="onPageChanged">
       <template v-slot:action>
         <el-dropdown>
           <el-button>
@@ -16,13 +16,13 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>
-                <auth-button auth="button/rpm_install" @click="handleUpdateRpm('软件包下发')" :show="true">
-                  rpm下发
+                <auth-button auth="button/rpm_install" link @click="handleUpdateRpm('软件包下发')" :show="true">
+                  软件包下发
                 </auth-button>
               </el-dropdown-item>
               <el-dropdown-item>
-                <auth-button auth="button/rpm_uninstall" @click="handleUpdateRpm('软件包卸载')" :show="true">
-                  rpm卸载
+                <auth-button auth="button/rpm_uninstall" link @click="handleUpdateRpm('软件包卸载')" :show="true">
+                  软件包卸载
                 </auth-button>
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -37,82 +37,80 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="CPU" label="cpu">
-        </el-table-column>
+        <el-table-column align="center" prop="CPU" label="cpu"> </el-table-column>
         <el-table-column align="center" label="状态">
           <template #default="scope">
             <state-dot :runstatus="scope.row.runstatus" :maintstatus="scope.row.maintstatus"></state-dot>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="sysinfo" label="系统">
-        </el-table-column>
+        <el-table-column align="center" prop="sysinfo" label="系统"> </el-table-column>
       </template>
     </PGTable>
     <el-dialog :title="title" v-model="display" width="760px" destroy-on-close @close="display = false">
-      <UpdateRpm :acType='title' :machines='machines' />
+      <UpdateRpm :acType="title" :machines="machines" />
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, onActivated } from "vue";
-import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus';
+import { useRoute } from "vue-router";
+import { ElMessage } from "element-plus";
 
 import PGTable from "@/components/PGTable.vue";
 import AuthButton from "@/components/AuthButton.vue";
 import StateDot from "@/components/StateDot.vue";
 import UpdateRpm from "./components/UpdateRpm.vue";
-import type { BatchMachineInfo } from '@/types/batch';
+import type { BatchMachineInfo } from "@/types/batch";
 import { getBatchDetail } from "@/request/batch";
 import { RespCodeOK } from "@/request/request";
 
-const route = useRoute()
+const route = useRoute();
 
 // 机器列表
-const batchID = ref(route.params.id)
-const showSelect = ref(true)
-const machines = ref<BatchMachineInfo[]>([])
-const total = ref(0)
+const batchID = ref(route.params.id);
+const machines = ref<BatchMachineInfo[]>([]);
+const total = ref(0);
 
 onActivated(() => {
   batchID.value = route.params.id;
-  updateBatchList()
-})
+  updateBatchList();
+});
 
 onMounted(() => {
-  updateBatchList()
-})
+  updateBatchList();
+});
 
-const title = ref('');
+const title = ref("");
 const display = ref(false);
 // 下发/卸载rpm
 const handleUpdateRpm = (type: string) => {
   title.value = type;
   display.value = true;
-}
+};
 
 function updateBatchList(page: number = 1, size: number = 10) {
   getBatchDetail({
     page: page,
     size: size,
     ID: batchID.value,
-  }).then((resp: any) => {
-    if (resp.code === RespCodeOK) {
-      total.value = resp.total
-      machines.value = resp.data
-    } else {
-      ElMessage.error("failed to get batch detail info: " + resp.msg)
-    }
-  }).catch((err: any) => {
-    ElMessage.error("failed to get batch detail info:" + err.msg)
   })
+    .then((resp: any) => {
+      if (resp.code === RespCodeOK) {
+        total.value = resp.total;
+        machines.value = resp.data;
+      } else {
+        ElMessage.error("failed to get batch detail info: " + resp.msg);
+      }
+    })
+    .catch((err: any) => {
+      ElMessage.error("failed to get batch detail info:" + err.msg);
+    });
 }
 
 function onPageChanged(currentPage: number, currentSize: number) {
-  updateBatchList(currentPage, currentSize)
+  updateBatchList(currentPage, currentSize);
 }
-
 </script>
 
 <style lang="scss" scoped></style>
