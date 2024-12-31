@@ -102,14 +102,6 @@ function togglePluginState(item: any) {
       updatePluginList();
       // 更新页面插件路由、sidebar等
       updatePlugins();
-      // 删除插件tagview、增删全局扩展点
-      let pluginExt = res.data.filter((item: Extention) => item.type === "machine");
-      if (targetEnabled === 0) {
-        clearTagview(item);
-        usePluginStore().delExtention(pluginExt);
-      } else {
-        usePluginStore().addExtention(pluginExt);
-      }
     } else {
       ElMessage.error(res.msg);
     }
@@ -124,24 +116,10 @@ function onDeletePlugin(item: any) {
       updatePluginList();
       // 更新页面插件路由、sidebar等
       updatePlugins();
-      // 删除插件tagview
-      clearTagview(item);
-      // 删除插件扩展点
-      let pluginExt = item.extentions && item.extentions.filter((item: Extention) => item.type === "machine");
-      usePluginStore().delExtention(pluginExt);
     } else {
       ElMessage.error(res.msg);
     }
   });
-}
-
-import { tagviewStore } from "@/stores/tagview";
-function clearTagview(item: any) {
-  for (let i = 0; i < tagviewStore().taginfos.length; i++) {
-    if (tagviewStore().taginfos[i].path === "/plugin-" + item.name) {
-      tagviewStore().taginfos.splice(i, 1);
-    }
-  }
 }
 </script>
 

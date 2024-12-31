@@ -129,7 +129,7 @@ const changeCollapse = () => {
 
 watchEffect(() => {
   user.value = userStore().user;
-  collapseWidth.value = isCollapse.value ? "3.4%" : "10%";
+  collapseWidth.value = isCollapse.value ? "66px" : "160px";
 });
 
 watch(

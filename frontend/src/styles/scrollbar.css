@@ -1,0 +1,33 @@
+/* 整体滚动条 */
+::-webkit-scrollbar {
+  width: 8px; /* 滚动条的宽度 */
+  height: 8px; /* 滚动条的高度 */
+}
+
+/* 滚动条轨道 */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* 轨道背景颜色 */
+  border-radius: 10px; /* 圆角 */
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1; /* 滑块颜色 */
+  border-radius: 10px; /* 圆角 */
+}
+
+/* 滚动条滑块在悬停时的样式 */
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1; /* 悬停时的颜色 */
+}
+
+/* 滚动条滑块在活动状态下的样式 */
+::-webkit-scrollbar-thumb:active {
+  background: #888; /* 点击时的颜色 */
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin; /* 设置滚动条宽度为细 */
+  scrollbar-color: #c1c1c1 #f1f1f1; /* 滑块颜色和轨道颜色 */
+}

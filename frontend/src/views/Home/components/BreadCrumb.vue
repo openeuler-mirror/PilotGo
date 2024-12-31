@@ -7,17 +7,15 @@
 -->
 <template>
   <div>
-    <el-breadcrumb separator="/">
+    <el-breadcrumb separator="/" class="bread">
       <el-breadcrumb-item to="/overview">
-        <span class="el-dropdown-link">
-          首页
-        </span>
+        <span class="el-dropdown-link"> 首页 </span>
       </el-breadcrumb-item>
 
       <template v-for="item in route.meta.breadcrumb">
         <el-breadcrumb-item :key="item.name" v-if="item.path && !item.hidden && item.children">
           <el-dropdown @command="router2path">
-            <span class="el-dropdown-link ">
+            <span class="el-dropdown-link">
               {{ item.name }}
               <el-icon class="el-icon--right">
                 <arrow-down />
@@ -25,7 +23,12 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item v-for="route in item.children" v-if="!route.hidden" :key="route.name" :command="route">
+                <el-dropdown-item
+                  v-for="route in item.children"
+                  v-if="!route.hidden"
+                  :key="route.name"
+                  :command="route"
+                >
                   {{ route.menuName }}
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -40,26 +43,24 @@
     </el-breadcrumb>
   </div>
 </template>
-  
+
 <script setup lang="ts">
-import { watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-import { ArrowDown } from '@element-plus/icons-vue';
-import { directTo } from '@/router';
+import { watchEffect } from "vue";
+import { useRoute } from "vue-router";
+import { ArrowDown } from "@element-plus/icons-vue";
+import { directTo } from "@/router";
 
 const route = useRoute() as any;
 
 const router2path = (path: any) => {
-  directTo(path)
-}
-
+  directTo(path);
+};
 </script>
-  
+
 <style lang="scss" scoped>
 .el-dropdown-link {
   cursor: pointer;
+  font-weight: normal;
   color: var(--el-color-primary);
-  display: flex;
-  align-items: center;
 }
 </style>
