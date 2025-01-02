@@ -8,11 +8,13 @@
 package controller
 
 import (
+	"fmt"
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -48,6 +50,12 @@ func CreateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	global.SendRemindMsg(
+		global.ServerSendMsg,
+		fmt.Sprintf("用户 %s 创建批次 %s", u.Username, params.Name),
+	)
+
 	response.Success(c, nil, "批次入库成功")
 }
 
@@ -103,6 +111,12 @@ func DeleteBatchHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
+
+	global.SendRemindMsg(
+		global.ServerSendMsg,
+		fmt.Sprintf("用户 %s 删除批次 %v", u.Username, batchdel.BatchID),
+	)
+
 	response.Success(c, nil, "批次删除成功")
 }
 
@@ -139,6 +153,12 @@ func UpdateBatchHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
+
+	global.SendRemindMsg(
+		global.ServerSendMsg,
+		fmt.Sprintf("用户 %s 更新批次 %s", u.Username, batchinfo.BatchName),
+	)
+
 	response.Success(c, nil, "批次修改成功")
 }
 

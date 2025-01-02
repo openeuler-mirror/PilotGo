@@ -8,10 +8,13 @@
 package plugin
 
 import (
+	"fmt"
 	"time"
 
 	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/pkg/dbmanager/redismanager"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 
@@ -41,6 +44,22 @@ func checkAndRebind() {
 		if !plugin_status.(*client.PluginStatus).Connected || time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval+1*time.Second {
 			err := Handshake(p.Url, p)
 			if err != nil {
+				if time.Since(plugin_status.(*client.PluginStatus).LastConnect) <= client.HeartbeatInterval*2+1*time.Second {
+					_addr := p.Url
+					if p.Url == "localhost" || p.Url == "127.0.0.1" {
+						node, err := dao.MachineInfoByUUID(p.UUID)
+						if err == nil {
+							_addr = node.IP
+						} else {
+							logger.Error("fail to get machineinfo by uuid: %s", err.Error())
+						}
+					}
+					global.SendRemindMsg(
+						global.PluginSendMsg,
+						fmt.Sprintf("%s 插件离线 %s", p.Name, _addr),
+					)
+				}
+
 				logger.Error("rebind plugin and pilotgo server failed:%v", err.Error())
 				value := client.PluginStatus{
 					Connected:   false,
@@ -80,6 +99,22 @@ func checkAndRebind() {
 					PublishEvent(ms)
 				}
 			} else {
+				if time.Since(plugin_status.(*client.PluginStatus).LastConnect) > client.HeartbeatInterval*2+1*time.Second {
+					_addr := p.Url
+					if p.Url == "localhost" || p.Url == "127.0.0.1" {
+						node, err := dao.MachineInfoByUUID(p.UUID)
+						if err == nil {
+							_addr = node.IP
+						} else {
+							logger.Error("fail to get machineinfo by uuid: %s", err.Error())
+						}
+					}
+					global.SendRemindMsg(
+						global.PluginSendMsg,
+						fmt.Sprintf("%s 插件上线 %s", p.Name, _addr),
+					)
+				}
+
 				value := client.PluginStatus{
 					Connected:   true,
 					LastConnect: time.Now(),

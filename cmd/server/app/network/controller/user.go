@@ -21,6 +21,7 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	userservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -166,6 +167,12 @@ func LoginHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	global.SendRemindMsg(
+		global.ServerSendMsg,
+		fmt.Sprintf("用户 %s 登录", u.Username),
+	)
+
 	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "roleId": roleId}, "登录成功!")
 }
 
@@ -205,6 +212,11 @@ func Logout(c *gin.Context) {
 		MessageData: msgDataString,
 	}
 	plugin.PublishEvent(ms)
+
+	global.SendRemindMsg(
+		global.ServerSendMsg,
+		fmt.Sprintf("用户 %s 登出", u.Username),
+	)
 
 	response.Success(c, nil, "退出成功!")
 }

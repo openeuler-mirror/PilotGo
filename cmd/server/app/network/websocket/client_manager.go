@@ -10,6 +10,7 @@ package websocket
 import (
 	"sync"
 
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"k8s.io/klog/v2"
 )
@@ -20,11 +21,11 @@ var (
 
 // 连接管理
 type ClientManager struct {
-	Clients     map[*Client]bool // 全部的连接
-	ClientsLock sync.RWMutex     // 读写锁
-	Register    chan *Client     // 连接处理
-	Unregister  chan *Client     // 断开连接处理程序
-	Broadcast   chan []byte      // 广播 向全部成员发送数据
+	Clients     map[*Client]bool              // 全部的连接
+	ClientsLock sync.RWMutex                  // 读写锁
+	Register    chan *Client                  // 连接处理
+	Unregister  chan *Client                  // 断开连接处理程序
+	Broadcast   chan *global.WebsocketSendMsg // 广播 向全部成员发送数据
 }
 
 func NewClientManager() (clientManager *ClientManager) {
@@ -32,7 +33,7 @@ func NewClientManager() (clientManager *ClientManager) {
 		Clients:    make(map[*Client]bool),
 		Register:   make(chan *Client, 1000),
 		Unregister: make(chan *Client, 1000),
-		Broadcast:  make(chan []byte, 1000),
+		Broadcast:  make(chan *global.WebsocketSendMsg, 1000),
 	}
 	return
 }
@@ -95,6 +96,7 @@ func (manager *ClientManager) Start(stopCh <-chan struct{}) {
 		select {
 		case <-stopCh:
 			klog.Warningln("websocket CliManager success exit")
+			manager.Close()
 			return
 		case conn := <-manager.Register:
 			// 建立连接事件
@@ -113,6 +115,16 @@ func (manager *ClientManager) Start(stopCh <-chan struct{}) {
 				}
 			}
 		}
+	}
+}
+
+func (manager *ClientManager) Close() {
+	clients := CliManager.GetClients()
+	for client := range clients {
+		manager.ClientsLock.Lock()
+		delete(manager.Clients, client)
+		manager.ClientsLock.Unlock()
+		client.Socket.Close()
 	}
 }
 
