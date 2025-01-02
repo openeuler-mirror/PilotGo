@@ -7,6 +7,8 @@
  */
 package global
 
+import "gitee.com/openeuler/PilotGo/sdk/logger"
+
 const (
 	// 新注册机器添加到部门根节点
 	UncateloguedDepartId = 1
@@ -17,3 +19,34 @@ const (
 	// 集群规模
 	ClusterSize = 10
 )
+
+var WARN_MSG chan *WebsocketSendMsg = make(chan *WebsocketSendMsg, 100)
+
+type WebsocketSendMsgType int
+
+const (
+	MachineSendMsg WebsocketSendMsgType = iota
+	PluginSendMsg
+	ServerSendMsg
+)
+
+type WebsocketSendMsg struct {
+	MsgType WebsocketSendMsgType `json:"msgtype"`
+	Msg     string               `json:"msg"`
+}
+
+/*
+	WebsocketSendMsgType: pkg/global/global.go
+*/
+func SendRemindMsg(msg_type WebsocketSendMsgType, msg string) {
+	defer func ()  {
+		if r := recover(); r != nil {
+			logger.Error("send remind message to closed channel WARN_MSG: %+v", r)	
+		}	
+	}()
+
+	WARN_MSG <- &WebsocketSendMsg{
+		MsgType: msg_type,
+		Msg:     msg,
+	}
+}

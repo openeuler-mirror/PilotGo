@@ -94,7 +94,7 @@ func DeleteAgent(uuid string) {
 }
 
 func AddandRunAgent(c net.Conn) error {
-	if globalAgentManager.ReturnAgentNumber() == global.ClusterSize {
+	if globalAgentManager.ReturnAgentNumber() >= global.ClusterSize {
 		c.Close()
 		return errors.Errorf("cluster size is full, can't add new agent")
 	}

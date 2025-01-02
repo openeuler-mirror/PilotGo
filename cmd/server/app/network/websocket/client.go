@@ -8,10 +8,11 @@
 package websocket
 
 import (
+	"encoding/json"
 	"runtime/debug"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gorilla/websocket"
 	"k8s.io/klog/v2"
@@ -24,10 +25,10 @@ const (
 
 // 用户连接
 type Client struct {
-	Addr          string          // 客户端地址
-	Socket        *websocket.Conn // 用户连接
-	Send          chan []byte     // 待发送的数据
-	HeartbeatTime uint64          // 用户上次心跳时间
+	Addr          string                        // 客户端地址
+	Socket        *websocket.Conn               // 用户连接
+	Send          chan *global.WebsocketSendMsg // 待发送的数据
+	HeartbeatTime uint64                        // 用户上次心跳时间
 }
 
 // 初始化
@@ -35,7 +36,7 @@ func NewClient(addr string, socket *websocket.Conn, firstTime uint64) (client *C
 	client = &Client{
 		Addr:          addr,
 		Socket:        socket,
-		Send:          make(chan []byte, 100),
+		Send:          make(chan *global.WebsocketSendMsg, 100),
 		HeartbeatTime: firstTime,
 	}
 
@@ -75,12 +76,19 @@ func (c *Client) Write() {
 			logger.Debug("Client发送数据 关闭连接: %s, OK: %t", c.Addr, ok)
 			return
 		}
-		c.Socket.WriteMessage(websocket.TextMessage, message)
+		msg_json, err := json.Marshal(message)
+		if err != nil {
+			logger.Error("fail to marshal json data in ws client.write(): %s, %+v, %s", c.Addr, message, err.Error())
+			return
+		}
+		if err := c.Socket.WriteMessage(websocket.TextMessage, msg_json); err != nil {
+			logger.Error("err while writing message to websocket client(remote: %s): %s", c.Socket.RemoteAddr(), err.Error())
+		}
 	}
 }
 
 // 发送数据
-func (c *Client) SendMsg(msg []byte) {
+func (c *Client) SendMsg(msg_type global.WebsocketSendMsgType, msg string) {
 	if c == nil {
 		return
 	}
@@ -91,7 +99,10 @@ func (c *Client) SendMsg(msg []byte) {
 		}
 	}()
 
-	c.Send <- msg
+	c.Send <- &global.WebsocketSendMsg{
+		MsgType: msg_type,
+		Msg:     msg,
+	}
 }
 
 // 监测系统日志警告推送到前端
@@ -101,9 +112,8 @@ func SendWarnMsgToWeb(stopCh <-chan struct{}) {
 		case <-stopCh:
 			klog.Warningln("SendWarnMsgToWeb success exit")
 			return
-		case data := <-agentmanager.WARN_MSG:
-			CliManager.Broadcast <- []byte(data.(string))
-
+		case data := <-global.WARN_MSG:
+			CliManager.Broadcast <- data
 		}
 	}
 

@@ -18,6 +18,7 @@ import (
 	configservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/configfile"
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	pkgglobal "gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	pnet "gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
@@ -27,8 +28,6 @@ import (
 )
 
 type AgentMessageHandler func(*Agent, *protocol.Message) error
-
-var WARN_MSG chan interface{}
 
 type Agent struct {
 	UUID             string
@@ -64,6 +63,11 @@ func NewAgent(conn net.Conn) (*Agent, error) {
 		return nil, err
 	}
 
+	pkgglobal.SendRemindMsg(
+		pkgglobal.MachineSendMsg, 
+		fmt.Sprintf("agent机器 %s 已连接", agent.IP),
+	)
+
 	return agent, nil
 }
 
@@ -91,7 +95,7 @@ func (a *Agent) startListen() {
 				logger.Error("update machine status failed: %s", err.Error())
 			}
 			DeleteAgent(a.UUID)
-			str := "agent机器" + a.IP + "已断开连接"
+			str := "agent机器 " + a.IP + " 已断开连接"
 			logger.Warn("agent %s disconnected, ip:%s", a.UUID, a.IP)
 			// 发布“平台主机离线”事件
 			msgData := commonSDK.MessageData{
@@ -110,7 +114,7 @@ func (a *Agent) startListen() {
 			}
 			plugin.PublishEvent(ms)
 			// 消息推送到前端
-			WARN_MSG <- str
+			pkgglobal.SendRemindMsg(pkgglobal.MachineSendMsg, str)
 			return
 		}
 		readBuff = append(readBuff, buff[:n]...)
@@ -137,7 +141,7 @@ func (a *Agent) Init() error {
 	})
 	a.bindHandler(protocol.FileMonitor, func(a *Agent, msg *protocol.Message) error {
 		logger.Info("process file monitor from processor:%s", msg.String())
-		WARN_MSG <- msg.Data.(string)
+		pkgglobal.SendRemindMsg(pkgglobal.MachineSendMsg, msg.Data.(string))
 		return nil
 	})
 
@@ -267,4 +271,8 @@ func ConfigMessageInfo(Data interface{}) {
 			logger.Error("配置文件添加失败%s", err.Error())
 		}
 	}
+	pkgglobal.SendRemindMsg(
+		pkgglobal.MachineSendMsg, 
+		fmt.Sprintf("uuid %s 添加配置文件 %s", p["Machine_uuid"].(string), p["ConfigName"].(string)),
+	)
 }
