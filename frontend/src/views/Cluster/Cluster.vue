@@ -107,6 +107,7 @@ import { getPagedDepartMachines, getMachineTags, deleteMachine } from "@/request
 import { RespCodeOK, type RespInterface } from "@/request/request";
 import { usePluginStore } from "@/stores/plugin";
 import { useTerminalStore } from "@/stores/terminal";
+import { updatePlugins } from "@/views/Plugin/plugin";
 // 部门树
 const departmentID = ref(1);
 
@@ -119,6 +120,7 @@ const showChangeDepartDialog = ref(false);
 let pluginBtns = ref([] as any);
 
 onMounted(() => {
+  updatePlugins();
   updateDepartmentMachines(departmentID.value);
   pluginBtns.value = usePluginStore().extention;
 });

@@ -16,7 +16,7 @@
               <component :is="menu.icon"></component>
             </el-icon>
             &nbsp;
-            {{ menu.title }}
+            <span>{{ menu.title }}</span>
           </template>
           <el-menu-item
             v-for="(subMenu, subIndex) in menu.subMenus"
@@ -32,9 +32,7 @@
           :index="menu.path"
           :class="menu.title === activeTitle ? 'active' : 'inactive'"
         >
-          <el-icon>
-            <component :is="menu.icon"></component> </el-icon
-          >&nbsp;
+          <el-icon> <component :is="menu.icon"></component> </el-icon>&nbsp;
           <template #title>{{ menu.title }}</template>
         </el-menu-item>
       </template>

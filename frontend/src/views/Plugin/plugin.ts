@@ -10,6 +10,8 @@ import { ElMessage } from "element-plus";
 import { RespCodeOK } from "@/request/request";
 import { getPlugins } from "@/request/plugin";
 import type { Extention } from "@/types/plugin";
+import { usePluginStore } from "@/stores/plugin";
+import { tagviewStore } from "@/stores/tagview";
 // const router = useRouter();
 export const iframeComponents = ref<any>([]);
 
@@ -23,6 +25,14 @@ export function updatePlugins() {
       if (res.code === RespCodeOK) {
         let iframes: any = [];
         res.data.forEach((item: any, index: number) => {
+          // 删除插件tagview、增删全局扩展点
+          let pluginExt = item.extentions.filter((item: Extention) => item.type === "machine");
+          if (item.enabled === 0) {
+            clearTagview(item);
+            usePluginStore().delExtention(pluginExt);
+          } else {
+            usePluginStore().addExtention(pluginExt);
+          }
           if (item.enabled === 0 || item.status === false) {
             // 0:禁用，1：启用
             return;
@@ -52,4 +62,14 @@ export function updatePlugins() {
     .catch((err) => {
       ElMessage.error("处理数据流程出错：", err);
     });
+}
+
+/* 清除插件tagview */
+
+function clearTagview(item: any) {
+  for (let i = 0; i < tagviewStore().taginfos.length; i++) {
+    if (tagviewStore().taginfos[i].path === "/plugin-" + item.name) {
+      tagviewStore().taginfos.splice(i, 1);
+    }
+  }
 }
