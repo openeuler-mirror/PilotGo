@@ -20,21 +20,13 @@ import (
 // 获取服务列表
 func (b *BaseOS) GetServiceList() ([]common.ListService, error) {
 	list := make([]common.ListService, 0)
-	exitc, result1, stde, err := utils.RunCommand("systemctl list-units --all|grep 'loaded[ ]*' | awk 'NR>2{print $1\" \" $2\" \" $3\" \" $4}'")
-	if exitc == 0 && result1 != "" && stde == "" && err == nil {
+	exitc, result, stde, err := utils.RunCommand("systemctl list-units --all --type=service --no-legend --no-pager --plain | awk '{print $1\" \"$2\" \"$3\" \"$4}'")
+	if exitc == 0 && result != "" && stde == "" && err == nil {
 	} else {
-		logger.Error("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result1, stde, err)
-		return nil, fmt.Errorf("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result1, stde, err)
+		logger.Error("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result, stde, err)
+		return nil, fmt.Errorf("failed to execute the command to get the list of services: %d, %s, %s, %v", exitc, result, stde, err)
 	}
 
-	exitc, result2, stde, err := utils.RunCommand("systemctl list-units --all|grep 'not-found' | awk 'NR>2{print $2\" \" $3\" \" $4\" \" $5}'")
-	if exitc == 0 && result2 != "" && stde == "" && err == nil {
-	} else {
-		logger.Error("the command to get the list of services has failed to run: %d, %s, %s, %v", exitc, result1, stde, err)
-		return nil, fmt.Errorf("the command to get the list of services has failed to run: %d, %s, %s, %v", exitc, result1, stde, err)
-	}
-
-	result := result1 + result2
 	reader := strings.NewReader(result)
 	scanner := bufio.NewScanner(reader)
 	for {
