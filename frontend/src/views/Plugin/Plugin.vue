@@ -7,7 +7,7 @@
 -->
 <template>
   <div class="container">
-    <PGTable :data="plugins" title="插件列表" :total="total" :onPageChanged="onPageChanged">
+    <PGTable :data="plugins" title="插件列表" :total="total" v-model:page="page">
       <template v-slot:action>
         <el-button @click="displayDialog = true">添加插件</el-button>
       </template>
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 
 import PGTable from "@/components/PGTable.vue";
@@ -66,15 +66,16 @@ const displayDialog = ref(false);
 
 const plugins = ref([]);
 const total = ref(0);
+const page = ref({ pageSize: 10, currentPage: 1 });
 
 onMounted(() => {
   updatePluginList();
 });
 
-function updatePluginList(page: number = 1, size: number = 10) {
+function updatePluginList() {
   getPluginsPaged({
-    page: page,
-    size: size,
+    page: page.value.currentPage,
+    size: page.value.pageSize,
   })
     .then((resp: any) => {
       if (resp.code === RespCodeOK) {
@@ -89,9 +90,16 @@ function updatePluginList(page: number = 1, size: number = 10) {
     });
 }
 
-function onPageChanged(currentPage: number, currentSize: number) {
-  updatePluginList(currentPage, currentSize);
-}
+// 监听分页选项的修改
+watch(
+  () => page.value,
+  (newV) => {
+    if (newV) {
+      updatePluginList();
+    }
+  },
+  { deep: true }
+);
 
 function togglePluginState(item: any) {
   let targetEnabled = item.enabled === 1 ? 0 : 1;

@@ -12,7 +12,7 @@
       title="批次列表"
       :showSelect="true"
       :total="total"
-      :onPageChanged="onPageChanged"
+      v-model:page="page"
       v-model:selectedData="selectedBatches"
     >
       <template v-slot:action>
@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onActivated } from "vue";
+import { ref, onMounted, onActivated, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AuthButton from "@/components/AuthButton.vue";
 import PGTable from "@/components/PGTable.vue";
@@ -76,6 +76,7 @@ function onEditBatch(id: number) {
 
 const batches = ref<BatchItem[]>([]);
 const total = ref(0);
+const page = ref({ pageSize: 10, currentPage: 1 });
 
 onActivated(() => {
   updateBatchInfo();
@@ -85,10 +86,10 @@ onMounted(() => {
   updateBatchInfo();
 });
 
-function updateBatchInfo(page: number = 1, size: number = 10) {
+function updateBatchInfo() {
   getBatches({
-    page: page,
-    size: size,
+    page: page.value.currentPage,
+    size: page.value.pageSize,
   })
     .then((resp: any) => {
       if (resp.code === RespCodeOK) {
@@ -136,9 +137,16 @@ function batchDelete() {
     });
 }
 
-function onPageChanged(currentPage: number, currentSize: number) {
-  updateBatchInfo(currentPage, currentSize);
-}
+// 监听分页选项的修改
+watch(
+  () => page.value,
+  (newV) => {
+    if (newV) {
+      updateBatchInfo();
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style lang="scss" scoped>

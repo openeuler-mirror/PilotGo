@@ -30,6 +30,11 @@ html {
   --active-color: rgb(241, 139, 14);
 }
 
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 /* element */
 .el-menu {
   border-right: 0 !important;

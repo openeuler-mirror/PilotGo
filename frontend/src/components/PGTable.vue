@@ -31,10 +31,10 @@
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
         :page-sizes="pageSizes"
-        :current-page="currentPage"
-        :page-size="currentSize"
-        @current-change="currentChangeHandler"
-        @size-change="sizeChangeHandler"
+        :page-size="page.pageSize"
+        :current-page="page.currentPage"
+        @current-change="(cPage:number) => page.currentPage = cPage"
+        @size-change="(pSize:number) => page.pageSize = pSize"
       >
       </el-pagination>
     </div>
@@ -43,6 +43,10 @@
 
 <script lang="ts" setup>
 import { toRaw, ref } from "vue";
+interface PageInterface {
+  pageSize: number;
+  currentPage: number;
+}
 
 const props = defineProps({
   title: String,
@@ -60,15 +64,17 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  page: {
+    type: Object as () => PageInterface,
+    default: {
+      pageSize: 10,
+      currentPage: 1,
+    },
+  },
 
   pageSizes: {
     type: Array,
     default: [10, 20, 50, 100],
-  },
-
-  onPageChanged: {
-    type: Function,
-    default: () => {},
   },
   isExpand: {
     type: Boolean,
@@ -76,14 +82,7 @@ const props = defineProps({
   },
 });
 
-const currentPage = ref(1);
-const currentSize = ref(10);
-
 const emit = defineEmits(["update:selectedData", "update:expandData"]);
-function resetPage() {
-  currentPage.value = 1;
-}
-defineExpose({ resetPage });
 
 const onSelectionChange = (val: any[]) => {
   let d: any[] = [];
@@ -97,16 +96,6 @@ const onSelectionChange = (val: any[]) => {
 const onExpandChange = (row: any) => {
   emit("update:expandData", row);
 };
-
-function currentChangeHandler(cpage: number) {
-  props.onPageChanged(cpage, currentSize.value);
-  currentPage.value = cpage;
-}
-
-function sizeChangeHandler(pSize: number) {
-  props.onPageChanged(1, pSize);
-  currentSize.value = pSize;
-}
 
 // 控制expand图标显示隐藏
 const getRowClassOfIsExpand = ({ row }: any) => {

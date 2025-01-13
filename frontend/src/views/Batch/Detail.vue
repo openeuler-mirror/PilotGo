@@ -7,7 +7,7 @@
 -->
 <template>
   <div>
-    <PGTable :data="machines" title="批次详情" :showSelect="false" :total="total" :onPageChanged="onPageChanged">
+    <PGTable :data="machines" title="批次详情" :showSelect="false" :total="total" v-model:page="page">
       <template v-slot:action>
         <el-dropdown>
           <el-button>
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onActivated } from "vue";
+import { ref, onMounted, onActivated, watch } from "vue";
 import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 
@@ -71,6 +71,7 @@ const route = useRoute();
 const batchID = ref(route.params.id);
 const machines = ref<BatchMachineInfo[]>([]);
 const total = ref(0);
+const page = ref({ pageSize: 10, currentPage: 1 });
 
 onActivated(() => {
   batchID.value = route.params.id;
@@ -89,10 +90,10 @@ const handleUpdateRpm = (type: string) => {
   display.value = true;
 };
 
-function updateBatchList(page: number = 1, size: number = 10) {
+function updateBatchList() {
   getBatchDetail({
-    page: page,
-    size: size,
+    page: page.value.currentPage,
+    size: page.value.pageSize,
     ID: batchID.value,
   })
     .then((resp: any) => {
@@ -108,9 +109,16 @@ function updateBatchList(page: number = 1, size: number = 10) {
     });
 }
 
-function onPageChanged(currentPage: number, currentSize: number) {
-  updateBatchList(currentPage, currentSize);
-}
+// 监听分页选项的修改
+watch(
+  () => page.value,
+  (newV) => {
+    if (newV) {
+      updateBatchList();
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style lang="scss" scoped></style>
