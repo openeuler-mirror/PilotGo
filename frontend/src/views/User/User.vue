@@ -15,7 +15,7 @@
       :showSelect="true"
       :total="total"
       v-model:selectedData="selectedUsers"
-      :onPageChanged="onPageChanged"
+      v-model:page="page"
     >
       <template v-slot:action>
         <div class="search">
@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -84,14 +84,15 @@ import { RespCodeOK } from "@/request/request";
 const refTable = ref();
 const users = ref([]);
 const total = ref(0);
+const page = ref({ pageSize: 10, currentPage: 1 });
 onMounted(() => {
   updateUsers();
 });
 
-function updateUsers(page: number = 1, size: number = 10) {
+function updateUsers() {
   getUsers({
-    page: page,
-    size: size,
+    page: page.value.currentPage,
+    size: page.value.pageSize,
   })
     .then((resp: any) => {
       if (resp.code === RespCodeOK) {
@@ -179,7 +180,7 @@ const searchInput = ref("");
 
 function onSearchUser() {
   // 重置到table第一页
-  refTable.value.resetPage();
+  page.value.currentPage = 1;
 
   if (searchInput.value === "") {
     tableMode = "list";
@@ -230,18 +231,26 @@ function onResetUserPasswd(user: any) {
     });
 }
 
-// list:所有用户清单
-// search:搜索用户
+/**
+ * 监听分页选项的修改
+ * @params tableMode {string} list:所有用户清单 search:搜索用户
+ */
 let tableMode = "list";
-function onPageChanged(currentPage: number, currentSize: number) {
-  if (tableMode === "search") {
-    searchUserList(currentPage, currentSize);
-  } else if (tableMode === "list") {
-    updateUsers(currentPage, currentSize);
-  } else {
-    ElMessage.error("invalid table mode:" + tableMode);
-  }
-}
+watch(
+  () => page.value,
+  (newV) => {
+    if (newV) {
+      if (tableMode === "search") {
+        searchUserList();
+      } else if (tableMode === "list") {
+        updateUsers();
+      } else {
+        ElMessage.error("invalid table mode:" + tableMode);
+      }
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style lang="scss" scoped>

@@ -20,7 +20,7 @@
         title="机器列表"
         :showSelect="showSelect"
         :total="total"
-        :onPageChanged="onPageChanged"
+        v-model:page="page"
         v-model:selectedData="selectedMachines"
       >
         <template v-slot:action>
@@ -115,6 +115,7 @@ const departmentID = ref(1);
 const showSelect = ref(true);
 const machines = ref<any>([]);
 const total = ref(0);
+const page = ref({ pageSize: 10, currentPage: 1 });
 
 const showChangeDepartDialog = ref(false);
 let pluginBtns = ref([] as any);
@@ -138,10 +139,10 @@ watch(
   { immediate: true, deep: true }
 );
 
-function updateDepartmentMachines(departID: number, page: number = 1, size: number = 10) {
+function updateDepartmentMachines(departID: number) {
   getPagedDepartMachines({
-    page: page,
-    size: size,
+    page: page.value.currentPage,
+    size: page.value.pageSize,
     DepartId: departID,
   })
     .then((resp: any) => {
@@ -181,10 +182,16 @@ function updateDepartmentMachines(departID: number, page: number = 1, size: numb
     });
 }
 
-function onPageChanged(currentPage: number, currentSize: number) {
-  updateDepartmentMachines(departmentID.value, currentPage, currentSize);
-}
-
+// 监听分页选项的修改
+watch(
+  () => page.value,
+  (newV) => {
+    if (newV) {
+      updateDepartmentMachines(departmentID.value);
+    }
+  },
+  { deep: true }
+);
 function machineDetail(info: any) {
   directTo("/cluster/machine/" + info.uuid);
 }
@@ -227,7 +234,9 @@ const handleDeleteMachine = () => {
       });
       deleteMachine({ deluuid: uuidArr }).then((res: RespInterface) => {
         if (res.code === RespCodeOK) {
-          updateDepartmentMachines(1, 1, 10);
+          page.value.currentPage = 1;
+          page.value.pageSize = 10;
+          updateDepartmentMachines(1);
           ElMessage.success(res.msg);
         } else {
           ElMessage.success(res.msg);

@@ -45,9 +45,9 @@ import Chart from "./components/Chart.vue";
 import { baseOptions_pie } from "./components/chart";
 
 interface MachinesOverview {
-  normal?: number;
-  offline?: number;
-  free?: number;
+  normal: number;
+  offline: number;
+  free: number;
 }
 
 onMounted(() => {
@@ -57,7 +57,7 @@ onMounted(() => {
 });
 
 // 获取机器概览数据
-const pieOptions = ref(baseOptions_pie);
+const pieOptions = ref<any>(baseOptions_pie);
 const getMachinesOverview = () => {
   machinesOverview()
     .then((resp: any) => {
@@ -65,11 +65,11 @@ const getMachinesOverview = () => {
         let result: MachinesOverview = resp.data.data.AgentStatus;
         if (!result) return;
         baseOptions_pie.series[0].data = [
-          { value: result.normal!, name: "在线" },
-          { value: result.offline!, name: "离线" },
-          { value: result.free!, name: "未分配" },
+          { value: result.normal, name: "在线" },
+          { value: result.offline, name: "离线" },
+          { value: result.free, name: "未分配" },
         ];
-        pieOptions.value = baseOptions_pie;
+        pieOptions.value = { ...baseOptions_pie };
       } else {
         ElMessage.error("failed to get machines overview info: " + resp.msg);
       }
