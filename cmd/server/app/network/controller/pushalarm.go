@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -31,4 +32,14 @@ func PushAlarmHandler(c *gin.Context) {
 
 	// 用户连接事件
 	websocket.CliManager.Register <- client
+
+	messages := websocket.CliManager.SendMsgBuffer.GetAll()
+	for _, msg := range messages {
+		_msg, ok := msg.(*global.WebsocketSendMsg)
+		if !ok {
+			logger.Error("websocketSendMsg assert error: %+v", msg)
+			continue
+		}
+		client.SendMsg(_msg)
+	}
 }
