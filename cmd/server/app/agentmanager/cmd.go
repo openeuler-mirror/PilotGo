@@ -8,6 +8,8 @@
 package agentmanager
 
 import (
+	"encoding/base64"
+
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
 )
@@ -25,15 +27,20 @@ func (a *Agent) RunCommand(cmd string) (*utils.CmdResult, error) {
 
 // 远程在agent上运行脚本文件
 func (a *Agent) RunScript(script string, params []string) (*utils.CmdResult, error) {
+	encoded_script := base64.StdEncoding.EncodeToString([]byte(script))
 	data := struct {
 		Script string
 		Params []string
 	}{
-		Script: script,
+		Script: encoded_script,
 		Params: params,
 	}
 	responseMessage, err := a.SendMessageWrapper(protocol.RunScript, data, "failed to run script on agent", 0, nil, "")
-	return responseMessage.(*utils.CmdResult), err
+	result, ok := responseMessage.(*utils.CmdResult)
+	if !ok {
+		return &utils.CmdResult{}, err
+	}
+	return result, err
 }
 
 // chmod [-R] 权限值 文件名

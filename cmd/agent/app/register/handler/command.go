@@ -9,6 +9,7 @@ package handler
 
 import (
 	"encoding/base64"
+	"fmt"
 	"path"
 	"strings"
 
@@ -102,8 +103,8 @@ func RunScriptHandler(c *network.SocketClient, msg *protocol.Message) error {
 
 	decoded_script, err = base64.StdEncoding.DecodeString(d.Script)
 	if err != nil {
-		errorInfo = "Err decoding base64: " + err.Error()
-		logger.Error("%s", errorInfo)
+		errorInfo = fmt.Sprintf("Err decoding base64: %v, %s", d.Script, err.Error())
+		logger.Error("Err decoding base64: %v, %s", d.Script, err.Error())
 		goto ERROR
 	}
 
