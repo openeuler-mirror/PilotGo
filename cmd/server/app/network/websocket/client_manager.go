@@ -21,19 +21,21 @@ var (
 
 // 连接管理
 type ClientManager struct {
-	Clients     map[*Client]bool              // 全部的连接
-	ClientsLock sync.RWMutex                  // 读写锁
-	Register    chan *Client                  // 连接处理
-	Unregister  chan *Client                  // 断开连接处理程序
-	Broadcast   chan *global.WebsocketSendMsg // 广播 向全部成员发送数据
+	Clients       map[*Client]bool              // 全部的连接
+	ClientsLock   sync.RWMutex                  // 读写锁
+	Register      chan *Client                  // 连接处理
+	Unregister    chan *Client                  // 断开连接处理程序
+	Broadcast     chan *global.WebsocketSendMsg // 广播 向全部成员发送数据
+	SendMsgBuffer *global.LimitedList           // 发送消息缓冲区
 }
 
 func NewClientManager() (clientManager *ClientManager) {
 	clientManager = &ClientManager{
-		Clients:    make(map[*Client]bool),
-		Register:   make(chan *Client, 1000),
-		Unregister: make(chan *Client, 1000),
-		Broadcast:  make(chan *global.WebsocketSendMsg, 1000),
+		Clients:       make(map[*Client]bool),
+		Register:      make(chan *Client, 1000),
+		Unregister:    make(chan *Client, 1000),
+		Broadcast:     make(chan *global.WebsocketSendMsg, 1000),
+		SendMsgBuffer: global.NewLimitedList(global.RemindMsgSize),
 	}
 	return
 }
@@ -105,6 +107,8 @@ func (manager *ClientManager) Start(stopCh <-chan struct{}) {
 			// 断开连接事件
 			manager.EventUnregister(conn)
 		case message := <-manager.Broadcast:
+			manager.SendMsgBuffer.Store(message)
+
 			// 广播事件
 			clients := manager.GetClients()
 			for conn := range clients {

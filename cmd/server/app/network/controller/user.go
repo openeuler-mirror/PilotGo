@@ -170,7 +170,7 @@ func LoginHandler(c *gin.Context) {
 
 	global.SendRemindMsg(
 		global.ServerSendMsg,
-		fmt.Sprintf("用户 %s 登录", u.Username),
+		fmt.Sprintf("用户 %s 登录, IP: %s", u.Username, c.RemoteIP()),
 	)
 
 	response.Success(c, gin.H{"token": token, "departName": departName, "departId": departId, "roleId": roleId}, "登录成功!")
@@ -215,7 +215,7 @@ func Logout(c *gin.Context) {
 
 	global.SendRemindMsg(
 		global.ServerSendMsg,
-		fmt.Sprintf("用户 %s 登出", u.Username),
+		fmt.Sprintf("用户 %s 登出, IP: %s", u.Username, c.RemoteIP()),
 	)
 
 	response.Success(c, nil, "退出成功!")

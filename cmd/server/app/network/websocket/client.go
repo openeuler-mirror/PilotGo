@@ -88,7 +88,7 @@ func (c *Client) Write() {
 }
 
 // 发送数据
-func (c *Client) SendMsg(msg_type global.WebsocketSendMsgType, msg string) {
+func (c *Client) SendMsg(msg *global.WebsocketSendMsg) {
 	if c == nil {
 		return
 	}
@@ -99,10 +99,7 @@ func (c *Client) SendMsg(msg_type global.WebsocketSendMsgType, msg string) {
 		}
 	}()
 
-	c.Send <- &global.WebsocketSendMsg{
-		MsgType: msg_type,
-		Msg:     msg,
-	}
+	c.Send <- msg
 }
 
 // 监测系统日志警告推送到前端
