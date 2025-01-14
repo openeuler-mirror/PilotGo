@@ -16,18 +16,9 @@ import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import App from "./App.vue";
 import router from "./router";
 import microApp from "@micro-zoe/micro-app";
-
+import "virtual:svg-icons-register";
 import "amfe-flexible";
 
-// 监听窗口在变化时重新设置跟文件大小
-window.onresize = function () {
-  console.log(
-    "当前字体大小：",
-    document.documentElement.clientWidth,
-    document.documentElement.style.fontSize,
-    window.devicePixelRatio
-  );
-};
 export const app = createApp(App);
 app.use(pinia);
 app.use(router);
