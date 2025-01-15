@@ -9,6 +9,7 @@ package controller
 
 import (
 	machineservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/machine"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,32 @@ import (
 type MachineModifyDepart struct {
 	MachineID string `json:"machineid"`
 	DepartID  int    `json:"departid"`
+}
+
+// 获取机器列表
+func MachineInfoNoPageHandler(c *gin.Context) {
+	data, err := machineservice.MachineAll()
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	resp := []*common.MachineNode{}
+	for _, item := range data {
+		d := &common.MachineNode{
+			UUID:        item.UUID,
+			IP:          item.IP,
+			Department:  item.Departname,
+			CPUArch:     item.CPU,
+			OS:          item.Systeminfo,
+			RunStatus:   item.Runstatus,
+			MaintStatus: item.Maintstatus,
+		}
+
+		resp = append(resp, d)
+	}
+
+	response.Success(c, resp, "获取所有的机器数据")
 }
 
 // 分页获取机器列表
