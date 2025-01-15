@@ -16,10 +16,11 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/network/controller"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/script"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
@@ -135,7 +136,13 @@ func RunScriptHandler(c *gin.Context) {
 
 	logger.Debug("run script on agents :%v", d.Batch.MachineUUIDs)
 	// Enabled according to the needs of the plugin
-	positions, matchedCommands := controller.FindDangerousCommandsPos(d.Script)
+	cmds, err := script.GetDangerousCommandsInBlackList()
+	if err != nil {
+		logger.Error("run script error(dangerous commands list): %s", err.Error())
+		response.Fail(c, nil, "internal error occurred while retrieving dangerous commands")
+		return
+	}
+	positions, matchedCommands := global.FindDangerousCommandsPos(d.Script, cmds)
 	if len(positions) > 0 {
 		logger.Debug("Matched Commands: %v", matchedCommands)
 		str := strings.Join(matchedCommands, "\n")

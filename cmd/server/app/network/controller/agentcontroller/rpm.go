@@ -8,6 +8,7 @@
 package agentcontroller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -139,7 +141,7 @@ func InstallRpmHandler(c *gin.Context) {
 		if err != nil {
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			logger.Error("%v",err.Error())
+			logger.Error("%v", err.Error())
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -166,8 +168,13 @@ func InstallRpmHandler(c *gin.Context) {
 	}
 	status := auditlog.BatchActionStatus(StatusCodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error("%v",err.Error())
+		logger.Error("%v", err.Error())
 	}
+
+	global.SendRemindMsg(
+		global.MachineSendMsg,
+		fmt.Sprintf("用户 %s 执行 %s 软件包安装, machines: %v", u.Username, rpm.RPM, rpm.UUIDs),
+	)
 
 	switch strings.Split(status, ",")[2] {
 	case "0.00":
@@ -239,7 +246,7 @@ func RemoveRpmHandler(c *gin.Context) {
 		if err != nil {
 			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
 			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			logger.Error("%v",err.Error())
+			logger.Error("%v", err.Error())
 			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -267,8 +274,13 @@ func RemoveRpmHandler(c *gin.Context) {
 
 	status := auditlog.BatchActionStatus(StatusCodes)
 	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error("%v",err.Error())
+		logger.Error("%v", err.Error())
 	}
+
+	global.SendRemindMsg(
+		global.MachineSendMsg,
+		fmt.Sprintf("用户 %s 执行 %s 软件包卸载, machines: %v", u.Username, rpm.RPM, rpm.UUIDs),
+	)
 
 	switch strings.Split(status, ",")[2] {
 	case "0.00":

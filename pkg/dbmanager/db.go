@@ -56,7 +56,7 @@ func MysqldbInit(conf *options.MysqlDBInfo) error {
 	mysqlmanager.MySQL().AutoMigrate(&auditlog.AuditLog{})
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.ConfigFiles{})
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.HistoryConfigFiles{})
-	mysqlmanager.MySQL().AutoMigrate(&script.Script{})
+	mysqlmanager.MySQL().AutoMigrate(&script.Script{}, &script.HistoryVersion{}, &script.DangerousCommands{})
 	mysqlmanager.MySQL().AutoMigrate(&configfile.ConfigFile{})
 	mysqlmanager.MySQL().AutoMigrate(&user.User{})
 	mysqlmanager.MySQL().AutoMigrate(&role.Role{})
@@ -70,6 +70,11 @@ func MysqldbInit(conf *options.MysqlDBInfo) error {
 
 	// 创建公司组织
 	mysqlmanager.MySQL().AutoMigrate(&depart.DepartNode{})
+
+	// 创建高危命令黑名单
+	if err := script.CreateDangerousCommands(); err != nil {
+		return err
+	}
 
 	return depart.CreateOrganization()
 }
