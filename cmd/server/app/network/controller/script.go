@@ -150,25 +150,24 @@ func DeleteScriptHandler(c *gin.Context) {
 	}
 	auditlog.Add(log)
 
-	if err := scriptservice.DeleteScript(req_body.ScriptID, req_body.Version); err != nil {
-		logger.Error("fail to delete script: %s", err.Error())
-		response.Fail(c, nil, err.Error())
-		return
-	}
-
 	var script_name string
-	script, err := scriptservice.GetScriptByID(req_body.ScriptID)
+	_script, err := scriptservice.GetScriptByID(req_body.ScriptID)
 	if err != nil {
 		logger.Error("fail to get script by id: %s", err.Error())
 		script_name = ""
 	} else {
-		script_name = script.Name
+		script_name = _script.Name
 	}
 	global.SendRemindMsg(
 		global.MachineSendMsg,
 		fmt.Sprintf("用户 %s 删除脚本 %s %s", u.Username, script_name, req_body.Version),
 	)
-
+	
+	if err := scriptservice.DeleteScript(req_body.ScriptID, req_body.Version); err != nil {
+		logger.Error("fail to delete script: %s", err.Error())
+		response.Fail(c, nil, err.Error())
+		return
+	}
 	response.Success(c, nil, "成功")
 }
 

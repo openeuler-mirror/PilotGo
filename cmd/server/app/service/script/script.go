@@ -107,6 +107,10 @@ func ScriptHistoryVersion(scriptid uint) ([]*dao.HistoryVersion, error) {
 func RunScript(runscriptmeta *RunScriptMeta, batch *common.Batch) ([]batchservice.R, error) {
 	var err error
 
+	if runscriptmeta.ScriptID == 0 {
+		return nil, errors.Errorf("script id abnormal, id: %d", runscriptmeta.ScriptID)
+	}
+
 	script_content := ""
 	if runscriptmeta.Version == "" {
 		script_content, err = dao.ShowScriptContent(runscriptmeta.ScriptID)

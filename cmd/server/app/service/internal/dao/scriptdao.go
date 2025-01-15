@@ -192,9 +192,27 @@ func CreateDangerousCommands() error {
 }
 
 func UpdateCommandsBlackList(_whitelist []uint) error {
-	for _, id := range _whitelist {
-		if err := mysqlmanager.MySQL().Model(&DangerousCommands{}).Where("id=?", id).Update("active", false).Error; err != nil {
-			return err
+	commands, err := GetDangerousCommandsList()
+	if err != nil {
+		return err
+	}
+	for _, cmd := range commands {
+		in_whitelist := false
+		for _, whiteID := range _whitelist {
+			if cmd.ID == whiteID {
+				in_whitelist = true
+				break
+			}
+		}
+		if !in_whitelist && !cmd.Active {
+			if err := mysqlmanager.MySQL().Model(&DangerousCommands{}).Where("id=?", cmd.ID).Update("active", true).Error; err != nil {
+				return err
+			}
+		}
+		if in_whitelist {
+			if err := mysqlmanager.MySQL().Model(&DangerousCommands{}).Where("id=?", cmd.ID).Update("active", false).Error; err != nil {
+				return err
+			}
 		}
 	}
 	return nil

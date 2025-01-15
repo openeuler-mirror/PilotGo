@@ -199,6 +199,7 @@ func registerAPIs(router *gin.Engine) {
 			//machine list
 			mac := system.Group("/macList")
 			mac.GET("/machineinfo", controller.MachineInfoHandler)
+			mac.GET("/machineinfo_nopage", controller.MachineInfoNoPageHandler)
 			mac.POST("/gettags", pluginapi.GetTagHandler)
 			mac.GET("/machinealldata", controller.MachineAllDataHandler)
 		}
@@ -216,6 +217,7 @@ func registerAPIs(router *gin.Engine) {
 			batchmanager := system.Group("/batchmanager")
 			{
 				batchmanager.GET("/batchinfo", controller.BatchInfoHandler)
+				batchmanager.GET("/batchinfo_nopage", controller.BatchInfoNoPageHandler)
 				batchmanager.GET("/batchmachineinfo", controller.BatchMachineInfoHandler)
 				batchmanager.GET("/selectbatch", controller.SelectBatchHandler)
 			}
