@@ -108,6 +108,8 @@ var (
 		"dept_delete",
 		"dept_update",
 		"machine_delete",
+		"run_script",
+		"update_script_blacklist",
 	}
 
 	MenuList = []string{

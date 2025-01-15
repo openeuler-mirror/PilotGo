@@ -127,7 +127,7 @@ func SetupRouter() *gin.Engine {
 }
 
 func registerAPIs(router *gin.Engine) {
-	router.GET("/event", controller.PushAlarmHandler)
+	router.GET("/event", middleware.TokenCheckMiddleware, controller.PushAlarmHandler)
 
 	api := router.Group("/api/v1")
 
@@ -176,6 +176,11 @@ func registerAPIs(router *gin.Engine) {
 			system.POST("/updatedepart", middleware.NeedPermission("dept_update", "button"), controller.UpdateDepartHandler)
 			system.POST("/modifydepart", middleware.NeedPermission("dept_change", "button"), controller.ModifyMachineDepartHandler)
 			system.POST("/deletemachine", middleware.NeedPermission("machine_delete", "button"), controller.DeleteMachineHandler)
+		}
+		{
+			script := authenApi.Group("/script_auth")
+			script.POST("/run", middleware.NeedPermission("run_script", "button"), controller.RunScriptHandler)
+			script.PUT("/update_blacklist", middleware.NeedPermission("update_script_blacklist", "button"), controller.UpdateCommandsBlackListHandler)
 		}
 	}
 
@@ -249,7 +254,12 @@ func registerAPIs(router *gin.Engine) {
 		{
 			// script manager
 			script := system.Group("/script")
-			script.POST("/save", controller.AddScriptHandler)
+			script.POST("/create", controller.AddScriptHandler)
+			script.PUT("/update", controller.UpdateScriptHandler)
+			script.DELETE("/delete", controller.DeleteScriptHandler)
+			script.GET("/list_all", controller.GetScriptListHandler)
+			script.GET("/list_history", controller.GetScriptHistoryVersionHandler)
+			script.GET("/blacklist", controller.GetDangerousCommandsList)
 		}
 	}
 

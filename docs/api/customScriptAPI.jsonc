@@ -1,0 +1,180 @@
+{
+    "/api/v1/script/create": {
+        "POST": {
+            "summary": "创建脚本",
+            "queryParam": null,
+            "requestBody": {
+                "name": "unset-web-proxy",
+                "content": "#!/bin/bash\nunset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy\necho \"third edit\"",
+                "description": "取消网络代理环境变量"
+            },
+            "response": {}
+        }
+    },
+    "/api/v1/script/update": {
+        "PUT": {
+            "summary": "更新脚本",
+            "queryParam": null,
+            "requestBody": {
+                "id": 4,
+                "name": "",
+                "content": "",
+                "description": ""
+            },
+            "response": {}
+        }
+    },
+    "/api/v1/script/delete": {
+        "DELETE": {
+            "summary": "删除脚本",
+            "queryParam": null,
+            "requestBody": {
+                "script_id": 4,
+                "version": "2025-01-03 14:09:23-109164"
+            },
+            "response": {}
+        }
+    },
+    "/api/v1/script_auth/run": {
+        "POST": {
+            "summary": "运行脚本",
+            "queryParam": null,
+            "requestBody": {
+                "batch_id": 13,
+                "machine_uuids": [
+                ],
+                "script_id": 4,
+                "version": "2025-01-03 14:20:32-201623",
+                "params": [
+                    ""
+                ]
+            },
+            "response": {
+                "code": 200,
+                "data": [
+                    {
+                        "machine_uuid": "2dab460c-3075-4e09-90a3-ab031ff823f2",
+                        "machine_ip": "192.168.75.134",
+                        "retcode": 0,
+                        "stdout": "second edit",
+                        "stderr": ""
+                    },
+                    {
+                        "machine_uuid": "",
+                        "machine_ip": "",
+                        "retcode": 0,
+                        "stdout": "",
+                        "stderr": ""
+                    }
+                ],
+                "msg": "成功"
+            }
+        }
+    },
+    "/api/v1/script/list_all": {
+        "GET": {
+            "summary": "获取脚本列表",
+            "queryParam": {
+                "page": 1,
+                "size": 10
+            },
+            "requestBody": null,
+            "response": {
+                "code": 200,
+                "data": [
+                    {
+                        "id": 4,
+                        "name": "unset-web-proxy",
+                        "content": "#!/bin/bash\nunset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy\necho \"third edit\"",
+                        "description": "取消网络代理环境变量",
+                        "UpdatedAt": "2025-01-03T14:20:32.299+08:00",
+                        "history_version": null,
+                        "deleted": 0
+                    }
+                ],
+                "ok": true,
+                "page": 1,
+                "size": 10,
+                "total": 2
+            }
+        }
+    },
+    "/api/v1/script/list_history": {
+        "GET": {
+            "summary": "获取指定脚本的历史版本",
+            "queryParam": {
+                "script_id": 1
+            },
+            "requestBody": null,
+            "response": {
+                "code": 200,
+                "data": [
+                    {
+                        "id": 6,
+                        "scriptid": 4,
+                        "version": "2025-01-03 14:08:55-930328",
+                        "content": "#!/bin/bash\nunset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy",
+                        "description": "取消网络代理环境变量",
+                        "UpdatedAt": "2025-01-03T14:08:55.922+08:00",
+                        "Script": {
+                            "id": 0,
+                            "name": "",
+                            "content": "",
+                            "description": "",
+                            "UpdatedAt": "0001-01-01T00:00:00Z",
+                            "history_version": null,
+                            "deleted": 0
+                        }
+                    }
+                ],
+                "msg": "成功"
+            }
+        }
+    },
+    "/api/v1/script/blacklist": {
+        "GET": {
+            "summary": "获取命令黑名单列表",
+            "queryParam": null,
+            "requestBody": null,
+            "response": {
+                "code": 200,
+                "data": [
+                    {
+                        "id": 1,
+                        "command": ".*rm\\s+-[r,f,rf].*",
+                        "active": false
+                    },
+                    {
+                        "id": 2,
+                        "command": ".*lvremove\\s+-f.*",
+                        "active": false
+                    },
+                    {
+                        "id": 3,
+                        "command": ".*poweroff.*",
+                        "active": false
+                    }
+                ],
+                "msg": "成功"
+            }
+        }
+    },
+    "/api/v1/script_auth/update_blacklist": {
+        "PUT": {
+            "summary": "修改命令黑名单",
+            "queryParam": null,
+            "requestBody": {
+                "white_list": [
+                    1,
+                    2,
+                    3
+                ]
+            },
+            "response": {
+                "code": 200,
+                "data": null,
+                "msg": "成功"
+            }
+        }
+    }
+}
