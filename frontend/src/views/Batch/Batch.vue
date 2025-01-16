@@ -32,7 +32,7 @@
       <template v-slot:content>
         <el-table-column align="center" label="批次名称">
           <template #default="{ row }">
-            <el-link type="primary" @click="directTo(`/batch/detail/${row.ID}`)">
+            <el-link type="primary" @click="directTo(`/cluster/batch/detail/${row.ID}`)">
               {{ row.name }}
             </el-link>
           </template>
