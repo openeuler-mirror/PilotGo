@@ -18,7 +18,8 @@ import (
 type DepartNode = dao.DepartNode
 
 type DeleteDeparts struct {
-	DepartID int `json:"DepartID"`
+	DepartID   int    `json:"DepartID"`
+	DepartName string `json:"departName"`
 }
 
 type AddDepartNode struct {
@@ -268,7 +269,7 @@ func MachineList(DepId int) ([]dao.Res, error) {
 func ReturnSpecifiedDepart(id int, res *[]int) {
 	temp, err := dao.SubDepartId(id)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("%v", err.Error())
 	}
 	if len(temp) == 0 {
 		return

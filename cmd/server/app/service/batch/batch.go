@@ -118,10 +118,10 @@ func GetBatchPaged(offset, size int) (int64, []Batch, error) {
 
 // 删除批次
 func DeleteBatch(ids []int) error {
-	for _, value := range ids {
-		err := dao.DeleteBatch(value)
+	for _, batchId := range ids {
+		err := dao.DeleteBatch(batchId)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%v", err.Error())
 			return err
 		}
 	}
@@ -162,7 +162,7 @@ func GetBatchMachines(offset, size, batchid int) (int64, []dao.MachineNode, erro
 	for _, macId := range machineIdlist {
 		MacInfo, err := dao.MachineInfo(int(macId.MachineNodeID))
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("%v", err.Error())
 		}
 		machinesInfo = append(machinesInfo, MacInfo)
 	}

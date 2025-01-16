@@ -10,6 +10,8 @@ package controller
 import (
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
@@ -19,7 +21,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 添加批次
@@ -35,19 +36,24 @@ func CreateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleBatch,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "创建批次",
-	}
-	auditlog.Add(log)
-	params.Manager = u.Email
 
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "批次创建",
+		Module:     auditlog.BatchCreate,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "批次创建:" + params.Name,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
+
+	params.Manager = u.Email
 	if err := batch.CreateBatch(params); err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "创建批次失败："+err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -56,6 +62,8 @@ func CreateBatchHandler(c *gin.Context) {
 		global.ServerSendMsg,
 		fmt.Sprintf("用户 %s 创建批次 %s", u.Username, params.Name),
 	)
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 
 	response.Success(c, nil, "批次入库成功")
 }
@@ -107,7 +115,8 @@ func BatchInfoHandler(c *gin.Context) {
 // 删除批次
 func DeleteBatchHandler(c *gin.Context) {
 	batchdel := struct {
-		BatchID []int `json:"BatchID"`
+		BatchID []int    `json:"BatchID"`
+		Batches []string `json:"Batches"`
 	}{}
 	if err := c.Bind(&batchdel); err != nil {
 		response.Fail(c, nil, "parameter error")
@@ -123,18 +132,23 @@ func DeleteBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleBatch,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "删除批次",
-	}
-	auditlog.Add(log)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "批次删除",
+		Module:     auditlog.BatchDelete,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "批次删除:" + strings.Join(batchdel.Batches, ","),
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	if err := batch.DeleteBatch(batchdel.BatchID); err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "删除批次失败："+err.Error())
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
@@ -143,6 +157,8 @@ func DeleteBatchHandler(c *gin.Context) {
 		global.ServerSendMsg,
 		fmt.Sprintf("用户 %s 删除批次 %v", u.Username, batchdel.BatchID),
 	)
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 
 	response.Success(c, nil, "批次删除成功")
 }
@@ -164,19 +180,24 @@ func UpdateBatchHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleBatch,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "编辑批次",
-	}
-	auditlog.Add(log)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "批次编辑",
+		Module:     auditlog.BatchEdit,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "批次编辑:" + batchinfo.BatchName,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	err = batch.UpdateBatch(batchinfo.BatchId, batchinfo.BatchName, batchinfo.Description)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "批次编辑失败："+err.Error())
 		response.Fail(c, gin.H{"status": false}, "update batch failed: "+err.Error())
 		return
 	}
@@ -185,6 +206,8 @@ func UpdateBatchHandler(c *gin.Context) {
 		global.ServerSendMsg,
 		fmt.Sprintf("用户 %s 更新批次 %s", u.Username, batchinfo.BatchName),
 	)
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 
 	response.Success(c, nil, "批次修改成功")
 }
@@ -214,7 +237,7 @@ func BatchMachineInfoHandler(c *gin.Context) {
 	response.DataPagination(c, data, int(total), p)
 }
 
-// 一次性获取素有批次，供下拉列表选择
+// 一次性获取所有批次，供下拉列表选择
 func SelectBatchHandler(c *gin.Context) {
 	batch, err := batch.SelectBatch()
 	if err != nil {

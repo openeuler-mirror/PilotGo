@@ -54,6 +54,7 @@ func MysqldbInit(conf *options.MysqlDBInfo) error {
 	mysqlmanager.MySQL().AutoMigrate(&batch.Batch{})
 	mysqlmanager.MySQL().AutoMigrate(&batch.BatchMachines{})
 	mysqlmanager.MySQL().AutoMigrate(&auditlog.AuditLog{})
+	mysqlmanager.MySQL().AutoMigrate(&auditlog.SubLog{})
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.ConfigFiles{})
 	mysqlmanager.MySQL().AutoMigrate(&configmanage.HistoryConfigFiles{})
 	mysqlmanager.MySQL().AutoMigrate(&script.Script{}, &script.HistoryVersion{}, &script.DangerousCommands{})

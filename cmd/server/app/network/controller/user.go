@@ -24,10 +24,8 @@ import (
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/tealeg/xlsx"
 )
 
@@ -64,25 +62,8 @@ func RegisterHandler(c *gin.Context) {
 		}
 	}
 
-	u, err := jwt.ParseUser(c)
+	err := userservice.Register(user)
 	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "添加用户",
-	}
-	auditlog.Add(log)
-
-	err = userservice.Register(user)
-	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -124,15 +105,6 @@ func LoginHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "用户登录",
-	}
-	auditlog.Add(log)
 	// 发布“用户登录”事件
 	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgUserLogin,
@@ -156,14 +128,12 @@ func LoginHandler(c *gin.Context) {
 
 	departName, departId, roleId, err := userservice.Login(&user)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
 	token, err := jwt.GenerateUserToken(*u)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -183,15 +153,6 @@ func Logout(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "用户退出",
-	}
-	auditlog.Add(log)
 	// 发布“用户退出”事件
 	msgData := commonSDK.MessageData{
 		MsgType:     eventSDK.MsgUserLogout,
@@ -286,24 +247,8 @@ func UpdatePasswordHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
+	err := userservice.UpdatePassword(user.Email, user.Password)
 	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "修改密码",
-	}
-	auditlog.Add(log)
-
-	err = userservice.UpdatePassword(user.Email, user.Password)
-	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -318,24 +263,8 @@ func ResetPasswordHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
+	err := userservice.ResetPassword(user.Email)
 	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "重置密码",
-	}
-	auditlog.Add(log)
-
-	err = userservice.ResetPassword(user.Email)
-	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -353,36 +282,10 @@ func DeleteUserHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "删除用户",
-	}
-	auditlog.Add(log)
-
 	for _, ps := range fd.Deldatas {
-		log_s := &auditlog.AuditLog{
-			LogUUID:    uuid.New().String(),
-			ParentUUID: log.LogUUID,
-			Module:     auditlog.ModuleUser,
-			Status:     auditlog.StatusOK,
-			UserID:     u.ID,
-			Action:     "删除用户",
-			Message:    "用户：" + strings.Split(ps, "/")[0],
-		}
-		auditlog.Add(log_s)
 
 		err := userservice.DeleteUser(strings.Split(ps, "/")[0])
 		if err != nil {
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
 			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
@@ -391,10 +294,6 @@ func DeleteUserHandler(c *gin.Context) {
 	}
 
 	status := auditlog.BatchActionStatus(statuscodes)
-	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error("%s", err.Error())
-	}
-
 	switch strings.Split(status, ",")[2] {
 	case "0.00":
 		response.Fail(c, nil, "用户删除失败")
@@ -413,24 +312,9 @@ func UpdateUserHandler(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "修改用户信息",
-	}
-	auditlog.Add(log)
 
-	err = userservice.UpdateUser(user)
+	err := userservice.UpdateUser(user)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -446,21 +330,6 @@ func ImportUser(c *gin.Context) {
 	}
 	UserExit := make([]string, 0)
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleUser,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "批量导入用户",
-	}
-	auditlog.Add(log)
-
 	name := file.Filename
 	c.SaveUploadedFile(file, name)
 	xlFile, err := xlsx.OpenFile(name)
@@ -470,9 +339,6 @@ func ImportUser(c *gin.Context) {
 	}
 	UserExit, err = userservice.ReadFile(xlFile, UserExit)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
-		auditlog.UpdateMessage(log, strings.Join(UserExit, ";"))
-		println(log)
 		response.Fail(c, gin.H{"UserExit": UserExit}, err.Error())
 		return
 	}
@@ -481,8 +347,6 @@ func ImportUser(c *gin.Context) {
 		response.Success(c, nil, "导入用户信息成功")
 		return
 	} else {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
-		auditlog.UpdateMessage(log, strings.Join(UserExit, ";"))
 		response.Fail(c, gin.H{"UserExit": UserExit}, "以上用户已经存在")
 	}
 }

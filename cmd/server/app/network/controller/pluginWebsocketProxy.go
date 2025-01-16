@@ -16,13 +16,10 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
-	uuidservice "github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -86,11 +83,6 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 	p, err := plugin.GetPlugin(name)
 	if err != nil {
 		c.String(http.StatusNotFound, "plugin not found: "+err.Error())
-		return
-	}
-
-	if err := clientAuthentication(c); err != nil {
-		c.String(http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -214,21 +206,4 @@ func transferMessages(_srcConn, _dstConn *websocket.Conn, _err_ch chan error, _w
 			}
 		}
 	}
-}
-
-func clientAuthentication(_ctx *gin.Context) error {
-	u, err := jwt.ParseUser(_ctx)
-	if err != nil {
-		return fmt.Errorf("user token error: %s", err.Error())
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "parse Plugin",
-	}
-	auditlog.Add(log)
-	return nil
 }

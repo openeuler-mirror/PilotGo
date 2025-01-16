@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
@@ -20,7 +21,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 存储脚本文件
@@ -37,31 +37,38 @@ func AddScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
 		Action:     "创建脚本",
-	}
-	auditlog.Add(log)
+		Module:     auditlog.ScriptAdd,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "创建脚本:" + script.Name,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	cmds, err := scriptservice.GetDangerousCommandsInBlackList()
 	if err != nil {
-		logger.Error("fail to create script(dangerous commands list): %s", err.Error())
-		response.Fail(c, nil, "internal error occurred while retrieving dangerous commands")
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "创建高危命令脚本失败:"+err.Error())
+		response.Fail(c, nil, "创建失败")
 		return
 	}
 	positions, matchedCommands := global.FindDangerousCommandsPos(script.Content, cmds)
 	if len(positions) > 0 {
-		logger.Error("Matched Commands: %v", matchedCommands)
-		response.Fail(c, nil, "Dangerous commands detected in script: "+strings.Join(matchedCommands, "\n"))
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "脚本中检测到高危命令")
+		response.Fail(c, nil, "脚本中检测到高危命令: "+strings.Join(matchedCommands, "\n"))
 		return
 	}
 
 	if err := scriptservice.AddScript(script); err != nil {
-		logger.Error("fail to create script: %s", err.Error())
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "创建脚本失败:"+err.Error())
 		response.Fail(c, nil, fmt.Sprintf("脚本文件添加失败: %s", err.Error()))
 		return
 	}
@@ -70,6 +77,8 @@ func AddScriptHandler(c *gin.Context) {
 		global.ServerSendMsg,
 		fmt.Sprintf("用户 %s 创建脚本 %s", u.Username, script.Name),
 	)
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 
 	response.Success(c, nil, "成功")
 }
@@ -87,15 +96,6 @@ func UpdateScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "更新脚本",
-	}
-	auditlog.Add(log)
 
 	cmds, err := scriptservice.GetDangerousCommandsInBlackList()
 	if err != nil {
@@ -140,15 +140,6 @@ func DeleteScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "删除脚本",
-	}
-	auditlog.Add(log)
 
 	var script_name string
 	_script, err := scriptservice.GetScriptByID(req_body.ScriptID)
@@ -162,7 +153,7 @@ func DeleteScriptHandler(c *gin.Context) {
 		global.MachineSendMsg,
 		fmt.Sprintf("用户 %s 删除脚本 %s %s", u.Username, script_name, req_body.Version),
 	)
-	
+
 	if err := scriptservice.DeleteScript(req_body.ScriptID, req_body.Version); err != nil {
 		logger.Error("fail to delete script: %s", err.Error())
 		response.Fail(c, nil, err.Error())
@@ -184,15 +175,6 @@ func RunScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "执行脚本",
-	}
-	auditlog.Add(log)
 
 	batch := &common.Batch{}
 	if body.BatchID < 1 && len(body.MachineUUIDs) == 0 {
