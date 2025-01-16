@@ -9,8 +9,10 @@ import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 
 import postCssPxToRem from "postcss-pxtorem";
+import { resolve } from "node:path";
 
 export default defineConfig({
   plugins: [
@@ -20,6 +22,10 @@ export default defineConfig({
           isCustomElement: (tag) => /^micro-app/.test(tag),
         },
       },
+    }),
+    createSvgIconsPlugin({
+      iconDirs: [resolve(resolve("src", "assets/icons"))],
+      symbolId: "icon-[dir]-[name]",
     }),
   ],
   resolve: {
@@ -33,7 +39,7 @@ export default defineConfig({
     cors: true,
     proxy: {
       "/api/v1": {
-        target: "http://10.44.43.181:8888", //10.41.107.196
+        target: "https://10.41.107.29:8888", //10.41.107.29:8888 \  10.44.43.181:8888 \ 10.41.161.101:8888"
         secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true, // 如果接口跨域，需要进行这个参数配置
         // rewrite: path => path.replace(/^\/demo/, '/demo')

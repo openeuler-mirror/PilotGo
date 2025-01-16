@@ -168,24 +168,33 @@ export let authData = [
       },
     ],
   },
-  /* {
-    id: '6',
-    label: '配置管理',
-    isMenu: true,display:true,
-    menuName: 'config',
-    operations: [{
-        id: '21',
-        btnId: '14',
-        label: '配置下发',
-        menuName: 'config_install',
-    }]
-}, */
+  {
+    id: "6",
+    label: "自定义脚本管理",
+    isMenu: true,
+    display: true,
+    menuName: "script",
+    operations: [
+      {
+        id: "28",
+        btnId: "21",
+        label: "执行脚本",
+        menuName: "run_script",
+      },
+      {
+        id: "29",
+        btnId: "22",
+        label: "更新黑名单",
+        menuName: "update_script_blacklist",
+      },
+    ],
+  },
   {
     id: "7",
     label: "日志管理",
     isMenu: true,
     display: true,
-    menuName: "log",
+    menuName: "audit",
     operations: [],
   },
   {
