@@ -59,9 +59,9 @@ func IsExistID(id int) (bool, error) {
 	return batch.ID != 0, err
 }
 
-func DeleteBatch(departid int) error {
+func DeleteBatch(id int) error {
 	var batch Batch
-	return mysqlmanager.MySQL().Where("id=?", departid).Delete(&batch).Error
+	return mysqlmanager.MySQL().Where("id=?", id).Delete(&batch).Error
 }
 
 func UpdateBatch(BatchID int, BatchName string, Descrip string) error {

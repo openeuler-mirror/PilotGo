@@ -316,9 +316,7 @@ func registerAPIs(router *gin.Engine) {
 
 	AuditLog := tokenApi.Group("/log") // 审计日志
 	{
-		AuditLog.GET("/log_all", controller.LogAllHandler)
-		// TODO: 界面未调用该接口
-		AuditLog.GET("/log_child", controller.GetAuditLogByIdHandler)
+		AuditLog.GET("/log_all", controller.AuditLogAllHandler)
 	}
 
 	plugin := tokenApi.Group("") // 插件管理

@@ -9,19 +9,15 @@ package agentcontroller
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-	"strings"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	uuidservice "github.com/google/uuid"
 )
 
 type RPMS struct {
@@ -105,70 +101,48 @@ func InstallRpmHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "rpm软件包安装",
-	}
-	auditlog.Add(log)
 
-	StatusCodes := make([]string, 0)
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "软件包安装-" + rpm.RPM,
+		Module:     auditlog.RPMInstall,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
 
+	var codeMap = make(map[string]struct{})
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
-		log_s := &auditlog.AuditLog{
-			LogUUID:    uuidservice.New().String(),
-			ParentUUID: log.LogUUID,
-			Module:     auditlog.ModuleMachine,
-			Status:     auditlog.StatusOK,
-			UserID:     u.ID,
-			Action:     "rpm软件包安装",
-			Message:    "agentuuid:" + uuid,
-		}
-		auditlog.Add(log_s)
+
 		if agent == nil {
-			message := "获取uuid失败" + rpm.RPM + strconv.Itoa(http.StatusBadRequest)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
+		subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+			LogId:        logId,
+			ActionObject: "软件包安装:" + agent.IP,
+			UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+		})
 
 		info, err := agent.AgentOverview()
 		if err != nil {
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			logger.Error("%v", err.Error())
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "获取agent主机基础信息失败")
+			codeMap[uuid] = struct{}{}
 			continue
 		}
 		if info.SysInfo.Platform == "NestOS For Container" {
-			logger.Error("Install rpm is not supported on NestOS For Container")
-			message := "Install rpm is not supported on NestOS For Container" + rpm.RPM + strconv.Itoa(http.StatusBadRequest)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "Install rpm is not supported on NestOS For Container")
+			codeMap[uuid] = struct{}{}
 			continue
 		}
 
 		_, Err, err := agent.InstallRpm(rpm.RPM)
 		if err != nil || len(Err) != 0 {
-			message := Err + rpm.RPM + strconv.Itoa(http.StatusBadRequest)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, Err)
+			codeMap[uuid] = struct{}{}
 			continue
 		} else {
-			message := rpm.RPM + strconv.Itoa(http.StatusOK)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, rpm.RPM+"安装成功")
 		}
-	}
-	status := auditlog.BatchActionStatus(StatusCodes)
-	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error("%v", err.Error())
 	}
 
 	global.SendRemindMsg(
@@ -176,16 +150,12 @@ func InstallRpmHandler(c *gin.Context) {
 		fmt.Sprintf("用户 %s 执行 %s 软件包安装, machines: %v", u.Username, rpm.RPM, rpm.UUIDs),
 	)
 
-	switch strings.Split(status, ",")[2] {
-	case "0.00":
-		response.Fail(c, nil, "软件包安装失败")
-		return
-	case "1.00":
-		response.Success(c, nil, "软件包安装成功")
-		return
-	default:
-		response.Success(c, nil, "软件包安装部分成功")
+	if len(codeMap) == 0 {
+		auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	} else {
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
 	}
+	response.Success(c, nil, "软件包安装指令下发成功")
 }
 
 func RemoveRpmHandler(c *gin.Context) {
@@ -210,85 +180,54 @@ func RemoveRpmHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "rpm软件包卸载",
-	}
-	auditlog.Add(log)
 
-	StatusCodes := make([]string, 0)
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "软件包卸载-" + rpm.RPM,
+		Module:     auditlog.RPMRemove,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+
+	var codeMap = make(map[string]struct{})
 	for _, uuid := range rpm.UUIDs {
 		agent := agentmanager.GetAgent(uuid)
-		log_s := &auditlog.AuditLog{
-			LogUUID:    uuidservice.New().String(),
-			ParentUUID: log.LogUUID,
-			Module:     auditlog.ModuleMachine,
-			Status:     auditlog.StatusOK,
-			UserID:     u.ID,
-			Action:     "rpm软件包卸载",
-			Message:    "agentuuid:" + uuid,
-		}
-		auditlog.Add(log_s)
 
 		if agent == nil {
-			message := "获取uuid失败" + rpm.RPM + strconv.Itoa(http.StatusBadRequest)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
 			continue
 		}
+		subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+			LogId:        logId,
+			ActionObject: "软件包卸载:" + agent.IP,
+			UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+		})
 
 		info, err := agent.AgentOverview()
 		if err != nil {
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+err.Error())
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			logger.Error("%v", err.Error())
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "获取agent主机基础信息失败")
+			codeMap[uuid] = struct{}{}
 			continue
 		}
 		if info.SysInfo.Platform == "NestOS For Container" {
-			logger.Error("Remove rpm is not supported on NestOS For Container")
-			message := "Remove rpm is not supported on NestOS For Container" + rpm.RPM + strconv.Itoa(http.StatusBadRequest)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "Install rpm is not supported on NestOS For Container")
+			codeMap[uuid] = struct{}{}
 			continue
 		}
 
 		_, Err, err := agent.RemoveRpm(rpm.RPM)
 		if len(Err) != 0 || err != nil {
-			message := Err + rpm.RPM + strconv.Itoa(http.StatusBadRequest)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			auditlog.UpdateStatus(log_s, auditlog.StatusFailed)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusBadRequest))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, Err)
+			codeMap[uuid] = struct{}{}
 			continue
 		} else {
-			message := rpm.RPM + strconv.Itoa(http.StatusOK)
-			auditlog.UpdateMessage(log_s, "agentuuid:"+uuid+message)
-			StatusCodes = append(StatusCodes, strconv.Itoa(http.StatusOK))
+			auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, rpm.RPM+"卸载成功")
 		}
 	}
 
-	status := auditlog.BatchActionStatus(StatusCodes)
-	if err := auditlog.UpdateStatus(log, status); err != nil {
-		logger.Error("%v", err.Error())
+	if len(codeMap) == 0 {
+		auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	} else {
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
 	}
-
-	global.SendRemindMsg(
-		global.MachineSendMsg,
-		fmt.Sprintf("用户 %s 执行 %s 软件包卸载, machines: %v", u.Username, rpm.RPM, rpm.UUIDs),
-	)
-
-	switch strings.Split(status, ",")[2] {
-	case "0.00":
-		response.Fail(c, nil, "软件包卸载失败")
-		return
-	case "1.00":
-		response.Success(c, nil, "软件包卸载成功")
-	default:
-		response.Success(c, nil, "软件包卸载部分成功")
-	}
+	response.Success(c, nil, "软件包卸载指令下发成功")
 }

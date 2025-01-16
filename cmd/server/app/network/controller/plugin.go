@@ -16,15 +16,12 @@ import (
 	"time"
 
 	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	commonSDK "gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
-	uuidservice "github.com/google/uuid"
 )
 
 // 查询插件清单
@@ -65,24 +62,8 @@ func AddPluginHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "Add Plugin",
-	}
-	auditlog.Add(log)
-
 	p, err := plugin.AddPlugin(&param)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "add plugin failed:"+err.Error())
 		return
 	}
@@ -126,23 +107,8 @@ func TogglePluginHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "Toggle Plugin",
-	}
-	auditlog.Add(log)
-
 	logger.Info("toggle plugin:%s to enable %d", param.UUID, param.Enable)
-	if err = plugin.TogglePlugin(param.UUID, param.Enable); err != nil {
+	if err := plugin.TogglePlugin(param.UUID, param.Enable); err != nil {
 		response.Fail(c, nil, "toggle plugin error:"+err.Error())
 		return
 	}
@@ -168,21 +134,6 @@ func UnloadPluginHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "Unload Plugin",
-	}
-	auditlog.Add(log)
 
 	// 发布“插件卸载”事件
 	msgData := commonSDK.MessageData{
@@ -215,28 +166,12 @@ func UnloadPluginHandler(c *gin.Context) {
 }
 
 func PluginGatewayHandler(c *gin.Context) {
-	// TODO
 	name := c.Param("plugin_name")
 	p, err := plugin.GetPlugin(name)
 	if err != nil {
 		c.String(http.StatusNotFound, "plugin not found: "+err.Error())
 		return
 	}
-
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModulePlugin,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "parse Plugin",
-	}
-	auditlog.Add(log)
 
 	s := strings.Replace(p.Url, "/plugin/"+name, "", 1)
 	ishttp, err := httputils.ServerIsHttp(s)

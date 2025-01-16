@@ -17,25 +17,30 @@ import (
 
 // 日志执行操作状态
 const (
-	StatusOK     = "OK"
-	StatusFailed = "failed"
+	StatusSuccess = "成功"
+	StatusFail    = "失败"
 )
 
 // 日志记录归属模块
 const (
-	ModuleUser    = "user"    // 登录 注销(父日志没有创建者和部门信息) 添加 删除 修改密码 重置密码 修改用户信息
-	ModuleRole    = "role"    // 角色权限 编辑角色 删除角色 添加角色
-	ModulePlugin  = "plugin"  // null
-	ModuleBatch   = "batch"   // 添加批次 删除批次 编辑批次
-	ModuleMachine = "machine" // null
-	ModuleDepart  = "depart"
-	//LogTypeRPM       = "软件包安装/卸载" // rpm安装 rpm卸载
-	//LogTypeService   = "运行服务"     // null
-	//LogTypeSysctl    = "配置内核参数"   // null
-	//LogTypeBroadcast = "配置文件下发"   // 配置文件下发
+	BatchCreate = "系统/创建批次"
+	BatchDelete = "系统/删除批次"
+	BatchEdit   = "系统/编辑批次"
+
+	DepartAdd    = "系统/部门添加"
+	DepartDelete = "系统/部门删除"
+	DepartEdit   = "系统/部门更名"
+
+	RPMInstall = "系统/软件包安装"
+	RPMRemove  = "系统/软件包卸载"
+
+	RoleChange = "角色管理/权限变更"
+
+	ScriptAdd = "自定义脚本/创建脚本"
 )
 
 type AuditLog = dao.AuditLog
+type SubLog = dao.SubLog
 
 // 单机操作成功状态:是否成功，机器数量，成功率
 const (
@@ -57,35 +62,24 @@ func BatchActionStatus(StatusCodes []string) (status string) {
 	return
 }
 
-func Add(log *dao.AuditLog) error {
+func Add(log *dao.AuditLog) (int, error) {
+	return log.Record()
+}
+func AddSubLog(log *dao.SubLog) (int, error) {
 	return log.Record()
 }
 
 // 修改日志的操作状态
-func UpdateStatus(log *dao.AuditLog, status string) error {
-	return log.UpdateStatus(status)
+func UpdateLog(logId int, status string) error {
+	return dao.UpdateLogStatus(logId, status)
 }
 
 // 添加message信息
-func UpdateMessage(log *dao.AuditLog, message string) error {
-	return log.UpdateMessage(message)
+func UpdateSubLog(subLogId int, status, message string) error {
+	return dao.UpdateSubLogMessage(subLogId, status, message)
 }
 
 // 分页查询
 func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
 	return dao.GetAuditLogPaged(offset, size)
-}
-
-// 查询子日志
-func GetAuditLogById(logUUId string) ([]dao.AuditLog, error) {
-	return dao.GetAuditLogById(logUUId)
-}
-
-// 查询父日志为空的记录
-func GetParentLog(offset, size int) (int64, []AuditLog, error) {
-	return dao.GetParentLog(offset, size)
-}
-
-func GetByModule(name string) ([]dao.AuditLog, error) {
-	return dao.GetAuditLogByModule(name)
 }

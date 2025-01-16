@@ -9,11 +9,8 @@ package agentcontroller
 
 import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	uuidservice "github.com/google/uuid"
 )
 
 type AgentService struct {
@@ -63,33 +60,14 @@ func ServiceStartHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "ServiceStart",
-	}
-	auditlog.Add(log)
-
 	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+"获取uuid失败")
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
 		return
 	}
 
 	service_start, Err, err := agent.ServiceStart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+err.Error())
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 		return
 	}
@@ -103,33 +81,15 @@ func ServiceStopHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "ServiceStop",
-	}
-	auditlog.Add(log)
-
 	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+"获取uuid失败")
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
 		return
 	}
 
 	service_stop, Err, err := agent.ServiceStop(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+err.Error())
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		response.Fail(c, nil, "服务停止失败：%v"+Err)
 		return
 	}
 	response.Success(c, gin.H{"service_stop": service_stop}, "Success")
@@ -142,33 +102,14 @@ func ServiceRestartHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuidservice.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleMachine,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "ServiceRestart",
-	}
-	auditlog.Add(log)
-
 	agent := agentmanager.GetAgent(agentservice.UUID)
 	if agent == nil {
-		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+"获取uuid失败")
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "获取uuid失败")
 		return
 	}
 
 	service_restart, Err, err := agent.ServiceRestart(agentservice.Service)
 	if len(Err) != 0 || err != nil {
-		auditlog.UpdateMessage(log, "agentuuid:"+agentservice.UUID+err.Error())
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, gin.H{"error": Err}, "Failed!")
 		return
 	}

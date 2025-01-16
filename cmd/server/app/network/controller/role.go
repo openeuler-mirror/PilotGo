@@ -8,13 +8,14 @@
 package controller
 
 import (
+	"time"
+
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	roleservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 获取所有角色
@@ -56,29 +57,13 @@ func AddRoleHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
-	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleRole,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "添加角色",
-	}
-	auditlog.Add(log)
-
 	userRole := &roleservice.Role{
 		Name:        params.Role,
 		Description: params.Description,
 	}
 
-	err = roleservice.AddRole(userRole)
+	err := roleservice.AddRole(userRole)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -95,24 +80,8 @@ func DeleteRoleHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
+	err := roleservice.DeleteRole(params.RoleId)
 	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleRole,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "删除角色",
-	}
-	auditlog.Add(log)
-
-	err = roleservice.DeleteRole(params.RoleId)
-	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, "有用户绑定此角色，不可删除")
 		return
 	}
@@ -130,24 +99,8 @@ func UpdateRoleInfoHandler(c *gin.Context) {
 		return
 	}
 
-	u, err := jwt.ParseUser(c)
+	err := roleservice.UpdateRoleInfo(params.Role, params.Description)
 	if err != nil {
-		response.Fail(c, nil, "user token error:"+err.Error())
-		return
-	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleRole,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "修改角色信息",
-	}
-	auditlog.Add(log)
-
-	err = roleservice.UpdateRoleInfo(params.Role, params.Description)
-	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
 		response.Fail(c, nil, err.Error())
 		return
 	}
@@ -172,21 +125,28 @@ func RolePermissionChangeHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleRole,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "修改角色权限",
-	}
-	auditlog.Add(log)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "角色权限变更",
+		Module:     auditlog.RoleChange,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "角色权限变更:" + params.Role,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	err = roleservice.UpdateRolePermissions(params.Role, params.Buttons, params.Menus, params.PluginPermissions)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "角色权限变更失败："+err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 	response.Success(c, nil, "角色权限变更成功")
 }

@@ -9,6 +9,7 @@ package controller
 
 import (
 	"strconv"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
@@ -16,7 +17,6 @@ import (
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/net"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type NewDepart struct {
@@ -87,22 +87,30 @@ func AddDepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleDepart,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "添加部门信息",
-	}
-	auditlog.Add(log)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "部门添加",
+		Module:     auditlog.DepartAdd,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "部门添加:" + newDepart.DepartName,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	err = depart.AddDepart(&newDepart)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "部门添加失败："+err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
+
 	response.Success(c, nil, "部门信息入库成功")
 }
 
@@ -119,22 +127,29 @@ func DeleteDepartDataHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleDepart,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "删除部门信息",
-	}
-	auditlog.Add(log)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "部门删除",
+		Module:     auditlog.DepartDelete,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "部门删除：" + DelDept.DepartName,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	err = depart.DeleteDepart(&DelDept)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "部门删除失败："+err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 	response.Success(c, nil, "部门删除成功")
 }
 
@@ -151,21 +166,29 @@ func UpdateDepartHandler(c *gin.Context) {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
 	}
-	log := &auditlog.AuditLog{
-		LogUUID:    uuid.New().String(),
-		ParentUUID: "",
-		Module:     auditlog.ModuleDepart,
-		Status:     auditlog.StatusOK,
-		UserID:     u.ID,
-		Action:     "修改部门信息",
-	}
-	auditlog.Add(log)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "修改部门名称",
+		Module:     auditlog.DepartEdit,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "修改部门名称" + new.DepartName,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	err = depart.UpdateDepart(new.DepartID, new.DepartName)
 	if err != nil {
-		auditlog.UpdateStatus(log, auditlog.StatusFailed)
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "部门名称修改失败："+err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
+
 	response.Success(c, nil, "部门更新成功")
 }
