@@ -42,7 +42,7 @@ let sidebarRoutes = [
         meta: {
           title: "概览",
           panel: "overview",
-          icon: "HomeFilled",
+          icon: "House",
           breadcrumb: [{ name: "概览" }],
         },
       },
@@ -179,8 +179,19 @@ let sidebarRoutes = [
         meta: {
           title: "角色管理",
           panel: "role",
-          icon: "Ticket",
+          icon: "Lock",
           breadcrumb: [{ name: "角色管理" }],
+        },
+      },
+      {
+        path: "/script",
+        name: "Script",
+        component: () => import("../views/CustomScript/index.vue"),
+        meta: {
+          title: "自定义脚本",
+          panel: "batch",
+          icon: "Management",
+          breadcrumb: [{ name: "自定义脚本" }],
         },
       },
       {
