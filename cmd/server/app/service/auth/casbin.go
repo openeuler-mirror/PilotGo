@@ -121,6 +121,7 @@ var (
 		"audit",
 		"plugin",
 		"terminal",
+		"script",
 	}
 )
 

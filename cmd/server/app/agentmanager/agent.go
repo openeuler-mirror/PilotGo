@@ -65,7 +65,7 @@ func NewAgent(conn net.Conn) (*Agent, error) {
 
 	pkgglobal.SendRemindMsg(
 		pkgglobal.MachineSendMsg, 
-		fmt.Sprintf("agent机器 %s 已连接", agent.IP),
+		fmt.Sprintf("agent 机器 %s 已连接", agent.IP),
 	)
 
 	return agent, nil
@@ -95,7 +95,7 @@ func (a *Agent) startListen() {
 				logger.Error("update machine status failed: %s", err.Error())
 			}
 			DeleteAgent(a.UUID)
-			str := "agent机器 " + a.IP + " 已断开连接"
+			str := "agent 机器 " + a.IP + " 已断开连接"
 			logger.Warn("agent %s disconnected, ip:%s", a.UUID, a.IP)
 			// 发布“平台主机离线”事件
 			msgData := commonSDK.MessageData{
