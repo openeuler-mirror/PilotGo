@@ -114,12 +114,14 @@ function batchDelete() {
   })
     .then(() => {
       // TODO: fix proxy object problem
-      let params: number[] = [];
-      selectedBatches.value!.forEach((item) => {
-        params.push(item.ID);
+      let batch_ids: number[] = [];
+      let batch_names: string[] = [];
+      selectedBatches.value!.forEach((item: any) => {
+        batch_ids.push(item.ID);
+        batch_names.push(item.name);
       });
 
-      deleteBatch({ BatchID: params })
+      deleteBatch({ BatchID: batch_ids, Batches: batch_names })
         .then((resp: any) => {
           if (resp.code === RespCodeOK) {
             updateBatchInfo();

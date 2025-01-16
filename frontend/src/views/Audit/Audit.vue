@@ -7,80 +7,48 @@
 -->
 <template>
   <div class="container">
-    <PGTable
-      :data="logs"
-      title="审计日志"
-      :showSelect="false"
-      :total="total"
-      v-model:page="page"
-      :isExpand="true"
-      v-model:expandData="expandLog"
-    >
+    <PGTable :data="logs" title="审计日志" :showSelect="false" :total="total" v-model:page="page" :isExpand="true">
       <template v-slot:content>
         <el-table-column type="expand">
-          <div style="width: 100%; padding-left: 10%">
-            <el-table
-              height="200"
-              :data="logChildrens"
-              style="width: 60%; border: 1px solid #dedfe0; border-radius: 4px"
-            >
-              <el-table-column prop="action" label="子日志名称" width="220" />
-              <el-table-column label="子日志进度" width="200">
-                <template #default="scope">
-                  <el-progress style="width: 100%" type="line" :percentage="scope.row.status == 'OK' ? 100 : 0">
-                    {{ scope.row.status == "OK" ? "1/1" : "0/1" }}
-                  </el-progress></template
-                >
-              </el-table-column>
-              <el-table-column align="center" prop="operation" label="详情">
-                <template #default="scope">
-                  <el-button size="small" @click="handleDetail(scope.row)"> 查看 </el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
+          <template #default="{ row }">
+            <div style="width: 100%; display: flex; justify-content: center; background-color: #f5f7fa; padding: 6px 0">
+              <el-table max-height="200" :data="row.SubLog" style="width: 60%; border-radius: 6px">
+                <el-table-column prop="action" label="执行动作" width="220" />
+                <el-table-column label="状态" width="200">
+                  <template #default="{ row }">
+                    <el-tag :type="row.status === '成功' ? 'success' : 'danger'">{{ row.status }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="updateTime" label="更新时间" width="220" />
+
+                <el-table-column align="center" prop="operation" label="详情">
+                  <template #default="scope">
+                    <el-button size="small" @click="handleDetail(scope.row)"> 查看 </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </template>
         </el-table-column>
-        <el-table-column align="center" prop="action" label="日志名称"> </el-table-column>
-        <el-table-column align="center" prop="user_id" label="创建者"> </el-table-column>
+        <el-table-column align="center" prop="action" label="执行动作"> </el-table-column>
+        <el-table-column align="center" prop="module" label="所属模块"> </el-table-column>
+        <el-table-column align="center" prop="batches" label="处理批次"> </el-table-column>
+        <el-table-column align="center" prop="user" label="创建者"> </el-table-column>
         <el-table-column align="center" label="进度" style="display: flex; align-items: center">
-          <template #default="scope">
-            <el-progress
-              v-if="!scope.row.Isempty"
-              style="width: 100%"
-              type="line"
-              :percentage="scope.row.status == 'OK' ? 100 : 0"
-            >
-              {{ scope.row.status == "OK" ? "1/1" : "0/1" }}
-            </el-progress>
-            <el-progress
-              v-else
-              style="width: 100%"
-              type="line"
-              :percentage="
-                scope.row.status.split(',')[2] === '1.00' || scope.row.status.split(',')[2] === '0.00'
-                  ? 100
-                  : scope.row.status.split(',')[2] * 100 || 0
-              "
-              :status="
-                scope.row.status.split(',')[2] === '0.00'
-                  ? 'exception'
-                  : scope.row.status.split(',')[2] === '1.00'
-                  ? 'success'
-                  : 'warning'
-              "
-            >
-              {{ scope.row.status.split(",")[0] + "/" + scope.row.status.split(",")[1] }}
+          <template #default="{ row }">
+            <el-progress style="width: 100%" type="line" :percentage="computedPercentage(row.SubLog)">
+              {{ row.SubLog.filter((i: any) => i.status === "成功").length + "/" + row.SubLog.length }}
             </el-progress>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="CreatedAt" label="创建时间" sortable>
-          <template #default="scope">
-            <span>{{ scope.row.CreatedAt }}</span>
+        <el-table-column align="center" prop="status" label="状态">
+          <template #default="{ row }">
+            <el-tag :type="row.status === '成功' ? 'success' : 'danger'">{{ row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="operation" label="详情">
+        <el-table-column align="center" prop="createTime" label="创建时间" sortable>
           <template #default="scope">
-            <el-button size="small" @click="handleDetail(scope.row)"> 查看 </el-button>
+            <span>{{ scope.row.createTime }}</span>
           </template>
         </el-table-column>
       </template>
@@ -92,11 +60,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watchEffect, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 import PGTable from "@/components/PGTable.vue";
 
-import { getLogs, getLogChildrens } from "@/request/audit";
+import { getLogs } from "@/request/audit";
 import { RespCodeOK, type RespInterface } from "@/request/request";
 import type { AuditItem } from "@/types/audit";
 import AuditDetail from "./AuditDetail.vue";
@@ -127,17 +95,21 @@ function getPageLogs() {
     });
 }
 
-// 获取子日志
-const expandLog = ref();
-const logChildrens = ref<AuditItem[]>([]);
-watchEffect(() => {
-  if (expandLog.value && expandLog.value.log_uuid)
-    getLogChildrens({ uuid: expandLog.value.log_uuid }).then((res: RespInterface) => {
-      if (res.code === RespCodeOK) {
-        logChildrens.value = res.data!;
-      }
-    });
-});
+// 计算进度
+interface SubLogItem {
+  id: number;
+  action: string;
+  logId: number; // 父日志id
+  message: string;
+  status: string;
+  updateTime: string;
+}
+const computedPercentage = (subLog: SubLogItem[]) => {
+  if (!subLog) return 0;
+  let successCount = subLog.filter((item: SubLogItem) => item.status == "成功").length;
+  let filedCount = subLog.filter((item: SubLogItem) => item.status == "失败").length;
+  return (successCount / subLog.length) * 100;
+};
 
 // 获取详情
 const handleDetail = (auditItem: AuditItem) => {
