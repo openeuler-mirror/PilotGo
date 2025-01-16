@@ -9,15 +9,12 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	eventSDK "gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/role"
 	userservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
@@ -273,7 +270,6 @@ func ResetPasswordHandler(c *gin.Context) {
 
 // 删除用户
 func DeleteUserHandler(c *gin.Context) {
-	statuscodes := []string{}
 	fd := struct {
 		Deldatas []string `json:"delDatas,omitempty"`
 	}{}
@@ -282,26 +278,28 @@ func DeleteUserHandler(c *gin.Context) {
 		return
 	}
 
+	var codeMap = make(map[string][]string)
 	for _, ps := range fd.Deldatas {
-
 		err := userservice.DeleteUser(strings.Split(ps, "/")[0])
 		if err != nil {
-			statuscodes = append(statuscodes, strconv.Itoa(http.StatusBadRequest))
-			continue
+			if _, exists := codeMap["失败"]; !exists {
+				codeMap["失败"] = []string{}
+			}
+			codeMap["失败"] = append(codeMap["失败"], ps)
+		} else {
+			if _, exists := codeMap["成功"]; !exists {
+				codeMap["成功"] = []string{}
+			}
+			codeMap["成功"] = append(codeMap["成功"], ps)
 		}
-
-		statuscodes = append(statuscodes, strconv.Itoa(http.StatusOK))
 	}
 
-	status := auditlog.BatchActionStatus(statuscodes)
-	switch strings.Split(status, ",")[2] {
-	case "0.00":
+	if len(codeMap["成功"]) == 0 {
 		response.Fail(c, nil, "用户删除失败")
-		return
-	case "1.00":
+	} else if len(codeMap["失败"]) == 0 {
 		response.Success(c, nil, "用户删除成功")
-	default:
-		response.Success(c, nil, "用户删除部分成功")
+	} else {
+		response.Success(c, nil, "部分用户删除成功")
 	}
 }
 

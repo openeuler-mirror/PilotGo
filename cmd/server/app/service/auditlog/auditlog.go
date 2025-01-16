@@ -8,10 +8,6 @@
 package auditlog
 
 import (
-	"fmt"
-	"net/http"
-	"strconv"
-
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/internal/dao"
 )
 
@@ -41,26 +37,6 @@ const (
 
 type AuditLog = dao.AuditLog
 type SubLog = dao.SubLog
-
-// 单机操作成功状态:是否成功，机器数量，成功率
-const (
-	ActionOK    = "1,1,1.00"
-	ActionFalse = "0,1,0.00"
-)
-
-// 计算批量机器操作的状态：成功数，总数目，比率
-func BatchActionStatus(StatusCodes []string) (status string) {
-	var StatusOKCounts int
-	for _, success := range StatusCodes {
-		if success == strconv.Itoa(http.StatusOK) {
-			StatusOKCounts++
-		}
-	}
-	num, _ := strconv.ParseFloat(fmt.Sprintf("%.2f", float64(StatusOKCounts)/float64(len(StatusCodes))), 64)
-	rate := strconv.FormatFloat(num, 'f', 2, 64)
-	status = strconv.Itoa(StatusOKCounts) + "," + strconv.Itoa(len(StatusCodes)) + "," + rate
-	return
-}
 
 func Add(log *dao.AuditLog) (int, error) {
 	return log.Record()

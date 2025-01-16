@@ -46,7 +46,7 @@ func CreateBatchHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "批次创建:" + params.Name,
+		ActionObject: "批次创建：" + params.Name,
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 
@@ -142,7 +142,7 @@ func DeleteBatchHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "批次删除:" + strings.Join(batchdel.Batches, ","),
+		ActionObject: "批次删除：" + strings.Join(batchdel.Batches, ","),
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 
@@ -190,7 +190,7 @@ func UpdateBatchHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "批次编辑:" + batchinfo.BatchName,
+		ActionObject: "批次编辑：" + batchinfo.BatchName,
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 

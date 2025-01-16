@@ -97,7 +97,7 @@ func AddDepartHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "部门添加:" + newDepart.DepartName,
+		ActionObject: "部门添加：" + newDepart.DepartName,
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 
@@ -176,7 +176,7 @@ func UpdateDepartHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "修改部门名称" + new.DepartName,
+		ActionObject: "修改部门名称：" + new.DepartName,
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 
@@ -188,7 +188,7 @@ func UpdateDepartHandler(c *gin.Context) {
 		return
 	}
 	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
-	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "部门新名称为："+new.DepartName)
 
 	response.Success(c, nil, "部门更新成功")
 }

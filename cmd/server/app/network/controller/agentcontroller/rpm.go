@@ -119,7 +119,7 @@ func InstallRpmHandler(c *gin.Context) {
 		}
 		subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 			LogId:        logId,
-			ActionObject: "软件包安装:" + agent.IP,
+			ActionObject: "软件包安装：" + agent.IP,
 			UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 		})
 
@@ -198,7 +198,7 @@ func RemoveRpmHandler(c *gin.Context) {
 		}
 		subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 			LogId:        logId,
-			ActionObject: "软件包卸载:" + agent.IP,
+			ActionObject: "软件包卸载：" + agent.IP,
 			UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 		})
 

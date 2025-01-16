@@ -135,7 +135,7 @@ func RolePermissionChangeHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "角色权限变更:" + params.Role,
+		ActionObject: "角色权限变更：" + params.Role,
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 

@@ -115,7 +115,6 @@ var (
 	MenuList = []string{
 		"overview",
 		"cluster",
-		"batch",
 		"usermanager",
 		"rolemanager",
 		"audit",

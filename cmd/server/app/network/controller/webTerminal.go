@@ -59,24 +59,30 @@ func WebTerminal(c *gin.Context) {
 	}
 
 	var logBuff = bufPool.Get().(*bytes.Buffer)
-	logBuff.Reset()
-	defer bufPool.Put(logBuff)
+	defer func() {
+		logBuff.Reset()
+		defer bufPool.Put(logBuff)
+	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	wg := sync.WaitGroup{}
 	wg.Add(2)
+
 	go func() {
 		defer wg.Done()
 		err := terminal.LoopRead(logBuff, ctx)
 		if err != nil {
-			logger.Error("%#v", err)
+			logger.Error("LoopRead 退出：%#v", err)
 		}
+		cancel()
 	}()
 	go func() {
 		defer wg.Done()
 		err := terminal.SessionWait()
 		if err != nil {
-			logger.Error("%#v", err)
+			logger.Error("SessionWait 退出：%#v", err)
 		}
 		cancel()
 	}()
