@@ -47,7 +47,7 @@ func AddScriptHandler(c *gin.Context) {
 	})
 	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
 		LogId:        logId,
-		ActionObject: "创建脚本:" + script.Name,
+		ActionObject: "创建脚本：" + script.Name,
 		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
 	})
 

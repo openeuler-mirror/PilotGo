@@ -80,8 +80,8 @@ func DecodedMsgToSSHClient(msg string) (*SSHClient, error) {
 
 // 升级HTTP协议为WebSocket
 var Upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  1024 * 4,
+	WriteBufferSize: 1024 * 4,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},

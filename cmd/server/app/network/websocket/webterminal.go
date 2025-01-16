@@ -66,7 +66,7 @@ func NewTerminal(ws_conn *websocket.Conn, sshClient *ssh.Client) (*Terminal, err
 	return terminal, nil
 }
 func (t *Terminal) Write(p []byte) (n int, err error) {
-	writer, err := t.WsConn.NextWriter(websocket.TextMessage)
+	writer, err := t.WsConn.NextWriter(websocket.BinaryMessage)
 	if err != nil {
 		return 0, err
 	}
@@ -108,8 +108,7 @@ func (t *Terminal) LoopRead(logBuff *bytes.Buffer, context context.Context) erro
 			switch wsData[0] {
 			case MsgResize:
 				var args Resize
-				err := json.Unmarshal(body, &args)
-				if err != nil {
+				if err := json.Unmarshal(body, &args); err != nil {
 					return fmt.Errorf("ssh pty resize windows err:%s", err)
 				}
 				if args.Columns > 0 && args.Rows > 0 {
