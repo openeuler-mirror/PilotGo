@@ -109,7 +109,7 @@ const message_list = ref<MessageItem[]>([]);
 const receiveMessage = (messageItem: any) => {
   let result: MessageItem = JSON.parse(messageItem.data);
   let source: string = result.msgtype === 0 ? " 机器" : result.msgtype === 1 ? " 插件" : " 平台";
-  result.time = formatDate(new Date()) + source;
+  result.time = result.time + source;
   message_list.value.unshift(result);
 };
 </script>
