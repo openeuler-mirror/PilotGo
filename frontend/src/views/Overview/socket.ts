@@ -28,8 +28,7 @@ interface socket {
 let protocol = window.location.protocol === "http:" ? "ws://" : "wss://";
 const socket: socket = {
   websocket: null,
-  connectURL: "wss://" + "10.41.107.29:8888",
-  // connectURL: protocol+window.location.host+"/plugin/ws/logs",
+  connectURL: protocol + window.location.host,
   // 开启标识
   socket_open: false,
   // 心跳timer
@@ -39,7 +38,7 @@ const socket: socket = {
   // 是否自动重连
   is_reonnect: true,
   // 重连次数
-  reconnect_count: 100,
+  reconnect_count: 3,
   // 已发起重连次数
   reconnect_current: 1,
   // 网络错误提示此时
