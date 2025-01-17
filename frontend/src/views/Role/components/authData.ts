@@ -73,9 +73,21 @@ export let authData = [
         label: "编辑部门",
         menuName: "dept_update",
       },
+      {
+        id: "10",
+        btnId: "3",
+        label: "编辑批次",
+        menuName: "batch_update",
+      },
+      {
+        id: "11",
+        btnId: "4",
+        label: "删除批次",
+        menuName: "batch_delete",
+      },
     ],
   },
-  {
+  /* {
     id: "3",
     label: "批次",
     isMenu: true,
@@ -95,7 +107,7 @@ export let authData = [
         menuName: "batch_delete",
       },
     ],
-  },
+  }, */
   {
     id: "4",
     label: "用户管理",

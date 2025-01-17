@@ -65,7 +65,10 @@ let sidebarRoutes = [
                 {
                   name: "系统",
                   path: "/cluster",
-                  children: [{ name: "createBatch", menuName: "创建批次" }],
+                  children: [
+                    { name: "createBatch", menuName: "创建批次" },
+                    { name: "BatchList", menuName: "批次列表" },
+                  ],
                 },
                 { name: "机器列表" },
               ],
@@ -83,7 +86,10 @@ let sidebarRoutes = [
                 {
                   name: "系统",
                   path: "/cluster",
-                  children: [{ name: "createBatch", menuName: "创建批次" }],
+                  children: [
+                    { name: "createBatch", menuName: "创建批次" },
+                    { name: "BatchList", menuName: "批次列表" },
+                  ],
                 },
                 { name: "机器列表", path: "/cluster/" },
                 { name: "机器详情" },
@@ -103,48 +109,56 @@ let sidebarRoutes = [
                 {
                   name: "系统",
                   path: "/cluster",
-                  children: [{ name: "macList", menuName: "机器列表" }],
+                  children: [
+                    { name: "macList", menuName: "机器列表" },
+                    { name: "BatchList", menuName: "批次列表" },
+                  ],
                 },
                 { name: "创建批次" },
               ],
               icon: "",
             },
           },
-        ],
-      },
-      {
-        path: "/batch",
-        meta: {
-          title: "批次",
-          panel: "batch",
-          icon: "DocumentCopy",
-          breadcrumb: [{ name: "批次" }],
-        },
-        children: [
           {
-            path: "",
-            redirect: "/batch/list",
-          },
-          {
-            path: "/batch/list",
+            path: "/cluster/batch/list",
             name: "BatchList",
             component: () => import("../views/Batch/Batch.vue"),
             meta: {
               title: "批次列表",
               panel: "batch",
-              breadcrumb: [{ name: "批次", path: "/batch" }, { name: "批次列表" }],
+              breadcrumb: [
+                {
+                  name: "系统",
+                  path: "/cluster",
+                  children: [
+                    { name: "macList", menuName: "机器列表" },
+                    { name: "createBatch", menuName: "创建批次" },
+                  ],
+                },
+                { name: "批次列表" },
+              ],
               icon: "",
             },
           },
           {
-            path: "/batch/detail/:id",
+            path: "/cluster/batch/detail/:id",
             name: "BatchDetail",
             component: () => import("../views/Batch/Detail.vue"),
             meta: {
               ignore: true,
               title: "批次详情",
               panel: "batch",
-              breadcrumb: [{ name: "批次", path: "/batch" }, { name: "批次详情" }],
+              breadcrumb: [
+                {
+                  name: "系统",
+                  path: "/cluster",
+                  children: [
+                    { name: "macList", menuName: "机器列表" },
+                    { name: "createBatch", menuName: "创建批次" },
+                  ],
+                },
+                { name: "批次详情" },
+              ],
               icon: "",
             },
           },
