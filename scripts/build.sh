@@ -61,6 +61,10 @@ function build_frontend() {
 
 function build_backend() {
     # must provide arch parameter(amd64, arm64 or i386, must meet GOARCH requires)
+    VERSION=$(cat ./VERSION)
+    COMMIT=$(git rev-parse --verify HEAD)
+    GO_VERSION=$(go version | awk '{print $3}' | awk -F "go" '{print $2}' | awk -F '.' '{print $1"."$2}')
+    TIME=$(date +%Y-%m-%dT%H:%M:%S)
 
     echo "cleanning tmp directory..."
     rm -rf ./out/${1}
@@ -69,11 +73,16 @@ function build_backend() {
 
     echo "building server for ${1}..."
     mkdir -p ${version_path}/server
-    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build  -tags=production -o ${version_path}/server/pilotgo-server ./cmd/server/main.go
+    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -mod=vendor -tags=production -ldflags " \
+    -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.version=${VERSION} \
+    -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.commit=${COMMIT} \
+    -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.goVersion=${GO_VERSION} \
+    -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.buildTime=${TIME}" \
+    -o ${version_path}/server/PilotGo-server ./cmd/server/main.go
 
     echo "building agent for ${1}..."
     mkdir -p ${version_path}/agent
-    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/pilotgo-agent ./cmd/agent/main.go
+    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -mod=vendor -o ${version_path}/agent/PilotGo-agent ./cmd/agent/main.go
 }
 
 function pack_tar() {
