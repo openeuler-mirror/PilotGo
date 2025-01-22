@@ -85,7 +85,11 @@ func GetMachineIDPaged(offset, size, batchid int) (int64, []BatchMachines, error
 	err := mysqlmanager.MySQL().Model(BatchMachines{}).Order("machine_node_id desc").Where("batch_id=?", batchid).Offset(offset).Limit(size).Find(&machineids).Offset(-1).Limit(-1).Count(&count).Error
 	return count, machineids, err
 }
-
+func GetBatchName(BatchID uint) (string, error) {
+	var batch Batch
+	err := mysqlmanager.MySQL().Where("id=?", BatchID).Find(&batch).Error
+	return batch.Name, err
+}
 func GetMachineID(BatchID int) ([]uint, error) {
 	var machineids []uint
 	err := mysqlmanager.MySQL().Model(BatchMachines{}).Select("machine_node_id").Where("batch_id=?", BatchID).Find(&machineids).Error

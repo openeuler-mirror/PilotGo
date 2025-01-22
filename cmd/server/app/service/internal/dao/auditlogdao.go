@@ -58,3 +58,8 @@ func GetAuditLogPaged(offset, size int) (int64, []AuditLog, error) {
 	err := mysqlmanager.MySQL().Model(AuditLog{}).Order("id desc").Preload("LogChild").Offset(offset).Limit(size).Find(&auditlogs).Offset(-1).Limit(-1).Count(&count).Error
 	return count, auditlogs, err
 }
+func GetSubLogStatus(logId int) bool {
+	var count int64
+	mysqlmanager.MySQL().Model(SubLog{}).Select("status").Where("log_id = ? AND status = ?", logId, "失败").Count(&count)
+	return count > 0
+}

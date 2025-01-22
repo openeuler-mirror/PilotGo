@@ -10,7 +10,7 @@
     <div class="basic">
       <el-descriptions class="margin-top" :column="1">
         <el-descriptions-item label="操作:">{{ audit.action }}</el-descriptions-item>
-        <el-descriptions-item label="日志:">{{ audit.message }}</el-descriptions-item>
+        <el-descriptions-item label="日志:"><pre>{{ audit.message }}</pre></el-descriptions-item>
       </el-descriptions>
     </div>
   </div>

@@ -9,10 +9,12 @@ package script
 
 import (
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	batchservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/pkg/global"
@@ -104,7 +106,7 @@ func ScriptHistoryVersion(scriptid uint) ([]*dao.HistoryVersion, error) {
 	return scripts, nil
 }
 
-func RunScript(runscriptmeta *RunScriptMeta, batch *common.Batch) ([]batchservice.R, error) {
+func RunScript(createName string, runscriptmeta *RunScriptMeta, batch *common.Batch) ([]batchservice.R, error) {
 	var err error
 
 	if runscriptmeta.ScriptID == 0 {
@@ -124,6 +126,17 @@ func RunScript(runscriptmeta *RunScriptMeta, batch *common.Batch) ([]batchservic
 		}
 	}
 
+	var batch_name []string
+	batchName, _ := dao.GetBatchName(runscriptmeta.BatchID)
+	batch_name = append(batch_name, batchName)
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "脚本运行",
+		Module:     auditlog.ScriptExec,
+		User:       createName,
+		Batches:    strings.Join(batch_name, ","),
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+
 	cmds, err := GetDangerousCommandsInBlackList()
 	if err != nil {
 		return nil, errors.Errorf("run script error(dangerous commands list): %s", err.Error())
@@ -136,6 +149,11 @@ func RunScript(runscriptmeta *RunScriptMeta, batch *common.Batch) ([]batchservic
 	f := func(uuid string) batchservice.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
+			subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+				LogId:        logId,
+				ActionObject: "执行主机：" + agent.IP,
+				UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+			})
 			data, err := agent.RunScript(script_content, runscriptmeta.Params)
 			if err != nil {
 				logger.Error("run script error, agent:%s, command:%s", uuid, script_content)
@@ -148,12 +166,24 @@ func RunScript(runscriptmeta *RunScriptMeta, batch *common.Batch) ([]batchservic
 				Stdout:      data.Stdout,
 				Stderr:      data.Stderr,
 			}
+			if len(data.Stderr) != 0 {
+				auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, data.Stderr)
+			} else {
+				auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, data.Stdout)
+			}
 			return re
 		}
 		return common.CmdResult{}
 	}
 
 	result := batchservice.BatchProcess(batch, f, script_content, runscriptmeta.Params)
+
+	if dao.GetSubLogStatus(logId) {
+		auditlog.UpdateLog(logId, auditlog.StatusFail)
+	} else {
+		auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	}
+
 	return result, nil
 }
 
