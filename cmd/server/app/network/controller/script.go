@@ -11,10 +11,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	scriptservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/script"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -38,37 +36,21 @@ func AddScriptHandler(c *gin.Context) {
 		return
 	}
 
-	logId, _ := auditlog.Add(&auditlog.AuditLog{
-		Action:     "创建脚本",
-		Module:     auditlog.ScriptAdd,
-		User:       u.Username,
-		Batches:    "",
-		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
-	})
-	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
-		LogId:        logId,
-		ActionObject: "创建脚本：" + script.Name,
-		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
-	})
-
 	cmds, err := scriptservice.GetDangerousCommandsInBlackList()
 	if err != nil {
-		auditlog.UpdateLog(logId, auditlog.StatusFail)
-		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "创建高危命令脚本失败:"+err.Error())
+		logger.Error("创建高危命令脚本失败: %v", err.Error())
 		response.Fail(c, nil, "创建失败")
 		return
 	}
 	positions, matchedCommands := global.FindDangerousCommandsPos(script.Content, cmds)
 	if len(positions) > 0 {
-		auditlog.UpdateLog(logId, auditlog.StatusFail)
-		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "脚本中检测到高危命令")
+		logger.Error("脚本中检测到高危命令: %v", strings.Join(matchedCommands, ","))
 		response.Fail(c, nil, "脚本中检测到高危命令: "+strings.Join(matchedCommands, "\n"))
 		return
 	}
 
 	if err := scriptservice.AddScript(script); err != nil {
-		auditlog.UpdateLog(logId, auditlog.StatusFail)
-		auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, "创建脚本失败:"+err.Error())
+		logger.Error("创建脚本失败: %v", err.Error())
 		response.Fail(c, nil, fmt.Sprintf("脚本文件添加失败: %s", err.Error()))
 		return
 	}
@@ -77,8 +59,6 @@ func AddScriptHandler(c *gin.Context) {
 		global.ServerSendMsg,
 		fmt.Sprintf("用户 %s 创建脚本 %s", u.Username, script.Name),
 	)
-	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
-	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 
 	response.Success(c, nil, "成功")
 }
@@ -99,20 +79,20 @@ func UpdateScriptHandler(c *gin.Context) {
 
 	cmds, err := scriptservice.GetDangerousCommandsInBlackList()
 	if err != nil {
-		logger.Error("fail to edit script(dangerous commands list): %s", err.Error())
-		response.Fail(c, nil, "internal error occurred while retrieving dangerous commands")
+		logger.Error("更新脚本检测到高危命令: %v", err.Error())
+		response.Fail(c, nil, "更新失败")
 		return
 	}
 	positions, matchedCommands := global.FindDangerousCommandsPos(script.Content, cmds)
 	if len(positions) > 0 {
-		logger.Error("Matched Commands: %v", matchedCommands)
-		response.Fail(c, nil, "Dangerous commands detected in script: "+strings.Join(matchedCommands, "\n"))
+		logger.Error("脚本中检测到高危命令: %v", strings.Join(matchedCommands, ","))
+		response.Fail(c, nil, "脚本中检测到高危命令: "+strings.Join(matchedCommands, "\n"))
 		return
 	}
 
 	if err := scriptservice.UpdateScript(script); err != nil {
-		logger.Error("fail to edit script: %s", err.Error())
-		response.Fail(c, nil, fmt.Sprintf("脚本文件添加失败: %s", err.Error()))
+		logger.Error("更新脚本失败: %v", err.Error())
+		response.Fail(c, nil, fmt.Sprintf("脚本文件更新失败: %s", err.Error()))
 		return
 	}
 
@@ -188,7 +168,7 @@ func RunScriptHandler(c *gin.Context) {
 		batch.MachineUUIDs = append(batch.MachineUUIDs, body.MachineUUIDs...)
 	}
 
-	result, err := scriptservice.RunScript(body, batch)
+	result, err := scriptservice.RunScript(u.Username, body, batch)
 	if err != nil {
 		logger.Error("fail to run script: %s", err.Error())
 		response.Fail(c, nil, err.Error())

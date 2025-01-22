@@ -23,7 +23,7 @@ type Script struct {
 	Name           string `json:"name"`
 	Content        string `json:"content"`
 	Description    string `json:"description"`
-	UpdatedAt      time.Time
+	UpdatedAt      string
 	HistoryVersion []HistoryVersion `gorm:"foreignKey:ScriptID" json:"history_version"`
 	Deleted        int              `json:"deleted"` //deleted为1的时候表示删除，一般表示为0
 }
@@ -34,13 +34,13 @@ type HistoryVersion struct {
 	Version     string `gorm:"unique" json:"version"`
 	Content     string `json:"content"`
 	Description string `json:"description"`
-	UpdatedAt   time.Time
+	UpdatedAt   string
 	Script      Script //`gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 // 添加脚本文件
 func AddScript(_script Script) error {
-	_script.UpdatedAt = time.Now()
+	_script.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
 	if err := mysqlmanager.MySQL().Save(&_script).Error; err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func AddScript(_script Script) error {
 }
 
 func UpdateScript(_script Script) error {
-	now := time.Now()
+	now := time.Now().Format("2006-01-02 15:04:05")
 
 	old_script := Script{}
 	if err := mysqlmanager.MySQL().Where("id=?", _script.ID).Find(&old_script).Error; err != nil {
@@ -67,7 +67,7 @@ func UpdateScript(_script Script) error {
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	vcode := fmt.Sprintf("%06v", rnd.Int31n(1000000))
-	version := now.Format("2006-01-02 15:04:05") + "-" + vcode
+	version := now + "-" + vcode
 	history := HistoryVersion{
 		ScriptID:    _script.ID,
 		Version:     version,
@@ -142,10 +142,6 @@ func ScriptList(query *response.PaginationQ) ([]*Script, int, error) {
 		return nil, 0, err
 	}
 
-	for _, script := range scripts {
-		script.UpdatedAt = script.UpdatedAt.Local()
-	}
-
 	var total int64
 	if err := mysqlmanager.MySQL().Model(&Script{}).Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -159,9 +155,6 @@ func GetScriptHistoryVersion(scriptid uint) ([]*HistoryVersion, error) {
 		return nil, err
 	}
 
-	for _, script := range history_scripts {
-		script.UpdatedAt = script.UpdatedAt.Local()
-	}
 	return history_scripts, nil
 }
 

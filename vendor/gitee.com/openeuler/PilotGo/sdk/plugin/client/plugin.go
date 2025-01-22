@@ -17,12 +17,14 @@ import (
 
 // 用于初始化Client
 type PluginInfo struct {
+	MenuName    string `json:"menuName"`
 	Name        string `json:"name"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
 	Author      string `json:"author"`
 	Email       string `json:"email"`
 	Url         string `json:"url"`
+	Icon        string `json:"icon"`
 	PluginType  string `json:"plugin_type"`
 	ReverseDest string `json:"reverse_dest"`
 }
