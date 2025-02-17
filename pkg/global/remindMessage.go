@@ -23,9 +23,6 @@ type WebsocketSendMsg struct {
 	Msg     string               `json:"msg"`
 }
 
-/*
-WebsocketSendMsgType: pkg/global/global.go
-*/
 func SendRemindMsg(msg_type WebsocketSendMsgType, msg string) {
 	defer func() {
 		if r := recover(); r != nil {

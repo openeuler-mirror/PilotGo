@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,13 @@ func PushAlarmHandler(c *gin.Context) {
 	currentTime := uint64(time.Now().Unix())
 	client := websocket.NewClient(conn.RemoteAddr().String(), conn, currentTime)
 
-	go client.Read()
+	u, ok := c.Get("user")
+	if !ok {
+		logger.Error("webSocket 连接失败: 找不到用户信息")
+		return
+	}
+
+	go client.Read(u.(*user.User).Username)
 	go client.Write()
 
 	// 用户连接事件
