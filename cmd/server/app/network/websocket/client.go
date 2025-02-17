@@ -9,6 +9,7 @@ package websocket
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime/debug"
 	"time"
 
@@ -44,7 +45,7 @@ func NewClient(addr string, socket *websocket.Conn, firstTime uint64) (client *C
 }
 
 // 读取客户端数据
-func (c *Client) Read() {
+func (c *Client) Read(username string) {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error("write stop: %s, %s", string(debug.Stack()), r)
@@ -54,6 +55,17 @@ func (c *Client) Read() {
 	for {
 		_, _, err := c.Socket.ReadMessage()
 		if err != nil {
+			if websocket.IsCloseError(
+				err,
+				websocket.CloseNormalClosure,
+				websocket.CloseGoingAway,
+				websocket.CloseAbnormalClosure,
+			) {
+				global.SendRemindMsg(
+					global.ServerSendMsg,
+					fmt.Sprintf("用户 %s 断开连接, IP: %s", username, c.Addr),
+				)
+			}
 			CliManager.Unregister <- c
 			logger.Debug("读取客户端数据 关闭连接: %s, %s", c.Addr, err)
 			return
