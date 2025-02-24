@@ -7,13 +7,13 @@
 -->
 
 <template>
-  <div>
-    <div class="iframe-content" v-if="showFrame">
-      <iframe :src="props.url" class="iframe"></iframe>
+  <div class="frameC">
+    <div class="frameC" v-if="showFrame">
+      <iframe :src="props.url" class="frameC"></iframe>
     </div>
-    <div class="micro_content" v-show="!showFrame">
+    <div class="frameC" v-show="!showFrame">
       <micro-app
-        class="micro"
+        class="frameC"
         :baseroute="'/' + props.name"
         :name="props.name"
         :url="props.url"
@@ -62,17 +62,8 @@ watchEffect(() => {
 </script>
 
 <style lang="scss" scoped>
-.iframe-content,
-.micro_content {
-  box-sizing: border-box;
-  height: 100%;
+.frameC {
   width: 100%;
-
-  .iframe,
-  .micro {
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
+  height: 100%;
 }
 </style>

@@ -24,34 +24,45 @@
         v-model:selectedData="selectedMachines"
       >
         <template v-slot:action>
-          <el-dropdown>
-            <el-button>
-              操作
-              <el-icon>
-                <ArrowDown />
-              </el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>
-                  <auth-button auth="button/dept_change" link :show="true" @click="showChangeDepartDialog = true">
-                    变更部门
-                  </auth-button>
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <auth-button auth="button/machine_delete" link :show="true" @click="handleDeleteMachine">
-                    删除
-                  </auth-button>
-                </el-dropdown-item>
-                <el-dropdown-item v-for="item in pluginBtns">
-                  <!-- <auth-button :auth="'button/' + item.permission" link :show="true" @click="handlePluginAPI(item.url)">
+          <div class="search">
+            <el-input
+              class="search_input"
+              v-model.trim="searchInput"
+              placeholder="请输入关键字进行搜索..."
+              @change="onSearchHost"
+            />&nbsp;
+            <el-button @click="onSearchHost">搜索</el-button>
+            <el-divider direction="vertical" style="height: 2.5em" />
+
+            <el-dropdown>
+              <el-button>
+                操作
+                <el-icon>
+                  <ArrowDown />
+                </el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item>
+                    <auth-button auth="button/dept_change" link :show="true" @click="showChangeDepartDialog = true">
+                      变更部门
+                    </auth-button>
+                  </el-dropdown-item>
+                  <el-dropdown-item>
+                    <auth-button auth="button/machine_delete" link :show="true" @click="handleDeleteMachine">
+                      删除
+                    </auth-button>
+                  </el-dropdown-item>
+                  <el-dropdown-item v-for="item in pluginBtns">
+                    <!-- <auth-button :auth="'button/' + item.permission" link :show="true" @click="handlePluginAPI(item.url)">
                     {{ item.name }}
                   </auth-button> -->
-                  <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+                    <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </template>
         <template v-slot:content>
           <el-table-column align="center" label="ip">
@@ -86,7 +97,7 @@
     <el-dialog title="主机部门变更" v-model="showChangeDepartDialog" destroy-on-close>
       <change-depart
         :machines="selectedMachines"
-        @depart-updated="updateDepartmentMachines(departmentID)"
+        @depart-updated="updateDepartmentMachines({ DepartId: departmentID })"
         @close="showChangeDepartDialog = false"
       />
     </el-dialog>
@@ -116,13 +127,14 @@ const showSelect = ref(true);
 const machines = ref<any>([]);
 const total = ref(0);
 const page = ref({ pageSize: 10, currentPage: 1 });
+const searchInput = ref("");
 
 const showChangeDepartDialog = ref(false);
 let pluginBtns = ref([] as any);
 
 onMounted(() => {
   updatePlugins();
-  updateDepartmentMachines(departmentID.value);
+  updateDepartmentMachines({ DepartId: departmentID.value });
   pluginBtns.value = usePluginStore().extention;
 });
 
@@ -139,11 +151,11 @@ watch(
   { immediate: true, deep: true }
 );
 
-function updateDepartmentMachines(departID: number) {
+function updateDepartmentMachines(params: any) {
   getPagedDepartMachines({
     page: page.value.currentPage,
     size: page.value.pageSize,
-    DepartId: departID,
+    ...params,
   })
     .then((resp: any) => {
       if (resp.code === RespCodeOK) {
@@ -187,7 +199,7 @@ watch(
   () => page.value,
   (newV) => {
     if (newV) {
-      updateDepartmentMachines(departmentID.value);
+      searchInput.value ? onSearchHost() : updateDepartmentMachines({ DepartId: departmentID.value });
     }
   },
   { deep: true }
@@ -198,7 +210,7 @@ function machineDetail(info: any) {
 
 function onDepartmentClicked(depart: any) {
   departmentID.value = depart.id;
-  updateDepartmentMachines(depart.id);
+  updateDepartmentMachines({ DepartId: depart.id });
 }
 
 // 发送插件的请求
@@ -210,11 +222,48 @@ const handlePluginAPI = (url: string) => {
   axios.post(window.location.origin + url, { uuids: uuidArr }).then((response: any) => {
     if (response.data.data.code === 200) {
       setTimeout(() => {
-        updateDepartmentMachines(departmentID.value);
+        updateDepartmentMachines({ DepartId: departmentID.value });
         ElMessage.success(response.data.data.msg);
       }, 2000);
     }
   });
+};
+
+/**
+ * 模糊搜索
+ * @params search:string 模糊关键字
+ * 其中状态一栏对应关系：
+ * 在线-online
+ * | 离线-offline
+ * | normal-正常使用
+ * | maintenance-维护中
+ */
+const onSearchHost = () => {
+  let searchKey: string = "";
+  let stateDict = [
+    {
+      label: "在线",
+      value: "online",
+    },
+    {
+      label: "离线",
+      value: "offline",
+    },
+    {
+      label: "正常使用",
+      value: "normal",
+    },
+    {
+      label: "维护中",
+      value: "maintenance",
+    },
+  ];
+
+  if (searchInput.value) {
+    let filterStates = stateDict.filter((item) => item.label.match(searchInput.value));
+    searchKey = filterStates.length > 0 ? filterStates[0].value : searchInput.value;
+  }
+  updateDepartmentMachines({ search: searchKey });
 };
 
 /*
@@ -236,7 +285,7 @@ const handleDeleteMachine = () => {
         if (res.code === RespCodeOK) {
           page.value.currentPage = 1;
           page.value.pageSize = 10;
-          updateDepartmentMachines(1);
+          updateDepartmentMachines({ DepartId: 1 });
           ElMessage.success(res.msg);
         } else {
           ElMessage.success(res.msg);
@@ -275,6 +324,15 @@ const handleTerminal = (ip: string) => {
   .cluster {
     width: 80%;
     height: 100%;
+    .search {
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      &_input {
+        width: 300px;
+      }
+    }
   }
 }
 </style>

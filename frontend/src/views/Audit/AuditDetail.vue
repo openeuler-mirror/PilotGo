@@ -10,27 +10,29 @@
     <div class="basic">
       <el-descriptions class="margin-top" :column="1">
         <el-descriptions-item label="操作:">{{ audit.action }}</el-descriptions-item>
-        <el-descriptions-item label="日志:"><pre>{{ audit.message }}</pre></el-descriptions-item>
+        <el-descriptions-item label="日志:">
+          <pre>{{ audit.message }}</pre>
+        </el-descriptions-item>
       </el-descriptions>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref } from "vue";
 
 const props = defineProps({
   audit: {
     type: Object,
     required: true,
-    default: {}
-  }
-})
+    default: {},
+  },
+});
 
-let audit = ref({})
+let audit = ref({});
 onMounted(() => {
   audit.value = props.audit;
-})
+});
 </script>
 
 <style scoped lang="scss">

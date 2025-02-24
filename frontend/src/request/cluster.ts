@@ -7,7 +7,7 @@
  */
 import request from "./request";
 
-// 分页获取部门机器信息
+// 分页获取部门机器信息 || 模糊搜索机器列表
 export function getPagedDepartMachines(data: any) {
   return request({
     url: "macList/machineinfo",
