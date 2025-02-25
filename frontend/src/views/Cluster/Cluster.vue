@@ -53,10 +53,24 @@
                       删除
                     </auth-button>
                   </el-dropdown-item>
-                  <el-dropdown-item v-for="item in pluginBtns">
-                    <!-- <auth-button :auth="'button/' + item.permission" link :show="true" @click="handlePluginAPI(item.url)">
-                    {{ item.name }}
-                  </auth-button> -->
+
+                  <!-- 插件扩展点 -->
+                  <el-dropdown-item
+                    v-if="hasPermisson('button/monitor_operate')"
+                    v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'prometheus')"
+                  >
+                    <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="hasPermisson('button/logs_operate')"
+                    v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'logs')"
+                  >
+                    <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="hasPermisson('button/topology_operate')"
+                    v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'topology')"
+                  >
                     <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -119,6 +133,8 @@ import { RespCodeOK, type RespInterface } from "@/request/request";
 import { usePluginStore } from "@/stores/plugin";
 import { useTerminalStore } from "@/stores/terminal";
 import { updatePlugins } from "@/views/Plugin/plugin";
+import { hasPermisson } from "@/module/permission";
+import type { Extention } from "@/types/plugin";
 // 部门树
 const departmentID = ref(1);
 

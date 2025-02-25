@@ -5,7 +5,7 @@
  * Author: Gzx1999 <guozhengxin@kylinos.cn>
  * Date: Wed Jan 3 18:00:12 2024 +0800
  */
-// 整个系统需要控制权限的按钮配置项 当前24
+// 整个系统需要控制权限的按钮配置项 当前29
 
 // 需要做动态添加插件权限逻辑
 
@@ -215,26 +215,57 @@ export let authData = [
     isMenu: true,
     display: true,
     menuName: "plugin",
-    operations: [],
+    operations: [
+      {
+        id: "22",
+        btnId: "15",
+        label: "插件操作",
+        menuName: "plugin_operate",
+      },
+    ],
   },
   {
     id: "9",
     label: "监控告警",
     isMenu: true,
-    display: false,
+    display: true,
     menuName: "monitor",
     operations: [
       {
-        id: "22",
-        btnId: "15",
-        label: "安装expoter",
-        menuName: "expoter_install",
-      },
-      {
         id: "23",
         btnId: "16",
-        label: "卸载expoter",
-        menuName: "expoter_uninstall",
+        label: "监控操作",
+        menuName: "monitor_operate",
+      },
+    ],
+  },
+  {
+    id: "10",
+    label: "主机日志",
+    isMenu: true,
+    display: true,
+    menuName: "logs",
+    operations: [
+      {
+        id: "30",
+        btnId: "23",
+        label: "日志操作",
+        menuName: "logs_operate",
+      },
+    ],
+  },
+  {
+    id: "11",
+    label: "集群拓扑",
+    isMenu: true,
+    display: true,
+    menuName: "topo",
+    operations: [
+      {
+        id: "31",
+        btnId: "24",
+        label: "拓扑操作",
+        menuName: "topology_operate",
       },
     ],
   },

@@ -9,7 +9,7 @@
   <div class="container">
     <PGTable :data="plugins" title="插件列表" :total="total" v-model:page="page">
       <template v-slot:action>
-        <el-button @click="displayDialog = true">添加插件</el-button>
+        <auth-button auth="button/plugin_operate" @click="displayDialog = true">添加插件</auth-button>
       </template>
       <template v-slot:content>
         <el-table-column align="center" prop="custom_name" label="插件名称"> </el-table-column>
@@ -36,10 +36,12 @@
         </el-table-column>
         <el-table-column align="center" label="操作">
           <template #default="scope">
-            <el-button size="small" plain name="default_all" @click="togglePluginState(scope.row)">
+            <auth-button size="small" plain auth="button/plugin_operate" @click="togglePluginState(scope.row)">
               {{ scope.row.enabled === 1 ? "禁用" : "启用" }}
-            </el-button>
-            <el-button size="small" type="danger" @click="onDeletePlugin(scope.row)">移除</el-button>
+            </auth-button>
+            <auth-button size="small" type="danger" auth="button/plugin_operate" @click="onDeletePlugin(scope.row)"
+              >移除</auth-button
+            >
           </template>
         </el-table-column>
       </template>
@@ -56,12 +58,12 @@ import { ElMessage } from "element-plus";
 
 import PGTable from "@/components/PGTable.vue";
 import AddPlugin from "./components/AddPlugin.vue";
+import AuthButton from "@/components/AuthButton.vue";
 
 import { updatePlugins } from "./plugin";
 import { getPluginsPaged, togglePlugin, deletePlugins } from "@/request/plugin";
 import { RespCodeOK } from "@/request/request";
-import type { Extention } from "@/types/plugin";
-import { usePluginStore } from "@/stores/plugin";
+
 const displayDialog = ref(false);
 
 const plugins = ref([]);
