@@ -11,8 +11,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auditlog"
 	scriptservice "gitee.com/openeuler/PilotGo/cmd/server/app/service/script"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -77,6 +79,19 @@ func UpdateScriptHandler(c *gin.Context) {
 		return
 	}
 
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "编辑脚本",
+		Module:     auditlog.ScriptEdit,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "编辑脚本：" + script.Name,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
+
 	cmds, err := scriptservice.GetDangerousCommandsInBlackList()
 	if err != nil {
 		logger.Error("更新脚本检测到高危命令: %v", err.Error())
@@ -100,6 +115,8 @@ func UpdateScriptHandler(c *gin.Context) {
 		global.ServerSendMsg,
 		fmt.Sprintf("用户 %s 更新脚本 %s", u.Username, script.Name),
 	)
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
 
 	response.Success(c, nil, "成功")
 }
@@ -129,16 +146,33 @@ func DeleteScriptHandler(c *gin.Context) {
 	} else {
 		script_name = _script.Name
 	}
-	global.SendRemindMsg(
-		global.MachineSendMsg,
-		fmt.Sprintf("用户 %s 删除脚本 %s %s", u.Username, script_name, req_body.Version),
-	)
+
+	logId, _ := auditlog.Add(&auditlog.AuditLog{
+		Action:     "删除脚本",
+		Module:     auditlog.ScriptDelete,
+		User:       u.Username,
+		Batches:    "",
+		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+	subLogId, _ := auditlog.AddSubLog(&auditlog.SubLog{
+		LogId:        logId,
+		ActionObject: "删除脚本：" + script_name,
+		UpdateTime:   time.Now().Format("2006-01-02 15:04:05"),
+	})
 
 	if err := scriptservice.DeleteScript(req_body.ScriptID, req_body.Version); err != nil {
 		logger.Error("fail to delete script: %s", err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
+
+	global.SendRemindMsg(
+		global.MachineSendMsg,
+		fmt.Sprintf("用户 %s 删除脚本 %s %s", u.Username, script_name, req_body.Version),
+	)
+	auditlog.UpdateLog(logId, auditlog.StatusSuccess)
+	auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, "操作成功")
+
 	response.Success(c, nil, "成功")
 }
 
@@ -154,6 +188,15 @@ func RunScriptHandler(c *gin.Context) {
 	if err != nil {
 		response.Fail(c, nil, "user token error:"+err.Error())
 		return
+	}
+
+	var script_name string
+	script, err := scriptservice.GetScriptByID(body.ScriptID)
+	if err != nil {
+		logger.Error("fail to get script by id: %s", err.Error())
+		script_name = ""
+	} else {
+		script_name = script.Name
 	}
 
 	batch := &common.Batch{}
@@ -175,14 +218,15 @@ func RunScriptHandler(c *gin.Context) {
 		return
 	}
 
-	var script_name string
-	script, err := scriptservice.GetScriptByID(body.ScriptID)
-	if err != nil {
-		logger.Error("fail to get script by id: %s", err.Error())
-		script_name = ""
-	} else {
-		script_name = script.Name
+	result_str := []string{}
+	for _, v := range result {
+		cmdR, ok := v.(common.CmdResult)
+		if !ok {
+			continue
+		}
+		result_str = append(result_str, fmt.Sprintf("\n机器IP:%s\nstdout:\n%s\nstderr:\n%s", cmdR.MachineIP, cmdR.Stdout, cmdR.Stderr))
 	}
+
 	global.SendRemindMsg(
 		global.MachineSendMsg,
 		fmt.Sprintf("用户 %s 执行脚本 %s %s, batch: %v, machines: %v", u.Username, script_name, body.Version, body.BatchID, body.MachineUUIDs),

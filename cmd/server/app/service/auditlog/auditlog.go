@@ -32,7 +32,10 @@ const (
 
 	RoleChange = "角色管理/权限变更"
 
-	ScriptExec = "自定义脚本/脚本执行"
+	ScriptAdd    = "自定义脚本/脚本创建"
+	ScriptExec   = `自定义脚本/脚本运行`
+	ScriptDelete = "自定义脚本/脚本删除"
+	ScriptEdit   = "自定义脚本/脚本编辑"
 )
 
 type AuditLog = dao.AuditLog

@@ -8,6 +8,7 @@
 package script
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -126,6 +127,15 @@ func RunScript(createName string, runscriptmeta *RunScriptMeta, batch *common.Ba
 		}
 	}
 
+	var script_name string
+	script, err := GetScriptByID(runscriptmeta.ScriptID)
+	if err != nil {
+		logger.Error("fail to get script by id: %s", err.Error())
+		script_name = ""
+	} else {
+		script_name = script.Name
+	}
+
 	var batch_name []string
 	batchName, _ := dao.GetBatchName(runscriptmeta.BatchID)
 	batch_name = append(batch_name, batchName)
@@ -167,9 +177,9 @@ func RunScript(createName string, runscriptmeta *RunScriptMeta, batch *common.Ba
 				Stderr:      data.Stderr,
 			}
 			if len(data.Stderr) != 0 {
-				auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, data.Stderr)
+				auditlog.UpdateSubLog(subLogId, auditlog.StatusFail, fmt.Sprintf("脚本 -> %s\n%s", script_name, data.Stderr))
 			} else {
-				auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, data.Stdout)
+				auditlog.UpdateSubLog(subLogId, auditlog.StatusSuccess, fmt.Sprintf("脚本 -> %s\n%s", script_name, data.Stdout))
 			}
 			return re
 		}
