@@ -8,6 +8,7 @@
 package script
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -130,7 +131,7 @@ func RunScript(createName string, runscriptmeta *RunScriptMeta, batch *common.Ba
 	batchName, _ := dao.GetBatchName(runscriptmeta.BatchID)
 	batch_name = append(batch_name, batchName)
 	logId, _ := auditlog.Add(&auditlog.AuditLog{
-		Action:     "脚本运行",
+		Action:     fmt.Sprintf("脚本运行(%v)", batchName),
 		Module:     auditlog.ScriptExec,
 		User:       createName,
 		Batches:    strings.Join(batch_name, ","),
