@@ -10,13 +10,21 @@ import type { Extention } from "@/types/plugin";
 export const usePluginStore = defineStore("plugin", {
   state: () => {
     return {
-      extention: [] as Extention[],
+      extention: [] as any[],
     };
   },
   actions: {
     addExtention(pluginExt: Extention[]) {
       // 添加扩展点
-      this.extention = pluginExt;
+      const map = new Map();
+      [...this.extention, ...pluginExt].forEach((item) => {
+        if (!map.has(item.name)) {
+          map.set(item.name, item);
+        }
+      });
+      let result = Array.from(map.values());
+
+      this.extention = result;
     },
     delExtention(pluginExt: Extention[]) {
       // 删除扩展点
