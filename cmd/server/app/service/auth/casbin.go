@@ -110,6 +110,7 @@ var (
 		"machine_delete",
 		"run_script",
 		"update_script_blacklist",
+		"plugin_operate",
 	}
 
 	MenuList = []string{
@@ -176,16 +177,6 @@ func initAdminPolicy() {
 		}
 	}
 
-	// test
-	{
-		ok, err := addPolicy("admin", "plugins", "get", DomainPilotGo)
-		if err != nil {
-			logger.Error("init admin policy failed:%s", err)
-		}
-		if !ok {
-			logger.Debug("admin test permission already exists")
-		}
-	}
 }
 
 func CheckAuth(user, resource, action, domain string) (bool, error) {
