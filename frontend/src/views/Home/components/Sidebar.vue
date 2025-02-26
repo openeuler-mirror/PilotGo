@@ -6,38 +6,40 @@
  * Date: Wed Jan 3 18:00:12 2024 +0800
 -->
 <template>
-  <div class="menu">
-    <el-menu :collapse="props.isCollapse" :router="true">
-      <template v-for="(menu, index) in routes" :key="index">
-        <!-- 带子菜单的项 -->
-        <el-sub-menu v-if="menu.subMenus && !menu.hidden" :index="menu.path">
-          <template #title>
-            <el-icon>
-              <component :is="menu.icon"></component>
-            </el-icon>
-            &nbsp;
-            <span>{{ menu.title }}</span>
-          </template>
+  <el-scrollbar style="height: 100%">
+    <div class="menu">
+      <el-menu :collapse="props.isCollapse" :router="true">
+        <template v-for="(menu, index) in routes" :key="index">
+          <!-- 带子菜单的项 -->
+          <el-sub-menu v-if="menu.subMenus && !menu.hidden" :index="menu.path">
+            <template #title>
+              <el-icon>
+                <component :is="menu.icon"></component>
+              </el-icon>
+              &nbsp;
+              <span>{{ menu.title }}</span>
+            </template>
+            <el-menu-item
+              v-for="(subMenu, subIndex) in menu.subMenus"
+              :index="subMenu.path"
+              :class="subMenu.title === activeTitle ? 'active' : 'inactive'"
+            >
+              {{ subMenu.title }}
+            </el-menu-item>
+          </el-sub-menu>
+          <!-- 不带子菜单的项 -->
           <el-menu-item
-            v-for="(subMenu, subIndex) in menu.subMenus"
-            :index="subMenu.path"
-            :class="subMenu.title === activeTitle ? 'active' : 'inactive'"
+            v-if="!menu.subMenus && !menu.hidden"
+            :index="menu.path"
+            :class="menu.title === activeTitle ? 'active' : 'inactive'"
           >
-            {{ subMenu.title }}
+            <el-icon> <component :is="menu.icon"></component> </el-icon>&nbsp;
+            <template #title>{{ menu.title }}</template>
           </el-menu-item>
-        </el-sub-menu>
-        <!-- 不带子菜单的项 -->
-        <el-menu-item
-          v-if="!menu.subMenus && !menu.hidden"
-          :index="menu.path"
-          :class="menu.title === activeTitle ? 'active' : 'inactive'"
-        >
-          <el-icon> <component :is="menu.icon"></component> </el-icon>&nbsp;
-          <template #title>{{ menu.title }}</template>
-        </el-menu-item>
-      </template>
-    </el-menu>
-  </div>
+        </template>
+      </el-menu>
+    </div>
+  </el-scrollbar>
 </template>
 
 <script setup lang="ts">

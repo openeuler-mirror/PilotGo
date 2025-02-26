@@ -11,7 +11,11 @@
       <el-table-column label="菜单权限" width="180">
         <template #default="scope">
           <el-checkbox-group v-model="checkedMenu" @change="handleCheckedMenuChange" v-if="scope.row.display">
-            <el-checkbox :label="scope.row.menuName" :disabled="!props.showEdit" :key="scope.row.menuName">
+            <el-checkbox
+              :label="scope.row.menuName"
+              :disabled="!props.showEdit || scope.row.disabled"
+              :key="scope.row.menuName"
+            >
               {{ scope.row.label }}</el-checkbox
             >
           </el-checkbox-group>
