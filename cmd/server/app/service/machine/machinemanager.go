@@ -48,11 +48,11 @@ func AddMachine(Machine *MachineNode) error {
 	return Machine.Add()
 }
 
-func MachineInfo(depart *Depart, offset, size int) (int64, []dao.Res, error) {
+func MachineInfo(depart *Depart, offset, size int, search string) (int64, []dao.Res, error) {
 	var TheDeptAndSubDeptIds []int
 	departservice.ReturnSpecifiedDepart(depart.ID, &TheDeptAndSubDeptIds)
 	TheDeptAndSubDeptIds = append([]int{depart.ID}, TheDeptAndSubDeptIds...)
-	total, data, err := dao.GetMachinePaged(TheDeptAndSubDeptIds, offset, size)
+	total, data, err := dao.GetMachinePaged(TheDeptAndSubDeptIds, offset, size, search)
 	return total, data, err
 }
 
