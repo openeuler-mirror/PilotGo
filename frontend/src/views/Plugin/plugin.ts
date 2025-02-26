@@ -24,12 +24,13 @@ export function updatePlugins() {
     .then((res: any) => {
       if (res.code === RespCodeOK) {
         let iframes: any = [];
+        usePluginStore().extention = [];
         res.data.forEach((item: any, index: number) => {
           // 删除插件tagview、增删全局扩展点
           let pluginExt = item.extentions.filter((item: Extention) => item.type === "machine");
           if (item.enabled === 0) {
             clearTagview(item);
-            usePluginStore().delExtention(pluginExt);
+            // usePluginStore().delExtention(pluginExt);
           } else {
             usePluginStore().addExtention(pluginExt);
           }

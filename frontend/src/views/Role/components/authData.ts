@@ -229,6 +229,7 @@ export let authData = [
     label: "监控告警",
     isMenu: true,
     display: true,
+    disabled: true,
     menuName: "monitor",
     operations: [
       {
@@ -244,6 +245,7 @@ export let authData = [
     label: "主机日志",
     isMenu: true,
     display: true,
+    disabled: true,
     menuName: "logs",
     operations: [
       {
@@ -259,7 +261,8 @@ export let authData = [
     label: "集群拓扑",
     isMenu: true,
     display: true,
-    menuName: "topo",
+    disabled: true,
+    menuName: "topology",
     operations: [
       {
         id: "31",
