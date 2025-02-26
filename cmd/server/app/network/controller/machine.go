@@ -54,13 +54,15 @@ func MachineInfoHandler(c *gin.Context) {
 		return
 	}
 
+	search := c.Query("search")
+
 	depart := &machineservice.Depart{}
 	if c.ShouldBind(&depart) != nil {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 	num := query.PageSize * (query.Page - 1)
-	total, data, err := machineservice.MachineInfo(depart, num, query.PageSize)
+	total, data, err := machineservice.MachineInfo(depart, num, query.PageSize, search)
 	if err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
