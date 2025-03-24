@@ -35,8 +35,10 @@ func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
 		r := SetupRouter()
 		// start websocket server
 		go websocket.CliManager.Start(stopCh)
+
 		shutdownCtx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
 		srv := &http.Server{
 			Addr:    conf.Addr,
 			Handler: r,
