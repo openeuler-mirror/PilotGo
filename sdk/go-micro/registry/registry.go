@@ -22,11 +22,11 @@ type ServiceInfo struct {
 
 // Options represents the configuration options for service registry
 type Options struct {
-	Endpoints   []string
-	ServiceName string
-	ServiceAddr string
-	Version     string
-	DialTimeout time.Duration
+	Endpoints   []string      // etcd address
+	ServiceName string        // 服务地址
+	ServiceAddr string        // 服务名称
+	Version     string        // 服务版本
+	DialTimeout time.Duration // 超时时间
 }
 
 // EventType represents the type of service registry events
