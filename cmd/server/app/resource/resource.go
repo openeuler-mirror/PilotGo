@@ -15,18 +15,16 @@ import (
 	"net/http"
 	"strings"
 
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 
 func StaticRouter(router *gin.Engine) {
 	router.Static("/assets", "./frontend/dist/assets")
-	router.Static("/pilotgo.ico", "./frontend/dist/pilotgo.ico")
+	router.StaticFile("/pilotgo.ico", "./frontend/dist/pilotgo.ico")
 	router.StaticFile("/", "./frontend/dist/index.html")
 
 	// 解决页面刷新404的问题
 	router.NoRoute(func(c *gin.Context) {
-		logger.Debug("process noroute: %s", c.Request.URL.String())
 		if !strings.HasPrefix(c.Request.RequestURI, "/api/") && !strings.HasPrefix(c.Request.RequestURI, "/plugin/") {
 			c.File("./frontend/dist/index.html")
 			return

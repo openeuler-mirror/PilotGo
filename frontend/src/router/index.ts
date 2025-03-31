@@ -203,7 +203,7 @@ let sidebarRoutes = [
         component: () => import("../views/CustomScript/index.vue"),
         meta: {
           title: "自定义脚本",
-          panel: "batch",
+          panel: "script",
           icon: "Management",
           breadcrumb: [{ name: "自定义脚本" }],
         },
