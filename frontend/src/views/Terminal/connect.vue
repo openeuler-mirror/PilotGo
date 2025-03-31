@@ -48,15 +48,21 @@ const runRealTerminal = () => {
   loading.value = false;
 };
 
-const onWSReceive = (message: any) => {
+const onWSReceive = (event: any) => {
   // 首次接收消息,发送给后端，进行同步适配
   if (first.value === true) {
     first.value = false;
     resizeRemoteTerminal();
   }
-  const data = message.data;
+  
   term.value.element && term.value.focus();
-  term.value.write(data.toString(Utf8));
+  if (event.data instanceof Blob) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+        term.value.write(e.target.result);
+    };
+    reader.readAsText(event.data);
+  }
 };
 
 const errorRealTerminal = (ex: any) => {
