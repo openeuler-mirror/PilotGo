@@ -41,7 +41,6 @@ func StaticRouter(router *gin.Engine) {
 
 	// 解决页面刷新404的问题
 	router.NoRoute(func(c *gin.Context) {
-		logger.Debug("process noroute: %s", c.Request.URL.String())
 		if !strings.HasPrefix(c.Request.RequestURI, "/api/") && !strings.HasPrefix(c.Request.RequestURI, "/plugin/") {
 			c.FileFromFS("/", http.FS(StaticFiles))
 			return

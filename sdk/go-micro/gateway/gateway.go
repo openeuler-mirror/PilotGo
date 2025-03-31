@@ -15,6 +15,7 @@ import (
 	"net/http/httputil"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -99,9 +100,8 @@ func (g *Gateway) watchServices(router *gin.Engine) error {
 			logger.Info("Service added/updated: %s at %s:%s\n", service.ServiceName, service.Address, service.Port)
 
 		case registry.EventTypeDelete:
-			g.removeService(event.Key)
-
 			// 动态更新路由
+			g.removeService(event.Key)
 			g.updateRouter(router, "")
 			logger.Info("Service removed: %s\n", event.Key)
 		}
@@ -164,32 +164,33 @@ func (g *Gateway) updateRouter(router *gin.Engine, serviceName string) {
 	defer g.serviceLock.Unlock()
 
 	if serviceName == "" {
-		routerGroup := router.Group("/")
-		routerGroup.Any(fmt.Sprintf("/%s/*path", serviceName), func(c *gin.Context) {
-			c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Service %s not found", serviceName)})
-		})
-		logger.Info("Removed route for service: %s", serviceName)
 		return
 	}
 
+	// 动态生成基础路径
+	var basePath string
+	switch {
+	case serviceName == "pilotgo-server":
+		basePath = "/api/v1"
+	default:
+		serviceType := strings.TrimSuffix(serviceName, "-service")
+		basePath = fmt.Sprintf("/plugin/%s", serviceType)
+	}
 	// 动态绑定服务名到代理
-	router.Any(fmt.Sprintf("/%s/*path", serviceName), func(c *gin.Context) {
+	router.Any(fmt.Sprintf("%s/*path", basePath), func(c *gin.Context) {
+
 		targetService, err := g.getService(serviceName)
 		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{"error": fmt.Sprintf("Service %s unavailable", serviceName)})
 			return
 		}
 
-		// 构造目标URL
-		targetURL := fmt.Sprintf("http://%s:%s%s", targetService.Address, targetService.Port, c.Param("path"))
-		logger.Info("Proxying request to: %s", targetURL)
-
 		// 使用反向代理转发请求
 		proxy := &httputil.ReverseProxy{
 			Director: func(req *http.Request) {
 				req.URL.Scheme = "http"
 				req.URL.Host = fmt.Sprintf("%s:%s", targetService.Address, targetService.Port)
-				req.URL.Path = c.Param("path")
+				req.URL.Path = basePath + c.Param("path")
 				req.Header = c.Request.Header
 			},
 		}
