@@ -99,7 +99,7 @@ func (e *etcdRegistry) Deregister() error {
 }
 
 func (e *etcdRegistry) Get(key string) (string, error) {
-	resp, err := e.client.Get(e.ctx, key)
+	resp, err := e.client.Get(e.ctx, "/services/"+key)
 	if err != nil {
 		return "", err
 	}
@@ -114,6 +114,21 @@ func (e *etcdRegistry) Put(key string, value string) error {
 	return err
 }
 
+func (r *etcdRegistry) List() ([]*ServiceInfo, error) {
+	resp, err := r.client.Get(context.Background(), "/services/", clientv3.WithPrefix())
+	if err != nil {
+		return nil, err
+	}
+
+	services := make([]*ServiceInfo, 0)
+	for _, kv := range resp.Kvs {
+		var service ServiceInfo
+		if err := json.Unmarshal(kv.Value, &service); err == nil {
+			services = append(services, &service)
+		}
+	}
+	return services, nil
+}
 func (e *etcdRegistry) Delete(key string) error {
 	_, err := e.client.Delete(e.ctx, key)
 	return err
@@ -124,7 +139,7 @@ func (e *etcdRegistry) Close() error {
 	return e.client.Close()
 }
 
-func (e *etcdRegistry) Watch(key string, callback WatchCallback) error {
+func (e *etcdRegistry) Watch(ctx context.Context, key string, callback WatchCallback) error {
 	watchChan := e.client.Watch(e.ctx, key, clientv3.WithPrefix())
 	go func() {
 		for resp := range watchChan {

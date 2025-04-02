@@ -21,6 +21,9 @@ func Success(c *gin.Context, data interface{}, msg string) {
 func Fail(c *gin.Context, data interface{}, msg string) {
 	result(c, http.StatusOK, http.StatusBadRequest, data, msg)
 }
+func Unavailable(c *gin.Context, data interface{}, msg string) {
+	result(c, http.StatusOK, http.StatusServiceUnavailable, data, msg)
+}
 
 // 拼装json 分页数据
 func DataPagination(c *gin.Context, list interface{}, total int, query *PaginationQ) {
