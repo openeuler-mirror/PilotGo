@@ -8,6 +8,7 @@
 package registry
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -59,8 +60,10 @@ type Registry interface {
 	Put(key string, value string) error
 	// Delete removes service information
 	Delete(key string) error
+	// List retrieves all service information
+	List() ([]*ServiceInfo, error)
 	// Watch watches for service changes
-	Watch(key string, callback WatchCallback) error
+	Watch(ctx context.Context, key string, callback WatchCallback) error
 	// Close closes the registry client
 	Close() error
 }

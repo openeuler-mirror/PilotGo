@@ -8,6 +8,7 @@
 package proxy
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -70,7 +71,7 @@ func (p *Proxy) watchServices() error {
 		}
 	}
 
-	return p.registry.Watch("/services/", callback)
+	return p.registry.Watch(context.Background(), "/services/", callback)
 }
 
 // addService adds a service to the proxy
