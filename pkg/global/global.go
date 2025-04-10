@@ -7,6 +7,8 @@
  */
 package global
 
+import "gitee.com/openeuler/PilotGo/sdk/go-micro/gateway"
+
 const (
 	// 新注册机器添加到部门根节点
 	UncateloguedDepartId = 1
@@ -20,3 +22,6 @@ const (
 	// 消息提醒缓存
 	RemindMsgSize = 20
 )
+
+// caddy gateway
+var GW *gateway.CaddyGateway

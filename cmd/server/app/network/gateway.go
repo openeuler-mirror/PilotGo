@@ -9,6 +9,7 @@ package network
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -17,6 +18,9 @@ import (
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/cmd/options"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
+	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auth"
+	"gitee.com/openeuler/PilotGo/pkg/global"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/go-micro/gateway"
 	"gitee.com/openeuler/PilotGo/sdk/go-micro/registry"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -120,10 +124,35 @@ func startGateway(ctx context.Context, conf *options.HttpServer, addr *net.TCPAd
 		return fmt.Errorf("failed to initialize registry: %v", err)
 	}
 
-	gw := gateway.NewCaddyGateway(reg, conf.Addr)
+	watchCallback := func(eventType registry.EventType, service *registry.ServiceInfo) {
+		if perms, ok := service.Metadata["permissions"]; ok {
+
+			jsonData, err := json.Marshal(perms)
+			if err != nil {
+				return
+			}
+			var permissions []common.Permission
+			if err := json.Unmarshal(jsonData, &permissions); err != nil {
+				return
+			}
+
+			switch eventType {
+			case registry.EventTypePut:
+				if err := auth.AddPluginServicePermission("admin", permissions, service.ServiceName); err != nil {
+					logger.Error("Failed to add permissions for service %s: %v", service.ServiceName, err)
+				}
+			case registry.EventTypeDelete:
+				if err := auth.DeletePluginServicePermission(permissions, service.ServiceName); err != nil {
+					logger.Error("Failed to remove permissions for service %s: %v", service.ServiceName, err)
+				}
+			}
+		}
+	}
+
+	global.GW = gateway.NewCaddyGateway(reg, conf.Addr, watchCallback)
 
 	go func() {
-		if err := gw.Run(); err != nil {
+		if err := global.GW.Run(); err != nil {
 			logger.Error("Gateway encountered an error: %v", err)
 		}
 	}()
@@ -132,7 +161,7 @@ func startGateway(ctx context.Context, conf *options.HttpServer, addr *net.TCPAd
 		<-ctx.Done()
 		logger.Info("Gateway stopped successfully")
 
-		if err := gw.Stop(); err != nil {
+		if err := global.GW.Stop(); err != nil {
 			logger.Error("Failed to stop Gateway: %v", err)
 		} else {
 			logger.Info("Gateway stopped successfully")

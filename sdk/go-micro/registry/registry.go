@@ -11,14 +11,16 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"gitee.com/openeuler/PilotGo/sdk/common"
 )
 
 // ServiceInfo represents the basic information of a service
 type ServiceInfo struct {
-	ServiceName string            `json:"serviceName"`
-	Address     string            `json:"address"`
-	Port        string            `json:"port"`
-	Metadata    map[string]string `json:"metadata,omitempty"`
+	ServiceName string                 `json:"serviceName"`
+	Address     string                 `json:"address"`
+	Port        string                 `json:"port"`
+	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // Options represents the configuration options for service registry
@@ -26,8 +28,11 @@ type Options struct {
 	Endpoints   []string      // etcd address
 	ServiceName string        // 服务地址
 	ServiceAddr string        // 服务名称
-	Version     string        // 服务版本
 	DialTimeout time.Duration // 超时时间
+
+	Version     string              // 服务版本
+	Extentions  []common.Extention  // 用于平台扩展点功能
+	Permissions []common.Permission //用于权限校验
 }
 
 // EventType represents the type of service registry events
@@ -55,7 +60,7 @@ type Registry interface {
 	// Deregister removes a service registration
 	Deregister() error
 	// Get retrieves service information
-	Get(key string) (string, error)
+	Get(key string) (*ServiceInfo, error)
 	// Put stores service information
 	Put(key string, value string) error
 	// Delete removes service information
