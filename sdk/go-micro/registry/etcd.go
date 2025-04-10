@@ -98,15 +98,19 @@ func (e *etcdRegistry) Deregister() error {
 	return nil
 }
 
-func (e *etcdRegistry) Get(key string) (string, error) {
-	resp, err := e.client.Get(e.ctx, "/services/"+key)
+func (e *etcdRegistry) Get(key string) (*ServiceInfo, error) {
+	resp, err := e.client.Get(e.ctx, key)
 	if err != nil {
-		return "", err
+		return &ServiceInfo{}, err
 	}
 	if len(resp.Kvs) == 0 {
-		return "", nil
+		return &ServiceInfo{}, nil
 	}
-	return string(resp.Kvs[0].Value), nil
+	var service ServiceInfo
+	if err := json.Unmarshal(resp.Kvs[0].Value, &service); err != nil {
+		return &ServiceInfo{}, err
+	}
+	return &service, nil
 }
 
 func (e *etcdRegistry) Put(key string, value string) error {

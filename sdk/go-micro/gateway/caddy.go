@@ -26,6 +26,8 @@ import (
 	_ "github.com/caddyserver/caddy/v2/modules/standard"
 )
 
+type ServiceEventCallback func(eventType registry.EventType, service *registry.ServiceInfo)
+
 type CaddyGateway struct {
 	registry      registry.Registry
 	services      map[string][]*registry.ServiceInfo
@@ -33,15 +35,17 @@ type CaddyGateway struct {
 	serviceLock   *sync.RWMutex
 	cancel        context.CancelFunc
 	httpAddr      string
+	watchCallback ServiceEventCallback
 }
 
-func NewCaddyGateway(reg registry.Registry, httpAddr string) *CaddyGateway {
+func NewCaddyGateway(reg registry.Registry, httpAddr string, watchCB ServiceEventCallback) *CaddyGateway {
 	return &CaddyGateway{
 		registry:      reg,
 		services:      make(map[string][]*registry.ServiceInfo),
 		serviceStatus: make(map[string]bool),
 		serviceLock:   &sync.RWMutex{},
 		httpAddr:      httpAddr,
+		watchCallback: watchCB,
 	}
 }
 func (g *CaddyGateway) Run() error {
@@ -131,6 +135,10 @@ func (g *CaddyGateway) generateCaddyConfig() (*caddy.Config, error) {
 			basePath,
 			basePath + "/*",
 			basePath + "/*/*",
+			"/plugin_manage",
+			"/plugin_manage/*",
+			"/plugin_manage/*/*",
+			"/plugin_manage/*/*/*",
 		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal matcher config: %v", err)
@@ -278,8 +286,16 @@ func (g *CaddyGateway) watchServices(ctx context.Context) error {
 				return
 			}
 			g.addService(&service)
+
+			if g.watchCallback != nil {
+				g.watchCallback(event.Type, &service)
+			}
 			logger.Info("Service added/updated: %s at %s:%s", service.ServiceName, service.Address, service.Port)
 		case registry.EventTypeDelete:
+			if g.watchCallback != nil {
+				g.watchCallback(event.Type, g.GetService(event.Key))
+			}
+
 			g.removeService(event.Key)
 			logger.Info("Service removed: %s", event.Key)
 		}
