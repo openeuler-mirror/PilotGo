@@ -15,7 +15,7 @@ PilotGo 核心功能模块包括：
 * 主机管理：状态前端可视化、直接执行软件包管理、服务管理、内核参数调优、简单易操作；
   
 * 批次管理：支持运维操作并发执行，稳定高效；
- 
+
 * 日志审计：跟踪记录用户及插件的变更操作，方便问题回溯及安全审计；
 
 * 告警管理：平台异常实时感知；
@@ -39,48 +39,74 @@ PilotGo可用于典型的服务器集群管理场景，支持大批量的服务�
 #### 安装、启动教程
 
 PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭防火墙。
-1.  安装mysql、redis，并设置密码；
-2.  安装PilotGo-server，并修改配置文件:
-   >dnf install -y PilotGo-server
+1. **安装mysql、redis**，并设置密码；
 
-   >vim /opt/PilotGo/server/config_server.yaml
+2. **安装PilotGo-server**，并修改配置文件:
 
-   http_server：addr为安装PilotGo-server地址；
+    ```bash
+    dnf install -y PilotGo-server
+    vim /opt/PilotGo/server/config_server.yaml
+    ```
 
-   socket_server：addr为安装PilotGo-server地址；
+    http_server：addr为安装PilotGo-server地址；
 
-   mysql：host_name为安装mysql地址；user_name为DB的登录用户；password为DB访问密码；
+    socket_server：addr为安装PilotGo-server地址；
 
-   redis：redis_conn为安装redis服务地址；redis_pwd为redis密码；
+    mysql：host_name为安装mysql地址；user_name为DB的登录用户；password为DB访问密码；
 
-   启动服务
-   >systemctl start PilotGo-server
+    redis：redis_conn为安装redis服务地址；redis_pwd为redis密码；
 
-   停止服务
-   >systemctl stop PilotGo-server
+    storage：path为文件服务存储路径
 
-   服务状态
-   >systemctl status PilotGo-server
-3.  安装PilotGo-agent：
-   >dnf install -y PilotGo-agent
+    本地第一次启动请填入mysql密码，redis密码和文件服务存储路径
+
+    **启动服务**:
+
+     ```bash
+     systemctl start PilotGo-server
+     ```
+    **停止服务**:
+
+     ```bash
+     systemctl stop PilotGo-server
+     ```
+    **服务状态**:
+
+     ```bash
+     systemctl status PilotGo-server
+     ```
+3. **安装PilotGo-agent**：
+
+    ```bash
+    dnf install -y PilotGo-agent
+    vim /opt/PilotGo/agent/config_agent.yaml
+    ```
+
+    **server**：addr为安装PilotGo-server地址；
    
-   >vim /opt/PilotGo/agent/config_agent.yaml
-   
-   server：addr为安装PilotGo-server地址；
-   
-   启动服务
-   >systemctl start PilotGo-agent
+    **启动服务**
 
-   停止服务
-   >systemctl stop PilotGo-agent
+      ```bash
+      systemctl start PilotGo-agent
+      ```
 
-   服务状态
-   >systemctl status PilotGo-agent
-4.  插件安装：
-   [PilotGo-plugin-grafana插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-grafana)  
-   [PilotGo-plugin-prometheus插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-prometheus)
-   [PilotGo-plugin-a-tune插件安装](https://gitee.com/openeuler/PilotGo-plugin-a-tune)
-   [PilotGo-plugin-topology插件安装](https://gitee.com/openeuler/PilotGo-plugin-topology)
+    **停止服务**
+
+      ```bash
+      systemctl stop PilotGo-agent
+      ```
+
+    **服务状态**
+
+      ```bash
+      systemctl status PilotGo-agent
+      ```
+
+4. **插件安装**：
+   * [PilotGo-plugin-grafana插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-grafana)  
+   * [PilotGo-plugin-prometheus插件安装](https://gitee.com/src-openeuler/PilotGo-plugin-prometheus)
+   * [PilotGo-plugin-a-tune插件安装](https://gitee.com/openeuler/PilotGo-plugin-a-tune)
+   * [PilotGo-plugin-topology插件安装](https://gitee.com/openeuler/PilotGo-plugin-topology)
 
 #### 补充链接
 
@@ -105,3 +131,5 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
 4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
 5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
 6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+
+
