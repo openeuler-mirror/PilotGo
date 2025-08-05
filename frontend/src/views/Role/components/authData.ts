@@ -211,7 +211,7 @@ export let authData = [
   },
   {
     id: "8",
-    label: "插件管理",
+    label: "插件服务管理",
     isMenu: true,
     display: true,
     menuName: "plugin",

@@ -224,10 +224,10 @@ let sidebarRoutes = [
         name: "Plugin",
         component: () => import("../views/Plugin/Plugin.vue"),
         meta: {
-          title: "插件管理",
+          title: "插件服务管理",
           panel: "plugin",
           icon: "Menu",
-          breadcrumb: [{ name: "插件管理" }],
+          breadcrumb: [{ name: "插件服务管理" }],
         },
       },
     ],
