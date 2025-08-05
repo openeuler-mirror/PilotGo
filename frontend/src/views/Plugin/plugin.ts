@@ -28,23 +28,22 @@ export function updatePlugins() {
         res.data.forEach((item: any, index: number) => {
           // 删除插件tagview、增删全局扩展点
           let pluginExt = item.extentions.filter((item: Extention) => item.type === "machine");
-          if (item.enabled === 0) {
+          if (item.status === false) {
             clearTagview(item);
             // usePluginStore().delExtention(pluginExt);
           } else {
             usePluginStore().addExtention(pluginExt);
           }
-          if (item.enabled === 0 || item.status === false) {
+          if (item.status === false) {
             // 0:禁用，1：启用
             return;
           }
           // 创建组件
           let iframeObj: any = {
-            path: "/plugin-" + item.name,
-            name: "plugin-" + item.name,
+            path: "/plugin-" + item.serviceName,
+            name: "plugin-" + item.serviceName,
             menuName: item.menuName,
-            url: item.url,
-            plugin_type: item.plugin_type,
+            url: item.address,
             icon: item.icon || "Menu",
           };
 
@@ -69,7 +68,7 @@ export function updatePlugins() {
 
 function clearTagview(item: any) {
   for (let i = 0; i < tagviewStore().taginfos.length; i++) {
-    if (tagviewStore().taginfos[i].path === "/plugin-" + item.name) {
+    if (tagviewStore().taginfos[i].path === "/plugin-" + item.serviceName) {
       tagviewStore().taginfos.splice(i, 1);
     }
   }
