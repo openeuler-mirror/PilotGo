@@ -170,10 +170,13 @@ func (g *CaddyGateway) generateCaddyConfig() (*caddy.Config, error) {
 				"set": map[string][]string{
 					"Host":               {"{http.reverse_proxy.upstream.host}"},
 					"X-Forwarded-Prefix": {basePath},
+					"Cookie":             {"{http.request.header.Cookie}"},
 				},
 			},
 			"response": map[string]interface{}{
-				"set":      map[string][]string{},
+				"set": map[string][]string{
+					"Set-Cookie": {"{http.reverse_proxy.header.Set-Cookie}"},
+				},
 				"deferred": true,
 			},
 		}

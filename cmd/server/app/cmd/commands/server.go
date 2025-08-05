@@ -109,7 +109,7 @@ func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) err
 	}
 
 	//start http server,and bind the plugin api、static file
-	err := network.HttpServerInit(config.HttpServer, ctx.Done())
+	err := network.HttpGatewayServerInit(config.HttpServer, ctx.Done())
 	if err != nil {
 		logger.Error("HttpServerInit socket server init failed, error:%v", err)
 		return err

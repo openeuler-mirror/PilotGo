@@ -39,6 +39,8 @@ func NewServiceRegistrar(opts *Options) (Registry, error) {
 		Port:        strings.Split(opts.ServiceAddr, ":")[1],
 		Metadata: map[string]interface{}{
 			"version":     opts.Version,
+			"menuName":    opts.MenuName,
+			"icon":        opts.Icon,
 			"extentions":  opts.Extentions,
 			"permissions": opts.Permissions,
 		},
