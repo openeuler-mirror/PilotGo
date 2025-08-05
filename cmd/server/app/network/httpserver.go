@@ -119,9 +119,6 @@ func SetupRouter() *gin.Engine {
 	// 对插件提供的api接口
 	registerPluginApi(router)
 
-	// 绑定插件接口反向代理handler
-	registerPluginGateway(router)
-
 	// 绑定前端静态资源handler
 	resource.StaticRouter(router)
 
@@ -323,17 +320,11 @@ func registerAPIs(router *gin.Engine) {
 
 	plugin := tokenApi.Group("") // 插件管理
 	{
-		plugin.GET("/plugins_paged", controller.GetPluginsPagedHandler)
+		plugin.GET("/plugins_paged", controller.GetPluginServicesPaged)
 		p := plugin.Group("/plugins")
 		{
-			// 添加插件
-			p.PUT("", controller.AddPluginHandler)
-			// 启用/停用plugin
-			p.POST("/:uuid", controller.TogglePluginHandler)
-			// 删除插件
-			p.DELETE("/:uuid", controller.UnloadPluginHandler)
-			// 获取插件列表
-			p.GET("/", controller.GetPluginsHandler)
+			p.GET("/", controller.GetPluginServices)
+			p.POST("/toggle", controller.TogglePluginService)
 		}
 	}
 }
@@ -370,13 +361,4 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.POST("/heartbeat", pluginapi.PluginHeartbeat)
 		pluginAPI.POST("/has_permission", pluginapi.HasPermission)
 	}
-}
-
-func registerPluginGateway(router *gin.Engine) {
-	gateway := router.Group("/plugin")
-	logger.Info("gateway process plugin request")
-	gateway.Any("/:plugin_name", controller.PluginGatewayHandler)
-	gateway.Any("/:plugin_name/*action", controller.PluginGatewayHandler)
-
-	gateway.GET("/ws/:plugin_name", controller.PluginWebsocketGatewayHandler)
 }
