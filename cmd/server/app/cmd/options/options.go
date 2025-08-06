@@ -207,7 +207,7 @@ func (c *pilotgoConfig) watchConfig() <-chan ServerConfig {
 		viper.OnConfigChange(func(in fsnotify.Event) {
 			cfg := New()
 			if err := viper.Unmarshal(cfg); err != nil {
-				klog.Errorf("config reload error", err)
+				klog.Errorf("config reload error: %v", err)
 			} else {
 				if in.Op&fsnotify.Write != 0 && len(viper.AllKeys()) > 0 {
 					c.cfgChangeCh <- *cfg
