@@ -34,14 +34,13 @@ import microApp from "@micro-zoe/micro-app";
 
 const showFrame = ref(false);
 const route: any = useRoute();
-console.log(route);
 let props = reactive({
   url: "",
   plugin_type: "",
   name: "",
 });
 watchEffect(() => {
-  if (route.meta.name.includes("plugin")) {
+  if (route.meta.name && route.meta.name.includes("plugin")) {
     // 如果是插件
     if (route.meta.subRoute) {
       // 插件的子路由
