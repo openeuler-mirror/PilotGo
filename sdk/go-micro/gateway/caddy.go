@@ -59,7 +59,6 @@ func (g *CaddyGateway) Run() error {
 	if err := caddy.Run(&caddy.Config{}); err != nil {
 		return fmt.Errorf("failed to start caddy: %v", err)
 	}
-	logger.Info("start gateway service on: https://%s", g.httpAddr)
 
 	// 初始加载已有服务
 	if err := g.loadExistingServices(); err != nil {
