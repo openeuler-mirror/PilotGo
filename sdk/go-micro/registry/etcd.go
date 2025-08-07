@@ -104,7 +104,7 @@ func (e *etcdRegistry) Get(key string) (*ServiceInfo, error) {
 		return &ServiceInfo{}, err
 	}
 	if len(resp.Kvs) == 0 {
-		return &ServiceInfo{}, nil
+		return &ServiceInfo{}, fmt.Errorf("未找到服务实例")
 	}
 	var service ServiceInfo
 	if err := json.Unmarshal(resp.Kvs[0].Value, &service); err != nil {
