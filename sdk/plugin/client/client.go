@@ -16,8 +16,6 @@ import (
 
 const TokenCookie = "PluginToken"
 
-type GetTagsCallback func([]string) []common.Tag
-
 type Client struct {
 	PluginInfo *PluginInfo
 	// 并发锁
@@ -28,17 +26,6 @@ type Client struct {
 
 	// 鉴权token
 	token string
-
-	// 用于event消息处理
-	EventChan        chan *common.EventMessage
-	EventCallbackMap map[int]common.EventCallback
-
-	// 用于异步command及script执行结果处理机
-	asyncCmdResultChan      chan *common.AsyncCmdResult
-	cmdProcessorCallbackMap map[string]CallbackHandler
-
-	// 用于处理主机标签
-	getTagsCallback GetTagsCallback
 
 	// 用于平台扩展点功能
 	extentions []common.Extention
@@ -55,15 +42,9 @@ var global_client *Client
 
 func DefaultClient(desc *PluginInfo) *Client {
 	global_client = &Client{
-		PluginInfo: desc,
-
-		EventChan:        make(chan *common.EventMessage, 20),
-		EventCallbackMap: make(map[int]common.EventCallback),
-
-		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
-		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
-		extentions:              []common.Extention{},
-		permissions:             []common.Permission{},
+		PluginInfo:  desc,
+		extentions:  []common.Extention{},
+		permissions: []common.Permission{},
 	}
 	global_client.cond = sync.NewCond(&global_client.mu)
 
@@ -112,12 +93,12 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 	// TODO: start command result process service
 	// client.startEventProcessor()
-	client.startCommandResultProcessor()
+	// client.startCommandResultProcessor()
 }
 
-func (client *Client) OnGetTags(callback GetTagsCallback) {
-	client.getTagsCallback = callback
-}
+// func (client *Client) OnGetTags(callback GetTagsCallback) {
+// 	client.getTagsCallback = callback
+// }
 
 // client是否bind PilotGo server
 func (client *Client) IsBind() bool {
