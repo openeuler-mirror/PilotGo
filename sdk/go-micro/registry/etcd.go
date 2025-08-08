@@ -99,7 +99,7 @@ func (e *etcdRegistry) Deregister() error {
 }
 
 func (e *etcdRegistry) Get(key string) (*ServiceInfo, error) {
-	resp, err := e.client.Get(e.ctx, key)
+	resp, err := e.client.Get(e.ctx, "/services/"+key)
 	if err != nil {
 		return &ServiceInfo{}, err
 	}

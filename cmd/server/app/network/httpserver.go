@@ -8,100 +8,16 @@
 package network
 
 import (
-	"context"
-	"net/http"
-	"strings"
-
-	"gitee.com/openeuler/PilotGo/cmd/server/app/cmd/options"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/controller"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/controller/agentcontroller"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/controller/pluginapi"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/middleware"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/resource"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"k8s.io/klog/v2"
 )
-
-func HttpServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
-	if err := SessionManagerInit(conf); err != nil {
-		return err
-	}
-
-	go func() {
-		r := SetupRouter()
-		// start websocket server
-		go websocket.CliManager.Start(stopCh)
-
-		shutdownCtx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		srv := &http.Server{
-			Addr:    conf.Addr,
-			Handler: r,
-		}
-		go func() {
-			<-stopCh
-			klog.Warningln("httpserver prepare stop")
-			_ = srv.Shutdown(shutdownCtx)
-		}()
-		// start http server
-		if conf.UseHttps {
-			if conf.CertFile == "" || conf.KeyFile == "" {
-				logger.Error("https cert or key not configd")
-				return
-			}
-
-			logger.Info("start http service on: https://%s", conf.Addr)
-
-			if err := srv.ListenAndServeTLS(conf.CertFile, conf.KeyFile); err != nil {
-				if err != http.ErrServerClosed {
-					logger.Error("ListenAndServeTLS start http server failed:%v", err)
-					return
-				}
-			}
-		} else {
-			logger.Info("start http service on: http://%s", conf.Addr)
-			if err := srv.ListenAndServe(); err != nil {
-				if err != http.ErrServerClosed {
-					logger.Error("ListenAndServe start http server failed:%v", err)
-
-				}
-
-			}
-		}
-	}()
-
-	if conf.Debug {
-		go func() {
-			// pprof
-			portIndex := strings.Index(conf.Addr, ":")
-			addr := conf.Addr[:portIndex] + ":6060"
-			logger.Debug("start pprof service on: %s", addr)
-			if conf.UseHttps {
-				if conf.CertFile == "" || conf.KeyFile == "" {
-					logger.Error("https cert or key not configd")
-					return
-				}
-
-				err := http.ListenAndServeTLS(addr, conf.CertFile, conf.KeyFile, nil)
-				if err != nil {
-					logger.Error("failed to start pprof, error:%v", err)
-				}
-			} else {
-				err := http.ListenAndServe(addr, nil)
-				if err != nil {
-					logger.Error("failed to start pprof, error:%v", err)
-				}
-			}
-		}()
-	}
-
-	return nil
-}
 
 func SetupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
@@ -332,7 +248,7 @@ func registerAPIs(router *gin.Engine) {
 func registerPluginApi(router *gin.Engine) {
 	api := router.Group("/api/v1")
 	pluginAPI := api.Group("/pluginapi")
-	pluginAPI.Use(pluginapi.AuthCheck)
+	pluginAPI.Use(middleware.PluginAuthServiceCheck)
 	{
 		pluginAPI.POST("/upload", controller.Upload)
 

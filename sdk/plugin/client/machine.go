@@ -10,16 +10,20 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-func (c *Client) MachineList() ([]*common.MachineNode, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+func (c *CClient) MachineList() ([]*common.MachineNode, error) {
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
 	}
-	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_list"
+
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/machine_list", serverInfo.Address, serverInfo.Port)
+
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
 			TokenCookie: c.token,
