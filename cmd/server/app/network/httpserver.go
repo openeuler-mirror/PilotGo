@@ -236,12 +236,16 @@ func registerAPIs(router *gin.Engine) {
 
 	plugin := tokenApi.Group("") // 插件管理
 	{
+
 		plugin.GET("/plugins_paged", controller.GetPluginServicesPaged)
 		p := plugin.Group("/plugins")
 		{
 			p.GET("/", controller.GetPluginServices)
 			p.POST("/toggle", controller.TogglePluginService)
 		}
+
+		gateway := router.Group("/plugin")
+		gateway.GET("/ws/:serviceName", controller.PluginWebsocketGatewayHandler)
 	}
 }
 
@@ -270,11 +274,5 @@ func registerPluginApi(router *gin.Engine) {
 		pluginAPI.GET("/batch_list", pluginapi.BatchListHandler)
 		pluginAPI.GET("/batch_uuid", pluginapi.MachineListOfBatch)
 		pluginAPI.POST("/getnodefiles", pluginapi.GetNodeFiles)
-	}
-	// plugin
-	{
-		pluginAPI.GET("/plugins", pluginapi.PluginList)
-		pluginAPI.POST("/heartbeat", pluginapi.PluginHeartbeat)
-		pluginAPI.POST("/has_permission", pluginapi.HasPermission)
 	}
 }

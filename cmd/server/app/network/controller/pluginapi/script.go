@@ -10,13 +10,11 @@
 package pluginapi
 
 import (
-	"net/url"
 	"strings"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/script"
 	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/common"
@@ -195,18 +193,9 @@ func RunCommandAsyncHandler(c *gin.Context) {
 
 	// 获取插件地址和回调url
 	name := c.Query("plugin_name")
-	p, err := plugin.GetPlugin(name)
-	if err != nil {
-		response.Fail(c, nil, "plugin not found: "+err.Error())
-		return
-	}
-	parsedURL, err := url.Parse(p.Url)
-	if err != nil {
-		logger.Error("URL解析失败:%v", err)
-		response.Fail(c, nil, "解析插件url失败")
-		return
-	}
-	caller := "http://" + parsedURL.Host + "/plugin_manage/api/v1/command_result"
+	p := global.GW.GetService(name)
+
+	caller := "http://" + p.Address + ":" + p.Port + "/plugin_manage/api/v1/command_result"
 
 	taskId := time.Now().Format("20060102150405")
 	macuuids := batch.GetBatchMachineUUIDS(d.Batch)

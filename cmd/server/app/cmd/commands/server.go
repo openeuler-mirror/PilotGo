@@ -17,7 +17,6 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auth"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/pkg/dbmanager"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -133,9 +132,6 @@ func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) err
 func startServices(mysqlInfo *options.MysqlDBInfo, stopCh <-chan struct{}) error {
 	// verify permission initialize
 	auth.Casbin(mysqlInfo)
-
-	// plugin server initialize
-	plugin.Init(stopCh)
 
 	return nil
 }
