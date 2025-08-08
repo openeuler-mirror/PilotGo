@@ -9,20 +9,23 @@ package client
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) BatchList() ([]*common.BatchList, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return []*common.BatchList{}, err
 	}
-	url := "http://" + c.Server() + "/api/v1/pluginapi/batch_list"
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/batch_list", serverInfo.Address, serverInfo.Port)
+
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {
@@ -40,13 +43,15 @@ func (c *Client) BatchList() ([]*common.BatchList, error) {
 }
 
 func (c *Client) BatchUUIDList(batchId string) ([]string, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return []string{}, err
 	}
-	url := "http://" + c.Server() + "/api/v1/pluginapi/batch_uuid?batchId=" + batchId
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/batch_uuid?batchId=%s", serverInfo.Address, serverInfo.Port, batchId)
+
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {

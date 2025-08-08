@@ -9,14 +9,14 @@ package client
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-func (c *CClient) MachineList() ([]*common.MachineNode, error) {
+func (c *Client) MachineList() ([]*common.MachineNode, error) {
 	serverInfo, err := c.Registry.Get("pilotgo-server")
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (c *CClient) MachineList() ([]*common.MachineNode, error) {
 
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {
@@ -44,13 +44,15 @@ func (c *CClient) MachineList() ([]*common.MachineNode, error) {
 }
 
 func (c *Client) MachineInfoByUUID(machine_uuid string) (*common.MachineNode, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return &common.MachineNode{}, err
 	}
-	url := "http://" + c.Server() + "/api/v1/pluginapi/machine_info?machine_uuid=" + machine_uuid
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/machine_info?machine_uuid=%s", serverInfo.Address, serverInfo.Port, machine_uuid)
+
 	r, err := httputils.Get(url, &httputils.Params{
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {

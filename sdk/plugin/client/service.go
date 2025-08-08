@@ -9,17 +9,19 @@ package client
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
 func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*common.ServiceResult, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return []*common.ServiceResult{}, err
 	}
-	url := c.Server() + "/api/v1/pluginapi/service/:name"
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/service/:name", serverInfo.Address, serverInfo.Port)
 
 	p := &common.ServiceStruct{
 		Batch:       batch,
@@ -29,7 +31,7 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*comm
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: p,
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {
@@ -45,10 +47,11 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*comm
 }
 
 func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return []*common.ServiceResult{}, err
 	}
-	url := c.Server() + "/api/v1/pluginapi/start_service"
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/start_service", serverInfo.Address, serverInfo.Port)
 
 	p := &common.ServiceStruct{
 		Batch:       batch,
@@ -58,7 +61,7 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*commo
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: p,
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {
@@ -74,10 +77,11 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*commo
 }
 
 func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common.ServiceResult, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return []*common.ServiceResult{}, err
 	}
-	url := c.Server() + "/api/v1/pluginapi/stop_service"
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/stop_service", serverInfo.Address, serverInfo.Port)
 
 	p := &common.ServiceStruct{
 		Batch:       batch,
@@ -87,7 +91,7 @@ func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*common
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: p,
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {

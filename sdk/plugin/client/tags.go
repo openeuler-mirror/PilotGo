@@ -7,6 +7,6 @@
  */
 package client
 
-func (c *CClient) OnGetTags(callback GetTagsCallback) {
+func (c *Client) OnGetTags(callback GetTagsCallback) {
 	c.getTagsCallback = callback
 }
