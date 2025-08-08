@@ -58,19 +58,19 @@ func NewClient(serviceName string, reg registry.Registry) (*Client, error) {
 }
 
 // RegisterHandlers 注册一些插件标准的API接口，清单如下：
-func (c *Client) RegisterHandlers(router *gin.Engine) {
+func (cli *Client) RegisterHandlers(router *gin.Engine) {
 	api := router.Group("/plugin_manage/api/v1/")
 	{
 		api.GET("/gettags", func(c *gin.Context) {
-			c.Set("__internal__client_instance", c)
+			c.Set("__internal__client_instance", cli)
 		}, TagsHandler)
 
 		api.PUT("/command_result", func(c *gin.Context) {
-			c.Set("__internal__client_instance", c)
+			c.Set("__internal__client_instance", cli)
 		}, RunCommandResultHandler)
 	}
 
 	// TODO: start command result process service
 	// c.startEventProcessor()
-	c.startCommandResultProcessor()
+	cli.startCommandResultProcessor()
 }

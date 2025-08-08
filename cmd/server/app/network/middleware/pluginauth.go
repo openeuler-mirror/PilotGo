@@ -10,7 +10,6 @@ package middleware
 import (
 	"net/http"
 
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/jwt"
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +22,6 @@ func PluginAuthServiceCheck(c *gin.Context) {
 			"code": 401,
 			"msg":  "plugin token check error:" + err.Error()})
 		c.Abort()
-		logger.Info("ssss %v", err.Error())
 		return
 	}
 
