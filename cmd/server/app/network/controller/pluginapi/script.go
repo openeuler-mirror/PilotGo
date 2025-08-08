@@ -10,13 +10,11 @@
 package pluginapi
 
 import (
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/agentmanager"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/network/jwt"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/batch"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/script"
@@ -28,20 +26,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 )
-
-// 检查plugin接口调用权限
-func AuthCheck(c *gin.Context) {
-	_, err := jwt.ParsePluginClaims(c)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"code": 401,
-			"msg":  "plugin token check error:" + err.Error()})
-		c.Abort()
-		return
-	}
-
-	c.Next()
-}
 
 // 远程运行脚本
 func RunCommandHandler(c *gin.Context) {

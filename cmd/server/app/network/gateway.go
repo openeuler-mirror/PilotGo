@@ -114,7 +114,7 @@ func HttpGatewayServerInit(conf *options.ServerConfig, stopCh <-chan struct{}) e
 }
 
 func startGateway(ctx context.Context, conf *options.ServerConfig, addr *net.TCPAddr) error {
-	reg, err := registry.NewServiceRegistrar(&registry.Options{
+	sr, err := registry.NewServiceRegistrar(&registry.Options{
 		Endpoints:   conf.Etcd.Endpoints,
 		ServiceAddr: addr.String(),
 		ServiceName: conf.Etcd.ServiveName,
@@ -150,7 +150,7 @@ func startGateway(ctx context.Context, conf *options.ServerConfig, addr *net.TCP
 		}
 	}
 
-	global.GW = gateway.NewCaddyGateway(reg, conf.HttpServer.Addr, watchCallback)
+	global.GW = gateway.NewCaddyGateway(sr.Registry, conf.HttpServer.Addr, watchCallback)
 
 	go func() {
 		if err := global.GW.Run(); err != nil {
