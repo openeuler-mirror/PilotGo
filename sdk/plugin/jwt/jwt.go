@@ -19,8 +19,7 @@ import (
 var Issue = "PilotGo"
 
 const (
-	TokenCookie  = "PluginToken"
-	JWTSecretKey = ""
+	TokenCookie = "PluginToken"
 )
 
 type PluginServiceClaims struct {
@@ -40,7 +39,7 @@ func GeneratePluginServiceToken(serviceName string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(JWTSecretKey))
+	tokenString, err := token.SignedString([]byte(serviceName))
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +52,12 @@ func ParsePluginServiceClaims(c *gin.Context) (*PluginServiceClaims, error) {
 		return nil, err
 	}
 
-	claims, err := parseClaims(cookie.Value, &PluginServiceClaims{})
+	jwtSecretKey, err := getJWTSecretKeyForService(cookie.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, err := parseClaims(cookie.Value, jwtSecretKey, &PluginServiceClaims{})
 	if err != nil {
 		return nil, err
 	}
@@ -63,19 +67,14 @@ func ParsePluginServiceClaims(c *gin.Context) (*PluginServiceClaims, error) {
 	}
 	return m, nil
 }
-func parseToken(tokenString string, clames jwt.Claims) (*jwt.Token, error) {
-	token, err := jwt.ParseWithClaims(tokenString, clames, func(token *jwt.Token) (i interface{}, err error) {
-		return []byte(JWTSecretKey), nil
-	})
-	return token, err
-}
 
-func parseClaims(tokenString string, claims jwt.Claims) (jwt.Claims, error) {
+func parseClaims(tokenString string, jwtSecretKey string, claims jwt.Claims) (jwt.Claims, error) {
 	if tokenString == "" {
 		return nil, fmt.Errorf("token is empty")
 	}
-
-	token, err := parseToken(tokenString, claims)
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (i interface{}, err error) {
+		return []byte(jwtSecretKey), nil
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
@@ -85,4 +84,14 @@ func parseClaims(tokenString string, claims jwt.Claims) (jwt.Claims, error) {
 	}
 
 	return token.Claims, nil
+}
+
+func getJWTSecretKeyForService(tokenString string) (string, error) {
+	parser := new(jwt.Parser)
+	tempClaims := &PluginServiceClaims{}
+	_, _, err := parser.ParseUnverified(tokenString, tempClaims)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse token without verifying: %s", err.Error())
+	}
+	return tempClaims.ServiceName, nil
 }

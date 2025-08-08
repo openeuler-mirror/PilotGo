@@ -3,166 +3,163 @@
  * PilotGo licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
- * Date: Wed Sep 27 17:35:12 2023 +0800
+ * Date: Wed Aug 06 17:35:12 2025 +0800
  */
 package client
 
-// import (
-// 	"encoding/base64"
-// 	"encoding/json"
-// 	"errors"
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 
-// 	"gitee.com/openeuler/PilotGo/sdk/common"
-// 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
-// )
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/jwt"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
+)
 
-// type CallbackHandler struct {
-// 	RunCommandCallback RunCommandCallback
-// 	TaskLen            int
-// }
+func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
+	}
 
-// type RunCommandCallback func([]*common.CmdResult)
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/run_command", serverInfo.Address, serverInfo.Port)
 
-// func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
-// 	if !c.IsBind() {
-// 		return nil, errors.New("unbind PilotGo-server platform")
-// 	}
+	p := &common.CmdStruct{
+		Batch:   batch,
+		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
+	}
 
-// 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command"
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+		Cookie: map[string]string{
+			jwt.TokenCookie: c.token,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
 
-// 	p := &common.CmdStruct{
-// 		Batch:   batch,
-// 		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
-// 	}
+	res := &struct {
+		Code    int                 `json:"code"`
+		Message string              `json:"msg"`
+		Data    []*common.CmdResult `json:"data"`
+	}{}
+	if err := json.Unmarshal(r.Body, res); err != nil {
+		return nil, err
+	}
 
-// 	r, err := httputils.Post(url, &httputils.Params{
-// 		Body: p,
-// 		Cookie: map[string]string{
-// 			TokenCookie: c.token,
-// 		},
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return res.Data, nil
+}
 
-// 	res := &struct {
-// 		Code    int                 `json:"code"`
-// 		Message string              `json:"msg"`
-// 		Data    []*common.CmdResult `json:"data"`
-// 	}{}
-// 	if err := json.Unmarshal(r.Body, res); err != nil {
-// 		return nil, err
-// 	}
+type ScriptStruct struct {
+	Batch  *common.Batch `json:"batch"`
+	Script string        `json:"script"`
+	Params []string      `json:"params"`
+}
 
-// 	return res.Data, nil
-// }
+func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
+	}
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/run_script", serverInfo.Address, serverInfo.Port)
 
-// type ScriptStruct struct {
-// 	Batch  *common.Batch `json:"batch"`
-// 	Script string        `json:"script"`
-// 	Params []string      `json:"params"`
-// }
+	p := &ScriptStruct{
+		Batch:  batch,
+		Script: base64.StdEncoding.EncodeToString([]byte(script)),
+		Params: params,
+	}
 
-// func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
-// 	if !c.IsBind() {
-// 		return nil, errors.New("unbind PilotGo-server platform")
-// 	}
-// 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_script"
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+		Cookie: map[string]string{
+			jwt.TokenCookie: c.token,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
 
-// 	p := &ScriptStruct{
-// 		Batch:  batch,
-// 		Script: base64.StdEncoding.EncodeToString([]byte(script)),
-// 		Params: params,
-// 	}
+	res := &struct {
+		Code    int                 `json:"code"`
+		Message string              `json:"msg"`
+		Data    []*common.CmdResult `json:"data"`
+	}{}
+	if err := json.Unmarshal(r.Body, res); err != nil {
+		return nil, err
+	}
 
-// 	r, err := httputils.Post(url, &httputils.Params{
-// 		Body: p,
-// 		Cookie: map[string]string{
-// 			TokenCookie: c.token,
-// 		},
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	return res.Data, nil
+}
 
-// 	res := &struct {
-// 		Code    int                 `json:"code"`
-// 		Message string              `json:"msg"`
-// 		Data    []*common.CmdResult `json:"data"`
-// 	}{}
-// 	if err := json.Unmarshal(r.Body, res); err != nil {
-// 		return nil, err
-// 	}
+func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/run_command_async?plugin_name=", serverInfo.Address, serverInfo.Port)
 
-// 	return res.Data, nil
-// }
+	p := &common.CmdStruct{
+		Batch:   batch,
+		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
+	}
 
-// func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
-// 	if !c.IsBind() {
-// 		return errors.New("unbind PilotGo-server platform")
-// 	}
-// 	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+		Cookie: map[string]string{
+			jwt.TokenCookie: c.token,
+		},
+	})
+	if err != nil {
+		return err
+	}
 
-// 	p := &common.CmdStruct{
-// 		Batch:   batch,
-// 		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
-// 	}
+	res := struct {
+		Code int `json:"code"`
+		Data struct {
+			TaskID  string `json:"task_id"`
+			TaskLen int    `json:"task_len"`
+		} `json:"data"`
+	}{}
+	if err := json.Unmarshal(r.Body, &res); err != nil {
+		return err
+	}
 
-// 	r, err := httputils.Post(url, &httputils.Params{
-// 		Body: p,
-// 		Cookie: map[string]string{
-// 			TokenCookie: c.token,
-// 		},
-// 	})
-// 	if err != nil {
-// 		return err
-// 	}
+	taskID := res.Data.TaskID
+	TaskLen := res.Data.TaskLen
+	c.registerCommandResultCallback(taskID, TaskLen, callback)
 
-// 	res := struct {
-// 		Code int `json:"code"`
-// 		Data struct {
-// 			TaskID  string `json:"task_id"`
-// 			TaskLen int    `json:"task_len"`
-// 		} `json:"data"`
-// 	}{}
-// 	if err := json.Unmarshal(r.Body, &res); err != nil {
-// 		return err
-// 	}
+	return nil
+}
 
-// 	taskID := res.Data.TaskID
-// 	TaskLen := res.Data.TaskLen
-// 	c.registerCommandResultCallback(taskID, TaskLen, callback)
+func (c *Client) startCommandResultProcessor() {
+	go func() {
+		for {
+			d := <-c.asyncCmdResultChan
 
-// 	return nil
-// }
+			cb, ok := c.cmdProcessorCallbackMap[d.TaskID]
+			if !ok {
+				continue
+			}
 
-// func (c *Client) startCommandResultProcessor() {
-// 	go func() {
-// 		for {
-// 			d := <-c.asyncCmdResultChan
+			// 注意：map并发安全
+			cb.RunCommandCallback(d.Result)
+			cb.TaskLen = cb.TaskLen - len(d.Result)
+			if cb.TaskLen == 0 {
+				delete(c.cmdProcessorCallbackMap, d.TaskID)
+			}
+		}
+	}()
+}
 
-// 			cb, ok := c.cmdProcessorCallbackMap[d.TaskID]
-// 			if !ok {
-// 				continue
-// 			}
+func (c *Client) registerCommandResultCallback(taskID string, taskLen int, callback RunCommandCallback) {
+	rccb := c.cmdProcessorCallbackMap[taskID]
+	rccb.RunCommandCallback = callback
+	rccb.TaskLen = taskLen
+	c.cmdProcessorCallbackMap[taskID] = rccb
+}
 
-// 			// 注意：map并发安全
-// 			cb.RunCommandCallback(d.Result)
-// 			cb.TaskLen = cb.TaskLen - len(d.Result)
-// 			if cb.TaskLen == 0 {
-// 				delete(c.cmdProcessorCallbackMap, d.TaskID)
-// 			}
-// 		}
-// 	}()
-// }
-
-// func (c *Client) registerCommandResultCallback(taskID string, taskLen int, callback RunCommandCallback) {
-// 	rccb := c.cmdProcessorCallbackMap[taskID]
-// 	rccb.RunCommandCallback = callback
-// 	rccb.TaskLen = taskLen
-// 	c.cmdProcessorCallbackMap[taskID] = rccb
-// }
-
-// func (c *Client) ProcessCommandResult(command_result *common.AsyncCmdResult) {
-// 	c.asyncCmdResultChan <- command_result
-// }
+func (c *Client) ProcessCommandResult(command_result *common.AsyncCmdResult) {
+	c.asyncCmdResultChan <- command_result
+}
