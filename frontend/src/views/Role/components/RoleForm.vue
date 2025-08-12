@@ -65,7 +65,7 @@ const props = defineProps({
 });
 interface RolePermission {
   button: Array<string>;
-  menu: string;
+  menu: Array<string>;
 }
 const emits = defineEmits(["close", "rolesUpdated"]);
 const tableData = ref([] as any[]);
@@ -78,8 +78,8 @@ onMounted(() => {
   let all_operations = [] as any[];
   tableData.value.forEach((item) => (all_operations = all_operations.concat(item.operations)));
   checkedOperation.value = handleCheckedData(btns, all_operations);
-  if (rolePermission.menu !== "") {
-    checkedMenu.value = handleCheckedData(rolePermission.menu.split(","), tableData.value);
+  if (rolePermission.menu.length > 0) {
+    checkedMenu.value = handleCheckedData(rolePermission.menu, tableData.value);
   }
 });
 
