@@ -13,6 +13,7 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auth"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/internal/dao"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	"gitee.com/openeuler/PilotGo/sdk/common"
 )
 
 type Role = dao.Role
@@ -32,7 +33,7 @@ func RoleId(R []int) int {
 }
 
 // return menu, button, error
-func GetLoginUserPermission(Roleid []int) (map[string]interface{}, error) {
+func GetLoginUserPermission(Roleid []int) (interface{}, error) {
 	// TODO: multi role case
 	roleId := RoleId(Roleid) //用户的最高权限
 	role, err := dao.GetRoleById(roleId)
@@ -44,11 +45,11 @@ func GetLoginUserPermission(Roleid []int) (map[string]interface{}, error) {
 }
 
 type ReturnRole struct {
-	ID          int                    `json:"id"`
-	Role        string                 `json:"role"`
-	Type        int                    `json:"type"`
-	Description string                 `json:"description"`
-	Permissions map[string]interface{} `json:"permissions"`
+	ID          int                 `json:"id"`
+	Role        string              `json:"role"`
+	Type        int                 `json:"type"`
+	Description string              `json:"description"`
+	Permissions map[string][]string `json:"permissions"`
 }
 
 func GetRoles() ([]*ReturnRole, error) {
@@ -72,30 +73,27 @@ func GetRoles() ([]*ReturnRole, error) {
 	return result, nil
 }
 
-func getRoleMenuButtons(role string) map[string]interface{} {
-	permissions := make(map[string]interface{})
+func getRoleMenuButtons(role string) map[string][]string {
+	permissions := make(map[string][]string)
 	//获取pilotgo-server的权限信息
-	menu := ""
+	menu := []string{}
 	buttons := []string{}
-	policys := auth.GetFilteredPolicy(role, "", "button", "")
+	policys := auth.GetFilteredPolicy(role, "", "button", auth.DomainPilotGo)
 	for _, v := range policys {
 		buttons = append(buttons, v[1])
 	}
 	permissions["button"] = buttons
 
-	policys = auth.GetFilteredPolicy(role, "", "menu", "")
+	policys = auth.GetFilteredPolicy(role, "", "menu", auth.DomainPilotGo)
 	for _, v := range policys {
-		menu = menu + "," + v[1]
-	}
-	if len(menu) > 0 {
-		menu = menu[1:]
+		menu = append(menu, v[1])
 	}
 	permissions["menu"] = menu
 
 	//遍历查询插件权限
 	p := plugin.GetRolePluginPermission(role)
 	for k, v := range p {
-		permissions[k] = v
+		permissions[k] = append(permissions[k], v...)
 	}
 	return permissions
 }
@@ -140,7 +138,7 @@ func UpdateRoleInfo(name, description string) error {
 }
 
 // 更改角色权限
-func UpdateRolePermissions(role string, buttons, menus []string, PluginPermissions []plugin.PluginPermission) error {
+func UpdateRolePermissions(role string, buttons, menus []string) error {
 	if role == "admin" {
 		return errors.New("admin角色权限不可修改")
 	}
@@ -148,11 +146,12 @@ func UpdateRolePermissions(role string, buttons, menus []string, PluginPermissio
 	if err := auth.DeleteRole(role); err != nil {
 		return err
 	}
-	if err := auth.UpdateRolePermissions(role, buttons, menus); err != nil {
+	ms, bs, pms := BuildAllPermissions(menus, buttons)
+	if err := auth.UpdateRolePermissions(role, bs, ms); err != nil {
 		return err
 	}
 
-	return plugin.UpdatePluginPermissions(role, PluginPermissions)
+	return plugin.UpdatePluginPermissions(role, pms)
 }
 
 // 分页查询
@@ -174,4 +173,45 @@ func GetRolePaged(offset, size int) (int64, []*ReturnRole, error) {
 	}
 
 	return total, result, err
+}
+func BuildAllPermissions(menus, buttons []string) ([]string, []string, []plugin.PluginPermission) {
+	resultMap := make(map[string][]common.Permission)
+	serverMenus := []string{}
+	serverButtons := []string{}
+
+	addResource := func(res string, isMenu bool) {
+		if domain, action := auth.PermissionListMap.FindByInnerKey(res); domain != "" && action != "" {
+			if domain == auth.DomainPilotGo {
+				if isMenu {
+					serverMenus = append(serverMenus, res)
+				} else {
+					serverButtons = append(serverButtons, res)
+				}
+			} else {
+				resultMap[domain] = append(resultMap[domain], common.Permission{
+					Resource: res,
+					Operate:  action,
+				})
+			}
+
+		}
+	}
+
+	for _, res := range menus {
+		addResource(res, true)
+	}
+
+	for _, res := range buttons {
+		addResource(res, false)
+	}
+
+	var result []plugin.PluginPermission
+	for serviceName, perms := range resultMap {
+		result = append(result, plugin.PluginPermission{
+			ServiceName: serviceName,
+			Permissions: perms,
+		})
+	}
+
+	return serverMenus, serverButtons, result
 }
