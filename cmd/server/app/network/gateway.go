@@ -26,7 +26,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func HttpGatewayServerInit(conf *options.ServerConfig, stopCh <-chan struct{}) error {
+func HttpGatewayServerInit(conf *options.ServerConfig, stopCh <-chan struct{}, readyCh chan<- struct{}) error {
 	if err := SessionManagerInit(conf.HttpServer); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func HttpGatewayServerInit(conf *options.ServerConfig, stopCh <-chan struct{}) e
 		addr := ln.Addr().(*net.TCPAddr)
 		addr.IP = net.ParseIP(strings.Split(conf.HttpServer.Addr, ":")[0])
 
-		if err := startGateway(shutdownCtx, conf, addr); err != nil {
+		if err := startGateway(shutdownCtx, conf, addr, readyCh); err != nil {
 			logger.Error("failed to start gateway, error:%v", err)
 		}
 
@@ -113,7 +113,7 @@ func HttpGatewayServerInit(conf *options.ServerConfig, stopCh <-chan struct{}) e
 	return nil
 }
 
-func startGateway(ctx context.Context, conf *options.ServerConfig, addr *net.TCPAddr) error {
+func startGateway(ctx context.Context, conf *options.ServerConfig, addr *net.TCPAddr, readyCh chan<- struct{}) error {
 	sr, err := registry.NewServiceRegistrar(&registry.Options{
 		Endpoints:   conf.Etcd.Endpoints,
 		ServiceAddr: addr.String(),
@@ -151,6 +151,7 @@ func startGateway(ctx context.Context, conf *options.ServerConfig, addr *net.TCP
 	}
 
 	global.GW = gateway.NewCaddyGateway(sr.Registry, conf.HttpServer.Addr, watchCallback)
+	readyCh <- struct{}{}
 
 	go func() {
 		if err := global.GW.Run(); err != nil {
