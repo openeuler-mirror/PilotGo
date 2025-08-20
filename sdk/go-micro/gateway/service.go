@@ -64,6 +64,8 @@ func (g *CaddyGateway) GetAllServices() []map[string]interface{} {
 			"address":     svc.Address,
 			"port":        svc.Port,
 			"version":     svc.Metadata["version"],
+			"menuName":    svc.Metadata["menuName"],
+			"icon":        svc.Metadata["icon"],
 			"status":      g.serviceStatus[serviceName],
 			"extentions":  svc.Metadata["extentions"],
 			"permissions": svc.Metadata["permissions"],

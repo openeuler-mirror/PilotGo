@@ -9,10 +9,11 @@ package tag
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
@@ -21,15 +22,13 @@ import (
 // 向所有插件发送uuidlist
 func RequestTag(UUIDList []string) ([]common.Tag, error) {
 	//TODO：获取在线插件列表
-	plugins, err := plugin.GetPlugins()
-	if err != nil {
-		return nil, err
-	}
+	p := global.GW.GetAllServices()
+
 	msg := []common.Tag{}
 	//向url发送请求
-	for _, v := range plugins {
+	for _, v := range p {
 		//TODO:规定插件接收请求的api
-		url := v.Url + "/plugin_manage/api/v1/gettags"
+		url := fmt.Sprintf("http://%s:%s/plugin_manage/api/v1/gettags", v["address"], v["port"])
 		uuidTags := &struct {
 			UUIDS []string `json:"uuids"`
 		}{
@@ -60,10 +59,12 @@ func RequestTag(UUIDList []string) ([]common.Tag, error) {
 		if err := resp.ParseData(&tags); err != nil {
 			logger.Error(err.Error())
 		}
+
+		servicename := v["serviceName"].(string)
 		for _, vt := range tags {
-			vt.PluginName = v.Name
+			vt.PluginName = servicename
 			msg = append(msg, vt)
 		}
 	}
-	return msg, err
+	return msg, nil
 }

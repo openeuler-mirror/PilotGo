@@ -68,7 +68,7 @@
           </el-text>
         </div>
       </el-container>
-      <changePwd v-if="changePassword" />
+      <changePwd v-if="changePassword" @close="changePassword = false" />
     </el-container>
   </div>
 </template>

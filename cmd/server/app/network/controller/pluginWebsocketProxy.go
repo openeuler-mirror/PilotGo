@@ -16,9 +16,8 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -79,28 +78,12 @@ func PluginWebsocketGatewayHandler(c *gin.Context) {
 		close(errChan)
 	}()
 
-	name := c.Param("plugin_name")
-	p, err := plugin.GetPlugin(name)
-	if err != nil {
-		c.String(http.StatusNotFound, "plugin not found: "+err.Error())
-		return
-	}
+	name := c.Param("serviceName")
+	p := global.GW.GetService(name)
 
-	target_addr := strings.Replace(strings.Split(p.Url, "//")[1], "/plugin/"+name, "", 1)
-	targetURL_str := fmt.Sprintf("ws://%s/ws/proxy", target_addr)
-	ishttp, err := httputils.ServerIsHttp("http://" + target_addr)
-	if err != nil {
-		c.String(http.StatusNotFound, "parse plugin url error: "+err.Error())
-		return
-	}
-	if ishttp && strings.Split(targetURL_str, "://")[0] == "wss" {
-		targetURL_str = "ws://" + strings.Split(targetURL_str, "://")[1]
-	}
-	if !ishttp && strings.Split(targetURL_str, "://")[0] == "ws" {
-		targetURL_str = "wss://" + strings.Split(targetURL_str, "://")[1]
-	}
+	targetURL_str := fmt.Sprintf("ws://%s/ws/proxy", p.Address+":"+p.Port)
 
-	logger.Debug("websocket proxy plugin request: %s->%s", c.Request.RemoteAddr, target_addr)
+	logger.Debug("websocket proxy plugin request: %s->%s", c.Request.RemoteAddr, targetURL_str)
 
 	client_wsconn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

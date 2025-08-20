@@ -10,9 +10,11 @@ package plugin
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"gitee.com/openeuler/PilotGo/pkg/global"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
@@ -58,24 +60,11 @@ func publishEvent(eventServer string, msg common.EventMessage) error {
 }
 
 func isPluginEventConnected() (string, bool) {
-	var eventServer string
-	var connected bool
-
-	plugins, err := GetPlugins()
-	if err != nil {
+	ok := global.GW.GetServiceStatus("event-service")
+	if !ok {
 		return "", false
 	}
 
-	for _, p := range plugins {
-		if p.Name == "event" {
-			eventServer = p.Url
-			connected = p.ConnectStatus
-			break
-		}
-	}
-
-	if eventServer == "" || !connected {
-		return "", false
-	}
-	return eventServer, connected
+	service := global.GW.GetService("event-service")
+	return fmt.Sprintf("http://%s:%s", service.Address, service.Port), true
 }
