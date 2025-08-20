@@ -1,0 +1,8 @@
+label: PilotGo用户指南
+isManual: true
+description: 使用 PilotGo 运维管理平台管理主机、权限和告警等
+sections:
+  - label: 概述
+    href: ./pilotgo_introduction.md
+  - label: 使用方法
+    href: ./usage_instructions.md
