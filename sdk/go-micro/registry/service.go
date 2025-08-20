@@ -20,12 +20,12 @@ import (
 
 // ServiceRegistrar handles service registration and lifecycle management
 type ServiceRegistrar struct {
-	registry Registry
-	info     *ServiceInfo
+	Registry    Registry
+	ServiceInfo *ServiceInfo
 }
 
 // NewServiceRegistrar creates a new service registrar
-func NewServiceRegistrar(opts *Options) (Registry, error) {
+func NewServiceRegistrar(opts *Options) (*ServiceRegistrar, error) {
 	// Create registry client
 	reg, err := NewRegistry(RegistryTypeEtcd, opts)
 	if err != nil {
@@ -39,14 +39,16 @@ func NewServiceRegistrar(opts *Options) (Registry, error) {
 		Port:        strings.Split(opts.ServiceAddr, ":")[1],
 		Metadata: map[string]interface{}{
 			"version":     opts.Version,
+			"menuName":    opts.MenuName,
+			"icon":        opts.Icon,
 			"extentions":  opts.Extentions,
 			"permissions": opts.Permissions,
 		},
 	}
 
 	sr := &ServiceRegistrar{
-		registry: reg,
-		info:     info,
+		Registry:    reg,
+		ServiceInfo: info,
 	}
 
 	if err := sr.Start(); err != nil {
@@ -68,12 +70,12 @@ func NewServiceRegistrar(opts *Options) (Registry, error) {
 	}()
 
 	logger.Info("service registered to etcd successfully")
-	return reg, nil
+	return sr, nil
 }
 
 // Start registers the service and starts keeping it alive
 func (s *ServiceRegistrar) Start() error {
-	if err := s.registry.Register(s.info); err != nil {
+	if err := s.Registry.Register(s.ServiceInfo); err != nil {
 		return fmt.Errorf("failed to register service: %v", err)
 	}
 	return nil
@@ -81,8 +83,8 @@ func (s *ServiceRegistrar) Start() error {
 
 // Stop deregisters the service and cleans up resources
 func (s *ServiceRegistrar) Stop() error {
-	if err := s.registry.Deregister(); err != nil {
+	if err := s.Registry.Deregister(); err != nil {
 		return fmt.Errorf("failed to deregister service: %v", err)
 	}
-	return s.registry.Close()
+	return s.Registry.Close()
 }

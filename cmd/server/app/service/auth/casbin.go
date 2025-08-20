@@ -13,7 +13,6 @@ import (
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/cmd/options"
 	suser "gitee.com/openeuler/PilotGo/cmd/server/app/service/user"
-	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/casbin/casbin/v2"
 	casbinmodel "github.com/casbin/casbin/v2/model"
@@ -21,17 +20,6 @@ import (
 )
 
 var G_Enfocer *casbin.Enforcer
-
-type CasbinRule struct {
-	PType    string `json:"ptype"`
-	RoleType string `json:"role"`
-	Url      string `json:"url"`
-	Method   string `json:"method"`
-}
-
-const (
-	DomainPilotGo = "PilotGo-server"
-)
 
 func Casbin(conf *options.MysqlDBInfo) {
 	text := `
@@ -81,83 +69,19 @@ func Casbin(conf *options.MysqlDBInfo) {
 
 	// TODO:
 	initAdminPolicy()
+	initPluginServicePermission()
 }
 
 func addPolicy(role, resource, action, domain string) (bool, error) {
 	return G_Enfocer.AddPolicy(role, resource, action, domain)
 }
 
-var (
-	PermissionList = []string{
-		"rpm_install",
-		"rpm_uninstall",
-		"batch_create",
-		"batch_update",
-		"batch_delete",
-		"user_add",
-		"user_import",
-		"user_edit",
-		"user_reset",
-		"user_del",
-		"role_add",
-		"role_update",
-		"role_delete",
-		"role_modify",
-		"dept_change",
-		"dept_add",
-		"dept_delete",
-		"dept_update",
-		"machine_delete",
-		"run_script",
-		"update_script_blacklist",
-		"plugin_operate",
-	}
-
-	MenuList = []string{
-		"overview",
-		"cluster",
-		"usermanager",
-		"rolemanager",
-		"audit",
-		"plugin",
-		"terminal",
-		"script",
-	}
-)
-
-// 添加插件权限到列表中
-func AddPluginPermission(role string, permissions []common.Permission, uuid string) error {
-	//TODO；先添加到列表中可以展示
-	for _, v := range permissions {
-		ok, err := addPolicy(role, v.Resource, v.Operate, uuid)
-		if err != nil {
-			logger.Error("init plugin-admin policy failed:%s", err)
-		}
-		if !ok {
-			logger.Debug("plugin-admin %s permission already exists: %s", v.Operate, v.Resource)
-		}
-	}
-	return nil
-}
-
-// 删除插件权限
-func DeletePluginPermission(permissions []common.Permission, uuid string) error {
-	for _, v := range permissions {
-		ok, err := G_Enfocer.RemoveFilteredPolicy(1, v.Resource, v.Operate, uuid)
-		if err != nil {
-			logger.Error("delete plugin policy failed:%s", err)
-		}
-		if !ok {
-			logger.Debug("delete plugin %s permission failed: %s", v.Operate, v.Resource)
-		}
-	}
-	return nil
-}
-
 func initAdminPolicy() {
 	G_Enfocer.AddRoleForUser("admin", "admin")
 
 	for _, p := range PermissionList {
+		PermissionListMap.Set(DomainPilotGo, "button", p)
+
 		ok, err := addPolicy("admin", p, "button", DomainPilotGo)
 		if err != nil {
 			logger.Error("init admin policy failed:%s", err)
@@ -168,6 +92,8 @@ func initAdminPolicy() {
 	}
 
 	for _, m := range MenuList {
+		PermissionListMap.Set(DomainPilotGo, "menu", m)
+
 		ok, err := addPolicy("admin", m, "menu", DomainPilotGo)
 		if err != nil {
 			logger.Error("init admin policy failed:%s", err)

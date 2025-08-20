@@ -79,47 +79,9 @@ func parseMyClaims(c *gin.Context) (*UserClaims, error) {
 	return m, nil
 }
 
-type PluginClaims struct {
-	jwt.StandardClaims
-
-	Name string
-	UUID string
-}
-
 func GeneratePluginToken(name, uuid string) (string, error) {
-	claims := &PluginClaims{
-		Name: name,
-		UUID: uuid,
 
-		StandardClaims: jwt.StandardClaims{
-			IssuedAt: time.Now().Unix(),
-			Issuer:   Issue,
-			Subject:  "plugin token",
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(config.OptionsConfig.JWT.SecretKey))
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
-}
-
-func ParsePluginClaims(c *gin.Context) (*PluginClaims, error) {
-	cookie, err := c.Request.Cookie("PluginToken") //Get authorization header
-	if err != nil {
-		return nil, err
-	}
-
-	claims, err := parseClaims(cookie.Value, &PluginClaims{})
-	if err != nil {
-		return nil, err
-	}
-	m, ok := claims.(*PluginClaims)
-	if !ok {
-		return nil, errors.New("invalid plugin claims")
-	}
-	return m, nil
+	return "", nil
 }
 
 func parseToken(tokenString string, clames jwt.Claims) (*jwt.Token, error) {

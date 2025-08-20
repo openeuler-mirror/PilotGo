@@ -181,7 +181,7 @@ let sidebarRoutes = [
         component: () => import("../views/User/User.vue"),
         meta: {
           title: "用户管理",
-          panel: "user",
+          panel: "usermanager",
           icon: "UserFilled",
           breadcrumb: [{ name: "用户管理" }],
         },
@@ -192,7 +192,7 @@ let sidebarRoutes = [
         component: () => import("../views/Role/Role.vue"),
         meta: {
           title: "角色管理",
-          panel: "role",
+          panel: "usermanager",
           icon: "Lock",
           breadcrumb: [{ name: "角色管理" }],
         },
@@ -224,10 +224,10 @@ let sidebarRoutes = [
         name: "Plugin",
         component: () => import("../views/Plugin/Plugin.vue"),
         meta: {
-          title: "插件管理",
+          title: "插件服务管理",
           panel: "plugin",
           icon: "Menu",
-          breadcrumb: [{ name: "插件管理" }],
+          breadcrumb: [{ name: "插件服务管理" }],
         },
       },
     ],

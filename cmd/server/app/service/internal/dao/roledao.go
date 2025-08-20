@@ -24,11 +24,6 @@ type Role struct {
 	ButtonID    string `json:"buttonId"`
 }
 
-type RoleButton struct {
-	ID     uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	Button string `json:"button"`
-}
-
 // 根据角色名称返回角色id和用户类型
 func GetRoleId(name string) (roleId int, err error) {
 	var role Role

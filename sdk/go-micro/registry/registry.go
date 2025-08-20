@@ -25,12 +25,13 @@ type ServiceInfo struct {
 
 // Options represents the configuration options for service registry
 type Options struct {
-	Endpoints   []string      // etcd address
-	ServiceName string        // 服务地址
-	ServiceAddr string        // 服务名称
-	DialTimeout time.Duration // 超时时间
-
+	Endpoints   []string            // etcd address
+	ServiceName string              // 服务地址
+	ServiceAddr string              // 服务名称
+	DialTimeout time.Duration       // 超时时间
 	Version     string              // 服务版本
+	MenuName    string              // 菜单名称
+	Icon        string              // 菜单图标
 	Extentions  []common.Extention  // 用于平台扩展点功能
 	Permissions []common.Permission //用于权限校验
 }

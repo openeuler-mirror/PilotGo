@@ -17,7 +17,6 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/service/auth"
-	"gitee.com/openeuler/PilotGo/cmd/server/app/service/plugin"
 	"gitee.com/openeuler/PilotGo/pkg/dbmanager"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -72,6 +71,8 @@ func NewServerCommand() *cobra.Command {
 	return cmd
 }
 func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) error {
+	// ready channel，用于 GW 启动完成的通知
+	gwreadyCh := make(chan struct{})
 	if atomic.LoadInt64(&conut) > 0 {
 		return nil
 	}
@@ -109,14 +110,14 @@ func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) err
 	}
 
 	//start http server,and bind the plugin api、static file
-	err := network.HttpServerInit(config.HttpServer, ctx.Done())
+	err := network.HttpGatewayServerInit(config, ctx.Done(), gwreadyCh)
 	if err != nil {
 		logger.Error("HttpServerInit socket server init failed, error:%v", err)
 		return err
 	}
 
 	// start other services
-	if err := startServices(config.MysqlDBinfo, ctx.Done()); err != nil {
+	if err := startServices(config.MysqlDBinfo, gwreadyCh); err != nil {
 		logger.Error("start services error: %s", err)
 		return err
 	}
@@ -130,12 +131,10 @@ func run(opts *options.ServerOptions, ctx context.Context, _ *cobra.Command) err
 	return nil
 
 }
-func startServices(mysqlInfo *options.MysqlDBInfo, stopCh <-chan struct{}) error {
-	// verify permission initialize
+func startServices(mysqlInfo *options.MysqlDBInfo, readyCh <-chan struct{}) error {
+	<-readyCh
+	auth.NewPermissionMap()
 	auth.Casbin(mysqlInfo)
-
-	// plugin server initialize
-	plugin.Init(stopCh)
 
 	return nil
 }

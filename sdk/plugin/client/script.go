@@ -3,32 +3,27 @@
  * PilotGo licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
- * Date: Wed Sep 27 17:35:12 2023 +0800
+ * Date: Wed Aug 06 17:35:12 2025 +0800
  */
 package client
 
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/jwt"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-type CallbackHandler struct {
-	RunCommandCallback RunCommandCallback
-	TaskLen            int
-}
-
-type RunCommandCallback func([]*common.CmdResult)
-
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
 	}
 
-	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command"
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/run_command", serverInfo.Address, serverInfo.Port)
 
 	p := &common.CmdStruct{
 		Batch:   batch,
@@ -38,7 +33,7 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResul
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {
@@ -64,10 +59,11 @@ type ScriptStruct struct {
 }
 
 func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
-	if !c.IsBind() {
-		return nil, errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
 	}
-	url := "http://" + c.Server() + "/api/v1/pluginapi/run_script"
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/run_script", serverInfo.Address, serverInfo.Port)
 
 	p := &ScriptStruct{
 		Batch:  batch,
@@ -78,7 +74,7 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {
@@ -98,10 +94,11 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 }
 
 func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
-	if !c.IsBind() {
-		return errors.New("unbind PilotGo-server platform")
+	serverInfo, err := c.Registry.Get("pilotgo-server")
+	if err != nil {
+		return err
 	}
-	url := "http://" + c.Server() + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/run_command_async?plugin_name=", serverInfo.Address, serverInfo.Port)
 
 	p := &common.CmdStruct{
 		Batch:   batch,
@@ -111,7 +108,7 @@ func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCo
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: p,
 		Cookie: map[string]string{
-			TokenCookie: c.token,
+			jwt.TokenCookie: c.token,
 		},
 	})
 	if err != nil {

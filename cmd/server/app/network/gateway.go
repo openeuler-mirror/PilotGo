@@ -14,7 +14,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-	"time"
 
 	"gitee.com/openeuler/PilotGo/cmd/server/app/cmd/options"
 	"gitee.com/openeuler/PilotGo/cmd/server/app/network/websocket"
@@ -27,8 +26,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func HttpGatewayServerInit(conf *options.HttpServer, stopCh <-chan struct{}) error {
-	if err := SessionManagerInit(conf); err != nil {
+func HttpGatewayServerInit(conf *options.ServerConfig, stopCh <-chan struct{}, readyCh chan<- struct{}) error {
+	if err := SessionManagerInit(conf.HttpServer); err != nil {
 		return err
 	}
 
@@ -49,9 +48,9 @@ func HttpGatewayServerInit(conf *options.HttpServer, stopCh <-chan struct{}) err
 			return
 		}
 		addr := ln.Addr().(*net.TCPAddr)
-		addr.IP = net.ParseIP(strings.Split(conf.Addr, ":")[0])
+		addr.IP = net.ParseIP(strings.Split(conf.HttpServer.Addr, ":")[0])
 
-		if err := startGateway(shutdownCtx, conf, addr); err != nil {
+		if err := startGateway(shutdownCtx, conf, addr, readyCh); err != nil {
 			logger.Error("failed to start gateway, error:%v", err)
 		}
 
@@ -61,19 +60,21 @@ func HttpGatewayServerInit(conf *options.HttpServer, stopCh <-chan struct{}) err
 			_ = srv.Shutdown(shutdownCtx)
 		}()
 
-		if conf.UseHttps {
-			if conf.CertFile == "" || conf.KeyFile == "" {
-				logger.Error("https cert or key not configd")
+		if conf.HttpServer.UseHttps {
+			if conf.HttpServer.CertFile == "" || conf.HttpServer.KeyFile == "" {
+				logger.Error("https cert or key not conf.HttpServerigd")
 				return
 			}
+			logger.Info("start gateway service on: https://%s", conf.HttpServer.Addr)
 
-			if err := srv.ServeTLS(ln, conf.CertFile, conf.KeyFile); err != nil {
+			if err := srv.ServeTLS(ln, conf.HttpServer.CertFile, conf.HttpServer.KeyFile); err != nil {
 				if err != http.ErrServerClosed {
 					logger.Error("ListenAndServeTLS start http server failed:%v", err)
 					return
 				}
 			}
 		} else {
+			logger.Info("start gateway service on: http://%s", conf.HttpServer.Addr)
 			if err := srv.Serve(ln); err != nil {
 				if err != http.ErrServerClosed {
 					logger.Error("ListenAndServe start http server failed:%v", err)
@@ -84,19 +85,19 @@ func HttpGatewayServerInit(conf *options.HttpServer, stopCh <-chan struct{}) err
 		}
 
 	}()
-	if conf.Debug {
+	if conf.HttpServer.Debug {
 		go func() {
 			// pprof
-			portIndex := strings.Index(conf.Addr, ":")
-			addr := conf.Addr[:portIndex] + ":6060"
+			portIndex := strings.Index(conf.HttpServer.Addr, ":")
+			addr := conf.HttpServer.Addr[:portIndex] + ":6060"
 			logger.Debug("start pprof service on: %s", addr)
-			if conf.UseHttps {
-				if conf.CertFile == "" || conf.KeyFile == "" {
-					logger.Error("https cert or key not configd")
+			if conf.HttpServer.UseHttps {
+				if conf.HttpServer.CertFile == "" || conf.HttpServer.KeyFile == "" {
+					logger.Error("https cert or key not conf.HttpServerigd")
 					return
 				}
 
-				err := http.ListenAndServeTLS(addr, conf.CertFile, conf.KeyFile, nil)
+				err := http.ListenAndServeTLS(addr, conf.HttpServer.CertFile, conf.HttpServer.KeyFile, nil)
 				if err != nil {
 					logger.Error("failed to start pprof, error:%v", err)
 				}
@@ -112,13 +113,13 @@ func HttpGatewayServerInit(conf *options.HttpServer, stopCh <-chan struct{}) err
 	return nil
 }
 
-func startGateway(ctx context.Context, conf *options.HttpServer, addr *net.TCPAddr) error {
-	reg, err := registry.NewServiceRegistrar(&registry.Options{
-		Endpoints:   []string{"localhost:2379"},
+func startGateway(ctx context.Context, conf *options.ServerConfig, addr *net.TCPAddr, readyCh chan<- struct{}) error {
+	sr, err := registry.NewServiceRegistrar(&registry.Options{
+		Endpoints:   conf.Etcd.Endpoints,
 		ServiceAddr: addr.String(),
-		ServiceName: "pilotgo-server",
-		Version:     "v3.0",
-		DialTimeout: 5 * time.Second,
+		ServiceName: conf.Etcd.ServiveName,
+		Version:     conf.Etcd.Version,
+		DialTimeout: conf.Etcd.DialTimeout,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to initialize registry: %v", err)
@@ -149,7 +150,8 @@ func startGateway(ctx context.Context, conf *options.HttpServer, addr *net.TCPAd
 		}
 	}
 
-	global.GW = gateway.NewCaddyGateway(reg, conf.Addr, watchCallback)
+	global.GW = gateway.NewCaddyGateway(sr.Registry, conf.HttpServer.Addr, watchCallback)
+	readyCh <- struct{}{}
 
 	go func() {
 		if err := global.GW.Run(); err != nil {
