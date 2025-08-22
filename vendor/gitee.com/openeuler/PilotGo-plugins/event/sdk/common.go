@@ -79,6 +79,8 @@ func GetMessageTypeString(msgType int) string {
 	}
 }
 
+var MessageTypes = []string{"用户登录", "用户退出", "平台新增主机", "平台移除主机", "主机上线", "主机离线", "主机安装软件包", "主机升级软件包", "主机卸载软件包", "主机ip变更", "插件添加", "插件卸载", "插件上线", "插件离线"}
+
 type MessageData struct {
 	MsgType     int         `json:"msg_type_id"`
 	MessageType string      `json:"msg_type"`

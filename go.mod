@@ -176,7 +176,7 @@ require (
 )
 
 require (
-	gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20241204130048-1bc7cc64986f
+	gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20250822093058-f48c8d19e0b3
 	gitee.com/openeuler/PilotGo/sdk v0.0.0-20250121031234-c5439c613a24
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/bytedance/sonic v1.12.5 // indirect
@@ -241,7 +241,6 @@ require (
 	gorm.io/driver/postgres v1.5.2 // indirect
 	gorm.io/driver/sqlserver v1.5.0 // indirect
 	gorm.io/plugin/dbresolver v1.4.1 // indirect
-	k8s.io/apimachinery v0.22.1
 	modernc.org/libc v1.23.0 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.6.0 // indirect
