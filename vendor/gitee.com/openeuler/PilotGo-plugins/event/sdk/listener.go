@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Wed Jul 24 10:02:04 2024 +0800
@@ -10,6 +10,7 @@ package sdk
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,21 +22,29 @@ import (
 
 var plugin_client *client.Client
 
+type SN struct {
+	ServiceName string `json:"serviceName"`
+}
+
 // 注册event事件监听
-func ListenEvent(eventTypes []int, callbacks common.EventCallback) error {
+func ListenEvent(serviceName string, eventTypes []int, callbacks common.EventCallback) error {
 	var eventtypes []string
 	for _, i := range eventTypes {
 		eventtypes = append(eventtypes, strconv.Itoa(i))
 	}
 
-	eventServer, err := eventPluginServer()
+	eventService, err := plugin_client.Registry.Get("event-service")
 	if err != nil {
 		return err
 	}
 
-	url := eventServer + "/plugin/event/listener/register?eventTypes=" + strings.Join(eventtypes, ",")
+	url := fmt.Sprintf("http://%s:%s/plugin/event/listener/register?eventTypes=%s", eventService.Address, eventService.Port, strings.Join(eventtypes, ","))
+
+	b := SN{
+		ServiceName: serviceName,
+	}
 	r, err := httputils.Put(url, &httputils.Params{
-		Body: plugin_client.PluginInfo,
+		Body: b,
 	})
 	if err != nil {
 		return err
@@ -66,19 +75,22 @@ func ListenEvent(eventTypes []int, callbacks common.EventCallback) error {
 }
 
 // 取消注册event事件监听
-func UnListenEvent(eventTypes []int) error {
+func UnListenEvent(serviceName string, eventTypes []int) error {
 	var eventtypes []string
 	for _, i := range eventTypes {
 		eventtypes = append(eventtypes, strconv.Itoa(i))
 	}
-	eventServer, err := eventPluginServer()
+	eventService, err := plugin_client.Registry.Get("event-service")
 	if err != nil {
 		return err
 	}
 
-	url := eventServer + "/plugin/event/listener/unregister?eventTypes=" + strings.Join(eventtypes, ",")
+	url := fmt.Sprintf("http://%s:%s/plugin/event/listener/unregister?eventTypes=%s", eventService.Address, eventService.Port, strings.Join(eventtypes, ","))
+	b := SN{
+		ServiceName: serviceName,
+	}
 	r, err := httputils.Delete(url, &httputils.Params{
-		Body: plugin_client.PluginInfo,
+		Body: b,
 	})
 	if err != nil {
 		return err
@@ -110,15 +122,18 @@ func UnListenEvent(eventTypes []int) error {
 }
 
 // 插件服务退出，取消注册所有本插件的event事件监听
-func UnPluginListenEvent() error {
-	eventServer, err := eventPluginServer()
+func UnPluginListenEvent(serviceName string) error {
+	eventService, err := plugin_client.Registry.Get("event-service")
 	if err != nil {
 		return err
 	}
 
-	url := eventServer + "/plugin/event/listener/unpluginRegister"
+	url := fmt.Sprintf("http://%s:%s/plugin/event/listener/unpluginRegister", eventService.Address, eventService.Port)
+	b := SN{
+		ServiceName: serviceName,
+	}
 	r, err := httputils.Delete(url, &httputils.Params{
-		Body: plugin_client.PluginInfo,
+		Body: b,
 	})
 	if err != nil {
 		return err
@@ -149,11 +164,11 @@ func UnPluginListenEvent() error {
 
 // 发布event事件
 func PublishEvent(msg common.EventMessage) error {
-	eventServer, err := eventPluginServer()
+	eventService, err := plugin_client.Registry.Get("event-service")
 	if err != nil {
 		return err
 	}
-	url := eventServer + "/plugin/event/publishEvent"
+	url := fmt.Sprintf("http://%s:%s/plugin/event/publishEvent", eventService.Address, eventService.Port)
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: &msg,
 	})

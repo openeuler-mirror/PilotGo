@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Wed Jul 24 10:02:04 2024 +0800
@@ -9,7 +9,6 @@ package sdk
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"os"
 	"os/signal"
@@ -21,7 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UnPluginListenEventHandler() {
+func UnPluginListenEventHandler(serviceName string) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
@@ -32,7 +31,7 @@ func UnPluginListenEventHandler() {
 			switch s {
 			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
 				logger.Info("接收到退出信号: %s", s.String())
-				UnPluginListenEvent()
+				UnPluginListenEvent(serviceName)
 				os.Exit(0)
 			default:
 				logger.Info("接收到未知信号: %s", s.String())
@@ -63,27 +62,6 @@ func eventHandler(c *gin.Context) {
 	}
 
 	ProcessEvent(&msg)
-}
-
-func eventPluginServer() (string, error) {
-	plugins, err := plugin_client.GetPlugins()
-	if err != nil {
-		return "", err
-	}
-
-	var eventServer string
-	for _, p := range plugins {
-		if p.Name == "event" {
-			eventServer = p.Url
-			break
-		}
-	}
-
-	if eventServer == "" {
-		return "", errors.New("event plugin not found")
-	}
-
-	return eventServer, nil
 }
 
 func registerEventCallback(eventType int, callback common.EventCallback) {
