@@ -73,7 +73,7 @@ function build_backend() {
 
     echo "building server for ${1}..."
     mkdir -p ${version_path}/server
-    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -mod=vendor -tags=production -ldflags " \
+    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -tags=production -ldflags " \
     -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.version=${VERSION} \
     -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.commit=${COMMIT} \
     -X gitee.com/openeuler/PilotGo/cmd/server/app/network/controller.goVersion=${GO_VERSION} \
@@ -82,7 +82,7 @@ function build_backend() {
 
     echo "building agent for ${1}..."
     mkdir -p ${version_path}/agent
-    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -mod=vendor -o ${version_path}/agent/PilotGo-agent ./cmd/agent/main.go
+    GOWORK=off CGO_ENABLED=0 GOOS=linux GOARCH=${1} go build -o ${version_path}/agent/PilotGo-agent ./cmd/agent/main.go
 }
 
 function pack_tar() {
