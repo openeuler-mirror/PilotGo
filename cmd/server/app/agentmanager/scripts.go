@@ -8,13 +8,13 @@ import (
 // 远程在agent上运行脚本文件
 func (a *Agent) AgentRunScripts(scriptType string, script string, params string) (*utils.CmdResult, error) {
 	data := struct {
-		Script     string
-		Params     string
-		ScriptType string
+		ScriptContent string
+		Params        string
+		ScriptType    string
 	}{
-		Script:     script,
-		ScriptType: scriptType,
-		Params:     params,
+		ScriptContent: script,
+		ScriptType:    scriptType,
+		Params:        params,
 	}
 	responseMessage, err := a.SendMessageWrapper(protocol.AgentRunScripts, data, "failed to run script on agent", 0, nil, "")
 	result, ok := responseMessage.(*utils.CmdResult)
