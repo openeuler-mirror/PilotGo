@@ -272,4 +272,20 @@ export let authData = [
       },
     ],
   },
+  {
+    id: "12",
+    label: "机器调优",
+    isMenu: true,
+    display: true,
+    disabled: true,
+    menuName: "atune",
+    operations: [
+      {
+        id: "32",
+        btnId: "25",
+        label: "调优操作",
+        menuName: "atune_operate",
+      },
+    ],
+  },
 ];
