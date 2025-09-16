@@ -9,7 +9,6 @@ import (
 	"gitee.com/openeuler/PilotGo/cmd/agent/app/network"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/pkg/utils/message/protocol"
-	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
@@ -32,10 +31,9 @@ func getScriptInfo(scriptType string) (suffix string, interpreter string, err er
 }
 
 type ScriptsRun struct {
-	Batch         *common.Batch `json:"batch"`
-	ScriptType    string        `json:"script_type"`
-	ScriptContent string        `json:"script_content"`
-	Params        string        `json:"params"`
+	ScriptType    string
+	ScriptContent string
+	Params        string
 }
 
 func AgentRunScriptsHandler(c *network.SocketClient, msg *protocol.Message) error {
@@ -56,6 +54,7 @@ func AgentRunScriptsHandler(c *network.SocketClient, msg *protocol.Message) erro
 		return c.Send(resp_msg)
 	}
 
+	logger.Debug("%#v", d)
 	suffix, interpreter, err := getScriptInfo(d.ScriptType)
 	if err != nil {
 		errorInfo := "parse data error:" + err.Error()
@@ -73,7 +72,16 @@ func AgentRunScriptsHandler(c *network.SocketClient, msg *protocol.Message) erro
 		resp_msg.Error = errorInfo
 		return c.Send(resp_msg)
 	}
-
+	// 确保工作目录存在
+	if _, err := os.Stat(workDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(workDir, 0755); err != nil {
+			errorInfo := "mkdir workdir error:" + err.Error()
+			logger.Error("%s", errorInfo)
+			resp_msg.Status = -1
+			resp_msg.Error = errorInfo
+			return c.Send(resp_msg)
+		}
+	}
 	// 创建临时脚本文件
 	tmpFile, err := os.CreateTemp(workDir, "script_*"+suffix)
 	if err != nil {
@@ -83,7 +91,7 @@ func AgentRunScriptsHandler(c *network.SocketClient, msg *protocol.Message) erro
 		resp_msg.Error = errorInfo
 		return c.Send(resp_msg)
 	}
-	defer os.Remove(tmpFile.Name()) // 删除临时脚本文件
+	// defer os.Remove(tmpFile.Name()) // 删除临时脚本文件
 
 	_, err = tmpFile.Write(decoded_script)
 	if err != nil {
