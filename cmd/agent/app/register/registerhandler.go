@@ -58,6 +58,8 @@ func RegitsterHandler(c *network.SocketClient) {
 
 	c.BindHandler(protocol.RunCommand, handler.RunCommandHandler)
 	c.BindHandler(protocol.RunScript, handler.RunScriptHandler)
+	// 针对脚本运维所做的可以执行各种脚本的拓展
+	c.BindHandler(protocol.AgentRunScripts, handler.AgentRunScriptsHandler)
 
 	c.BindHandler(protocol.AgentOverview, handler.AgentOverviewHandler)
 	c.BindHandler(protocol.AgentInfo, handler.AgentInfoHandler)

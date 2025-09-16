@@ -36,6 +36,8 @@ const (
 	RunCommand = 8
 	// agent端执行shell脚本
 	RunScript = 81
+	// agent端执行各种脚本
+	AgentRunScripts = 82
 	// agent升级
 	AgentUpdate = 9
 	// agent卸载
