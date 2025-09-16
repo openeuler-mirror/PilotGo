@@ -14,6 +14,7 @@ type ScriptsRun struct {
 	ScriptType    string        `json:"script_type"`
 	ScriptContent string        `json:"script_content"`
 	Params        string        `json:"params"`
+	TimeOutSec    int           `json:"timeoutSec"`
 }
 
 // 远程agent运行各种脚本
@@ -31,7 +32,7 @@ func AgentRunScriptsHandler(c *gin.Context) {
 	f := func(uuid string) batch.R {
 		agent := agentmanager.GetAgent(uuid)
 		if agent != nil {
-			data, err := agent.AgentRunScripts(sr.ScriptType, sr.ScriptContent, sr.Params)
+			data, err := agent.AgentRunScripts(sr.ScriptType, sr.ScriptContent, sr.Params, sr.TimeOutSec)
 			if err != nil {
 				logger.Error("run script error, agent:%s, command:%s", uuid, sr.ScriptContent)
 			}
