@@ -14,9 +14,10 @@ type ScriptsRun struct {
 	ScriptType    string        `json:"script_type"`
 	ScriptContent string        `json:"script_content"`
 	Params        string        `json:"params"`
+	TimeOutSec    int           `json:"timeoutSec"`
 }
 
-func (c *Client) AgentRunScripts(batch *common.Batch, scriptType string, script string, params string) ([]*common.CmdResult, error) {
+func (c *Client) AgentRunScripts(batch *common.Batch, scriptType string, script string, params string, timeoutSec int) ([]*common.CmdResult, error) {
 	serverInfo, err := c.Registry.Get("pilotgo-server")
 	if err != nil {
 		return nil, err
@@ -28,6 +29,7 @@ func (c *Client) AgentRunScripts(batch *common.Batch, scriptType string, script 
 		ScriptType:    scriptType,
 		ScriptContent: script,
 		Params:        params,
+		TimeOutSec:    timeoutSec,
 	}
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: scriptRun,
