@@ -22,16 +22,16 @@ The core modules of PilotGo include:
 
 * Plugin System: Extends platform functionalities. Plugins can interact with each other, boosting automation and reducing manual effort.
 
-![Alt text](./docs/images/functional%20modules.png)
+![Alt text](./docs/other/images/functional%20modules.png)
 
 
 Integrated Plugins in the Current OS Release
 
 * **Prometheus Plugin**: Hosts the Prometheus monitoring component, automates the deployment and configuration of `node-exporter` for data collection, and integrates with the platform’s alerting system.
-  ![Alt text](./docs/images/prometheus%20plugin.png)
+  ![Alt text](./docs/other/images/prometheus%20plugin.png)
 
 * **Grafana Plugin**: Integrates Grafana visualization, offering a beautiful and user-friendly metrics dashboard.
-  ![Alt text](./docs/images/grafana%20plugin.png)
+  ![Alt text](./docs/other/images/grafana%20plugin.png)
 
 #### Application Scenarios
 
@@ -118,7 +118,7 @@ PilotGo supports both **standalone** and **clustered** deployment. Be sure to **
 1. [PilotGo User Manual](https://gitee.com/openeuler/docs/tree/master/docs/zh/docs/PilotGo/使用手册.md)
 2. [PilotGo Software Repository](https://gitee.com/src-openeuler/PilotGo)
 3. PilotGo Community Developer WeChat Group
-![Alt text](./docs/images/PilotGo社区开发群.jpg)
+![Alt text](./docs/other/images/PilotGo社区开发群.jpg)
 
 #### Contribution
 

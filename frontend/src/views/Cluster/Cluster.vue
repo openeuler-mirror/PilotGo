@@ -61,6 +61,12 @@
                   >
                     <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
                   </el-dropdown-item>
+                   <el-dropdown-item
+                    v-if="hasPermisson('button/atune_operate')"
+                    v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'atune')"
+                  >
+                    <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
+                  </el-dropdown-item>
                   <el-dropdown-item
                     v-if="hasPermisson('button/logs_operate')"
                     v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'logs')"

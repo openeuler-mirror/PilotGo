@@ -19,20 +19,48 @@ import (
 
 // 获取CPU型号
 func (b *BaseOS) GetCPUName() (string, error) {
+	// 先检测当前架构
+	arch, err := getSystemArchitecture()
+	if err != nil {
+		logger.Error("failed to detect system architecture: %v", err)
+		return "", fmt.Errorf("failed to detect system architecture: %v", err)
+	}
+
+	// RISC-V 架构特殊处理
+	if arch == "riscv64" {
+		exitc, cpuname, stde, err := utils.RunCommand("cat /proc/device-tree/compatible")
+		if exitc == 0 && len(cpuname) > 0 && stde == "" && err == nil {
+			cpuname = strings.TrimSpace(cpuname)
+			// 提取第一个兼容的设备名称
+			compatibleList := strings.Split(cpuname, "\x00")
+			if len(compatibleList) > 0 {
+				return compatibleList[0], nil
+			}
+		}
+		logger.Error("failed to get RISC-V CPU info: %d, %s, %s, %v", exitc, cpuname, stde, err)
+		return "", fmt.Errorf("failed to get RISC-V CPU info: %d, %s, %s, %v", exitc, cpuname, stde, err)
+	}
+
+	// 其他架构保持原有逻辑
 	exitc, cpuname, stde, err := utils.RunCommand("lscpu | grep 'Model name' | sort | uniq")
 	if exitc == 0 && len(cpuname) > 0 && stde == "" && err == nil {
 		cpuname = strings.Replace(cpuname, "\n", "", -1)
 		str := strings.Split(cpuname, ":")
-		if len(str) == 1 {
-			str = strings.Split(cpuname, ":")
-			cpuname = strings.TrimLeft(str[1], " ")
-		} else {
-			cpuname = strings.TrimLeft(str[1], " ")
+		if len(str) >= 2 {
+			return strings.TrimSpace(str[1]), nil
 		}
-		return cpuname, nil
 	}
 	logger.Error("failed to get cpu model name: %d, %s, %s, %v", exitc, cpuname, stde, err)
 	return "", fmt.Errorf("failed to get cpu model name: %d, %s, %s, %v", exitc, cpuname, stde, err)
+}
+
+// 获取系统架构
+func getSystemArchitecture() (string, error) {
+	exitc, arch, stde, err := utils.RunCommand("uname -m")
+	if exitc != 0 || stde != "" || err != nil {
+		return "", fmt.Errorf("failed to get architecture: %d, %s, %v", exitc, stde, err)
+	}
+	return strings.TrimSpace(arch), nil
 }
 
 // 获取物理CPU个数

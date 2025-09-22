@@ -324,14 +324,23 @@ systemctl start PilotGo-server
 ### 3.1 Grafana插件使用说明
 
 1. 在任意一台服务器上执行dnf install PilotGo-plugin-grafana grafana；
-2. 将/opt/PilotGo/plugin/grafana/config.yaml文件中ip地址修改为本机真实ip，修改/etc/grafana/grafana.ini文件以下信息：
+2. 将/opt/PilotGo/plugin/grafana/config.yaml文件中ip地址修改为本机真实ip，修改/etc/grafana/grafana.ini文件以下信息（若不存在则添加）：
 
     ```shell
-    root_url = http://真实ip:9999/plugin/grafana
-
+    [server]
+    root_url = http://localhost:9999/plugin/grafana
     serve_from_sub_path = true
 
+    [security]
     allow_embedding = true
+
+    [auth]
+    cookie_samesite = none
+
+    [cors]
+    enabled = true
+    allow_origin = http://localhost:9999
+    allow_credentials = true
     ```
 
 3. 重启两个服务，执行以下命令：
@@ -357,4 +366,63 @@ systemctl start PilotGo-server
 
 4. 成功登录pilotgo平台，点击左侧导航栏中的插件管理，点击添加插件按钮，填写插件名称和服务地址，并点击确定；![本地路径](./figures/P插件1.png)
 5. 页面增加一条插件管理数据，导航栏增加一个插件按钮。![本地路径](./figures/P插件2.png)![本地路径](./figures/P插件3.png)
-6. 在页面选择机器ip和监控时间，展示机器数据面板。![本地路径](./figures/P插件4.png)
+6. 如果要监控某台机器，需要先到机器列表为这台机器安装 exporter。然后在页面选择机器ip和监控时间，展示机器数据面板。![本地路径](./figures/P插件4.png)
+
+### 3.3 PilotGo-plugin-a-tune插件使用说明
+
+1. 在任意一台服务器上执行dnf install PilotGo-plugin-a-tune;
+2. 将/opt/PilotGo/plugin/a-tune/config.yml文件中ip地址修改为真实ip；
+3. 重启服务，执行以下命令：
+
+    ```shell
+    systemctl start PilotGo-plugin-a-tune
+    ```
+
+4. 成功登录pilotgo平台，点击左侧导航栏中的插件管理，点击添加插件按钮，填写插件名称和服务地址，并点击确定；![本地路径](./figures/A插件1.png)
+5. 页面增加一条插件管理数据，导航栏增加一个插件按钮。![本地路径](./figures/A插件2.png)
+6. 在机器列表中为想要调优的机器安装 a-tune。
+
+#### 3.3.1 调优模板
+
+##### 3.3.1.1 添加调优模板
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和调优模板；
+2. 点击页面右上角的新增按钮，输入字段信息，并点击保存；![本地路径](./figures/A插件3.png)
+3. 页面显示新添加的调优模板信息，并点击操作栏目的详情按钮可以查看模板详情。![本地路径](./figures/A插件4.png)
+
+##### 3.3.1.2 修改调优模板
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和调优模板；
+2. 在页面上找到要修改的模板，并点击编辑按钮；![本地路径](./figures/A插件6.png)
+3. 修改信息后点击页面的保存按钮，刷新页面，页面显示修改后的调优模板信息。![本地路径](./figures/A插件7.png)![本地路径](./figures/A插件8.png)
+
+##### 3.3.1.3 删除调优模板
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和调优模板；
+2. 在页面上找到要删除的模板，选中对应模板，点击右上角的删除按钮，并点击确定；![本地路径](./figures/A插件9.png)![本地路径](./figures/A插件10.png)![本地路径](./figures/A插件5.png)
+
+#### 3.3.2 调优任务 ​
+
+##### 3.3.2.1 添加调优任务 ​
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和任删除模板后刷新页面，页面不存在已删除的模板信息。务列表；
+2. 点击页面右上角的新增按钮，填写新增任务的信息，并点击保存按钮；![本地路径](./figures/A插件11.png)
+3. 刷新页面，页面显示新增加的任务信息，状态栏显示等待。![本地路径](./figures/A插件12.png)
+
+##### 3.3.2.2 重启单个任务 ​
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和任务列表；
+2. 在页面上找到要重启的任务，点击对应的重启按钮；![本地路径](./figures/A插件13.png)
+3. 页面状态栏显示运行中，执行完成后状态变为完成。![本地路径](./figures/A插件14.png)![本地路径](./figures/A插件15.png)
+
+##### 3.3.2.3 查看单个任务详情 ​
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和任务列表；
+2. 在页面上找到要查看的任务名称，点击对应的详情按钮；
+3. 页面显示单个任务的详细信息。![本地路径](./figures/A插件16.png)
+
+##### 3.3.2.4 删除调优任务 ​
+
+1. 具有该权限的用户成功登录，点击左侧导航栏中的plugin-atune插件和任务列表；
+2. 在页面上找到要删除的任务列表，选中对应的任务，点击右上角的删除按钮，并点击确定；![本地路径](./figures/A插件17.png)![本地路径](./figures/A插件18.png)
+3. 删除任务后刷新页面，页面不存在任已删除的务信息。![本地路径](./figures/A插件19.png)

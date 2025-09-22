@@ -2,7 +2,7 @@
 
 #### 介绍
 
-PilotGo 是 openEuler 社区原生孵化的运维管理平台，采用插件式架构设计，功能模块轻量化组合、独立迭代演进，同时保证核心功能稳定；同时使用插件来增强平台功能、并打通不同运维组件之间的壁垒，实现了全局的状态感知及自动化流程。
+PilotGo 是 openEuler 社区原生孵化的运维管理平台，采用插件式架构设计，功能模块轻量化组合、独立迭代演进，同时保证核心功能稳定，使用插件来增强平台功能、并打通不同运维组件之间的壁垒，实现了全局的状态感知及自动化流程。
 
 #### 功能描述
 
@@ -22,15 +22,15 @@ PilotGo 核心功能模块包括：
 
 * 插件功能：支持扩展平台功能，插件联动，自动化能力倍增，减少人工干预。
 
-![Alt text](./docs/images/functional%20modules.png)
+![Alt text](./docs/other/images/functional%20modules.png)
 
 
 当前OS发布版本还集成了以下插件：
 
-* Prometheus：托管Prometheus监控组件，自动化下发及配置node-exporter监控数据采集，对接平台告警功能；![Alt text](./docs/images/prometheus%20plugin.png)
+* Prometheus：托管Prometheus监控组件，自动化下发及配置node-exporter监控数据采集，对接平台告警功能；![Alt text](./docs/other/images/prometheus%20plugin.png)
 
 * Grafana：集成Grafana可视化平台，提供美观易用的指标监控面板功能。
-![Alt text](./docs/images/grafana%20plugin.png)
+![Alt text](./docs/other/images/grafana%20plugin.png)
 
 #### 应用场景
 
@@ -113,7 +113,7 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
 1.  [PilotGo使用手册](https://gitee.com/openeuler/docs/tree/master/docs/zh/docs/PilotGo/使用手册.md)
 2.  PilotGo[软件包仓](https://gitee.com/src-openeuler/PilotGo)
 3.  PliotGo社区开发微信群
-![Alt text](./docs/images/PilotGo社区开发群.jpg)
+![Alt text](./docs/other/images/PilotGo社区开发群.jpg)
 
 #### 参与贡献
 
