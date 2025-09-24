@@ -43,7 +43,7 @@ function check_golang(){
 
 function build_frontend() {
     pushd frontend
-    echo "dowoloading frontend libraries, please wait..."
+    echo "downloading frontend libraries, please wait..."
     yarn install
     echo "compiling frontend, please wait..."
     yarn run build
