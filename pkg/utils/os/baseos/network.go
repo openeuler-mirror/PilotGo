@@ -10,11 +10,9 @@ package baseos
 import (
 	"bufio"
 	"fmt"
-	"net"
 	"regexp"
 	"strings"
 
-	aconfig "gitee.com/openeuler/PilotGo/cmd/agent/app/config"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
 	"gitee.com/openeuler/PilotGo/pkg/utils/os/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -291,22 +289,11 @@ func (b *BaseOS) RestartNetwork(nic string) error {
 
 func (b *BaseOS) GetHostIp() (string, error) {
 	var IP string
-	//判断配置文件是否为localhost
-	if strings.Split(aconfig.Config().Server.Addr, ":")[0] == "localhost" {
-		//通过网卡信息方式获取ip地址
-		n, err := b.GetNetworkConnInfo()
-		if err != nil {
-			return "", err
-		}
-		IP = n.IPAddr
+	ips, err := GetAllHostIPs()
+	if err != nil {
+		return "", err
 	} else {
-		//获取IP
-		conn, err := net.Dial("udp", aconfig.Config().Server.Addr)
-		if err != nil {
-			return "", err
-		}
-		defer conn.Close()
-		IP = strings.Split(conn.LocalAddr().String(), ":")[0]
+		IP = ips[0].IP
 	}
 	return IP, nil
 }
