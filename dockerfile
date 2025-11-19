@@ -12,7 +12,7 @@ RUN yarn --cwd frontend build
 
 ####################################################################################################
 
-FROM m.daocloud.io/docker.io/library/golang:1.21-alpine3.18 as builder
+FROM m.daocloud.io/docker.io/library/golang:1.24-alpine as builder
 
 ARG version_path="/out/backend/pilotgo/"
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
@@ -32,7 +32,7 @@ COPY --from=ui /frontend/dist/assets      ./cmd/server/app/resource/assets
 COPY --from=ui /frontend/dist/index.html  ./cmd/server/app/resource/index.html 
 COPY --from=ui /frontend/dist/pilotgo.ico ./cmd/server/app/resource/pilotgo.ico
 
-RUN  GOWORK=off GO111MODULE=on go build -mod=vendor -o ${version_path}/server/pilotgo-server -tags="production" ./cmd/server/main.go
+RUN  GOWORK=off GO111MODULE=on GOPROXY='https://goproxy.cn,direct' go build  -o ${version_path}/server/pilotgo-server -tags="production" ./cmd/server/main.go
 RUN  chmod a+x ${version_path}/server/pilotgo-server
 
 ####################################################################################################
