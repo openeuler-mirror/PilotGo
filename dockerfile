@@ -1,13 +1,8 @@
 FROM  m.daocloud.io/docker.io/library/node:20-alpine as ui
 
 RUN npm config set registry https://registry.npmmirror.com/  && yarn config set registry https://registry.npmmirror.com/
-COPY frontend/package.json frontend/yarn.lock frontend/
-
-RUN yarn --cwd frontend install --network-timeout 1000000
-
-
 COPY frontend frontend
-
+RUN yarn --cwd frontend install --network-timeout 1000000
 RUN yarn --cwd frontend build
 
 ####################################################################################################
