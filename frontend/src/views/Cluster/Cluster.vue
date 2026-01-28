@@ -35,7 +35,7 @@
             <el-divider direction="vertical" style="height: 2.5em" />
 
             <el-dropdown>
-              <el-button>
+              <el-button :disabled="selectedMachines.length == 0">
                 操作
                 <el-icon>
                   <ArrowDown />
@@ -58,12 +58,6 @@
                   <el-dropdown-item
                     v-if="hasPermisson('button/monitor_operate')"
                     v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'prometheus')"
-                  >
-                    <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
-                  </el-dropdown-item>
-                   <el-dropdown-item
-                    v-if="hasPermisson('button/atune_operate')"
-                    v-for="item in pluginBtns.filter((item:Extention)=>item.permission.split('.')[1] === 'atune')"
                   >
                     <el-button link @click="handlePluginAPI(item.url)">{{ item.name }}</el-button>
                   </el-dropdown-item>
@@ -241,14 +235,22 @@ const handlePluginAPI = (url: string) => {
   selectedMachines.value.forEach((item: any) => {
     uuidArr.push(item.uuid);
   });
-  axios.post(window.location.origin + url, { uuids: uuidArr }).then((response: any) => {
-    if (response.data.data.code === 200) {
-      setTimeout(() => {
-        updateDepartmentMachines({ DepartId: departmentID.value });
-        ElMessage.success(response.data.data.msg);
-      }, 2000);
-    }
-  });
+  axios
+    .post(window.location.origin + url, { uuids: uuidArr })
+    .then((response: any) => {
+      let result = response.data;
+      if (result.code === 200) {
+        setTimeout(() => {
+          updateDepartmentMachines({ DepartId: departmentID.value });
+          ElMessage.success(result.msg);
+        }, 2000);
+      } else {
+        ElMessage.error(result.msg);
+      }
+    })
+    .catch((err) => {
+      ElMessage.error("插件请求接口出错");
+    });
 };
 
 /**
