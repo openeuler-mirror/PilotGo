@@ -32,6 +32,12 @@ func IsDepartNodeExist(pid int, depart string) (bool, error) {
 	return Depart.ID != 0, err
 }
 
+func IsSystemInInitState() bool {
+	var root DepartNode
+	mysqlmanager.MySQL().Where("p_id = 0 AND node_locate = 0").First(&root)
+	return root.Depart == "组织名"
+}
+
 func IsRootExist() (bool, error) {
 	var Depart DepartNode
 	err := mysqlmanager.MySQL().Where("node_locate=?", 0).Find(&Depart).Error
@@ -77,9 +83,9 @@ func GetPidAndId(depart string) (pid, id int, err error) {
 	return dep.PID, dep.ID, err
 }
 
-// 根据部门ids查询所属部门，待确定
+// 根据部门ids查询所属部门
 func DepartIdsToGetDepartNames(ids []int) (names []string) {
-	mysqlmanager.MySQL().Model(&DepartNode{}).Select("depart").Where("id=?", ids[0]).Find(&names)
+	mysqlmanager.MySQL().Model(&DepartNode{}).Select("depart").Where("id IN ?", ids).Find(&names)
 	return
 }
 

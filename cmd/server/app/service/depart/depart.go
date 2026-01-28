@@ -152,7 +152,11 @@ func AddDepart(newDepart *AddDepartNode) error {
 		PID:    pid,
 		Depart: depart,
 	}
+
 	if pid == 0 {
+		if dao.IsSystemInInitState() {
+			return errors.New("部门根节点【组织名】为初始化示例数据,请先修改")
+		}
 		temp, err := dao.IsRootExist()
 		if err != nil {
 			return err
@@ -172,6 +176,10 @@ func AddDepart(newDepart *AddDepartNode) error {
 		}
 		if parent.ID == 0 {
 			return errors.New("部门PID有误,数据库中不存在该部门PID")
+		}
+
+		if dao.IsSystemInInitState() {
+			return errors.New("部门根节点【组织名】为初始化示例数据,请先修改")
 		}
 
 		temp, err := dao.IsDepartNodeExist(pid, depart)
