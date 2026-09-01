@@ -61,7 +61,7 @@
         </el-main>
         <div class="footer">
           <el-text>
-            <el-link type="warning" href="https://gitee.com/openeuler/PilotGo" target="_blank">PilotGo</el-link>
+            <el-link type="warning" href="https://atomgit.com/openeuler/PilotGo" target="_blank">PilotGo</el-link>
             version:
             {{ version.commit ? version.version + "-" + version.commit : version.version || "undefined" }} &emsp; build
             time: {{ version.build_time || "undefined" }} &emsp; ©All right reserved.
