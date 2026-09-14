@@ -1,5 +1,7 @@
 # PilotGo
 
+English | [简体中文](./README.md)
+
 ## Overview
 
 PilotGo is an operations and maintenance (O\&M) management platform natively incubated by the openEuler community. It adopts a plugin-based architecture with modular, lightweight, and independently evolving functional components, while ensuring the stability of core features. Plugins enhance the platform's capabilities and break down barriers between different O\&M components, achieving global state awareness and automated workflows.
