@@ -1,5 +1,7 @@
 # PilotGo
 
+简体中文 | [English](./README_EN.md)
+
 #### 介绍
 
 PilotGo 是 openEuler 社区原生孵化的运维管理平台，采用插件式架构设计，功能模块轻量化组合、独立迭代演进，同时保证核心功能稳定，使用插件来增强平台功能、并打通不同运维组件之间的壁垒，实现了全局的状态感知及自动化流程。
@@ -123,5 +125,13 @@ PilotGo可以单机部署也可以采用集群式部署。安装之前先关闭�
 4.  新建 Pull Request
 
 
+#### 特技
+
+1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
+2.  gitcode 官方博客 [blog.gitcode.com](https://blog.gitcode.com)
+3.  你可以 [https://gitcode.com/explore](https://gitcode.com/explore) 这个地址来了解 gitcode 上的优秀开源项目
+4.  [GVP](https://gitcode.com/gvp) 全称是 gitcode 最有价值开源项目，是综合评定出的优秀开源项目
+5.  gitcode 官方提供的使用手册 [https://gitcode.com/help](https://gitcode.com/help)
+6.  gitcode 封面人物是一档用来展示 gitcode 会员风采的栏目 [https://gitcode.com/gitcode-stars/](https://gitcode.com/gitcode-stars/)
 
 
