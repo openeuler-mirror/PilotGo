@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"runtime/debug"
+	"sync"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/pkg/global"
@@ -30,6 +31,18 @@ type Client struct {
 	Socket        *websocket.Conn               // 用户连接
 	Send          chan *global.WebsocketSendMsg // 待发送的数据
 	HeartbeatTime uint64                        // 用户上次心跳时间
+	closeOnce     sync.Once                     // 保证 Send 通道只被关闭一次，避免重复 close panic
+}
+
+// Close 幂等地关闭连接：只会关闭一次 Send 通道并关闭底层 socket。
+// 并发或重复调用均安全，不会触发 "close of closed channel" panic。
+func (c *Client) Close() {
+	c.closeOnce.Do(func() {
+		close(c.Send)
+	})
+	if c.Socket != nil {
+		c.Socket.Close()
+	}
 }
 
 // 初始化

@@ -115,7 +115,10 @@ func (manager *ClientManager) Start(stopCh <-chan struct{}) {
 				select {
 				case conn.Send <- message:
 				default:
-					close(conn.Send)
+					// 发送缓冲已满(消费者阻塞或滞后)，统一回收该连接：
+					// 先从管理器摘除，再幂等关闭，避免后续广播对同一连接重复 close 通道
+					manager.EventUnregister(conn)
+					conn.Close()
 				}
 			}
 		}
@@ -123,12 +126,11 @@ func (manager *ClientManager) Start(stopCh <-chan struct{}) {
 }
 
 func (manager *ClientManager) Close() {
-	clients := CliManager.GetClients()
+	clients := manager.GetClients()
 	for client := range clients {
-		manager.ClientsLock.Lock()
-		delete(manager.Clients, client)
-		manager.ClientsLock.Unlock()
-		client.Socket.Close()
+		manager.EventUnregister(client)
+		// 幂等关闭：同时释放 Send 通道，避免 Write goroutine 永久阻塞在 <-c.Send
+		client.Close()
 	}
 }
 
