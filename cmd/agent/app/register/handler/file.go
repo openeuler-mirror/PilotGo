@@ -8,6 +8,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"gitee.com/openeuler/PilotGo/cmd/agent/app/global"
 	"gitee.com/openeuler/PilotGo/cmd/agent/app/network"
 	"gitee.com/openeuler/PilotGo/pkg/utils"
@@ -30,7 +32,29 @@ func ReadFilePatternHandler(c *network.SocketClient, msg *protocol.Message) erro
 		return c.Send(resp_msg)
 	}
 
-	data, err := utils.ReadFilePattern(file["path"].(string), file["name"].(string))
+	path, ok := file["path"].(string)
+	if !ok {
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  "get msg data error: invalid path",
+		}
+		return c.Send(resp_msg)
+	}
+
+	name, ok := file["name"].(string)
+	if !ok {
+		resp_msg := &protocol.Message{
+			UUID:   msg.UUID,
+			Type:   msg.Type,
+			Status: -1,
+			Error:  "get msg data error: invalid name",
+		}
+		return c.Send(resp_msg)
+	}
+
+	data, err := utils.ReadFilePattern(path, name)
 	if err != nil {
 		resp_msg := &protocol.Message{
 			UUID:   msg.UUID,
@@ -124,8 +148,26 @@ func AgentConfigHandler(c *network.SocketClient, msg *protocol.Message) error {
 	p, ok := msg.Data.(map[string]interface{})
 	if ok {
 		var ConMess global.ConfigMessage
-		ConMess.Machine_uuid = p["Machine_uuid"].(string)
-		ConMess.ConfigName = p["ConfigName"].(string)
+		ConMess.Machine_uuid, ok = p["Machine_uuid"].(string)
+		if !ok {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  fmt.Sprintf("monitor file parameter error: invalid Machine_uuid: %v", p["Machine_uuid"]),
+			}
+			return c.Send(resp_msg)
+		}
+		ConMess.ConfigName, ok = p["ConfigName"].(string)
+		if !ok {
+			resp_msg := &protocol.Message{
+				UUID:   msg.UUID,
+				Type:   msg.Type,
+				Status: -1,
+				Error:  fmt.Sprintf("monitor file parameter error: invalid ConfigName: %v", p["ConfigName"]),
+			}
+			return c.Send(resp_msg)
+		}
 		err := global.Configfsnotify(ConMess, c)
 		if err != nil {
 			resp_msg := &protocol.Message{

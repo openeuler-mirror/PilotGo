@@ -142,9 +142,9 @@ func GetFiles(filePath string, scanSub bool) (fs []string, err error) {
 	return fs, nil
 }
 
-func UpdateFile(path, filename, data interface{}) (lastversion string, err error) {
+func UpdateFile(path, filename, data string) (lastversion string, err error) {
 	//判断path是否带有斜杠
-	fullname := strings.TrimRight(path.(string), "/") + "/" + filename.(string)
+	fullname := strings.TrimRight(path, "/") + "/" + filename
 	fok, lok := IsFileExist(fullname)
 	if fok {
 		lastversion, err = FileReadString(fullname)
@@ -152,7 +152,7 @@ func UpdateFile(path, filename, data interface{}) (lastversion string, err error
 			return "", err
 		}
 		//解码参数
-		decodedate, err := base64.StdEncoding.DecodeString(data.(string))
+		decodedate, err := base64.StdEncoding.DecodeString(data)
 		if err != nil {
 			return "", err
 		}
