@@ -8,10 +8,11 @@
 package utils
 
 import (
-	"fmt"
 	"io"
 	"os/exec"
 	"strings"
+
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 type CmdResult struct {
@@ -53,7 +54,7 @@ func RunCommand(s string) (int, string, string, error) {
 
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Println(err)
+		logger.Error("RunCommand wait error: %s", err.Error())
 		e, ok := err.(*exec.ExitError)
 		if !ok {
 			return 0, "", "", err
@@ -103,7 +104,7 @@ func RunScript(absPath string, params []string) (*CmdResult, error) {
 
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Println(err)
+		logger.Error("RunScript wait error: %s", err.Error())
 		e, ok := err.(*exec.ExitError)
 		if !ok {
 			return nil, err
